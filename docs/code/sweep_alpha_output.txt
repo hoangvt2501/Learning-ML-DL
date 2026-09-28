@@ -1,0 +1,23 @@
+=== Trước biến đổi ===
+activation: chênh lệch giữa các kênh =   77.4 lần
+trọng số  : chênh lệch giữa các cột  =   1.94 lần
+sai số đầu ra W8A8 khi KHÔNG biến đổi = 7.7435%
+
+=== Quét alpha ===
+ alpha  sai số đầu ra   chênh kênh X   chênh cột W
+  0.00       8.0184%          91.3x          1.0x
+  0.10       5.3438%          58.1x          1.6x
+  0.20       3.5958%          37.0x          2.5x
+  0.30       2.4771%          23.6x          3.9x
+  0.40       1.8057%          15.0x          6.1x
+  0.50       1.4430%           9.6x          9.6x
+  0.60       1.3361%           6.1x         15.0x
+  0.70       1.4606%           3.9x         23.6x
+  0.80       1.8426%           2.5x         37.0x
+  0.90       2.5329%           1.6x         58.1x
+  1.00       3.6431%           1.0x         91.3x
+
+cực tiểu trên lưới: alpha = 0.60, sai số = 1.3361%
+alpha = 0 cho 8.0184%, tức TỆ HƠN cả khi không biến đổi (7.7435%) — vì chia cho s = 1/max|W| làm chênh lệch giữa các kênh activation tăng từ 77.4 lên 91.3 lần.
+
+(Không có matplotlib — bỏ qua phần vẽ hình.)

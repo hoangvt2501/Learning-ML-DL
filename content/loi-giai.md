@@ -236,10 +236,12 @@ Với lớp $256 \to 64$ trong thí nghiệm ($K = 256$, $N = 64$): $1/64 + 1/25
 
 **Kiểm chứng.** Sau khi sửa, `max |q_y(integer) - q_y(float sim)|` vẫn phải bằng **0 LSB**. Nếu khác 0, gần như chắc chắn bạn quên một trong bốn số hạng, hoặc dùng miền clamp không khớp giữa đường số nguyên và đường mô phỏng số thực (nhớ rằng bất đối xứng dùng hết $[-128, 127]$, còn đối xứng chỉ dùng $[-127, 127]$).
 
+Một nguồn lệch nữa, không liên quan tới bốn số hạng: **quy ước làm tròn của bước dịch phải**. Hàm `rounding_right_shift` trong bài làm tròn nửa về phía $+\infty$, còn gemmlowp/TFLite làm tròn nửa ra xa số 0; hai quy ước chỉ khác nhau ở đúng điểm giữa của giá trị âm và lệch tối đa 1 LSB. Nếu bạn so kết quả với một backend thật mà thấy vài phần tử lệch đúng 1 LSB thì hãy nghi chỗ này trước — xem [ghi chú Mục 6.4](ghi-chu.html#gc-sec-6-4).
+
 ## Bài 6
 @meta chuong=8 | dang=Thí nghiệm | kho=Trung bình
 
-> Bài này yêu cầu **chạy lại thí nghiệm**. Phần dưới là phân tích dự đoán kèm cách kiểm chứng, không phải số liệu đã đo. Hãy chạy rồi đối chiếu.
+> **Chưa chạy.** Bài này cần chạy lại thí nghiệm trong `code/torch_experiments.py`, tức cần PyTorch và scikit-learn. Phần dưới vì thế là **phân tích dự đoán kèm cách kiểm chứng**, không phải số liệu đã đo — khác với [Bài 8](#bai-8) là bài duy nhất trong nhóm này đã chạy thật. Hãy chạy rồi đối chiếu với dự đoán.
 
 **Thay đổi cần làm.** Trong phần calibration của `code/torch_experiments.py`, làm bẩn tập calibration:
 
@@ -273,7 +275,7 @@ rồi chạy lại cả bốn phương pháp và ghi lại **ngưỡng chọn đ
 ## Bài 7
 @meta chuong=9 | dang=Thí nghiệm | kho=Khó
 
-> Bài này yêu cầu **chạy lại thí nghiệm**. Phần dưới là hướng dẫn cài đặt đầy đủ cùng dự đoán, không phải số liệu đã đo.
+> **Chưa chạy.** Bài này cần huấn luyện lại bằng PyTorch. Phần dưới là **hướng dẫn cài đặt đầy đủ cùng dự đoán**, không phải số liệu đã đo. Khi báo cáo kết quả, hãy ghi rõ đâu là số đo được và đâu là kỳ vọng.
 
 **Ý tưởng LSQ (Mục 9.2).** Thay vì để $S$ bám theo EMA của min/max, ta coi $S$ là **tham số huấn luyện được** và cho nó nhận gradient từ chính hàm mất mát. Với lượng tử đối xứng
 
@@ -327,45 +329,86 @@ class LsqQuant(nn.Module):
 ## Bài 8
 @meta chuong=11 | dang=Thí nghiệm | kho=Trung bình
 
-**Cách quét.** Trong phần mô phỏng SmoothQuant của `code/numpy_experiments.py`:
+> **Bài này đã được chạy thật.** Script `code/sweep_alpha.py` dựng lại đúng thí nghiệm ở Mục 11.3 — cùng hạt giống 42 và cùng thứ tự rút số ngẫu nhiên — nên nó tái lập chính xác hai mốc đã in trong giáo trình: per-tensor **7,7435%** và SmoothQuant $\alpha = 0{,}5$ cho **1,4430%**. Mọi con số dưới đây lấy từ lần chạy đó, không phải dự đoán.
+
+**Cách quét.**
 
 ```python
-errs = []
-for a in np.arange(0.0, 1.01, 0.1):
-    s = (np.abs(X).max(0) ** a) / (np.abs(W).max(0) ** (1 - a))
-    s = np.clip(s, 1e-5, None)
-    Xs, Ws = X / s, W * s                       # biến đổi tương đương về mặt toán học
-    Y_hat = quant_w8a8(Xs, Ws)                  # activation per-tensor, trọng số per-channel
-    errs.append(np.linalg.norm(Y_hat - X @ W.T) / np.linalg.norm(X @ W.T))
+ax = np.abs(Xl).max(axis=0)          # biên độ activation theo kênh đầu vào
+aw = np.abs(Wl).max(axis=0)          # biên độ trọng số theo kênh đầu vào
+
+for alpha in np.arange(0.0, 1.001, 0.05):
+    s = ax ** alpha / aw ** (1 - alpha)
+    Xs, Ws = Xl / s, Wl * s
+    assert np.allclose(Xs @ Ws.T, Yl)                      # biến đổi tương đương
+    err = rel(a8_per_tensor(Xs) @ w8_per_channel(Ws).T, Yl)
 ```
 
-Đồ thị thu được có dạng **chữ U**, cực tiểu ở quãng giữa.
+Chạy bằng `python code/sweep_alpha.py`; có matplotlib thì script vẽ luôn đường cong.
 
-**Vì sao $\alpha = 0$ không tốt.** Khi đó $s_j = 1/\max|W_{:,j}|$. Nhìn từng vế:
+**Kết quả đo được.**
 
-- $W \,\text{diag}(s)$: mọi cột trọng số bị chuẩn hoá về biên độ 1 — trọng số trở nên **dễ tuyệt đối**. Nhưng trọng số vốn đã dễ rồi (Mục 11.1), nên đây là công sức đổ đi.
-- $X\,\text{diag}(s)^{-1} = X \cdot \text{diag}(\max|W_{:,j}|)$: tỉ lệ giữa các kênh activation **không đổi**, vì $\max|W|$ không tương quan với outlier của activation. Sáu kênh gấp 60 lần vẫn gấp 60 lần, và scale per-tensor vẫn bị chúng ép thô.
+| $\alpha$ | 0,00 | 0,20 | 0,30 | 0,40 | 0,50 | **0,60** | 0,70 | 0,80 | 1,00 |
+|---|---|---|---|---|---|---|---|---|---|
+| Sai số đầu ra | 8,02% | 3,60% | 2,48% | 1,81% | 1,44% | **1,34%** | 1,46% | 1,84% | 3,64% |
+| Chênh lệch giữa các kênh $X$ | 91,3× | 37,0× | 23,6× | 15,0× | 9,6× | 6,1× | 3,9× | 2,5× | 1,0× |
+| Chênh lệch giữa các cột $W$ | 1,0× | 2,5× | 3,9× | 6,1× | 9,6× | 15,0× | 23,6× | 37,0× | 91,3× |
 
-Nói ngắn: toàn bộ độ khó vẫn nằm nguyên ở activation, nơi ta **không** được dùng per-channel (Mục 5.2).
+Đường cong đúng là **chữ U** như trực giác dự đoán. Nhưng hai chi tiết chỉ lộ ra khi đo thật.
 
-**Vì sao $\alpha = 1$ cũng không tốt.** Khi đó $s_j = \max|X_{:,j}|$:
+### Chi tiết 1 — $\alpha = 0$ không phải "không làm gì"
 
-- $X\,\text{diag}(s)^{-1}$: mọi kênh activation đưa về biên độ 1 — activation trở nên **phẳng lý tưởng**, per-tensor không còn bị outlier phá.
-- $W\,\text{diag}(s)$: cột $j$ của trọng số bị nhân lên $\max|X_{:,j}|$, nên **toàn bộ độ chênh 60 lần chuyển sang trọng số**. Chỗ chết người: trọng số lượng tử **per-kênh-đầu-ra**, tức mỗi *hàng* một scale, trong khi độ chênh vừa tạo ra lại nằm dọc theo *cột*. Vậy là độ chênh nằm **bên trong** phạm vi của một scale. Vài cột lớn kéo scale của cả hàng lên, và mọi trọng số còn lại trong hàng bị nghiền về 0.
+Không biến đổi gì cả: **7,74%**. Đặt $\alpha = 0$: **8,02%**. Tức là tệ hơn một chút.
 
-Nói ngắn: ta đã chuyển độ khó sang một nơi mà granularity cũng không cứu được.
+Khi $\alpha = 0$ thì $s_j = 1/\max|W_{:,j}|$, nên mỗi kênh activation bị **nhân** với $\max|W_{:,j}|$. Đây là một phép nhân thật, nên:
 
-**Vì sao điểm tốt nằm ở giữa.** Với $\alpha = 0{,}5$, sau biến đổi cả hai vế đều có biên độ
+- Nó **không xoá được** cấu trúc outlier, vì $\max|W_{:,j}|$ chẳng liên quan gì tới việc kênh $j$ có phải outlier hay không. Sáu kênh lớn vẫn lớn.
+- Nhưng nó **vẫn làm đổi tỉ lệ** giữa các kênh: tỉ lệ giữa kênh $j$ và kênh $k$ bị nhân thêm $\max|W_{:,j}| / \max|W_{:,k}|$. Ở lần chạy này $\max|W|$ chênh nhau 1,94 lần giữa các cột, và kết quả là chênh lệch giữa các kênh activation **tăng** từ 77,4× lên 91,3×.
 
-$$\max|X_{:,j}| / s_j = s_j \max|W_{:,j}| = \sqrt{\max|X_{:,j}| \cdot \max|W_{:,j}|},$$
+> Đây là chỗ dễ nói sai nhất của bài. "Hệ số không tương quan với outlier" **không** đồng nghĩa với "tỉ lệ giữa các kênh không đổi". Không tương quan chỉ có nghĩa là phép nhân ấy không giúp gì; nó vẫn là một phép nhân và vẫn làm xáo trộn tỉ lệ, theo hướng nào thì tuỳ dữ liệu.
 
-tức **trung bình nhân** — độ khó được chia đều nhất có thể cho hai phía. Đây đúng là ý tưởng cân bằng giữa các lớp (CLE) ở Mục 9.5, chỉ khác là áp dụng giữa activation và trọng số.
+Chạy thêm hai hạt giống khác cho 8,48% và 8,43%, so với 8,05% và 8,52% khi không biến đổi. Kết luận **bền vững** là: $\alpha = 0$ gần như không mang lại gì, chứ không phải lúc nào cũng có hại. Toàn bộ độ khó vẫn nằm ở activation, nơi ta chỉ có một scale duy nhất cho cả tensor.
 
-**Lưu ý khi đọc đồ thị.**
+### Chi tiết 2 — cực tiểu nằm ở $\alpha \approx 0{,}60$, không phải 0,50
 
-- Đáy chữ U thường **phẳng** trong quãng $\alpha \in [0{,}4;\ 0{,}6]$. Đừng đọc cực tiểu thành một con số chính xác.
-- Vị trí cực tiểu **dịch theo mức nặng của outlier**: outlier càng nặng thì $\alpha$ tối ưu càng lớn. Bài báo SmoothQuant lấy 0,5 làm mặc định nhưng ghi nhận có mô hình cần giá trị lớn hơn.
-- Dữ liệu trong thí nghiệm là tổng hợp. Số tuyệt đối không mang sang mô hình thật được; **hình dạng chữ U** và lý do tạo ra nó mới là thứ mang đi được.
+Ở $\alpha = 0{,}5$, hai vế có **biên độ bằng nhau** đúng như lý thuyết: sau biến đổi cả hai đều bằng
+
+$$\max|X_{:,j}| / s_j \;=\; s_j \max|W_{:,j}| \;=\; \sqrt{\max|X_{:,j}| \cdot \max|W_{:,j}|},$$
+
+tức trung bình nhân — bảng trên cho thấy cả hai dòng đều là 9,6×. Đây đúng là ý tưởng cân bằng giữa các lớp (CLE) ở Mục 9.5, áp dụng giữa activation và trọng số.
+
+**Nhưng biên độ bằng nhau không có nghĩa sai số bằng nhau.** Tách riêng từng nguồn sai số:
+
+| $\alpha$ | chỉ lượng tử $W$ | chỉ lượng tử $X$ | cả hai |
+|---|---|---|---|
+| 0,0 | 0,66% | 7,99% | 8,02% |
+| **0,5** | **0,60%** | **1,31%** | 1,44% |
+| 1,0 | 3,55% | 0,80% | 3,64% |
+
+Ở $\alpha = 0{,}5$, activation vẫn là vế **đắt gấp hơn hai lần** trọng số. Vì vậy đẩy thêm chút độ khó sang phía trọng số còn có lợi, và cực tiểu dịch sang 0,60.
+
+**Vì sao trọng số chịu đựng giỏi hơn với cùng mức chênh lệch?** Vì granularity của hai vế khác nhau (Chương 5):
+
+- Trọng số được lượng tử **per-kênh-đầu-ra**: 512 scale, mỗi hàng một cái.
+- Activation được lượng tử **per-tensor**: đúng **một** scale cho toàn bộ tensor.
+
+Cùng một mức chênh lệch 9,6×, vế có 512 scale hấp thụ rẻ hơn hẳn vế chỉ có 1 scale. Quy tắc mang đi được: **cực tiểu luôn lệch về phía tensor có granularity mịn hơn.** Nếu đổi activation sang per-token (nhiều scale hơn), cực tiểu sẽ dịch ngược lại gần 0,5.
+
+Cực tiểu ở 0,60 lặp lại y hệt trên cả ba hạt giống đã thử, nên đây không phải chuyện may rủi của một lần rút số.
+
+### Vì sao $\alpha = 1$ cũng không tốt
+
+Khi đó $s_j = \max|X_{:,j}|$:
+
+- $X\,\text{diag}(s)^{-1}$: mọi kênh activation về biên độ 1 — activation **phẳng lý tưởng**, sai số chỉ còn 0,80%.
+- $W\,\text{diag}(s)$: cột $j$ của trọng số bị nhân lên $\max|X_{:,j}|$, nên **toàn bộ độ chênh 91,3× chuyển sang trọng số**. Chỗ chết người: độ chênh vừa tạo ra nằm dọc theo **cột** (kênh đầu vào), trong khi scale của trọng số lại theo **hàng** (kênh đầu ra). Vậy là độ chênh nằm gọn *bên trong* phạm vi của một scale, đúng chỗ mà per-channel không với tới. Sai số do trọng số nhảy từ 0,60% lên 3,55%.
+
+### Những gì mang đi được
+
+- **Hình dạng chữ U** và lý do tạo ra nó: hai vế cùng chia nhau một lượng độ khó cố định, ép hết về một phía đều đắt.
+- **Đáy khá phẳng**: mọi $\alpha \in [0{,}5;\ 0{,}7]$ đều dưới 1,5%. Chọn 0,5 như bài báo chỉ đắt hơn cực tiểu 8%, không đáng để dò kỹ.
+- **Cực tiểu lệch về phía có granularity mịn hơn** — đây mới là quy tắc dùng lại được cho mô hình thật.
+- **Số tuyệt đối thì không mang đi được.** Dữ liệu ở đây là tổng hợp, chỉ 6 kênh outlier, biên độ gấp đúng 60 lần. Bài báo SmoothQuant lấy $\alpha = 0{,}5$ làm mặc định và ghi nhận mô hình có outlier nặng hơn cần giá trị lớn hơn; muốn biết con số cho mô hình của mình thì phải quét trên chính mô hình đó.
 
 ## Bài 9
 @meta chuong=11 | dang=Tính toán | kho=Cơ bản
@@ -409,4 +452,4 @@ Tính theo từng bậc cho dễ kiểm tra:
 | Dùng GQA với 8 KV head | 26,84 GB → 5,4 GB (giảm 5 lần) |
 | Giảm batch xuống 1 | 26,84 GB → 6,7 GB |
 
-Chính vì phép tính này mà **mọi mô hình mở ra đời sau 2023 đều dùng GQA hoặc MQA**: đó là cách duy nhất cắt KV cache ngay từ kiến trúc, trước khi cần đến lượng tử hoá.
+Chính phép tính này giải thích vì sao **GQA (và trước đó là MQA) trở thành lựa chọn phổ biến** ở các mô hình mở cỡ lớn ra đời từ 2023 trở đi: nó cắt KV cache ngay từ kiến trúc, tức trước khi phải nhờ tới lượng tử hoá. Nhưng đây là một **xu hướng**, không phải quy luật và cũng không phải cách duy nhất — vẫn có mô hình giữ MHA đầy đủ, và các hướng khác như lượng tử KV cache, nén KV cache hay attention thưa đều nhắm vào cùng nút thắt. Khi đọc một mô hình cụ thể, hãy tra $n_{\text{kv\_heads}}$ trong file cấu hình của nó thay vì suy đoán từ năm phát hành.

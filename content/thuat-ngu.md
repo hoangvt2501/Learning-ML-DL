@@ -63,14 +63,20 @@ Mức độ chia nhỏ tensor để mỗi phần dùng một cặp $(S, Z)$ riê
 ### Theo tensor | per-tensor
 Một cặp $(S, Z)$ cho cả tensor. Đơn giản nhất; một kênh biên độ lớn ép mọi kênh khác dùng bước nhảy thô.
 
+### Trục thu gọn | reduction axis
+Trục mà phép nhân ma trận lấy tổng theo nó — chỉ số $k$ trong $y_j = \sum_k W_{jk} x_k$. Đây là khái niệm quyết định mọi chuyện về độ mịn: một scale **đặt trên trục thu gọn thì không rút ra ngoài một phép tích vô hướng duy nhất được**, còn đặt trên trục không bị lấy tổng thì rút ra miễn phí. Xem [ghi chú Mục 5.2](ghi-chu.html#gc-sec-5-2).
+
 ### Theo kênh | per-channel, per-axis
-Mỗi kênh **đầu ra** của trọng số có $S$ riêng. Mặc định cho Conv và Linear trong TFLite và PyTorch hiện nay. Bắt buộc theo trục đầu ra vì đó là trục không bị lấy tổng (Mục 5.2).
+Mỗi kênh **đầu ra** của trọng số có $S$ riêng. Mặc định cho Conv và Linear trong TFLite và PyTorch hiện nay. Phải theo trục đầu ra vì với trọng số, đó là trục duy nhất không bị lấy tổng (Mục 5.2).
 
 ### Theo nhóm, theo khối | per-group, per-block
-Chia mỗi hàng trọng số thành các nhóm liên tiếp 32, 64 hoặc 128 phần tử, mỗi nhóm một scale. Chuẩn cho lượng tử 4 bit của LLM.
+Chia mỗi hàng trọng số thành các nhóm liên tiếp 32, 64 hoặc 128 phần tử, mỗi nhóm một scale. Chuẩn cho lượng tử 4 bit của LLM. Đáng chú ý: đây chính là cách **đặt được scale trên trục thu gọn** — ta tách tổng thành từng nhóm, cộng dồn số nguyên trong nhóm rồi mới nhân scale của nhóm đó. Cái giá là một phép nhân scale cho mỗi nhóm.
 
 ### Theo token | per-token
 Mỗi hàng (token) của ma trận activation có scale riêng. Hợp lệ vì chỉ số token không bị lấy tổng trong phép nhân ma trận.
+
+### Theo kênh cho activation | per-channel activation
+Trong một phép GEMM chuẩn với **một** bộ cộng dồn, cách này không dùng được, vì kênh của activation chính là trục thu gọn — và đó là nguồn gốc bài toán outlier của LLM (Mục 11.1). Nói "không bao giờ làm được" thì quá mạnh: chia nhóm vẫn làm được (xem *per-group*), và có ngoại lệ do cấu trúc lớp như depthwise convolution, nơi kênh đầu vào không hề bị lấy tổng. Xem [ghi chú Mục 5.2](ghi-chu.html#gc-sec-5-2) và [Bài 4](bai-tap.html#bai-4).
 
 ## Đường tính toán số nguyên
 

@@ -348,6 +348,43 @@ a.xref:hover { border-bottom-style: solid; }
 .callout > :last-child { margin-bottom: 0; }
 .callout-note { border-left-color: var(--accent); background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface)); }
 
+/* ------------------------------------------------- ghi chú biên tập */
+.editor-note {
+  margin: 2rem 0; padding: 1.1rem 1.3rem;
+  background: var(--warn-soft);
+  border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent);
+  border-left: 3px solid var(--warn);
+  border-radius: var(--radius);
+  scroll-margin-top: calc(var(--topbar-h) + 1rem);
+}
+.note-head { margin-bottom: .4rem; }
+.note-tag {
+  display: inline-block; padding: .14rem .55rem; border-radius: 99px;
+  background: color-mix(in srgb, var(--warn) 16%, transparent);
+  color: var(--warn); text-decoration: none;
+  font-family: var(--font-ui); font-size: .7rem; font-weight: 600;
+  letter-spacing: .03em;
+}
+a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent); color: var(--warn); }
+.note-title {
+  font-family: var(--font-ui); font-size: 1rem; font-weight: 650;
+  margin: 0 0 .6rem; color: var(--text); line-height: 1.4;
+}
+.note-body { font-size: .95rem; }
+.note-body > :last-child { margin-bottom: 0; }
+.note-body .table-wrap { background: var(--surface); }
+.note-body .code-block { background: var(--surface); }
+
+.note-list { display: grid; gap: 1.5rem; }
+.note-card {
+  padding: 1.25rem 1.4rem; background: var(--surface);
+  border: 1px solid var(--line); border-left: 3px solid var(--warn);
+  border-radius: var(--radius); scroll-margin-top: calc(var(--topbar-h) + 1rem);
+}
+.note-card-head { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.note-src { margin-left: auto; font-family: var(--font-ui); font-size: .78rem; text-decoration: none; }
+.note-card h3 { margin-top: .2rem; }
+
 /* -------------------------------------------------------------- toc */
 .toc { position: sticky; top: var(--topbar-h); max-height: calc(100vh - var(--topbar-h)); overflow-y: auto; }
 .toc-inner { padding: 2.75rem 1.25rem 3rem .5rem; font-family: var(--font-ui); }
@@ -867,4 +904,10 @@ a.xref:hover { border-bottom-style: solid; }
   details { break-inside: avoid; }
   .figure, .table-wrap, .code-block { break-inside: avoid; }
   a { color: #000; text-decoration: underline; }
+}
+
+.src-badge {
+  padding: .12rem .5rem; border-radius: 99px;
+  background: var(--accent-soft); color: var(--accent-2);
+  font-family: var(--font-ui); font-size: .68rem; font-weight: 600;
 }

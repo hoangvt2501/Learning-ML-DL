@@ -35,6 +35,12 @@ const SCRIPTS = [
     title: 'sensitivity.py',
     note: 'Phân tích độ nhạy theo lớp ở Mục 12.2: lượng tử từng lớp một xuống 3 bit, giữ các lớp khác ở FP32.',
   },
+  {
+    file: 'sweep_alpha.py',
+    title: 'sweep_alpha.py',
+    added: true,
+    note: 'Lời giải chạy được cho Bài 8: quét tham số α của SmoothQuant và đo sai số đầu ra. Dựng lại đúng trạng thái ngẫu nhiên của thí nghiệm ở Mục 11.3 nên tái lập chính xác hai mốc 7,7435% và 1,4430% đã in trong giáo trình. Chỉ cần NumPy.',
+  },
 ];
 
 function highlight(code, lang) {
@@ -67,6 +73,7 @@ export function buildCodePage(ctx) {
       '<section class="src-card" id="' + s.file.replace(/\./g, '-') + '">' +
       '<header class="src-head">' +
       '<h3 class="src-title"><code>code/' + escapeHtml(s.file) + '</code></h3>' +
+      (s.added ? '<span class="src-badge">viết thêm cho repo này</span>' : '') +
       '<span class="src-meta">' + lines + ' dòng</span>' +
       '<a class="src-dl" href="code/' + escapeHtml(s.file) + '" download>Tải về</a>' +
       '</header>' +

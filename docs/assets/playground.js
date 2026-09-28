@@ -505,16 +505,28 @@
 
   /* ===========================================  4. requantization */
 
+  // Như Mục 6.4, nhưng bổ sung nhánh chuẩn hoá XUỐNG để mọi M > 0 đều dùng được.
+  // Đoạn mã in trong giáo trình chỉ có nhánh đi lên nên giới hạn ở 0 < M <= 1.
   function quantizeMultiplier(M) {
     var shift = 0;
     while (M < 0.5 && shift < 62) { M *= 2; shift++; }
+    while (M >= 1 && shift > -62) { M /= 2; shift--; }
     var M0 = rne(M * Math.pow(2, 31));
     if (M0 === Math.pow(2, 31)) { M0 /= 2; shift--; }
     return { M0: M0, shift: shift };
   }
-  function roundingRightShift(x, n) {
+
+  // Hai quy ước làm tròn của bước dịch phải. Chúng chỉ khác nhau ở đúng điểm
+  // giữa của giá trị âm, lệch tối đa 1 LSB — xem ghi chú Mục 6.4.
+  function shiftHalfUp(x, n) {              // như mã trong giáo trình (>> của Python)
     return Math.floor((x + Math.pow(2, n - 1)) / Math.pow(2, n));
   }
+  function shiftHalfAwayFromZero(x, n) {    // như RoundingDivideByPOT của gemmlowp
+    var d = Math.pow(2, n);
+    var q = x / d;
+    return q < 0 ? -Math.round(-q) : Math.round(q);
+  }
+  var roundingRightShift = shiftHalfUp;
 
   function updateRequant() {
     if (!$('rqSw')) return;
@@ -527,45 +539,49 @@
       return;
     }
     var M = Sw * Sx / Sy;
-    if (M >= 1) {
-      ['rqM0', 'rqShift', 'rqInt', 'rqFloat', 'rqDiff'].forEach(function (id) { setStat(id, '–'); });
-      setStat('rqM', fmt(M), 'is-warn');
-      $('rqFormula').textContent = '';
-      note.innerHTML = '<b>M = ' + fmt(M) + ' ≥ 1.</b> Cách viết M = 2⁻ⁿ·M₀ ở Mục 6.4 giả định ' +
-        'M nằm trong (0, 1), điều luôn đúng trong thực tế vì S_y phải đủ lớn để chứa dải đầu ra. ' +
-        'Hãy tăng S_y hoặc giảm S_w·S_x.';
-      return;
-    }
-
     var qm = quantizeMultiplier(M);
     var total = 31 + qm.shift;
-    var intResult = roundingRightShift(acc * qm.M0, total);
+    var prod = acc * qm.M0;
+    var intResult = shiftHalfUp(prod, total);
+    var gemmlowp = shiftHalfAwayFromZero(prod, total);
     var floatResult = rne(acc * M);
 
-    setStat('rqM', fmt(M));
+    setStat('rqM', fmt(M), M >= 1 ? 'is-warn' : '');
     setStat('rqM0', fmtInt(qm.M0));
-    setStat('rqShift', String(total), 'is-accent');
+    setStat('rqShift', String(total), total < 0 ? 'is-warn' : 'is-accent');
     setStat('rqInt', fmtInt(intResult), 'is-accent');
     setStat('rqFloat', fmtInt(floatResult));
     setStat('rqDiff', String(intResult - floatResult),
       intResult === floatResult ? 'is-accent' : 'is-warn');
 
+    var shiftTxt = total >= 0 ? '>> ' + total : '<< ' + -total;
     $('rqFormula').textContent =
       'M  = S_w·S_x / S_y = ' + M.toPrecision(10) + '\n' +
       'M  = 2^-(' + qm.shift + ') · M₀ ,  M₀ = ' + (M * Math.pow(2, qm.shift)).toPrecision(10) +
       ' ∈ [0,5 ; 1)\n' +
       'M₀(int32) = round(M₀ · 2³¹) = ' + qm.M0 + '\n' +
-      'kết quả = (acc · M₀) >> (31 + ' + qm.shift + ') = (' + acc + ' · ' + qm.M0 + ') >> ' +
-      total + ' = ' + intResult;
+      'kết quả = (acc · M₀) ' + shiftTxt + ' = (' + acc + ' · ' + qm.M0 + ') ' +
+      shiftTxt + ' = ' + intResult;
 
-    var exact = acc * M;
-    note.innerHTML =
-      'Sai số của cách dùng dấu chấm tĩnh so với nhân số thực rồi làm tròn: <b>' +
+    var msgs = [];
+    msgs.push('Sai số của cách dùng dấu chấm tĩnh so với nhân số thực rồi làm tròn: <b>' +
       (intResult - floatResult) + ' LSB</b>' +
       (intResult === floatResult ? ' — trùng khớp.' : '.') +
-      ' Giá trị thực chính xác là ' + fmt(exact, 4) + '. ' +
-      'Tích trung gian <code>acc · M₀</code> bằng ' + fmt(acc * qm.M0) +
-      ', vượt xa int32 — đó là lý do bước này phải làm ở <b>số nguyên 64 bit</b>.';
+      ' Giá trị thực chính xác là ' + fmt(acc * M, 4) + '.');
+
+    if (M >= 1) {
+      msgs.push('<b>M = ' + fmt(M) + ' ≥ 1.</b> Đoạn mã in ở Mục 6.4 chỉ chuẩn hoá <i>lên</i> ' +
+        'nên sẽ tràn int32 ở đây; công cụ này thêm nhánh chuẩn hoá xuống, cho <code>shift = ' +
+        qm.shift + '</code> âm — tức một phép <b>dịch trái</b>, đúng như gemmlowp/TFLite làm.');
+    }
+    if (intResult !== gemmlowp) {
+      msgs.push('<b>Hai quy ước làm tròn lệch nhau ở đây:</b> cách của giáo trình (nửa về phía ' +
+        '+∞) cho ' + fmtInt(intResult) + ', còn gemmlowp/TFLite (nửa ra xa số 0) cho ' +
+        fmtInt(gemmlowp) + '. Chỉ xảy ra khi bộ cộng dồn âm và rơi đúng điểm giữa.');
+    }
+    msgs.push('Tích trung gian <code>acc · M₀</code> bằng ' + fmt(prod) +
+      ', vượt xa int32 — đó là lý do bước này phải làm ở <b>số nguyên 64 bit</b>.');
+    note.innerHTML = msgs.join(' ');
   }
 
   /* =============================================  5. tính dung lượng */
@@ -680,6 +696,7 @@
     rne: rne, affineParams: affineParams, quantize: quantize, dequantize: dequantize,
     encodeFloat: encodeFloat, FORMATS: FORMATS,
     quantizeMultiplier: quantizeMultiplier, roundingRightShift: roundingRightShift,
+    shiftHalfUp: shiftHalfUp, shiftHalfAwayFromZero: shiftHalfAwayFromZero,
     samples: samples, mseAt: mseAt, clipCompute: clipCompute,
     WEIGHT_FORMATS: WEIGHT_FORMATS,
   };

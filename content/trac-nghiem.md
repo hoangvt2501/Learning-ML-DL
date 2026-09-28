@@ -111,12 +111,19 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 - [ ] Vì trục đầu vào không có outlier
 > Với $y_j = \sum_k W_{jk} x_k$, scale phụ thuộc $j$ thì rút ra ngoài $\sum_k$ được; phụ thuộc $k$ thì nằm kẹt bên trong và phải nhân số thực cho từng phần tử.
 
-### Activation có được lượng tử per-channel không?
-- [ ] Có, giống hệt trọng số
-- [x] Không — kênh của activation chính là trục bị lấy tổng; nhưng lượng tử **per-token** thì được
-- [ ] Không, và cũng không có cách nào mịn hơn per-tensor
-- [ ] Chỉ được khi dùng INT4
-> Chính ràng buộc này sinh ra bài toán outlier của LLM: vài kênh activation biên độ lớn làm hỏng scale của mọi kênh khác, mà ta lại không được đặt scale riêng theo kênh (Mục 11.1).
+### Phát biểu nào **chặt nhất** về việc lượng tử activation theo kênh?
+- [ ] Luôn làm được, giống hệt trọng số
+- [ ] Không bao giờ làm được, vì activation không có khái niệm kênh đầu ra
+- [x] Scale đặt trên **trục thu gọn** thì không rút ra ngoài một phép tích vô hướng duy nhất được — nhưng chia nhóm thì vẫn làm được, và có ngoại lệ do cấu trúc lớp
+- [ ] Chỉ làm được khi dùng INT4
+> Ràng buộc nằm ở **trục**, không ở tensor. Chấp nhận tách tổng thành từng nhóm (per-group) là đặt được scale trên trục thu gọn — đó là cách lượng tử 4 bit cho LLM vẫn chạy. Depthwise convolution thì kênh đầu vào không hề bị lấy tổng nên miễn phí luôn. Cái không làm được là có scale activation theo kênh **miễn phí** trong một GEMM chuẩn — và đúng ràng buộc đó sinh ra bài toán outlier của LLM (Mục 11.1).
+
+### Vì sao lượng tử per-group (nhóm 32–128) đặt được scale trên trục thu gọn?
+- [ ] Vì nhóm nhỏ nên sai số không đáng kể
+- [x] Vì ta tách tổng thành từng nhóm: cộng dồn số nguyên trong mỗi nhóm, nhân scale của nhóm đó, rồi mới cộng các nhóm lại
+- [ ] Vì phần cứng có lệnh riêng cho per-group
+- [ ] Không đặt được — per-group chỉ áp dụng cho trục đầu ra
+> Cái giá phải trả là một phép nhân scale cho mỗi nhóm thay vì mỗi kênh đầu ra — chấp nhận được khi nhóm đủ lớn. Đây là lý do "mô hình 4 bit" của LLM tốn 4,125–4,5 bit mỗi trọng số (Mục 11.8) chứ không phải đúng 4.
 
 ### Trong thí nghiệm Mục 5.3, granularity ảnh hưởng ra sao ở 8 bit so với 4 bit?
 - [ ] Ảnh hưởng mạnh ở cả hai
@@ -154,6 +161,27 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 - [ ] Dùng bảng tra cho mọi giá trị có thể
 - [ ] Chuyển tạm sang FP16
 > $M_0^{\text{int}} = \lfloor M_0 \cdot 2^{31} \rceil$ và $\text{acc} \cdot M \approx (\text{acc} \cdot M_0^{\text{int}}) \gg (31 + n)$. Toàn bộ đường đi vẫn thuần số nguyên nên chạy được trên NPU/DSP không có FPU.
+
+### Đoạn mã `quantize_multiplier` ở Mục 6.4 dùng được cho hệ số $M$ nào?
+- [ ] Mọi $M > 0$
+- [x] Chỉ $0 < M \le 1$ — với $M > 1$ thì $M_0$ tràn int32
+- [ ] Mọi $M$, kể cả âm
+- [ ] Chỉ $M < 0{,}5$
+> Vòng lặp `while M < 0.5` chỉ chuẩn hoá **lên**. Cài đặt thật (`QuantizeMultiplier` của gemmlowp/TFLite) cho phép `shift` **âm**, tức một phép dịch trái, nên mọi $M > 0$ đều xử lý được; chỉ cần thêm `while M >= 1: M /= 2; shift -= 1`. Xem [ghi chú Mục 6.4](ghi-chu.html#gc-sec-6-4).
+
+### Hàm dịch phải có làm tròn trong Mục 6.4 xử lý giá trị **âm** theo quy ước nào?
+- [ ] Làm tròn nửa về số chẵn, giống NumPy
+- [x] Làm tròn nửa về phía $+\infty$ — khác với gemmlowp/TFLite vốn làm tròn nửa **ra xa số 0**
+- [ ] Luôn làm tròn xuống, không có ngoại lệ
+- [ ] Mọi cài đặt đều giống nhau nên không cần quan tâm
+> `>>` của Python là dịch số học, tương đương lấy sàn, nên $(x + 2^{n-1}) \gg n$ làm tròn nửa lên. Hai quy ước chỉ khác nhau ở đúng điểm giữa của giá trị âm: $-6/4$ cho $-1$ ở đây nhưng $-2$ ở gemmlowp. Lệch tối đa 1 LSB — vô hại với lập luận của chương, nhưng phải khớp nếu bạn cần kết quả trùng từng bit với một backend cụ thể.
+
+### Kết quả "trùng khớp từng bit" ở Mục 6.5 chứng minh điều gì?
+- [ ] Mô phỏng fake quantization luôn cho đầu ra y hệt mọi backend INT8
+- [x] Phép suy ra ở Chương 6 là đúng, và hai cài đặt **trong chính tài liệu này** khớp nhau trên cấu hình đã nêu
+- [ ] Lượng tử hoá không gây sai số nào
+- [ ] Backend nào cũng dùng cùng một quy ước làm tròn
+> Đây là phép **tự đối chiếu** giữa đường số nguyên và bản mô phỏng số thực của cùng một tác giả, không phải phép đối chiếu với TFLite hay ONNX Runtime. Mức khớp với backend thật còn phụ thuộc quy ước làm tròn, độ chính xác bước requantization, cách gộp lớp và op nào rơi về FP32 — nên mục 8 của danh sách kiểm tra (Mục 12.3) vẫn bắt buộc đo trên thiết bị đích.
 
 ## Chương 7
 
@@ -290,6 +318,20 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 - [ ] Khoảng 6
 - [ ] Khoảng 8
 > Ví dụ: INT4 nhóm 128 scale FP16 là $4 + 16/128 = 4{,}125$; GGUF `Q4_0` và `Q4_K` đều là 4,5. Cộng thêm một số lớp (embedding, lớp đầu ra) thường giữ ở độ chính xác cao hơn.
+
+### Quét $\alpha$ của SmoothQuant trên chính dữ liệu của Mục 11.3 cho kết quả nào?
+- [ ] Sai số giảm đều khi $\alpha$ tăng từ 0 lên 1
+- [ ] $\alpha = 0$ tốt nhất, vì trọng số được chuẩn hoá hoàn toàn
+- [x] Đường cong hình chữ U, cực tiểu ở $\alpha \approx 0{,}60$; còn $\alpha = 0$ gần như không giúp được gì
+- [ ] Sai số không phụ thuộc $\alpha$ vì phép biến đổi là tương đương toán học
+> Đo thật bằng `code/sweep_alpha.py`: 8,02% tại $\alpha = 0$, 1,44% tại 0,5, **1,34% tại 0,60**, 3,64% tại 1,0. Biến đổi tuy tương đương về mặt toán học nhưng nó đổi *dữ liệu đem đi lượng tử*, nên sai số đổi theo. Xem [Bài 8](bai-tap.html#bai-8).
+
+### Vì sao cực tiểu lại lệch sang phải điểm cân bằng $\alpha = 0{,}5$?
+- [ ] Vì bài báo SmoothQuant chọn sai giá trị mặc định
+- [x] Vì ở $\alpha = 0{,}5$ hai vế có **biên độ** bằng nhau nhưng **sai số** thì không: activation chỉ có một scale cho cả tensor, còn trọng số có một scale cho mỗi kênh đầu ra
+- [ ] Vì dữ liệu mô phỏng có đúng 6 kênh outlier
+- [ ] Vì trọng số luôn dễ lượng tử hơn activation ở mọi mức chênh lệch
+> Đo riêng từng nguồn ở $\alpha = 0{,}5$: sai số do trọng số 0,60%, do activation 1,31%. Vế có 512 scale hấp thụ cùng một mức chênh lệch rẻ hơn hẳn vế chỉ có 1 scale, nên đẩy thêm độ khó sang trọng số vẫn còn lợi. Quy tắc mang đi được: **cực tiểu lệch về phía tensor có granularity mịn hơn.**
 
 ## Chương 12
 

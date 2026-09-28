@@ -22,7 +22,10 @@ const PATHS = [
 ];
 
 export function buildHomePage(ctx) {
-  const { md, nav, page, escapeHtml, write, chapters, minutes, docTitle, intro, neighbours } = ctx;
+  const {
+    md, nav, page, escapeHtml, write, chapters, minutes, docTitle, intro, neighbours,
+    quizCount, noteCount,
+  } = ctx;
 
   const byNum = new Map(chapters.map((c) => [c.num, c]));
   const fileOf = (c) => (c.num === '14' ? 'bai-tap.html' : c.file);
@@ -31,7 +34,7 @@ export function buildHomePage(ctx) {
     { n: '15', l: 'chương' },
     { n: '17', l: 'hình sinh bằng mã' },
     { n: '9', l: 'bài tập có lời giải' },
-    { n: '42', l: 'câu trắc nghiệm' },
+    { n: String(quizCount), l: 'câu trắc nghiệm' },
     { n: '5', l: 'công cụ tương tác' },
   ];
 
@@ -79,7 +82,15 @@ export function buildHomePage(ctx) {
       href: 'bai-tap.html',
       icon: '✎',
       title: 'Bài tập và trắc nghiệm',
-      note: 'Chín bài của giáo trình kèm lời giải đầy đủ, 42 câu trắc nghiệm theo chương và các bài luyện tính tay có tự chấm.',
+      note: 'Chín bài của giáo trình kèm lời giải đầy đủ, ' + quizCount +
+        ' câu trắc nghiệm theo chương và các bài luyện tính tay có tự chấm.',
+    },
+    {
+      href: 'ghi-chu.html',
+      icon: '!',
+      title: 'Ghi chú biên tập',
+      note: noteCount + ' chỗ trong giáo trình được phát biểu chặt lại, mỗi chỗ kèm kiểm chứng bằng mã — ' +
+        'ghi chú cũng hiện ngay cuối mục tương ứng khi bạn đọc chương.',
     },
     {
       href: 'hinh-anh.html',

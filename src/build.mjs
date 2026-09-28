@@ -13,6 +13,7 @@ import { buildFiguresPage } from './pages/figures.mjs';
 import { buildCodePage } from './pages/code.mjs';
 import { buildHomePage } from './pages/home.mjs';
 import { parseQuizzes, renderQuiz } from './pages/quiz.mjs';
+import { parseNotes, injectNotes, buildNotesPage } from './pages/notes.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'docs');
@@ -122,6 +123,7 @@ const nav = {
     { file: 'thuc-hanh.html', icon: '⚙', label: 'Phòng thí nghiệm' },
     { file: 'hinh-anh.html', icon: '◳', label: 'Thư viện 17 hình' },
     { file: 'thuat-ngu.html', icon: '¶', label: 'Từ điển thuật ngữ' },
+    { file: 'ghi-chu.html', icon: '!', label: 'Ghi chú biên tập' },
     { file: 'ma-nguon.html', icon: '{}', label: 'Mã nguồn thí nghiệm' },
     { file: 'toan-van.html', icon: '≡', label: 'Toàn văn một trang' },
   ],
@@ -228,10 +230,11 @@ for (const ch of chapters) {
 
 const minutes = Object.fromEntries(chapters.map((c) => [c.num, readingMinutes(c.markdown)]));
 const quizzes = parseQuizzes(read('content/trac-nghiem.md'));
+const notes = parseNotes(read('content/ghi-chu.md'));
 
 for (const ch of chapters) {
   if (ch.num === '14') continue; // trang bài tập dựng riêng ở bước sau
-  const html = rendered.get(ch.num);
+  const html = injectNotes(rendered.get(ch.num), ch.num, notes, md);
   const { prev, next } = neighbours(ch.file);
   const kicker = ch.num === 'PL' ? 'Phụ lục' : 'Chương ' + ch.num;
   const quiz = quizzes.has(ch.num) ? renderQuiz(md, quizzes.get(ch.num), 'chapter') : '';
@@ -280,6 +283,8 @@ const ctx = {
   extractToc,
   searchIndex,
   ROOT,
+  quizCount: [...quizzes.values()].reduce((a, g) => a + g.questions.length, 0),
+  noteCount: notes.size,
 };
 
 buildHomePage(ctx);
@@ -287,6 +292,7 @@ buildExercisePage(ctx, rendered.get('14'), chapters.find((c) => c.num === '14'))
 buildPlaygroundPage(ctx);
 buildGlossaryPage(ctx);
 buildFiguresPage(ctx);
+buildNotesPage(ctx, notes);
 buildCodePage(ctx);
 
 // ------------------------------------------------------- 7. trang toàn văn
@@ -294,7 +300,7 @@ buildCodePage(ctx);
   registry.currentFile = 'toan-van.html';
   const all = chapters
     .map((ch) => {
-      const body = md.render('## ' + ch.title + '\n\n' + ch.markdown);
+      const body = injectNotes(md.render('## ' + ch.title + '\n\n' + ch.markdown), ch.num, notes, md);
       return '<section class="fulltext-chapter">' + body + '</section>';
     })
     .join('\n');

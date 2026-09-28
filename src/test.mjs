@@ -157,6 +157,33 @@ group('Mục 6.5 — requantization bằng dấu chấm tĩnh');
   check('dịch phải có làm tròn: 6 >> 2 = 2', L.roundingRightShift(6, 2), 2);
 }
 
+/* ------------------- Ghi chú Mục 6.4 — phạm vi M và quy ước làm tròn */
+group('Ghi chú Mục 6.4 — M ≥ 1 và cách làm tròn số âm');
+{
+  // Đoạn mã in trong sách chỉ chuẩn hoá lên nên chỉ đúng với 0 < M <= 1.
+  // Bản dùng trong công cụ có thêm nhánh xuống, nên mọi M > 0 đều hợp lệ.
+  for (const M of [0.002, 0.75, 1, 2.5, 7.9]) {
+    const qm = L.quantizeMultiplier(M);
+    check('M = ' + M + ': M₀ nằm trong [2³⁰, 2³¹)',
+      qm.M0 >= Math.pow(2, 30) && qm.M0 < Math.pow(2, 31), true);
+    check('M = ' + M + ': khôi phục lại đúng M',
+      qm.M0 * Math.pow(2, -(31 + qm.shift)), M, Math.abs(M) * 1e-9);
+  }
+  check('M = 2,5 cần dịch TRÁI (shift âm)', L.quantizeMultiplier(2.5).shift < 0, true);
+
+  // Hai quy ước chỉ khác nhau ở đúng điểm giữa của giá trị âm.
+  check('nửa về +∞:   -6 >> 2 = -1', L.shiftHalfUp(-6, 2), -1);
+  check('xa số 0:     -6 >> 2 = -2', L.shiftHalfAwayFromZero(-6, 2), -2);
+  check('nửa về +∞:   -2 >> 2 = 0', L.shiftHalfUp(-2, 2), 0);
+  check('xa số 0:     -2 >> 2 = -1', L.shiftHalfAwayFromZero(-2, 2), -1);
+  check('số dương thì hai quy ước trùng nhau (+6)',
+    L.shiftHalfUp(6, 2) === L.shiftHalfAwayFromZero(6, 2), true);
+  check('số dương thì hai quy ước trùng nhau (+10)',
+    L.shiftHalfUp(10, 2) === L.shiftHalfAwayFromZero(10, 2), true);
+  check('không rơi điểm giữa thì cũng trùng nhau (-7)',
+    L.shiftHalfUp(-7, 2) === L.shiftHalfAwayFromZero(-7, 2), true);
+}
+
 /* --------------------------------------------- Mục 11.8 — số bit thực tế */
 group('Mục 11.8 — số bit thực tế mỗi trọng số');
 check('INT4 nhóm 128 = 4,125', L.WEIGHT_FORMATS.int4.bits, 4.125, 1e-12);
