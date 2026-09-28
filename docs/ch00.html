@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0. Kiến thức nền và quy ước ký hiệu — Quantization trong Deep Learning: từ nguyên lý đến thực hành</title>
+<meta name="description" content="Bảng ký hiệu dùng xuyên suốt tài liệu và phần kiến thức nền cần có trước khi bắt đầu.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">Q</span>
+    <span class="brand-text"><b>Quantization</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><p class="nav-group">Giáo trình</p><ul class="nav-list"><li><a href="ch00.html" class="is-active" aria-current="page"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li><li><a href="ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao cần quantization</span></a></li><li><a href="ch02.html"><span class="nav-num">2</span><span class="nav-label">Máy tính biểu diễn số</span></a></li><li><a href="ch03.html"><span class="nav-num">3</span><span class="nav-label">Uniform affine quantization</span></a></li><li><a href="ch04.html"><span class="nav-num">4</span><span class="nav-label">Phân tích sai số</span></a></li><li><a href="ch05.html"><span class="nav-num">5</span><span class="nav-label">Độ mịn (granularity)</span></a></li><li><a href="ch06.html"><span class="nav-num">6</span><span class="nav-label">Suy luận bằng số nguyên</span></a></li><li><a href="ch07.html"><span class="nav-num">7</span><span class="nav-label">Lượng tử cả một mạng</span></a></li><li><a href="ch08.html"><span class="nav-num">8</span><span class="nav-label">Calibration</span></a></li><li><a href="ch09.html"><span class="nav-num">9</span><span class="nav-label">PTQ và QAT</span></a></li><li><a href="ch10.html"><span class="nav-num">10</span><span class="nav-label">PyTorch và TFLite</span></a></li><li><a href="ch11.html"><span class="nav-num">11</span><span class="nav-label">Quantization cho LLM</span></a></li><li><a href="ch12.html"><span class="nav-num">12</span><span class="nav-label">Quy trình làm việc</span></a></li><li><a href="ch13.html"><span class="nav-num">13</span><span class="nav-label">Những hiểu lầm thường gặp</span></a></li><li><a href="bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="ch15.html"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 17 hình</span></a></li><li><a href="thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 0</span><span class="kicker-time">1 phút đọc</span></div><h2 id="sec-0" class="heading">0. Kiến thức nền và quy ước ký hiệu<a class="anchor" href="#sec-0" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Bảng ký hiệu dùng xuyên suốt tài liệu và phần kiến thức nền cần có trước khi bắt đầu.</p>
+<p>Người đọc cần biết: đại số tuyến tính cơ bản (nhân ma trận), cách một mạng CNN/Transformer tính toán, lan truyền ngược, và Python/NumPy/PyTorch ở mức đọc hiểu.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Ký hiệu</th>
+<th>Ý nghĩa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span></td>
+<td>một số thực (FP32) cần lượng tử: trọng số, activation hoặc bias</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span></span></span></span></td>
+<td>số nguyên tương ứng sau lượng tử</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>x</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{x}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">x</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.2222em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span></td>
+<td>giá trị thực khôi phục lại từ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span></span></span></span> (dequantize)</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi></mrow><annotation encoding="application/x-tex">b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span></span></span></span></td>
+<td>số bit của kiểu số nguyên (bit-width)</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><msub><mi>q</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo separator="true">,</mo><msub><mi>q</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[q_{min}, q_{max}]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">min</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">ma</span><span class="mord mathnormal mtight">x</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">]</span></span></span></span></td>
+<td>miền số nguyên, ví dụ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>255</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0, 255]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">255</span><span class="mclose">]</span></span></span></span> cho uint8, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mo>−</mo><mn>128</mn><mo separator="true">,</mo><mn>127</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[-128, 127]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">−</span><span class="mord">128</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">127</span><span class="mclose">]</span></span></span></span> cho int8</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mi>α</mi><mo separator="true">,</mo><mi>β</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\alpha, \beta]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="mclose">]</span></span></span></span></td>
+<td>dải số thực được ánh xạ (clipping range)</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span></span></span></span></td>
+<td><em>scale</em>: bước nhảy giữa hai mức lượng tử liền kề, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">S &gt; 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7224em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi></mrow><annotation encoding="application/x-tex">Z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">Z</span></span></span></span></td>
+<td><em>zero-point</em>: số nguyên ứng với số thực 0</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">⌊</mo><mo>⋅</mo><mo stretchy="false">⌉</mo></mrow><annotation encoding="application/x-tex">\lfloor \cdot \rceil</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">⌊</span><span class="mord">⋅</span><span class="mclose">⌉</span></span></span></span></td>
+<td>phép làm tròn đến số nguyên gần nhất</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>clamp</mtext><mo stretchy="false">(</mo><mi>v</mi><mo separator="true">,</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{clamp}(v, a, b)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">clamp</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">v</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">b</span><span class="mclose">)</span></span></span></span></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>min</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>max</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>v</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\min(\max(v, a), b)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">min</span><span class="mopen">(</span><span class="mop">max</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">v</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">b</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+<tr>
+<td>W8A8, W4A16…</td>
+<td>trọng số 8 bit và activation 8 bit; trọng số 4 bit và activation 16 bit…</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+</article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="index.html"><span class="pager-dir">← Trước</span><span class="pager-title">Trang chủ</span></a><a class="pager-link pager-next" href="ch01.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Vì sao cần quantization</span></a></nav>
+</main>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+[FP32] test accuracy = 0.9926  (n_test = 540)
+[BN folding] max |logit_folded - logit_goc| = 5.72e-06
+[Granularity] (bit, per_channel) -> (acc chỉ quantize weight, MSE lớp depthwise):
+    (8, False) acc=0.9926  mse_dw=1.344e-05
+    (8, True) acc=0.9926  mse_dw=6.757e-06
+    (4, False) acc=0.9130  mse_dw=4.998e-03
+    (4, True) acc=0.9759  mse_dw=1.941e-03
+[Calibration] W{b}A{b} PTQ, weight per-channel, lớp đầu/cuối 8 bit:
+   8 bit | min–max           : acc=0.9926 | ngưỡng lớp pw (act #3) = 5.481
+   8 bit | percentile 99.99% : acc=0.9926 | ngưỡng lớp pw (act #3) = 4.265
+   8 bit | MSE               : acc=0.9926 | ngưỡng lớp pw (act #3) = 4.833
+   8 bit | KL (entropy)      : acc=0.9907 | ngưỡng lớp pw (act #3) = 4.373
+   4 bit | min–max           : acc=0.9833 | ngưỡng lớp pw (act #3) = 5.481
+   4 bit | percentile 99.99% : acc=0.9815 | ngưỡng lớp pw (act #3) = 4.265
+   4 bit | MSE               : acc=0.9796 | ngưỡng lớp pw (act #3) = 3.240
+   4 bit | KL (entropy)      : acc=0.9833 | ngưỡng lớp pw (act #3) = 4.413
+[PTQ vs QAT] bits: [8, 6, 4, 3, 2]
+   PTQ min-max: ['0.9926', '0.9926', '0.9833', '0.6593', '0.1630']
+   PTQ MSE    : ['0.9926', '0.9926', '0.9796', '0.7204', '0.2481']
+   QAT (TB 3 seed): ['0.9907', '0.9901', '0.9796', '0.9401', '0.4944']
+[torch.ao eager static int8] acc = 0.9907; size FP32 = 48.5 KB, INT8 = 20.5 KB
+    QuantizedConvReLU2d(1, 16, kernel_size=(3, 3), stride=(1, 1), scale=0.02709164470434189, zero_point=0, padding=(1, 1))
+[torchao PT2E + X86InductorQuantizer] acc = 0.9926
+[MLP 1024-4096-4096-1024, batch 16, 1 luồng CPU]
+   FP32                                       size=  96.0 MB  latency=  14.31 ms  rel_err=0.00e+00
+   torch.ao quantize_dynamic (int8)           size=  24.0 MB  latency=   2.26 ms  rel_err=2.41e-02
+   torchao Int8WeightOnly                     size=  24.1 MB  latency=  33.85 ms  rel_err=6.74e-03
+   torchao Int8DynamicActivationInt8Weight    size=  24.1 MB  latency=   4.21 ms  rel_err=1.56e-02

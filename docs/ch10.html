@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10. Thực hành với PyTorch và TensorFlow Lite — Quantization trong Deep Learning: từ nguyên lý đến thực hành</title>
+<meta name="description" content="Mã đã chạy thật: eager mode, QAT, PT2E/torchao, LiteRT, và cách đo kích thước – độ trễ – độ chính xác cho đáng tin.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">Q</span>
+    <span class="brand-text"><b>Quantization</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><p class="nav-group">Giáo trình</p><ul class="nav-list"><li><a href="ch00.html"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li><li><a href="ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao cần quantization</span></a></li><li><a href="ch02.html"><span class="nav-num">2</span><span class="nav-label">Máy tính biểu diễn số</span></a></li><li><a href="ch03.html"><span class="nav-num">3</span><span class="nav-label">Uniform affine quantization</span></a></li><li><a href="ch04.html"><span class="nav-num">4</span><span class="nav-label">Phân tích sai số</span></a></li><li><a href="ch05.html"><span class="nav-num">5</span><span class="nav-label">Độ mịn (granularity)</span></a></li><li><a href="ch06.html"><span class="nav-num">6</span><span class="nav-label">Suy luận bằng số nguyên</span></a></li><li><a href="ch07.html"><span class="nav-num">7</span><span class="nav-label">Lượng tử cả một mạng</span></a></li><li><a href="ch08.html"><span class="nav-num">8</span><span class="nav-label">Calibration</span></a></li><li><a href="ch09.html"><span class="nav-num">9</span><span class="nav-label">PTQ và QAT</span></a></li><li><a href="ch10.html" class="is-active" aria-current="page"><span class="nav-num">10</span><span class="nav-label">PyTorch và TFLite</span></a></li><li><a href="ch11.html"><span class="nav-num">11</span><span class="nav-label">Quantization cho LLM</span></a></li><li><a href="ch12.html"><span class="nav-num">12</span><span class="nav-label">Quy trình làm việc</span></a></li><li><a href="ch13.html"><span class="nav-num">13</span><span class="nav-label">Những hiểu lầm thường gặp</span></a></li><li><a href="bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="ch15.html"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 17 hình</span></a></li><li><a href="thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 10</span><span class="kicker-time">6 phút đọc</span></div><h2 id="sec-10" class="heading">10. Thực hành với PyTorch và TensorFlow Lite<a class="anchor" href="#sec-10" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Mã đã chạy thật: eager mode, QAT, PT2E/torchao, LiteRT, và cách đo kích thước – độ trễ – độ chính xác cho đáng tin.</p>
+<h3 id="sec-10-1" class="heading">10.1. PyTorch<a class="anchor" href="#sec-10-1" aria-label="Liên kết tới mục này">#</a></h3>
+<h4 id="sec-10-1-1" class="heading">10.1.1. Tình trạng API (cập nhật 2026)<a class="anchor" href="#sec-10-1-1" aria-label="Liên kết tới mục này">#</a></h4>
+<p>PyTorch có hai thế hệ công cụ lượng tử:</p>
+<ul>
+<li><strong><code>torch.ao.quantization</code></strong> (eager mode và FX graph mode): API &quot;cổ điển&quot; mà phần lớn bài hướng dẫn trên mạng đang dùng. Ở PyTorch 2.14, chỉ cần gọi là thấy cảnh báo <code>DeprecationWarning: torch.ao.quantization is deprecated</code>. Cảnh báo này khuyên chuyển eager mode sang API <code>quantize_</code> của <strong>torchao</strong>, và chuyển FX sang <strong>PT2E</strong> (nay cũng nằm trong torchao). API cũ vẫn chạy được, nên vẫn hữu ích để học cơ chế.</li>
+<li><strong>torchao</strong> (<code>pip install torchao</code>): thư viện chính thức hiện nay, gồm <code>quantize_</code> cho mô hình (đặc biệt là LLM) và luồng PT2E dựa trên <code>torch.export</code>.</li>
+</ul>
+<p>Mọi đoạn mã PyTorch dưới đây đều đã chạy thật trên môi trường nêu ở đầu tài liệu. Kết quả in ra nằm trong <code>code/torch_experiments_output.txt</code>.</p>
+<h4 id="sec-10-1-2" class="heading">10.1.2. Static quantization với eager mode<a class="anchor" href="#sec-10-1-2" aria-label="Liên kết tới mục này">#</a></h4>
+<p>Eager mode đòi hỏi viết lại mô hình theo ba quy tắc: có <code>QuantStub</code>/<code>DeQuantStub</code> đánh dấu nơi bắt đầu và kết thúc vùng lượng tử; mỗi ReLU là <strong>một module riêng</strong> (không dùng <code>F.relu</code>) để gộp được; và các phép như cộng skip-connection phải dùng <code>FloatFunctional</code>.</p>
+<div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-keyword">import</span> torch, torch.nn <span class="hljs-keyword">as</span> nn
+<span class="hljs-keyword">import</span> torch.ao.quantization <span class="hljs-keyword">as</span> tq
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">QNet</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.quant = tq.QuantStub()                        <span class="hljs-comment"># FP32 -&gt; INT8 ở đầu vào</span>
+        <span class="hljs-variable language_">self</span>.conv1, <span class="hljs-variable language_">self</span>.bn1, <span class="hljs-variable language_">self</span>.relu1 = nn.Conv2d(<span class="hljs-number">1</span>, <span class="hljs-number">16</span>, <span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">16</span>), nn.ReLU()
+        <span class="hljs-variable language_">self</span>.dw, <span class="hljs-variable language_">self</span>.bn2, <span class="hljs-variable language_">self</span>.relu2 = nn.Conv2d(<span class="hljs-number">16</span>, <span class="hljs-number">16</span>, <span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, groups=<span class="hljs-number">16</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">16</span>), nn.ReLU()
+        <span class="hljs-variable language_">self</span>.pw, <span class="hljs-variable language_">self</span>.bn3, <span class="hljs-variable language_">self</span>.relu3 = nn.Conv2d(<span class="hljs-number">16</span>, <span class="hljs-number">32</span>, <span class="hljs-number">1</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">32</span>), nn.ReLU()
+        <span class="hljs-variable language_">self</span>.pool = nn.MaxPool2d(<span class="hljs-number">2</span>)
+        <span class="hljs-variable language_">self</span>.conv4, <span class="hljs-variable language_">self</span>.bn4, <span class="hljs-variable language_">self</span>.relu4 = nn.Conv2d(<span class="hljs-number">32</span>, <span class="hljs-number">32</span>, <span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">32</span>), nn.ReLU()
+        <span class="hljs-variable language_">self</span>.gap = nn.AdaptiveAvgPool2d(<span class="hljs-number">1</span>)
+        <span class="hljs-variable language_">self</span>.fc = nn.Linear(<span class="hljs-number">32</span>, <span class="hljs-number">10</span>)
+        <span class="hljs-variable language_">self</span>.dequant = tq.DeQuantStub()                    <span class="hljs-comment"># INT8 -&gt; FP32 ở đầu ra</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):
+        x = <span class="hljs-variable language_">self</span>.quant(x)
+        x = <span class="hljs-variable language_">self</span>.relu1(<span class="hljs-variable language_">self</span>.bn1(<span class="hljs-variable language_">self</span>.conv1(x)))
+        x = <span class="hljs-variable language_">self</span>.relu2(<span class="hljs-variable language_">self</span>.bn2(<span class="hljs-variable language_">self</span>.dw(x)))
+        x = <span class="hljs-variable language_">self</span>.pool(<span class="hljs-variable language_">self</span>.relu3(<span class="hljs-variable language_">self</span>.bn3(<span class="hljs-variable language_">self</span>.pw(x))))
+        x = <span class="hljs-variable language_">self</span>.relu4(<span class="hljs-variable language_">self</span>.bn4(<span class="hljs-variable language_">self</span>.conv4(x)))
+        x = <span class="hljs-variable language_">self</span>.fc(torch.flatten(<span class="hljs-variable language_">self</span>.gap(x), <span class="hljs-number">1</span>))
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.dequant(x)
+
+model = QNet(); model.load_state_dict(fp32_state_dict, strict=<span class="hljs-literal">False</span>); model.<span class="hljs-built_in">eval</span>()
+
+torch.backends.quantized.engine = <span class="hljs-string">&quot;x86&quot;</span>                  <span class="hljs-comment"># ARM / điện thoại: &quot;qnnpack&quot;</span>
+model.qconfig = tq.get_default_qconfig(<span class="hljs-string">&quot;x86&quot;</span>)            <span class="hljs-comment"># trọng số per-channel đối xứng, activation per-tensor</span>
+tq.fuse_modules(model, [[<span class="hljs-string">&quot;conv1&quot;</span>, <span class="hljs-string">&quot;bn1&quot;</span>, <span class="hljs-string">&quot;relu1&quot;</span>], [<span class="hljs-string">&quot;dw&quot;</span>, <span class="hljs-string">&quot;bn2&quot;</span>, <span class="hljs-string">&quot;relu2&quot;</span>],
+                        [<span class="hljs-string">&quot;pw&quot;</span>, <span class="hljs-string">&quot;bn3&quot;</span>, <span class="hljs-string">&quot;relu3&quot;</span>], [<span class="hljs-string">&quot;conv4&quot;</span>, <span class="hljs-string">&quot;bn4&quot;</span>, <span class="hljs-string">&quot;relu4&quot;</span>]], inplace=<span class="hljs-literal">True</span>)   <span class="hljs-comment"># Mục 7.3–7.4</span>
+tq.prepare(model, inplace=<span class="hljs-literal">True</span>)                          <span class="hljs-comment"># chèn observer</span>
+<span class="hljs-keyword">with</span> torch.no_grad():
+    model(X_calib)                                       <span class="hljs-comment"># calibration (Chương 8)</span>
+tq.convert(model, inplace=<span class="hljs-literal">True</span>)                          <span class="hljs-comment"># thay bằng kernel INT8 thật</span>
+<span class="hljs-built_in">print</span>(model.conv1)
+</code></pre></div>
+<div class="code-block is-output"><div class="code-head"><span class="code-lang">Kết quả chạy</span></div><pre><code>QuantizedConvReLU2d(1, 16, kernel_size=(3, 3), stride=(1, 1), scale=0.0270916..., zero_point=0, padding=(1, 1))
+</code></pre></div>
+<p>Để ý <code>zero_point=0</code>: vì dải đầu ra được đo <em>sau</em> ReLU nên <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\alpha = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>, và phép cắt thực hiện luôn ReLU như đã nói ở <a href="ch06.html#sec-6-4" class="xref">Mục 6.4</a>.</p>
+<p>Kết quả: độ chính xác <strong>99,07%</strong> (FP32: 99,26%), kích thước <code>state_dict</code> từ <strong>48,5 KB</strong> xuống <strong>20,5 KB</strong>. Tỉ lệ nén chỉ khoảng 2,4 lần chứ không phải 4 lần, vì với mô hình nhỏ như vậy, phần siêu dữ liệu khi tuần tự hóa (tên tensor, scale, zero-point, cấu trúc) chiếm tỉ trọng lớn. Với mô hình lớn, tỉ lệ tiến gần 4.</p>
+<h4 id="sec-10-1-3" class="heading">10.1.3. QAT với eager mode<a class="anchor" href="#sec-10-1-3" aria-label="Liên kết tới mục này">#</a></h4>
+<div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-keyword">import</span> torch.ao.nn.intrinsic.qat <span class="hljs-keyword">as</span> nniqat
+
+model = QNet(); model.load_state_dict(fp32_state_dict, strict=<span class="hljs-literal">False</span>)   <span class="hljs-comment"># BẮT ĐẦU TỪ MÔ HÌNH ĐÃ HUẤN LUYỆN</span>
+model.train()
+model.qconfig = tq.get_default_qat_qconfig(<span class="hljs-string">&quot;x86&quot;</span>)
+tq.fuse_modules_qat(model, [[<span class="hljs-string">&quot;conv1&quot;</span>, <span class="hljs-string">&quot;bn1&quot;</span>, <span class="hljs-string">&quot;relu1&quot;</span>], [<span class="hljs-string">&quot;dw&quot;</span>, <span class="hljs-string">&quot;bn2&quot;</span>, <span class="hljs-string">&quot;relu2&quot;</span>],
+                            [<span class="hljs-string">&quot;pw&quot;</span>, <span class="hljs-string">&quot;bn3&quot;</span>, <span class="hljs-string">&quot;relu3&quot;</span>], [<span class="hljs-string">&quot;conv4&quot;</span>, <span class="hljs-string">&quot;bn4&quot;</span>, <span class="hljs-string">&quot;relu4&quot;</span>]], inplace=<span class="hljs-literal">True</span>)
+tq.prepare_qat(model, inplace=<span class="hljs-literal">True</span>)                      <span class="hljs-comment"># chèn FakeQuantize, mô phỏng gộp BN</span>
+
+opt = torch.optim.Adam(model.parameters(), lr=<span class="hljs-number">5e-4</span>)     <span class="hljs-comment"># learning rate nhỏ: đây là fine-tune</span>
+<span class="hljs-keyword">for</span> epoch <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">10</span>):
+    <span class="hljs-keyword">if</span> epoch == <span class="hljs-number">6</span>: model.apply(tq.disable_observer)      <span class="hljs-comment"># cố định dải lượng tử</span>
+    <span class="hljs-keyword">if</span> epoch == <span class="hljs-number">7</span>: model.apply(nniqat.freeze_bn_stats)   <span class="hljs-comment"># cố định thống kê BatchNorm</span>
+    train_one_epoch(model, opt)
+
+model.<span class="hljs-built_in">eval</span>()
+qmodel = tq.convert(model)
+</code></pre></div>
+<p>Độ chính xác sau khi convert: <strong>98,33%</strong> (xem <code>code/torch_qat_eager.py</code>). Ở INT8, con số này ngang PTQ trong phạm vi dao động (4 ảnh trên 540), đúng như kết luận ở <a href="ch09.html#sec-9-3" class="xref">Mục 9.3</a>: QAT chỉ đáng dùng khi PTQ không đủ.</p>
+<p><strong>Một bài học từ chính quá trình viết tài liệu.</strong> Phiên bản đầu tiên của đoạn mã trên huấn luyện QAT <em>từ đầu</em> với learning rate <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>3</mn></mrow></msup></mrow><annotation encoding="application/x-tex">3 \times 10^{-3}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span></span> và chỉ đạt 87,2%. QAT là <strong>fine-tune</strong> một mô hình đã hội tụ, với learning rate nhỏ và vài epoch. Không nên coi nó là cách huấn luyện từ đầu.</p>
+<h4 id="sec-10-1-4" class="heading">10.1.4. PT2E với torchao<a class="anchor" href="#sec-10-1-4" aria-label="Liên kết tới mục này">#</a></h4>
+<p>Luồng PT2E xuất mô hình thành đồ thị bằng <code>torch.export</code>, nên <strong>không cần sửa mã mô hình</strong> (không cần QuantStub, không cần ReLU riêng):</p>
+<div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-keyword">from</span> torchao.quantization.pt2e.quantize_pt2e <span class="hljs-keyword">import</span> prepare_pt2e, convert_pt2e
+<span class="hljs-keyword">import</span> torchao.quantization.pt2e.quantizer.x86_inductor_quantizer <span class="hljs-keyword">as</span> xiq
+
+m = fp32_model.<span class="hljs-built_in">eval</span>()                                        <span class="hljs-comment"># mô hình gốc, viết bằng F.relu cũng được</span>
+exported = torch.export.export(
+    m, (X_calib[:<span class="hljs-number">4</span>],),
+    dynamic_shapes={<span class="hljs-string">&quot;x&quot;</span>: {<span class="hljs-number">0</span>: torch.export.Dim(<span class="hljs-string">&quot;batch&quot;</span>)}}     <span class="hljs-comment"># cho phép batch size thay đổi</span>
+).module()
+
+quantizer = xiq.X86InductorQuantizer().set_global(xiq.get_default_x86_inductor_quantization_config())
+prepared = prepare_pt2e(exported, quantizer)                 <span class="hljs-comment"># chèn observer</span>
+<span class="hljs-keyword">with</span> torch.no_grad():
+    prepared(X_calib)                                        <span class="hljs-comment"># calibration</span>
+quantized = convert_pt2e(prepared)                           <span class="hljs-comment"># đồ thị có các cặp quantize/dequantize</span>
+<span class="hljs-comment"># Để có kernel INT8 nhanh: torch.compile(quantized)</span>
+</code></pre></div>
+<p>Độ chính xác: <strong>99,26%</strong>, bằng FP32. Lưu ý thực tế: nếu bỏ tham số <code>dynamic_shapes</code>, đồ thị bị cố định batch size 4 và lỗi ngay khi chạy với batch khác (<code>Guard failed: x.size()[0] == 4</code>). Mình đã gặp lỗi này khi chạy thử.</p>
+<p>Mỗi phần cứng có <em>quantizer</em> riêng: <code>X86InductorQuantizer</code> cho CPU x86, <code>ArmInductorQuantizer</code> cho ARM, và các quantizer của ExecuTorch (XNNPACK, Qualcomm, Core ML…) cho thiết bị di động. Quantizer quyết định op nào được lượng tử và theo cấu hình nào, cho khớp với kernel mà backend đó có.</p>
+<h4 id="sec-10-1-5" class="heading">10.1.5. Dynamic và weight-only: đo độ trễ<a class="anchor" href="#sec-10-1-5" aria-label="Liên kết tới mục này">#</a></h4>
+<p>Thí nghiệm trên một MLP 1024→4096→4096→1024 (96 MB ở FP32), batch 16, một luồng CPU:</p>
+<div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-keyword">import</span> torch.ao.quantization <span class="hljs-keyword">as</span> tq
+<span class="hljs-keyword">from</span> torchao.quantization <span class="hljs-keyword">import</span> quantize_, Int8WeightOnlyConfig, Int8DynamicActivationInt8WeightConfig
+
+m1 = tq.quantize_dynamic(copy.deepcopy(base), {nn.Linear}, dtype=torch.qint8)     <span class="hljs-comment"># API cũ</span>
+m2 = copy.deepcopy(base); quantize_(m2, Int8WeightOnlyConfig())                   <span class="hljs-comment"># torchao</span>
+m3 = copy.deepcopy(base); quantize_(m3, Int8DynamicActivationInt8WeightConfig())  <span class="hljs-comment"># torchao</span>
+</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Cách</th>
+<th>Kích thước</th>
+<th>Độ trễ</th>
+<th>Sai số tương đối đầu ra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FP32</td>
+<td>96,0 MB</td>
+<td>14,3 ms</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>torch.ao</code> <code>quantize_dynamic</code></td>
+<td>24,0 MB</td>
+<td>2,3 ms</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2,4</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">2{,}4 \times 10^{-2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">2</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span></span></td>
+</tr>
+<tr>
+<td>torchao <code>Int8WeightOnly</code> (eager)</td>
+<td>24,1 MB</td>
+<td><strong>33,9 ms</strong></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6,7</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>3</mn></mrow></msup></mrow><annotation encoding="application/x-tex">6{,}7 \times 10^{-3}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">6</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">7</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span></span></td>
+</tr>
+<tr>
+<td>torchao <code>Int8DynamicActivationInt8Weight</code> (eager)</td>
+<td>24,1 MB</td>
+<td>4,2 ms</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1,6</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1{,}6 \times 10^{-2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">1</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">6</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span></span></td>
+</tr>
+</tbody>
+</table></div>
+<p>Cách đọc bảng:</p>
+<ul>
+<li>Kích thước giảm đúng 4 lần như lý thuyết.</li>
+<li>Tăng tốc khoảng 6 lần của <code>quantize_dynamic</code> là <strong>đặc thù phần cứng</strong>. CPU thử nghiệm có lệnh AVX-512 VNNI và AMX-INT8 chuyên cho phép nhân int8. Trên CPU không có các lệnh này, mức tăng tốc nhỏ hơn nhiều.</li>
+<li><code>Int8WeightOnly</code> chạy eager <strong>chậm hơn FP32 hơn 2 lần</strong>. Nếu không có <code>torch.compile</code> để sinh kernel hợp nhất, trọng số bị giải lượng tử về số thực ở mỗi lần gọi, tốn thêm công mà không bớt được phép tính nào. torchao được thiết kế để dùng cùng <code>torch.compile</code>. Đây là minh chứng cụ thể cho nhận định ở <a href="ch01.html#sec-1-4" class="xref">Mục 1.4</a>: lượng tử hóa chỉ nhanh khi có kernel phù hợp.</li>
+<li>Độ trễ dao động vài chục phần trăm giữa các lần chạy (FP32 đo được từ 14 đến 17 ms), nên luôn cần khởi động (warm-up) và lấy trung bình nhiều lần.</li>
+</ul>
+<p>Dynamic quantization trong <code>torch.ao</code> chỉ hỗ trợ <code>nn.Linear</code>, <code>nn.LSTM</code>, <code>nn.GRU</code> và một số lớp hồi quy khác, <strong>không hỗ trợ <code>nn.Conv2d</code></strong>. Mô hình tích chập cần static quantization.</p>
+<h3 id="sec-10-2" class="heading">10.2. TensorFlow Lite / LiteRT<a class="anchor" href="#sec-10-2" aria-label="Liên kết tới mục này">#</a></h3>
+<p>TensorFlow Lite đã được Google đổi tên thành <strong>LiteRT</strong> (2024); trình thông dịch có thể cài riêng qua gói <code>ai-edge-litert</code>. API chuyển đổi <code>tf.lite.TFLiteConverter</code> vẫn giữ nguyên.</p>
+<blockquote>
+<p><strong>Lưu ý:</strong> môi trường dựng tài liệu này không cài TensorFlow, nên các đoạn mã TF dưới đây <strong>không được chạy kiểm chứng như phần PyTorch</strong>. Chúng viết theo tài liệu chính thức về post-training quantization của TensorFlow.</p>
+</blockquote>
+<div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-keyword">import</span> tensorflow <span class="hljs-keyword">as</span> tf
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">make_converter</span>():                       <span class="hljs-comment"># tạo converter MỚI cho mỗi cấu hình để tránh cấu hình cũ dính lại</span>
+    <span class="hljs-keyword">return</span> tf.lite.TFLiteConverter.from_keras_model(model)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">representative_data_gen</span>():              <span class="hljs-comment"># dùng cho calibration (Chương 8)</span>
+    <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> tf.data.Dataset.from_tensor_slices(calib_images).batch(<span class="hljs-number">1</span>).take(<span class="hljs-number">300</span>):
+        <span class="hljs-keyword">yield</span> [x]
+
+<span class="hljs-comment"># 1) Dynamic range: trọng số INT8 lượng tử sẵn; activation lượng tử lúc chạy ở các op hỗ trợ</span>
+c = make_converter()
+c.optimizations = [tf.lite.Optimize.DEFAULT]
+tflite_dynamic = c.convert()
+
+<span class="hljs-comment"># 2) Float16: trọng số lưu FP16</span>
+c = make_converter()
+c.optimizations = [tf.lite.Optimize.DEFAULT]
+c.target_spec.supported_types = [tf.float16]
+tflite_fp16 = c.convert()
+
+<span class="hljs-comment"># 3) Full integer INT8: bắt buộc có representative dataset</span>
+c = make_converter()
+c.optimizations = [tf.lite.Optimize.DEFAULT]
+c.representative_dataset = representative_data_gen
+c.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]   <span class="hljs-comment"># op không có bản INT8 -&gt; báo lỗi, không lặng lẽ chạy FP32</span>
+c.inference_input_type = tf.int8
+c.inference_output_type = tf.int8
+tflite_int8 = c.convert()
+
+<span class="hljs-comment"># 4) 16x8: activation INT16, trọng số INT8; cho mô hình nhạy với sai số activation</span>
+c = make_converter()
+c.optimizations = [tf.lite.Optimize.DEFAULT]
+c.representative_dataset = representative_data_gen
+c.target_spec.supported_ops = [tf.lite.OpsSet.EXPERIMENTAL_TFLITE_BUILTINS_ACTIVATIONS_INT16_WEIGHTS_INT8]
+tflite_16x8 = c.convert()
+</code></pre></div>
+<p>Khi chạy mô hình full-integer, đầu vào phải được lượng tử bằng đúng <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>S</mi><mo separator="true">,</mo><mi>Z</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(S, Z)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">Z</span><span class="mclose">)</span></span></span></span> mà mô hình khai báo:</p>
+<div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python">interpreter = tf.lite.Interpreter(model_content=tflite_int8)
+interpreter.allocate_tensors()
+inp, out = interpreter.get_input_details()[<span class="hljs-number">0</span>], interpreter.get_output_details()[<span class="hljs-number">0</span>]
+S, Z = inp[<span class="hljs-string">&quot;quantization&quot;</span>]
+x_q = np.clip(np.<span class="hljs-built_in">round</span>(x / S + Z), -<span class="hljs-number">128</span>, <span class="hljs-number">127</span>).astype(np.int8)            <span class="hljs-comment"># công thức Mục 3.2</span>
+interpreter.set_tensor(inp[<span class="hljs-string">&quot;index&quot;</span>], x_q[<span class="hljs-literal">None</span>])
+interpreter.invoke()
+y_q = interpreter.get_tensor(out[<span class="hljs-string">&quot;index&quot;</span>])
+S_o, Z_o = out[<span class="hljs-string">&quot;quantization&quot;</span>]
+y = S_o * (y_q.astype(np.float32) - Z_o)                                  <span class="hljs-comment"># dequantize</span>
+</code></pre></div>
+<p>QAT trong TensorFlow dùng gói <code>tensorflow-model-optimization</code>. Từ TensorFlow 2.16, Keras mặc định là Keras 3, còn gói này vẫn dựa trên Keras 2, nên thường phải cài <code>tf_keras</code> và đặt biến môi trường <code>TF_USE_LEGACY_KERAS=1</code>. Ngoài ra, <code>quantize_model</code> chỉ nhận mô hình Sequential hoặc Functional gồm các lớp Keras chuẩn; các lớp đóng gói như <code>hub.KerasLayer</code> không lượng tử được.</p>
+<div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-keyword">import</span> tensorflow_model_optimization <span class="hljs-keyword">as</span> tfmot
+
+q_aware = tfmot.quantization.keras.quantize_model(model)   <span class="hljs-comment"># chèn fake-quant (Hình 10)</span>
+q_aware.<span class="hljs-built_in">compile</span>(optimizer=tf.keras.optimizers.Adam(<span class="hljs-number">1e-4</span>),
+                loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=<span class="hljs-literal">False</span>),
+                metrics=[<span class="hljs-string">&quot;accuracy&quot;</span>])
+q_aware.fit(train_images, train_labels, epochs=<span class="hljs-number">2</span>, validation_split=<span class="hljs-number">0.1</span>)
+
+c = tf.lite.TFLiteConverter.from_keras_model(q_aware)
+c.optimizations = [tf.lite.Optimize.DEFAULT]
+tflite_qat = c.convert()
+</code></pre></div>
+<h3 id="sec-10-3" class="heading">10.3. Đo lường đúng cách<a class="anchor" href="#sec-10-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Một báo cáo lượng tử hóa đáng tin phải có đủ <strong>ba</strong> con số, đo <strong>trên thiết bị đích</strong>:</p>
+<ol>
+<li><strong>Kích thước</strong> của file sẽ triển khai (không phải <code>state_dict</code> trong bộ nhớ).</li>
+<li><strong>Độ trễ</strong>: có warm-up, cố định số luồng, báo cáo trung bình hoặc trung vị qua nhiều lần chạy, ghi rõ batch size.</li>
+<li><strong>Độ chính xác</strong> trên đúng tập kiểm tra và đúng pipeline tiền xử lý của mô hình FP32 gốc.</li>
+</ol>
+<div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-keyword">import</span> os, time, torch
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">size_mb</span>(<span class="hljs-params">model</span>):
+    torch.save(model.state_dict(), <span class="hljs-string">&quot;/tmp/_m.pt&quot;</span>)
+    s = os.path.getsize(<span class="hljs-string">&quot;/tmp/_m.pt&quot;</span>) / <span class="hljs-number">2</span>**<span class="hljs-number">20</span>
+    os.remove(<span class="hljs-string">&quot;/tmp/_m.pt&quot;</span>)
+    <span class="hljs-keyword">return</span> s
+
+<span class="hljs-meta">@torch.no_grad()</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">latency_ms</span>(<span class="hljs-params">model, x, n=<span class="hljs-number">100</span>, warmup=<span class="hljs-number">10</span></span>):
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(warmup):
+        model(x)
+    t = time.perf_counter()
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(n):
+        model(x)
+    <span class="hljs-keyword">return</span> (time.perf_counter() - t) / n * <span class="hljs-number">1000</span>
+</code></pre></div>
+<hr>
+<section class="quiz" data-quiz data-chapter="10"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">3 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text"><code>torch.ao.quantization.quantize_dynamic</code> lượng tử những lớp nào?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Mọi lớp, kể cả Conv2d</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ <code>nn.Linear</code> và các lớp hồi quy (LSTM, GRU…) — <strong>không</strong> hỗ trợ <code>nn.Conv2d</code></span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ Conv2d</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ các lớp chuẩn hoá</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Mô hình tích chập cần static quantization. Đây là một trong những hiểu lầm được liệt kê ở <a href="ch13.html#sec-13" class="xref">Chương 13</a>.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Vì sao <code>Int8WeightOnly</code> của torchao chạy eager lại <strong>chậm hơn</strong> FP32?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì INT8 vốn chậm hơn FP32</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì không có <code>torch.compile</code> để sinh kernel hợp nhất, trọng số bị giải lượng tử về số thực ở mỗi lần gọi</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì mô hình lớn hơn sau khi lượng tử</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì phải tính min/max của activation mỗi lần chạy</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Tốn thêm công giải lượng tử mà không bớt được phép tính nào. torchao được thiết kế để dùng <strong>cùng</strong> <code>torch.compile</code>.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">Một báo cáo lượng tử hoá đáng tin cần đủ những con số nào?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ cần độ chính xác</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Độ chính xác và kích thước</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Kích thước file triển khai, độ trễ (có warm-up, cố định số luồng), và độ chính xác — đo <strong>trên thiết bị đích</strong></span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ cần độ trễ trên máy phát triển</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Đo <code>state_dict</code> trong bộ nhớ thay vì file triển khai, hay đo độ trễ trên máy dev thay vì thiết bị đích, là hai cách phổ biến nhất để tự lừa mình.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/3</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="ch09.html"><span class="pager-dir">← Trước</span><span class="pager-title">PTQ và QAT</span></a><a class="pager-link pager-next" href="ch11.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Quantization cho LLM</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-10-1">10.1. PyTorch</a></li><li class="toc-l4"><a href="#sec-10-1-1">10.1.1. Tình trạng API (cập nhật 2026)</a></li><li class="toc-l4"><a href="#sec-10-1-2">10.1.2. Static quantization với eager mode</a></li><li class="toc-l4"><a href="#sec-10-1-3">10.1.3. QAT với eager mode</a></li><li class="toc-l4"><a href="#sec-10-1-4">10.1.4. PT2E với torchao</a></li><li class="toc-l4"><a href="#sec-10-1-5">10.1.5. Dynamic và weight-only: đo độ trễ</a></li><li class="toc-l3"><a href="#sec-10-2">10.2. TensorFlow Lite / LiteRT</a></li><li class="toc-l3"><a href="#sec-10-3">10.3. Đo lường đúng cách</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

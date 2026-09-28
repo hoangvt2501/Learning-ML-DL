@@ -1,0 +1,2 @@
+[FP32] test accuracy = 0.9926  (n_test = 540)
+QAT eager int8 acc: 0.9833333492279053

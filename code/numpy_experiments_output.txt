@@ -1,0 +1,17 @@
+=== (A) Integer-only Linear ===
+S_x=0.038963 Z_x=106 | S_w=0.001661 | S_y=0.031995 Z_y=120
+M = 0.0020223740 = 1111811840 * 2^-(31+8) -> 0.0020223740
+max |q_y(integer) - q_y(float sim)| = 0 LSB; tỉ lệ khác nhau: 0.0000%
+sai số tương đối so với FP32: 1.6085%
+max |acc| = 66876 ; giới hạn int16 = 32767 ; cận trên lý thuyết 255*127*K = 8290560
+
+=== (B) GPTQ vs RTN, INT4 theo hàng ===
+RTN : sai số trọng số MSE=6.470e-06, sai số output tương đối=1.6430%
+GPTQ: sai số trọng số MSE=1.724e-05, sai số output tương đối=0.4480%
+
+=== (C) Outlier activation ===
+số cột được LLM.int8 tách: 6 ; kênh outlier thật: [85, 141, 361, 385, 439, 499]
+W8A8, activation per-tensor           : 7.7435%
+W8A8, activation per-token            : 3.6795%
+LLM.int8() (tách outlier)             : 0.1572%
+SmoothQuant (α=0.5) + per-tensor      : 1.4430%

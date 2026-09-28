@@ -1,0 +1,1040 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mã nguồn thí nghiệm — Quantization trong Deep Learning</title>
+<meta name="description" content="Sáu script Python sinh ra toàn bộ hình vẽ và số liệu của giáo trình, kèm kết quả in ra.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">Q</span>
+    <span class="brand-text"><b>Quantization</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><p class="nav-group">Giáo trình</p><ul class="nav-list"><li><a href="ch00.html"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li><li><a href="ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao cần quantization</span></a></li><li><a href="ch02.html"><span class="nav-num">2</span><span class="nav-label">Máy tính biểu diễn số</span></a></li><li><a href="ch03.html"><span class="nav-num">3</span><span class="nav-label">Uniform affine quantization</span></a></li><li><a href="ch04.html"><span class="nav-num">4</span><span class="nav-label">Phân tích sai số</span></a></li><li><a href="ch05.html"><span class="nav-num">5</span><span class="nav-label">Độ mịn (granularity)</span></a></li><li><a href="ch06.html"><span class="nav-num">6</span><span class="nav-label">Suy luận bằng số nguyên</span></a></li><li><a href="ch07.html"><span class="nav-num">7</span><span class="nav-label">Lượng tử cả một mạng</span></a></li><li><a href="ch08.html"><span class="nav-num">8</span><span class="nav-label">Calibration</span></a></li><li><a href="ch09.html"><span class="nav-num">9</span><span class="nav-label">PTQ và QAT</span></a></li><li><a href="ch10.html"><span class="nav-num">10</span><span class="nav-label">PyTorch và TFLite</span></a></li><li><a href="ch11.html"><span class="nav-num">11</span><span class="nav-label">Quantization cho LLM</span></a></li><li><a href="ch12.html"><span class="nav-num">12</span><span class="nav-label">Quy trình làm việc</span></a></li><li><a href="ch13.html"><span class="nav-num">13</span><span class="nav-label">Những hiểu lầm thường gặp</span></a></li><li><a href="bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="ch15.html"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 17 hình</span></a></li><li><a href="thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="ma-nguon.html" class="is-active" aria-current="page"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Tra cứu</span><span class="kicker-time">6 script</span></div><h1>Mã nguồn thí nghiệm</h1><p class="chapter-lede">Mọi hình và mọi con số thực nghiệm trong giáo trình đều do các script dưới đây sinh ra. Chúng được chép nguyên vẹn vào site nên tải về là chạy được ngay.</p><h3 class="heading" id="cach-chay">Cách chạy lại toàn bộ<a class="anchor" href="#cach-chay">#</a></h3><p>Các script đặt hạt giống cố định nên độ chính xác lặp lại được trên cùng phiên bản thư viện. Riêng độ trễ phụ thuộc phần cứng và dao động giữa các lần chạy.</p>
+<div class="code-block" data-lang="bash"><div class="code-head"><span class="code-lang">Bash</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-bash">pip install numpy scipy matplotlib scikit-learn torch torchao
+python code/fig_basics.py
+python code/fig_diagrams.py
+python code/numpy_experiments.py
+python code/torch_experiments.py        <span class="hljs-comment"># vài phút trên CPU</span>
+python code/torch_qat_eager.py
+python code/sensitivity.py
+</code></pre></div>
+<p>Môi trường đã dùng để sinh mọi số liệu trong tài liệu: Python 3.12, NumPy 2.4, PyTorch 2.14 (CPU), torchao 0.18, scikit-learn 1.8, CPU Intel Xeon 2,1 GHz (có AVX-512 VNNI và AMX-INT8), 1 luồng.</p>
+<h3 class="heading" id="danh-sach">Từng script<a class="anchor" href="#danh-sach">#</a></h3><div class="src-list"><section class="src-card" id="fig_basics-py"><header class="src-head"><h3 class="src-title"><code>code/fig_basics.py</code></h3><span class="src-meta">238 dòng</span><a class="src-dl" href="code/fig_basics.py" download>Tải về</a></header><p class="src-note">Sinh Hình 1–7, 12 và 16: chi phí năng lượng, bố cục bit, lưới FP so với INT, hàm bậc thang, đối xứng so với bất đối xứng, SQNR, đánh đổi làm tròn – cắt, STE và NF4.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Sinh các hình minh họa phần nền tảng. Mọi số liệu trên hình đều được TÍNH TRỰC TIẾP bởi code này
+(trừ Hình 1 lấy số liệu từ Horowitz, ISSCC 2014).&quot;&quot;&quot;</span>
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib
+matplotlib.use(<span class="hljs-string">&quot;Agg&quot;</span>)
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> matplotlib.patches <span class="hljs-keyword">import</span> Rectangle
+<span class="hljs-keyword">from</span> scipy.stats <span class="hljs-keyword">import</span> norm
+
+plt.rcParams.update({<span class="hljs-string">&quot;font.family&quot;</span>: <span class="hljs-string">&quot;DejaVu Sans&quot;</span>, <span class="hljs-string">&quot;font.size&quot;</span>: <span class="hljs-number">10</span>, <span class="hljs-string">&quot;axes.spines.top&quot;</span>: <span class="hljs-literal">False</span>,
+                     <span class="hljs-string">&quot;axes.spines.right&quot;</span>: <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;figure.dpi&quot;</span>: <span class="hljs-number">110</span>, <span class="hljs-string">&quot;savefig.dpi&quot;</span>: <span class="hljs-number">110</span>,
+                     <span class="hljs-string">&quot;savefig.bbox&quot;</span>: <span class="hljs-string">&quot;tight&quot;</span>})
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), <span class="hljs-string">&quot;..&quot;</span>, <span class="hljs-string">&quot;figs&quot;</span>) + os.sep
+os.makedirs(OUT, exist_ok=<span class="hljs-literal">True</span>)
+C_SIGN, C_EXP, C_MAN, C_INT = <span class="hljs-string">&quot;#d9534f&quot;</span>, <span class="hljs-string">&quot;#4a78c2&quot;</span>, <span class="hljs-string">&quot;#4caf6e&quot;</span>, <span class="hljs-string">&quot;#9e9e9e&quot;</span>
+rng = np.random.default_rng(<span class="hljs-number">0</span>)
+
+<span class="hljs-comment"># ---------------------------------------------------------------- Hình 1: năng lượng</span>
+ops = [(<span class="hljs-string">&quot;Cộng INT8&quot;</span>, <span class="hljs-number">0.03</span>), (<span class="hljs-string">&quot;Cộng INT32&quot;</span>, <span class="hljs-number">0.1</span>), (<span class="hljs-string">&quot;Cộng FP16&quot;</span>, <span class="hljs-number">0.4</span>), (<span class="hljs-string">&quot;Cộng FP32&quot;</span>, <span class="hljs-number">0.9</span>),
+       (<span class="hljs-string">&quot;Nhân INT8&quot;</span>, <span class="hljs-number">0.2</span>), (<span class="hljs-string">&quot;Nhân INT32&quot;</span>, <span class="hljs-number">3.1</span>), (<span class="hljs-string">&quot;Nhân FP16&quot;</span>, <span class="hljs-number">1.1</span>), (<span class="hljs-string">&quot;Nhân FP32&quot;</span>, <span class="hljs-number">3.7</span>),
+       (<span class="hljs-string">&quot;Đọc cache 8 KB (64 bit)&quot;</span>, <span class="hljs-number">10</span>), (<span class="hljs-string">&quot;Đọc cache 1 MB (64 bit)&quot;</span>, <span class="hljs-number">100</span>),
+       (<span class="hljs-string">&quot;Đọc DRAM (64 bit)&quot;</span>, <span class="hljs-number">1300</span>)]
+colors = [<span class="hljs-string">&quot;#4caf6e&quot;</span>] * <span class="hljs-number">2</span> + [<span class="hljs-string">&quot;#4a78c2&quot;</span>] * <span class="hljs-number">2</span> + [<span class="hljs-string">&quot;#4caf6e&quot;</span>] * <span class="hljs-number">2</span> + [<span class="hljs-string">&quot;#4a78c2&quot;</span>] * <span class="hljs-number">2</span> + [<span class="hljs-string">&quot;#e0923a&quot;</span>] * <span class="hljs-number">3</span>
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">8</span>, <span class="hljs-number">4.6</span>))
+y = np.arange(<span class="hljs-built_in">len</span>(ops))[::-<span class="hljs-number">1</span>]
+ax.barh(y, [v <span class="hljs-keyword">for</span> _, v <span class="hljs-keyword">in</span> ops], color=colors)
+ax.set_yticks(y, [n <span class="hljs-keyword">for</span> n, _ <span class="hljs-keyword">in</span> ops]); ax.set_xscale(<span class="hljs-string">&quot;log&quot;</span>)
+<span class="hljs-keyword">for</span> yi, (n, v) <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(y, ops):
+    lab = <span class="hljs-string">&quot;1300–2600&quot;</span> <span class="hljs-keyword">if</span> <span class="hljs-string">&quot;DRAM&quot;</span> <span class="hljs-keyword">in</span> n <span class="hljs-keyword">else</span> <span class="hljs-string">f&quot;<span class="hljs-subst">{v:g}</span>&quot;</span>
+    ax.text((<span class="hljs-number">2600</span> <span class="hljs-keyword">if</span> <span class="hljs-string">&quot;DRAM&quot;</span> <span class="hljs-keyword">in</span> n <span class="hljs-keyword">else</span> v) * <span class="hljs-number">1.15</span>, yi, lab + <span class="hljs-string">&quot; pJ&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9</span>)
+ax.set_xlim(<span class="hljs-number">0.01</span>, <span class="hljs-number">2e4</span>); ax.set_xlabel(<span class="hljs-string">&quot;Năng lượng mỗi phép toán (pJ, thang log)&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Năng lượng phép toán và truy cập bộ nhớ (công nghệ 45 nm, 0.9 V)&quot;</span>)
+ax.errorbar([<span class="hljs-number">1950</span>], [y[-<span class="hljs-number">1</span>]], xerr=[[<span class="hljs-number">650</span>], [<span class="hljs-number">650</span>]], fmt=<span class="hljs-string">&quot;none&quot;</span>, ecolor=<span class="hljs-string">&quot;k&quot;</span>, capsize=<span class="hljs-number">3</span>)
+ax.legend(handles=[Rectangle((<span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, color=c) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> [<span class="hljs-string">&quot;#4caf6e&quot;</span>, <span class="hljs-string">&quot;#4a78c2&quot;</span>, <span class="hljs-string">&quot;#e0923a&quot;</span>]],
+          labels=[<span class="hljs-string">&quot;Số nguyên&quot;</span>, <span class="hljs-string">&quot;Dấu phẩy động&quot;</span>, <span class="hljs-string">&quot;Bộ nhớ&quot;</span>], loc=<span class="hljs-string">&quot;upper right&quot;</span>, frameon=<span class="hljs-literal">False</span>)
+fig.text(<span class="hljs-number">0.01</span>, -<span class="hljs-number">0.02</span>, <span class="hljs-string">&quot;Nguồn số liệu: M. Horowitz, “Computing&#x27;s energy problem”, ISSCC 2014.&quot;</span>, fontsize=<span class="hljs-number">8</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig01_energy.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># ---------------------------------------------------------------- Hình 2: bố cục bit</span>
+fmts = [(<span class="hljs-string">&quot;FP32&quot;</span>, [(<span class="hljs-string">&quot;S&quot;</span>, <span class="hljs-number">1</span>, C_SIGN), (<span class="hljs-string">&quot;Exponent (8)&quot;</span>, <span class="hljs-number">8</span>, C_EXP), (<span class="hljs-string">&quot;Mantissa (23)&quot;</span>, <span class="hljs-number">23</span>, C_MAN)]),
+        (<span class="hljs-string">&quot;FP16&quot;</span>, [(<span class="hljs-string">&quot;S&quot;</span>, <span class="hljs-number">1</span>, C_SIGN), (<span class="hljs-string">&quot;Exp (5)&quot;</span>, <span class="hljs-number">5</span>, C_EXP), (<span class="hljs-string">&quot;Mantissa (10)&quot;</span>, <span class="hljs-number">10</span>, C_MAN)]),
+        (<span class="hljs-string">&quot;BF16&quot;</span>, [(<span class="hljs-string">&quot;S&quot;</span>, <span class="hljs-number">1</span>, C_SIGN), (<span class="hljs-string">&quot;Exponent (8)&quot;</span>, <span class="hljs-number">8</span>, C_EXP), (<span class="hljs-string">&quot;Man (7)&quot;</span>, <span class="hljs-number">7</span>, C_MAN)]),
+        (<span class="hljs-string">&quot;FP8 E4M3&quot;</span>, [(<span class="hljs-string">&quot;S&quot;</span>, <span class="hljs-number">1</span>, C_SIGN), (<span class="hljs-string">&quot;E (4)&quot;</span>, <span class="hljs-number">4</span>, C_EXP), (<span class="hljs-string">&quot;M (3)&quot;</span>, <span class="hljs-number">3</span>, C_MAN)]),
+        (<span class="hljs-string">&quot;FP8 E5M2&quot;</span>, [(<span class="hljs-string">&quot;S&quot;</span>, <span class="hljs-number">1</span>, C_SIGN), (<span class="hljs-string">&quot;E (5)&quot;</span>, <span class="hljs-number">5</span>, C_EXP), (<span class="hljs-string">&quot;M (2)&quot;</span>, <span class="hljs-number">2</span>, C_MAN)]),
+        (<span class="hljs-string">&quot;INT8&quot;</span>, [(<span class="hljs-string">&quot;Số nguyên bù 2 (8)&quot;</span>, <span class="hljs-number">8</span>, C_INT)]),
+        (<span class="hljs-string">&quot;INT4&quot;</span>, [(<span class="hljs-string">&quot;INT (4)&quot;</span>, <span class="hljs-number">4</span>, C_INT)])]
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">9</span>, <span class="hljs-number">3.8</span>))
+<span class="hljs-keyword">for</span> r, (name, parts) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(fmts):
+    x0, yy = <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(fmts) - <span class="hljs-number">1</span> - r
+    <span class="hljs-keyword">for</span> lab, nb, c <span class="hljs-keyword">in</span> parts:
+        ax.add_patch(Rectangle((x0, yy + <span class="hljs-number">0.1</span>), nb, <span class="hljs-number">0.8</span>, facecolor=c, edgecolor=<span class="hljs-string">&quot;white&quot;</span>, lw=<span class="hljs-number">1.5</span>))
+        <span class="hljs-keyword">if</span> nb &gt;= <span class="hljs-number">2</span> <span class="hljs-keyword">or</span> lab == <span class="hljs-string">&quot;S&quot;</span>:
+            ax.text(x0 + nb / <span class="hljs-number">2</span>, yy + <span class="hljs-number">0.5</span>, lab, ha=<span class="hljs-string">&quot;center&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, color=<span class="hljs-string">&quot;white&quot;</span>, fontsize=<span class="hljs-number">8.5</span>,
+                    fontweight=<span class="hljs-string">&quot;bold&quot;</span>)
+        x0 += nb
+    ax.text(-<span class="hljs-number">0.6</span>, yy + <span class="hljs-number">0.5</span>, name, ha=<span class="hljs-string">&quot;right&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontweight=<span class="hljs-string">&quot;bold&quot;</span>)
+    ax.text(x0 + <span class="hljs-number">0.5</span>, yy + <span class="hljs-number">0.5</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{x0}</span> bit&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9</span>, color=<span class="hljs-string">&quot;#555&quot;</span>)
+ax.set_xlim(-<span class="hljs-number">6</span>, <span class="hljs-number">36</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(fmts)); ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Bố cục bit của các kiểu dữ liệu thường gặp (S = bit dấu)&quot;</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig02_bit_layout.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># ---------------------------------------------------------------- Hình 3: lưới giá trị FP8 vs INT8</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">e4m3_values</span>():
+    vals = []
+    <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">16</span>):
+        <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">8</span>):
+            <span class="hljs-keyword">if</span> e == <span class="hljs-number">15</span> <span class="hljs-keyword">and</span> m == <span class="hljs-number">7</span>:      <span class="hljs-comment"># mã NaN duy nhất của E4M3 (biến thể OCP &quot;fn&quot;)</span>
+                <span class="hljs-keyword">continue</span>
+            vals.append((m / <span class="hljs-number">8</span>) * <span class="hljs-number">2.0</span> ** (<span class="hljs-number">1</span> - <span class="hljs-number">7</span>) <span class="hljs-keyword">if</span> e == <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> (<span class="hljs-number">1</span> + m / <span class="hljs-number">8</span>) * <span class="hljs-number">2.0</span> ** (e - <span class="hljs-number">7</span>))
+    <span class="hljs-keyword">return</span> np.array(vals)
+v8 = e4m3_values()
+<span class="hljs-keyword">assert</span> np.isclose(v8.<span class="hljs-built_in">max</span>(), <span class="hljs-number">448.0</span>)
+s_int8 = <span class="hljs-number">448</span> / <span class="hljs-number">127</span>
+vi8 = np.arange(<span class="hljs-number">0</span>, <span class="hljs-number">128</span>) * s_int8
+fig, axes = plt.subplots(<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, figsize=(<span class="hljs-number">9</span>, <span class="hljs-number">3.6</span>), sharex=<span class="hljs-literal">True</span>, gridspec_kw={<span class="hljs-string">&quot;hspace&quot;</span>: <span class="hljs-number">0.6</span>})
+<span class="hljs-keyword">for</span> ax, vals, title, c <span class="hljs-keyword">in</span> [(axes[<span class="hljs-number">0</span>], v8, <span class="hljs-string">&quot;FP8 E4M3 (các giá trị dương biểu diễn được)&quot;</span>, C_EXP),
+                           (axes[<span class="hljs-number">1</span>], vi8, <span class="hljs-string">f&quot;INT8 đối xứng, cùng giá trị lớn nhất 448 (bước S = 448/127 ≈ <span class="hljs-subst">{s_int8:<span class="hljs-number">.2</span>f}</span>)&quot;</span>, C_INT)]:
+    vv = vals[vals &lt;= <span class="hljs-number">40</span>]
+    ax.vlines(vv, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, color=c, lw=<span class="hljs-number">1</span>)
+    ax.set_yticks([]); ax.set_title(title, fontsize=<span class="hljs-number">9.5</span>, loc=<span class="hljs-string">&quot;left&quot;</span>); ax.spines[<span class="hljs-string">&quot;left&quot;</span>].set_visible(<span class="hljs-literal">False</span>)
+axes[<span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&quot;Giá trị (chỉ hiển thị đoạn [0, 40])&quot;</span>)
+fig.suptitle(<span class="hljs-string">&quot;Lưới dấu phẩy động dày gần 0, thưa ở xa; lưới số nguyên cách đều&quot;</span>, y=<span class="hljs-number">1.03</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig03_fp_grid.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># ---------------------------------------------------------------- Hình 4: bậc thang quantize</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">quant_params</span>(<span class="hljs-params">alpha, beta, qmin, qmax</span>):
+    S = (beta - alpha) / (qmax - qmin)
+    Z = <span class="hljs-built_in">int</span>(np.clip(np.<span class="hljs-built_in">round</span>(qmin - alpha / S), qmin, qmax))
+    <span class="hljs-keyword">return</span> S, Z
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">fake_quant</span>(<span class="hljs-params">x, S, Z, qmin, qmax</span>):
+    q = np.clip(np.<span class="hljs-built_in">round</span>(x / S) + Z, qmin, qmax)
+    <span class="hljs-keyword">return</span> S * (q - Z)
+S, Z = quant_params(-<span class="hljs-number">1.0</span>, <span class="hljs-number">3.0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">7</span>)
+x = np.linspace(-<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">4000</span>)
+xh = fake_quant(x, S, Z, <span class="hljs-number">0</span>, <span class="hljs-number">7</span>)
+lo, hi = S * (<span class="hljs-number">0</span> - Z), S * (<span class="hljs-number">7</span> - Z)
+fig, axes = plt.subplots(<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, figsize=(<span class="hljs-number">8</span>, <span class="hljs-number">5.6</span>), sharex=<span class="hljs-literal">True</span>, gridspec_kw={<span class="hljs-string">&quot;height_ratios&quot;</span>: [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>]})
+ax = axes[<span class="hljs-number">0</span>]
+ax.plot(x, x, <span class="hljs-string">&quot;--&quot;</span>, color=<span class="hljs-string">&quot;#999&quot;</span>, label=<span class="hljs-string">&quot;Lý tưởng: x̂ = x&quot;</span>)
+ax.plot(x, xh, color=C_EXP, lw=<span class="hljs-number">2</span>, label=<span class="hljs-string">&quot;x̂ = S·(q − Z)&quot;</span>)
+<span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> axes:
+    a.axvspan(-<span class="hljs-number">2</span>, lo, color=C_SIGN, alpha=<span class="hljs-number">0.08</span>); a.axvspan(hi, <span class="hljs-number">4</span>, color=C_SIGN, alpha=<span class="hljs-number">0.08</span>)
+ax.text(-<span class="hljs-number">1.95</span>, <span class="hljs-number">2.9</span>, <span class="hljs-string">&quot;vùng clipping&quot;</span>, color=C_SIGN, fontsize=<span class="hljs-number">9</span>)
+ax.text(hi + <span class="hljs-number">0.05</span>, -<span class="hljs-number">1.6</span>, <span class="hljs-string">&quot;vùng clipping&quot;</span>, color=C_SIGN, fontsize=<span class="hljs-number">9</span>)
+ax.set_ylabel(<span class="hljs-string">&quot;x̂ (sau quantize → dequantize)&quot;</span>); ax.legend(loc=<span class="hljs-string">&quot;upper left&quot;</span>, bbox_to_anchor=(<span class="hljs-number">0.2</span>, <span class="hljs-number">1</span>), frameon=<span class="hljs-literal">False</span>)
+ax.set_title(<span class="hljs-string">f&quot;Quantize 3 bit không dấu trên [−1, 3]:  S = 4/7 ≈ <span class="hljs-subst">{S:<span class="hljs-number">.4</span>f}</span>,  Z = <span class="hljs-subst">{Z}</span>\n&quot;</span>
+             <span class="hljs-string">f&quot;Dải biểu diễn thực tế sau khi làm tròn Z: [<span class="hljs-subst">{lo:<span class="hljs-number">.3</span>f}</span>, <span class="hljs-subst">{hi:<span class="hljs-number">.3</span>f}</span>]&quot;</span>)
+err = xh - x
+axes[<span class="hljs-number">1</span>].plot(x, err, color=C_SIGN)
+axes[<span class="hljs-number">1</span>].axhline(S / <span class="hljs-number">2</span>, ls=<span class="hljs-string">&quot;:&quot;</span>, color=<span class="hljs-string">&quot;#555&quot;</span>); axes[<span class="hljs-number">1</span>].axhline(-S / <span class="hljs-number">2</span>, ls=<span class="hljs-string">&quot;:&quot;</span>, color=<span class="hljs-string">&quot;#555&quot;</span>)
+axes[<span class="hljs-number">1</span>].text(-<span class="hljs-number">1.9</span>, S / <span class="hljs-number">2</span> + <span class="hljs-number">0.05</span>, <span class="hljs-string">&quot;±S/2&quot;</span>, fontsize=<span class="hljs-number">9</span>)
+axes[<span class="hljs-number">1</span>].set_ylim(-<span class="hljs-number">1.3</span>, <span class="hljs-number">1.3</span>); axes[<span class="hljs-number">1</span>].set_ylabel(<span class="hljs-string">&quot;Sai số x̂ − x&quot;</span>); axes[<span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&quot;x&quot;</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig04_staircase.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># ---------------------------------------------------------------- Hình 5: đối xứng vs bất đối xứng trên dữ liệu sau ReLU</span>
+act = np.maximum(rng.normal(<span class="hljs-number">0.3</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">200_000</span>), <span class="hljs-number">0</span>)
+amax = act.<span class="hljs-built_in">max</span>()
+bits = <span class="hljs-number">3</span>
+<span class="hljs-comment"># đối xứng có dấu, dải hạn chế [-(2^{b-1}-1), 2^{b-1}-1]</span>
+qs = <span class="hljs-number">2</span> ** (bits - <span class="hljs-number">1</span>) - <span class="hljs-number">1</span>
+S_sym = amax / qs
+lv_sym = np.arange(-qs, qs + <span class="hljs-number">1</span>) * S_sym
+<span class="hljs-comment"># bất đối xứng không dấu [0, 2^b - 1]</span>
+S_asym, Z_asym = quant_params(<span class="hljs-number">0.0</span>, amax, <span class="hljs-number">0</span>, <span class="hljs-number">2</span> ** bits - <span class="hljs-number">1</span>)
+lv_asym = (np.arange(<span class="hljs-number">0</span>, <span class="hljs-number">2</span> ** bits) - Z_asym) * S_asym
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">mse_sym</span>(<span class="hljs-params">x, b</span>):
+    q = <span class="hljs-number">2</span> ** (b - <span class="hljs-number">1</span>) - <span class="hljs-number">1</span>; s = np.<span class="hljs-built_in">abs</span>(x).<span class="hljs-built_in">max</span>() / q
+    <span class="hljs-keyword">return</span> np.mean((np.clip(np.<span class="hljs-built_in">round</span>(x / s), -q, q) * s - x) ** <span class="hljs-number">2</span>)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">mse_asym</span>(<span class="hljs-params">x, b</span>):
+    s, z = quant_params(x.<span class="hljs-built_in">min</span>(), x.<span class="hljs-built_in">max</span>(), <span class="hljs-number">0</span>, <span class="hljs-number">2</span> ** b - <span class="hljs-number">1</span>)
+    <span class="hljs-keyword">return</span> np.mean((fake_quant(x, s, z, <span class="hljs-number">0</span>, <span class="hljs-number">2</span> ** b - <span class="hljs-number">1</span>) - x) ** <span class="hljs-number">2</span>)
+fig, axes = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">3.4</span>), sharey=<span class="hljs-literal">True</span>)
+<span class="hljs-keyword">for</span> ax, lv, t <span class="hljs-keyword">in</span> [(axes[<span class="hljs-number">0</span>], lv_sym, <span class="hljs-string">f&quot;Đối xứng (<span class="hljs-subst">{bits}</span> bit có dấu): <span class="hljs-subst">{np.<span class="hljs-built_in">sum</span>(lv_sym &gt;= <span class="hljs-number">0</span>)}</span>/<span class="hljs-subst">{<span class="hljs-built_in">len</span>(lv_sym)}</span> mức dùng được&quot;</span>),
+                  (axes[<span class="hljs-number">1</span>], lv_asym, <span class="hljs-string">f&quot;Bất đối xứng (<span class="hljs-subst">{bits}</span> bit không dấu): <span class="hljs-subst">{<span class="hljs-built_in">len</span>(lv_asym)}</span>/<span class="hljs-subst">{<span class="hljs-built_in">len</span>(lv_asym)}</span> mức dùng được&quot;</span>)]:
+    ax.hist(act, bins=<span class="hljs-number">120</span>, <span class="hljs-built_in">range</span>=(-amax, amax), color=<span class="hljs-string">&quot;#bbb&quot;</span>, density=<span class="hljs-literal">True</span>)
+    <span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> lv:
+        ax.axvline(l, color=C_SIGN <span class="hljs-keyword">if</span> l &lt; -<span class="hljs-number">1e-9</span> <span class="hljs-keyword">else</span> C_EXP, lw=<span class="hljs-number">1.2</span>, ls=<span class="hljs-string">&quot;--&quot;</span> <span class="hljs-keyword">if</span> l &lt; -<span class="hljs-number">1e-9</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;-&quot;</span>)
+    ax.set_title(t, fontsize=<span class="hljs-number">9.5</span>); ax.set_xlabel(<span class="hljs-string">&quot;Giá trị activation sau ReLU&quot;</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">0.6</span>)
+    ax.annotate(<span class="hljs-string">f&quot;đỉnh tại 0 (<span class="hljs-subst">{np.mean(act == <span class="hljs-number">0</span>):<span class="hljs-number">.0</span>%}</span> giá trị)\nbị cắt bớt cho dễ nhìn&quot;</span>, xy=(<span class="hljs-number">0</span>, <span class="hljs-number">0.58</span>), xytext=(-<span class="hljs-number">4.8</span>, <span class="hljs-number">0.45</span>),
+                fontsize=<span class="hljs-number">8</span>, arrowprops=<span class="hljs-built_in">dict</span>(arrowstyle=<span class="hljs-string">&quot;-&gt;&quot;</span>, color=<span class="hljs-string">&quot;#555&quot;</span>))
+axes[<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&quot;Mật độ&quot;</span>)
+fig.suptitle(<span class="hljs-string">&quot;Mức lượng tử (đường dọc) đặt trên histogram activation; mức màu đỏ nét đứt bị lãng phí&quot;</span>, y=<span class="hljs-number">1.04</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig05_sym_asym.png&quot;</span>); plt.close(fig)
+sym_asym_mse = {b: (mse_sym(act, b), mse_asym(act, b)) <span class="hljs-keyword">for</span> b <span class="hljs-keyword">in</span> (<span class="hljs-number">4</span>, <span class="hljs-number">8</span>)}
+
+<span class="hljs-comment"># ---------------------------------------------------------------- Hình 6: đánh đổi rounding - clipping</span>
+w = rng.laplace(<span class="hljs-number">0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">1_000_000</span>)
+bits = <span class="hljs-number">4</span>; q = <span class="hljs-number">2</span> ** (bits - <span class="hljs-number">1</span>) - <span class="hljs-number">1</span>
+cs = np.linspace(<span class="hljs-number">0.5</span>, np.<span class="hljs-built_in">abs</span>(w).<span class="hljs-built_in">max</span>(), <span class="hljs-number">400</span>)
+r_err, c_err = [], []
+<span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> cs:
+    s = c / q
+    inside = np.<span class="hljs-built_in">abs</span>(w) &lt;= c
+    wq = np.clip(np.<span class="hljs-built_in">round</span>(w / s), -q, q) * s
+    e2 = (wq - w) ** <span class="hljs-number">2</span>
+    r_err.append(e2[inside].<span class="hljs-built_in">sum</span>() / w.size); c_err.append(e2[~inside].<span class="hljs-built_in">sum</span>() / w.size)
+r_err, c_err = np.array(r_err), np.array(c_err); tot = r_err + c_err
+c_opt = cs[np.argmin(tot)]
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">8</span>, <span class="hljs-number">4</span>))
+ax.plot(cs, r_err, label=<span class="hljs-string">&quot;Sai số làm tròn (rounding)&quot;</span>, color=C_EXP)
+ax.plot(cs, c_err, label=<span class="hljs-string">&quot;Sai số cắt (clipping)&quot;</span>, color=C_SIGN)
+ax.plot(cs, tot, label=<span class="hljs-string">&quot;Tổng MSE&quot;</span>, color=<span class="hljs-string">&quot;k&quot;</span>, lw=<span class="hljs-number">2</span>)
+ax.axvline(c_opt, ls=<span class="hljs-string">&quot;--&quot;</span>, color=<span class="hljs-string">&quot;k&quot;</span>); ax.axvline(cs[-<span class="hljs-number">1</span>], ls=<span class="hljs-string">&quot;:&quot;</span>, color=<span class="hljs-string">&quot;#777&quot;</span>)
+ax.text(c_opt + <span class="hljs-number">0.2</span>, <span class="hljs-number">2e-4</span>, <span class="hljs-string">f&quot;ngưỡng tối ưu c* ≈ <span class="hljs-subst">{c_opt:<span class="hljs-number">.2</span>f}</span>\nMSE = <span class="hljs-subst">{tot.<span class="hljs-built_in">min</span>():<span class="hljs-number">.4</span>f}</span>&quot;</span>, fontsize=<span class="hljs-number">9</span>)
+ax.text(cs[-<span class="hljs-number">1</span>] - <span class="hljs-number">0.2</span>, <span class="hljs-number">5e-3</span>, <span class="hljs-string">f&quot;min–max: c = max|w| = <span class="hljs-subst">{cs[-<span class="hljs-number">1</span>]:<span class="hljs-number">.2</span>f}</span>\nMSE = <span class="hljs-subst">{tot[-<span class="hljs-number">1</span>]:<span class="hljs-number">.4</span>f}</span>&quot;</span>, ha=<span class="hljs-string">&quot;right&quot;</span>, fontsize=<span class="hljs-number">9</span>)
+ax.set_yscale(<span class="hljs-string">&quot;log&quot;</span>); ax.set_xlabel(<span class="hljs-string">&quot;Ngưỡng cắt c  (dải quantize [−c, c])&quot;</span>); ax.set_ylabel(<span class="hljs-string">&quot;MSE (thang log)&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;INT4 đối xứng trên 10⁶ trọng số phân phối Laplace(0, 1)&quot;</span>); ax.legend(frameon=<span class="hljs-literal">False</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig07_round_clip.png&quot;</span>); plt.close(fig)
+clip_stats = (c_opt, tot.<span class="hljs-built_in">min</span>(), cs[-<span class="hljs-number">1</span>], tot[-<span class="hljs-number">1</span>])
+
+<span class="hljs-comment"># ---------------------------------------------------------------- Hình 7: SQNR theo số bit</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">sqnr_db</span>(<span class="hljs-params">x, xh</span>): <span class="hljs-keyword">return</span> <span class="hljs-number">10</span> * np.log10(np.mean(x ** <span class="hljs-number">2</span>) / np.mean((x - xh) ** <span class="hljs-number">2</span>))
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">q_sym</span>(<span class="hljs-params">x, b, c</span>):
+    qq = <span class="hljs-number">2</span> ** (b - <span class="hljs-number">1</span>) - <span class="hljs-number">1</span>; s = c / qq
+    <span class="hljs-keyword">return</span> np.clip(np.<span class="hljs-built_in">round</span>(x / s), -qq, qq) * s
+bs = np.arange(<span class="hljs-number">2</span>, <span class="hljs-number">11</span>)
+u = rng.uniform(-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1_000_000</span>); g = rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1_000_000</span>)
+s_uni = [sqnr_db(u, q_sym(u, b, <span class="hljs-number">1.0</span>)) <span class="hljs-keyword">for</span> b <span class="hljs-keyword">in</span> bs]
+s_gmm = [sqnr_db(g, q_sym(g, b, np.<span class="hljs-built_in">abs</span>(g).<span class="hljs-built_in">max</span>())) <span class="hljs-keyword">for</span> b <span class="hljs-keyword">in</span> bs]
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">best_clip</span>(<span class="hljs-params">x, b</span>):
+    cands = np.linspace(<span class="hljs-number">0.5</span>, np.<span class="hljs-built_in">abs</span>(x).<span class="hljs-built_in">max</span>(), <span class="hljs-number">300</span>)
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">max</span>(sqnr_db(x, q_sym(x, b, c)) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> cands)
+g_small = g[:<span class="hljs-number">200_000</span>]
+s_gopt = [best_clip(g_small, b) <span class="hljs-keyword">for</span> b <span class="hljs-keyword">in</span> bs]
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">7.5</span>, <span class="hljs-number">4</span>))
+ax.plot(bs, <span class="hljs-number">20</span> * np.log10(<span class="hljs-number">2</span> ** bs - <span class="hljs-number">2</span>), <span class="hljs-string">&quot;k--&quot;</span>, label=<span class="hljs-string">&quot;Lý thuyết cho phân phối đều: 20·log₁₀(2ᵇ−2) ≈ 6.02·b dB&quot;</span>)
+ax.plot(bs, s_uni, <span class="hljs-string">&quot;o&quot;</span>, color=C_MAN, label=<span class="hljs-string">&quot;Thực nghiệm: dữ liệu đều U(−1, 1)&quot;</span>)
+ax.plot(bs, s_gmm, <span class="hljs-string">&quot;s-&quot;</span>, color=C_SIGN, label=<span class="hljs-string">&quot;Gauss N(0,1), dải min–max&quot;</span>)
+ax.plot(bs, s_gopt, <span class="hljs-string">&quot;^-&quot;</span>, color=C_EXP, label=<span class="hljs-string">&quot;Gauss N(0,1), ngưỡng cắt tối ưu&quot;</span>)
+ax.set_xlabel(<span class="hljs-string">&quot;Số bit b&quot;</span>); ax.set_ylabel(<span class="hljs-string">&quot;SQNR (dB)&quot;</span>); ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8.5</span>)
+ax.set_title(<span class="hljs-string">&quot;Mỗi bit thêm vào tăng SQNR khoảng 6 dB&quot;</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig06_sqnr.png&quot;</span>); plt.close(fig)
+sqnr_tab = <span class="hljs-built_in">list</span>(<span class="hljs-built_in">zip</span>(bs, s_uni, s_gmm, s_gopt))
+
+<span class="hljs-comment"># ---------------------------------------------------------------- Hình 8: STE</span>
+x = np.linspace(-<span class="hljs-number">1.6</span>, <span class="hljs-number">1.6</span>, <span class="hljs-number">3000</span>)
+qq = <span class="hljs-number">3</span>; s = <span class="hljs-number">1</span> / qq
+fq = np.clip(np.<span class="hljs-built_in">round</span>(x / s), -qq, qq) * s
+fig, axes = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">3.4</span>))
+axes[<span class="hljs-number">0</span>].plot(x, x, <span class="hljs-string">&quot;--&quot;</span>, color=<span class="hljs-string">&quot;#999&quot;</span>, label=<span class="hljs-string">&quot;x&quot;</span>); axes[<span class="hljs-number">0</span>].plot(x, fq, color=C_EXP, lw=<span class="hljs-number">2</span>, label=<span class="hljs-string">&quot;FakeQuant(x)&quot;</span>)
+axes[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Lượt xuôi (forward): hàm bậc thang&quot;</span>); axes[<span class="hljs-number">0</span>].legend(frameon=<span class="hljs-literal">False</span>); axes[<span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&quot;x&quot;</span>)
+axes[<span class="hljs-number">1</span>].plot(x, np.zeros_like(x), color=C_SIGN, lw=<span class="hljs-number">2</span>, label=<span class="hljs-string">&quot;Đạo hàm thật: 0 hầu khắp nơi\n(không xác định tại các bước nhảy)&quot;</span>)
+axes[<span class="hljs-number">1</span>].plot(x, ((x &gt;= -<span class="hljs-number">1</span>) &amp; (x &lt;= <span class="hljs-number">1</span>)).astype(<span class="hljs-built_in">float</span>) + <span class="hljs-number">0.02</span>, color=C_MAN, lw=<span class="hljs-number">2</span>, label=<span class="hljs-string">&quot;STE: 1 trong [α, β], 0 ngoài&quot;</span>)
+axes[<span class="hljs-number">1</span>].set_ylim(-<span class="hljs-number">0.3</span>, <span class="hljs-number">1.4</span>); axes[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Lượt ngược (backward): đạo hàm dùng để cập nhật&quot;</span>)
+axes[<span class="hljs-number">1</span>].legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8.5</span>, loc=<span class="hljs-string">&quot;upper right&quot;</span>); axes[<span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&quot;x&quot;</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig12_ste.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># ---------------------------------------------------------------- Hình 9: NF4 vs INT4</span>
+offset = <span class="hljs-number">0.9677083</span>
+v1 = norm.ppf(np.linspace(offset, <span class="hljs-number">0.5</span>, <span class="hljs-number">9</span>)[:-<span class="hljs-number">1</span>])
+v3 = -norm.ppf(np.linspace(offset, <span class="hljs-number">0.5</span>, <span class="hljs-number">8</span>)[:-<span class="hljs-number">1</span>])
+nf4 = np.sort(np.concatenate([v1, [<span class="hljs-number">0.0</span>], v3])); nf4 /= nf4.<span class="hljs-built_in">max</span>()
+int4 = np.arange(-<span class="hljs-number">7</span>, <span class="hljs-number">8</span>) / <span class="hljs-number">7.0</span>
+W = rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (<span class="hljs-number">20_000</span>, <span class="hljs-number">64</span>))
+Wn = (W / np.<span class="hljs-built_in">abs</span>(W).<span class="hljs-built_in">max</span>(axis=<span class="hljs-number">1</span>, keepdims=<span class="hljs-literal">True</span>)).ravel()      <span class="hljs-comment"># chuẩn hóa absmax theo khối 64</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">nearest</span>(<span class="hljs-params">x, grid</span>):
+    idx = np.<span class="hljs-built_in">abs</span>(x[:, <span class="hljs-literal">None</span>] - grid[<span class="hljs-literal">None</span>, :]).argmin(<span class="hljs-number">1</span>); <span class="hljs-keyword">return</span> grid[idx]
+sub = Wn[:<span class="hljs-number">400_000</span>]
+mse_nf4 = np.mean((nearest(sub, nf4) - sub) ** <span class="hljs-number">2</span>); mse_int4 = np.mean((nearest(sub, int4) - sub) ** <span class="hljs-number">2</span>)
+fig, axes = plt.subplots(<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, figsize=(<span class="hljs-number">9</span>, <span class="hljs-number">4.6</span>), sharex=<span class="hljs-literal">True</span>)
+<span class="hljs-keyword">for</span> ax, grid, t, c <span class="hljs-keyword">in</span> [(axes[<span class="hljs-number">0</span>], int4, <span class="hljs-string">f&quot;INT4 đối xứng (15 mức cách đều) — MSE = <span class="hljs-subst">{mse_int4:<span class="hljs-number">.2</span>e}</span>&quot;</span>, C_INT),
+                       (axes[<span class="hljs-number">1</span>], nf4, <span class="hljs-string">f&quot;NF4 (16 mức theo phân vị phân phối chuẩn) — MSE = <span class="hljs-subst">{mse_nf4:<span class="hljs-number">.2</span>e}</span>&quot;</span>, C_EXP)]:
+    ax.hist(Wn, bins=<span class="hljs-number">200</span>, color=<span class="hljs-string">&quot;#ddd&quot;</span>, density=<span class="hljs-literal">True</span>)
+    <span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> grid: ax.axvline(l, color=c, lw=<span class="hljs-number">1.3</span>)
+    ax.set_title(t, fontsize=<span class="hljs-number">9.5</span>, loc=<span class="hljs-string">&quot;left&quot;</span>); ax.set_yticks([])
+axes[<span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&quot;Trọng số sau khi chia cho absmax của khối 64 phần tử (w ~ N(0,1))&quot;</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig16_nf4.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># ---------------------------------------------------------------- in số liệu dùng trong bài</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;S,Z (3bit,[-1,3]):&quot;</span>, S, Z, <span class="hljs-string">&quot;range&quot;</span>, lo, hi)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;sym/asym MSE on ReLU act:&quot;</span>, {b: (<span class="hljs-string">f&quot;<span class="hljs-subst">{a:<span class="hljs-number">.3</span>e}</span>&quot;</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{c:<span class="hljs-number">.3</span>e}</span>&quot;</span>) <span class="hljs-keyword">for</span> b, (a, c) <span class="hljs-keyword">in</span> sym_asym_mse.items()})
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;clip stats c_opt, mse_opt, c_max, mse_max:&quot;</span>, clip_stats)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;SQNR table (b, uniform, gauss-minmax, gauss-opt):&quot;</span>)
+<span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> sqnr_tab: <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;  %d  %.2f  %.2f  %.2f&quot;</span> % r)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;NF4 levels:&quot;</span>, np.<span class="hljs-built_in">round</span>(nf4, <span class="hljs-number">4</span>)); <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;mse nf4 / int4:&quot;</span>, mse_nf4, mse_int4, mse_int4 / mse_nf4)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;E4M3 #pos finite values:&quot;</span>, <span class="hljs-built_in">len</span>(v8), <span class="hljs-string">&quot;min subnormal&quot;</span>, v8[v8 &gt; <span class="hljs-number">0</span>].<span class="hljs-built_in">min</span>(), <span class="hljs-string">&quot;max&quot;</span>, v8.<span class="hljs-built_in">max</span>())
+</code></pre></div></details><details class="src-details"><summary>Kết quả chạy — <code>fig_basics_output.txt</code></summary><div class="code-block is-output"><div class="code-head"><span class="code-lang">Kết quả chạy</span></div><pre><code>S,Z (3bit,[-1,3]): 0.5714285714285714 2 range -1.1428571428571428 2.8571428571428568
+sym/asym MSE on ReLU act: {4: ('2.670e-02', '5.789e-03'), 8: ('8.110e-05', '2.013e-05')}
+clip stats c_opt, mse_opt, c_max, mse_max: (np.float64(4.834671266839116), np.float64(0.05474951535304592), np.float64(15.282340474092372), np.float64(0.34824472642637644))
+SQNR table (b, uniform, gauss-minmax, gauss-opt):
+  2  6.02  0.21  7.19
+  3  15.56  6.57  13.27
+  4  22.92  13.93  18.86
+  5  29.54  20.55  24.31
+  6  35.84  26.86  29.75
+  7  42.00  33.01  35.21
+  8  48.09  39.10  40.71
+  9  54.15  45.15  46.28
+  10  60.18  51.20  51.93
+NF4 levels: [-1.     -0.6962 -0.5251 -0.3949 -0.2844 -0.1848 -0.091   0.      0.0796
+  0.1609  0.2461  0.3379  0.4407  0.5626  0.723   1.    ]
+mse nf4 / int4: 0.0012968155040851605 0.0016708018282574324 1.288388227156569
+E4M3 #pos finite values: 127 min subnormal 0.001953125 max 448.0
+</code></pre></div></details></section><section class="src-card" id="fig_diagrams-py"><header class="src-head"><h3 class="src-title"><code>code/fig_diagrams.py</code></h3><span class="src-meta">77 dòng</span><a class="src-dl" href="code/fig_diagrams.py" download>Tải về</a></header><p class="src-note">Sinh Hình 9, 10 và 17: luồng dữ liệu thuần số nguyên, đồ thị có nút fake-quant, và sơ đồ chọn phương pháp.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Sơ đồ khối (vẽ bằng matplotlib để không phụ thuộc công cụ ngoài).&quot;&quot;&quot;</span>
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> matplotlib
+matplotlib.use(<span class="hljs-string">&quot;Agg&quot;</span>)
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> matplotlib.patches <span class="hljs-keyword">import</span> FancyBboxPatch, FancyArrowPatch
+
+plt.rcParams.update({<span class="hljs-string">&quot;font.family&quot;</span>: <span class="hljs-string">&quot;DejaVu Sans&quot;</span>, <span class="hljs-string">&quot;font.size&quot;</span>: <span class="hljs-number">9.5</span>, <span class="hljs-string">&quot;savefig.dpi&quot;</span>: <span class="hljs-number">110</span>, <span class="hljs-string">&quot;savefig.bbox&quot;</span>: <span class="hljs-string">&quot;tight&quot;</span>})
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), <span class="hljs-string">&quot;..&quot;</span>, <span class="hljs-string">&quot;figs&quot;</span>) + os.sep
+os.makedirs(OUT, exist_ok=<span class="hljs-literal">True</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">box</span>(<span class="hljs-params">ax, x, y, w, h, text, fc=<span class="hljs-string">&quot;#eef3fb&quot;</span>, ec=<span class="hljs-string">&quot;#4a78c2&quot;</span>, fs=<span class="hljs-number">9</span>, bold=<span class="hljs-literal">False</span></span>):
+    ax.add_patch(FancyBboxPatch((x - w / <span class="hljs-number">2</span>, y - h / <span class="hljs-number">2</span>), w, h, boxstyle=<span class="hljs-string">&quot;round,pad=0.02,rounding_size=0.08&quot;</span>,
+                                fc=fc, ec=ec, lw=<span class="hljs-number">1.4</span>))
+    ax.text(x, y, text, ha=<span class="hljs-string">&quot;center&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontsize=fs, fontweight=<span class="hljs-string">&quot;bold&quot;</span> <span class="hljs-keyword">if</span> bold <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;normal&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">arrow</span>(<span class="hljs-params">ax, p, q, text=<span class="hljs-literal">None</span>, color=<span class="hljs-string">&quot;#333&quot;</span>, off=(<span class="hljs-params"><span class="hljs-number">0</span>, <span class="hljs-number">0.12</span></span>), fs=<span class="hljs-number">8</span>, ls=<span class="hljs-string">&quot;-&quot;</span></span>):
+    ax.add_patch(FancyArrowPatch(p, q, arrowstyle=<span class="hljs-string">&quot;-|&gt;&quot;</span>, mutation_scale=<span class="hljs-number">12</span>, color=color, lw=<span class="hljs-number">1.3</span>, linestyle=ls))
+    <span class="hljs-keyword">if</span> text:
+        ax.text((p[<span class="hljs-number">0</span>] + q[<span class="hljs-number">0</span>]) / <span class="hljs-number">2</span> + off[<span class="hljs-number">0</span>], (p[<span class="hljs-number">1</span>] + q[<span class="hljs-number">1</span>]) / <span class="hljs-number">2</span> + off[<span class="hljs-number">1</span>], text, ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=fs, color=color)
+
+<span class="hljs-comment"># ------------------------------------------------------------ Hình 13: một lớp Linear/Conv chạy toàn số nguyên</span>
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">4.2</span>)); ax.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">12</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">4.4</span>); ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
+G, O, B = (<span class="hljs-string">&quot;#eaf6ee&quot;</span>, <span class="hljs-string">&quot;#4caf6e&quot;</span>), (<span class="hljs-string">&quot;#fdf1e4&quot;</span>, <span class="hljs-string">&quot;#e0923a&quot;</span>), (<span class="hljs-string">&quot;#eef3fb&quot;</span>, <span class="hljs-string">&quot;#4a78c2&quot;</span>)
+box(ax, <span class="hljs-number">1.0</span>, <span class="hljs-number">3.2</span>, <span class="hljs-number">1.6</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;q_x\nuint8&quot;</span>, *G)
+box(ax, <span class="hljs-number">1.0</span>, <span class="hljs-number">1.6</span>, <span class="hljs-number">1.6</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;q_w\nint8 (Z_w = 0)&quot;</span>, *G)
+box(ax, <span class="hljs-number">3.4</span>, <span class="hljs-number">2.4</span>, <span class="hljs-number">2.0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-string">&quot;Nhân int8 × int8\ncộng dồn int32\nΣ q_w·(q_x − Z_x)&quot;</span>, *B)
+box(ax, <span class="hljs-number">5.9</span>, <span class="hljs-number">2.4</span>, <span class="hljs-number">1.7</span>, <span class="hljs-number">0.8</span>, <span class="hljs-string">&quot;+ q_b\n(bias int32)&quot;</span>, *B)
+box(ax, <span class="hljs-number">8.2</span>, <span class="hljs-number">2.4</span>, <span class="hljs-number">2.2</span>, <span class="hljs-number">1.0</span>, <span class="hljs-string">&quot;Requantize\n(acc · M₀) &gt;&gt; (31 + n)\n[số nguyên 64 bit]&quot;</span>, *B)
+box(ax, <span class="hljs-number">10.6</span>, <span class="hljs-number">2.4</span>, <span class="hljs-number">1.6</span>, <span class="hljs-number">0.8</span>, <span class="hljs-string">&quot;+ Z_y, clamp\n[0, 255]&quot;</span>, *B)
+box(ax, <span class="hljs-number">10.6</span>, <span class="hljs-number">0.8</span>, <span class="hljs-number">1.6</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;q_y  uint8\n→ lớp tiếp theo&quot;</span>, *G)
+arrow(ax, (<span class="hljs-number">1.8</span>, <span class="hljs-number">3.2</span>), (<span class="hljs-number">2.4</span>, <span class="hljs-number">2.7</span>)); arrow(ax, (<span class="hljs-number">1.8</span>, <span class="hljs-number">1.6</span>), (<span class="hljs-number">2.4</span>, <span class="hljs-number">2.1</span>))
+arrow(ax, (<span class="hljs-number">4.4</span>, <span class="hljs-number">2.4</span>), (<span class="hljs-number">5.05</span>, <span class="hljs-number">2.4</span>), <span class="hljs-string">&quot;int32&quot;</span>); arrow(ax, (<span class="hljs-number">6.75</span>, <span class="hljs-number">2.4</span>), (<span class="hljs-number">7.1</span>, <span class="hljs-number">2.4</span>), <span class="hljs-string">&quot;int32&quot;</span>)
+arrow(ax, (<span class="hljs-number">9.3</span>, <span class="hljs-number">2.4</span>), (<span class="hljs-number">9.8</span>, <span class="hljs-number">2.4</span>)); arrow(ax, (<span class="hljs-number">10.6</span>, <span class="hljs-number">2.0</span>), (<span class="hljs-number">10.6</span>, <span class="hljs-number">1.15</span>))
+box(ax, <span class="hljs-number">5.9</span>, <span class="hljs-number">4.0</span>, <span class="hljs-number">9.0</span>, <span class="hljs-number">0.55</span>, <span class="hljs-string">&quot;Tính TRƯỚC khi convert (offline):   Z_x·Σ q_w ,   q_b = round(b / (S_w·S_x)) ,   M = S_w·S_x / S_y = M₀·2^−(31+n)&quot;</span>, *O, fs=<span class="hljs-number">8.5</span>)
+ax.text(<span class="hljs-number">6</span>, <span class="hljs-number">0.25</span>, <span class="hljs-string">&quot;Toàn bộ đường đi chỉ dùng số nguyên → chạy được trên NPU / DSP / vi điều khiển không có FPU.&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9</span>, style=<span class="hljs-string">&quot;italic&quot;</span>, color=<span class="hljs-string">&quot;#444&quot;</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig09_integer_pipeline.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># ------------------------------------------------------------ Hình 16: đồ thị có nút fake-quant (dùng cho PTQ mô phỏng &amp; QAT)</span>
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">2.9</span>)); ax.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">12</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">3</span>); ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
+FQ = (<span class="hljs-string">&quot;#fdecea&quot;</span>, <span class="hljs-string">&quot;#d9534f&quot;</span>)
+box(ax, <span class="hljs-number">0.6</span>, <span class="hljs-number">1.3</span>, <span class="hljs-number">0.9</span>, <span class="hljs-number">0.6</span>, <span class="hljs-string">&quot;x (FP32)&quot;</span>, *G)
+box(ax, <span class="hljs-number">1.9</span>, <span class="hljs-number">1.3</span>, <span class="hljs-number">1.1</span>, <span class="hljs-number">0.6</span>, <span class="hljs-string">&quot;FakeQuant\n(act, 8 bit)&quot;</span>, *FQ, fs=<span class="hljs-number">8</span>)
+box(ax, <span class="hljs-number">3.5</span>, <span class="hljs-number">2.5</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">0.5</span>, <span class="hljs-string">&quot;W (FP32)&quot;</span>, *G); box(ax, <span class="hljs-number">3.5</span>, <span class="hljs-number">1.75</span>, <span class="hljs-number">1.1</span>, <span class="hljs-number">0.5</span>, <span class="hljs-string">&quot;FakeQuant\n(weight)&quot;</span>, *FQ, fs=<span class="hljs-number">8</span>)
+box(ax, <span class="hljs-number">5.0</span>, <span class="hljs-number">1.3</span>, <span class="hljs-number">1.6</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;Conv + BN đã gộp\n(tính bằng FP32)&quot;</span>, *B)
+box(ax, <span class="hljs-number">6.7</span>, <span class="hljs-number">1.3</span>, <span class="hljs-number">0.9</span>, <span class="hljs-number">0.6</span>, <span class="hljs-string">&quot;ReLU&quot;</span>, *B)
+box(ax, <span class="hljs-number">8.1</span>, <span class="hljs-number">1.3</span>, <span class="hljs-number">1.1</span>, <span class="hljs-number">0.6</span>, <span class="hljs-string">&quot;FakeQuant\n(act)&quot;</span>, *FQ, fs=<span class="hljs-number">8</span>)
+box(ax, <span class="hljs-number">9.6</span>, <span class="hljs-number">1.3</span>, <span class="hljs-number">1.1</span>, <span class="hljs-number">0.6</span>, <span class="hljs-string">&quot;Lớp kế tiếp …&quot;</span>, *B)
+arrow(ax, (<span class="hljs-number">1.05</span>, <span class="hljs-number">1.3</span>), (<span class="hljs-number">1.35</span>, <span class="hljs-number">1.3</span>)); arrow(ax, (<span class="hljs-number">2.45</span>, <span class="hljs-number">1.3</span>), (<span class="hljs-number">4.2</span>, <span class="hljs-number">1.3</span>))
+arrow(ax, (<span class="hljs-number">3.5</span>, <span class="hljs-number">2.25</span>), (<span class="hljs-number">3.5</span>, <span class="hljs-number">2.0</span>)); arrow(ax, (<span class="hljs-number">3.5</span>, <span class="hljs-number">1.5</span>), (<span class="hljs-number">4.3</span>, <span class="hljs-number">1.45</span>))
+arrow(ax, (<span class="hljs-number">5.8</span>, <span class="hljs-number">1.3</span>), (<span class="hljs-number">6.25</span>, <span class="hljs-number">1.3</span>)); arrow(ax, (<span class="hljs-number">7.15</span>, <span class="hljs-number">1.3</span>), (<span class="hljs-number">7.55</span>, <span class="hljs-number">1.3</span>)); arrow(ax, (<span class="hljs-number">8.65</span>, <span class="hljs-number">1.3</span>), (<span class="hljs-number">9.05</span>, <span class="hljs-number">1.3</span>))
+ax.text(<span class="hljs-number">6</span>, <span class="hljs-number">0.3</span>, <span class="hljs-string">&quot;FakeQuant(x) = S·(clamp(round(x/S) + Z, q_min, q_max) − Z): giá trị vẫn là FP32 nhưng chỉ nhận các mức lượng tử.\n&quot;</span>
+        <span class="hljs-string">&quot;Lượt ngược dùng STE. Khi convert, mỗi cặp FakeQuant được thay bằng phép quantize / dequantize thật.&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8.5</span>, color=<span class="hljs-string">&quot;#444&quot;</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig10_fake_quant.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># ------------------------------------------------------------ Hình 17: quy trình chọn phương pháp</span>
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">11</span>, <span class="hljs-number">5.6</span>)); ax.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">11</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">6</span>); ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
+Y_ = (<span class="hljs-string">&quot;#fff8e1&quot;</span>, <span class="hljs-string">&quot;#c9a227&quot;</span>)
+box(ax, <span class="hljs-number">5.5</span>, <span class="hljs-number">5.5</span>, <span class="hljs-number">4.4</span>, <span class="hljs-number">0.6</span>, <span class="hljs-string">&quot;Mô hình FP32 đã huấn luyện + baseline accuracy&quot;</span>, *G, bold=<span class="hljs-literal">True</span>)
+box(ax, <span class="hljs-number">5.5</span>, <span class="hljs-number">4.5</span>, <span class="hljs-number">4.6</span>, <span class="hljs-number">0.65</span>, <span class="hljs-string">&quot;Phần cứng đích hỗ trợ kiểu gì?\n(GPU: FP16/BF16/FP8/INT8; CPU/NPU/MCU: INT8)&quot;</span>, *Y_, fs=<span class="hljs-number">8.5</span>)
+box(ax, <span class="hljs-number">1.7</span>, <span class="hljs-number">3.4</span>, <span class="hljs-number">3.1</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;Chỉ cần nhẹ/nhanh vừa phải:\nFP16 / BF16 (gần như không mất acc)&quot;</span>, *B, fs=<span class="hljs-number">8.5</span>)
+box(ax, <span class="hljs-number">5.5</span>, <span class="hljs-number">3.4</span>, <span class="hljs-number">2.8</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;Weight-only INT8 / INT4\nhoặc dynamic quantization\n(không cần dữ liệu calibration)&quot;</span>, *B, fs=<span class="hljs-number">8.5</span>)
+box(ax, <span class="hljs-number">9.3</span>, <span class="hljs-number">3.4</span>, <span class="hljs-number">2.6</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;Static full-integer INT8\n+ calibration 100–1000 mẫu&quot;</span>, *B, fs=<span class="hljs-number">8.5</span>)
+box(ax, <span class="hljs-number">7.4</span>, <span class="hljs-number">2.1</span>, <span class="hljs-number">3.4</span>, <span class="hljs-number">0.75</span>, <span class="hljs-string">&quot;Acc giảm quá ngưỡng cho phép?\n→ per-channel, đổi calibration,\nCLE / bias correction / AdaRound&quot;</span>, *Y_, fs=<span class="hljs-number">8.5</span>)
+box(ax, <span class="hljs-number">7.4</span>, <span class="hljs-number">0.8</span>, <span class="hljs-number">3.4</span>, <span class="hljs-number">0.75</span>, <span class="hljs-string">&quot;Vẫn chưa đạt?\n→ mixed precision cho lớp nhạy cảm\n→ QAT (fine-tune có fake-quant)&quot;</span>, *FQ, fs=<span class="hljs-number">8.5</span>)
+box(ax, <span class="hljs-number">2.6</span>, <span class="hljs-number">1.4</span>, <span class="hljs-number">3.0</span>, <span class="hljs-number">0.8</span>, <span class="hljs-string">&quot;Đo lại TRÊN THIẾT BỊ ĐÍCH:\nkích thước, độ trễ, độ chính xác&quot;</span>, *G, fs=<span class="hljs-number">8.5</span>, bold=<span class="hljs-literal">True</span>)
+arrow(ax, (<span class="hljs-number">5.5</span>, <span class="hljs-number">5.2</span>), (<span class="hljs-number">5.5</span>, <span class="hljs-number">4.8</span>))
+arrow(ax, (<span class="hljs-number">4.2</span>, <span class="hljs-number">4.3</span>), (<span class="hljs-number">2.4</span>, <span class="hljs-number">3.75</span>)); arrow(ax, (<span class="hljs-number">5.5</span>, <span class="hljs-number">4.2</span>), (<span class="hljs-number">5.5</span>, <span class="hljs-number">3.75</span>)); arrow(ax, (<span class="hljs-number">6.8</span>, <span class="hljs-number">4.3</span>), (<span class="hljs-number">8.7</span>, <span class="hljs-number">3.75</span>))
+arrow(ax, (<span class="hljs-number">9.3</span>, <span class="hljs-number">3.05</span>), (<span class="hljs-number">8.4</span>, <span class="hljs-number">2.45</span>)); arrow(ax, (<span class="hljs-number">5.9</span>, <span class="hljs-number">3.05</span>), (<span class="hljs-number">6.6</span>, <span class="hljs-number">2.45</span>))
+arrow(ax, (<span class="hljs-number">7.4</span>, <span class="hljs-number">1.72</span>), (<span class="hljs-number">7.4</span>, <span class="hljs-number">1.18</span>), <span class="hljs-string">&quot;có&quot;</span>, off=(<span class="hljs-number">0.25</span>, -<span class="hljs-number">0.05</span>))
+arrow(ax, (<span class="hljs-number">5.7</span>, <span class="hljs-number">2.1</span>), (<span class="hljs-number">4.1</span>, <span class="hljs-number">1.6</span>), <span class="hljs-string">&quot;không&quot;</span>, off=(<span class="hljs-number">0</span>, <span class="hljs-number">0.1</span>))
+arrow(ax, (<span class="hljs-number">1.6</span>, <span class="hljs-number">3.05</span>), (<span class="hljs-number">2.2</span>, <span class="hljs-number">1.8</span>)); arrow(ax, (<span class="hljs-number">5.7</span>, <span class="hljs-number">0.8</span>), (<span class="hljs-number">4.1</span>, <span class="hljs-number">1.2</span>))
+fig.savefig(OUT + <span class="hljs-string">&quot;fig17_decision.png&quot;</span>); plt.close(fig)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;ok&quot;</span>)
+</code></pre></div></details></section><section class="src-card" id="numpy_experiments-py"><header class="src-head"><h3 class="src-title"><code>code/numpy_experiments.py</code></h3><span class="src-meta">165 dòng</span><a class="src-dl" href="code/numpy_experiments.py" download>Tải về</a></header><p class="src-note">Thí nghiệm ở Mục 6.5 (đường tính toán số nguyên trùng khớp từng bit), 11.3 (SmoothQuant) và 11.4 (GPTQ so với RTN). Sinh Hình 14 và 15.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Thí nghiệm numpy: (A) lớp Linear chạy hoàn toàn bằng số nguyên, (B) GPTQ so với làm tròn thường (RTN),
+(C) mô phỏng outlier activation trong LLM và cách SmoothQuant / LLM.int8() xử lý.&quot;&quot;&quot;</span>
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib
+matplotlib.use(<span class="hljs-string">&quot;Agg&quot;</span>)
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+plt.rcParams.update({<span class="hljs-string">&quot;font.family&quot;</span>: <span class="hljs-string">&quot;DejaVu Sans&quot;</span>, <span class="hljs-string">&quot;font.size&quot;</span>: <span class="hljs-number">10</span>, <span class="hljs-string">&quot;axes.spines.top&quot;</span>: <span class="hljs-literal">False</span>,
+                     <span class="hljs-string">&quot;axes.spines.right&quot;</span>: <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;figure.dpi&quot;</span>: <span class="hljs-number">110</span>, <span class="hljs-string">&quot;savefig.dpi&quot;</span>: <span class="hljs-number">110</span>, <span class="hljs-string">&quot;savefig.bbox&quot;</span>: <span class="hljs-string">&quot;tight&quot;</span>})
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), <span class="hljs-string">&quot;..&quot;</span>, <span class="hljs-string">&quot;figs&quot;</span>) + os.sep
+os.makedirs(OUT, exist_ok=<span class="hljs-literal">True</span>)
+rng = np.random.default_rng(<span class="hljs-number">42</span>)
+
+<span class="hljs-comment"># ============================================================ (A) Integer-only Linear</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">affine_params</span>(<span class="hljs-params">lo, hi, qmin=<span class="hljs-number">0</span>, qmax=<span class="hljs-number">255</span></span>):
+    lo, hi = <span class="hljs-built_in">min</span>(lo, <span class="hljs-number">0.0</span>), <span class="hljs-built_in">max</span>(hi, <span class="hljs-number">0.0</span>)            <span class="hljs-comment"># dải phải chứa 0 để 0 biểu diễn chính xác</span>
+    S = (hi - lo) / (qmax - qmin)
+    Z = <span class="hljs-built_in">int</span>(np.clip(<span class="hljs-built_in">round</span>(qmin - lo / S), qmin, qmax))
+    <span class="hljs-keyword">return</span> S, Z
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">quantize_multiplier</span>(<span class="hljs-params">M</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Viết M (0 &lt; M &lt; 1) dưới dạng M0 * 2^(-31-shift), M0 là int32 trong [2^30, 2^31).&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">assert</span> <span class="hljs-number">0</span> &lt; M &lt; <span class="hljs-number">1</span>
+    shift = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">while</span> M &lt; <span class="hljs-number">0.5</span>:
+        M *= <span class="hljs-number">2</span>; shift += <span class="hljs-number">1</span>
+    M0 = <span class="hljs-built_in">int</span>(<span class="hljs-built_in">round</span>(M * (<span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">31</span>)))
+    <span class="hljs-keyword">if</span> M0 == (<span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">31</span>):                          <span class="hljs-comment"># làm tròn lên chạm 2^31</span>
+        M0 //= <span class="hljs-number">2</span>; shift -= <span class="hljs-number">1</span>
+    <span class="hljs-keyword">return</span> M0, shift
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">rounding_right_shift</span>(<span class="hljs-params">x, n</span>):                   <span class="hljs-comment"># chia cho 2^n, làm tròn gần nhất (x là int64)</span>
+    <span class="hljs-keyword">return</span> (x + (<span class="hljs-number">1</span> &lt;&lt; (n - <span class="hljs-number">1</span>))) &gt;&gt; n
+
+K, N_OUT, BATCH = <span class="hljs-number">256</span>, <span class="hljs-number">64</span>, <span class="hljs-number">1000</span>
+X = rng.normal(<span class="hljs-number">0.8</span>, <span class="hljs-number">1.0</span>, (BATCH, K)).astype(np.float32)          <span class="hljs-comment"># activation lệch dương (ví dụ sau GELU/Add)</span>
+W = rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">0.05</span>, (N_OUT, K)).astype(np.float32)
+b = rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">0.1</span>, N_OUT).astype(np.float32)
+Y = X @ W.T + b                                                          <span class="hljs-comment"># tham chiếu FP32</span>
+
+S_x, Z_x = affine_params(X.<span class="hljs-built_in">min</span>(), X.<span class="hljs-built_in">max</span>())                   <span class="hljs-comment"># activation: uint8 bất đối xứng</span>
+S_w = np.<span class="hljs-built_in">abs</span>(W).<span class="hljs-built_in">max</span>() / <span class="hljs-number">127</span>; Z_w = <span class="hljs-number">0</span>                        <span class="hljs-comment"># weight: int8 đối xứng</span>
+S_y, Z_y = affine_params(Y.<span class="hljs-built_in">min</span>(), Y.<span class="hljs-built_in">max</span>())                   <span class="hljs-comment"># output: uint8 bất đối xứng</span>
+
+q_x = np.clip(np.<span class="hljs-built_in">round</span>(X / S_x) + Z_x, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>).astype(np.int32)
+q_w = np.clip(np.<span class="hljs-built_in">round</span>(W / S_w), -<span class="hljs-number">127</span>, <span class="hljs-number">127</span>).astype(np.int32)
+q_b = np.<span class="hljs-built_in">round</span>(b / (S_w * S_x)).astype(np.int32)            <span class="hljs-comment"># bias int32, scale S_w*S_x, zero-point 0</span>
+
+<span class="hljs-comment"># Lõi int8 x int8 -&gt; cộng dồn int32 ; số hạng Z_x * sum(q_w) tính trước lúc convert</span>
+acc = q_x @ q_w.T - Z_x * q_w.<span class="hljs-built_in">sum</span>(axis=<span class="hljs-number">1</span>) + q_b            <span class="hljs-comment"># int32</span>
+M = S_w * S_x / S_y
+M0, shift = quantize_multiplier(M)
+q_y = Z_y + rounding_right_shift(acc.astype(np.int64) * M0, <span class="hljs-number">31</span> + shift)
+q_y = np.clip(q_y, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>)
+Y_int = S_y * (q_y - Z_y)                                    <span class="hljs-comment"># dequantize chỉ để so sánh</span>
+
+<span class="hljs-comment"># Đường &quot;mô phỏng&quot; (fake-quant bằng float) để kiểm tra đường số nguyên tính đúng</span>
+Y_sim = (S_x * (q_x - Z_x)) @ (S_w * q_w).T + S_w * S_x * q_b
+q_y_sim = np.clip(np.<span class="hljs-built_in">round</span>(Y_sim / S_y) + Z_y, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>)
+rel = <span class="hljs-keyword">lambda</span> a, r: np.linalg.norm(a - r) / np.linalg.norm(r)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=== (A) Integer-only Linear ===&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;S_x=<span class="hljs-subst">{S_x:<span class="hljs-number">.6</span>f}</span> Z_x=<span class="hljs-subst">{Z_x}</span> | S_w=<span class="hljs-subst">{S_w:<span class="hljs-number">.6</span>f}</span> | S_y=<span class="hljs-subst">{S_y:<span class="hljs-number">.6</span>f}</span> Z_y=<span class="hljs-subst">{Z_y}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;M = <span class="hljs-subst">{M:<span class="hljs-number">.10</span>f}</span> = <span class="hljs-subst">{M0}</span> * 2^-(31+<span class="hljs-subst">{shift}</span>) -&gt; <span class="hljs-subst">{M0 / <span class="hljs-number">2</span> ** (<span class="hljs-number">31</span> + shift):<span class="hljs-number">.10</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;max |q_y(integer) - q_y(float sim)| =&quot;</span>, <span class="hljs-built_in">int</span>(np.<span class="hljs-built_in">abs</span>(q_y - q_y_sim).<span class="hljs-built_in">max</span>()), <span class="hljs-string">&quot;LSB;&quot;</span>,
+      <span class="hljs-string">&quot;tỉ lệ khác nhau:&quot;</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{np.mean(q_y != q_y_sim):<span class="hljs-number">.4</span>%}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;sai số tương đối so với FP32: <span class="hljs-subst">{rel(Y_int, Y):<span class="hljs-number">.4</span>%}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;max |acc| =&quot;</span>, <span class="hljs-built_in">int</span>(np.<span class="hljs-built_in">abs</span>(acc).<span class="hljs-built_in">max</span>()), <span class="hljs-string">&quot;; giới hạn int16 =&quot;</span>, <span class="hljs-number">2</span> ** <span class="hljs-number">15</span> - <span class="hljs-number">1</span>,
+      <span class="hljs-string">&quot;; cận trên lý thuyết 255*127*K =&quot;</span>, <span class="hljs-number">255</span> * <span class="hljs-number">127</span> * K)
+
+<span class="hljs-comment"># ============================================================ (B) GPTQ vs RTN</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">quant_rtn_rows</span>(<span class="hljs-params">W, scales, qmax=<span class="hljs-number">7</span></span>):
+    <span class="hljs-keyword">return</span> np.clip(np.<span class="hljs-built_in">round</span>(W / scales[:, <span class="hljs-literal">None</span>]), -qmax, qmax) * scales[:, <span class="hljs-literal">None</span>]
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">gptq</span>(<span class="hljs-params">W, H, scales, qmax=<span class="hljs-number">7</span>, damp=<span class="hljs-number">0.01</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;GPTQ tối giản (không lazy-batch): lượng tử từng cột, bù sai số vào các cột chưa lượng tử.&quot;&quot;&quot;</span>
+    W = W.copy(); d = W.shape[<span class="hljs-number">1</span>]
+    H = H + damp * np.mean(np.diag(H)) * np.eye(d)
+    Hinv = np.linalg.cholesky(np.linalg.inv(H)).T            <span class="hljs-comment"># Cholesky trên (upper) của H^-1</span>
+    Q = np.zeros_like(W)
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(d):
+        w = W[:, i]
+        q = np.clip(np.<span class="hljs-built_in">round</span>(w / scales), -qmax, qmax) * scales
+        Q[:, i] = q
+        err = (w - q) / Hinv[i, i]
+        W[:, i + <span class="hljs-number">1</span>:] -= np.outer(err, Hinv[i, i + <span class="hljs-number">1</span>:])
+    <span class="hljs-keyword">return</span> Q
+
+d_in, d_out, n_cal = <span class="hljs-number">256</span>, <span class="hljs-number">128</span>, <span class="hljs-number">4096</span>
+A = rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (d_in, d_in)) * (np.linspace(<span class="hljs-number">1</span>, <span class="hljs-number">0.05</span>, d_in) ** <span class="hljs-number">2</span>)[<span class="hljs-literal">None</span>, :]   <span class="hljs-comment"># trộn -&gt; đặc trưng tương quan</span>
+Xc = (A @ rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (d_in, n_cal))).astype(np.float64)
+Xt = (A @ rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (d_in, n_cal))).astype(np.float64)
+Wg = rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">0.02</span>, (d_out, d_in))
+scales = np.<span class="hljs-built_in">abs</span>(Wg).<span class="hljs-built_in">max</span>(axis=<span class="hljs-number">1</span>) / <span class="hljs-number">7</span>                           <span class="hljs-comment"># INT4 đối xứng, scale theo hàng</span>
+H = <span class="hljs-number">2</span> * Xc @ Xc.T / n_cal
+Q_rtn = quant_rtn_rows(Wg, scales)
+Q_gptq = gptq(Wg, H, scales)
+out_err = <span class="hljs-keyword">lambda</span> Q: np.linalg.norm((Wg - Q) @ Xt) ** <span class="hljs-number">2</span> / np.linalg.norm(Wg @ Xt) ** <span class="hljs-number">2</span>
+w_err = <span class="hljs-keyword">lambda</span> Q: np.mean((Wg - Q) ** <span class="hljs-number">2</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n=== (B) GPTQ vs RTN, INT4 theo hàng ===&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;RTN : sai số trọng số MSE=<span class="hljs-subst">{w_err(Q_rtn):<span class="hljs-number">.3</span>e}</span>, sai số output tương đối=<span class="hljs-subst">{out_err(Q_rtn):<span class="hljs-number">.4</span>%}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;GPTQ: sai số trọng số MSE=<span class="hljs-subst">{w_err(Q_gptq):<span class="hljs-number">.3</span>e}</span>, sai số output tương đối=<span class="hljs-subst">{out_err(Q_gptq):<span class="hljs-number">.4</span>%}</span>&quot;</span>)
+gptq_res = (w_err(Q_rtn), out_err(Q_rtn), w_err(Q_gptq), out_err(Q_gptq))
+
+<span class="hljs-comment"># ============================================================ (C) Outlier activation, LLM.int8(), SmoothQuant</span>
+T, Kc, Mo = <span class="hljs-number">2048</span>, <span class="hljs-number">512</span>, <span class="hljs-number">512</span>
+Xl = rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (T, Kc))
+outlier_ch = rng.choice(Kc, <span class="hljs-number">6</span>, replace=<span class="hljs-literal">False</span>)
+Xl[:, outlier_ch] *= <span class="hljs-number">60</span>                                          <span class="hljs-comment"># vài kênh có biên độ lớn gấp hàng chục lần</span>
+Wl = rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">0.02</span>, (Mo, Kc))
+Yl = Xl @ Wl.T
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">q_sym</span>(<span class="hljs-params">x, S, qmax=<span class="hljs-number">127</span></span>):
+    <span class="hljs-keyword">return</span> np.clip(np.<span class="hljs-built_in">round</span>(x / S), -qmax, qmax) * S
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">w8_per_channel</span>(<span class="hljs-params">W</span>):                                           <span class="hljs-comment"># per-output-channel</span>
+    <span class="hljs-keyword">return</span> q_sym(W, np.<span class="hljs-built_in">abs</span>(W).<span class="hljs-built_in">max</span>(axis=<span class="hljs-number">1</span>, keepdims=<span class="hljs-literal">True</span>) / <span class="hljs-number">127</span>)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">a8_per_tensor</span>(<span class="hljs-params">X</span>):
+    <span class="hljs-keyword">return</span> q_sym(X, np.<span class="hljs-built_in">abs</span>(X).<span class="hljs-built_in">max</span>() / <span class="hljs-number">127</span>)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">a8_per_token</span>(<span class="hljs-params">X</span>):
+    <span class="hljs-keyword">return</span> q_sym(X, np.<span class="hljs-built_in">abs</span>(X).<span class="hljs-built_in">max</span>(axis=<span class="hljs-number">1</span>, keepdims=<span class="hljs-literal">True</span>) / <span class="hljs-number">127</span>)
+
+res = {}
+res[<span class="hljs-string">&quot;W8A8, activation per-tensor&quot;</span>] = rel(a8_per_tensor(Xl) @ w8_per_channel(Wl).T, Yl)
+res[<span class="hljs-string">&quot;W8A8, activation per-token&quot;</span>] = rel(a8_per_token(Xl) @ w8_per_channel(Wl).T, Yl)
+<span class="hljs-comment"># LLM.int8(): cột outlier (|x| &gt; 6) tính FP16, phần còn lại int8 per-token x per-channel</span>
+mask = (np.<span class="hljs-built_in">abs</span>(Xl) &gt; <span class="hljs-number">6.0</span>).<span class="hljs-built_in">any</span>(axis=<span class="hljs-number">0</span>)
+X_reg = Xl.copy(); X_reg[:, mask] = <span class="hljs-number">0</span>
+W_reg = Wl.copy(); W_reg[:, mask] = <span class="hljs-number">0</span>
+Y_mix = a8_per_token(X_reg) @ w8_per_channel(W_reg).T + Xl[:, mask] @ Wl[:, mask].T
+res[<span class="hljs-string">&quot;LLM.int8() (tách outlier)&quot;</span>] = rel(Y_mix, Yl)
+<span class="hljs-comment"># SmoothQuant alpha = 0.5</span>
+alpha = <span class="hljs-number">0.5</span>
+s = np.<span class="hljs-built_in">abs</span>(Xl).<span class="hljs-built_in">max</span>(axis=<span class="hljs-number">0</span>) ** alpha / np.<span class="hljs-built_in">abs</span>(Wl).<span class="hljs-built_in">max</span>(axis=<span class="hljs-number">0</span>) ** (<span class="hljs-number">1</span> - alpha)
+Xs, Ws = Xl / s, Wl * s
+<span class="hljs-keyword">assert</span> np.allclose(Xs @ Ws.T, Yl)                                 <span class="hljs-comment"># phép biến đổi tương đương toán học</span>
+res[<span class="hljs-string">&quot;SmoothQuant (α=0.5) + per-tensor&quot;</span>] = rel(a8_per_tensor(Xs) @ w8_per_channel(Ws).T, Yl)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n=== (C) Outlier activation ===&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;số cột được LLM.int8 tách:&quot;</span>, <span class="hljs-built_in">int</span>(mask.<span class="hljs-built_in">sum</span>()), <span class="hljs-string">&quot;; kênh outlier thật:&quot;</span>, <span class="hljs-built_in">sorted</span>(outlier_ch.tolist()))
+<span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> res.items(): <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{k:38s}</span>: <span class="hljs-subst">{v:<span class="hljs-number">.4</span>%}</span>&quot;</span>)
+
+fig, axes = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, figsize=(<span class="hljs-number">13</span>, <span class="hljs-number">3.6</span>), gridspec_kw={<span class="hljs-string">&quot;width_ratios&quot;</span>: [<span class="hljs-number">1.2</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">1.3</span>]})
+ch = np.arange(Kc)
+axes[<span class="hljs-number">0</span>].vlines(ch, <span class="hljs-number">0</span>, np.<span class="hljs-built_in">abs</span>(Xl).<span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>), color=<span class="hljs-string">&quot;#d9534f&quot;</span>, lw=<span class="hljs-number">1.2</span>)
+axes[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;max|X| theo kênh — TRƯỚC khi làm mịn&quot;</span>); axes[<span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&quot;Kênh (chiều ẩn)&quot;</span>)
+axes[<span class="hljs-number">1</span>].vlines(ch, <span class="hljs-number">0</span>, np.<span class="hljs-built_in">abs</span>(Xs).<span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>), color=<span class="hljs-string">&quot;#4a78c2&quot;</span>, lw=<span class="hljs-number">1.2</span>, label=<span class="hljs-string">&quot;max|X/s| (activation)&quot;</span>)
+axes[<span class="hljs-number">1</span>].vlines(ch + <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>, -np.<span class="hljs-built_in">abs</span>(Ws).<span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>), color=<span class="hljs-string">&quot;#4caf6e&quot;</span>, lw=<span class="hljs-number">1.2</span>, label=<span class="hljs-string">&quot;−max|W·s| (trọng số, vẽ ngược xuống)&quot;</span>)
+axes[<span class="hljs-number">1</span>].axhline(<span class="hljs-number">0</span>, color=<span class="hljs-string">&quot;k&quot;</span>, lw=<span class="hljs-number">0.5</span>)
+axes[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;SAU SmoothQuant (α = 0.5)&quot;</span>); axes[<span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&quot;Kênh (chiều ẩn)&quot;</span>); axes[<span class="hljs-number">1</span>].legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
+names = <span class="hljs-built_in">list</span>(res.keys()); vals = [res[n] * <span class="hljs-number">100</span> <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> names]
+axes[<span class="hljs-number">2</span>].barh(<span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(names))[::-<span class="hljs-number">1</span>], vals, color=[<span class="hljs-string">&quot;#d9534f&quot;</span>, <span class="hljs-string">&quot;#e0923a&quot;</span>, <span class="hljs-string">&quot;#4caf6e&quot;</span>, <span class="hljs-string">&quot;#4a78c2&quot;</span>])
+axes[<span class="hljs-number">2</span>].set_yticks(<span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(names))[::-<span class="hljs-number">1</span>], [n.replace(<span class="hljs-string">&quot;, &quot;</span>, <span class="hljs-string">&quot;\n&quot;</span>).replace(<span class="hljs-string">&quot; + &quot;</span>, <span class="hljs-string">&quot;\n+ &quot;</span>) <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> names], fontsize=<span class="hljs-number">8.5</span>)
+axes[<span class="hljs-number">2</span>].set_xscale(<span class="hljs-string">&quot;log&quot;</span>); axes[<span class="hljs-number">2</span>].set_xlabel(<span class="hljs-string">&quot;Sai số output tương đối (%, thang log)&quot;</span>)
+<span class="hljs-keyword">for</span> i, v <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(<span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(names))[::-<span class="hljs-number">1</span>], vals): axes[<span class="hljs-number">2</span>].text(v * <span class="hljs-number">1.1</span>, i, <span class="hljs-string">f&quot;<span class="hljs-subst">{v:<span class="hljs-number">.2</span>f}</span>%&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8.5</span>)
+axes[<span class="hljs-number">2</span>].set_xlim(<span class="hljs-number">0.1</span>, <span class="hljs-built_in">max</span>(vals) * <span class="hljs-number">6</span>); axes[<span class="hljs-number">2</span>].set_title(<span class="hljs-string">&quot;W8A8 trên dữ liệu có outlier&quot;</span>)
+fig.suptitle(<span class="hljs-string">&quot;Mô phỏng: 6/512 kênh activation có biên độ gấp 60 lần (dữ liệu tổng hợp)&quot;</span>, y=<span class="hljs-number">1.03</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig14_llm_outliers.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># Hình GPTQ</span>
+fig, axes = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">9</span>, <span class="hljs-number">3.2</span>))
+lab = [<span class="hljs-string">&quot;RTN&quot;</span>, <span class="hljs-string">&quot;GPTQ&quot;</span>]
+axes[<span class="hljs-number">0</span>].bar(lab, [gptq_res[<span class="hljs-number">0</span>], gptq_res[<span class="hljs-number">2</span>]], color=[<span class="hljs-string">&quot;#9e9e9e&quot;</span>, <span class="hljs-string">&quot;#4a78c2&quot;</span>]); axes[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Sai số TRỌNG SỐ (MSE)&quot;</span>)
+axes[<span class="hljs-number">1</span>].bar(lab, [gptq_res[<span class="hljs-number">1</span>] * <span class="hljs-number">100</span>, gptq_res[<span class="hljs-number">3</span>] * <span class="hljs-number">100</span>], color=[<span class="hljs-string">&quot;#9e9e9e&quot;</span>, <span class="hljs-string">&quot;#4a78c2&quot;</span>]); axes[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Sai số OUTPUT tương đối (%) trên dữ liệu kiểm tra&quot;</span>)
+<span class="hljs-keyword">for</span> ax <span class="hljs-keyword">in</span> axes: ax.ticklabel_format(axis=<span class="hljs-string">&quot;y&quot;</span>, style=<span class="hljs-string">&quot;sci&quot;</span>, scilimits=(-<span class="hljs-number">3</span>, <span class="hljs-number">3</span>))
+fig.suptitle(<span class="hljs-string">&quot;INT4 cho một lớp Linear 256→128, dữ liệu đầu vào có tương quan (tổng hợp)&quot;</span>, y=<span class="hljs-number">1.04</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig15_gptq.png&quot;</span>); plt.close(fig)
+</code></pre></div></details><details class="src-details"><summary>Kết quả chạy — <code>numpy_experiments_output.txt</code></summary><div class="code-block is-output"><div class="code-head"><span class="code-lang">Kết quả chạy</span></div><pre><code>=== (A) Integer-only Linear ===
+S_x=0.038963 Z_x=106 | S_w=0.001661 | S_y=0.031995 Z_y=120
+M = 0.0020223740 = 1111811840 * 2^-(31+8) -&gt; 0.0020223740
+max |q_y(integer) - q_y(float sim)| = 0 LSB; tỉ lệ khác nhau: 0.0000%
+sai số tương đối so với FP32: 1.6085%
+max |acc| = 66876 ; giới hạn int16 = 32767 ; cận trên lý thuyết 255*127*K = 8290560
+
+=== (B) GPTQ vs RTN, INT4 theo hàng ===
+RTN : sai số trọng số MSE=6.470e-06, sai số output tương đối=1.6430%
+GPTQ: sai số trọng số MSE=1.724e-05, sai số output tương đối=0.4480%
+
+=== (C) Outlier activation ===
+số cột được LLM.int8 tách: 6 ; kênh outlier thật: [85, 141, 361, 385, 439, 499]
+W8A8, activation per-tensor           : 7.7435%
+W8A8, activation per-token            : 3.6795%
+LLM.int8() (tách outlier)             : 0.1572%
+SmoothQuant (α=0.5) + per-tensor      : 1.4430%
+</code></pre></div></details></section><section class="src-card" id="torch_experiments-py"><header class="src-head"><h3 class="src-title"><code>code/torch_experiments.py</code></h3><span class="src-meta">357 dòng</span><a class="src-dl" href="code/torch_experiments.py" download>Tải về</a></header><p class="src-note">Thí nghiệm ở Mục 5.3 (granularity), 7.3 (gộp BatchNorm), 8.2 (calibration), 9.3 (PTQ so với QAT theo độ rộng bit) và 10.1 (PyTorch). Sinh Hình 8, 11 và 13. Chạy vài phút trên CPU.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Thí nghiệm PyTorch THẬT trên bộ dữ liệu chữ số viết tay 8x8 (sklearn digits, 1797 ảnh, có sẵn offline).
+Mọi con số trong bài phần thực nghiệm được in ra từ file này.&quot;&quot;&quot;</span>
+<span class="hljs-keyword">import</span> copy, os, time, warnings
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> torch, torch.nn <span class="hljs-keyword">as</span> nn, torch.nn.functional <span class="hljs-keyword">as</span> F
+<span class="hljs-keyword">import</span> matplotlib
+matplotlib.use(<span class="hljs-string">&quot;Agg&quot;</span>)
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> sklearn.datasets <span class="hljs-keyword">import</span> load_digits
+<span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split
+
+warnings.filterwarnings(<span class="hljs-string">&quot;ignore&quot;</span>)
+torch.set_num_threads(<span class="hljs-number">1</span>)
+plt.rcParams.update({<span class="hljs-string">&quot;font.family&quot;</span>: <span class="hljs-string">&quot;DejaVu Sans&quot;</span>, <span class="hljs-string">&quot;font.size&quot;</span>: <span class="hljs-number">10</span>, <span class="hljs-string">&quot;axes.spines.top&quot;</span>: <span class="hljs-literal">False</span>,
+                     <span class="hljs-string">&quot;axes.spines.right&quot;</span>: <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;figure.dpi&quot;</span>: <span class="hljs-number">110</span>, <span class="hljs-string">&quot;savefig.dpi&quot;</span>: <span class="hljs-number">110</span>, <span class="hljs-string">&quot;savefig.bbox&quot;</span>: <span class="hljs-string">&quot;tight&quot;</span>})
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), <span class="hljs-string">&quot;..&quot;</span>, <span class="hljs-string">&quot;figs&quot;</span>) + os.sep
+os.makedirs(OUT, exist_ok=<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># ------------------------------------------------------------------ dữ liệu</span>
+d = load_digits()
+X = (d.images / <span class="hljs-number">16.0</span>).astype(np.float32)[:, <span class="hljs-literal">None</span>]            <span class="hljs-comment"># (1797, 1, 8, 8), giá trị trong [0, 1]</span>
+y = d.target.astype(np.int64)
+Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=<span class="hljs-number">0.3</span>, random_state=<span class="hljs-number">0</span>, stratify=y)
+Xtr, Xte, ytr, yte = <span class="hljs-built_in">map</span>(torch.from_numpy, (Xtr, Xte, ytr, yte))
+Xcal = Xtr[:<span class="hljs-number">256</span>]                                              <span class="hljs-comment"># tập calibration: 256 ảnh từ tập train</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">accuracy</span>(<span class="hljs-params">model, X=Xte, y=yte</span>):
+    model.<span class="hljs-built_in">eval</span>()
+    <span class="hljs-keyword">with</span> torch.no_grad():
+        <span class="hljs-keyword">return</span> (model(X).argmax(<span class="hljs-number">1</span>) == y).<span class="hljs-built_in">float</span>().mean().item()
+
+<span class="hljs-comment"># ------------------------------------------------------------------ mô hình float (có BatchNorm, có depthwise)</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Net</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.conv1, <span class="hljs-variable language_">self</span>.bn1 = nn.Conv2d(<span class="hljs-number">1</span>, <span class="hljs-number">16</span>, <span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">16</span>)
+        <span class="hljs-variable language_">self</span>.dw, <span class="hljs-variable language_">self</span>.bn2 = nn.Conv2d(<span class="hljs-number">16</span>, <span class="hljs-number">16</span>, <span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, groups=<span class="hljs-number">16</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">16</span>)
+        <span class="hljs-variable language_">self</span>.pw, <span class="hljs-variable language_">self</span>.bn3 = nn.Conv2d(<span class="hljs-number">16</span>, <span class="hljs-number">32</span>, <span class="hljs-number">1</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">32</span>)
+        <span class="hljs-variable language_">self</span>.conv4, <span class="hljs-variable language_">self</span>.bn4 = nn.Conv2d(<span class="hljs-number">32</span>, <span class="hljs-number">32</span>, <span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">32</span>)
+        <span class="hljs-variable language_">self</span>.fc = nn.Linear(<span class="hljs-number">32</span>, <span class="hljs-number">10</span>)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):
+        x = F.relu(<span class="hljs-variable language_">self</span>.bn1(<span class="hljs-variable language_">self</span>.conv1(x)))
+        x = F.relu(<span class="hljs-variable language_">self</span>.bn2(<span class="hljs-variable language_">self</span>.dw(x)))
+        x = F.max_pool2d(F.relu(<span class="hljs-variable language_">self</span>.bn3(<span class="hljs-variable language_">self</span>.pw(x))), <span class="hljs-number">2</span>)
+        x = F.relu(<span class="hljs-variable language_">self</span>.bn4(<span class="hljs-variable language_">self</span>.conv4(x)))
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.fc(torch.flatten(F.adaptive_avg_pool2d(x, <span class="hljs-number">1</span>), <span class="hljs-number">1</span>))
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">train</span>(<span class="hljs-params">model, epochs=<span class="hljs-number">40</span>, lr=<span class="hljs-number">3e-3</span>, seed=<span class="hljs-number">0</span>, wd=<span class="hljs-number">0.0</span></span>):
+    g = torch.Generator().manual_seed(seed)
+    opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, epochs)
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(epochs):
+        model.train()
+        perm = torch.randperm(<span class="hljs-built_in">len</span>(Xtr), generator=g)
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(Xtr), <span class="hljs-number">64</span>):
+            idx = perm[i:i + <span class="hljs-number">64</span>]
+            loss = F.cross_entropy(model(Xtr[idx]), ytr[idx])
+            opt.zero_grad(); loss.backward(); opt.step()
+        sched.step()
+    <span class="hljs-keyword">return</span> model.<span class="hljs-built_in">eval</span>()
+
+torch.manual_seed(<span class="hljs-number">0</span>)
+fp_model = train(Net())
+acc_fp = accuracy(fp_model)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;[FP32] test accuracy = <span class="hljs-subst">{acc_fp:<span class="hljs-number">.4</span>f}</span>  (n_test = <span class="hljs-subst">{<span class="hljs-built_in">len</span>(yte)}</span>)&quot;</span>)
+
+<span class="hljs-comment"># ------------------------------------------------------------------ (1) BN folding</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">fold_bn</span>(<span class="hljs-params">conv, bn</span>):
+    std = torch.sqrt(bn.running_var + bn.eps)
+    w = conv.weight * (bn.weight / std).reshape(-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+    b0 = conv.bias <span class="hljs-keyword">if</span> conv.bias <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">else</span> torch.zeros_like(bn.running_mean)
+    b = bn.weight * (b0 - bn.running_mean) / std + bn.bias
+    fused = nn.Conv2d(conv.in_channels, conv.out_channels, conv.kernel_size, conv.stride, conv.padding,
+                      groups=conv.groups, bias=<span class="hljs-literal">True</span>)
+    fused.weight.data, fused.bias.data = w.detach().clone(), b.detach().clone()
+    <span class="hljs-keyword">return</span> fused
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">FoldedNet</span>(nn.Module):
+    <span class="hljs-string">&quot;&quot;&quot;Mạng sau khi gộp BN; có chỗ cắm fake-quant cho weight và activation.&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, net</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.convs = nn.ModuleList([fold_bn(net.conv1, net.bn1), fold_bn(net.dw, net.bn2),
+                                    fold_bn(net.pw, net.bn3), fold_bn(net.conv4, net.bn4)])
+        <span class="hljs-variable language_">self</span>.fc = copy.deepcopy(net.fc)
+        <span class="hljs-variable language_">self</span>.wq = <span class="hljs-literal">None</span>            <span class="hljs-comment"># hàm fake-quant weight: (tên lớp, W) -&gt; W_hat</span>
+        <span class="hljs-variable language_">self</span>.aq = <span class="hljs-literal">None</span>            <span class="hljs-comment"># danh sách fake-quant activation: aq[i](x)</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_w</span>(<span class="hljs-params">self, i, w</span>): <span class="hljs-keyword">return</span> w <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.wq <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">else</span> <span class="hljs-variable language_">self</span>.wq(i, w)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_a</span>(<span class="hljs-params">self, i, x</span>): <span class="hljs-keyword">return</span> x <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.aq <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">else</span> <span class="hljs-variable language_">self</span>.aq[i](x)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):
+        x = <span class="hljs-variable language_">self</span>._a(<span class="hljs-number">0</span>, x)                                     <span class="hljs-comment"># lượng tử input</span>
+        <span class="hljs-keyword">for</span> i, c <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-variable language_">self</span>.convs):
+            x = F.relu(F.conv2d(x, <span class="hljs-variable language_">self</span>._w(i, c.weight), c.bias, c.stride, c.padding, groups=c.groups))
+            <span class="hljs-keyword">if</span> i == <span class="hljs-number">2</span>: x = F.max_pool2d(x, <span class="hljs-number">2</span>)
+            x = <span class="hljs-variable language_">self</span>._a(i + <span class="hljs-number">1</span>, x)
+        x = torch.flatten(F.adaptive_avg_pool2d(x, <span class="hljs-number">1</span>), <span class="hljs-number">1</span>)
+        <span class="hljs-keyword">return</span> F.linear(x, <span class="hljs-variable language_">self</span>._w(<span class="hljs-number">4</span>, <span class="hljs-variable language_">self</span>.fc.weight), <span class="hljs-variable language_">self</span>.fc.bias)
+
+folded = FoldedNet(fp_model).<span class="hljs-built_in">eval</span>()
+<span class="hljs-keyword">with</span> torch.no_grad():
+    diff = (folded(Xte) - fp_model(Xte)).<span class="hljs-built_in">abs</span>().<span class="hljs-built_in">max</span>().item()
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;[BN folding] max |logit_folded - logit_goc| = <span class="hljs-subst">{diff:<span class="hljs-number">.2</span>e}</span>&quot;</span>)
+
+<span class="hljs-comment"># ------------------------------------------------------------------ (2) per-tensor vs per-channel</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">fq_sym</span>(<span class="hljs-params">w, bits, per_channel</span>):
+    qmax = <span class="hljs-number">2</span> ** (bits - <span class="hljs-number">1</span>) - <span class="hljs-number">1</span>
+    <span class="hljs-keyword">if</span> per_channel:
+        amax = w.<span class="hljs-built_in">abs</span>().reshape(w.shape[<span class="hljs-number">0</span>], -<span class="hljs-number">1</span>).<span class="hljs-built_in">max</span>(<span class="hljs-number">1</span>).values.clamp_min(<span class="hljs-number">1e-8</span>)
+        amax = amax.reshape(-<span class="hljs-number">1</span>, *([<span class="hljs-number">1</span>] * (w.dim() - <span class="hljs-number">1</span>)))
+    <span class="hljs-keyword">else</span>:
+        amax = w.<span class="hljs-built_in">abs</span>().<span class="hljs-built_in">max</span>().clamp_min(<span class="hljs-number">1e-8</span>)
+    s = amax / qmax
+    q = torch.clamp(torch.<span class="hljs-built_in">round</span>(w / s), -qmax, qmax) * s
+    <span class="hljs-keyword">return</span> w + (q - w).detach()                               <span class="hljs-comment"># STE</span>
+
+dw_w = folded.convs[<span class="hljs-number">1</span>].weight.detach()
+dw_ranges = dw_w.<span class="hljs-built_in">abs</span>().reshape(<span class="hljs-number">16</span>, -<span class="hljs-number">1</span>).<span class="hljs-built_in">max</span>(<span class="hljs-number">1</span>).values.numpy()
+res_gran = {}
+<span class="hljs-keyword">for</span> bits <span class="hljs-keyword">in</span> (<span class="hljs-number">8</span>, <span class="hljs-number">4</span>):
+    <span class="hljs-keyword">for</span> pc <span class="hljs-keyword">in</span> (<span class="hljs-literal">False</span>, <span class="hljs-literal">True</span>):
+        folded.wq = <span class="hljs-keyword">lambda</span> i, w, b=bits, p=pc: fq_sym(w, b, p)
+        res_gran[(bits, pc)] = (accuracy(folded),
+                                 torch.mean((fq_sym(dw_w, bits, pc) - dw_w) ** <span class="hljs-number">2</span>).item())
+folded.wq = <span class="hljs-literal">None</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;[Granularity] (bit, per_channel) -&gt; (acc chỉ quantize weight, MSE lớp depthwise):&quot;</span>)
+<span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> res_gran.items(): <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;   &quot;</span>, k, <span class="hljs-string">f&quot;acc=<span class="hljs-subst">{v[<span class="hljs-number">0</span>]:<span class="hljs-number">.4</span>f}</span>  mse_dw=<span class="hljs-subst">{v[<span class="hljs-number">1</span>]:<span class="hljs-number">.3</span>e}</span>&quot;</span>)
+
+fig, axes = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">3.4</span>))
+axes[<span class="hljs-number">0</span>].bar(<span class="hljs-built_in">range</span>(<span class="hljs-number">16</span>), dw_ranges, color=<span class="hljs-string">&quot;#4a78c2&quot;</span>)
+axes[<span class="hljs-number">0</span>].axhline(dw_ranges.<span class="hljs-built_in">max</span>(), ls=<span class="hljs-string">&quot;--&quot;</span>, color=<span class="hljs-string">&quot;#d9534f&quot;</span>)
+axes[<span class="hljs-number">0</span>].text(<span class="hljs-number">15.5</span>, dw_ranges.<span class="hljs-built_in">max</span>() * <span class="hljs-number">1.02</span>, <span class="hljs-string">&quot;dải per-tensor dùng chung&quot;</span>, ha=<span class="hljs-string">&quot;right&quot;</span>, color=<span class="hljs-string">&quot;#d9534f&quot;</span>, fontsize=<span class="hljs-number">9</span>)
+axes[<span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&quot;Kênh của lớp depthwise (sau khi gộp BN)&quot;</span>); axes[<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&quot;max|w| của kênh&quot;</span>)
+axes[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">f&quot;Lớp depthwise: max|w| lớn nhất / nhỏ nhất ≈ <span class="hljs-subst">{dw_ranges.<span class="hljs-built_in">max</span>() / dw_ranges.<span class="hljs-built_in">min</span>():<span class="hljs-number">.1</span>f}</span> lần&quot;</span>, fontsize=<span class="hljs-number">10</span>)
+lab = [<span class="hljs-string">&quot;INT8\nper-tensor&quot;</span>, <span class="hljs-string">&quot;INT8\nper-channel&quot;</span>, <span class="hljs-string">&quot;INT4\nper-tensor&quot;</span>, <span class="hljs-string">&quot;INT4\nper-channel&quot;</span>]
+keys = [(<span class="hljs-number">8</span>, <span class="hljs-literal">False</span>), (<span class="hljs-number">8</span>, <span class="hljs-literal">True</span>), (<span class="hljs-number">4</span>, <span class="hljs-literal">False</span>), (<span class="hljs-number">4</span>, <span class="hljs-literal">True</span>)]
+vals = [res_gran[k][<span class="hljs-number">0</span>] * <span class="hljs-number">100</span> <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> keys]
+bars = axes[<span class="hljs-number">1</span>].bar(lab, vals, color=[<span class="hljs-string">&quot;#9e9e9e&quot;</span>, <span class="hljs-string">&quot;#4a78c2&quot;</span>, <span class="hljs-string">&quot;#9e9e9e&quot;</span>, <span class="hljs-string">&quot;#4a78c2&quot;</span>])
+axes[<span class="hljs-number">1</span>].axhline(acc_fp * <span class="hljs-number">100</span>, ls=<span class="hljs-string">&quot;--&quot;</span>, color=<span class="hljs-string">&quot;k&quot;</span>); axes[<span class="hljs-number">1</span>].text(<span class="hljs-number">3.4</span>, acc_fp * <span class="hljs-number">100</span> + <span class="hljs-number">0.5</span>, <span class="hljs-string">&quot;FP32&quot;</span>, ha=<span class="hljs-string">&quot;right&quot;</span>)
+<span class="hljs-keyword">for</span> bb, v <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(bars, vals): axes[<span class="hljs-number">1</span>].text(bb.get_x() + bb.get_width() / <span class="hljs-number">2</span>, v + <span class="hljs-number">0.5</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{v:<span class="hljs-number">.1</span>f}</span>&quot;</span>, ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9</span>)
+axes[<span class="hljs-number">1</span>].set_ylim(<span class="hljs-built_in">min</span>(vals) - <span class="hljs-number">8</span>, <span class="hljs-number">102</span>); axes[<span class="hljs-number">1</span>].set_ylabel(<span class="hljs-string">&quot;Độ chính xác test (%)&quot;</span>)
+axes[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Chỉ lượng tử trọng số (activation giữ FP32)&quot;</span>, fontsize=<span class="hljs-number">10</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig08_per_channel.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># ------------------------------------------------------------------ (3) calibration activation</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">collect_acts</span>(<span class="hljs-params">model, X</span>):
+    acts = [[] <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>)]
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">mk</span>(<span class="hljs-params">i</span>):
+        <span class="hljs-keyword">def</span> <span class="hljs-title function_">f</span>(<span class="hljs-params">x</span>): acts[i].append(x.detach().flatten()); <span class="hljs-keyword">return</span> x
+        <span class="hljs-keyword">return</span> f
+    model.aq = [mk(i) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>)]
+    <span class="hljs-keyword">with</span> torch.no_grad(): model(X)
+    model.aq = <span class="hljs-literal">None</span>
+    <span class="hljs-keyword">return</span> [torch.cat(a) <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> acts]
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">fq_asym</span>(<span class="hljs-params">x, lo, hi, bits</span>):
+    lo, hi = <span class="hljs-built_in">min</span>(lo, <span class="hljs-number">0.0</span>), <span class="hljs-built_in">max</span>(hi, <span class="hljs-number">0.0</span>)
+    qmax = <span class="hljs-number">2</span> ** bits - <span class="hljs-number">1</span>
+    s = <span class="hljs-built_in">max</span>(hi - lo, <span class="hljs-number">1e-8</span>) / qmax
+    z = <span class="hljs-built_in">float</span>(np.clip(<span class="hljs-built_in">round</span>(-lo / s), <span class="hljs-number">0</span>, qmax))
+    q = torch.clamp(torch.<span class="hljs-built_in">round</span>(x / s) + z, <span class="hljs-number">0</span>, qmax)
+    xq = (q - z) * s
+    <span class="hljs-keyword">return</span> x + (xq - x).detach()
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">calib_minmax</span>(<span class="hljs-params">a, bits</span>): <span class="hljs-keyword">return</span> a.<span class="hljs-built_in">min</span>().item(), a.<span class="hljs-built_in">max</span>().item()
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">calib_percentile</span>(<span class="hljs-params">a, bits, p=<span class="hljs-number">99.99</span></span>):
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>, torch.quantile(a[torch.randperm(<span class="hljs-built_in">len</span>(a))[:<span class="hljs-number">1_000_000</span>]], p / <span class="hljs-number">100</span>).item()
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">calib_mse</span>(<span class="hljs-params">a, bits</span>):
+    amax = a.<span class="hljs-built_in">max</span>().item(); best = (<span class="hljs-literal">None</span>, <span class="hljs-built_in">float</span>(<span class="hljs-string">&quot;inf&quot;</span>))
+    <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> np.linspace(amax / <span class="hljs-number">50</span>, amax, <span class="hljs-number">200</span>):
+        e = torch.mean((fq_asym(a, <span class="hljs-number">0.0</span>, t, bits) - a) ** <span class="hljs-number">2</span>).item()
+        <span class="hljs-keyword">if</span> e &lt; best[<span class="hljs-number">1</span>]: best = (t, e)
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>, best[<span class="hljs-number">0</span>]
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">calib_kl</span>(<span class="hljs-params">a, bits, nbins=<span class="hljs-number">2048</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;Thuật toán entropy calibration kiểu TensorRT (Migacz, 2017), cho activation không âm.&quot;&quot;&quot;</span>
+    a = a.numpy(); a = a[a &gt; <span class="hljs-number">0</span>]
+    hist, edges = np.histogram(a, bins=nbins, <span class="hljs-built_in">range</span>=(<span class="hljs-number">0</span>, a.<span class="hljs-built_in">max</span>()))
+    nlev = <span class="hljs-number">2</span> ** bits - <span class="hljs-number">1</span>
+    best_kl, best_i = np.inf, nbins
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(nlev, nbins + <span class="hljs-number">1</span>):
+        p = hist[:i].astype(np.float64).copy(); p[-<span class="hljs-number">1</span>] += hist[i:].<span class="hljs-built_in">sum</span>()        <span class="hljs-comment"># dồn phần bị cắt vào bin cuối</span>
+        chunks = np.array_split(hist[:i].astype(np.float64), nlev)
+        q = np.concatenate([np.where(c &gt; <span class="hljs-number">0</span>, c.<span class="hljs-built_in">sum</span>() / <span class="hljs-built_in">max</span>((c &gt; <span class="hljs-number">0</span>).<span class="hljs-built_in">sum</span>(), <span class="hljs-number">1</span>), <span class="hljs-number">0</span>) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> chunks])
+        pm, qm = p / p.<span class="hljs-built_in">sum</span>(), q / <span class="hljs-built_in">max</span>(q.<span class="hljs-built_in">sum</span>(), <span class="hljs-number">1e-12</span>)
+        mask = pm &gt; <span class="hljs-number">0</span>
+        <span class="hljs-keyword">if</span> np.<span class="hljs-built_in">any</span>(qm[mask] == <span class="hljs-number">0</span>): <span class="hljs-keyword">continue</span>
+        kl = np.<span class="hljs-built_in">sum</span>(pm[mask] * np.log(pm[mask] / qm[mask]))
+        <span class="hljs-keyword">if</span> kl &lt; best_kl: best_kl, best_i = kl, i
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>, <span class="hljs-built_in">float</span>(edges[best_i])
+
+acts_cal = collect_acts(folded, Xcal)
+methods = {<span class="hljs-string">&quot;min–max&quot;</span>: calib_minmax, <span class="hljs-string">&quot;percentile 99.99%&quot;</span>: calib_percentile, <span class="hljs-string">&quot;MSE&quot;</span>: calib_mse, <span class="hljs-string">&quot;KL (entropy)&quot;</span>: calib_kl}
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">ptq_eval</span>(<span class="hljs-params">model, bits_w, bits_a, method, keep_ends_8bit=<span class="hljs-literal">True</span></span>):
+    ranges = []
+    <span class="hljs-keyword">for</span> i, a <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(acts_cal):
+        b = <span class="hljs-number">8</span> <span class="hljs-keyword">if</span> (i == <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> keep_ends_8bit) <span class="hljs-keyword">else</span> bits_a
+        ranges.append(calib_minmax(a, b) <span class="hljs-keyword">if</span> i == <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> methods[method](a, b))
+    model.aq = [<span class="hljs-keyword">lambda</span> x, r=r, b=(<span class="hljs-number">8</span> <span class="hljs-keyword">if</span> (i == <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> keep_ends_8bit) <span class="hljs-keyword">else</span> bits_a): fq_asym(x, r[<span class="hljs-number">0</span>], r[<span class="hljs-number">1</span>], b)
+                <span class="hljs-keyword">for</span> i, r <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(ranges)]
+    model.wq = <span class="hljs-keyword">lambda</span> i, w: fq_sym(w, <span class="hljs-number">8</span> <span class="hljs-keyword">if</span> (keep_ends_8bit <span class="hljs-keyword">and</span> i <span class="hljs-keyword">in</span> (<span class="hljs-number">0</span>, <span class="hljs-number">4</span>)) <span class="hljs-keyword">else</span> bits_w, <span class="hljs-literal">True</span>)
+    acc = accuracy(model); model.aq = model.wq = <span class="hljs-literal">None</span>
+    <span class="hljs-keyword">return</span> acc, ranges
+
+calib_res = {}
+<span class="hljs-keyword">for</span> bits <span class="hljs-keyword">in</span> (<span class="hljs-number">8</span>, <span class="hljs-number">4</span>):
+    <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> methods:
+        calib_res[(bits, m)] = ptq_eval(folded, bits, bits, m)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;[Calibration] W{b}A{b} PTQ, weight per-channel, lớp đầu/cuối 8 bit:&quot;</span>)
+<span class="hljs-keyword">for</span> (b, m), (acc, rg) <span class="hljs-keyword">in</span> calib_res.items():
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;   <span class="hljs-subst">{b}</span> bit | <span class="hljs-subst">{m:18s}</span>: acc=<span class="hljs-subst">{acc:<span class="hljs-number">.4</span>f}</span> | ngưỡng lớp pw (act #3) = <span class="hljs-subst">{rg[<span class="hljs-number">3</span>][<span class="hljs-number">1</span>]:<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+
+a3 = acts_cal[<span class="hljs-number">3</span>].numpy(); a3p = a3[a3 &gt; <span class="hljs-number">0</span>]
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">8.5</span>, <span class="hljs-number">3.8</span>))
+ax.hist(a3p, bins=<span class="hljs-number">300</span>, color=<span class="hljs-string">&quot;#ccc&quot;</span>, log=<span class="hljs-literal">True</span>)
+cols = {<span class="hljs-string">&quot;min–max&quot;</span>: <span class="hljs-string">&quot;#d9534f&quot;</span>, <span class="hljs-string">&quot;percentile 99.99%&quot;</span>: <span class="hljs-string">&quot;#e0923a&quot;</span>, <span class="hljs-string">&quot;MSE&quot;</span>: <span class="hljs-string">&quot;#4a78c2&quot;</span>, <span class="hljs-string">&quot;KL (entropy)&quot;</span>: <span class="hljs-string">&quot;#4caf6e&quot;</span>}
+<span class="hljs-keyword">for</span> m, c <span class="hljs-keyword">in</span> cols.items():
+    t = calib_res[(<span class="hljs-number">4</span>, m)][<span class="hljs-number">1</span>][<span class="hljs-number">3</span>][<span class="hljs-number">1</span>]
+    ax.axvline(t, color=c, lw=<span class="hljs-number">2</span>, label=<span class="hljs-string">f&quot;<span class="hljs-subst">{m}</span>: ngưỡng = <span class="hljs-subst">{t:<span class="hljs-number">.2</span>f}</span>, acc W4A4 = <span class="hljs-subst">{calib_res[(<span class="hljs-number">4</span>, m)][<span class="hljs-number">0</span>] * <span class="hljs-number">100</span>:<span class="hljs-number">.1</span>f}</span>%&quot;</span>)
+ax.set_xlabel(<span class="hljs-string">&quot;Giá trị activation dương sau lớp pointwise + ReLU (256 ảnh calibration)&quot;</span>)
+ax.set_ylabel(<span class="hljs-string">&quot;Số lượng (thang log)&quot;</span>); ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8.5</span>)
+ax.set_title(<span class="hljs-string">f&quot;Ngưỡng cắt do các phương pháp calibration chọn (4 bit); <span class="hljs-subst">{np.mean(a3 == <span class="hljs-number">0</span>):<span class="hljs-number">.0</span>%}</span> giá trị bằng 0 không vẽ&quot;</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig11_calibration.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># ------------------------------------------------------------------ (4) PTQ vs QAT theo số bit</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">EMARange</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, lo, hi, m=<span class="hljs-number">0.9</span></span>): <span class="hljs-variable language_">self</span>.lo, <span class="hljs-variable language_">self</span>.hi, <span class="hljs-variable language_">self</span>.m = lo, hi, m
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self, x</span>):
+        <span class="hljs-variable language_">self</span>.lo = <span class="hljs-variable language_">self</span>.m * <span class="hljs-variable language_">self</span>.lo + (<span class="hljs-number">1</span> - <span class="hljs-variable language_">self</span>.m) * <span class="hljs-built_in">min</span>(x.<span class="hljs-built_in">min</span>().item(), <span class="hljs-number">0.0</span>)
+        <span class="hljs-variable language_">self</span>.hi = <span class="hljs-variable language_">self</span>.m * <span class="hljs-variable language_">self</span>.hi + (<span class="hljs-number">1</span> - <span class="hljs-variable language_">self</span>.m) * x.<span class="hljs-built_in">max</span>().item()
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">qat</span>(<span class="hljs-params">fmodel, bits, epochs=<span class="hljs-number">15</span>, lr=<span class="hljs-number">5e-4</span>, seed=<span class="hljs-number">0</span></span>):
+    model = copy.deepcopy(fmodel)
+    _, ranges = ptq_eval(model, bits, bits, <span class="hljs-string">&quot;MSE&quot;</span>)                 <span class="hljs-comment"># khởi tạo dải bằng PTQ</span>
+    emas = [EMARange(lo, hi) <span class="hljs-keyword">for</span> lo, hi <span class="hljs-keyword">in</span> ranges]
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">mk</span>(<span class="hljs-params">i</span>):
+        b = <span class="hljs-number">8</span> <span class="hljs-keyword">if</span> i == <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> bits
+        <span class="hljs-keyword">def</span> <span class="hljs-title function_">f</span>(<span class="hljs-params">x</span>):
+            <span class="hljs-keyword">if</span> model.training: emas[i].update(x.detach())
+            <span class="hljs-keyword">return</span> fq_asym(x, emas[i].lo, emas[i].hi, b)
+        <span class="hljs-keyword">return</span> f
+    model.aq = [mk(i) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>)]
+    model.wq = <span class="hljs-keyword">lambda</span> i, w: fq_sym(w, <span class="hljs-number">8</span> <span class="hljs-keyword">if</span> i <span class="hljs-keyword">in</span> (<span class="hljs-number">0</span>, <span class="hljs-number">4</span>) <span class="hljs-keyword">else</span> bits, <span class="hljs-literal">True</span>)
+    g = torch.Generator().manual_seed(seed)
+    opt = torch.optim.Adam(model.parameters(), lr=lr)
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(epochs):
+        model.train()
+        perm = torch.randperm(<span class="hljs-built_in">len</span>(Xtr), generator=g)
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(Xtr), <span class="hljs-number">64</span>):
+            idx = perm[i:i + <span class="hljs-number">64</span>]
+            loss = F.cross_entropy(model(Xtr[idx]), ytr[idx])
+            opt.zero_grad(); loss.backward(); opt.step()
+    acc = accuracy(model); model.aq = model.wq = <span class="hljs-literal">None</span>
+    <span class="hljs-keyword">return</span> acc
+
+bit_list = [<span class="hljs-number">8</span>, <span class="hljs-number">6</span>, <span class="hljs-number">4</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>]
+ptq_minmax = [ptq_eval(folded, b, b, <span class="hljs-string">&quot;min–max&quot;</span>)[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> b <span class="hljs-keyword">in</span> bit_list]
+ptq_mse = [ptq_eval(folded, b, b, <span class="hljs-string">&quot;MSE&quot;</span>)[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> b <span class="hljs-keyword">in</span> bit_list]
+qat_acc = [np.mean([qat(folded, b, seed=s) <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">3</span>)]) <span class="hljs-keyword">for</span> b <span class="hljs-keyword">in</span> bit_list]
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;[PTQ vs QAT] bits:&quot;</span>, bit_list)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;   PTQ min-max:&quot;</span>, [<span class="hljs-string">f&quot;<span class="hljs-subst">{a:<span class="hljs-number">.4</span>f}</span>&quot;</span> <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> ptq_minmax])
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;   PTQ MSE    :&quot;</span>, [<span class="hljs-string">f&quot;<span class="hljs-subst">{a:<span class="hljs-number">.4</span>f}</span>&quot;</span> <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> ptq_mse])
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;   QAT (TB 3 seed):&quot;</span>, [<span class="hljs-string">f&quot;<span class="hljs-subst">{a:<span class="hljs-number">.4</span>f}</span>&quot;</span> <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> qat_acc])
+
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">7.5</span>, <span class="hljs-number">4</span>))
+ax.axhline(acc_fp * <span class="hljs-number">100</span>, ls=<span class="hljs-string">&quot;--&quot;</span>, color=<span class="hljs-string">&quot;k&quot;</span>, label=<span class="hljs-string">f&quot;FP32 (<span class="hljs-subst">{acc_fp * <span class="hljs-number">100</span>:<span class="hljs-number">.1</span>f}</span>%)&quot;</span>)
+ax.plot(bit_list, np.array(ptq_minmax) * <span class="hljs-number">100</span>, <span class="hljs-string">&quot;s-&quot;</span>, color=<span class="hljs-string">&quot;#d9534f&quot;</span>, label=<span class="hljs-string">&quot;PTQ, calibration min–max&quot;</span>)
+ax.plot(bit_list, np.array(ptq_mse) * <span class="hljs-number">100</span>, <span class="hljs-string">&quot;o-&quot;</span>, color=<span class="hljs-string">&quot;#e0923a&quot;</span>, label=<span class="hljs-string">&quot;PTQ, calibration MSE&quot;</span>)
+ax.plot(bit_list, np.array(qat_acc) * <span class="hljs-number">100</span>, <span class="hljs-string">&quot;^-&quot;</span>, color=<span class="hljs-string">&quot;#4a78c2&quot;</span>, label=<span class="hljs-string">&quot;QAT (15 epoch, trung bình 3 lần chạy)&quot;</span>)
+ax.set_xticks(bit_list, [<span class="hljs-string">f&quot;W<span class="hljs-subst">{b}</span>A<span class="hljs-subst">{b}</span>&quot;</span> <span class="hljs-keyword">for</span> b <span class="hljs-keyword">in</span> bit_list]); ax.invert_xaxis()
+ax.set_ylabel(<span class="hljs-string">&quot;Độ chính xác test (%)&quot;</span>); ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">9</span>)
+ax.set_title(<span class="hljs-string">&quot;PTQ và QAT theo độ rộng bit (lớp đầu/cuối giữ 8 bit)&quot;</span>)
+fig.savefig(OUT + <span class="hljs-string">&quot;fig13_ptq_qat.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-comment"># ------------------------------------------------------------------ (5) Backend int8 thật của PyTorch</span>
+<span class="hljs-keyword">import</span> torch.ao.quantization <span class="hljs-keyword">as</span> tq
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">size_kb</span>(<span class="hljs-params">m</span>):
+    torch.save(m.state_dict(), <span class="hljs-string">&quot;/tmp/_m.pt&quot;</span>); s = os.path.getsize(<span class="hljs-string">&quot;/tmp/_m.pt&quot;</span>) / <span class="hljs-number">1024</span>; os.remove(<span class="hljs-string">&quot;/tmp/_m.pt&quot;</span>); <span class="hljs-keyword">return</span> s
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">QNet</span>(nn.Module):
+    <span class="hljs-string">&quot;&quot;&quot;Cùng kiến trúc Net nhưng viết theo yêu cầu của eager-mode quantization.&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.quant = tq.QuantStub()
+        <span class="hljs-variable language_">self</span>.conv1, <span class="hljs-variable language_">self</span>.bn1, <span class="hljs-variable language_">self</span>.relu1 = nn.Conv2d(<span class="hljs-number">1</span>, <span class="hljs-number">16</span>, <span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">16</span>), nn.ReLU()
+        <span class="hljs-variable language_">self</span>.dw, <span class="hljs-variable language_">self</span>.bn2, <span class="hljs-variable language_">self</span>.relu2 = nn.Conv2d(<span class="hljs-number">16</span>, <span class="hljs-number">16</span>, <span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, groups=<span class="hljs-number">16</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">16</span>), nn.ReLU()
+        <span class="hljs-variable language_">self</span>.pw, <span class="hljs-variable language_">self</span>.bn3, <span class="hljs-variable language_">self</span>.relu3 = nn.Conv2d(<span class="hljs-number">16</span>, <span class="hljs-number">32</span>, <span class="hljs-number">1</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">32</span>), nn.ReLU()
+        <span class="hljs-variable language_">self</span>.pool = nn.MaxPool2d(<span class="hljs-number">2</span>)
+        <span class="hljs-variable language_">self</span>.conv4, <span class="hljs-variable language_">self</span>.bn4, <span class="hljs-variable language_">self</span>.relu4 = nn.Conv2d(<span class="hljs-number">32</span>, <span class="hljs-number">32</span>, <span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, bias=<span class="hljs-literal">False</span>), nn.BatchNorm2d(<span class="hljs-number">32</span>), nn.ReLU()
+        <span class="hljs-variable language_">self</span>.gap = nn.AdaptiveAvgPool2d(<span class="hljs-number">1</span>)
+        <span class="hljs-variable language_">self</span>.fc = nn.Linear(<span class="hljs-number">32</span>, <span class="hljs-number">10</span>)
+        <span class="hljs-variable language_">self</span>.dequant = tq.DeQuantStub()
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):
+        x = <span class="hljs-variable language_">self</span>.quant(x)
+        x = <span class="hljs-variable language_">self</span>.relu1(<span class="hljs-variable language_">self</span>.bn1(<span class="hljs-variable language_">self</span>.conv1(x)))
+        x = <span class="hljs-variable language_">self</span>.relu2(<span class="hljs-variable language_">self</span>.bn2(<span class="hljs-variable language_">self</span>.dw(x)))
+        x = <span class="hljs-variable language_">self</span>.pool(<span class="hljs-variable language_">self</span>.relu3(<span class="hljs-variable language_">self</span>.bn3(<span class="hljs-variable language_">self</span>.pw(x))))
+        x = <span class="hljs-variable language_">self</span>.relu4(<span class="hljs-variable language_">self</span>.bn4(<span class="hljs-variable language_">self</span>.conv4(x)))
+        x = <span class="hljs-variable language_">self</span>.fc(torch.flatten(<span class="hljs-variable language_">self</span>.gap(x), <span class="hljs-number">1</span>))
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.dequant(x)
+
+qm = QNet(); qm.load_state_dict(fp_model.state_dict(), strict=<span class="hljs-literal">False</span>); qm.<span class="hljs-built_in">eval</span>()
+<span class="hljs-keyword">assert</span> accuracy(qm) == acc_fp
+torch.backends.quantized.engine = <span class="hljs-string">&quot;x86&quot;</span>
+qm.qconfig = tq.get_default_qconfig(<span class="hljs-string">&quot;x86&quot;</span>)
+tq.fuse_modules(qm, [[<span class="hljs-string">&quot;conv1&quot;</span>, <span class="hljs-string">&quot;bn1&quot;</span>, <span class="hljs-string">&quot;relu1&quot;</span>], [<span class="hljs-string">&quot;dw&quot;</span>, <span class="hljs-string">&quot;bn2&quot;</span>, <span class="hljs-string">&quot;relu2&quot;</span>], [<span class="hljs-string">&quot;pw&quot;</span>, <span class="hljs-string">&quot;bn3&quot;</span>, <span class="hljs-string">&quot;relu3&quot;</span>],
+                     [<span class="hljs-string">&quot;conv4&quot;</span>, <span class="hljs-string">&quot;bn4&quot;</span>, <span class="hljs-string">&quot;relu4&quot;</span>]], inplace=<span class="hljs-literal">True</span>)
+tq.prepare(qm, inplace=<span class="hljs-literal">True</span>)
+<span class="hljs-keyword">with</span> torch.no_grad(): qm(Xcal)
+tq.convert(qm, inplace=<span class="hljs-literal">True</span>)
+acc_eager = accuracy(qm)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;[torch.ao eager static int8] acc = <span class="hljs-subst">{acc_eager:<span class="hljs-number">.4</span>f}</span>; size FP32 = <span class="hljs-subst">{size_kb(fp_model):<span class="hljs-number">.1</span>f}</span> KB, INT8 = <span class="hljs-subst">{size_kb(qm):<span class="hljs-number">.1</span>f}</span> KB&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;   &quot;</span>, qm.conv1)
+
+<span class="hljs-comment"># PT2E với torchao</span>
+<span class="hljs-keyword">try</span>:
+    <span class="hljs-keyword">from</span> torchao.quantization.pt2e.quantize_pt2e <span class="hljs-keyword">import</span> prepare_pt2e, convert_pt2e
+    <span class="hljs-keyword">import</span> torchao.quantization.pt2e.quantizer.x86_inductor_quantizer <span class="hljs-keyword">as</span> xiq
+    m = copy.deepcopy(fp_model).<span class="hljs-built_in">eval</span>()
+    ep = torch.export.export(m, (Xcal[:<span class="hljs-number">4</span>],), dynamic_shapes={<span class="hljs-string">&quot;x&quot;</span>: {<span class="hljs-number">0</span>: torch.export.Dim(<span class="hljs-string">&quot;batch&quot;</span>)}}).module()
+    quantizer = xiq.X86InductorQuantizer().set_global(xiq.get_default_x86_inductor_quantization_config())
+    pm = prepare_pt2e(ep, quantizer)
+    <span class="hljs-keyword">with</span> torch.no_grad(): pm(Xcal)
+    cm = convert_pt2e(pm)
+    <span class="hljs-keyword">with</span> torch.no_grad():
+        acc_pt2e = (cm(Xte).argmax(<span class="hljs-number">1</span>) == yte).<span class="hljs-built_in">float</span>().mean().item()
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;[torchao PT2E + X86InductorQuantizer] acc = <span class="hljs-subst">{acc_pt2e:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+<span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;[PT2E] lỗi:&quot;</span>, <span class="hljs-built_in">repr</span>(e)[:<span class="hljs-number">300</span>])
+
+<span class="hljs-comment"># torchao quantize_ (weight-only / dynamic) trên một MLP lớn hơn + đo độ trễ</span>
+<span class="hljs-keyword">from</span> torchao.quantization <span class="hljs-keyword">import</span> quantize_, Int8WeightOnlyConfig, Int8DynamicActivationInt8WeightConfig
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">mlp</span>(): <span class="hljs-keyword">return</span> nn.Sequential(nn.Linear(<span class="hljs-number">1024</span>, <span class="hljs-number">4096</span>), nn.ReLU(), nn.Linear(<span class="hljs-number">4096</span>, <span class="hljs-number">4096</span>), nn.ReLU(), nn.Linear(<span class="hljs-number">4096</span>, <span class="hljs-number">1024</span>)).<span class="hljs-built_in">eval</span>()
+torch.manual_seed(<span class="hljs-number">0</span>); base = mlp(); xin = torch.randn(<span class="hljs-number">16</span>, <span class="hljs-number">1024</span>)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">lat</span>(<span class="hljs-params">m, n=<span class="hljs-number">30</span></span>):
+    <span class="hljs-keyword">with</span> torch.no_grad():
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>): m(xin)
+        t = time.perf_counter()
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(n): m(xin)
+    <span class="hljs-keyword">return</span> (time.perf_counter() - t) / n * <span class="hljs-number">1000</span>
+<span class="hljs-keyword">with</span> torch.no_grad(): ref = base(xin)
+rows = [(<span class="hljs-string">&quot;FP32&quot;</span>, base)]
+dyn_ao = tq.quantize_dynamic(copy.deepcopy(base), {nn.Linear}, dtype=torch.qint8); rows.append((<span class="hljs-string">&quot;torch.ao quantize_dynamic (int8)&quot;</span>, dyn_ao))
+<span class="hljs-keyword">for</span> name, cfg <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;torchao Int8WeightOnly&quot;</span>, Int8WeightOnlyConfig()),
+                  (<span class="hljs-string">&quot;torchao Int8DynamicActivationInt8Weight&quot;</span>, Int8DynamicActivationInt8WeightConfig())]:
+    <span class="hljs-keyword">try</span>:
+        mm = copy.deepcopy(base); quantize_(mm, cfg); rows.append((name, mm))
+    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+        <span class="hljs-built_in">print</span>(name, <span class="hljs-string">&quot;lỗi:&quot;</span>, <span class="hljs-built_in">repr</span>(e)[:<span class="hljs-number">200</span>])
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;[MLP 1024-4096-4096-1024, batch 16, 1 luồng CPU]&quot;</span>)
+<span class="hljs-keyword">for</span> name, m <span class="hljs-keyword">in</span> rows:
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-keyword">with</span> torch.no_grad(): o = m(xin)
+        err = ((o - ref).norm() / ref.norm()).item()
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;   <span class="hljs-subst">{name:42s}</span> size=<span class="hljs-subst">{size_kb(m) / <span class="hljs-number">1024</span>:<span class="hljs-number">6.1</span>f}</span> MB  latency=<span class="hljs-subst">{lat(m):<span class="hljs-number">7.2</span>f}</span> ms  rel_err=<span class="hljs-subst">{err:<span class="hljs-number">.2</span>e}</span>&quot;</span>)
+    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;   <span class="hljs-subst">{name}</span>: lỗi khi chạy <span class="hljs-subst">{<span class="hljs-built_in">repr</span>(e)[:<span class="hljs-number">200</span>]}</span>&quot;</span>)
+</code></pre></div></details><details class="src-details"><summary>Kết quả chạy — <code>torch_experiments_output.txt</code></summary><div class="code-block is-output"><div class="code-head"><span class="code-lang">Kết quả chạy</span></div><pre><code>[FP32] test accuracy = 0.9926  (n_test = 540)
+[BN folding] max |logit_folded - logit_goc| = 5.72e-06
+[Granularity] (bit, per_channel) -&gt; (acc chỉ quantize weight, MSE lớp depthwise):
+    (8, False) acc=0.9926  mse_dw=1.344e-05
+    (8, True) acc=0.9926  mse_dw=6.757e-06
+    (4, False) acc=0.9130  mse_dw=4.998e-03
+    (4, True) acc=0.9759  mse_dw=1.941e-03
+[Calibration] W{b}A{b} PTQ, weight per-channel, lớp đầu/cuối 8 bit:
+   8 bit | min–max           : acc=0.9926 | ngưỡng lớp pw (act #3) = 5.481
+   8 bit | percentile 99.99% : acc=0.9926 | ngưỡng lớp pw (act #3) = 4.265
+   8 bit | MSE               : acc=0.9926 | ngưỡng lớp pw (act #3) = 4.833
+   8 bit | KL (entropy)      : acc=0.9907 | ngưỡng lớp pw (act #3) = 4.373
+   4 bit | min–max           : acc=0.9833 | ngưỡng lớp pw (act #3) = 5.481
+   4 bit | percentile 99.99% : acc=0.9815 | ngưỡng lớp pw (act #3) = 4.265
+   4 bit | MSE               : acc=0.9796 | ngưỡng lớp pw (act #3) = 3.240
+   4 bit | KL (entropy)      : acc=0.9833 | ngưỡng lớp pw (act #3) = 4.413
+[PTQ vs QAT] bits: [8, 6, 4, 3, 2]
+   PTQ min-max: ['0.9926', '0.9926', '0.9833', '0.6593', '0.1630']
+   PTQ MSE    : ['0.9926', '0.9926', '0.9796', '0.7204', '0.2481']
+   QAT (TB 3 seed): ['0.9907', '0.9901', '0.9796', '0.9401', '0.4944']
+[torch.ao eager static int8] acc = 0.9907; size FP32 = 48.5 KB, INT8 = 20.5 KB
+    QuantizedConvReLU2d(1, 16, kernel_size=(3, 3), stride=(1, 1), scale=0.02709164470434189, zero_point=0, padding=(1, 1))
+[torchao PT2E + X86InductorQuantizer] acc = 0.9926
+[MLP 1024-4096-4096-1024, batch 16, 1 luồng CPU]
+   FP32                                       size=  96.0 MB  latency=  14.31 ms  rel_err=0.00e+00
+   torch.ao quantize_dynamic (int8)           size=  24.0 MB  latency=   2.26 ms  rel_err=2.41e-02
+   torchao Int8WeightOnly                     size=  24.1 MB  latency=  33.85 ms  rel_err=6.74e-03
+   torchao Int8DynamicActivationInt8Weight    size=  24.1 MB  latency=   4.21 ms  rel_err=1.56e-02
+</code></pre></div></details></section><section class="src-card" id="torch_qat_eager-py"><header class="src-head"><h3 class="src-title"><code>code/torch_qat_eager.py</code></h3><span class="src-meta">28 dòng</span><a class="src-dl" href="code/torch_qat_eager.py" download>Tải về</a></header><p class="src-note">QAT bằng eager mode của PyTorch, Mục 10.1.3.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;QAT eager mode của torch.ao: fine-tune từ trọng số FP32 đã huấn luyện rồi convert sang INT8.
+Chạy: python code/torch_qat_eager.py (tự huấn luyện lại mô hình FP32 trước).&quot;&quot;&quot;</span>
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> warnings; warnings.filterwarnings(<span class="hljs-string">&quot;ignore&quot;</span>)
+src = <span class="hljs-built_in">open</span>(os.path.join(os.path.dirname(os.path.abspath(__file__)), <span class="hljs-string">&#x27;torch_experiments.py&#x27;</span>)).read()
+<span class="hljs-built_in">exec</span>(src.split(<span class="hljs-string">&#x27;# ------------------------------------------------------------------ (1) BN folding&#x27;</span>)[<span class="hljs-number">0</span>])
+<span class="hljs-built_in">exec</span>(<span class="hljs-string">&#x27;import torch.ao.quantization as tq\n&#x27;</span> + <span class="hljs-string">&#x27;class QNet&#x27;</span> + src.split(<span class="hljs-string">&#x27;class QNet&#x27;</span>)[<span class="hljs-number">1</span>].split(<span class="hljs-string">&#x27;qm = QNet()&#x27;</span>)[<span class="hljs-number">0</span>])
+<span class="hljs-keyword">import</span> torch.ao.nn.intrinsic.qat <span class="hljs-keyword">as</span> nniqat
+model = QNet(); model.load_state_dict(fp_model.state_dict(), strict=<span class="hljs-literal">False</span>)   <span class="hljs-comment"># bắt đầu từ trọng số FP32 đã huấn luyện</span>
+model.train()
+torch.backends.quantized.engine = <span class="hljs-string">&quot;x86&quot;</span>
+model.qconfig = tq.get_default_qat_qconfig(<span class="hljs-string">&quot;x86&quot;</span>)
+tq.fuse_modules_qat(model, [[<span class="hljs-string">&quot;conv1&quot;</span>,<span class="hljs-string">&quot;bn1&quot;</span>,<span class="hljs-string">&quot;relu1&quot;</span>],[<span class="hljs-string">&quot;dw&quot;</span>,<span class="hljs-string">&quot;bn2&quot;</span>,<span class="hljs-string">&quot;relu2&quot;</span>],[<span class="hljs-string">&quot;pw&quot;</span>,<span class="hljs-string">&quot;bn3&quot;</span>,<span class="hljs-string">&quot;relu3&quot;</span>],[<span class="hljs-string">&quot;conv4&quot;</span>,<span class="hljs-string">&quot;bn4&quot;</span>,<span class="hljs-string">&quot;relu4&quot;</span>]], inplace=<span class="hljs-literal">True</span>)
+tq.prepare_qat(model, inplace=<span class="hljs-literal">True</span>)
+opt = torch.optim.Adam(model.parameters(), lr=<span class="hljs-number">5e-4</span>)
+g = torch.Generator().manual_seed(<span class="hljs-number">0</span>)
+<span class="hljs-keyword">for</span> ep <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">10</span>):
+    <span class="hljs-keyword">if</span> ep == <span class="hljs-number">6</span>: model.apply(tq.disable_observer)          <span class="hljs-comment"># cố định dải lượng tử</span>
+    <span class="hljs-keyword">if</span> ep == <span class="hljs-number">7</span>: model.apply(nniqat.freeze_bn_stats)       <span class="hljs-comment"># cố định thống kê BN</span>
+    model.train()
+    perm = torch.randperm(<span class="hljs-built_in">len</span>(Xtr), generator=g)
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(Xtr), <span class="hljs-number">64</span>):
+        idx = perm[i:i+<span class="hljs-number">64</span>]
+        loss = F.cross_entropy(model(Xtr[idx]), ytr[idx]); opt.zero_grad(); loss.backward(); opt.step()
+model.<span class="hljs-built_in">eval</span>()
+qmodel = tq.convert(model)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;QAT eager int8 acc:&quot;</span>, accuracy(qmodel))
+</code></pre></div></details><details class="src-details"><summary>Kết quả chạy — <code>torch_qat_eager_output.txt</code></summary><div class="code-block is-output"><div class="code-head"><span class="code-lang">Kết quả chạy</span></div><pre><code>[FP32] test accuracy = 0.9926  (n_test = 540)
+QAT eager int8 acc: 0.9833333492279053
+</code></pre></div></details></section><section class="src-card" id="sensitivity-py"><header class="src-head"><h3 class="src-title"><code>code/sensitivity.py</code></h3><span class="src-meta">23 dòng</span><a class="src-dl" href="code/sensitivity.py" download>Tải về</a></header><p class="src-note">Phân tích độ nhạy theo lớp ở Mục 12.2: lượng tử từng lớp một xuống 3 bit, giữ các lớp khác ở FP32.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Phân tích độ nhạy theo lớp: lượng tử từng lớp một xuống 3 bit (trọng số + activation đầu ra), các lớp khác giữ FP32.&quot;&quot;&quot;</span>
+<span class="hljs-keyword">import</span> os
+src = <span class="hljs-built_in">open</span>(os.path.join(os.path.dirname(os.path.abspath(__file__)), <span class="hljs-string">&quot;torch_experiments.py&quot;</span>)).read()
+<span class="hljs-built_in">exec</span>(src.split(<span class="hljs-string">&quot;# ------------------------------------------------------------------ (4) PTQ vs QAT&quot;</span>)[<span class="hljs-number">0</span>])
+
+names = [<span class="hljs-string">&quot;conv1 (3x3)&quot;</span>, <span class="hljs-string">&quot;dw (depthwise 3x3)&quot;</span>, <span class="hljs-string">&quot;pw (pointwise 1x1)&quot;</span>, <span class="hljs-string">&quot;conv4 (3x3)&quot;</span>, <span class="hljs-string">&quot;fc (Linear)&quot;</span>]
+_, ranges = ptq_eval(folded, <span class="hljs-number">8</span>, <span class="hljs-number">8</span>, <span class="hljs-string">&quot;MSE&quot;</span>)               <span class="hljs-comment"># dải activation tham chiếu</span>
+acts_ranges3 = [calib_mse(a, <span class="hljs-number">3</span>) <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> acts_cal]       <span class="hljs-comment"># ngưỡng MSE cho 3 bit</span>
+BITS = <span class="hljs-number">3</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;FP32: <span class="hljs-subst">{acc_fp:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+<span class="hljs-keyword">for</span> li, name <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(names):
+    folded.wq = <span class="hljs-keyword">lambda</span> i, w, li=li: fq_sym(w, BITS, <span class="hljs-literal">True</span>) <span class="hljs-keyword">if</span> i == li <span class="hljs-keyword">else</span> w
+    <span class="hljs-comment"># activation đầu ra của lớp li là điểm aq[li+1] (với fc: không có activation sau, chỉ lượng tử trọng số)</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">mk</span>(<span class="hljs-params">i, li=li</span>):
+        <span class="hljs-keyword">if</span> i == li + <span class="hljs-number">1</span> <span class="hljs-keyword">and</span> i &lt; <span class="hljs-number">5</span>:
+            lo, hi = acts_ranges3[i]
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">lambda</span> x: fq_asym(x, lo, hi, BITS)
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">lambda</span> x: x
+    folded.aq = [mk(i) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>)]
+    acc = accuracy(folded)
+    folded.wq = folded.aq = <span class="hljs-literal">None</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{name:22s}</span>: acc = <span class="hljs-subst">{acc:<span class="hljs-number">.4</span>f}</span>  (giảm <span class="hljs-subst">{<span class="hljs-number">100</span> * (acc_fp - acc):<span class="hljs-number">.2</span>f}</span> điểm %)&quot;</span>)
+</code></pre></div></details><details class="src-details"><summary>Kết quả chạy — <code>sensitivity_output.txt</code></summary><div class="code-block is-output"><div class="code-head"><span class="code-lang">Kết quả chạy</span></div><pre><code>FP32: 0.9926
+conv1 (3x3)           : acc = 0.9519  (giảm 4.07 điểm %)
+dw (depthwise 3x3)    : acc = 0.9630  (giảm 2.96 điểm %)
+pw (pointwise 1x1)    : acc = 0.8796  (giảm 11.30 điểm %)
+conv4 (3x3)           : acc = 0.9870  (giảm 0.56 điểm %)
+fc (Linear)           : acc = 0.9926  (giảm 0.00 điểm %)
+</code></pre></div></details></section></div></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="thuat-ngu.html"><span class="pager-dir">← Trước</span><span class="pager-title">Từ điển thuật ngữ</span></a><a class="pager-link pager-next" href="toan-van.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Toàn văn một trang</span></a></nav>
+</main>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

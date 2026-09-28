@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>15. Tài liệu tham khảo — Quantization trong Deep Learning: từ nguyên lý đến thực hành</title>
+<meta name="description" content="Hai mươi nguồn gốc: bài báo nền tảng, kỹ thuật cho LLM, và tài liệu công cụ.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">Q</span>
+    <span class="brand-text"><b>Quantization</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><p class="nav-group">Giáo trình</p><ul class="nav-list"><li><a href="ch00.html"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li><li><a href="ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao cần quantization</span></a></li><li><a href="ch02.html"><span class="nav-num">2</span><span class="nav-label">Máy tính biểu diễn số</span></a></li><li><a href="ch03.html"><span class="nav-num">3</span><span class="nav-label">Uniform affine quantization</span></a></li><li><a href="ch04.html"><span class="nav-num">4</span><span class="nav-label">Phân tích sai số</span></a></li><li><a href="ch05.html"><span class="nav-num">5</span><span class="nav-label">Độ mịn (granularity)</span></a></li><li><a href="ch06.html"><span class="nav-num">6</span><span class="nav-label">Suy luận bằng số nguyên</span></a></li><li><a href="ch07.html"><span class="nav-num">7</span><span class="nav-label">Lượng tử cả một mạng</span></a></li><li><a href="ch08.html"><span class="nav-num">8</span><span class="nav-label">Calibration</span></a></li><li><a href="ch09.html"><span class="nav-num">9</span><span class="nav-label">PTQ và QAT</span></a></li><li><a href="ch10.html"><span class="nav-num">10</span><span class="nav-label">PyTorch và TFLite</span></a></li><li><a href="ch11.html"><span class="nav-num">11</span><span class="nav-label">Quantization cho LLM</span></a></li><li><a href="ch12.html"><span class="nav-num">12</span><span class="nav-label">Quy trình làm việc</span></a></li><li><a href="ch13.html"><span class="nav-num">13</span><span class="nav-label">Những hiểu lầm thường gặp</span></a></li><li><a href="bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="ch15.html" class="is-active" aria-current="page"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 17 hình</span></a></li><li><a href="thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 15</span><span class="kicker-time">2 phút đọc</span></div><h2 id="sec-15" class="heading">15. Tài liệu tham khảo<a class="anchor" href="#sec-15" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Hai mươi nguồn gốc: bài báo nền tảng, kỹ thuật cho LLM, và tài liệu công cụ.</p>
+<p><strong>Nền tảng</strong></p>
+<ol>
+<li>M. Horowitz. <em>Computing's energy problem (and what we can do about it).</em> ISSCC 2014.</li>
+<li>B. Jacob et al. <em>Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference.</em> CVPR 2018. arXiv:1712.05877.</li>
+<li>R. Krishnamoorthi. <em>Quantizing deep convolutional networks for efficient inference: A whitepaper.</em> arXiv:1806.08342, 2018.</li>
+<li>M. Nagel et al. <em>A White Paper on Neural Network Quantization.</em> arXiv:2106.08295, 2021.</li>
+<li>A. Gholami et al. <em>A Survey of Quantization Methods for Efficient Neural Network Inference.</em> arXiv:2103.13630, 2021.</li>
+<li>S. Migacz. <em>8-bit Inference with TensorRT.</em> NVIDIA GTC 2017.</li>
+</ol>
+<p><strong>Huấn luyện và PTQ nâng cao</strong></p>
+<ol start="7">
+<li>Y. Bengio, N. Léonard, A. Courville. <em>Estimating or Propagating Gradients Through Stochastic Neurons for Conditional Computation.</em> arXiv:1308.3432, 2013.</li>
+<li>S. K. Esser et al. <em>Learned Step Size Quantization.</em> ICLR 2020. arXiv:1902.08153.</li>
+<li>M. Nagel et al. <em>Data-Free Quantization Through Weight Equalization and Bias Correction.</em> ICCV 2019. arXiv:1906.04721.</li>
+<li>M. Nagel et al. <em>Up or Down? Adaptive Rounding for Post-Training Quantization.</em> ICML 2020. arXiv:2004.10568.</li>
+</ol>
+<p><strong>LLM và định dạng số mới</strong></p>
+<ol start="11">
+<li>T. Dettmers et al. <em>LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale.</em> NeurIPS 2022. arXiv:2208.07339.</li>
+<li>G. Xiao et al. <em>SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models.</em> ICML 2023. arXiv:2211.10438.</li>
+<li>E. Frantar et al. <em>GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers.</em> ICLR 2023. arXiv:2210.17323.</li>
+<li>J. Lin et al. <em>AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration.</em> MLSys 2024. arXiv:2306.00978.</li>
+<li>T. Dettmers et al. <em>QLoRA: Efficient Finetuning of Quantized LLMs.</em> NeurIPS 2023. arXiv:2305.14314.</li>
+<li>Z. Liu et al. <em>KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache.</em> ICML 2024. arXiv:2402.02750.</li>
+<li>P. Micikevicius et al. <em>FP8 Formats for Deep Learning.</em> arXiv:2209.05433, 2022.</li>
+<li>B. D. Rouhani et al. <em>Microscaling Data Formats for Deep Learning.</em> arXiv:2310.10537, 2023.</li>
+</ol>
+<p><strong>Tài liệu công cụ</strong></p>
+<ol start="19">
+<li>PyTorch, <em>Quantization</em> (docs.pytorch.org) và torchao (github.com/pytorch/ao).</li>
+<li>TensorFlow / LiteRT, <em>Post-training quantization</em> (ai.google.dev/edge/litert).</li>
+</ol>
+<hr>
+</article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="bai-tap.html"><span class="pager-dir">← Trước</span><span class="pager-title">Bài tập</span></a><a class="pager-link pager-next" href="phu-luc.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Phụ lục: chạy lại thí nghiệm</span></a></nav>
+</main>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

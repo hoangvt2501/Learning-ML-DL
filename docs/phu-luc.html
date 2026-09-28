@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phụ lục: chạy lại toàn bộ thí nghiệm — Quantization trong Deep Learning: từ nguyên lý đến thực hành</title>
+<meta name="description" content="Cây thư mục mã nguồn và các lệnh để tái lập toàn bộ hình vẽ cùng số liệu trong tài liệu.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">Q</span>
+    <span class="brand-text"><b>Quantization</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><p class="nav-group">Giáo trình</p><ul class="nav-list"><li><a href="ch00.html"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li><li><a href="ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao cần quantization</span></a></li><li><a href="ch02.html"><span class="nav-num">2</span><span class="nav-label">Máy tính biểu diễn số</span></a></li><li><a href="ch03.html"><span class="nav-num">3</span><span class="nav-label">Uniform affine quantization</span></a></li><li><a href="ch04.html"><span class="nav-num">4</span><span class="nav-label">Phân tích sai số</span></a></li><li><a href="ch05.html"><span class="nav-num">5</span><span class="nav-label">Độ mịn (granularity)</span></a></li><li><a href="ch06.html"><span class="nav-num">6</span><span class="nav-label">Suy luận bằng số nguyên</span></a></li><li><a href="ch07.html"><span class="nav-num">7</span><span class="nav-label">Lượng tử cả một mạng</span></a></li><li><a href="ch08.html"><span class="nav-num">8</span><span class="nav-label">Calibration</span></a></li><li><a href="ch09.html"><span class="nav-num">9</span><span class="nav-label">PTQ và QAT</span></a></li><li><a href="ch10.html"><span class="nav-num">10</span><span class="nav-label">PyTorch và TFLite</span></a></li><li><a href="ch11.html"><span class="nav-num">11</span><span class="nav-label">Quantization cho LLM</span></a></li><li><a href="ch12.html"><span class="nav-num">12</span><span class="nav-label">Quy trình làm việc</span></a></li><li><a href="ch13.html"><span class="nav-num">13</span><span class="nav-label">Những hiểu lầm thường gặp</span></a></li><li><a href="bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="ch15.html"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="phu-luc.html" class="is-active" aria-current="page"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 17 hình</span></a></li><li><a href="thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Phụ lục</span><span class="kicker-time">1 phút đọc</span></div><h2 id="phu-luc-chay-lai-toan-bo-thi-nghiem" class="heading">Phụ lục: chạy lại toàn bộ thí nghiệm<a class="anchor" href="#phu-luc-chay-lai-toan-bo-thi-nghiem" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Cây thư mục mã nguồn và các lệnh để tái lập toàn bộ hình vẽ cùng số liệu trong tài liệu.</p>
+<div class="code-block is-tree"><div class="code-head"><span class="code-lang">Cấu trúc thư mục</span></div><pre><code>quantization/
+├── quantization.md                     # tài liệu này
+├── figs/                               # 17 hình, sinh bởi các script dưới
+└── code/
+    ├── fig_basics.py                   # Hình 1–7, 12, 16
+    ├── fig_diagrams.py                 # Hình 9, 10, 17
+    ├── numpy_experiments.py            # Mục 6.5, 11.3, 11.4; Hình 14, 15
+    ├── torch_experiments.py            # Mục 5.3, 7.3, 8.2, 9.3, 10.1; Hình 8, 11, 13
+    ├── torch_qat_eager.py              # Mục 10.1.3
+    ├── sensitivity.py                  # Mục 12.2
+    └── *_output.txt                    # kết quả in ra của từng script
+</code></pre></div>
+<div class="code-block" data-lang="bash"><div class="code-head"><span class="code-lang">Bash</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-bash">pip install numpy scipy matplotlib scikit-learn torch torchao
+python code/fig_basics.py
+python code/fig_diagrams.py
+python code/numpy_experiments.py
+python code/torch_experiments.py        <span class="hljs-comment"># vài phút trên CPU; huấn luyện mô hình, PTQ, QAT, backend INT8</span>
+python code/torch_qat_eager.py
+python code/sensitivity.py
+</code></pre></div>
+<p>Các script đặt seed cố định nên kết quả độ chính xác lặp lại được trên cùng phiên bản thư viện. Riêng độ trễ phụ thuộc phần cứng và dao động giữa các lần chạy.</p>
+</article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="ch15.html"><span class="pager-dir">← Trước</span><span class="pager-title">Tài liệu tham khảo</span></a><a class="pager-link pager-next" href="thuc-hanh.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Phòng thí nghiệm</span></a></nav>
+</main>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

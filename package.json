@@ -1,0 +1,21 @@
+{
+  "name": "quantization-course",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Giáo trình Quantization trong Deep Learning — trang web tự học có hình minh hoạ, thí nghiệm tương tác và bài tập",
+  "type": "module",
+  "scripts": {
+    "build": "node src/build.mjs",
+    "serve": "node src/serve.mjs",
+    "dev": "node src/build.mjs && node src/serve.mjs",
+    "test": "node src/test.mjs",
+    "check": "node src/check-links.mjs",
+    "verify": "node src/build.mjs && node src/test.mjs && node src/check-links.mjs"
+  },
+  "devDependencies": {
+    "@vscode/markdown-it-katex": "^1.1.1",
+    "highlight.js": "^11.11.1",
+    "katex": "^0.16.22",
+    "markdown-it": "^14.1.0"
+  }
+}

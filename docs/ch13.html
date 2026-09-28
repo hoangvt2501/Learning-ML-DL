@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>13. Những hiểu lầm thường gặp — Quantization trong Deep Learning: từ nguyên lý đến thực hành</title>
+<meta name="description" content="Chín phát biểu nghe rất hợp lý nhưng sai, kèm đính chính có dẫn chứng từ chính các thí nghiệm trong tài liệu.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">Q</span>
+    <span class="brand-text"><b>Quantization</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><p class="nav-group">Giáo trình</p><ul class="nav-list"><li><a href="ch00.html"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li><li><a href="ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao cần quantization</span></a></li><li><a href="ch02.html"><span class="nav-num">2</span><span class="nav-label">Máy tính biểu diễn số</span></a></li><li><a href="ch03.html"><span class="nav-num">3</span><span class="nav-label">Uniform affine quantization</span></a></li><li><a href="ch04.html"><span class="nav-num">4</span><span class="nav-label">Phân tích sai số</span></a></li><li><a href="ch05.html"><span class="nav-num">5</span><span class="nav-label">Độ mịn (granularity)</span></a></li><li><a href="ch06.html"><span class="nav-num">6</span><span class="nav-label">Suy luận bằng số nguyên</span></a></li><li><a href="ch07.html"><span class="nav-num">7</span><span class="nav-label">Lượng tử cả một mạng</span></a></li><li><a href="ch08.html"><span class="nav-num">8</span><span class="nav-label">Calibration</span></a></li><li><a href="ch09.html"><span class="nav-num">9</span><span class="nav-label">PTQ và QAT</span></a></li><li><a href="ch10.html"><span class="nav-num">10</span><span class="nav-label">PyTorch và TFLite</span></a></li><li><a href="ch11.html"><span class="nav-num">11</span><span class="nav-label">Quantization cho LLM</span></a></li><li><a href="ch12.html"><span class="nav-num">12</span><span class="nav-label">Quy trình làm việc</span></a></li><li><a href="ch13.html" class="is-active" aria-current="page"><span class="nav-num">13</span><span class="nav-label">Những hiểu lầm thường gặp</span></a></li><li><a href="bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="ch15.html"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 17 hình</span></a></li><li><a href="thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 13</span><span class="kicker-time">2 phút đọc</span></div><h2 id="sec-13" class="heading">13. Những hiểu lầm thường gặp<a class="anchor" href="#sec-13" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Chín phát biểu nghe rất hợp lý nhưng sai, kèm đính chính có dẫn chứng từ chính các thí nghiệm trong tài liệu.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Hiểu lầm</th>
+<th>Thực tế</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&quot;Lượng tử hóa luôn làm mô hình nhanh hơn.&quot;</td>
+<td>Chỉ khi phần cứng và thư viện có kernel phù hợp. <a href="ch10.html#sec-10-1-5" class="xref">Mục 10.1.5</a> cho thấy weight-only INT8 chạy eager chậm hơn FP32 hơn 2 lần.</td>
+</tr>
+<tr>
+<td>&quot;INT8 luôn giảm kích thước đúng 4 lần.&quot;</td>
+<td>Đúng với phần trọng số. File thực tế còn chứa siêu dữ liệu, scale và các lớp giữ FP32; mô hình nhỏ ở <a href="ch10.html#sec-10-1-2" class="xref">Mục 10.1.2</a> chỉ giảm 2,4 lần.</td>
+</tr>
+<tr>
+<td>&quot;FP32 dùng một số bit cho phần nguyên và số bit còn lại cho phần thập phân.&quot;</td>
+<td>Sai. FP32 gồm 1 bit dấu, 8 bit exponent, 23 bit mantissa (<a href="ch02.html#sec-2-2" class="xref">Mục 2.2</a>); vị trí dấu chấm được mã hóa qua exponent.</td>
+</tr>
+<tr>
+<td>&quot;Dynamic quantization lượng tử activation dựa trên thống kê một batch lúc chuyển đổi.&quot;</td>
+<td>Trọng số được lượng tử sẵn lúc chuyển đổi; activation được lượng tử <em>lúc chạy</em> từ min/max của chính tensor đó, nên không cần dữ liệu calibration.</td>
+</tr>
+<tr>
+<td>&quot;<code>quantize_dynamic</code> của PyTorch lượng tử cả Conv2d.&quot;</td>
+<td>Không. Chỉ Linear và các lớp hồi quy (LSTM, GRU…); tích chập cần static quantization.</td>
+</tr>
+<tr>
+<td>&quot;Sai số trọng số càng nhỏ thì mô hình càng chính xác.&quot;</td>
+<td>Cái cần bảo toàn là đầu ra. GPTQ tăng sai số trọng số 2,7 lần nhưng giảm sai số đầu ra 3,7 lần (<a href="ch11.html#sec-11-4" class="xref">Mục 11.4</a>).</td>
+</tr>
+<tr>
+<td>&quot;Dải min–max là an toàn nhất vì không cắt giá trị nào.&quot;</td>
+<td>Min–max thường cho MSE lớn hơn nhiều so với ngưỡng tối ưu: 6,4 lần trong thí nghiệm <a href="ch04.html#sec-4-3" class="xref">Mục 4.3</a>.</td>
+</tr>
+<tr>
+<td>&quot;QAT lúc nào cũng tốt hơn PTQ.&quot;</td>
+<td>Ở 8 bit, PTQ thường ngang QAT với chi phí nhỏ hơn rất nhiều (<a href="ch09.html#sec-9-3" class="xref">Mục 9.3</a>). QAT đáng giá ở số bit thấp hoặc với mô hình nhỏ, nhạy cảm.</td>
+</tr>
+<tr>
+<td>&quot;Lớp đầu và lớp cuối luôn là lớp nhạy nhất.&quot;</td>
+<td>Chỉ là kinh nghiệm. Ở <a href="ch12.html#sec-12-2" class="xref">Mục 12.2</a>, lớp cuối lại không nhạy chút nào; phải đo trên chính mô hình.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<section class="quiz" data-quiz data-chapter="13"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">2 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">&quot;INT8 luôn giảm kích thước file đúng 4 lần.&quot; Phát biểu này:</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đúng trong mọi trường hợp</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Sai — file còn chứa siêu dữ liệu, scale và các lớp giữ FP32; mô hình nhỏ ở <a href="ch10.html#sec-10-1-2" class="xref">Mục 10.1.2</a> chỉ giảm 2,4 lần</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Sai — thực ra luôn giảm 8 lần</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Sai — kích thước không đổi</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Tỉ lệ 4 lần đúng với <strong>phần trọng số</strong>. Mô hình càng lớn thì tỉ lệ thực tế càng tiến gần 4.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">&quot;Sai số trọng số càng nhỏ thì mô hình càng chính xác.&quot; Phát biểu này:</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đúng — đó là mục tiêu của mọi phương pháp lượng tử</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Sai — cái cần bảo toàn là <strong>đầu ra</strong>; GPTQ tăng sai số trọng số 2,7 lần mà giảm sai số đầu ra 3,7 lần</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đúng, trừ trường hợp dùng per-channel</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Sai — thực ra hai đại lượng không liên quan gì nhau</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Đây là hiểu lầm nền tảng nhất trong danh sách, vì nó quyết định ta <strong>tối ưu hàm mục tiêu nào</strong>. AdaRound và GPTQ đều xuất phát từ việc sửa lại mục tiêu này.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/2</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="ch12.html"><span class="pager-dir">← Trước</span><span class="pager-title">Quy trình làm việc</span></a><a class="pager-link pager-next" href="bai-tap.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Bài tập</span></a></nav>
+</main>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

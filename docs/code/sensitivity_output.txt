@@ -1,0 +1,6 @@
+FP32: 0.9926
+conv1 (3x3)           : acc = 0.9519  (giảm 4.07 điểm %)
+dw (depthwise 3x3)    : acc = 0.9630  (giảm 2.96 điểm %)
+pw (pointwise 1x1)    : acc = 0.8796  (giảm 11.30 điểm %)
+conv4 (3x3)           : acc = 0.9870  (giảm 0.56 điểm %)
+fc (Linear)           : acc = 0.9926  (giảm 0.00 điểm %)

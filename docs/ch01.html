@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1. Vì sao cần quantization — Quantization trong Deep Learning: từ nguyên lý đến thực hành</title>
+<meta name="description" content="Bốn động cơ: bộ nhớ, năng lượng, tốc độ và cái giá phải trả. Vì sao di chuyển dữ liệu đắt hơn tính toán hàng trăm lần.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">Q</span>
+    <span class="brand-text"><b>Quantization</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><p class="nav-group">Giáo trình</p><ul class="nav-list"><li><a href="ch00.html"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li><li><a href="ch01.html" class="is-active" aria-current="page"><span class="nav-num">1</span><span class="nav-label">Vì sao cần quantization</span></a></li><li><a href="ch02.html"><span class="nav-num">2</span><span class="nav-label">Máy tính biểu diễn số</span></a></li><li><a href="ch03.html"><span class="nav-num">3</span><span class="nav-label">Uniform affine quantization</span></a></li><li><a href="ch04.html"><span class="nav-num">4</span><span class="nav-label">Phân tích sai số</span></a></li><li><a href="ch05.html"><span class="nav-num">5</span><span class="nav-label">Độ mịn (granularity)</span></a></li><li><a href="ch06.html"><span class="nav-num">6</span><span class="nav-label">Suy luận bằng số nguyên</span></a></li><li><a href="ch07.html"><span class="nav-num">7</span><span class="nav-label">Lượng tử cả một mạng</span></a></li><li><a href="ch08.html"><span class="nav-num">8</span><span class="nav-label">Calibration</span></a></li><li><a href="ch09.html"><span class="nav-num">9</span><span class="nav-label">PTQ và QAT</span></a></li><li><a href="ch10.html"><span class="nav-num">10</span><span class="nav-label">PyTorch và TFLite</span></a></li><li><a href="ch11.html"><span class="nav-num">11</span><span class="nav-label">Quantization cho LLM</span></a></li><li><a href="ch12.html"><span class="nav-num">12</span><span class="nav-label">Quy trình làm việc</span></a></li><li><a href="ch13.html"><span class="nav-num">13</span><span class="nav-label">Những hiểu lầm thường gặp</span></a></li><li><a href="bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="ch15.html"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 17 hình</span></a></li><li><a href="thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 1</span><span class="kicker-time">3 phút đọc</span></div><h2 id="sec-1" class="heading">1. Vì sao cần quantization<a class="anchor" href="#sec-1" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Bốn động cơ: bộ nhớ, năng lượng, tốc độ và cái giá phải trả. Vì sao di chuyển dữ liệu đắt hơn tính toán hàng trăm lần.</p>
+<h3 id="sec-1-1" class="heading">1.1. Chi phí bộ nhớ<a class="anchor" href="#sec-1-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Kích thước lưu trữ của một mô hình xấp xỉ bằng <em>số tham số × số byte mỗi tham số</em>. Số tham số không đổi khi lượng tử hóa; chỉ số byte mỗi tham số thay đổi.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mô hình</th>
+<th>Số tham số</th>
+<th>FP32</th>
+<th>FP16 / BF16</th>
+<th>INT8</th>
+<th>INT4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ResNet-50</td>
+<td>25,6 triệu</td>
+<td>102 MB</td>
+<td>51 MB</td>
+<td>25,6 MB</td>
+<td>12,8 MB</td>
+</tr>
+<tr>
+<td>LLM 7 tỉ tham số</td>
+<td>7 tỉ</td>
+<td>28 GB</td>
+<td>14 GB</td>
+<td>7 GB</td>
+<td>3,5 GB</td>
+</tr>
+</tbody>
+</table></div>
+<p>Bảng trên chưa tính phần phụ trội nhỏ để lưu các scale (xem <a href="ch11.html#sec-11-8" class="xref">Mục 11.8</a>). Với LLM, con số này quyết định mô hình có vừa bộ nhớ GPU hay điện thoại hay không.</p>
+<h3 id="sec-1-2" class="heading">1.2. Chi phí năng lượng<a class="anchor" href="#sec-1-2" aria-label="Liên kết tới mục này">#</a></h3>
+<figure class="figure" id="hinh-1">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 1"><img src="figs/fig01_energy.png" alt="Hình 1" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 1.</strong> Năng lượng một phép toán và một lần truy cập bộ nhớ ở công nghệ 45 nm (Horowitz, 2014). Trục hoành là thang log.</figcaption>
+</figure>
+<p>Có hai nhận xét quan trọng từ <a href="ch01.html#hinh-1" class="xref">Hình 1</a>:</p>
+<ol>
+<li><strong>Phép toán số nguyên rẻ hơn dấu phẩy động nhiều lần.</strong> Một phép cộng INT8 (0,03 pJ) rẻ hơn khoảng 30 lần so với phép cộng FP32 (0,9 pJ). Một phép nhân INT8 (0,2 pJ) rẻ hơn khoảng 18 lần so với phép nhân FP32 (3,7 pJ).</li>
+<li><strong>Di chuyển dữ liệu đắt hơn tính toán rất nhiều.</strong> Đọc 64 bit từ DRAM tốn 1300–2600 pJ, tức gấp hàng trăm lần một phép nhân FP32. Vì vậy, giảm số byte phải đọc từ bộ nhớ thường mang lại lợi ích <em>lớn hơn</em> việc tính toán rẻ hơn.</li>
+</ol>
+<h3 id="sec-1-3" class="heading">1.3. Tốc độ: bài toán bị giới hạn bởi tính toán hay bởi bộ nhớ<a class="anchor" href="#sec-1-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Một phép toán trên phần cứng bị chặn bởi một trong hai giới hạn:</p>
+<ul>
+<li><strong>Compute-bound</strong> (giới hạn bởi tính toán): ví dụ nhân hai ma trận lớn với batch lớn. Lượng tử hóa giúp nhanh hơn vì các đơn vị tính số nguyên có thông lượng cao hơn. Trên nhiều GPU, thông lượng tensor core INT8 gấp đôi FP16.</li>
+<li><strong>Memory-bound</strong> (giới hạn bởi băng thông bộ nhớ): ví dụ sinh từng token của LLM với batch nhỏ. Mỗi trọng số được đọc một lần nhưng chỉ tham gia rất ít phép tính. Lúc này, chỉ cần <em>nén trọng số</em> (weight-only quantization) là đã nhanh hơn gần tỉ lệ với mức nén, kể cả khi phép nhân vẫn làm bằng FP16.</li>
+</ul>
+<p>Khái niệm định lượng cho sự phân biệt này là <strong>cường độ số học</strong> (arithmetic intensity) = số phép toán / số byte đọc ghi. Mô hình <em>roofline</em> so sánh đại lượng này với tỉ số giữa thông lượng tính toán và băng thông bộ nhớ của phần cứng.</p>
+<h3 id="sec-1-4" class="heading">1.4. Cái giá phải trả<a class="anchor" href="#sec-1-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Lượng tử hóa là phép <strong>nén có mất mát</strong> (lossy). Nó gây sai số, và sai số này có thể làm giảm độ chính xác của mô hình. Ngoài ra, lợi ích tốc độ chỉ xuất hiện khi phần cứng và thư viện có <em>kernel</em> số nguyên tương ứng. Nếu không, mô hình chỉ nhẹ hơn chứ không nhanh hơn, thậm chí chậm hơn (ví dụ thực tế ở <a href="ch10.html#sec-10-1-5" class="xref">Mục 10.1.5</a>). Toàn bộ phần còn lại của tài liệu xoay quanh câu hỏi: <em>làm sao giảm số bit mà sai số gây ra là nhỏ nhất?</em></p>
+<hr>
+<section class="quiz" data-quiz data-chapter="1"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">3 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Theo <a href="ch01.html#hinh-1" class="xref">Hình 1</a>, đọc 64 bit từ DRAM tốn năng lượng gấp khoảng bao nhiêu lần một phép nhân FP32?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Xấp xỉ bằng nhau</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Khoảng 10 lần</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vài trăm lần</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">DRAM còn rẻ hơn</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Đọc 64 bit từ DRAM tốn 1300–2600 pJ, còn một phép nhân FP32 tốn 3,7 pJ — chênh nhau hàng trăm lần. Đây là lý do giảm số byte phải đọc thường có lợi <strong>hơn</strong> việc làm phép tính rẻ đi.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Sinh từng token của một LLM với batch nhỏ là bài toán thuộc loại nào?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Memory-bound — bị chặn bởi băng thông bộ nhớ</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Compute-bound — bị chặn bởi thông lượng tính toán</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Bị chặn bởi độ trễ mạng</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Không bị chặn bởi gì cả</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Mỗi trọng số được đọc một lần nhưng chỉ tham gia rất ít phép tính, nên cường độ số học rất thấp. Vì vậy chỉ cần <strong>nén trọng số</strong> (weight-only) là đã nhanh hơn gần tỉ lệ với mức nén, kể cả khi phép nhân vẫn làm bằng FP16.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">&quot;Lượng tử hoá luôn làm mô hình chạy nhanh hơn.&quot; Phát biểu này:</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đúng, vì phép toán số nguyên rẻ hơn</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đúng, vì mô hình nhẹ hơn</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Sai — chỉ nhanh khi phần cứng và thư viện có kernel số nguyên tương ứng</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Sai — lượng tử hoá luôn làm chậm đi</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> <a href="ch10.html#sec-10-1-5" class="xref">Mục 10.1.5</a> đo được <code>Int8WeightOnly</code> chạy eager <strong>chậm hơn FP32 hơn 2 lần</strong>, vì không có <code>torch.compile</code> thì trọng số bị giải lượng tử về số thực ở mỗi lần gọi. Không có kernel phù hợp thì mô hình chỉ nhẹ hơn chứ không nhanh hơn.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/3</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="ch00.html"><span class="pager-dir">← Trước</span><span class="pager-title">Ký hiệu và quy ước</span></a><a class="pager-link pager-next" href="ch02.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Máy tính biểu diễn số</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-1-1">1.1. Chi phí bộ nhớ</a></li><li class="toc-l3"><a href="#sec-1-2">1.2. Chi phí năng lượng</a></li><li class="toc-l3"><a href="#sec-1-3">1.3. Tốc độ: bài toán bị giới hạn bởi tính toán hay bởi bộ nhớ</a></li><li class="toc-l3"><a href="#sec-1-4">1.4. Cái giá phải trả</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>
