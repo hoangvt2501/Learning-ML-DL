@@ -32,6 +32,31 @@ export const figureId = (num) => 'hinh-' + num;
  *   currentFile: string   (đặt lại trước mỗi lần render)
  * }
  */
+/**
+ * Trích dẫn khối được dùng xuyên suốt làm "chú thích quan trọng". Ở đây ta gắn
+ * cho nó một lớp theo NỘI DUNG mở đầu, để nó hiện ra như một hộp có kiểu thay vì
+ * một khối chữ nghiêng lẫn vào bài — đây là cách các trang tài liệu kỹ thuật làm.
+ */
+const LOAI_CHU_THICH = [
+  [/^(cảnh báo|cẩn thận|chú ý|lưu ý|đừng|không nên|sai lầm|một lưu ý|một cảnh báo)/i, 'canh-bao'],
+  [/^(mẹo|quy tắc|cách chữa|thủ thuật|hệ quả thực tế|hệ quả|dùng được ngay|nên làm)/i, 'meo'],
+  [/^(câu này|cách nói|cách trả lời|khi phỏng vấn|ghi điểm|đáng nhớ|điểm cần nhớ|nói được)/i, 'phong-van'],
+];
+
+function loaiChuThich(tokens, idx) {
+  // Tìm đoạn chữ đầu tiên bên trong khối trích dẫn.
+  for (let i = idx + 1; i < tokens.length; i++) {
+    const tk = tokens[i];
+    if (tk.type === 'blockquote_close') break;
+    if (tk.type === 'inline') {
+      const txt = tk.content.replace(/^[*_\s]+/, '').trim();
+      for (const [re, ten] of LOAI_CHU_THICH) if (re.test(txt)) return ten;
+      return 'ghi-chu';
+    }
+  }
+  return 'ghi-chu';
+}
+
 export function createMarkdownIt(registry) {
   const md = new MarkdownIt({ html: false, linkify: false, typographer: false });
 
@@ -63,6 +88,12 @@ export function createMarkdownIt(registry) {
       ? '<a class="anchor" href="#' + id + '" aria-label="Liên kết tới mục này">#</a>'
       : '';
     return anchor + '</' + tokens[idx].tag + '>\n';
+  };
+
+  // Khối trích dẫn -> hộp chú thích có kiểu, nhận dạng theo chữ mở đầu.
+  md.renderer.rules.blockquote_open = (tokens, idx, options, env, self) => {
+    tokens[idx].attrJoin('class', 'callout callout--' + loaiChuThich(tokens, idx));
+    return self.renderToken(tokens, idx, options);
   };
 
   // ---------------------------------------------------------------- bảng

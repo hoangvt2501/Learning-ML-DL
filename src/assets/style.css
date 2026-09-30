@@ -1078,3 +1078,85 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
 /* nhịp chuyển trang của router: chỉ mờ đi một chút, không nhấp nháy */
 .is-navigating .content { opacity: .55; transition: opacity .12s ease; }
 .content { transition: opacity .12s ease; }
+
+/* ------------------------------------------- hình tương tác trong lab */
+.viz {
+  width: 100%; display: block; border-radius: var(--radius-sm);
+  background: var(--surface); border: 1px solid var(--line);
+  touch-action: none;
+}
+.lab-output--2 { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.lab-grid--wide .lab-controls { max-width: 260px; }
+.ctl-range { display: block; }
+.ctl-range input[type="range"] { width: 100%; accent-color: var(--accent); margin-top: .3rem; }
+.ctl-out {
+  float: right; font-variant-numeric: tabular-nums; color: var(--accent);
+  font-weight: 650; font-style: normal;
+}
+.ctl-check { display: flex; align-items: center; gap: .5rem; }
+.ctl-check input { accent-color: var(--accent); width: 15px; height: 15px; }
+.ctl-check span { font-family: var(--font-ui); font-size: .84rem; color: var(--text-2); }
+.lab-btns { display: flex; gap: .45rem; flex-wrap: wrap; }
+.lab-btn {
+  flex: 1 1 auto; padding: .42rem .7rem; border-radius: 6px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line);
+  font-family: var(--font-ui); font-size: .8rem; color: var(--text-2);
+}
+.lab-btn:hover { border-color: var(--accent); color: var(--accent); }
+.lab-btn:active { background: var(--bg-soft); }
+.lab-page .hero--tight { padding-bottom: 1rem; }
+
+@media (max-width: 720px) {
+  .lab-output--2 { grid-template-columns: 1fr; }
+  .lab-grid--wide .lab-controls { max-width: none; }
+}
+
+/* Trang phòng thí nghiệm cần rộng hơn cột chữ thường: hình tương tác mà hẹp
+   thì mất hết tác dụng quan sát. */
+.lab-page { max-width: 980px; }
+.lab-page > .lab { max-width: none; }
+.lab-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; align-content: start; }
+@media (max-width: 720px) { .lab-stats { grid-template-columns: 1fr; } }
+
+/* ------------------------------------------------- hộp chú thích có kiểu */
+.prose .callout {
+  position: relative; margin: 1.5rem 0; padding: .85rem 1rem .85rem 2.5rem;
+  border-radius: var(--radius-sm); border: 1px solid var(--line);
+  border-left: 3px solid var(--accent); background: var(--bg-soft);
+  font-style: normal; color: var(--text-2);
+}
+.prose .callout > :first-child { margin-top: 0; }
+.prose .callout > :last-child { margin-bottom: 0; }
+.prose .callout::before {
+  position: absolute; left: .8rem; top: .78rem;
+  font-size: .95rem; line-height: 1.4; opacity: .9;
+}
+.callout--ghi-chu::before { content: "i"; font-weight: 700; font-style: italic; color: var(--accent); }
+.callout--canh-bao { border-left-color: #b0413e; }
+.callout--canh-bao::before { content: "!"; font-weight: 700; color: #b0413e; }
+.callout--meo { border-left-color: #b8860b; }
+.callout--meo::before { content: "\25C6"; color: #b8860b; font-size: .8rem; }
+.callout--phong-van { border-left-color: #2f6f9f; }
+.callout--phong-van::before { content: "\275D"; color: #2f6f9f; }
+
+/* ---------------------------------------- ô xem trước khi rê lên liên kết */
+.xpreview {
+  position: absolute; z-index: 60; width: min(380px, calc(100vw - 24px));
+  padding: .7rem .85rem; border-radius: var(--radius-sm);
+  background: var(--surface); border: 1px solid var(--line);
+  box-shadow: 0 8px 28px rgba(0,0,0,.14);
+  font-family: var(--font-ui);
+}
+.xpreview-title {
+  margin: 0 0 .3rem; font-size: .86rem; font-weight: 650; color: var(--accent);
+  line-height: 1.35;
+}
+.xpreview-body { margin: 0; font-size: .8rem; line-height: 1.55; color: var(--text-2); }
+.xpreview-hint {
+  margin: .5rem 0 0; font-size: .66rem; color: var(--text-3);
+  letter-spacing: .05em; text-transform: uppercase;
+}
+
+/* tên phần trên dòng kicker của trang chương */
+.kicker-part { font-family: var(--font-ui); font-size: .76rem; color: var(--text-3); }
+.kicker-part::before { content: "\00B7"; margin: 0 .45rem; opacity: .6; }

@@ -63,7 +63,8 @@
     "codeDir": "code/nentang",
     "scripts": "content/scripts-nentang.json",
     "figuresNote": "Mười ba hình đều do mã nguồn trong code/nentang/ sinh ra. Mười kết quả trong đó là kiểm chứng một đẳng thức chứ không phải mô phỏng — Phụ lục liệt kê đủ kèm sai số thật của từng cái.",
-    "drills": false
+    "drills": false,
+    "lab": "nentang"
   },
   {
     "id": "models",
@@ -128,7 +129,8 @@
     "codeDir": "code/models",
     "scripts": "content/scripts-models.json",
     "figuresNote": "Mười hình do mã nguồn trong code/models/ sinh ra từ thí nghiệm chạy thật. Bốn kết quả ở Chương 12 là đối chiếu với số tham số và ngân sách giờ-GPU đã công bố của GPT-2 và Llama-2.",
-    "drills": false
+    "drills": false,
+    "lab": "models"
   },
   {
     "id": "bieudien",
@@ -189,7 +191,8 @@
     "codeDir": "code/bieudien",
     "scripts": "content/scripts-bieudien.json",
     "figuresNote": "Mười bốn hình đều do mã nguồn trong code/bieudien/ sinh ra. Hai kết quả là kiểm chứng một đẳng thức chứ không phải mô phỏng, và ba chỗ số liệu mâu thuẫn với điều tác giả định viết — Phụ lục nói rõ cả ba.",
-    "drills": false
+    "drills": false,
+    "lab": "bieudien"
   },
   {
     "id": "quantization",

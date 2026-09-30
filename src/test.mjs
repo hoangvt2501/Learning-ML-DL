@@ -24,9 +24,11 @@ sandbox.window.document = stubDoc;
 vm.createContext(sandbox);
 vm.runInContext(fs.readFileSync(path.join(ROOT, 'src/assets/playground.js'), 'utf8'), sandbox);
 vm.runInContext(fs.readFileSync(path.join(ROOT, 'src/assets/lab-mlops.js'), 'utf8'), sandbox);
+vm.runInContext(fs.readFileSync(path.join(ROOT, 'src/assets/viz.js'), 'utf8'), sandbox);
 
 const L = sandbox.window.QZ_LAB;
 const M = sandbox.window.QZ_MLOPS;
+const Z = sandbox.window.QZ_VIZ;
 
 let pass = 0;
 let fail = 0;
@@ -663,6 +665,71 @@ check('E[b * grad log pi] = 0 vì tổng xác suất luôn bằng 1', (() => {
   return maxAbs;
 })(), 0, 1e-15);
 check('giảm độ lệch chuẩn 2,3 lần tiết kiệm 5,3 lần số mẫu', 2.3 ** 2, 5.29, 0.01);
+
+// ---------------------------------------------------------------------------
+// Phòng thí nghiệm — các hàm dùng chung trong src/assets/viz.js.
+// Đây là CHÍNH mã đang chạy trên trang, không phải bản chép lại, nên nếu ai sửa
+// nó mà làm lệch khỏi số liệu đã in trong giáo trình thì bộ kiểm tra báo ngay.
+// ---------------------------------------------------------------------------
+
+group('Lab — độ lớn gradient qua nhiều lớp so với số đo ở Mục 6.3');
+const HE = Math.SQRT2;
+// Cột phải là con số ĐO ĐƯỢC in trong giáo trình; công cụ phải bám sát nó.
+const CAU_HINH = [
+  ['gain 0,5 — khởi tạo quá nhỏ', 0.5, false, false, 1.233e-18],
+  ['gain √2 — khởi tạo He', HE, false, false, 1.421],
+  ['gain 2,0 — khởi tạo quá lớn', 2.0, false, false, 1.490e6],
+  ['He + chuẩn hoá', HE, true, false, 1.151],
+  ['He + kết nối tắt, KHÔNG chuẩn hoá', HE, false, true, 2.446e8],
+  ['He + chuẩn hoá + kết nối tắt (pre-LN)', HE, true, true, 2.222],
+];
+for (const [ten, gain, norm, res, doDuoc] of CAU_HINH) {
+  const v = Z.doLonGradient(gain, 40, norm, res);
+  // Khớp trong vòng một hệ số 2 là đủ: công cụ tóm tắt hành vi chứ không mô
+  // phỏng lại phép truyền ngược, nhưng nó phải đúng BẬC ĐỘ LỚN.
+  const tiLe = Math.abs(Math.log10(v / doDuoc));
+  check(ten + ' — cùng bậc độ lớn với số đo', tiLe < 0.35, true);
+}
+check('gain 0,5 phải là TIÊU BIẾN', Z.doLonGradient(0.5, 40, false, false) < 1e-6, true);
+check('gain 2,0 phải là BÙNG NỔ', Z.doLonGradient(2.0, 40, false, false) > 1e6, true);
+check('kết nối tắt MỘT MÌNH làm bùng nổ',
+  Z.doLonGradient(HE, 40, false, true) > 1e6, true);
+check('thêm chuẩn hoá thì ổn định lại', (() => {
+  const v = Z.doLonGradient(HE, 40, true, true);
+  return v > 1 && v < 10;
+})(), true);
+check('khởi tạo He một mình cho tỉ lệ gần 1',
+  Z.doLonGradient(HE, 40, false, false), 1, 0.01);
+check('càng sâu thì càng lệch xa 1 khi gain sai',
+  Z.doLonGradient(0.5, 80, false, false) < Z.doLonGradient(0.5, 40, false, false), true);
+
+group('Lab — các hàm số dùng chung');
+check('softmax cho tổng bằng 1',
+  Z.softmax([2.1, -0.4, 1.7, 0.3]).reduce((a, b) => a + b, 0), 1, 1e-12);
+check('softmax bất biến khi cộng hằng số vào mọi logit', (() => {
+  const a = Z.softmax([1, 2, 3]);
+  const b = Z.softmax([101, 102, 103]);
+  return Math.max(...a.map((v, i) => Math.abs(v - b[i])));
+})(), 0, 1e-12);
+check('giải hệ 2x2 đúng', (() => {
+  const x = Z.giaiTuyenTinh([[4, 10], [10, 30]], [16, 47]);
+  return Math.abs(x[0] - 0.5) + Math.abs(x[1] - 1.4);
+})(), 0, 1e-12);
+check('giải hệ suy biến trả về null',
+  Z.giaiTuyenTinh([[1, 2], [2, 4]], [1, 2]), null);
+check('cùng hạt giống thì cùng dãy số ngẫu nhiên', (() => {
+  const a = Z.rng(42), b = Z.rng(42);
+  let d = 0;
+  for (let i = 0; i < 50; i++) d += Math.abs(a.n() - b.n());
+  return d;
+})(), 0, 1e-15);
+check('khác hạt giống thì khác dãy', (() => {
+  const a = Z.rng(1), b = Z.rng(2);
+  let d = 0;
+  for (let i = 0; i < 50; i++) d += Math.abs(a.n() - b.n());
+  return d > 1;
+})(), true);
+
 
 console.log('\n' + (fail === 0 ? 'Tất cả ' + pass + ' phép kiểm tra đều đạt.' : pass + ' đạt, ' + fail + ' HỎNG.'));
 process.exit(fail === 0 ? 0 : 1);

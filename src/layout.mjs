@@ -212,6 +212,7 @@ ${tocAside}
 
 <script src="assets/app.js" defer></script>
 <script src="assets/router.js" defer></script>
+<script src="assets/preview.js" defer></script>
 ${scripts}
 </body>
 </html>
