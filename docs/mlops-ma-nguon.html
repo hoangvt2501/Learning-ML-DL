@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mã nguồn thí nghiệm — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
+<meta name="description" content="2 script Python sinh ra toàn bộ hình vẽ và số liệu của giáo trình, kèm kết quả in ra.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>MLOps</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group">Giáo trình 2 · MLOps</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html" class="is-active" aria-current="page"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Tra cứu</span><span class="kicker-time">2 script</span></div><h1>Mã nguồn thí nghiệm</h1><p class="chapter-lede">Mọi hình và mọi con số thực nghiệm trong giáo trình đều do các script dưới đây sinh ra. Chúng được chép nguyên vẹn vào site nên tải về là chạy được ngay.</p><h3 class="heading" id="cach-chay">Cách chạy lại toàn bộ<a class="anchor" href="#cach-chay">#</a></h3><p>Hai script dưới đây sinh ra toàn bộ 14 hình và mọi con số thực nghiệm của giáo trình.
+Chúng đặt hạt giống cố định nên chạy lại cho kết quả y hệt.</p>
+<div class="code-block" data-lang="bash"><div class="code-head"><span class="code-lang">Bash</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-bash">pip install numpy scipy matplotlib scikit-learn
+python code/mlops/experiments.py     <span class="hljs-comment"># Hình 6, 7, 9–14 — khoảng một phút</span>
+python code/mlops/fig_diagrams.py    <span class="hljs-comment"># Hình 1–5 và Hình 8</span>
+</code></pre></div>
+<p>Môi trường đã dùng để sinh số liệu trong tài liệu: Python 3.13, NumPy 2.3, SciPy 1.16,
+scikit-learn 1.7, matplotlib 3.10.</p>
+<p>Lưu ý về phạm vi: những con số đo được ở đây đến từ <strong>dữ liệu mô phỏng</strong>, được thiết kế để
+cô lập đúng một cơ chế mỗi lần. Chúng dùng để chứng minh <em>cơ chế</em> tồn tại và có độ lớn đáng
+kể, không dùng để suy ra con số cho một hệ thống cụ thể nào. Muốn có con số cho hệ thống của
+mình thì chạy lại đúng thí nghiệm ấy trên dữ liệu của mình — cách làm được nêu trong từng bài
+tập ở <a href="mlops-bai-tap.html#sec-14" class="xref">Chương 14</a>.</p>
+<h3 class="heading" id="danh-sach">Từng script<a class="anchor" href="#danh-sach">#</a></h3><div class="src-list"><section class="src-card" id="experiments-py"><header class="src-head"><h3 class="src-title"><code>code/mlops/experiments.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">385 dòng</span><a class="src-dl" href="code/mlops/experiments.py" download>Tải về</a></header><p class="src-note">Sinh Hình 6, 7 và 9–14 cùng mọi số liệu thực nghiệm của giáo trình: đánh giá theo lát cắt, đuôi độ trễ khi toả nhánh, cỡ mẫu A/B, ba loại dịch chuyển phân phối, PSI dưới giả thuyết không, so sánh phép dò dịch chuyển, độ cũ của mô hình, và vòng phản hồi thoái hoá.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Thí nghiệm sinh số liệu và Hình 6, 7, 9–14 của giáo trình MLOps.
+
+Mọi con số thực nghiệm trong tài liệu đều in ra từ script này. Hạt giống cố định
+nên chạy lại cho kết quả y hệt.
+
+    python code/mlops/experiments.py
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib
+matplotlib.use(<span class="hljs-string">&quot;Agg&quot;</span>)
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> scipy <span class="hljs-keyword">import</span> stats
+<span class="hljs-keyword">from</span> sklearn.linear_model <span class="hljs-keyword">import</span> LogisticRegression
+<span class="hljs-keyword">from</span> sklearn.ensemble <span class="hljs-keyword">import</span> GradientBoostingClassifier
+
+OUT = <span class="hljs-string">&quot;figs/&quot;</span>
+SEED = <span class="hljs-number">2026</span>
+rng = np.random.default_rng(SEED)
+
+plt.rcParams.update({
+    <span class="hljs-string">&quot;figure.dpi&quot;</span>: <span class="hljs-number">150</span>, <span class="hljs-string">&quot;font.size&quot;</span>: <span class="hljs-number">9</span>, <span class="hljs-string">&quot;axes.grid&quot;</span>: <span class="hljs-literal">True</span>,
+    <span class="hljs-string">&quot;grid.alpha&quot;</span>: <span class="hljs-number">.25</span>, <span class="hljs-string">&quot;axes.spines.top&quot;</span>: <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;axes.spines.right&quot;</span>: <span class="hljs-literal">False</span>,
+})
+C_MAIN, C_WARN, C_BAD, C_DIM = <span class="hljs-string">&quot;#1f6f68&quot;</span>, <span class="hljs-string">&quot;#b8860b&quot;</span>, <span class="hljs-string">&quot;#b0413e&quot;</span>, <span class="hljs-string">&quot;#8a857c&quot;</span>
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">head</span>(<span class="hljs-params">t</span>):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">72</span> + <span class="hljs-string">&quot;\n&quot;</span> + t + <span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">72</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (A) Hình 7 — Đuôi độ trễ khi một yêu cầu toả ra nhiều dịch vụ</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(A) Ngân sach do tre: p99 cua max-of-k (tail at scale)&quot;</span>)
+
+P50, P99 = <span class="hljs-number">20.0</span>, <span class="hljs-number">100.0</span>                      <span class="hljs-comment"># ms, do tre mot dich vu</span>
+sigma = np.log(P99 / P50) / stats.norm.ppf(<span class="hljs-number">0.99</span>)
+mu = np.log(P50)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;lognormal: median=<span class="hljs-subst">{P50}</span> ms, p99=<span class="hljs-subst">{P99}</span> ms -&gt; mu=<span class="hljs-subst">{mu:<span class="hljs-number">.4</span>f}</span>, sigma=<span class="hljs-subst">{sigma:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">q_of_max</span>(<span class="hljs-params">q, k</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Phan vi q cua max cua k lan goi doc lap.&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">return</span> np.exp(mu + sigma * stats.norm.ppf(q ** (<span class="hljs-number">1.0</span> / k)))
+
+ks = np.array([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">5</span>, <span class="hljs-number">10</span>, <span class="hljs-number">20</span>, <span class="hljs-number">50</span>, <span class="hljs-number">100</span>])
+p99_max = np.array([q_of_max(<span class="hljs-number">0.99</span>, k) <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> ks])
+slow_frac = <span class="hljs-number">1</span> - <span class="hljs-number">0.99</span> ** ks                   <span class="hljs-comment"># ti le yeu cau cham it nhat 1 nhanh</span>
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;k&#x27;</span>:&gt;<span class="hljs-number">5</span>}</span> <span class="hljs-subst">{<span class="hljs-string">&#x27;p99 cua max (ms)&#x27;</span>:&gt;<span class="hljs-number">18</span>}</span> <span class="hljs-subst">{<span class="hljs-string">&#x27;% yeu cau co &gt;=1 nhanh vuot p99&#x27;</span>:&gt;<span class="hljs-number">34</span>}</span>&quot;</span>)
+<span class="hljs-keyword">for</span> k, p, s <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(ks, p99_max, slow_frac):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{k:5d}</span> <span class="hljs-subst">{p:<span class="hljs-number">18.1</span>f}</span> <span class="hljs-subst">{s*<span class="hljs-number">100</span>:<span class="hljs-number">33.1</span>f}</span>%&quot;</span>)
+A = <span class="hljs-built_in">dict</span>(ks=ks, p99=p99_max, slow=slow_frac, sigma=sigma, mu=mu)
+
+fig, ax = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">8.4</span>, <span class="hljs-number">3.0</span>))
+ax[<span class="hljs-number">0</span>].plot(ks, p99_max, <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">4</span>, color=C_MAIN)
+ax[<span class="hljs-number">0</span>].axhline(P99, ls=<span class="hljs-string">&quot;--&quot;</span>, lw=<span class="hljs-number">1.1</span>, color=C_DIM)
+ax[<span class="hljs-number">0</span>].annotate(<span class="hljs-string">f&quot;p99 một dịch vụ = <span class="hljs-subst">{P99:<span class="hljs-number">.0</span>f}</span> ms&quot;</span>, (<span class="hljs-number">1</span>, P99), xytext=(<span class="hljs-number">4</span>, -<span class="hljs-number">14</span>),
+               textcoords=<span class="hljs-string">&quot;offset points&quot;</span>, fontsize=<span class="hljs-number">8</span>, color=C_DIM)
+ax[<span class="hljs-number">0</span>].set_xscale(<span class="hljs-string">&quot;log&quot;</span>); ax[<span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&quot;số nhánh k gọi song song&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&quot;p99 của thời gian trả lời (ms)&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Đuôi dài lên rất nhanh theo số nhánh&quot;</span>)
+ax[<span class="hljs-number">1</span>].plot(ks, slow_frac * <span class="hljs-number">100</span>, <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">4</span>, color=C_BAD)
+ax[<span class="hljs-number">1</span>].set_xscale(<span class="hljs-string">&quot;log&quot;</span>); ax[<span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&quot;số nhánh k gọi song song&quot;</span>)
+ax[<span class="hljs-number">1</span>].set_ylabel(<span class="hljs-string">&quot;% yêu cầu chạm ít nhất một nhánh chậm&quot;</span>)
+ax[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Xác suất chạm đuôi = $1-0{,}99^k$&quot;</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops07_tail.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (B) Hình 6 — Chỉ số gộp tăng trong khi một lát cắt tụt</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(B) Danh gia theo lat cat: chi so gop che mat su that&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">make_slices</span>(<span class="hljs-params">n=<span class="hljs-number">8000</span>, seed=<span class="hljs-number">1</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;Nhóm B là người dùng mới: đặc trưng x2 (lịch sử mua hàng) chỉ có nghĩa với nhóm A.&quot;&quot;&quot;</span>
+    r = np.random.default_rng(seed)
+    is_b = r.random(n) &lt; <span class="hljs-number">0.15</span>                    <span class="hljs-comment"># 15% la nguoi dung moi</span>
+    x1 = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, n)                       <span class="hljs-comment"># dac trung ai cung co</span>
+    y = (r.random(n) &lt; <span class="hljs-number">1</span> / (<span class="hljs-number">1</span> + np.exp(-<span class="hljs-number">1.1</span> * x1))).astype(<span class="hljs-built_in">int</span>)
+    <span class="hljs-comment"># x2 manh nhung chi co tin hieu voi nhom A; voi nhom B no la nhieu thuan tuy</span>
+    x2 = np.where(is_b, r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, n), <span class="hljs-number">2.2</span> * (y - <span class="hljs-number">0.5</span>) + r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">0.7</span>, n))
+    <span class="hljs-keyword">return</span> np.c_[x1, x2], y, is_b.astype(<span class="hljs-built_in">int</span>)
+
+Xtr, ytr, gtr = make_slices(seed=<span class="hljs-number">1</span>)
+Xte, yte, gte = make_slices(seed=<span class="hljs-number">2</span>)
+
+v1 = LogisticRegression().fit(Xtr[:, :<span class="hljs-number">1</span>], ytr)          <span class="hljs-comment"># chi dung x1</span>
+v2 = LogisticRegression().fit(Xtr, ytr)                  <span class="hljs-comment"># them x2</span>
+
+ok1 = v1.predict(Xte[:, :<span class="hljs-number">1</span>]) == yte
+ok2 = v2.predict(Xte) == yte
+rows = []
+<span class="hljs-keyword">for</span> name, mask <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;Tổng thể&quot;</span>, np.ones(<span class="hljs-built_in">len</span>(yte), <span class="hljs-built_in">bool</span>)),
+                   (<span class="hljs-string">&quot;Nhóm A (85%)&quot;</span>, gte == <span class="hljs-number">0</span>), (<span class="hljs-string">&quot;Nhóm B (15%)&quot;</span>, gte == <span class="hljs-number">1</span>)]:
+    rows.append((name, ok1[mask].mean(), ok2[mask].mean()))
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;v2 = v1 + đặc trưng x2, thứ chỉ có tín hiệu với nhóm A&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;Lát cắt&#x27;</span>:&lt;<span class="hljs-number">14</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;v1&#x27;</span>:&gt;<span class="hljs-number">9</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;v2&#x27;</span>:&gt;<span class="hljs-number">9</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;thay đổi&#x27;</span>:&gt;<span class="hljs-number">11</span>}</span>&quot;</span>)
+<span class="hljs-keyword">for</span> n_, a, b <span class="hljs-keyword">in</span> rows:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{n_:&lt;<span class="hljs-number">14</span>}</span><span class="hljs-subst">{a*<span class="hljs-number">100</span>:<span class="hljs-number">8.2</span>f}</span>%<span class="hljs-subst">{b*<span class="hljs-number">100</span>:<span class="hljs-number">8.2</span>f}</span>%<span class="hljs-subst">{(b-a)*<span class="hljs-number">100</span>:+<span class="hljs-number">10.2</span>f}</span> đ&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;trọng số v2 học được: x1=<span class="hljs-subst">{v2.coef_[<span class="hljs-number">0</span>,<span class="hljs-number">0</span>]:<span class="hljs-number">.2</span>f}</span>, x2=<span class="hljs-subst">{v2.coef_[<span class="hljs-number">0</span>,<span class="hljs-number">1</span>]:<span class="hljs-number">.2</span>f}</span>&quot;</span>)
+B = rows
+
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">5.2</span>, <span class="hljs-number">3.0</span>))
+names = [r[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> rows]; xs = np.arange(<span class="hljs-built_in">len</span>(rows)); w = <span class="hljs-number">.36</span>
+ax.bar(xs - w/<span class="hljs-number">2</span>, [r[<span class="hljs-number">1</span>]*<span class="hljs-number">100</span> <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> rows], w, label=<span class="hljs-string">&quot;mô hình v1&quot;</span>, color=C_DIM)
+ax.bar(xs + w/<span class="hljs-number">2</span>, [r[<span class="hljs-number">2</span>]*<span class="hljs-number">100</span> <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> rows], w, label=<span class="hljs-string">&quot;mô hình v2&quot;</span>, color=C_MAIN)
+<span class="hljs-keyword">for</span> i, r <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(rows):
+    d = (r[<span class="hljs-number">2</span>] - r[<span class="hljs-number">1</span>]) * <span class="hljs-number">100</span>
+    ax.annotate(<span class="hljs-string">f&quot;<span class="hljs-subst">{d:+<span class="hljs-number">.1</span>f}</span>đ&quot;</span>, (i + w/<span class="hljs-number">2</span>, r[<span class="hljs-number">2</span>]*<span class="hljs-number">100</span> + <span class="hljs-number">.6</span>), ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8</span>,
+                color=C_BAD <span class="hljs-keyword">if</span> d &lt; <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> C_MAIN)
+ax.set_xticks(xs); ax.set_xticklabels(names); ax.set_ylabel(<span class="hljs-string">&quot;Độ chính xác (%)&quot;</span>)
+ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
+ax.set_title(<span class="hljs-string">&quot;Gộp lại thì v2 tốt hơn — nhóm B thì không&quot;</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops06_slice.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (C) Hình 9 — Cỡ mẫu cần cho A/B test</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(C) Co mau A/B test cho ti le chuyen doi&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">n_per_arm</span>(<span class="hljs-params">p, rel_lift, alpha=<span class="hljs-number">0.05</span>, power=<span class="hljs-number">0.80</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;Hai phia, hai nhanh bang nhau, xap xi chuan.&quot;&quot;&quot;</span>
+    p2 = p * (<span class="hljs-number">1</span> + rel_lift)
+    z_a = stats.norm.ppf(<span class="hljs-number">1</span> - alpha / <span class="hljs-number">2</span>)
+    z_b = stats.norm.ppf(power)
+    <span class="hljs-keyword">return</span> (z_a + z_b) ** <span class="hljs-number">2</span> * (p * (<span class="hljs-number">1</span> - p) + p2 * (<span class="hljs-number">1</span> - p2)) / (p2 - p) ** <span class="hljs-number">2</span>
+
+base = <span class="hljs-number">0.05</span>
+lifts = np.array([<span class="hljs-number">0.01</span>, <span class="hljs-number">0.02</span>, <span class="hljs-number">0.05</span>, <span class="hljs-number">0.10</span>, <span class="hljs-number">0.20</span>])
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;CTR nen = <span class="hljs-subst">{base:<span class="hljs-number">.0</span>%}</span>, alpha=0.05 hai phia, power=80%&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;lift tuong doi&#x27;</span>:&gt;<span class="hljs-number">16</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;n moi nhanh&#x27;</span>:&gt;<span class="hljs-number">14</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;ngay (100k/ngay/nhanh)&#x27;</span>:&gt;<span class="hljs-number">26</span>}</span>&quot;</span>)
+C = []
+<span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> lifts:
+    n = n_per_arm(base, l)
+    C.append((l, n, n / <span class="hljs-number">100_000</span>))
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{l:<span class="hljs-number">15.0</span>%}</span><span class="hljs-subst">{n:<span class="hljs-number">14</span>,<span class="hljs-number">.0</span>f}</span><span class="hljs-subst">{n/<span class="hljs-number">100_000</span>:<span class="hljs-number">25.1</span>f}</span>&quot;</span>)
+
+fine = np.linspace(<span class="hljs-number">0.005</span>, <span class="hljs-number">0.25</span>, <span class="hljs-number">200</span>)
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">5.4</span>, <span class="hljs-number">3.0</span>))
+<span class="hljs-keyword">for</span> p0, c <span class="hljs-keyword">in</span> [(<span class="hljs-number">0.01</span>, C_BAD), (<span class="hljs-number">0.05</span>, C_MAIN), (<span class="hljs-number">0.20</span>, C_WARN)]:
+    ax.plot(fine * <span class="hljs-number">100</span>, [n_per_arm(p0, l) <span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> fine], color=c, label=<span class="hljs-string">f&quot;CTR nền <span class="hljs-subst">{p0:<span class="hljs-number">.0</span>%}</span>&quot;</span>)
+ax.set_yscale(<span class="hljs-string">&quot;log&quot;</span>); ax.set_xlabel(<span class="hljs-string">&quot;Mức cải thiện tương đối cần phát hiện (%)&quot;</span>)
+ax.set_ylabel(<span class="hljs-string">&quot;Cỡ mẫu mỗi nhánh (log)&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Muốn bắt cải thiện nhỏ thì cỡ mẫu tăng theo $1/\\Delta^2$&quot;</span>)
+ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops09_abtest.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (D) Hình 10 — Ba loại dịch chuyển và cái nào dò được bằng X</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(D) Ba loai dich chuyen: cai nao do duoc ma khong can nhan&quot;</span>)
+
+n = <span class="hljs-number">4000</span>
+r = np.random.default_rng(<span class="hljs-number">7</span>)
+Xs = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (n, <span class="hljs-number">2</span>))
+w_true = np.array([<span class="hljs-number">1.5</span>, -<span class="hljs-number">1.0</span>])
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">label</span>(<span class="hljs-params">X, w, noise=<span class="hljs-number">0.0</span>, r=r</span>):
+    p = <span class="hljs-number">1</span> / (<span class="hljs-number">1</span> + np.exp(-(X @ w)))
+    <span class="hljs-keyword">return</span> (r.random(<span class="hljs-built_in">len</span>(X)) &lt; p).astype(<span class="hljs-built_in">int</span>)
+ys = label(Xs, w_true)
+clf = LogisticRegression().fit(Xs, ys)
+
+scen = {}
+<span class="hljs-comment"># 1. Covariate shift: P(X) doi, P(Y|X) giu nguyen</span>
+Xc = r.normal(<span class="hljs-number">1.2</span>, <span class="hljs-number">1.0</span>, (n, <span class="hljs-number">2</span>)); yc = label(Xc, w_true)
+scen[<span class="hljs-string">&quot;Covariate shift&quot;</span>] = (Xc, yc)
+<span class="hljs-comment"># 2. Label shift: P(Y) doi, P(X|Y) giu nguyen  -&gt; lay mau lai theo nhan</span>
+Xl_pool, yl_pool = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (<span class="hljs-number">4</span> * n, <span class="hljs-number">2</span>)), <span class="hljs-literal">None</span>
+yl_pool = label(Xl_pool, w_true)
+idx1 = np.flatnonzero(yl_pool == <span class="hljs-number">1</span>); idx0 = np.flatnonzero(yl_pool == <span class="hljs-number">0</span>)
+take = np.r_[r.choice(idx1, <span class="hljs-built_in">int</span>(<span class="hljs-number">.8</span> * n)), r.choice(idx0, <span class="hljs-built_in">int</span>(<span class="hljs-number">.2</span> * n))]
+scen[<span class="hljs-string">&quot;Label shift&quot;</span>] = (Xl_pool[take], yl_pool[take])
+<span class="hljs-comment"># 3. Concept drift: P(X) giu nguyen, P(Y|X) doi</span>
+Xd = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (n, <span class="hljs-number">2</span>)); yd = label(Xd, np.array([-<span class="hljs-number">1.0</span>, <span class="hljs-number">1.5</span>]))
+scen[<span class="hljs-string">&quot;Concept drift&quot;</span>] = (Xd, yd)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;Kịch bản&#x27;</span>:&lt;<span class="hljs-number">18</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;Độ chính xác&#x27;</span>:&gt;<span class="hljs-number">14</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;KS trên x1 (p)&#x27;</span>:&gt;<span class="hljs-number">17</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;KS trên x2 (p)&#x27;</span>:&gt;<span class="hljs-number">17</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;Dò được bằng X?&#x27;</span>:&gt;<span class="hljs-number">19</span>}</span>&quot;</span>)
+base_acc = clf.score(Xs, ys)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;Không dịch chuyển&#x27;</span>:&lt;<span class="hljs-number">18</span>}</span><span class="hljs-subst">{base_acc*<span class="hljs-number">100</span>:<span class="hljs-number">13.1</span>f}</span>%<span class="hljs-subst">{<span class="hljs-string">&#x27;—&#x27;</span>:&gt;<span class="hljs-number">17</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;—&#x27;</span>:&gt;<span class="hljs-number">17</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;—&#x27;</span>:&gt;<span class="hljs-number">19</span>}</span>&quot;</span>)
+D = []
+<span class="hljs-keyword">for</span> name, (X2, y2) <span class="hljs-keyword">in</span> scen.items():
+    acc = clf.score(X2, y2)
+    p1 = stats.ks_2samp(Xs[:, <span class="hljs-number">0</span>], X2[:, <span class="hljs-number">0</span>]).pvalue
+    p2 = stats.ks_2samp(Xs[:, <span class="hljs-number">1</span>], X2[:, <span class="hljs-number">1</span>]).pvalue
+    seen = <span class="hljs-string">&quot;CÓ&quot;</span> <span class="hljs-keyword">if</span> <span class="hljs-built_in">min</span>(p1, p2) &lt; <span class="hljs-number">1e-3</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;KHÔNG&quot;</span>
+    D.append((name, acc, p1, p2, seen))
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{name:&lt;<span class="hljs-number">18</span>}</span><span class="hljs-subst">{acc*<span class="hljs-number">100</span>:<span class="hljs-number">13.1</span>f}</span>%<span class="hljs-subst">{p1:<span class="hljs-number">17.2</span>e}</span><span class="hljs-subst">{p2:<span class="hljs-number">17.2</span>e}</span><span class="hljs-subst">{seen:&gt;<span class="hljs-number">19</span>}</span>&quot;</span>)
+
+fig, axes = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, figsize=(<span class="hljs-number">9.6</span>, <span class="hljs-number">3.0</span>), sharex=<span class="hljs-literal">True</span>, sharey=<span class="hljs-literal">True</span>)
+<span class="hljs-keyword">for</span> ax_, (name, (X2, y2)) <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(axes, scen.items()):
+    ax_.scatter(Xs[:<span class="hljs-number">600</span>, <span class="hljs-number">0</span>], Xs[:<span class="hljs-number">600</span>, <span class="hljs-number">1</span>], s=<span class="hljs-number">5</span>, alpha=<span class="hljs-number">.35</span>, color=C_DIM, label=<span class="hljs-string">&quot;nguồn&quot;</span>)
+    ax_.scatter(X2[:<span class="hljs-number">600</span>, <span class="hljs-number">0</span>], X2[:<span class="hljs-number">600</span>, <span class="hljs-number">1</span>], s=<span class="hljs-number">5</span>, alpha=<span class="hljs-number">.45</span>, color=C_MAIN, label=<span class="hljs-string">&quot;đích&quot;</span>)
+    xx = np.linspace(-<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">50</span>)
+    ax_.plot(xx, -(clf.coef_[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>] * xx + clf.intercept_[<span class="hljs-number">0</span>]) / clf.coef_[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+             color=C_BAD, lw=<span class="hljs-number">1.4</span>, label=<span class="hljs-string">&quot;biên mô hình&quot;</span>)
+    acc = clf.score(X2, y2)
+    ax_.set_title(<span class="hljs-string">f&quot;<span class="hljs-subst">{name}</span>\nđộ chính xác <span class="hljs-subst">{acc*<span class="hljs-number">100</span>:<span class="hljs-number">.1</span>f}</span>%&quot;</span>, fontsize=<span class="hljs-number">9</span>)
+    ax_.set_xlabel(<span class="hljs-string">&quot;$x_1$&quot;</span>)
+axes[<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&quot;$x_2$&quot;</span>); axes[<span class="hljs-number">0</span>].set_xlim(-<span class="hljs-number">4</span>, <span class="hljs-number">5</span>); axes[<span class="hljs-number">0</span>].set_ylim(-<span class="hljs-number">4</span>, <span class="hljs-number">5</span>)
+axes[<span class="hljs-number">0</span>].legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">7</span>, loc=<span class="hljs-string">&quot;upper left&quot;</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops10_shifts.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (E) Hình 11 — PSI dưới giả thuyết không phụ thuộc n và số bin</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(E) PSI khi KHONG he co dich chuyen: E[PSI] ~ 2(k-1)/n&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">psi</span>(<span class="hljs-params">a, b, bins</span>):
+    edges = np.quantile(a, np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, bins + <span class="hljs-number">1</span>)); edges[<span class="hljs-number">0</span>], edges[-<span class="hljs-number">1</span>] = -np.inf, np.inf
+    pa = np.histogram(a, edges)[<span class="hljs-number">0</span>] / <span class="hljs-built_in">len</span>(a)
+    pb = np.histogram(b, edges)[<span class="hljs-number">0</span>] / <span class="hljs-built_in">len</span>(b)
+    eps = <span class="hljs-number">1e-6</span>
+    pa, pb = np.clip(pa, eps, <span class="hljs-literal">None</span>), np.clip(pb, eps, <span class="hljs-literal">None</span>)
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">float</span>(np.<span class="hljs-built_in">sum</span>((pb - pa) * np.log(pb / pa)))
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;n mỗi mẫu&#x27;</span>:&gt;<span class="hljs-number">11</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;k=5&#x27;</span>:&gt;<span class="hljs-number">11</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;k=10&#x27;</span>:&gt;<span class="hljs-number">11</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;k=20&#x27;</span>:&gt;<span class="hljs-number">11</span>}</span>   | lý thuyết 2(k-1)/n với k=10&quot;</span>)
+E = []
+<span class="hljs-keyword">for</span> n_ <span class="hljs-keyword">in</span> [<span class="hljs-number">200</span>, <span class="hljs-number">500</span>, <span class="hljs-number">1000</span>, <span class="hljs-number">5000</span>, <span class="hljs-number">20000</span>]:
+    row = []
+    <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> [<span class="hljs-number">5</span>, <span class="hljs-number">10</span>, <span class="hljs-number">20</span>]:
+        vals = [psi(rng.normal(size=n_), rng.normal(size=n_), k) <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">300</span>)]
+        row.append(np.mean(vals))
+    E.append((n_, *row, <span class="hljs-number">2</span> * <span class="hljs-number">9</span> / n_))
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{n_:11d}</span><span class="hljs-subst">{row[<span class="hljs-number">0</span>]:<span class="hljs-number">11.4</span>f}</span><span class="hljs-subst">{row[<span class="hljs-number">1</span>]:<span class="hljs-number">11.4</span>f}</span><span class="hljs-subst">{row[<span class="hljs-number">2</span>]:<span class="hljs-number">11.4</span>f}</span>   | <span class="hljs-subst">{<span class="hljs-number">2</span>*<span class="hljs-number">9</span>/n_:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">5.6</span>, <span class="hljs-number">3.1</span>))
+ns = np.array([e[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> E])
+<span class="hljs-keyword">for</span> j, k <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>([<span class="hljs-number">5</span>, <span class="hljs-number">10</span>, <span class="hljs-number">20</span>]):
+    ax.plot(ns, [e[<span class="hljs-number">1</span> + j] <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> E], <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">4</span>, label=<span class="hljs-string">f&quot;đo được, k=<span class="hljs-subst">{k}</span> bin&quot;</span>)
+    ax.plot(ns, <span class="hljs-number">2</span> * (k - <span class="hljs-number">1</span>) / ns, <span class="hljs-string">&quot;:&quot;</span>, lw=<span class="hljs-number">1.2</span>, color=<span class="hljs-string">&quot;k&quot;</span>, alpha=<span class="hljs-number">.5</span>)
+ax.axhline(<span class="hljs-number">0.1</span>, ls=<span class="hljs-string">&quot;--&quot;</span>, lw=<span class="hljs-number">1.1</span>, color=C_WARN)
+ax.axhline(<span class="hljs-number">0.25</span>, ls=<span class="hljs-string">&quot;--&quot;</span>, lw=<span class="hljs-number">1.1</span>, color=C_BAD)
+ax.annotate(<span class="hljs-string">&quot;ngưỡng 0,25 “dịch chuyển mạnh”&quot;</span>, (ns[<span class="hljs-number">0</span>], <span class="hljs-number">0.26</span>), fontsize=<span class="hljs-number">7.5</span>, color=C_BAD)
+ax.annotate(<span class="hljs-string">&quot;ngưỡng 0,10&quot;</span>, (ns[<span class="hljs-number">0</span>], <span class="hljs-number">0.105</span>), fontsize=<span class="hljs-number">7.5</span>, color=C_WARN)
+ax.set_xscale(<span class="hljs-string">&quot;log&quot;</span>); ax.set_yscale(<span class="hljs-string">&quot;log&quot;</span>)
+ax.set_xlabel(<span class="hljs-string">&quot;cỡ mẫu n mỗi phía&quot;</span>); ax.set_ylabel(<span class="hljs-string">&quot;PSI trung bình khi hai mẫu CÙNG phân phối&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Đường chấm là $2(k-1)/n$&quot;</span>)
+ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">7.5</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops11_psi_null.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (F) Hình 12 — Tỉ lệ báo động giả của ngưỡng PSI cố định</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(F) Ti le bao dong gia va do nhay: PSI 0.25 so voi kiem dinh KS&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">rates</span>(<span class="hljs-params">n_, delta, trials=<span class="hljs-number">400</span>, k=<span class="hljs-number">10</span>, alpha=<span class="hljs-number">0.01</span></span>):
+    fp_psi = fp_ks = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(trials):
+        a = rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, n_); b = rng.normal(delta, <span class="hljs-number">1</span>, n_)
+        <span class="hljs-keyword">if</span> psi(a, b, k) &gt; <span class="hljs-number">0.25</span>: fp_psi += <span class="hljs-number">1</span>
+        <span class="hljs-keyword">if</span> stats.ks_2samp(a, b).pvalue &lt; alpha: fp_ks += <span class="hljs-number">1</span>
+    <span class="hljs-keyword">return</span> fp_psi / trials, fp_ks / trials
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;n&#x27;</span>:&gt;<span class="hljs-number">7</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;δ&#x27;</span>:&gt;<span class="hljs-number">6</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;PSI&gt;0,25 báo&#x27;</span>:&gt;<span class="hljs-number">15</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;KS p&lt;0,01 báo&#x27;</span>:&gt;<span class="hljs-number">16</span>}</span>&quot;</span>)
+F = []
+<span class="hljs-keyword">for</span> n_ <span class="hljs-keyword">in</span> [<span class="hljs-number">50</span>, <span class="hljs-number">100</span>, <span class="hljs-number">200</span>, <span class="hljs-number">1000</span>, <span class="hljs-number">10000</span>]:
+    <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> [<span class="hljs-number">0.0</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">0.3</span>]:
+        rp, rk = rates(n_, d)
+        F.append((n_, d, rp, rk))
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{n_:7d}</span><span class="hljs-subst">{d:<span class="hljs-number">6.1</span>f}</span><span class="hljs-subst">{rp*<span class="hljs-number">100</span>:<span class="hljs-number">14.0</span>f}</span>%<span class="hljs-subst">{rk*<span class="hljs-number">100</span>:<span class="hljs-number">15.0</span>f}</span>%&quot;</span>)
+
+fig, ax = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">8.4</span>, <span class="hljs-number">3.0</span>), sharey=<span class="hljs-literal">True</span>)
+deltas = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">0.4</span>, <span class="hljs-number">9</span>)
+<span class="hljs-keyword">for</span> n_, c <span class="hljs-keyword">in</span> [(<span class="hljs-number">100</span>, C_BAD), (<span class="hljs-number">1000</span>, C_WARN), (<span class="hljs-number">10000</span>, C_MAIN)]:
+    rp = [rates(n_, d, trials=<span class="hljs-number">250</span>)[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> deltas]
+    rk = [rates(n_, d, trials=<span class="hljs-number">250</span>)[<span class="hljs-number">1</span>] <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> deltas]
+    ax[<span class="hljs-number">0</span>].plot(deltas, np.array(rp) * <span class="hljs-number">100</span>, <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">3.5</span>, color=c, label=<span class="hljs-string">f&quot;n=<span class="hljs-subst">{n_}</span>&quot;</span>)
+    ax[<span class="hljs-number">1</span>].plot(deltas, np.array(rk) * <span class="hljs-number">100</span>, <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">3.5</span>, color=c, label=<span class="hljs-string">f&quot;n=<span class="hljs-subst">{n_}</span>&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Quy tắc PSI &gt; 0,25&quot;</span>); ax[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Kiểm định KS, p &lt; 0,01&quot;</span>)
+<span class="hljs-keyword">for</span> a_ <span class="hljs-keyword">in</span> ax:
+    a_.set_xlabel(<span class="hljs-string">&quot;độ dịch chuyển thật $\\delta$ (đơn vị $\\sigma$)&quot;</span>); a_.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
+ax[<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&quot;% lần báo có dịch chuyển&quot;</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops12_detect.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (G) Hình 13 — Mô hình cũ đi và nhịp huấn luyện lại</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(G) Do cu cua mo hinh va nhip huan luyen lai&quot;</span>)
+
+WEEKS, DRIFT = <span class="hljs-number">52</span>, <span class="hljs-number">0.035</span>          <span class="hljs-comment"># radian moi tuan, bien quyet dinh xoay dan</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">world</span>(<span class="hljs-params">week, m=<span class="hljs-number">4000</span>, r=<span class="hljs-literal">None</span></span>):
+    r = r <span class="hljs-keyword">or</span> np.random.default_rng(<span class="hljs-number">1000</span> + week)
+    X = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (m, <span class="hljs-number">2</span>))
+    th = DRIFT * week
+    w = np.array([np.cos(th), np.sin(th)]) * <span class="hljs-number">2.0</span>
+    <span class="hljs-keyword">return</span> X, label(X, w, r=r)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">run</span>(<span class="hljs-params">cadence</span>):
+    <span class="hljs-string">&quot;&quot;&quot;cadence = so tuan giua hai lan huan luyen lai; None = khong bao gio.&quot;&quot;&quot;</span>
+    X0, y0 = world(<span class="hljs-number">0</span>); model = LogisticRegression().fit(X0, y0)
+    acc = []
+    <span class="hljs-keyword">for</span> wk <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(WEEKS):
+        Xw, yw = world(wk)
+        acc.append(model.score(Xw, yw))
+        <span class="hljs-keyword">if</span> cadence <span class="hljs-keyword">and</span> (wk + <span class="hljs-number">1</span>) % cadence == <span class="hljs-number">0</span>:
+            model = LogisticRegression().fit(Xw, yw)
+    <span class="hljs-keyword">return</span> np.array(acc)
+
+G = {}
+<span class="hljs-keyword">for</span> cad, lab <span class="hljs-keyword">in</span> [(<span class="hljs-literal">None</span>, <span class="hljs-string">&quot;không huấn luyện lại&quot;</span>), (<span class="hljs-number">12</span>, <span class="hljs-string">&quot;mỗi quý&quot;</span>), (<span class="hljs-number">4</span>, <span class="hljs-string">&quot;mỗi tháng&quot;</span>), (<span class="hljs-number">1</span>, <span class="hljs-string">&quot;mỗi tuần&quot;</span>)]:
+    a = run(cad); G[lab] = a
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{lab:&lt;<span class="hljs-number">24</span>}</span> trung bình <span class="hljs-subst">{a.mean()*<span class="hljs-number">100</span>:<span class="hljs-number">5.2</span>f}</span>%   thấp nhất <span class="hljs-subst">{a.<span class="hljs-built_in">min</span>()*<span class="hljs-number">100</span>:<span class="hljs-number">5.2</span>f}</span>%   tuần 52: <span class="hljs-subst">{a[-<span class="hljs-number">1</span>]*<span class="hljs-number">100</span>:<span class="hljs-number">5.2</span>f}</span>%&quot;</span>)
+stale_cost = (G[<span class="hljs-string">&quot;mỗi tuần&quot;</span>].mean() - G[<span class="hljs-string">&quot;không huấn luyện lại&quot;</span>].mean()) * <span class="hljs-number">100</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nGia cua viec khong huan luyen lai: <span class="hljs-subst">{stale_cost:<span class="hljs-number">.2</span>f}</span> diem phan tram do chinh xac trung binh&quot;</span>)
+
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">6.0</span>, <span class="hljs-number">3.1</span>))
+<span class="hljs-keyword">for</span> lab, a <span class="hljs-keyword">in</span> G.items():
+    ax.plot(np.arange(WEEKS), a * <span class="hljs-number">100</span>, lw=<span class="hljs-number">1.6</span>, label=lab)
+ax.set_xlabel(<span class="hljs-string">&quot;tuần kể từ lần huấn luyện đầu&quot;</span>); ax.set_ylabel(<span class="hljs-string">&quot;độ chính xác (%)&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Cùng một mô hình, chỉ khác nhịp huấn luyện lại&quot;</span>)
+ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops13_staleness.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (H) Hình 14 — Vòng phản hồi thoái hoá</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(H) Vong phan hoi thoai hoa: do da dang sup the nao&quot;</span>)
+
+N_ITEM, ROUNDS, USERS, TOPK, WARMUP = <span class="hljs-number">2000</span>, <span class="hljs-number">30</span>, <span class="hljs-number">3000</span>, <span class="hljs-number">10</span>, <span class="hljs-number">200</span>
+true_q = rng.beta(<span class="hljs-number">1.6</span>, <span class="hljs-number">9.0</span>, N_ITEM)   <span class="hljs-comment"># it mon that tot, phan lon tam thuong          # chat luong that, he thong khong biet</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">simulate</span>(<span class="hljs-params">eps, seed=<span class="hljs-number">11</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;Mô phỏng hệ gợi ý tự huấn luyện lại trên log click của chính nó.&quot;&quot;&quot;</span>
+    r = np.random.default_rng(seed)
+    shown = np.zeros(N_ITEM); clicks = np.zeros(N_ITEM)
+    <span class="hljs-comment"># Vòng khởi động: hiển thị ngẫu nhiên một ít, nên ước lượng ban đầu rất nhiễu.</span>
+    imp = r.choice(N_ITEM, WARMUP)
+    np.add.at(shown, imp, <span class="hljs-number">1</span>)
+    np.add.at(clicks, imp, r.random(WARMUP) &lt; true_q[imp])
+    ever = <span class="hljs-built_in">set</span>(imp.tolist())
+
+    cov, quality, found = [], [], []
+    elite = <span class="hljs-built_in">set</span>(np.argsort(-true_q)[:<span class="hljs-number">20</span>].tolist())   <span class="hljs-comment"># 1% danh muc tot nhat</span>
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(ROUNDS):
+        score = np.where(shown &gt; <span class="hljs-number">0</span>, clicks / np.maximum(shown, <span class="hljs-number">1</span>), <span class="hljs-number">0.0</span>)
+        top = np.argsort(-score)[:TOPK]
+        pool = top
+        <span class="hljs-keyword">if</span> eps &gt; <span class="hljs-number">0</span>:                               <span class="hljs-comment"># thay eps ti le bang muc ngau nhien</span>
+            n_rand = <span class="hljs-built_in">max</span>(<span class="hljs-number">1</span>, <span class="hljs-built_in">int</span>(<span class="hljs-built_in">round</span>(eps * TOPK)))
+            pool = np.r_[top[: TOPK - n_rand], r.choice(N_ITEM, n_rand, replace=<span class="hljs-literal">False</span>)]
+        imp = r.choice(pool, USERS)
+        cl = r.random(USERS) &lt; true_q[imp]
+        np.add.at(shown, imp, <span class="hljs-number">1</span>); np.add.at(clicks, imp, cl)
+        ever.update(np.unique(imp).tolist())
+        cov.append(<span class="hljs-built_in">len</span>(ever) / N_ITEM)
+        quality.append(true_q[top].mean())
+        found.append(<span class="hljs-built_in">len</span>(elite &amp; ever) / <span class="hljs-built_in">len</span>(elite))
+    <span class="hljs-keyword">return</span> np.array(cov), np.array(quality), np.array(found)
+
+H = {}
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;Chiến lược&#x27;</span>:&lt;<span class="hljs-number">24</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;phủ danh mục&#x27;</span>:&gt;<span class="hljs-number">14</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;chất lượng top-10&#x27;</span>:&gt;<span class="hljs-number">20</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;đã thấy top-1% tốt nhất&#x27;</span>:&gt;<span class="hljs-number">24</span>}</span>&quot;</span>)
+<span class="hljs-keyword">for</span> eps, lab <span class="hljs-keyword">in</span> [(<span class="hljs-number">0.0</span>, <span class="hljs-string">&quot;không ngẫu nhiên hoá&quot;</span>), (<span class="hljs-number">0.1</span>, <span class="hljs-string">&quot;ε = 10% ngẫu nhiên&quot;</span>), (<span class="hljs-number">0.3</span>, <span class="hljs-string">&quot;ε = 30% ngẫu nhiên&quot;</span>)]:
+    covs, quals, fnds = [], [], []
+    <span class="hljs-keyword">for</span> sd <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">20</span>):                          <span class="hljs-comment"># trung binh 20 lan chay</span>
+        c, q, fd = simulate(eps, seed=<span class="hljs-number">11</span> + sd)
+        covs.append(c); quals.append(q); fnds.append(fd)
+    cov, qual, fnd = np.mean(covs, <span class="hljs-number">0</span>), np.mean(quals, <span class="hljs-number">0</span>), np.mean(fnds, <span class="hljs-number">0</span>)
+    H[lab] = (cov, qual, fnd)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{lab:&lt;<span class="hljs-number">24</span>}</span><span class="hljs-subst">{cov[-<span class="hljs-number">1</span>]*<span class="hljs-number">100</span>:<span class="hljs-number">13.1</span>f}</span>%<span class="hljs-subst">{qual[-<span class="hljs-number">1</span>]:<span class="hljs-number">20.3</span>f}</span><span class="hljs-subst">{fnd[-<span class="hljs-number">1</span>]*<span class="hljs-number">100</span>:<span class="hljs-number">23.0</span>f}</span>%&quot;</span>)
+ceil10 = np.sort(true_q)[-<span class="hljs-number">10</span>:].mean()
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Tran co the dat (top-10 that): <span class="hljs-subst">{ceil10:<span class="hljs-number">.3</span>f}</span> | trung binh danh muc: <span class="hljs-subst">{true_q.mean():<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+
+fig, ax = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, figsize=(<span class="hljs-number">10.2</span>, <span class="hljs-number">2.9</span>))
+<span class="hljs-keyword">for</span> lab, (cov, qual, fnd) <span class="hljs-keyword">in</span> H.items():
+    ax[<span class="hljs-number">0</span>].plot(cov * <span class="hljs-number">100</span>, lw=<span class="hljs-number">1.7</span>, label=lab)
+    ax[<span class="hljs-number">1</span>].plot(qual, lw=<span class="hljs-number">1.7</span>, label=lab)
+    ax[<span class="hljs-number">2</span>].plot(fnd * <span class="hljs-number">100</span>, lw=<span class="hljs-number">1.7</span>, label=lab)
+ax[<span class="hljs-number">1</span>].axhline(true_q.<span class="hljs-built_in">max</span>(), ls=<span class="hljs-string">&quot;--&quot;</span>, lw=<span class="hljs-number">1.1</span>, color=C_DIM)
+ax[<span class="hljs-number">1</span>].annotate(<span class="hljs-string">&quot;món tốt nhất thật sự&quot;</span>, (<span class="hljs-number">0.4</span>, true_q.<span class="hljs-built_in">max</span>() - <span class="hljs-number">.012</span>), fontsize=<span class="hljs-number">7.5</span>, color=C_DIM)
+ax[<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&quot;% danh mục từng được hiển thị&quot;</span>); ax[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Độ đa dạng&quot;</span>)
+ax[<span class="hljs-number">1</span>].set_ylabel(<span class="hljs-string">&quot;chất lượng thật của top-10&quot;</span>); ax[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Chất lượng&quot;</span>)
+ax[<span class="hljs-number">2</span>].set_ylabel(<span class="hljs-string">&quot;% nhóm 1% tốt nhất đã từng được hiện&quot;</span>); ax[<span class="hljs-number">2</span>].set_title(<span class="hljs-string">&quot;Khả năng khám phá&quot;</span>)
+<span class="hljs-keyword">for</span> a_ <span class="hljs-keyword">in</span> ax: a_.set_xlabel(<span class="hljs-string">&quot;vòng huấn luyện lại&quot;</span>)
+ax[<span class="hljs-number">0</span>].legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">7.5</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops14_feedback.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nDa luu 8 hinh vao &quot;</span> + OUT)
+</code></pre></div></details><details class="src-details"><summary>Kết quả chạy — <code>experiments_output.txt</code></summary><div class="code-block is-output"><div class="code-head"><span class="code-lang">Kết quả chạy</span></div><pre><code>
+========================================================================
+(A) Ngân sach do tre: p99 cua max-of-k (tail at scale)
+========================================================================
+lognormal: median=20.0 ms, p99=100.0 ms -&gt; mu=2.9957, sigma=0.6918
+    k   p99 cua max (ms)    % yeu cau co &gt;=1 nhanh vuot p99
+    1              100.0                               1.0%
+    2              118.8                               2.0%
+    5              146.4                               4.9%
+   10              169.5                               9.6%
+   20              194.7                              18.2%
+   50              231.4                              39.5%
+  100              261.9                              63.4%
+
+========================================================================
+(B) Danh gia theo lat cat: chi so gop che mat su that
+========================================================================
+v2 = v1 + đặc trưng x2, thứ chỉ có tín hiệu với nhóm A
+Lát cắt              v1       v2   thay đổi
+Tổng thể         69.14%   88.96%    +19.83 đ
+Nhóm A (85%)     68.99%   94.48%    +25.49 đ
+Nhóm B (15%)     69.97%   58.35%    -11.62 đ
+trọng số v2 học được: x1=1.07, x2=2.28
+
+========================================================================
+(C) Co mau A/B test cho ti le chuyen doi
+========================================================================
+CTR nen = 5%, alpha=0.05 hai phia, power=80%
+  lift tuong doi   n moi nhanh    ngay (100k/ngay/nhanh)
+             1%     2,996,694                     30.0
+             2%       752,700                      7.5
+             5%       122,121                      1.2
+            10%        31,231                      0.3
+            20%         8,155                      0.1
+
+========================================================================
+(D) Ba loai dich chuyen: cai nao do duoc ma khong can nhan
+========================================================================
+Kịch bản            Độ chính xác   KS trên x1 (p)   KS trên x2 (p)    Dò được bằng X?
+Không dịch chuyển          75.6%                —                —                  —
+Covariate shift            76.4%         0.00e+00         0.00e+00                 CÓ
+Label shift                75.1%         1.23e-29         2.23e-07                 CÓ
+Concept drift              26.9%         4.83e-01         4.28e-02              KHÔNG
+
+========================================================================
+(E) PSI khi KHONG he co dich chuyen: E[PSI] ~ 2(k-1)/n
+========================================================================
+  n mỗi mẫu        k=5       k=10       k=20   | lý thuyết 2(k-1)/n với k=10
+        200     0.0399     0.0943     0.2050   | 0.0900
+        500     0.0164     0.0353     0.0795   | 0.0360
+       1000     0.0080     0.0179     0.0381   | 0.0180
+       5000     0.0015     0.0037     0.0076   | 0.0036
+      20000     0.0004     0.0009     0.0019   | 0.0009
+
+========================================================================
+(F) Ti le bao dong gia va do nhay: PSI 0.25 so voi kiem dinh KS
+========================================================================
+      n     δ   PSI&gt;0,25 báo   KS p&lt;0,01 báo
+     50   0.0            73%              0%
+     50   0.1            78%              1%
+     50   0.3            82%              5%
+    100   0.0            24%              1%
+    100   0.1            24%              2%
+    100   0.3            54%             24%
+    200   0.0             0%              0%
+    200   0.1             0%              5%
+    200   0.3            17%             49%
+   1000   0.0             0%              2%
+   1000   0.1             0%             22%
+   1000   0.3             0%            100%
+  10000   0.0             0%              0%
+  10000   0.1             0%            100%
+  10000   0.3             0%            100%
+
+========================================================================
+(G) Do cu cua mo hinh va nhip huan luyen lai
+========================================================================
+không huấn luyện lại     trung bình 64.61%   thấp nhất 45.42%   tuần 52: 45.48%
+mỗi quý                  trung bình 76.89%   thấp nhất 74.50%   tuần 52: 78.25%
+mỗi tháng                trung bình 77.68%   thấp nhất 75.80%   tuần 52: 78.25%
+mỗi tuần                 trung bình 77.80%   thấp nhất 75.72%   tuần 52: 78.72%
+
+Gia cua viec khong huan luyen lai: 13.19 diem phan tram do chinh xac trung binh
+
+========================================================================
+(H) Vong phan hoi thoai hoa: do da dang sup the nao
+========================================================================
+Chiến lược                phủ danh mục   chất lượng top-10 đã thấy top-1% tốt nhất
+không ngẫu nhiên hoá              9.5%               0.351                      8%
+ε = 10% ngẫu nhiên               10.8%               0.384                     10%
+ε = 30% ngẫu nhiên               13.4%               0.402                     12%
+Tran co the dat (top-10 that): 0.555 | trung binh danh muc: 0.153
+
+Da luu 8 hinh vao figs/
+</code></pre></div></details></section><section class="src-card" id="fig_diagrams-py"><header class="src-head"><h3 class="src-title"><code>code/mlops/fig_diagrams.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">205 dòng</span><a class="src-dl" href="code/mlops/fig_diagrams.py" download>Tải về</a></header><p class="src-note">Sinh Hình 1–5 và Hình 8: hộp mã ML giữa hạ tầng bao quanh, vòng đời ML là vòng lặp, ba mức tự động hoá, phổ lỗi dữ liệu, tính đúng theo thời điểm, và bốn chiến lược ra mắt. Đây là hình vẽ tay bằng matplotlib, để trong mã nguồn cho sửa được và cho khớp với chữ trong bài.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Sinh Hình 1–5 và Hình 8 của giáo trình MLOps: các sơ đồ khái niệm.
+
+Đây là hình vẽ tay bằng matplotlib chứ không phải kết quả thí nghiệm, nhưng vẫn
+để trong mã nguồn để sửa được và để mọi chi tiết khớp với chữ trong bài.
+
+    python code/mlops/fig_diagrams.py
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> matplotlib
+matplotlib.use(<span class="hljs-string">&quot;Agg&quot;</span>)
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> matplotlib.patches <span class="hljs-keyword">import</span> FancyBboxPatch, FancyArrowPatch
+
+OUT = <span class="hljs-string">&quot;figs/&quot;</span>
+plt.rcParams.update({<span class="hljs-string">&quot;figure.dpi&quot;</span>: <span class="hljs-number">150</span>, <span class="hljs-string">&quot;font.size&quot;</span>: <span class="hljs-number">9</span>})
+
+INK, DIM = <span class="hljs-string">&quot;#1f1d1a&quot;</span>, <span class="hljs-string">&quot;#8a857c&quot;</span>
+TEAL, TEAL_BG = <span class="hljs-string">&quot;#1f6f68&quot;</span>, <span class="hljs-string">&quot;#e0efed&quot;</span>
+AMBER, AMBER_BG = <span class="hljs-string">&quot;#8a5300&quot;</span>, <span class="hljs-string">&quot;#fbf0db&quot;</span>
+RED, RED_BG = <span class="hljs-string">&quot;#a13328&quot;</span>, <span class="hljs-string">&quot;#fbe9e6&quot;</span>
+BLUE, BLUE_BG = <span class="hljs-string">&quot;#1a5aa8&quot;</span>, <span class="hljs-string">&quot;#dceafb&quot;</span>
+GREEN, GREEN_BG = <span class="hljs-string">&quot;#2c6b39&quot;</span>, <span class="hljs-string">&quot;#e6f2e8&quot;</span>
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">box</span>(<span class="hljs-params">ax, x, y, w, h, text, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=INK, fs=<span class="hljs-number">8.5</span>, weight=<span class="hljs-string">&quot;normal&quot;</span>, lw=<span class="hljs-number">1.1</span>, r=<span class="hljs-number">0.02</span></span>):
+    ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle=<span class="hljs-string">f&quot;round,pad=0,rounding_size=<span class="hljs-subst">{r}</span>&quot;</span>,
+                                fc=fc, ec=ec, lw=lw, zorder=<span class="hljs-number">2</span>))
+    ax.text(x + w / <span class="hljs-number">2</span>, y + h / <span class="hljs-number">2</span>, text, ha=<span class="hljs-string">&quot;center&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontsize=fs,
+            color=INK, weight=weight, zorder=<span class="hljs-number">3</span>, linespacing=<span class="hljs-number">1.45</span>)
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">arrow</span>(<span class="hljs-params">ax, p, q, color=INK, lw=<span class="hljs-number">1.2</span>, style=<span class="hljs-string">&quot;-|&gt;&quot;</span>, ls=<span class="hljs-string">&quot;-&quot;</span></span>):
+    ax.add_patch(FancyArrowPatch(p, q, arrowstyle=style, mutation_scale=<span class="hljs-number">11</span>,
+                                 color=color, lw=lw, linestyle=ls,
+                                 shrinkA=<span class="hljs-number">2</span>, shrinkB=<span class="hljs-number">2</span>, zorder=<span class="hljs-number">4</span>))
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">canvas</span>(<span class="hljs-params">w, h, xlim=(<span class="hljs-params"><span class="hljs-number">0</span>, <span class="hljs-number">10</span></span>), ylim=(<span class="hljs-params"><span class="hljs-number">0</span>, <span class="hljs-number">6</span></span>)</span>):
+    fig, ax = plt.subplots(figsize=(w, h))
+    ax.set_xlim(*xlim); ax.set_ylim(*ylim); ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
+    <span class="hljs-keyword">return</span> fig, ax
+
+
+<span class="hljs-comment"># ===================================================== Hình 1 — hộp mã ML bé xíu</span>
+fig, ax = canvas(<span class="hljs-number">8.0</span>, <span class="hljs-number">3.6</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">12</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">7</span>))
+around = [
+    (<span class="hljs-string">&quot;Thu thập\ndữ liệu&quot;</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">4.6</span>, <span class="hljs-number">1.9</span>, <span class="hljs-number">1.5</span>, BLUE_BG, BLUE),
+    (<span class="hljs-string">&quot;Kiểm định\ndữ liệu&quot;</span>, <span class="hljs-number">2.3</span>, <span class="hljs-number">5.2</span>, <span class="hljs-number">1.9</span>, <span class="hljs-number">0.9</span>, BLUE_BG, BLUE),
+    (<span class="hljs-string">&quot;Trích xuất\nđặc trưng&quot;</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">2.6</span>, <span class="hljs-number">1.9</span>, <span class="hljs-number">1.7</span>, GREEN_BG, GREEN),
+    (<span class="hljs-string">&quot;Quản lý\ncấu hình&quot;</span>, <span class="hljs-number">4.4</span>, <span class="hljs-number">5.2</span>, <span class="hljs-number">1.7</span>, <span class="hljs-number">0.9</span>, AMBER_BG, AMBER),
+    (<span class="hljs-string">&quot;Hạ tầng\nphục vụ&quot;</span>, <span class="hljs-number">8.3</span>, <span class="hljs-number">4.2</span>, <span class="hljs-number">1.9</span>, <span class="hljs-number">1.9</span>, TEAL_BG, TEAL),
+    (<span class="hljs-string">&quot;Quản lý\ntài nguyên máy&quot;</span>, <span class="hljs-number">10.4</span>, <span class="hljs-number">4.2</span>, <span class="hljs-number">1.5</span>, <span class="hljs-number">1.9</span>, TEAL_BG, TEAL),
+    (<span class="hljs-string">&quot;Công cụ\nphân tích&quot;</span>, <span class="hljs-number">6.3</span>, <span class="hljs-number">5.2</span>, <span class="hljs-number">1.8</span>, <span class="hljs-number">0.9</span>, AMBER_BG, AMBER),
+    (<span class="hljs-string">&quot;Quản lý\nquy trình&quot;</span>, <span class="hljs-number">8.3</span>, <span class="hljs-number">2.0</span>, <span class="hljs-number">1.9</span>, <span class="hljs-number">1.9</span>, AMBER_BG, AMBER),
+    (<span class="hljs-string">&quot;Giám sát&quot;</span>, <span class="hljs-number">10.4</span>, <span class="hljs-number">2.0</span>, <span class="hljs-number">1.5</span>, <span class="hljs-number">1.9</span>, RED_BG, RED),
+    (<span class="hljs-string">&quot;Hạ tầng\nphục vụ dữ liệu&quot;</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">3.0</span>, <span class="hljs-number">2.0</span>, GREEN_BG, GREEN),
+    (<span class="hljs-string">&quot;Kiểm thử và gỡ lỗi&quot;</span>, <span class="hljs-number">3.4</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">4.6</span>, <span class="hljs-number">1.5</span>, RED_BG, RED),
+    (<span class="hljs-string">&quot;Xác minh\nmô hình&quot;</span>, <span class="hljs-number">8.3</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">3.6</span>, <span class="hljs-number">1.4</span>, RED_BG, RED),
+]
+<span class="hljs-keyword">for</span> t, x, y, w, h, fc, ec <span class="hljs-keyword">in</span> around:
+    box(ax, x, y, w, h, t, fc=fc, ec=ec, fs=<span class="hljs-number">8</span>)
+box(ax, <span class="hljs-number">4.4</span>, <span class="hljs-number">2.6</span>, <span class="hljs-number">3.6</span>, <span class="hljs-number">2.3</span>, <span class="hljs-string">&quot;&quot;</span>, fc=<span class="hljs-string">&quot;#f4f2ec&quot;</span>, ec=DIM)
+ax.text(<span class="hljs-number">6.2</span>, <span class="hljs-number">4.6</span>, <span class="hljs-string">&quot;Thu thập đặc trưng&quot;</span>, ha=<span class="hljs-string">&quot;center&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8</span>, color=INK, zorder=<span class="hljs-number">3</span>)
+box(ax, <span class="hljs-number">5.55</span>, <span class="hljs-number">3.35</span>, <span class="hljs-number">1.3</span>, <span class="hljs-number">0.8</span>, <span class="hljs-string">&quot;Mã\nML&quot;</span>, fc=INK, ec=INK, fs=<span class="hljs-number">9</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+ax.text(<span class="hljs-number">6.2</span>, <span class="hljs-number">3.75</span>, <span class="hljs-string">&quot;Mã\nML&quot;</span>, ha=<span class="hljs-string">&quot;center&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9.5</span>,
+        color=<span class="hljs-string">&quot;white&quot;</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, zorder=<span class="hljs-number">5</span>, linespacing=<span class="hljs-number">1.3</span>)
+ax.text(<span class="hljs-number">6.0</span>, <span class="hljs-number">6.55</span>, <span class="hljs-string">&quot;Chỉ một phần rất nhỏ của hệ thống ML thật là mã học máy&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=INK)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops01_debt.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># ===================================================== Hình 2 — vòng đời là vòng lặp</span>
+fig, ax = canvas(<span class="hljs-number">8.4</span>, <span class="hljs-number">3.4</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">12</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">6</span>))
+stages = [
+    (<span class="hljs-string">&quot;Bài toán\nnghiệp vụ&quot;</span>, <span class="hljs-number">0.2</span>, TEAL_BG, TEAL),
+    (<span class="hljs-string">&quot;Dữ liệu và\nnhãn&quot;</span>, <span class="hljs-number">2.15</span>, BLUE_BG, BLUE),
+    (<span class="hljs-string">&quot;Đặc trưng và\nthí nghiệm&quot;</span>, <span class="hljs-number">4.1</span>, BLUE_BG, BLUE),
+    (<span class="hljs-string">&quot;Đánh giá và\nra mắt&quot;</span>, <span class="hljs-number">6.05</span>, GREEN_BG, GREEN),
+    (<span class="hljs-string">&quot;Phục vụ&quot;</span>, <span class="hljs-number">8.0</span>, GREEN_BG, GREEN),
+    (<span class="hljs-string">&quot;Giám sát&quot;</span>, <span class="hljs-number">9.95</span>, RED_BG, RED),
+]
+<span class="hljs-keyword">for</span> t, x, fc, ec <span class="hljs-keyword">in</span> stages:
+    box(ax, x, <span class="hljs-number">3.0</span>, <span class="hljs-number">1.75</span>, <span class="hljs-number">1.3</span>, t, fc=fc, ec=ec, fs=<span class="hljs-number">8.2</span>)
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(stages) - <span class="hljs-number">1</span>):
+    arrow(ax, (stages[i][<span class="hljs-number">1</span>] + <span class="hljs-number">1.75</span>, <span class="hljs-number">3.65</span>), (stages[i + <span class="hljs-number">1</span>][<span class="hljs-number">1</span>], <span class="hljs-number">3.65</span>))
+<span class="hljs-comment"># ba vong quay lai</span>
+loops = [(<span class="hljs-number">10.85</span>, <span class="hljs-number">5.05</span>, <span class="hljs-string">&quot;dịch chuyển phân phối → huấn luyện lại&quot;</span>, RED),
+         (<span class="hljs-number">10.85</span>, <span class="hljs-number">3.05</span>, <span class="hljs-string">&quot;lỗi dữ liệu → sửa pipeline&quot;</span>, AMBER),
+         (<span class="hljs-number">10.85</span>, <span class="hljs-number">2.25</span>, <span class="hljs-string">&quot;chỉ số sản phẩm không nhúc nhích → đổi bài toán&quot;</span>, TEAL)]
+targets = [(<span class="hljs-number">4.98</span>, <span class="hljs-number">3.0</span>), (<span class="hljs-number">3.03</span>, <span class="hljs-number">3.0</span>), (<span class="hljs-number">1.08</span>, <span class="hljs-number">3.0</span>)]
+<span class="hljs-keyword">for</span> (sx, sy, label, col), (tx, ty) <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(loops, targets):
+    ax.add_patch(FancyArrowPatch((sx, <span class="hljs-number">3.0</span>), (tx, ty - <span class="hljs-number">0.02</span>),
+                                 connectionstyle=<span class="hljs-string">f&quot;arc3,rad=<span class="hljs-subst">{<span class="hljs-number">0.16</span> + <span class="hljs-number">0.07</span> * loops.index((sx, sy, label, col))}</span>&quot;</span>,
+                                 arrowstyle=<span class="hljs-string">&quot;-|&gt;&quot;</span>, mutation_scale=<span class="hljs-number">10</span>, color=col, lw=<span class="hljs-number">1.2</span>,
+                                 linestyle=(<span class="hljs-number">0</span>, (<span class="hljs-number">4</span>, <span class="hljs-number">2</span>)), shrinkA=<span class="hljs-number">2</span>, shrinkB=<span class="hljs-number">2</span>, zorder=<span class="hljs-number">1</span>))
+    ax.text(tx + (sx - tx) / <span class="hljs-number">2</span>, <span class="hljs-number">1.35</span> - <span class="hljs-number">0.42</span> * loops.index((sx, sy, label, col)),
+            label, ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">7.6</span>, color=col)
+ax.text(<span class="hljs-number">6.0</span>, <span class="hljs-number">5.5</span>, <span class="hljs-string">&quot;Vòng đời ML là một vòng lặp, không phải một đường thẳng&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=INK)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops02_lifecycle.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># ===================================================== Hình 3 — ba mức tự động hoá</span>
+fig, ax = canvas(<span class="hljs-number">8.6</span>, <span class="hljs-number">3.5</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">12</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">6</span>))
+levels = [
+    (<span class="hljs-string">&quot;Mức 0 — thủ công&quot;</span>, <span class="hljs-number">0.2</span>, [<span class="hljs-string">&quot;mọi bước làm tay&quot;</span>, <span class="hljs-string">&quot;bàn giao mô hình đã\nhuấn luyện cho kỹ sư&quot;</span>,
+                               <span class="hljs-string">&quot;vài tháng một lần&quot;</span>, <span class="hljs-string">&quot;không giám sát&quot;</span>], RED_BG, RED),
+    (<span class="hljs-string">&quot;Mức 1 — tự động hoá pipeline&quot;</span>, <span class="hljs-number">4.1</span>, [<span class="hljs-string">&quot;pipeline huấn luyện\nchạy tự động&quot;</span>,
+                                           <span class="hljs-string">&quot;kiểm định dữ liệu và\nmô hình trong pipeline&quot;</span>,
+                                           <span class="hljs-string">&quot;bàn giao cả PIPELINE&quot;</span>, <span class="hljs-string">&quot;có huấn luyện lại (CT)&quot;</span>], AMBER_BG, AMBER),
+    (<span class="hljs-string">&quot;Mức 2 — tự động hoá CI/CD&quot;</span>, <span class="hljs-number">8.0</span>, [<span class="hljs-string">&quot;CI/CD cho chính pipeline&quot;</span>,
+                                        <span class="hljs-string">&quot;thử nghiệm ý tưởng mới\nrồi triển khai nhanh&quot;</span>,
+                                        <span class="hljs-string">&quot;nhiều pipeline song song&quot;</span>, <span class="hljs-string">&quot;giám sát khép kín&quot;</span>], GREEN_BG, GREEN),
+]
+<span class="hljs-keyword">for</span> title, x, items, fc, ec <span class="hljs-keyword">in</span> levels:
+    box(ax, x, <span class="hljs-number">0.5</span>, <span class="hljs-number">3.7</span>, <span class="hljs-number">4.5</span>, <span class="hljs-string">&quot;&quot;</span>, fc=fc, ec=ec, lw=<span class="hljs-number">1.3</span>)
+    ax.text(x + <span class="hljs-number">1.85</span>, <span class="hljs-number">4.55</span>, title, ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=ec)
+    <span class="hljs-keyword">for</span> i, it <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(items):
+        ax.text(x + <span class="hljs-number">0.25</span>, <span class="hljs-number">3.85</span> - i * <span class="hljs-number">0.92</span>, <span class="hljs-string">&quot;•&quot;</span>, fontsize=<span class="hljs-number">9</span>, color=ec, va=<span class="hljs-string">&quot;top&quot;</span>)
+        ax.text(x + <span class="hljs-number">0.6</span>, <span class="hljs-number">3.85</span> - i * <span class="hljs-number">0.92</span>, it, fontsize=<span class="hljs-number">8</span>, va=<span class="hljs-string">&quot;top&quot;</span>, color=INK, linespacing=<span class="hljs-number">1.4</span>)
+<span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> (<span class="hljs-number">3.95</span>, <span class="hljs-number">7.85</span>):
+    arrow(ax, (x, <span class="hljs-number">2.7</span>), (x + <span class="hljs-number">0.3</span>, <span class="hljs-number">2.7</span>), color=DIM)
+ax.text(<span class="hljs-number">6.0</span>, <span class="hljs-number">5.5</span>, <span class="hljs-string">&quot;Càng lên mức cao, thứ được bàn giao càng lớn: mô hình → pipeline → hệ thống&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9.3</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=INK)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops03_levels.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># ===================================================== Hình 4 — phổ lỗi dữ liệu</span>
+fig, ax = canvas(<span class="hljs-number">8.4</span>, <span class="hljs-number">3.2</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">12</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">5.4</span>))
+cells = [
+    (<span class="hljs-string">&quot;Lỗi cứng\n(hard)&quot;</span>, <span class="hljs-string">&quot;đảo cột, tuổi âm,\nkiểu sai, tệp rỗng&quot;</span>,
+     <span class="hljs-string">&quot;Dự đoán sai rõ ràng.\nDễ bắt bằng ràng buộc schema.&quot;</span>, <span class="hljs-string">&quot;Chặn pipeline ngay&quot;</span>, RED_BG, RED, <span class="hljs-number">0.2</span>),
+    (<span class="hljs-string">&quot;Lỗi mềm\n(soft)&quot;</span>, <span class="hljs-string">&quot;vài trường null,\nđơn vị đổi, mã lạ&quot;</span>,
+     <span class="hljs-string">&quot;Vẫn ra dự đoán hợp lý,\nnên trôi qua kiểm tra.&quot;</span>, <span class="hljs-string">&quot;Cảnh báo + theo dõi tỉ lệ&quot;</span>, AMBER_BG, AMBER, <span class="hljs-number">4.1</span>),
+    (<span class="hljs-string">&quot;Dịch chuyển\n(drift)&quot;</span>, <span class="hljs-string">&quot;phân phối đổi dần\ntheo tuần, theo mùa&quot;</span>,
+     <span class="hljs-string">&quot;Không có gì “sai”,\nchỉ là thế giới đã khác.&quot;</span>, <span class="hljs-string">&quot;Điều tra, có thể huấn luyện lại&quot;</span>, BLUE_BG, BLUE, <span class="hljs-number">8.0</span>),
+]
+<span class="hljs-keyword">for</span> title, ex, why, act, fc, ec, x <span class="hljs-keyword">in</span> cells:
+    box(ax, x, <span class="hljs-number">0.4</span>, <span class="hljs-number">3.7</span>, <span class="hljs-number">4.2</span>, <span class="hljs-string">&quot;&quot;</span>, fc=fc, ec=ec, lw=<span class="hljs-number">1.3</span>)
+    ax.text(x + <span class="hljs-number">1.85</span>, <span class="hljs-number">4.15</span>, title, ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=ec, linespacing=<span class="hljs-number">1.3</span>)
+    ax.text(x + <span class="hljs-number">1.85</span>, <span class="hljs-number">3.25</span>, ex, ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8</span>, color=INK, style=<span class="hljs-string">&quot;italic&quot;</span>, linespacing=<span class="hljs-number">1.4</span>)
+    ax.text(x + <span class="hljs-number">1.85</span>, <span class="hljs-number">2.25</span>, why, ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8</span>, color=INK, linespacing=<span class="hljs-number">1.5</span>)
+    box(ax, x + <span class="hljs-number">0.3</span>, <span class="hljs-number">0.65</span>, <span class="hljs-number">3.1</span>, <span class="hljs-number">0.65</span>, act, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=ec, fs=<span class="hljs-number">8</span>)
+arrow(ax, (<span class="hljs-number">0.2</span>, <span class="hljs-number">4.95</span>), (<span class="hljs-number">11.7</span>, <span class="hljs-number">4.95</span>), color=DIM)
+ax.text(<span class="hljs-number">0.3</span>, <span class="hljs-number">5.12</span>, <span class="hljs-string">&quot;dễ phát hiện, hại ngay&quot;</span>, fontsize=<span class="hljs-number">8</span>, color=DIM)
+ax.text(<span class="hljs-number">11.6</span>, <span class="hljs-number">5.12</span>, <span class="hljs-string">&quot;khó phát hiện, hại chậm&quot;</span>, fontsize=<span class="hljs-number">8</span>, color=DIM, ha=<span class="hljs-string">&quot;right&quot;</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops04_errors.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># ============================================ Hình 5 — tính đúng theo thời điểm</span>
+fig, ax = canvas(<span class="hljs-number">8.6</span>, <span class="hljs-number">4.1</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">12</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">8.0</span>))
+ax.text(<span class="hljs-number">6.0</span>, <span class="hljs-number">7.6</span>, <span class="hljs-string">&quot;Cùng một dòng huấn luyện, hai cách ghép cho hai giá trị khác nhau&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=INK)
+
+<span class="hljs-keyword">for</span> row, (lab, col, used, src) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(
+        [(<span class="hljs-string">&quot;ĐÚNG — ghép theo thời điểm&quot;</span>, GREEN, <span class="hljs-string">&quot;31&quot;</span>, <span class="hljs-number">4.0</span>),
+         (<span class="hljs-string">&quot;SAI — ghép giá trị hiện tại&quot;</span>, RED, <span class="hljs-string">&quot;480&quot;</span>, <span class="hljs-number">10.4</span>)]):
+    y = <span class="hljs-number">5.3</span> - row * <span class="hljs-number">3.35</span>
+    ax.text(<span class="hljs-number">0.5</span>, y + <span class="hljs-number">1.25</span>, lab, fontsize=<span class="hljs-number">9</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=col)
+    ax.plot([<span class="hljs-number">0.5</span>, <span class="hljs-number">11.5</span>], [y, y], color=DIM, lw=<span class="hljs-number">1.0</span>, zorder=<span class="hljs-number">1</span>)
+    <span class="hljs-keyword">for</span> t, x <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;1/3&quot;</span>, <span class="hljs-number">1.6</span>), (<span class="hljs-string">&quot;15/3&quot;</span>, <span class="hljs-number">4.0</span>), (<span class="hljs-string">&quot;1/4&quot;</span>, <span class="hljs-number">6.6</span>), (<span class="hljs-string">&quot;hôm nay&quot;</span>, <span class="hljs-number">10.4</span>)]:
+        ax.plot([x], [y], <span class="hljs-string">&quot;o&quot;</span>, ms=<span class="hljs-number">4.5</span>, color=DIM, zorder=<span class="hljs-number">3</span>)
+        ax.text(x, y - <span class="hljs-number">0.34</span>, t, ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">7.5</span>, color=DIM, va=<span class="hljs-string">&quot;top&quot;</span>)
+    ax.plot([<span class="hljs-number">6.6</span>, <span class="hljs-number">6.6</span>], [y - <span class="hljs-number">0.12</span>, y + <span class="hljs-number">0.95</span>], color=AMBER, lw=<span class="hljs-number">1.3</span>, ls=<span class="hljs-string">&quot;--&quot;</span>, zorder=<span class="hljs-number">2</span>)
+    ax.text(<span class="hljs-number">6.75</span>, y + <span class="hljs-number">0.9</span>, <span class="hljs-string">&quot;thời điểm cần dự đoán&quot;</span>, fontsize=<span class="hljs-number">7.6</span>, color=AMBER, va=<span class="hljs-string">&quot;top&quot;</span>)
+    <span class="hljs-keyword">for</span> x, v <span class="hljs-keyword">in</span> [(<span class="hljs-number">1.6</span>, <span class="hljs-string">&quot;12&quot;</span>), (<span class="hljs-number">4.0</span>, <span class="hljs-string">&quot;31&quot;</span>), (<span class="hljs-number">10.4</span>, <span class="hljs-string">&quot;480&quot;</span>)]:
+        hot = <span class="hljs-built_in">abs</span>(x - src) &lt; <span class="hljs-number">0.01</span>
+        box(ax, x - <span class="hljs-number">0.42</span>, y + <span class="hljs-number">0.18</span>, <span class="hljs-number">0.84</span>, <span class="hljs-number">0.46</span>, v,
+            fc=(GREEN_BG <span class="hljs-keyword">if</span> row == <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> RED_BG) <span class="hljs-keyword">if</span> hot <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;white&quot;</span>,
+            ec=col <span class="hljs-keyword">if</span> hot <span class="hljs-keyword">else</span> DIM, fs=<span class="hljs-number">8</span>, weight=<span class="hljs-string">&quot;bold&quot;</span> <span class="hljs-keyword">if</span> hot <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;normal&quot;</span>)
+    ax.add_patch(FancyArrowPatch((src, y + <span class="hljs-number">0.14</span>), (<span class="hljs-number">2.2</span>, y - <span class="hljs-number">0.88</span>), arrowstyle=<span class="hljs-string">&quot;-|&gt;&quot;</span>,
+                                 mutation_scale=<span class="hljs-number">11</span>, color=col, lw=<span class="hljs-number">1.5</span>,
+                                 connectionstyle=<span class="hljs-string">&quot;arc3,rad=-0.09&quot;</span> <span class="hljs-keyword">if</span> row <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;arc3,rad=0.3&quot;</span>,
+                                 shrinkA=<span class="hljs-number">3</span>, shrinkB=<span class="hljs-number">3</span>, zorder=<span class="hljs-number">4</span>))
+    box(ax, <span class="hljs-number">0.5</span>, y - <span class="hljs-number">1.48</span>, <span class="hljs-number">5.8</span>, <span class="hljs-number">0.6</span>,
+        <span class="hljs-string">f&quot;giá trị đưa vào tập huấn luyện = <span class="hljs-subst">{used}</span>&quot;</span>, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=col, fs=<span class="hljs-number">8.4</span>)
+    <span class="hljs-keyword">if</span> row == <span class="hljs-number">1</span>:
+        ax.text(<span class="hljs-number">6.6</span>, y - <span class="hljs-number">1.18</span>, <span class="hljs-string">&quot;← thông tin của tương lai, lúc dự đoán thật không hề có&quot;</span>,
+                fontsize=<span class="hljs-number">8</span>, color=RED, va=<span class="hljs-string">&quot;center&quot;</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops05_pit.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># ===================================================== Hình 8 — chiến lược ra mắt</span>
+fig, ax = canvas(<span class="hljs-number">8.6</span>, <span class="hljs-number">4.0</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">12</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">7.4</span>))
+ax.text(<span class="hljs-number">6.0</span>, <span class="hljs-number">7.05</span>, <span class="hljs-string">&quot;Bốn cách đưa mô hình mới ra, khác nhau ở chỗ ai chịu rủi ro&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=INK)
+strategies = [
+    (<span class="hljs-string">&quot;Shadow&quot;</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">3.9</span>, <span class="hljs-string">&quot;100% lưu lượng chạy qua cả hai,\nchỉ bản cũ trả lời người dùng&quot;</span>,
+     <span class="hljs-string">&quot;rủi ro cho người dùng: 0\nnhưng không đo được phản ứng thật&quot;</span>, TEAL_BG, TEAL),
+    (<span class="hljs-string">&quot;Canary&quot;</span>, <span class="hljs-number">6.2</span>, <span class="hljs-number">3.9</span>, <span class="hljs-string">&quot;1% → 5% → 25% → 100%,\ndừng lại nếu chỉ số xấu đi&quot;</span>,
+     <span class="hljs-string">&quot;hạn chế bán kính thiệt hại\ncần chỉ số đủ nhạy ở 1%&quot;</span>, GREEN_BG, GREEN),
+    (<span class="hljs-string">&quot;Blue–green&quot;</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.5</span>, <span class="hljs-string">&quot;hai môi trường song song,\nđổi toàn bộ trong một nhịp&quot;</span>,
+     <span class="hljs-string">&quot;quay lui tức thì\nnhưng thiệt hại là 100% nếu hỏng&quot;</span>, AMBER_BG, AMBER),
+    (<span class="hljs-string">&quot;A/B test&quot;</span>, <span class="hljs-number">6.2</span>, <span class="hljs-number">0.5</span>, <span class="hljs-string">&quot;chia người dùng ngẫu nhiên,\nđo chỉ số sản phẩm có ý nghĩa thống kê&quot;</span>,
+     <span class="hljs-string">&quot;câu trả lời nhân quả duy nhất\nnhưng tốn thời gian và lưu lượng&quot;</span>, BLUE_BG, BLUE),
+]
+<span class="hljs-keyword">for</span> name, x, y, how, tradeoff, fc, ec <span class="hljs-keyword">in</span> strategies:
+    box(ax, x, y, <span class="hljs-number">5.6</span>, <span class="hljs-number">2.9</span>, <span class="hljs-string">&quot;&quot;</span>, fc=fc, ec=ec, lw=<span class="hljs-number">1.3</span>)
+    ax.text(x + <span class="hljs-number">0.3</span>, y + <span class="hljs-number">2.5</span>, name, fontsize=<span class="hljs-number">9.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=ec)
+    ax.text(x + <span class="hljs-number">0.3</span>, y + <span class="hljs-number">1.55</span>, how, fontsize=<span class="hljs-number">8.2</span>, color=INK, va=<span class="hljs-string">&quot;center&quot;</span>, linespacing=<span class="hljs-number">1.5</span>)
+    box(ax, x + <span class="hljs-number">0.3</span>, y + <span class="hljs-number">0.25</span>, <span class="hljs-number">5.0</span>, <span class="hljs-number">0.85</span>, tradeoff, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=ec, fs=<span class="hljs-number">7.8</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops08_rollout.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Đã lưu Hình 1–5 và Hình 8 vào &quot;</span> + OUT)
+</code></pre></div></details></section></div></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="mlops-thuat-ngu.html"><span class="pager-dir">← Trước</span><span class="pager-title">Từ điển thuật ngữ</span></a><a class="pager-link pager-next" href="mlops-toan-van.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Toàn văn một trang</span></a></nav>
+</main>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

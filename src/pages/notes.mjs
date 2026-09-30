@@ -68,8 +68,8 @@ export function injectNotes(html, chapterNum, notes, md) {
 }
 
 export function buildNotesPage(ctx, notes) {
-  const { md, nav, page, escapeHtml, write, neighbours, registry, chapters, searchIndex } = ctx;
-  registry.currentFile = 'ghi-chu.html';
+  const { md, nav, page, escapeHtml, write, neighbours, registry, chapters, searchIndex, f, book } = ctx;
+  registry.currentFile = f('ghi-chu.html');
 
   const list = [...notes.values()].sort((a, b) =>
     a.section.localeCompare(b.section, undefined, { numeric: true })
@@ -77,9 +77,9 @@ export function buildNotesPage(ctx, notes) {
 
   for (const n of list) {
     searchIndex.push({
-      c: 'GC',
+      c: 'GC', b: book.short,
       t: 'Ghi chú Mục ' + n.section + ' — ' + n.title,
-      h: 'ghi-chu.html#gc-' + sectionId(n.section),
+      h: f('ghi-chu.html') + '#gc-' + sectionId(n.section),
       x: n.markdown.replace(/```[\s\S]*?```/g, ' ').replace(/[#*_`>|$\\]/g, ' ')
         .replace(/\s+/g, ' ').trim().slice(0, 900),
     });
@@ -100,7 +100,7 @@ export function buildNotesPage(ctx, notes) {
   const cards = list
     .map((n) => {
       const ch = chapterOf(n.section);
-      const file = 'ch' + String(ch).padStart(2, '0') + '.html';
+      const file = f('ch' + String(ch).padStart(2, '0') + '.html');
       return (
         '<article class="note-card" id="gc-' + sectionId(n.section) + '">' +
         '<header class="note-card-head">' +
@@ -128,15 +128,15 @@ export function buildNotesPage(ctx, notes) {
     '</article>';
 
   write(
-    'ghi-chu.html',
+    f('ghi-chu.html'),
     page({
       title: 'Ghi chú biên tập — Quantization trong Deep Learning',
       description:
         'Những chỗ trong giáo trình cần phát biểu chặt hơn, kèm kiểm chứng bằng mã: ràng buộc trục thu gọn, phạm vi của quantize_multiplier, ý nghĩa của kết quả trùng khớp từng bit, và giá trị α tối ưu của SmoothQuant.',
       body,
       nav,
-      file: 'ghi-chu.html',
-      ...neighbours('ghi-chu.html'),
+      file: f('ghi-chu.html'),
+      ...neighbours(f('ghi-chu.html')),
     })
   );
 }

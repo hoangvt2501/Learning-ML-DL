@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3. Dữ liệu: hợp đồng, kiểm định và phổ lỗi — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
+<meta name="description" content="Phổ lỗi cứng → mềm → dịch chuyển và ba cách phản ứng khác nhau; hợp đồng dữ liệu bốn tầng; độ trễ nhãn và phiên bản hoá dữ liệu.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>MLOps</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group">Giáo trình 2 · MLOps</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html" class="is-active" aria-current="page"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 3</span><span class="kicker-time">7 phút đọc</span></div><h2 id="sec-3" class="heading">3. Dữ liệu: hợp đồng, kiểm định và phổ lỗi<a class="anchor" href="#sec-3" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Phổ lỗi cứng → mềm → dịch chuyển và ba cách phản ứng khác nhau; hợp đồng dữ liệu bốn tầng; độ trễ nhãn và phiên bản hoá dữ liệu.</p>
+<h3 id="sec-3-1" class="heading">3.1. Vì sao chương này đứng trước chương mô hình<a class="anchor" href="#sec-3-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Một quan sát nhất quán trong nghiên cứu phỏng vấn: kỹ sư ML giỏi <strong>lặp trên dữ liệu chứ không nhất thiết lặp trên mô hình</strong>. Lý do đơn giản: với cùng một lượng công sức, sửa dữ liệu thường cho mức cải thiện lớn hơn đổi kiến trúc, và quan trọng hơn — <strong>lỗi dữ liệu là loại lỗi im lặng</strong>, còn lỗi mô hình thì hiện ra trên chỉ số.</p>
+<h3 id="sec-3-2" class="heading">3.2. Phổ lỗi dữ liệu: cứng → mềm → dịch chuyển<a class="anchor" href="#sec-3-2" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Đây là khung phân loại hữu dụng nhất mà tài liệu này biết, lấy từ Shankar và cộng sự. Nó giải thích vì sao &quot;kiểm tra dữ liệu&quot; không phải một việc mà là <strong>ba việc khác nhau</strong>.</p>
+<figure class="figure" id="hinh-4">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 4"><img src="figs/mlops04_errors.png" alt="Hình 4" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 4.</strong> Ba loại lỗi dữ liệu đòi hỏi ba cách phản ứng khác nhau. Sai lầm phổ biến là dùng cùng một cơ chế cảnh báo cho cả ba.</figcaption>
+</figure>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Loại</th>
+<th>Ví dụ</th>
+<th>Đặc điểm</th>
+<th>Phản ứng đúng</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Lỗi cứng</strong> (hard)</td>
+<td>đảo hai cột, tuổi âm, kiểu sai, tệp rỗng</td>
+<td>Cho dự đoán sai rõ ràng. Vi phạm ràng buộc kiểm tra được.</td>
+<td><strong>Chặn pipeline.</strong> Thà không có dự đoán còn hơn có dự đoán rác.</td>
+</tr>
+<tr>
+<td><strong>Lỗi mềm</strong> (soft)</td>
+<td>vài trường null, đơn vị đổi, xuất hiện mã danh mục lạ</td>
+<td>Vẫn ra dự đoán trông hợp lý, nên <strong>trôi qua mọi kiểm tra</strong>. Khó bắt và khó định lượng.</td>
+<td>Cảnh báo và theo dõi <strong>tỉ lệ</strong>, không chặn.</td>
+</tr>
+<tr>
+<td><strong>Dịch chuyển</strong> (drift)</td>
+<td>phân phối đổi dần theo tuần, theo mùa</td>
+<td>Không có gì &quot;sai&quot;; thế giới đã khác. Diễn ra chậm.</td>
+<td>Điều tra, có thể huấn luyện lại (<a href="mlops-ch09.html#sec-9" class="xref">Chương 9</a>, <a href="mlops-ch11.html#sec-11" class="xref">11</a>).</td>
+</tr>
+</tbody>
+</table></div>
+<p>Bài báo ghi nhận hai nỗi đau cụ thể quanh khung này, và cả hai đều nên nói ra khi phỏng vấn vì chúng chứng tỏ bạn hiểu vấn đề vận hành chứ không chỉ vấn đề kỹ thuật:</p>
+<ol>
+<li><strong>Bắt người ta tự tay đặt ràng buộc chất lượng dữ liệu là không bền.</strong> Người biết vì sao ngưỡng ấy là 0,3 sẽ nghỉ việc, và ngưỡng ấy ở lại.</li>
+<li><strong>Nỗi đau được nhắc nhiều nhất là báo động giả</strong> — cảnh báo nổ trong khi chất lượng ML vẫn ổn. Hậu quả của báo động giả không phải là phiền, mà là <strong>đội ngừng tin vào cảnh báo</strong>, và lúc có sự cố thật thì không ai buồn nhìn.</li>
+</ol>
+<h3 id="sec-3-3" class="heading">3.3. Hợp đồng dữ liệu<a class="anchor" href="#sec-3-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Cách chữa gốc cho lỗi cứng là biến giả định ngầm thành <strong>hợp đồng dữ liệu (data contract)</strong> có thể kiểm tra bằng máy. Một hợp đồng tối thiểu gồm bốn tầng:</p>
+<div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-comment"># Tầng 1 — schema: tên cột, kiểu, cột nào được phép null</span>
+schema = {
+    <span class="hljs-string">&quot;user_id&quot;</span>:      {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;int64&quot;</span>,   <span class="hljs-string">&quot;nullable&quot;</span>: <span class="hljs-literal">False</span>},
+    <span class="hljs-string">&quot;amount_vnd&quot;</span>:   {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;float64&quot;</span>, <span class="hljs-string">&quot;nullable&quot;</span>: <span class="hljs-literal">False</span>},
+    <span class="hljs-string">&quot;country&quot;</span>:      {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;category&quot;</span>,<span class="hljs-string">&quot;nullable&quot;</span>: <span class="hljs-literal">False</span>},
+    <span class="hljs-string">&quot;event_time&quot;</span>:   {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;datetime&quot;</span>,<span class="hljs-string">&quot;nullable&quot;</span>: <span class="hljs-literal">False</span>},
+}
+
+<span class="hljs-comment"># Tầng 2 — miền giá trị: ràng buộc trên từng giá trị</span>
+domain = {
+    <span class="hljs-string">&quot;amount_vnd&quot;</span>: {<span class="hljs-string">&quot;min&quot;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">5e9</span>},
+    <span class="hljs-string">&quot;country&quot;</span>:    {<span class="hljs-string">&quot;allowed&quot;</span>: {<span class="hljs-string">&quot;VN&quot;</span>, <span class="hljs-string">&quot;SG&quot;</span>, <span class="hljs-string">&quot;TH&quot;</span>, <span class="hljs-string">&quot;ID&quot;</span>}},
+}
+
+<span class="hljs-comment"># Tầng 3 — thống kê: ràng buộc trên phân phối của cả lô</span>
+batch_stats = {
+    <span class="hljs-string">&quot;amount_vnd&quot;</span>: {<span class="hljs-string">&quot;null_rate_max&quot;</span>: <span class="hljs-number">0.001</span>, <span class="hljs-string">&quot;mean_shift_max_sigma&quot;</span>: <span class="hljs-number">3</span>},
+    <span class="hljs-string">&quot;country&quot;</span>:    {<span class="hljs-string">&quot;new_category_rate_max&quot;</span>: <span class="hljs-number">0.005</span>},
+}
+
+<span class="hljs-comment"># Tầng 4 — quan hệ giữa các cột và giữa các bảng</span>
+invariants = [
+    <span class="hljs-string">&quot;event_time &lt;= ingest_time&quot;</span>,                  <span class="hljs-comment"># không có sự kiện từ tương lai</span>
+    <span class="hljs-string">&quot;refund_amount &lt;= amount_vnd&quot;</span>,
+    <span class="hljs-string">&quot;count(rows) between 0.7*d7_median and 1.4*d7_median&quot;</span>,   <span class="hljs-comment"># lô không hụt, không phình</span>
+]
+</code></pre></div>
+<p>Ba điều đáng nói về thiết kế này:</p>
+<ul>
+<li><strong>Tầng 1 và 2 bắt lỗi cứng, tầng 3 và 4 bắt lỗi mềm.</strong> Trộn chúng vào một cơ chế là nguồn gốc của báo động giả.</li>
+<li><strong>Hợp đồng phải được sinh ra từ dữ liệu chứ không chỉ viết tay.</strong> Cách làm chuẩn là suy ra schema và khoảng giá trị từ một tập tham chiếu đã được duyệt, rồi cho người xem lại — như vậy hợp đồng không chết theo người viết ra nó.</li>
+<li><strong>Ràng buộc &quot;không có sự kiện từ tương lai&quot;</strong> ở tầng 4 nhìn thì tầm thường, nhưng nó chính là tuyến phòng thủ đầu tiên chống rò rỉ nhãn — chủ đề của <a href="mlops-ch04.html#sec-4" class="xref">Chương 4</a>.</li>
+</ul>
+<h3 id="sec-3-4" class="heading">3.4. Kiểm định ở cả đầu vào lẫn đầu ra<a class="anchor" href="#sec-3-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Một thực hành được nhắc đi nhắc lại trong nghiên cứu phỏng vấn: <strong>kiểm định dữ liệu đi vào <em>và</em> đi ra khỏi mỗi pipeline</strong>. Lý do là một pipeline nhiều bước có tính chất khó chịu: bước thứ ba hỏng thì bước thứ năm vẫn chạy, và chỉ đến đầu ra cuối cùng mới thấy con số lạ — lúc đó đã mất hàng giờ để lần ngược.</p>
+<p>Nguyên tắc chung mượn từ hệ phân tán: <strong>fail fast, fail loud, fail at the boundary</strong> — hỏng sớm, hỏng ồn ào, và hỏng ở đúng ranh giới nơi trách nhiệm đổi chủ.</p>
+<h3 id="sec-3-5" class="heading">3.5. Nhãn: nguồn lỗi bị đánh giá thấp nhất<a class="anchor" href="#sec-3-5" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Ba loại vấn đề về nhãn, xếp theo mức độ hay bị bỏ qua:</p>
+<ol>
+<li><strong>Độ trễ nhãn (label lag).</strong> Khoảng cách giữa lúc dự đoán và lúc biết đáp án thật. Với dự đoán click là vài phút; với dự đoán vỡ nợ tín dụng là <strong>hàng tháng tới hàng năm</strong>. Độ trễ nhãn quyết định gần như mọi thứ khác: nó quyết định bạn giám sát được gì (<a href="mlops-ch10.html#sec-10" class="xref">Chương 10</a>) và huấn luyện lại được nhanh đến đâu (<a href="mlops-ch11.html#sec-11" class="xref">Chương 11</a>).</li>
+<li><strong>Nhãn nhiễu và nhãn bất đồng.</strong> Cần đo <strong>mức đồng thuận giữa người gán nhãn</strong> và coi nó là <strong>trần trên của độ chính xác khả dĩ</strong>. Một mô hình đạt 95% trong khi hai người gán nhãn chỉ đồng ý với nhau 90% là một mô hình đáng nghi, không phải đáng mừng.</li>
+<li><strong>Nhãn bị chính hệ thống làm lệch.</strong> Nếu nhãn lấy từ hành vi người dùng trên kết quả do mô hình đưa ra, thì nhãn ấy không phải quan sát khách quan về thế giới — đó là <a href="mlops-ch12.html#sec-12" class="xref">Chương 12</a>.</li>
+</ol>
+<h3 id="sec-3-6" class="heading">3.6. Phiên bản hoá dữ liệu<a class="anchor" href="#sec-3-6" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Chữ V thứ ba ở <a href="mlops-ch02.html#sec-2-2" class="xref">Mục 2.2</a> áp cho dữ liệu chứ không chỉ cho mô hình. Câu hỏi cần trả lời được bất cứ lúc nào là: <em>mô hình đang chạy trong sản xuất được huấn luyện từ chính xác tập dữ liệu nào?</em></p>
+<p>Có ba mức trả lời, chi phí tăng dần:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mức</th>
+<th>Cách làm</th>
+<th>Trả lời được câu hỏi gì</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yếu</td>
+<td>Ghi lại đường dẫn và dấu thời gian</td>
+<td>&quot;Nó ở thư mục đó, ngày đó&quot; — không dựng lại được nếu thư mục bị ghi đè</td>
+</tr>
+<tr>
+<td>Vừa</td>
+<td>Lưu <strong>hash nội dung</strong> của tập dữ liệu cùng với mô hình</td>
+<td>&quot;Đúng tập này hay không&quot; — phát hiện được thay đổi, nhưng chưa dựng lại được</td>
+</tr>
+<tr>
+<td>Mạnh</td>
+<td>Lưu trữ <strong>bất biến, chỉ thêm</strong> (immutable, append-only) + truy vết dòng dõi (lineage)</td>
+<td>Dựng lại được đúng tập huấn luyện của bất kỳ mô hình nào trong quá khứ</td>
+</tr>
+</tbody>
+</table></div>
+<p>Mức mạnh nghe đắt, nhưng nó là điều kiện cần để điều tra sự cố. Khi mô hình hành xử lạ, câu hỏi đầu tiên luôn là &quot;dữ liệu huấn luyện có gì bất thường không&quot; — và nếu không dựng lại được tập ấy thì cuộc điều tra dừng ngay ở câu hỏi đầu tiên.</p>
+<hr>
+<section class="quiz" data-quiz data-chapter="3"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">3 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Phổ lỗi dữ liệu &quot;cứng → mềm → dịch chuyển&quot; đòi hỏi mấy cách phản ứng?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Một — cảnh báo cho cả ba</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Ba — chặn pipeline, cảnh báo và theo dõi tỉ lệ, điều tra và có thể huấn luyện lại</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Hai — chặn hoặc bỏ qua</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Không cần phản ứng, chỉ cần ghi log</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Trộn cả ba vào một cơ chế cảnh báo chính là nguồn gốc của báo động giả — nỗi đau được nhắc nhiều nhất trong nghiên cứu phỏng vấn.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Vì sao lỗi mềm khó bắt hơn lỗi cứng?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó xảy ra ít hơn</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó vẫn cho ra dự đoán trông hợp lý, nên trôi qua mọi kiểm tra</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó chỉ xuất hiện trong dữ liệu huấn luyện</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó cần nhãn mới phát hiện được</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Vài trường null hay một đơn vị bị đổi không vi phạm ràng buộc nào, nhưng nó lặng lẽ làm lệch dự đoán. Vì vậy lỗi mềm cần theo dõi <strong>tỉ lệ</strong> chứ không cần chặn.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">Hậu quả nghiêm trọng nhất của báo động giả là gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Tốn tài nguyên tính toán</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Làm chậm pipeline</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đội ngừng tin vào cảnh báo, nên lúc có sự cố thật thì không ai nhìn</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Làm sai lệch chỉ số chất lượng</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Một hệ cảnh báo không được tin thì <strong>tệ hơn không có</strong>, vì nó tạo cảm giác an toàn giả.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/3</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="mlops-ch02.html"><span class="pager-dir">← Trước</span><span class="pager-title">Vòng đời và ba chữ V</span></a><a class="pager-link pager-next" href="mlops-ch04.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Đặc trưng và tính đúng theo thời điểm</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-3-1">3.1. Vì sao chương này đứng trước chương mô hình</a></li><li class="toc-l3"><a href="#sec-3-2">3.2. Phổ lỗi dữ liệu: cứng → mềm → dịch chuyển</a></li><li class="toc-l3"><a href="#sec-3-3">3.3. Hợp đồng dữ liệu</a></li><li class="toc-l3"><a href="#sec-3-4">3.4. Kiểm định ở cả đầu vào lẫn đầu ra</a></li><li class="toc-l3"><a href="#sec-3-5">3.5. Nhãn: nguồn lỗi bị đánh giá thấp nhất</a></li><li class="toc-l3"><a href="#sec-3-6">3.6. Phiên bản hoá dữ liệu</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

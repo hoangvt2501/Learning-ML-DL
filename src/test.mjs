@@ -15,12 +15,18 @@ const stubDoc = {
   querySelectorAll: () => [],
   addEventListener: () => {},
 };
-const sandbox = { window: {}, document: stubDoc, console, Math, Number, Object, Float64Array };
+const sandbox = {
+  window: {}, document: stubDoc, console,
+  Math, Number, Object, Array, String, JSON, Float64Array,
+  isFinite, parseFloat, parseInt, Infinity, NaN,
+};
 sandbox.window.document = stubDoc;
 vm.createContext(sandbox);
 vm.runInContext(fs.readFileSync(path.join(ROOT, 'src/assets/playground.js'), 'utf8'), sandbox);
+vm.runInContext(fs.readFileSync(path.join(ROOT, 'src/assets/lab-mlops.js'), 'utf8'), sandbox);
 
 const L = sandbox.window.QZ_LAB;
+const M = sandbox.window.QZ_MLOPS;
 
 let pass = 0;
 let fail = 0;
@@ -218,6 +224,57 @@ group('Mục 4.3 — ngưỡng cắt tối ưu trên dữ liệu Laplace, INT4')
   const b = L.clipCompute('laplace', 6).best[1];
   check('mỗi bit giảm MSE ~4 lần (2 bit -> ~16 lần)', a / b > 8 && a / b < 32, true);
 }
+
+/* =====================================================================
+   Giáo trình 2 — MLOps: đối chiếu với kết quả của code/mlops/experiments.py
+   ===================================================================== */
+
+group('MLOps — hàm thống kê nền');
+check('normInv(0,975) = 1,959964', M.normInv(0.975), 1.959964, 1e-6);
+check('normInv(0,80) = 0,841621', M.normInv(0.80), 0.841621, 1e-6);
+check('normInv(0,99) = 2,326348', M.normInv(0.99), 2.326348, 1e-6);
+check('median của χ²(9) ≈ 8,343', M.chi2inv(0.5, 9), 8.3428, 1e-3);
+check('chi2sf(25; 9) = 0,002964', M.chi2sf(25, 9), 0.002964, 1e-5);
+check('chi2inv là nghịch đảo của chi2cdf', M.chi2cdf(M.chi2inv(0.9, 7), 7), 0.9, 1e-8);
+
+group('MLOps Mục 8.4 — cỡ mẫu A/B');
+// Các con số dưới đây in ra từ code/mlops/experiments.py phần (C).
+check('nền 5%, lift 1% -> 2.996.694', Math.round(M.nPerArm(0.05, 0.01, 0.05, 0.8, 0)), 2996694, 2);
+check('nền 5%, lift 2% -> 752.700', Math.round(M.nPerArm(0.05, 0.02, 0.05, 0.8, 0)), 752700, 2);
+check('nền 5%, lift 5% -> 122.121', Math.round(M.nPerArm(0.05, 0.05, 0.05, 0.8, 0)), 122121, 2);
+check('nền 5%, lift 20% -> 8.155', Math.round(M.nPerArm(0.05, 0.20, 0.05, 0.8, 0)), 8155, 2);
+check('Bài 2: nền 2%, lift 5% -> 315.203', Math.round(M.nPerArm(0.02, 0.05, 0.05, 0.8, 0)), 315203, 2);
+check('CUPED giảm 40% phương sai thì cỡ mẫu giảm đúng 40%',
+  M.nPerArm(0.02, 0.05, 0.05, 0.8, 0.4) / M.nPerArm(0.02, 0.05, 0.05, 0.8, 0), 0.6, 1e-12);
+check('gấp đôi mức lift thì cỡ mẫu giảm khoảng 4 lần',
+  M.nPerArm(0.05, 0.05, 0.05, 0.8, 0) / M.nPerArm(0.05, 0.10, 0.05, 0.8, 0), 3.911, 0.02);
+
+group('MLOps Mục 9.5 — PSI dưới giả thuyết không');
+check('E[PSI] với n=500, k=10 là 0,036', M.psiMeanNull(500, 10), 0.036, 1e-12);
+check('E[PSI] với n=200, k=10 là 0,090', M.psiMeanNull(200, 10), 0.09, 1e-12);
+check('E[PSI] với n=200, k=20 là 0,190', M.psiMeanNull(200, 20), 0.19, 1e-12);
+check('phân vị 99% của PSI (n=500, k=10) = 0,0867', M.psiQuantile(0.99, 500, 10), 0.0867, 5e-4);
+check('P(PSI > 0,10) khi n=500, k=10 = 0,00297', M.psiFalseAlarmRate(0.10, 500, 10), 0.00297, 1e-5);
+check('Bài 1: 200 đặc trưng -> 0,59 báo động giả mỗi ngày',
+  200 * M.psiFalseAlarmRate(0.10, 500, 10), 0.593, 5e-3);
+check('n để E[PSI] < 0,01 với k=10 là 1800', 2 * 9 / 0.01, 1800, 1e-9);
+check('ngưỡng 0,25 ở n=20.000 gần như không bao giờ chạm',
+  M.psiFalseAlarmRate(0.25, 20000, 10) < 1e-12, true);
+
+group('MLOps Mục 7.3 — đuôi độ trễ khi toả nhánh');
+// Một dịch vụ có trung vị 20 ms và p99 = 100 ms.
+check('k=1 thì trả về đúng p99 = 100 ms', M.tailQuantile(0.99, 1, 20, 100), 100, 1e-9);
+check('k=10 -> 169,5 ms', M.tailQuantile(0.99, 10, 20, 100), 169.5, 0.1);
+check('k=50 -> 231,4 ms', M.tailQuantile(0.99, 50, 20, 100), 231.4, 0.1);
+check('k=100 -> 261,9 ms', M.tailQuantile(0.99, 100, 20, 100), 261.9, 0.1);
+check('Bài 3: k=25 thì 22,22% yêu cầu chạm nhánh chậm', 1 - Math.pow(0.99, 25), 0.2222, 1e-4);
+check('Bài 3: mỗi nhánh phải đạt phân vị 99,9598%', Math.pow(0.99, 1 / 25) * 100, 99.9598, 1e-4);
+check('k=100 thì 63,4% yêu cầu chạm nhánh chậm', 1 - Math.pow(0.99, 100), 0.634, 1e-3);
+
+group('MLOps Mục 6.5 — quy tắc lấy nhỏ nhất của ML Test Score');
+check('Bài 6: min(2; 0; 4; 0) = 0', M.mtsScore([2, 0, 4, 0]), 0);
+check('hạ tầng hoàn hảo mà không giám sát vẫn bằng 0', M.mtsScore([7, 7, 7, 0]), 0);
+check('bốn nhóm cân nhau thì điểm bằng chính mức đó', M.mtsScore([3, 3, 3, 3]), 3);
 
 console.log('\n' + (fail === 0 ? 'Tất cả ' + pass + ' phép kiểm tra đều đạt.' : pass + ' đạt, ' + fail + ' HỎNG.'));
 process.exit(fail === 0 ? 0 : 1);

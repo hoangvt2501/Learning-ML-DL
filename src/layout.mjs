@@ -27,14 +27,37 @@ function renderSidebar(nav, currentFile) {
     );
   };
 
+  // Bộ chuyển giáo trình: chỉ hiện khi site có từ hai giáo trình trở lên.
+  const switcher =
+    nav.books && nav.books.length > 1
+      ? '<div class="book-switch" role="group" aria-label="Chọn giáo trình">' +
+        nav.books
+          .map((b) => {
+            const active = nav.book && b.id === nav.book.id;
+            if (active) {
+              return '<span class="book-tab is-active" aria-current="true">' +
+                escapeHtml(b.short) + '</span>';
+            }
+            return '<a class="book-tab" href="' + b.slug + 'ch01.html">' +
+              escapeHtml(b.short) + '</a>';
+          })
+          .join('') +
+        '</div>'
+      : '';
+
   return (
     '<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình">' +
     '<div class="sidebar-inner">' +
-    '<p class="nav-group">Giáo trình</p><ul class="nav-list">' +
+    switcher +
+    '<p class="nav-group">' + escapeHtml(nav.groupLabel || 'Giáo trình') + '</p><ul class="nav-list">' +
     nav.chapters.map(item).join('') +
     '</ul>' +
     '<p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list">' +
     nav.extras.map(item).join('') +
+    '</ul>' +
+    '<p class="nav-group">Toàn site</p><ul class="nav-list">' +
+    '<li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span>' +
+    '<span class="nav-label">Trang chủ</span></a></li>' +
     '</ul>' +
     '</div></nav>'
   );
@@ -112,8 +135,9 @@ export function page(o) {
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
   </button>
   <a class="brand" href="index.html">
-    <span class="brand-mark" aria-hidden="true">Q</span>
-    <span class="brand-text"><b>Quantization</b><i>giáo trình tự học</i></span>
+    <span class="brand-mark" aria-hidden="true">${o.nav.book ? escapeHtml(o.nav.book.short[0]) : 'G'}</span>
+    <span class="brand-text"><b>${o.nav.book ? escapeHtml(o.nav.book.short) : 'Giáo trình'}</b><i>${
+      o.nav.book ? 'giáo trình tự học' : 'Quantization · MLOps'}</i></span>
   </a>
   <button class="search-btn" id="searchBtn" type="button">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>

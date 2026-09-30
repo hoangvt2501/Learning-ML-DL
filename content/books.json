@@ -1,0 +1,117 @@
+[
+  {
+    "id": "quantization",
+    "slug": "",
+    "kicker": "Giáo trình 1",
+    "short": "Quantization",
+    "source": "content/quantization.md",
+    "chapters": "content/chapters.json",
+    "quiz": "content/trac-nghiem.md",
+    "glossary": "content/thuat-ngu.md",
+    "solutions": "content/loi-giai.md",
+    "notes": "content/ghi-chu.md",
+    "lab": "quantization",
+    "code": "quantization",
+    "figures": true,
+    "blurb": "Từ công thức S và Z cho tới GPTQ, NF4 và KV cache. Viết theo lối bài giảng, mọi hình và mọi con số đều sinh ra từ mã chạy được.",
+    "paths": [
+      {
+        "tag": "Lần đầu tiếp xúc",
+        "title": "Hiểu bản chất trước đã",
+        "note": "Bốn chương liền mạch, đọc hết là nắm trọn phần lõi toán học.",
+        "steps": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ]
+      },
+      {
+        "tag": "Triển khai CNN trên thiết bị",
+        "title": "Từ mô hình FP32 tới file INT8",
+        "note": "Đi theo đúng thứ tự một quy trình thật: chuẩn bị, calibrate, đo, sửa.",
+        "steps": [
+          "3",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "12"
+        ]
+      },
+      {
+        "tag": "Chỉ quan tâm LLM",
+        "title": "Vì sao LLM cần kỹ thuật riêng",
+        "note": "Nắm phần lõi vừa đủ rồi rẽ thẳng sang GPTQ, AWQ, NF4 và KV cache.",
+        "steps": [
+          "1",
+          "3",
+          "5",
+          "11"
+        ]
+      }
+    ],
+    "codeDir": "code",
+    "scripts": "content/scripts-quantization.json",
+    "figuresNote": "Trừ Hình 1 dùng số liệu đã công bố của Horowitz (ISSCC 2014), mọi hình còn lại đều do mã nguồn sinh ra, chạy thật và chạy lại được."
+  },
+  {
+    "id": "mlops",
+    "slug": "mlops-",
+    "kicker": "Giáo trình 2",
+    "short": "MLOps",
+    "source": "content/mlops.md",
+    "chapters": "content/mlops-chapters.json",
+    "quiz": "content/mlops-trac-nghiem.md",
+    "glossary": "content/mlops-thuat-ngu.md",
+    "solutions": "content/mlops-loi-giai.md",
+    "lab": "mlops",
+    "code": "mlops",
+    "figures": true,
+    "blurb": "Vì sao mô hình tốt vẫn chết trong sản xuất, và phải dựng những gì quanh nó để nó sống. Mọi con số đều truy được về bài báo gốc hoặc về mã chạy lại được.",
+    "paths": [
+      {
+        "tag": "Lần đầu nghe tới MLOps",
+        "title": "Hiểu vì sao nó khó đã",
+        "note": "Bốn chương đầu cho bạn khung tư duy: nợ kỹ thuật, vòng đời, ba chữ V, và dữ liệu.",
+        "steps": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ]
+      },
+      {
+        "tag": "Sắp đi phỏng vấn",
+        "title": "Lối đi ngắn nhất tới câu trả lời chắc",
+        "note": "Bốn chương bị hỏi nhiều nhất, rồi vào thẳng phần ôn phỏng vấn.",
+        "steps": [
+          "1",
+          "6",
+          "9",
+          "10",
+          "15"
+        ]
+      },
+      {
+        "tag": "Đang vận hành hệ thống thật",
+        "title": "Từ lúc ra mắt tới lúc huấn luyện lại",
+        "note": "Đi theo đúng thứ tự một ca vận hành: phục vụ, ra mắt, giám sát, huấn luyện lại.",
+        "steps": [
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12"
+        ]
+      }
+    ],
+    "codeDir": "code/mlops",
+    "scripts": "content/scripts-mlops.json",
+    "figuresNote": "Mọi hình đều do mã nguồn trong thư mục code/mlops/ sinh ra, chạy thật và chạy lại được.",
+    "drills": false
+  }
+]

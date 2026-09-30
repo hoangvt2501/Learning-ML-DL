@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>16. Tài liệu tham khảo — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
+<meta name="description" content="Hai mươi nguồn, mỗi nguồn ghi rõ nó là nguồn của khẳng định nào trong tài liệu.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>MLOps</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group">Giáo trình 2 · MLOps</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html" class="is-active" aria-current="page"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 16</span><span class="kicker-time">4 phút đọc</span></div><h2 id="sec-16" class="heading">16. Tài liệu tham khảo<a class="anchor" href="#sec-16" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Hai mươi nguồn, mỗi nguồn ghi rõ nó là nguồn của khẳng định nào trong tài liệu.</p>
+<p><strong>Nền tảng về nợ kỹ thuật và kiểm thử</strong></p>
+<ol>
+<li>D. Sculley và cộng sự. <em>Hidden Technical Debt in Machine Learning Systems.</em> NeurIPS 2015. — nguồn của CACE, của các dạng nợ có tên, của con số 5% / 95% mã keo, và của bộ ba giám sát prediction bias / action limits / up-stream producers.</li>
+<li>D. Sculley và cộng sự. <em>Machine Learning: The High-Interest Credit Card of Technical Debt.</em> NeurIPS Workshop, 2014. — bản tiền thân, ngắn hơn.</li>
+<li>E. Breck, S. Cai, E. Nielsen, M. Salib, D. Sculley. <em>The ML Test Score: A Rubric for ML Production Readiness and Technical Debt Reduction.</em> IEEE Big Data 2017. — nguồn của 28 mục kiểm thử, cách tính điểm và bảng diễn giải.</li>
+<li>M. Zinkevich. <em>Rules of Machine Learning: Best Practices for ML Engineering.</em> Google. — tập quy tắc thực hành, bổ trợ rất tốt cho <a href="mlops-ch02.html#sec-2" class="xref">Chương 2</a> và <a href="mlops-ch06.html#sec-6" class="xref">6</a>.</li>
+</ol>
+<p><strong>Quy trình và kiến trúc</strong></p>
+<ol start="5">
+<li>Google Cloud. <em>MLOps: Continuous delivery and automation pipelines in machine learning.</em> — nguồn của ba mức tự động hoá, tám bước pipeline, sáu giai đoạn CI/CD ở mức 2, và định nghĩa training–serving skew.</li>
+<li>D. Sato, A. Wider, C. Windheuser. <em>Continuous Delivery for Machine Learning.</em> martinfowler.com, 2019.</li>
+<li>D. Kreuzberger, N. Kühl, S. Hirschl. <em>Machine Learning Operations (MLOps): Overview, Definition, and Architecture.</em> IEEE Access, 2023.</li>
+</ol>
+<p><strong>Thực hành từ người trong nghề</strong></p>
+<ol start="8">
+<li>S. Shankar, R. Garcia, J. M. Hellerstein, A. G. Parameswaran. <em>Operationalizing Machine Learning: An Interview Study.</em> arXiv:2209.09125, 2022. — nguồn của ba chữ V, bốn nhiệm vụ vòng đời, phổ lỗi cứng → mềm → dịch chuyển, bốn nỗi đau và bốn anti-pattern.</li>
+<li>C. Huyen. <em>Designing Machine Learning Systems.</em> O'Reilly, 2022.</li>
+<li>C. Huyen. <em>Data Distribution Shifts and Monitoring.</em> huyenchip.com, 2022. — nguồn của định nghĩa ba loại dịch chuyển theo <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>Y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(Y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span><span class="mclose">)</span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>Y</mi><mi mathvariant="normal">∣</mi><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(Y|X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span>, của degenerate feedback loop và của phân tầng chỉ số giám sát.</li>
+<li>A. Paleyes, R.-G. Urma, N. D. Lawrence. <em>Challenges in Deploying Machine Learning: A Survey of Case Studies.</em> ACM Computing Surveys, 2022.</li>
+</ol>
+<p><strong>Dịch chuyển phân phối và phát hiện</strong></p>
+<ol start="12">
+<li>J. Quiñonero-Candela, M. Sugiyama, A. Schwaighofer, N. D. Lawrence (chủ biên). <em>Dataset Shift in Machine Learning.</em> MIT Press, 2009. — nguồn học thuật gốc của phân loại covariate / prior probability / concept shift.</li>
+<li>J. G. Moreno-Torres và cộng sự. <em>A unifying view on dataset shift in classification.</em> Pattern Recognition, 2012.</li>
+<li>B. Yurdakul, J. Naranjo. <em>Statistical properties of the population stability index.</em> — nguồn cho kết quả PSI co giãn tiệm cận theo <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>χ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\chi^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0085em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">χ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span> và cho lập luận rằng giá trị tới hạn phụ thuộc cỡ mẫu và số bin.</li>
+<li>A. du Pisanie, J. Visagie và cộng sự. <em>A critical review of existing and new population stability testing procedures in credit risk scoring.</em> arXiv:2303.01227, 2023.</li>
+<li>J. Dean, L. A. Barroso. <em>The Tail at Scale.</em> Communications of the ACM, 2013. — nguồn của phân tích đuôi độ trễ khi toả nhánh ở <a href="mlops-ch07.html#sec-7-3" class="xref">Mục 7.3</a>.</li>
+</ol>
+<p><strong>Kiểm thử hành vi và đánh giá</strong></p>
+<ol start="17">
+<li>M. T. Ribeiro, T. Wu, C. Guestrin, S. Singh. <em>Beyond Accuracy: Behavioral Testing of NLP Models with CheckList.</em> ACL 2020. — nguồn của ba họ kiểm thử bất biến / kỳ vọng có hướng / chức năng tối thiểu.</li>
+<li>R. Kohavi, D. Tang, Y. Xu. <em>Trustworthy Online Controlled Experiments.</em> Cambridge University Press, 2020. — chuẩn mực về A/B test, peeking, đa kiểm định và ô nhiễm nhánh.</li>
+</ol>
+<p><strong>Kho đặc trưng</strong></p>
+<ol start="19">
+<li>Tài liệu Feast (feast.dev) và Tecton về <strong>point-in-time correct join</strong>, offline/online store và sổ đăng ký đặc trưng.</li>
+</ol>
+<p><strong>LLMOps</strong></p>
+<ol start="20">
+<li>Tài liệu vận hành và đánh giá LLM cập nhật 2025–2026 về LLM-as-judge, tập vàng, rào chắn và theo dõi chi phí theo bản ghi vết. Đây là mảng đổi nhanh nhất trong tài liệu này; hãy đối chiếu lại với nguồn hiện hành trước khi dùng con số cụ thể.</li>
+</ol>
+<hr>
+</article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="mlops-ch15.html"><span class="pager-dir">← Trước</span><span class="pager-title">Ôn phỏng vấn</span></a><a class="pager-link pager-next" href="mlops-phu-luc.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Phụ lục: chạy lại thí nghiệm</span></a></nav>
+</main>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

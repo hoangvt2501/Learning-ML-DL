@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6. Đánh giá cho sản xuất — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
+<meta name="description" content="Vì sao một con số là không đủ: đánh giá theo lát cắt với thí nghiệm đo được, kiểm thử hành vi, và toàn bộ 28 mục của ML Test Score.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>MLOps</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group">Giáo trình 2 · MLOps</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html" class="is-active" aria-current="page"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 6</span><span class="kicker-time">9 phút đọc</span></div><h2 id="sec-6" class="heading">6. Đánh giá cho sản xuất<a class="anchor" href="#sec-6" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Vì sao một con số là không đủ: đánh giá theo lát cắt với thí nghiệm đo được, kiểm thử hành vi, và toàn bộ 28 mục của ML Test Score.</p>
+<h3 id="sec-6-1" class="heading">6.1. Vì sao một con số là không đủ<a class="anchor" href="#sec-6-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Một mô hình được tóm bằng một con số duy nhất — &quot;độ chính xác 92%&quot; — là một mô hình chưa được đánh giá. Ba lý do, đi từ dễ tới khó.</p>
+<h3 id="sec-6-2" class="heading">6.2. Chỉ số ngoại tuyến phải gắn với chỉ số sản phẩm<a class="anchor" href="#sec-6-2" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Thực hành được nghiên cứu phỏng vấn nhấn mạnh: <strong>chỉ số đánh giá ML phải gắn với chỉ số sản phẩm</strong>. Cùng ý đó, tiêu chí <strong>Model 2</strong> của ML Test Score (<a href="mlops-ch06.html#sec-6-5" class="xref">Mục 6.5</a>) viết thẳng: <em>chỉ số đại diện ngoại tuyến phải tương quan với tác động thật</em>.</p>
+<p>Mối quan hệ giữa hai loại chỉ số hầu như không bao giờ tuyến tính:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Chỉ số ML</th>
+<th>Chỉ số sản phẩm tương ứng</th>
+<th>Quan hệ điển hình</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AUC của mô hình gian lận</td>
+<td>tiền thiệt hại chặn được</td>
+<td>bão hoà — sau một mức, AUC tăng mà tiền không đổi vì đội điều tra đã hết công suất</td>
+</tr>
+<tr>
+<td>NDCG của xếp hạng</td>
+<td>thời gian người dùng ở lại</td>
+<td>có thể <strong>nghịch</strong> — xếp hạng &quot;đúng&quot; quá có thể giảm khám phá</td>
+</tr>
+<tr>
+<td>Perplexity của mô hình ngôn ngữ</td>
+<td>tỉ lệ người dùng chấp nhận câu trả lời</td>
+<td>tương quan yếu, và yếu dần khi mô hình mạnh lên</td>
+</tr>
+</tbody>
+</table></div>
+<p>Vì vậy quy tắc là: <strong>chọn một chỉ số ngoại tuyến rẻ để lặp nhanh, nhưng phải kiểm chứng định kỳ rằng nó còn tương quan với chỉ số sản phẩm.</strong> Khi tương quan ấy đứt — và nó sẽ đứt — thì chỉ số ngoại tuyến trở thành một trò chơi tự sướng.</p>
+<h3 id="sec-6-3" class="heading">6.3. Đánh giá theo lát cắt<a class="anchor" href="#sec-6-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Đây là kỹ thuật có tỉ lệ <em>lợi ích trên công sức</em> cao nhất trong cả chương. Một chỉ số gộp là trung bình có trọng số theo lưu lượng, nên nó <strong>bị nhóm đa số chi phối hoàn toàn</strong>.</p>
+<p>Thí nghiệm sau nằm trong <code>code/mlops/experiments.py</code>. Tình huống rất thật: mô hình v2 được thêm một đặc trưng mạnh — &quot;hành vi mua hàng trong quá khứ&quot; — nhưng đặc trưng ấy <strong>chỉ có tín hiệu với khách hàng cũ</strong>. Với 15% người dùng mới, nó là nhiễu thuần tuý.</p>
+<figure class="figure" id="hinh-6">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 6"><img src="figs/mlops06_slice.png" alt="Hình 6" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 6.</strong> Cùng một thay đổi, ba cách nhìn khác nhau. Chỉ số gộp nói &quot;tốt hơn rất nhiều&quot;; nhóm người dùng mới nói ngược lại.</figcaption>
+</figure>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Lát cắt</th>
+<th>v1</th>
+<th>v2</th>
+<th>Thay đổi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tổng thể</td>
+<td>69,14%</td>
+<td>88,96%</td>
+<td><strong>+19,83 điểm</strong></td>
+</tr>
+<tr>
+<td>Nhóm A — khách cũ, 85% lưu lượng</td>
+<td>68,99%</td>
+<td>94,48%</td>
+<td>+25,49 điểm</td>
+</tr>
+<tr>
+<td>Nhóm B — khách mới, 15% lưu lượng</td>
+<td>69,97%</td>
+<td>58,35%</td>
+<td><strong>−11,62 điểm</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Cơ chế thì đơn giản và đáng nói ra khi phỏng vấn: mô hình học được trọng số lớn cho đặc trưng mới (trọng số đo được là 2,28 so với 1,07 của đặc trưng cũ) vì với 85% dữ liệu đặc trưng ấy rất tốt. Với 15% còn lại, chính trọng số lớn ấy <strong>bơm nhiễu thẳng vào dự đoán</strong>. Nhóm B không chỉ <em>không được lợi</em> — nó <strong>bị hại</strong>, và tụt xuống dưới cả mức của mô hình cũ.</p>
+<p>Đây cũng là minh hoạ sống của nguyên lý CACE ở <a href="mlops-ch01.html#sec-1-3" class="xref">Mục 1.3</a>: thêm một đặc trưng không phải là cộng thêm một thứ, mà là đổi toàn bộ hàm số.</p>
+<p><strong>Lát cắt nào cần theo dõi?</strong> Tối thiểu bốn nhóm:</p>
+<ol>
+<li><strong>Lát cắt nghiệp vụ</strong>: khách mới / cũ, thị trường, hạng khách hàng, kênh.</li>
+<li><strong>Lát cắt kỹ thuật</strong>: thiết bị, phiên bản ứng dụng, có / không có đặc trưng nào đó.</li>
+<li><strong>Lát cắt công bằng</strong>: các nhóm được pháp luật bảo vệ, nếu bài toán có liên quan.</li>
+<li><strong>Lát cắt thời gian</strong>: theo giờ trong ngày, theo ngày trong tuần, ngày lễ.</li>
+</ol>
+<p>Tiêu chí <strong>Model 6</strong> của ML Test Score phát biểu đúng yêu cầu này: <em>chất lượng mô hình phải đủ tốt trên mọi lát cắt dữ liệu quan trọng</em>.</p>
+<h3 id="sec-6-4" class="heading">6.4. Kiểm thử hành vi<a class="anchor" href="#sec-6-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Ngoài chỉ số trên tập kiểm tra, mô hình cần loại kiểm thử mà phần mềm thường vẫn dùng: khẳng định về <strong>hành vi</strong>, không về <strong>độ chính xác trung bình</strong>. Ba họ:</p>
+<div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-comment"># 1. Bất biến — đổi thứ không nên ảnh hưởng, dự đoán phải giữ nguyên</span>
+<span class="hljs-keyword">assert</span> model(<span class="hljs-string">&quot;Chuyến bay tới Hà Nội bị huỷ&quot;</span>) == model(<span class="hljs-string">&quot;Chuyến bay tới Đà Nẵng bị huỷ&quot;</span>)
+
+<span class="hljs-comment"># 2. Kỳ vọng có hướng — đổi thứ có hướng rõ ràng, dự đoán phải đổi đúng hướng</span>
+<span class="hljs-keyword">assert</span> risk(income=<span class="hljs-number">50_000_000</span>) &lt; risk(income=<span class="hljs-number">5_000_000</span>)
+
+<span class="hljs-comment"># 3. Chức năng tối thiểu — các ca đơn giản mà hệ thống KHÔNG ĐƯỢC PHÉP sai</span>
+<span class="hljs-keyword">assert</span> sentiment(<span class="hljs-string">&quot;Sản phẩm này tuyệt vời&quot;</span>) == <span class="hljs-string">&quot;tích cực&quot;</span>
+</code></pre></div>
+<p>Giá trị của chúng: một mô hình có thể tăng 1 điểm độ chính xác trung bình mà lại mất khả năng xử lý đúng một ca hiển nhiên. Chỉ số trung bình không bao giờ báo chuyện đó; kiểm thử hành vi thì báo ngay.</p>
+<h3 id="sec-6-5" class="heading">6.5. ML Test Score<a class="anchor" href="#sec-6-5" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Bộ tiêu chí đầy đủ nhất để trả lời câu &quot;hệ thống của bạn đã sẵn sàng cho sản xuất chưa&quot; là <em>The ML Test Score: A Rubric for ML Production Readiness and Technical Debt Reduction</em> (Breck và cộng sự, Google, 2017). Nó gồm <strong>28 mục, chia đều thành 4 nhóm 7 mục</strong>.</p>
+<p><strong>Nhóm 1 — Dữ liệu và đặc trưng</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data 1</td>
+<td>Kỳ vọng về đặc trưng được ghi lại thành một schema</td>
+</tr>
+<tr>
+<td>Data 2</td>
+<td>Mọi đặc trưng đều có ích — không có kiểu &quot;vơ hết vào&quot;</td>
+</tr>
+<tr>
+<td>Data 3</td>
+<td>Không đặc trưng nào có chi phí quá đắt so với lợi ích</td>
+</tr>
+<tr>
+<td>Data 4</td>
+<td>Đặc trưng tuân thủ các yêu cầu ở mức chính sách (quyền riêng tư, pháp lý)</td>
+</tr>
+<tr>
+<td>Data 5</td>
+<td>Pipeline dữ liệu có kiểm soát quyền riêng tư phù hợp</td>
+</tr>
+<tr>
+<td>Data 6</td>
+<td>Thêm đặc trưng mới được nhanh</td>
+</tr>
+<tr>
+<td>Data 7</td>
+<td>Toàn bộ mã tính đặc trưng đều được kiểm thử</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Nhóm 2 — Phát triển mô hình</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model 1</td>
+<td>Mọi đặc tả mô hình đều qua rà soát mã và được đưa vào quản lý phiên bản</td>
+</tr>
+<tr>
+<td>Model 2</td>
+<td>Chỉ số đại diện ngoại tuyến tương quan với tác động thật</td>
+</tr>
+<tr>
+<td>Model 3</td>
+<td>Mọi siêu tham số đã được tinh chỉnh</td>
+</tr>
+<tr>
+<td>Model 4</td>
+<td>Đã biết ảnh hưởng của việc mô hình cũ đi (staleness)</td>
+</tr>
+<tr>
+<td>Model 5</td>
+<td>Một mô hình đơn giản hơn không tốt hơn — kiểm tra định kỳ</td>
+</tr>
+<tr>
+<td>Model 6</td>
+<td>Chất lượng đủ tốt trên <strong>mọi lát cắt quan trọng</strong></td>
+</tr>
+<tr>
+<td>Model 7</td>
+<td>Đã kiểm tra các khía cạnh về tính bao hàm / công bằng</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Nhóm 3 — Hạ tầng ML</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Infra 1</td>
+<td><strong>Huấn luyện lặp lại được</strong></td>
+</tr>
+<tr>
+<td>Infra 2</td>
+<td>Mã đặc tả mô hình có kiểm thử đơn vị</td>
+</tr>
+<tr>
+<td>Infra 3</td>
+<td><strong>Toàn bộ pipeline</strong> có kiểm thử tích hợp</td>
+</tr>
+<tr>
+<td>Infra 4</td>
+<td>Chất lượng mô hình được kiểm định <strong>trước khi</strong> phục vụ</td>
+</tr>
+<tr>
+<td>Infra 5</td>
+<td>Mô hình cho phép gỡ lỗi bằng cách quan sát từng bước</td>
+</tr>
+<tr>
+<td>Infra 6</td>
+<td>Mô hình được thử qua quy trình <strong>canary</strong> trước khi ra toàn bộ</td>
+</tr>
+<tr>
+<td>Infra 7</td>
+<td><strong>Quay lui được nhanh và an toàn</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Nhóm 4 — Giám sát</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Monitor 1</td>
+<td>Thay đổi ở phụ thuộc thượng nguồn sinh ra thông báo</td>
+</tr>
+<tr>
+<td>Monitor 2</td>
+<td>Bất biến dữ liệu giữ đúng ở cả huấn luyện lẫn phục vụ</td>
+</tr>
+<tr>
+<td>Monitor 3</td>
+<td><strong>Đặc trưng lúc huấn luyện và lúc phục vụ tính ra cùng giá trị</strong></td>
+</tr>
+<tr>
+<td>Monitor 4</td>
+<td>Mô hình không quá cũ</td>
+</tr>
+<tr>
+<td>Monitor 5</td>
+<td>Mô hình ổn định về mặt số học</td>
+</tr>
+<tr>
+<td>Monitor 6</td>
+<td>Mô hình không bị tụt chất lượng đột ngột</td>
+</tr>
+<tr>
+<td>Monitor 7</td>
+<td>Mô hình không bị tụt chất lượng do hồi quy (regression)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Cách tính điểm</strong> — và đây là phần tinh tế nhất, rất đáng nhớ:</p>
+<ul>
+<li><strong>0,5 điểm</strong> nếu mục đó được thực hiện <strong>thủ công</strong>, có ghi lại kết quả và có phân phát cho người liên quan;</li>
+<li><strong>1 điểm</strong> nếu có <strong>hệ thống chạy mục đó tự động, lặp lại theo định kỳ</strong>;</li>
+<li>cộng điểm <strong>riêng cho từng nhóm trong bốn nhóm</strong>;</li>
+<li><strong>điểm cuối cùng là GIÁ TRỊ NHỎ NHẤT trong bốn điểm nhóm.</strong></li>
+</ul>
+<p>Lý do lấy nhỏ nhất được bài báo nói rõ: cả bốn nhóm đều quan trọng, nên muốn nâng điểm thì <strong>phải quan tâm cả bốn</strong>. Hệ quả sắc bén: một đội có hạ tầng huấn luyện hoàn hảo nhưng <strong>không giám sát gì</strong> thì điểm bằng 0 — dù ba nhóm kia đạt tối đa.</p>
+<p><strong>Cách đọc điểm</strong> (Bảng V của bài báo):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Điểm</th>
+<th>Ý nghĩa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Giống một dự án nghiên cứu hơn là một hệ thống sản xuất</td>
+</tr>
+<tr>
+<td>(0, 1]</td>
+<td>Không phải hoàn toàn chưa kiểm thử, nhưng đáng lo về những lỗ hổng nghiêm trọng</td>
+</tr>
+<tr>
+<td>(1, 2]</td>
+<td>Đã có bước đầu đưa vào sản xuất, cần đầu tư thêm</td>
+</tr>
+<tr>
+<td>(2, 3]</td>
+<td>Kiểm thử tương đối đủ, nhưng nhiều mục còn có thể tự động hoá</td>
+</tr>
+<tr>
+<td>(3, 5]</td>
+<td>Mức kiểm thử và giám sát tự động mạnh, hợp cho hệ thống trọng yếu</td>
+</tr>
+<tr>
+<td>&gt; 5</td>
+<td>Mức tự động hoá xuất sắc</td>
+</tr>
+</tbody>
+</table></div>
+<p>Bài báo cũng ghi chú rằng <strong>hệ thống ở giai đoạn khác nhau thì hợp lý khi nhắm tới điểm khác nhau</strong> — một prototype không cần đạt 4.</p>
+<hr>
+<section class="quiz" data-quiz data-chapter="6"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">3 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Trong thí nghiệm đánh giá theo lát cắt ở <a href="mlops-ch06.html#sec-6-3" class="xref">Mục 6.3</a>, điều gì xảy ra?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Mọi lát cắt đều cải thiện, chỉ khác mức độ</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ số gộp tăng 19,8 điểm nhưng nhóm 15% người dùng mới <strong>mất 11,6 điểm</strong> và tụt xuống dưới mô hình cũ</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ số gộp giảm nhưng các lát cắt đều tăng</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Không lát cắt nào đổi đáng kể</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Cơ chế: đặc trưng mới chỉ có tín hiệu với nhóm đa số, nên mô hình học trọng số lớn cho nó; với nhóm thiểu số chính trọng số lớn ấy <strong>bơm nhiễu thẳng vào dự đoán</strong>. Đây là CACE ở dạng đo được.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">ML Test Score được tính bằng cách nào?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Tổng điểm của cả 28 mục</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Trung bình điểm của bốn nhóm</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text"><strong>Giá trị nhỏ nhất</strong> trong bốn điểm nhóm</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Tỉ lệ phần trăm số mục đã đạt</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Mỗi mục được 0,5 điểm nếu làm thủ công có ghi chép, 1 điểm nếu tự động định kỳ. Lấy <code>min</code> vì cả bốn nhóm đều cần thiết — nên đội có hạ tầng hoàn hảo mà không giám sát gì thì <strong>điểm bằng 0</strong>.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">Ba họ kiểm thử hành vi là gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đơn vị, tích hợp, đầu-cuối</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Bất biến, kỳ vọng có hướng, chức năng tối thiểu</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chính xác, độ nhạy, độ đặc hiệu</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Ngoại tuyến, trực tuyến, shadow</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Giá trị của chúng: một mô hình có thể tăng 1 điểm độ chính xác trung bình mà lại mất khả năng xử lý đúng một ca hiển nhiên. Chỉ số trung bình không bao giờ báo chuyện đó.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/3</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="mlops-ch05.html"><span class="pager-dir">← Trước</span><span class="pager-title">Thí nghiệm lặp lại được</span></a><a class="pager-link pager-next" href="mlops-ch07.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Đóng gói và phục vụ</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-6-1">6.1. Vì sao một con số là không đủ</a></li><li class="toc-l3"><a href="#sec-6-2">6.2. Chỉ số ngoại tuyến phải gắn với chỉ số sản phẩm</a></li><li class="toc-l3"><a href="#sec-6-3">6.3. Đánh giá theo lát cắt</a></li><li class="toc-l3"><a href="#sec-6-4">6.4. Kiểm thử hành vi</a></li><li class="toc-l3"><a href="#sec-6-5">6.5. ML Test Score</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

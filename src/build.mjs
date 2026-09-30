@@ -1,4 +1,4 @@
-// Dựng site tĩnh từ content/quantization.md và các tệp nội dung đi kèm.
+// Dựng site tĩnh cho các giáo trình khai báo trong content/books.json.
 // Chạy: npm run build   ->   toàn bộ kết quả nằm trong docs/
 
 import fs from 'node:fs';
@@ -8,6 +8,7 @@ import { createMarkdownIt, sectionId, figureId, slugify } from './markdown.mjs';
 import { page, escapeHtml } from './layout.mjs';
 import { buildExercisePage } from './pages/exercises.mjs';
 import { buildPlaygroundPage } from './pages/playground.mjs';
+import { buildMlopsLabPage } from './pages/lab-mlops.mjs';
 import { buildGlossaryPage } from './pages/glossary.mjs';
 import { buildFiguresPage } from './pages/figures.mjs';
 import { buildCodePage } from './pages/code.mjs';
@@ -18,130 +19,43 @@ import { parseNotes, injectNotes, buildNotesPage } from './pages/notes.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'docs');
 
-const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
+// Chuẩn hoá xuống dòng về LF: mọi bộ phân tích bên dưới đều tách đoạn bằng \n{2,},
+// nên một tệp lưu kiểu CRLF sẽ lặng lẽ không tách được đoạn nào.
+const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8').replace(/\r\n?/g, '\n');
 const write = (rel, data) => {
   const p = path.join(OUT, rel);
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, data);
 };
 
-// ---------------------------------------------------------------- 1. nội dung
-const source = read('content/quantization.md');
-const chapterMeta = JSON.parse(read('content/chapters.json'));
+// ------------------------------------------------------------ tiện ích chung
 
 /** Cắt tài liệu thành các phần theo tiêu đề cấp 2. */
-function splitChapters(md) {
-  const lines = md.split('\n');
+function splitChapters(mdText) {
   const parts = [];
-  let head = [];
+  const head = [];
   let cur = null;
   let inFence = false;
 
-  for (const line of lines) {
+  for (const line of mdText.split('\n')) {
     if (/^```/.test(line)) inFence = !inFence;
     const h2 = !inFence && /^## (?!#)/.test(line) ? line.slice(3).trim() : null;
     if (h2) {
       if (cur) parts.push(cur);
       cur = { title: h2, lines: [] };
-    } else if (cur) {
-      cur.lines.push(line);
-    } else {
-      head.push(line);
-    }
+    } else if (cur) cur.lines.push(line);
+    else head.push(line);
   }
   if (cur) parts.push(cur);
   return { head: head.join('\n'), parts };
 }
 
-const { head, parts } = splitChapters(source);
-
-// Tiêu đề chính + đoạn dẫn nhập nằm trước mục lục.
-const docTitle = (head.match(/^# (.+)$/m) || [, 'Quantization'])[1].trim();
-const intro = head
-  .split('\n')
-  .filter((l) => l.startsWith('>'))
-  .join('\n');
-
-// Gắn từng phần đã cắt vào metadata chương.
-const chapters = chapterMeta.map((meta) => {
-  const part = parts.find((p) => {
-    if (meta.num === 'PL') return p.title.startsWith('Phụ lục');
-    return p.title.startsWith(meta.num + '. ');
-  });
-  if (!part) throw new Error('Không tìm thấy chương ' + meta.num + ' trong quantization.md');
-  return { ...meta, title: part.title, markdown: part.lines.join('\n').trim() };
-});
-
-// ------------------------------------------------- 2. sổ tra cứu mục và hình
-const registry = { sections: new Map(), figures: new Map(), currentFile: '' };
-
-for (const ch of chapters) {
-  const target = ch.num === '14' ? 'bai-tap.html' : ch.file;
-  // tiêu đề chương
-  if (ch.num !== 'PL') {
-    registry.sections.set(ch.num, {
-      href: target + '#' + sectionId(ch.num),
-      title: ch.title,
-      file: target,
-    });
-  }
-  // các mục con
-  const re = /^#{3,4} (\d+(?:\.\d+)+)\.\s*(.+)$/gm;
-  let m;
-  while ((m = re.exec(ch.markdown)) !== null) {
-    registry.sections.set(m[1], {
-      href: target + '#' + sectionId(m[1]),
-      title: m[2].trim(),
-      file: target,
-    });
-  }
-  // hình
-  const fr = /!\[Hình (\d+)\]\(figs\/([^)]+)\)\s*\n\s*\n\*\*Hình \1\.\*\*\s*([^\n]+)/g;
-  let f;
-  while ((f = fr.exec(ch.markdown)) !== null) {
-    registry.figures.set(f[1], {
-      href: target + '#' + figureId(f[1]),
-      src: 'figs/' + f[2],
-      caption: f[3].trim(), // markdown thô, có cả công thức
-      file: target,
-      chapter: ch.num,
-      chapterTitle: ch.title,
-    });
-  }
-}
-
-const md = createMarkdownIt(registry);
-
-// ---------------------------------------------------------------- 3. điều hướng
-const nav = {
-  chapters: chapters.map((c) => ({
-    file: c.num === '14' ? 'bai-tap.html' : c.file,
-    num: c.num,
-    label: c.label,
-  })),
-  extras: [
-    { file: 'thuc-hanh.html', icon: '⚙', label: 'Phòng thí nghiệm' },
-    { file: 'hinh-anh.html', icon: '◳', label: 'Thư viện 17 hình' },
-    { file: 'thuat-ngu.html', icon: '¶', label: 'Từ điển thuật ngữ' },
-    { file: 'ghi-chu.html', icon: '!', label: 'Ghi chú biên tập' },
-    { file: 'ma-nguon.html', icon: '{}', label: 'Mã nguồn thí nghiệm' },
-    { file: 'toan-van.html', icon: '≡', label: 'Toàn văn một trang' },
-  ],
-};
-
-const navOrder = [{ file: 'index.html', label: 'Trang chủ' }, ...nav.chapters, ...nav.extras];
-const neighbours = (file) => {
-  const i = navOrder.findIndex((x) => x.file === file);
-  return { prev: i > 0 ? navOrder[i - 1] : null, next: i >= 0 ? navOrder[i + 1] : null };
-};
-
-// ---------------------------------------------------------------- 4. tiện ích
 function readingMinutes(markdown) {
   const words = markdown.replace(/```[\s\S]*?```/g, ' ').split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(words / 170));
 }
 
-/** Mục lục bên phải, lấy từ các thẻ h3 (và h4 nếu có) trong HTML đã render. */
+/** Mục lục bên phải, lấy từ các thẻ h3/h4 trong HTML đã render. */
 function extractToc(html) {
   const re = /<h([34]) id="([^"]+)" class="heading">([\s\S]*?)<a class="anchor"/g;
   const items = [];
@@ -154,189 +68,247 @@ function extractToc(html) {
   return (
     '<ul class="toc-list">' +
     items
-      .map(
-        (i) =>
-          '<li class="toc-l' + i.level + '"><a href="#' + i.id + '">' + escapeHtml(i.text) + '</a></li>'
-      )
+      .map((i) =>
+        '<li class="toc-l' + i.level + '"><a href="#' + i.id + '">' + escapeHtml(i.text) + '</a></li>')
       .join('') +
     '</ul>'
   );
 }
 
-/** Chỉ mục tìm kiếm: mỗi mục con là một bản ghi. */
 const searchIndex = [];
-function indexChapter(ch, targetFile) {
-  const blocks = ch.markdown.split(/^(#{3,4} .+)$/m);
-  let currentHeading = ch.title;
-  let currentId = sectionId(ch.num === 'PL' ? '0' : ch.num);
-  if (ch.num === 'PL') currentId = slugify(ch.title);
 
-  // Mỗi mục con được cắt thành vài đoạn ~600 ký tự để kết quả tìm kiếm
-  // trỏ tới đúng chỗ và đoạn trích luôn chứa từ khoá.
-  const push = (heading, id, body) => {
-    const text = body
-      .replace(/```[\s\S]*?```/g, ' ')
-      .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
-      .replace(/[#*_`>|$\\]/g, ' ')
-      .replace(/[ \t]+/g, ' ')
-      .trim();
-    if (!text) return;
+// ============================================================ dựng một giáo trình
 
-    const chunks = [];
-    let buf = '';
-    for (const para of text.split(/\n{2,}/)) {
-      const p = para.replace(/\s+/g, ' ').trim();
-      if (!p) continue;
-      if (buf && buf.length + p.length > 600) { chunks.push(buf); buf = p; }
-      else buf = buf ? buf + ' ' + p : p;
+function buildBook(spec, books) {
+  const f = (name) => spec.slug + name;                 // tên file có tiền tố của sách
+  const source = read(spec.source);
+  const chapterMeta = JSON.parse(read(spec.chapters));
+  const { head, parts } = splitChapters(source);
+
+  const docTitle = (head.match(/^# (.+)$/m) || [, spec.short])[1].trim();
+  const intro = head.split('\n').filter((l) => l.startsWith('>')).join('\n');
+
+  const chapters = chapterMeta.map((meta) => {
+    const part = parts.find((p) =>
+      meta.num === 'PL' ? p.title.startsWith('Phụ lục') : p.title.startsWith(meta.num + '. '));
+    if (!part) throw new Error(`[${spec.id}] Không tìm thấy chương ${meta.num} trong ${spec.source}`);
+    return { ...meta, title: part.title, markdown: part.lines.join('\n').trim() };
+  });
+
+  // Chương nào là trang bài tập thì điều hướng trỏ thẳng sang đó.
+  const fileOf = (ch) => (ch.kind === 'exercises' ? f('bai-tap.html') : ch.file);
+
+  // ---------------------------------------------- sổ tra cứu mục và hình
+  const registry = { sections: new Map(), figures: new Map(), currentFile: '' };
+
+  for (const ch of chapters) {
+    const target = fileOf(ch);
+    if (ch.num !== 'PL') {
+      registry.sections.set(ch.num, {
+        href: target + '#' + sectionId(ch.num), title: ch.title, file: target,
+      });
     }
-    if (buf) chunks.push(buf);
-
-    for (const chunk of chunks) {
-      searchIndex.push({ c: ch.num, t: heading, h: targetFile + '#' + id, x: chunk });
+    const re = /^#{3,4} (\d+(?:\.\d+)+)\.\s*(.+)$/gm;
+    let m;
+    while ((m = re.exec(ch.markdown)) !== null) {
+      registry.sections.set(m[1], {
+        href: target + '#' + sectionId(m[1]), title: m[2].trim(), file: target,
+      });
     }
-  };
-
-  for (let i = 0; i < blocks.length; i++) {
-    const b = blocks[i];
-    const hm = b.match(/^#{3,4} (.+)$/);
-    if (hm) {
-      currentHeading = hm[1].trim();
-      const num = currentHeading.match(/^(\d+(?:\.\d+)*)\./);
-      currentId = num ? sectionId(num[1]) : slugify(currentHeading);
-    } else {
-      push(currentHeading, currentId, b);
+    const fr = /!\[Hình (\d+)\]\((figs\/[^)]+)\)\s*\n\s*\n\*\*Hình \1\.\*\*\s*([^\n]+)/g;
+    let fig;
+    while ((fig = fr.exec(ch.markdown)) !== null) {
+      registry.figures.set(fig[1], {
+        href: target + '#' + figureId(fig[1]),
+        src: fig[2],
+        caption: fig[3].trim(),
+        file: target,
+        chapter: ch.num,
+      });
     }
   }
+
+  const md = createMarkdownIt(registry);
+
+  // ---------------------------------------------------------- điều hướng
+  const extras = [];
+  if (spec.lab) extras.push({ file: f('thuc-hanh.html'), icon: '⚙', label: 'Phòng thí nghiệm' });
+  if (spec.figures && registry.figures.size) {
+    extras.push({ file: f('hinh-anh.html'), icon: '◳', label: `Thư viện ${registry.figures.size} hình` });
+  }
+  extras.push({ file: f('thuat-ngu.html'), icon: '¶', label: 'Từ điển thuật ngữ' });
+  if (spec.notes) extras.push({ file: f('ghi-chu.html'), icon: '!', label: 'Ghi chú biên tập' });
+  if (spec.code) extras.push({ file: f('ma-nguon.html'), icon: '{}', label: 'Mã nguồn thí nghiệm' });
+  extras.push({ file: f('toan-van.html'), icon: '≡', label: 'Toàn văn một trang' });
+
+  const nav = {
+    book: spec,
+    books,
+    groupLabel: spec.kicker + ' · ' + spec.short,
+    chapters: chapters.map((c) => ({ file: fileOf(c), num: c.num, label: c.label })),
+    extras,
+  };
+
+  const navOrder = [{ file: 'index.html', label: 'Trang chủ' }, ...nav.chapters, ...extras];
+  const neighbours = (file) => {
+    const i = navOrder.findIndex((x) => x.file === file);
+    return { prev: i > 0 ? navOrder[i - 1] : null, next: i >= 0 ? navOrder[i + 1] : null };
+  };
+
+  // ------------------------------------------------------ chỉ mục tìm kiếm
+  function indexChapter(ch, targetFile) {
+    const blocks = ch.markdown.split(/^(#{3,4} .+)$/m);
+    let heading = ch.title;
+    let id = ch.num === 'PL' ? slugify(ch.title) : sectionId(ch.num);
+
+    const push = (h, anchor, body) => {
+      const text = body
+        .replace(/```[\s\S]*?```/g, ' ')
+        .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+        .replace(/[#*_`>|$\\]/g, ' ')
+        .replace(/[ \t]+/g, ' ')
+        .trim();
+      if (!text) return;
+      const chunks = [];
+      let buf = '';
+      for (const para of text.split(/\n{2,}/)) {
+        const p = para.replace(/\s+/g, ' ').trim();
+        if (!p) continue;
+        if (buf && buf.length + p.length > 600) { chunks.push(buf); buf = p; }
+        else buf = buf ? buf + ' ' + p : p;
+      }
+      if (buf) chunks.push(buf);
+      for (const chunk of chunks) {
+        searchIndex.push({ b: spec.short, c: ch.num, t: h, h: targetFile + '#' + anchor, x: chunk });
+      }
+    };
+
+    for (const b of blocks) {
+      const hm = b.match(/^#{3,4} (.+)$/);
+      if (hm) {
+        heading = hm[1].trim();
+        const num = heading.match(/^(\d+(?:\.\d+)*)\./);
+        id = num ? sectionId(num[1]) : slugify(heading);
+      } else push(heading, id, b);
+    }
+  }
+
+  // ------------------------------------------------------------ dựng trang
+  const rendered = new Map();
+  for (const ch of chapters) {
+    const target = fileOf(ch);
+    registry.currentFile = target;
+    rendered.set(ch.num, md.render('## ' + ch.title + '\n\n' + ch.markdown));
+    indexChapter(ch, target);
+  }
+
+  const minutes = Object.fromEntries(chapters.map((c) => [c.num, readingMinutes(c.markdown)]));
+  const quizzes = spec.quiz ? parseQuizzes(read(spec.quiz)) : new Map();
+  const notes = spec.notes ? parseNotes(read(spec.notes)) : new Map();
+
+  for (const ch of chapters) {
+    if (ch.kind === 'exercises') continue;               // dựng riêng ở bước sau
+    const html = injectNotes(rendered.get(ch.num), ch.num, notes, md);
+    const kicker = ch.num === 'PL' ? 'Phụ lục' : 'Chương ' + ch.num;
+    const quiz = quizzes.has(ch.num) ? renderQuiz(md, quizzes.get(ch.num), 'chapter') : '';
+    const lede = '<p class="chapter-lede">' + escapeHtml(ch.summary) + '</p>';
+    const withLede = html.includes('</h2>') ? html.replace('</h2>', '</h2>' + lede) : lede + html;
+
+    write(ch.file, page({
+      title: ch.title + ' — ' + docTitle,
+      description: ch.summary,
+      body:
+        '<article class="prose">' +
+        '<div class="chapter-kicker"><span class="kicker-badge">' + kicker + '</span>' +
+        '<span class="kicker-time">' + minutes[ch.num] + ' phút đọc</span></div>' +
+        withLede + quiz + '</article>',
+      nav,
+      file: ch.file,
+      ...neighbours(ch.file),
+      toc: extractToc(html),
+    }));
+  }
+
+  // ------------------------------------------------------ trang chuyên biệt
+  const ctx = {
+    md, registry, nav, neighbours, page, escapeHtml, read, write, f,
+    book: spec, chapters, minutes, docTitle, intro, extractToc, searchIndex, ROOT,
+    quizCount: [...quizzes.values()].reduce((a, g) => a + g.questions.length, 0),
+    noteCount: notes.size,
+  };
+
+  const exChapter = chapters.find((c) => c.kind === 'exercises');
+  if (exChapter) buildExercisePage(ctx, exChapter);
+  if (spec.lab === 'quantization') buildPlaygroundPage(ctx);
+  if (spec.lab === 'mlops') buildMlopsLabPage(ctx);
+  if (spec.glossary) buildGlossaryPage(ctx);
+  if (spec.figures && registry.figures.size) buildFiguresPage(ctx);
+  if (spec.notes) buildNotesPage(ctx, notes);
+  if (spec.code) buildCodePage(ctx);
+
+  // ------------------------------------------------------------ toàn văn
+  registry.currentFile = f('toan-van.html');
+  const all = chapters
+    .map((ch) => '<section class="fulltext-chapter">' +
+      injectNotes(md.render('## ' + ch.title + '\n\n' + ch.markdown), ch.num, notes, md) +
+      '</section>')
+    .join('\n');
+  write(f('toan-van.html'), page({
+    title: 'Toàn văn — ' + docTitle,
+    description: 'Toàn bộ giáo trình ' + spec.short + ' trên một trang.',
+    body:
+      '<article class="prose">' +
+      '<div class="chapter-kicker"><span class="kicker-badge">Toàn văn</span>' +
+      '<span class="kicker-time">~' + Object.values(minutes).reduce((a, b) => a + b, 0) +
+      ' phút đọc</span></div>' +
+      '<h1>' + escapeHtml(docTitle) + '</h1>' +
+      '<p class="chapter-lede">Toàn bộ giáo trình trên một trang — tiện cho Ctrl+F, đọc ngoại tuyến hoặc in ra giấy.</p>' +
+      (intro ? md.render(intro) : '') + all + '</article>',
+    nav,
+    file: f('toan-van.html'),
+    ...neighbours(f('toan-van.html')),
+    bodyClass: 'is-fulltext',
+  }));
+
+  // Bản markdown gốc để tải về.
+  fs.copyFileSync(path.join(ROOT, spec.source), path.join(OUT, path.basename(spec.source)));
+
+  return {
+    spec, docTitle, intro, chapters, minutes, nav, fileOf,
+    figures: registry.figures.size,
+    sections: registry.sections.size,
+    quizCount: ctx.quizCount,
+    noteCount: ctx.noteCount,
+    exercises: exChapter ? 1 : 0,
+    md,
+  };
 }
 
-// ---------------------------------------------------------------- 5. dựng trang
+// ==================================================================== chạy
+
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
 
-const rendered = new Map();
+const allBooks = JSON.parse(read('content/books.json'));
+// Bỏ qua giáo trình chưa có tệp nguồn, để repo vẫn dựng được khi đang viết dở.
+const books = allBooks.filter((spec) => {
+  const ok = fs.existsSync(path.join(ROOT, spec.source));
+  if (!ok) console.warn('Bỏ qua giáo trình "' + spec.id + '": chưa có ' + spec.source);
+  return ok;
+});
+const built = books.map((spec) => buildBook(spec, books));
 
-for (const ch of chapters) {
-  const targetFile = ch.num === '14' ? 'bai-tap.html' : ch.file;
-  registry.currentFile = targetFile;
-  const heading =
-    ch.num === 'PL'
-      ? '## ' + ch.title
-      : '## ' + ch.title;
-  const html = md.render(heading + '\n\n' + ch.markdown);
-  rendered.set(ch.num, html);
-  indexChapter(ch, targetFile);
-}
+buildHomePage({ books: built, page, escapeHtml, write, read, ROOT, searchIndex });
 
-const minutes = Object.fromEntries(chapters.map((c) => [c.num, readingMinutes(c.markdown)]));
-const quizzes = parseQuizzes(read('content/trac-nghiem.md'));
-const notes = parseNotes(read('content/ghi-chu.md'));
-
-for (const ch of chapters) {
-  if (ch.num === '14') continue; // trang bài tập dựng riêng ở bước sau
-  const html = injectNotes(rendered.get(ch.num), ch.num, notes, md);
-  const { prev, next } = neighbours(ch.file);
-  const kicker = ch.num === 'PL' ? 'Phụ lục' : 'Chương ' + ch.num;
-  const quiz = quizzes.has(ch.num) ? renderQuiz(md, quizzes.get(ch.num), 'chapter') : '';
-  // Đặt câu tóm tắt ngay sau tiêu đề chương chứ không phải trước nó.
-  const lede = '<p class="chapter-lede">' + escapeHtml(ch.summary) + '</p>';
-  const withLede = html.includes('</h2>')
-    ? html.replace('</h2>', '</h2>' + lede)
-    : lede + html;
-  const body =
-    '<article class="prose">' +
-    '<div class="chapter-kicker"><span class="kicker-badge">' + kicker + '</span>' +
-    '<span class="kicker-time">' + minutes[ch.num] + ' phút đọc</span></div>' +
-    withLede +
-    quiz +
-    '</article>';
-
-  write(
-    ch.file,
-    page({
-      title: ch.title + ' — ' + docTitle,
-      description: ch.summary,
-      body,
-      nav,
-      file: ch.file,
-      prev,
-      next,
-      toc: extractToc(html),
-    })
-  );
-}
-
-// --------------------------------------------------- 6. các trang chuyên biệt
-const ctx = {
-  md,
-  registry,
-  nav,
-  neighbours,
-  page,
-  escapeHtml,
-  read,
-  write,
-  chapters,
-  minutes,
-  docTitle,
-  intro,
-  extractToc,
-  searchIndex,
-  ROOT,
-  quizCount: [...quizzes.values()].reduce((a, g) => a + g.questions.length, 0),
-  noteCount: notes.size,
-};
-
-buildHomePage(ctx);
-buildExercisePage(ctx, rendered.get('14'), chapters.find((c) => c.num === '14'));
-buildPlaygroundPage(ctx);
-buildGlossaryPage(ctx);
-buildFiguresPage(ctx);
-buildNotesPage(ctx, notes);
-buildCodePage(ctx);
-
-// ------------------------------------------------------- 7. trang toàn văn
-{
-  registry.currentFile = 'toan-van.html';
-  const all = chapters
-    .map((ch) => {
-      const body = injectNotes(md.render('## ' + ch.title + '\n\n' + ch.markdown), ch.num, notes, md);
-      return '<section class="fulltext-chapter">' + body + '</section>';
-    })
-    .join('\n');
-  const body =
-    '<article class="prose">' +
-    '<div class="chapter-kicker"><span class="kicker-badge">Toàn văn</span>' +
-    '<span class="kicker-time">~' +
-    Object.values(minutes).reduce((a, b) => a + b, 0) +
-    ' phút đọc</span></div>' +
-    '<h1>' + escapeHtml(docTitle) + '</h1>' +
-    '<p class="chapter-lede">Toàn bộ 15 chương trên một trang — tiện cho Ctrl+F, đọc ngoại tuyến hoặc in ra giấy.</p>' +
-    md.render(intro) +
-    all +
-    '</article>';
-  write(
-    'toan-van.html',
-    page({
-      title: 'Toàn văn — ' + docTitle,
-      description: 'Toàn bộ giáo trình trên một trang.',
-      body,
-      nav,
-      file: 'toan-van.html',
-      ...neighbours('toan-van.html'),
-      bodyClass: 'is-fulltext',
-    })
-  );
-}
-
-// ---------------------------------------------------------------- 8. tài nguyên
-function copyDir(from, to, filter) {
+// ---------------------------------------------------------------- tài nguyên
+function copyDir(from, to) {
+  if (!fs.existsSync(from)) return;
   fs.mkdirSync(to, { recursive: true });
   for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
     const s = path.join(from, entry.name);
     const d = path.join(to, entry.name);
-    if (entry.isDirectory()) copyDir(s, d, filter);
-    else if (!filter || filter(entry.name)) fs.copyFileSync(s, d);
+    if (entry.isDirectory()) copyDir(s, d);
+    else fs.copyFileSync(s, d);
   }
 }
 
@@ -351,26 +323,22 @@ copyDir(path.join(ROOT, 'src/assets'), path.join(OUT, 'assets'));
   write('assets/katex.min.css', css);
   const fontsOut = path.join(OUT, 'assets/fonts');
   fs.mkdirSync(fontsOut, { recursive: true });
-  for (const f of fs.readdirSync(path.join(kdist, 'fonts'))) {
-    if (f.endsWith('.woff2')) fs.copyFileSync(path.join(kdist, 'fonts', f), path.join(fontsOut, f));
+  for (const file of fs.readdirSync(path.join(kdist, 'fonts'))) {
+    if (file.endsWith('.woff2')) {
+      fs.copyFileSync(path.join(kdist, 'fonts', file), path.join(fontsOut, file));
+    }
   }
 }
 
-// Chỉ mục tìm kiếm nạp theo yêu cầu, dạng script để mở bằng file:// vẫn chạy.
 write('assets/search-index.js', 'window.QZ_INDEX=' + JSON.stringify(searchIndex) + ';');
-
-// Bản markdown gốc để tải về.
-fs.copyFileSync(path.join(ROOT, 'content/quantization.md'), path.join(OUT, 'quantization.md'));
 write('.nojekyll', '');
 
+const pages = fs.readdirSync(OUT).filter((x) => x.endsWith('.html')).length;
 console.log(
-  'Đã dựng ' +
-    fs.readdirSync(OUT).filter((f) => f.endsWith('.html')).length +
-    ' trang HTML, ' +
-    registry.figures.size +
-    ' hình, ' +
-    registry.sections.size +
-    ' mục tra cứu, ' +
-    searchIndex.length +
-    ' bản ghi tìm kiếm.'
+  'Đã dựng ' + pages + ' trang HTML cho ' + built.length + ' giáo trình:\n' +
+  built.map((b) =>
+    '  · ' + b.spec.short.padEnd(14) + b.chapters.length + ' chương, ' +
+    b.figures + ' hình, ' + b.sections + ' mục tra cứu, ' + b.quizCount + ' câu trắc nghiệm'
+  ).join('\n') +
+  '\n  → ' + searchIndex.length + ' bản ghi tìm kiếm.'
 );

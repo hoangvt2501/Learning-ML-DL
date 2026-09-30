@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1. Vì sao mô hình tốt vẫn chết trong sản xuất — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
+<meta name="description" content="Nợ kỹ thuật ẩn của hệ thống ML: nguyên lý CACE, mười ba dạng nợ có tên, và cách đọc cho đúng con số 5% mã học máy.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>MLOps</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group">Giáo trình 2 · MLOps</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html" class="is-active" aria-current="page"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 1</span><span class="kicker-time">11 phút đọc</span></div><h2 id="sec-1" class="heading">1. Vì sao mô hình tốt vẫn chết trong sản xuất<a class="anchor" href="#sec-1" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Nợ kỹ thuật ẩn của hệ thống ML: nguyên lý CACE, mười ba dạng nợ có tên, và cách đọc cho đúng con số 5% mã học máy.</p>
+<h3 id="sec-1-1" class="heading">1.1. Câu hỏi mở đầu<a class="anchor" href="#sec-1-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Một mô hình đạt AUC 0,94 trên tập kiểm tra. Sáu tháng sau nó vẫn chạy, không ai báo lỗi, không có ngoại lệ nào trong log — nhưng doanh thu từ tính năng ấy giảm 20% và không ai biết vì sao. Chuyện này phổ biến đến mức nó là lý do tồn tại của cả một nghề.</p>
+<p>Điều cần hiểu trước tiên: <strong>phần mềm thường hỏng theo cách ồn ào, hệ thống ML hỏng theo cách im lặng.</strong> Một API gọi sai kiểu dữ liệu thì ném ngoại lệ và có người bị đánh thức lúc 3 giờ sáng. Một mô hình nhận đầu vào đã lệch phân phối thì vẫn trả về một con số trong khoảng <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span>, đúng kiểu, đúng định dạng, đúng thời hạn — và sai.</p>
+<h3 id="sec-1-2" class="heading">1.2. Nợ kỹ thuật của hệ thống ML<a class="anchor" href="#sec-1-2" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Khung khái niệm chuẩn cho chuyện này là bài báo <em>Hidden Technical Debt in Machine Learning Systems</em> (Sculley và cộng sự, Google, NeurIPS 2015). Ý chính của nó:</p>
+<blockquote>
+<p>Xây và triển khai hệ thống ML thì tương đối nhanh và rẻ, nhưng <strong>duy trì chúng theo thời gian thì khó và đắt.</strong></p>
+</blockquote>
+<p>Bài báo mượn ẩn dụ <em>nợ kỹ thuật</em> của Ward Cunningham: vay nợ không phải lúc nào cũng sai, nhưng <strong>mọi khoản nợ đều phải trả lãi</strong>. Điểm nguy hiểm riêng của ML là khoản nợ này <strong>ẩn</strong> — nó nằm ở mức hệ thống chứ không ở mức mã nguồn, nên đọc code không thấy, và lãi thì cộng dồn im lặng.</p>
+<figure class="figure" id="hinh-1">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 1"><img src="figs/mlops01_debt.png" alt="Hình 1" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 1.</strong> Vẽ lại ý của Hình 1 trong Sculley và cộng sự (2015). Ô đen ở giữa là mã học máy. Mọi thứ bao quanh mới là phần phải xây, phải vận hành và phải trả nợ.</figcaption>
+</figure>
+<h3 id="sec-1-3" class="heading">1.3. Nguyên lý CACE<a class="anchor" href="#sec-1-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Khái niệm quan trọng nhất trong bài báo, và cũng là thứ hay bị hỏi nhất:</p>
+<blockquote>
+<p><strong>CACE — Changing Anything Changes Everything.</strong> Đổi bất cứ thứ gì là đổi tất cả.</p>
+</blockquote>
+<p>Lập luận rất gọn. Một mô hình học được một hàm từ <em>toàn bộ</em> các đầu vào cùng lúc. Thêm một đặc trưng <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">x_{n+1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span>, bỏ một đặc trưng <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">x_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>, hay chỉ đổi cách lấy mẫu — trọng số của <strong>mọi</strong> đặc trưng còn lại đều đổi theo. Không có đầu vào nào thực sự độc lập với đầu vào nào.</p>
+<p>Bài báo nói rõ CACE không chỉ áp cho tín hiệu đầu vào mà còn cho <strong>siêu tham số, thiết lập học, cách lấy mẫu, ngưỡng hội tụ, và về cơ bản là mọi thứ có thể tinh chỉnh được</strong>.</p>
+<p>Hệ quả thực hành, và đây là chỗ phân biệt người đã làm thật với người mới đọc:</p>
+<ul>
+<li><strong>Không tồn tại &quot;thay đổi nhỏ và cô lập&quot; trong một mô hình.</strong> Mọi thay đổi đều phải đánh giá lại toàn bộ, không thể lý luận cục bộ như sửa một hàm trong phần mềm thường.</li>
+<li>Cách giảm nhẹ mà bài báo nêu là <strong>cô lập mô hình và phục vụ theo tổ hợp (ensemble)</strong>, khi bài toán tách được thành các bài toán con độc lập một cách tự nhiên. Nhưng bài báo cũng thành thật: cách này chỉ hợp khi bài toán con thực sự rời nhau.</li>
+</ul>
+<h3 id="sec-1-4" class="heading">1.4. Các dạng nợ có tên<a class="anchor" href="#sec-1-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Nhớ được danh sách này là nhớ được phần lớn ngữ pháp của nghề. Chúng được nhóm theo nơi nợ phát sinh.</p>
+<p><strong>a) Mô hình phức tạp làm xói mòn ranh giới trừu tượng</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tên</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Entanglement</strong> (rối)</td>
+<td>Chính là CACE ở trên.</td>
+</tr>
+<tr>
+<td><strong>Correction cascade</strong> (thác hiệu chỉnh)</td>
+<td>Có mô hình <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex">m_a</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> cho bài toán A; cần giải bài toán A' hơi khác, ta học một mô hình nhỏ <em>nhận đầu ra của <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex">m_a</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> làm đầu vào</em> rồi học phần hiệu chỉnh. Nhanh, nhưng vừa tạo ra một phụ thuộc hệ thống mới vào <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex">m_a</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>, và cải thiện <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex">m_a</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> từ nay trở đi trở nên rất đắt.</td>
+</tr>
+<tr>
+<td><strong>Undeclared consumer</strong> (người dùng không khai báo)</td>
+<td>Đầu ra mô hình được ghi ra đâu đó mà không có kiểm soát truy cập, rồi một hệ thống khác lặng lẽ dùng nó làm đầu vào. Trong công nghệ phần mềm cổ điển gọi là <strong>visibility debt</strong>. Nguy hiểm vì nó tạo ra ràng buộc chặt mà <strong>không ai nhìn thấy</strong>.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>b) Phụ thuộc dữ liệu đắt hơn phụ thuộc mã</strong></p>
+<p>Bài báo nói thẳng: phụ thuộc mã thì trình biên dịch và trình liên kết phát hiện được bằng phân tích tĩnh; <strong>phụ thuộc dữ liệu thì không có công cụ tương đương</strong>, nên rất dễ tích tụ những chuỗi phụ thuộc khổng lồ mà không ai gỡ nổi.</p>
+<ul>
+<li>
+<p><strong>Unstable data dependency</strong> (phụ thuộc dữ liệu không ổn định): tín hiệu đầu vào lấy từ hệ thống khác, mà hệ thống ấy lại thay đổi hành vi theo thời gian — ví dụ nó cũng là một mô hình ML tự cập nhật, hoặc là một bảng tra phụ thuộc dữ liệu. Cách chữa là <strong>đóng băng phiên bản</strong> tín hiệu, nhưng đóng băng cũng có giá của nó: giá trị cũ dần và phải nuôi nhiều phiên bản song song.</p>
+</li>
+<li>
+<p><strong>Underutilized data dependency</strong> (phụ thuộc dữ liệu ít dùng): đặc trưng gần như không đóng góp gì nhưng vẫn nằm trong mô hình, khiến hệ thống dễ vỡ một cách không cần thiết. Bài báo liệt kê bốn đường vào:</p>
+<ul>
+<li><strong>Legacy feature</strong> — đặc trưng đưa vào từ sớm, sau này bị các đặc trưng mới làm cho thừa mà không ai nhận ra.</li>
+<li><strong>Bundled feature</strong> — một nhóm đặc trưng được đánh giá chung rồi đưa vào cả gói vì áp lực thời hạn, trong đó có cái vô dụng.</li>
+<li><strong>ε-feature</strong> — đặc trưng làm độ chính xác tăng một chút xíu nhưng chi phí phức tạp thì lớn.</li>
+<li><strong>Correlated feature</strong> — hai đặc trưng tương quan mạnh, một cái mới là nhân quả; mô hình chia đều công cho cả hai hoặc chọn nhầm cái không nhân quả, và hệ thống thành giòn khi thế giới đổi.</li>
+</ul>
+<p>Cách phát hiện mà bài báo đề xuất rất thực dụng: <strong>đánh giá bỏ-từng-đặc-trưng (leave-one-feature-out) định kỳ</strong>.</p>
+</li>
+</ul>
+<p><strong>c) Nợ ở mức hệ thống</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tên</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Glue code</strong></td>
+<td>Mã keo để nối các gói đa dụng lại với nhau. Đây là chỗ có con số nổi tiếng nhất của bài báo: <em>&quot;một hệ thống trưởng thành rốt cuộc có thể chỉ gồm <strong>nhiều nhất 5% mã học máy</strong> và <strong>ít nhất 95% mã keo</strong>&quot;</em>.</td>
+</tr>
+<tr>
+<td><strong>Pipeline jungle</strong> (rừng rậm pipeline)</td>
+<td>Trường hợp riêng của glue code, mọc lên ở khâu chuẩn bị dữ liệu: cào, ghép, lấy mẫu chồng chất theo năm tháng, đầy tệp trung gian.</td>
+</tr>
+<tr>
+<td><strong>Dead experimental codepath</strong></td>
+<td>Nhánh điều kiện để thử nghiệm nằm lẫn trong mã sản xuất. Mỗi nhánh riêng lẻ thì rẻ; cộng dồn thì thành nợ lớn.</td>
+</tr>
+<tr>
+<td><strong>Abstraction debt</strong></td>
+<td>Ngành ML chưa có một trừu tượng nào đạt tới mức thành công của <strong>cơ sở dữ liệu quan hệ</strong>. Câu hỏi &quot;giao diện đúng để mô tả một luồng dữ liệu, một mô hình, một dự đoán là gì?&quot; vẫn chưa có câu trả lời chuẩn.</td>
+</tr>
+<tr>
+<td><strong>Configuration debt</strong></td>
+<td>Hệ thống lớn nào cũng có rất nhiều tuỳ chọn cấu hình, và cả nhà nghiên cứu lẫn kỹ sư đều coi cấu hình là chuyện phụ. Trong khi một dòng cấu hình sai có sức phá hoại ngang một dòng mã sai.</td>
+</tr>
+<tr>
+<td><strong>Reproducibility debt</strong></td>
+<td>Chạy lại thí nghiệm và ra kết quả tương tự là yêu cầu khoa học cơ bản, nhưng thuật toán ngẫu nhiên, tính bất định của huấn luyện song song, phụ thuộc điều kiện khởi tạo và tương tác với thế giới bên ngoài làm việc đó rất khó.</td>
+</tr>
+<tr>
+<td><strong>Cultural debt</strong></td>
+<td>Ranh giới cứng giữa &quot;nghiên cứu&quot; và &quot;kỹ thuật&quot; là có hại. Đội cần <strong>thưởng cho việc xoá bớt đặc trưng, giảm độ phức tạp, cải thiện tính lặp lại và giám sát ngang với thưởng cho việc tăng độ chính xác</strong>.</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Ba &quot;mùi&quot; đáng ngờ</strong> mà bài báo đặt tên, rất hay được hỏi: <strong>plain-old-data type smell</strong> (thông tin giàu ngữ nghĩa của ML bị nhét vào float và int trần, nên một tham số không tự biết mình là log-odds hay là ngưỡng quyết định), <strong>multiple-language smell</strong> (mỗi mảnh viết một ngôn ngữ vì tiện thư viện, làm kiểm thử và bàn giao đắt lên), và <strong>prototype smell</strong> (phải dựa vào môi trường prototype thường xuyên là dấu hiệu hệ thống thật đang giòn).</p>
+</blockquote>
+<h3 id="sec-1-5" class="heading">1.5. Đọc con số 5% cho đúng<a class="anchor" href="#sec-1-5" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Con số &quot;5% mã ML, 95% mã keo&quot; bị trích sai rất nhiều. Ba điểm cần nói đúng:</p>
+<ol>
+<li>Nó là phát biểu về <strong>mã keo khi tái sử dụng các gói đa dụng</strong>, nằm trong mục <em>Glue Code</em> — <strong>không phải</strong> chú thích của <a href="mlops-ch01.html#hinh-1" class="xref">Hình 1</a>.</li>
+<li>Bài báo diễn đạt có biên: <em>nhiều nhất</em> 5% và <em>ít nhất</em> 95%. Đó là một nhận định định tính có kèm độ lớn, không phải một phép đo trên một mẫu hệ thống.</li>
+<li>Kết luận bài báo rút ra từ đó cũng thường bị bỏ mất: vì tỉ lệ ấy, <strong>viết một lời giải gọn và thuần nội bộ đôi khi rẻ hơn là tái sử dụng một gói đa dụng</strong>, và chiến lược chống glue code là <em>bọc các gói hộp đen sau một API chung</em>.</li>
+</ol>
+<p>Nói được cả ba ý này là dấu hiệu rõ nhất của người đã đọc bài báo chứ không chỉ nghe kể lại.</p>
+<h3 id="sec-1-6" class="heading">1.6. Cái giá phải trả cho việc không có MLOps<a class="anchor" href="#sec-1-6" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Đến đây có thể trả lời câu hỏi mở đầu. Mô hình AUC 0,94 ấy chết vì một trong các lý do sau, tất cả đều đã có tên ở trên:</p>
+<ul>
+<li>một nhà cung cấp dữ liệu thượng nguồn đổi đơn vị từ đồng sang nghìn đồng (<strong>unstable data dependency</strong>, không ai giám sát <strong>up-stream producer</strong>);</li>
+<li>một đặc trưng được tính khác nhau giữa lúc huấn luyện và lúc phục vụ (<strong>training–serving skew</strong>, <a href="mlops-ch04.html#sec-4" class="xref">Chương 4</a>);</li>
+<li>thế giới đã đổi và không ai đo (<strong>dịch chuyển phân phối</strong>, <a href="mlops-ch09.html#sec-9" class="xref">Chương 9</a>);</li>
+<li>một ngưỡng quyết định đặt tay từ năm ngoái vẫn còn đó sau khi mô hình đã huấn luyện lại (<strong>fixed threshold in dynamic system</strong>, <a href="mlops-ch10.html#sec-10-6" class="xref">Mục 10.6</a>);</li>
+<li>chính mô hình làm hỏng dữ liệu huấn luyện của lần sau (<strong>feedback loop</strong>, <a href="mlops-ch12.html#sec-12" class="xref">Chương 12</a>).</li>
+</ul>
+<p>Toàn bộ phần còn lại của tài liệu là cách phát hiện và chặn từng nguyên nhân ấy.</p>
+<hr>
+<section class="quiz" data-quiz data-chapter="1"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">4 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Nguyên lý CACE phát biểu điều gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Mọi thay đổi đều cần được rà soát mã</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đổi bất cứ thứ gì là đổi tất cả — không đầu vào nào thực sự độc lập với đầu vào nào</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Mô hình phức tạp luôn tốt hơn mô hình đơn giản</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Cấu hình phải được quản lý phiên bản</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> <em>Changing Anything Changes Everything.</em> Thêm hay bớt một đặc trưng làm đổi trọng số của <strong>mọi</strong> đặc trưng còn lại. Bài báo nói rõ nó áp cho cả siêu tham số, thiết lập học, cách lấy mẫu và ngưỡng hội tụ. Hệ quả: không tồn tại &quot;thay đổi nhỏ và cô lập&quot; trong một mô hình.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Con số &quot;5% mã học máy, 95% mã keo&quot; thực chất nói về cái gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chú thích của <a href="mlops-ch01.html#hinh-1" class="xref">Hình 1</a> trong bài báo, về tỉ lệ diện tích các hộp</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Tỉ lệ mã keo khi <strong>tái sử dụng các gói đa dụng</strong>, nêu trong mục <em>Glue Code</em></span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Tỉ lệ thời gian kỹ sư bỏ ra cho từng loại công việc</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Kết quả đo trên một mẫu hệ thống sản xuất của Google</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Bài báo viết có biên: <em>nhiều nhất</em> 5% và <em>ít nhất</em> 95%. Và kết luận đi kèm hay bị bỏ mất: vì tỉ lệ ấy, đôi khi <strong>viết một lời giải gọn và thuần nội bộ rẻ hơn tái dùng một gói đa dụng</strong>; chiến lược chống glue code là bọc gói hộp đen sau một API chung.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">&quot;Correction cascade&quot; là gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chuỗi lỗi lan từ pipeline này sang pipeline khác</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Học một mô hình nhỏ nhận đầu ra của mô hình có sẵn làm đầu vào để sửa cho bài toán hơi khác</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nhiều mô hình cùng dự đoán rồi lấy trung bình</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Sửa nhãn sai trong tập huấn luyện theo tầng</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Nhanh trước mắt, nhưng nó tạo ra một phụ thuộc hệ thống mới vào mô hình gốc, khiến việc cải thiện mô hình gốc từ đó trở nên rất đắt.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">4</span><span class="quiz-text">Đặc trưng nào sau đây <strong>không</strong> thuộc nhóm &quot;phụ thuộc dữ liệu ít dùng&quot;?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Legacy feature — đưa vào từ sớm, sau bị các đặc trưng mới làm cho thừa</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Bundled feature — vào cả gói vì áp lực thời hạn</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">ε-feature — tăng độ chính xác một chút xíu nhưng phức tạp lớn</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Unstable feature — lấy từ hệ thống thượng nguồn thay đổi hành vi theo thời gian</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Ba cái đầu là <em>underutilized data dependency</em>; cái cuối là <em>unstable data dependency</em>, một dạng nợ khác. Cách phát hiện nhóm ít dùng mà bài báo đề xuất là <strong>đánh giá bỏ-từng-đặc-trưng định kỳ</strong>.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/4</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="mlops-ch00.html"><span class="pager-dir">← Trước</span><span class="pager-title">Kiến thức nền và quy ước</span></a><a class="pager-link pager-next" href="mlops-ch02.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Vòng đời và ba chữ V</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-1-1">1.1. Câu hỏi mở đầu</a></li><li class="toc-l3"><a href="#sec-1-2">1.2. Nợ kỹ thuật của hệ thống ML</a></li><li class="toc-l3"><a href="#sec-1-3">1.3. Nguyên lý CACE</a></li><li class="toc-l3"><a href="#sec-1-4">1.4. Các dạng nợ có tên</a></li><li class="toc-l3"><a href="#sec-1-5">1.5. Đọc con số 5% cho đúng</a></li><li class="toc-l3"><a href="#sec-1-6">1.6. Cái giá phải trả cho việc không có MLOps</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

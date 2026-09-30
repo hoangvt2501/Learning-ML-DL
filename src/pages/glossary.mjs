@@ -34,19 +34,19 @@ function parseGlossary(raw) {
 }
 
 export function buildGlossaryPage(ctx) {
-  const { md, nav, page, escapeHtml, write, read, neighbours, registry, searchIndex } = ctx;
-  registry.currentFile = 'thuat-ngu.html';
+  const { md, nav, page, escapeHtml, write, read, neighbours, registry, searchIndex, f, book } = ctx;
+  registry.currentFile = f('thuat-ngu.html');
 
-  const groups = parseGlossary(read('content/thuat-ngu.md'));
+  const groups = parseGlossary(read(book.glossary));
   const total = groups.reduce((a, g) => a + g.terms.length, 0);
 
   // Đưa thuật ngữ vào chỉ mục tìm kiếm chung.
   for (const g of groups) {
     for (const t of g.terms) {
       searchIndex.push({
-        c: 'TN',
+        c: 'TN', b: book.short,
         t: (t.vi + (t.en ? ' · ' + t.en : '')).replace(/\$/g, '').trim(),
-        h: 'thuat-ngu.html#tn-' + slugify(t.vi),
+        h: f('thuat-ngu.html') + '#tn-' + slugify(t.vi),
         x: (t.en ? t.en + '. ' : '') + t.def.replace(/[$*_`\\]/g, ' ').replace(/\s+/g, ' ').trim(),
       });
     }
@@ -100,14 +100,14 @@ export function buildGlossaryPage(ctx) {
     '</article>';
 
   write(
-    'thuat-ngu.html',
+    f('thuat-ngu.html'),
     page({
-      title: 'Từ điển thuật ngữ — Quantization trong Deep Learning',
-      description: total + ' thuật ngữ quantization đối chiếu Việt – Anh, kèm định nghĩa ngắn.',
+      title: 'Từ điển thuật ngữ — ' + ctx.docTitle,
+      description: total + ' thuật ngữ ' + book.short + ' đối chiếu Việt – Anh, kèm định nghĩa ngắn.',
       body,
       nav,
-      file: 'thuat-ngu.html',
-      ...neighbours('thuat-ngu.html'),
+      file: f('thuat-ngu.html'),
+      ...neighbours(f('thuat-ngu.html')),
       scripts: ['assets/glossary.js'],
     })
   );

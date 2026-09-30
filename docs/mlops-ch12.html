@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>12. Vòng phản hồi: khi mô hình tự tạo ra dữ liệu của mình — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
+<meta name="description" content="Khi mô hình tự tạo ra dữ liệu huấn luyện của mình: vòng phản hồi thoái hoá, thí nghiệm đo mức thiệt hại, và bốn cách chữa.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>MLOps</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group">Giáo trình 2 · MLOps</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html" class="is-active" aria-current="page"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 12</span><span class="kicker-time">6 phút đọc</span></div><h2 id="sec-12" class="heading">12. Vòng phản hồi: khi mô hình tự tạo ra dữ liệu của mình<a class="anchor" href="#sec-12" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Khi mô hình tự tạo ra dữ liệu huấn luyện của mình: vòng phản hồi thoái hoá, thí nghiệm đo mức thiệt hại, và bốn cách chữa.</p>
+<h3 id="sec-12-1" class="heading">12.1. Hai loại vòng phản hồi<a class="anchor" href="#sec-12-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Sculley và cộng sự phân biệt:</p>
+<ul>
+<li><strong>Vòng phản hồi trực tiếp (direct feedback loop):</strong> mô hình ảnh hưởng trực tiếp tới việc chọn dữ liệu huấn luyện tương lai của chính nó. Bài báo ghi chú rằng lời giải đúng về mặt lý thuyết là <strong>thuật toán bandit</strong> (ví dụ contextual bandit), nhưng bandit không co giãn tốt lên kích thước không gian hành động của bài toán thật; cách giảm nhẹ khả thi là <strong>thêm một lượng ngẫu nhiên hoá</strong>, hoặc <strong>cô lập một phần dữ liệu khỏi ảnh hưởng của mô hình</strong>.</li>
+<li><strong>Vòng phản hồi ẩn (hidden feedback loop):</strong> hai hệ thống ảnh hưởng lẫn nhau <strong>gián tiếp qua thế giới</strong>. Khó hơn hẳn, vì không có đường dữ liệu nào trong sơ đồ hệ thống cho thấy mối liên hệ ấy.</li>
+</ul>
+<h3 id="sec-12-2" class="heading">12.2. Vòng phản hồi thoái hoá<a class="anchor" href="#sec-12-2" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Trường hợp riêng quan trọng nhất trong sản xuất là cái mà Chip Huyen gọi là <strong>degenerate feedback loop</strong>: dự đoán ảnh hưởng tới phản hồi, phản hồi được dùng làm nhãn để huấn luyện vòng sau, nên hệ thống <strong>tự xác nhận chính mình</strong>.</p>
+<p>Cơ chế rất dễ hiểu qua một hệ gợi ý:</p>
+<ol>
+<li>Món A tình cờ được xếp cao hơn món B ở vòng đầu, dù chất lượng thật tương đương.</li>
+<li>A được hiển thị nhiều hơn → nhận nhiều click hơn (chỉ vì được nhìn thấy nhiều hơn).</li>
+<li>Vòng huấn luyện sau thấy &quot;A có nhiều click&quot; → xếp A còn cao hơn.</li>
+<li>B không bao giờ được hiển thị nữa, nên không bao giờ có cơ hội chứng minh mình.</li>
+</ol>
+<p>Điểm chết người: <strong>dữ liệu trông rất đẹp</strong>. Tỉ lệ click trên những gì được hiển thị vẫn cao, vì hệ thống chỉ hiển thị thứ nó tin là tốt. Mọi chỉ số ngoại tuyến đều xanh.</p>
+<h3 id="sec-12-3" class="heading">12.3. Thí nghiệm: đo mức thiệt hại<a class="anchor" href="#sec-12-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Mô phỏng trong <code>code/mlops/experiments.py</code>: danh mục 2000 món với chất lượng thật khác nhau, hệ thống khởi động bằng một vòng hiển thị ngẫu nhiên nhỏ rồi cứ thế huấn luyện lại trên log click của chính nó, 30 vòng, trung bình 20 lần chạy.</p>
+<figure class="figure" id="hinh-14">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 14"><img src="figs/mlops14_feedback.png" alt="Hình 14" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 14.</strong> Không ngẫu nhiên hoá thì hệ thống khoá cứng vào phần danh mục mà nó tình cờ thấy ở vòng đầu và không bao giờ thoát ra.</figcaption>
+</figure>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Chiến lược</th>
+<th>Phủ danh mục</th>
+<th>Chất lượng thật của top-10</th>
+<th>Đã thấy nhóm 1% tốt nhất</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Không ngẫu nhiên hoá</td>
+<td><strong>9,5%</strong></td>
+<td>0,351</td>
+<td>8%</td>
+</tr>
+<tr>
+<td>ε = 10% chỗ dành cho ngẫu nhiên</td>
+<td>10,8%</td>
+<td>0,384</td>
+<td>10%</td>
+</tr>
+<tr>
+<td>ε = 30% chỗ dành cho ngẫu nhiên</td>
+<td><strong>13,4%</strong></td>
+<td><strong>0,402</strong></td>
+<td>12%</td>
+</tr>
+</tbody>
+</table></div>
+<p>Để so sánh: trần có thể đạt (chất lượng trung bình của 10 món tốt nhất thật sự) là <strong>0,555</strong>, còn trung bình cả danh mục là 0,153.</p>
+<p>Đọc bảng:</p>
+<ul>
+<li>Hệ không ngẫu nhiên hoá đạt <strong>0,351, tức 63% của trần</strong>, và <strong>vĩnh viễn chỉ nhìn thấy 9,5% danh mục</strong>. Nó không hỏng — nó chỉ không bao giờ tốt hơn được.</li>
+<li>Dành 30% số chỗ cho hiển thị ngẫu nhiên nâng chất lượng lên 0,402 (<strong>+15%</strong>) và mở rộng vùng nhìn thấy lên 41%.</li>
+<li>Cái giá phải trả là hiển thị 30% số chỗ cho món chưa biết gì — tức <strong>hy sinh ngắn hạn để đổi lấy khả năng học dài hạn</strong>. Đây đúng là đánh đổi khai thác – khám phá (exploitation – exploration), và cũng đúng là &quot;thêm một lượng ngẫu nhiên hoá&quot; mà Sculley và cộng sự đề xuất.</li>
+</ul>
+<h3 id="sec-12-4" class="heading">12.4. Nhận ra và chữa<a class="anchor" href="#sec-12-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p><strong>Dấu hiệu nhận biết</strong> — không dấu hiệu nào nằm trong chỉ số chất lượng thông thường:</p>
+<ul>
+<li><strong>Độ đa dạng giảm dần</strong> qua các vòng: entropy của phân phối hiển thị, số món phân biệt được hiển thị, tỉ lệ phủ danh mục.</li>
+<li><strong>Phân phối hiển thị lệch dần</strong> về một nhóm nhỏ: tỉ trọng của top 1% món tăng đều.</li>
+<li><strong>Nhóm mới không bao giờ nổi lên</strong>: món mới thêm vào danh mục không bao giờ vào được top.</li>
+</ul>
+<p><strong>Cách chữa</strong>, theo thứ tự chi phí:</p>
+<ol>
+<li><strong>Ngẫu nhiên hoá một phần chỗ hiển thị</strong> (ε-greedy). Rẻ nhất, và như thí nghiệm cho thấy là hiệu quả rõ rệt.</li>
+<li><strong>Giữ một nhóm đối chứng không bị mô hình tác động.</strong> Một tỉ lệ nhỏ lưu lượng nhận kết quả ngẫu nhiên hoặc theo heuristic. Đây là nguồn dữ liệu <strong>không thiên lệch</strong> duy nhất bạn có, và là cách duy nhất để đo mô hình thật sự tốt đến đâu.</li>
+<li><strong>Hiệu chỉnh theo xác suất hiển thị</strong> (inverse propensity weighting): khi huấn luyện, đánh trọng số mỗi mẫu bằng nghịch đảo xác suất nó được hiển thị, để bù cho thiên lệch phơi nhiễm. Đòi hỏi phải <strong>ghi lại xác suất hiển thị tại thời điểm hiển thị</strong> — và đây là thứ phải quyết định làm <strong>trước</strong>, vì không thể khôi phục về sau.</li>
+<li><strong>Đưa vị trí vào mô hình rồi đặt cứng lúc suy luận:</strong> thêm đặc trưng &quot;vị trí hiển thị&quot; lúc huấn luyện để mô hình học được phần click do vị trí gây ra, rồi lúc phục vụ thì đặt vị trí là một hằng số cho mọi món. Cách chuẩn để khử thiên lệch vị trí.</li>
+</ol>
+<p>Điểm thứ hai đáng nhấn mạnh hơn cả. Một nhóm đối chứng nhỏ, giữ thường trực, là <strong>khoản bảo hiểm rẻ nhất trong toàn bộ tài liệu này</strong>: nó vừa cho bạn dữ liệu sạch để huấn luyện, vừa cho bạn thước đo trung thực về giá trị thật của hệ thống.</p>
+<hr>
+<section class="quiz" data-quiz data-chapter="12"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">4 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Vòng phản hồi thoái hoá nguy hiểm vì điều gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó làm mô hình chạy chậm đi</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Dữ liệu trông rất đẹp — tỉ lệ click trên những gì được hiển thị vẫn cao, vì hệ thống chỉ hiển thị thứ nó tin là tốt</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó làm tăng chi phí huấn luyện</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó chỉ ảnh hưởng tới người dùng mới</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Mọi chỉ số ngoại tuyến đều xanh trong khi hệ thống đã khoá cứng vào một phần nhỏ của danh mục.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Trong thí nghiệm ở <a href="mlops-ch12.html#sec-12-3" class="xref">Mục 12.3</a>, hệ không ngẫu nhiên hoá nhìn thấy bao nhiêu phần danh mục?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Gần như toàn bộ</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Khoảng 50%</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">9,5% — và không bao giờ mở rộng thêm</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Phụ thuộc số vòng huấn luyện lại</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Nó đạt chất lượng 0,351 so với trần 0,555, tức 63% của mức tốt nhất có thể. Dành 30% số chỗ cho hiển thị ngẫu nhiên nâng lên 0,402 và mở vùng nhìn thấy lên 13,4%.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">Cách chữa nào cho vòng phản hồi vừa cho dữ liệu sạch để huấn luyện, vừa cho thước đo trung thực về giá trị hệ thống?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Ngẫu nhiên hoá một phần chỗ hiển thị</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Giữ một <strong>nhóm đối chứng</strong> không bị mô hình tác động</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Hiệu chỉnh theo xác suất hiển thị</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đưa vị trí vào mô hình rồi đặt cứng lúc suy luận</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Cả bốn đều là cách chữa hợp lệ, nhưng nhóm đối chứng là thứ duy nhất cho bạn <strong>nguồn dữ liệu không thiên lệch</strong> đồng thời là thước đo giá trị thật. Nó là khoản bảo hiểm rẻ nhất trong toàn bộ tài liệu.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">4</span><span class="quiz-text">Muốn dùng hiệu chỉnh theo xác suất hiển thị (inverse propensity weighting) thì phải chuẩn bị gì <strong>trước</strong>?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Một mô hình nhân quả</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Ghi lại <strong>xác suất hiển thị tại thời điểm hiển thị</strong> — không thể khôi phục về sau</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Một tập kiểm tra riêng</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nhãn của toàn bộ danh mục</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Đây là loại quyết định phải làm trước, giống như việc ghi lại id đoạn đã truy hồi trong hệ RAG ở <a href="mlops-ch13.html#sec-13-5" class="xref">Mục 13.5</a>.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/4</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="mlops-ch11.html"><span class="pager-dir">← Trước</span><span class="pager-title">Huấn luyện lại</span></a><a class="pager-link pager-next" href="mlops-ch13.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">LLMOps</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-12-1">12.1. Hai loại vòng phản hồi</a></li><li class="toc-l3"><a href="#sec-12-2">12.2. Vòng phản hồi thoái hoá</a></li><li class="toc-l3"><a href="#sec-12-3">12.3. Thí nghiệm: đo mức thiệt hại</a></li><li class="toc-l3"><a href="#sec-12-4">12.4. Nhận ra và chữa</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

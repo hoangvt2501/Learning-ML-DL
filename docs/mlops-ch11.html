@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11. Huấn luyện lại và tự động hoá — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
+<meta name="description" content="Đo giá của việc mô hình cũ đi, bốn loại kích hoạt, huấn luyện lại từ đầu so với học liên tục, và những cửa mà pipeline tự động không được đi tắt.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>MLOps</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group">Giáo trình 2 · MLOps</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html" class="is-active" aria-current="page"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 11</span><span class="kicker-time">6 phút đọc</span></div><h2 id="sec-11" class="heading">11. Huấn luyện lại và tự động hoá<a class="anchor" href="#sec-11" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Đo giá của việc mô hình cũ đi, bốn loại kích hoạt, huấn luyện lại từ đầu so với học liên tục, và những cửa mà pipeline tự động không được đi tắt.</p>
+<h3 id="sec-11-1" class="heading">11.1. Mô hình cũ đi nhanh đến mức nào<a class="anchor" href="#sec-11-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Trước khi hỏi &quot;bao lâu huấn luyện lại một lần&quot;, phải trả lời được <strong>cái giá của việc không huấn luyện lại</strong>. ML Test Score có riêng hai mục cho việc này: <strong>Model 4</strong> — <em>đã biết ảnh hưởng của độ cũ</em> — và <strong>Monitor 4</strong> — <em>mô hình không quá cũ</em>.</p>
+<p>Thí nghiệm trong <code>code/mlops/experiments.py</code>: mô phỏng một thế giới có concept drift chậm (biên quyết định xoay dần 0,035 radian mỗi tuần, tức khoảng <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mo>∘</mo></msup></mrow><annotation encoding="application/x-tex">2^\circ</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6741em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6741em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∘</span></span></span></span></span></span></span></span></span></span></span>), chạy 52 tuần với bốn nhịp huấn luyện lại.</p>
+<figure class="figure" id="hinh-13">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 13"><img src="figs/mlops13_staleness.png" alt="Hình 13" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 13.</strong> Cùng một mô hình, cùng một thế giới, chỉ khác nhịp huấn luyện lại.</figcaption>
+</figure>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Nhịp huấn luyện lại</th>
+<th>Độ chính xác trung bình</th>
+<th>Thấp nhất</th>
+<th>Tuần 52</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Không bao giờ</td>
+<td>64,61%</td>
+<td>45,42%</td>
+<td><strong>45,48%</strong></td>
+</tr>
+<tr>
+<td>Mỗi quý</td>
+<td>76,89%</td>
+<td>74,50%</td>
+<td>78,25%</td>
+</tr>
+<tr>
+<td>Mỗi tháng</td>
+<td>77,68%</td>
+<td>75,80%</td>
+<td>78,25%</td>
+</tr>
+<tr>
+<td>Mỗi tuần</td>
+<td>77,80%</td>
+<td>75,72%</td>
+<td>78,72%</td>
+</tr>
+</tbody>
+</table></div>
+<p>Ba điều rút ra, và cả ba đều là câu trả lời phỏng vấn tốt:</p>
+<ol>
+<li><strong>Không huấn luyện lại thì mất 13,19 điểm phần trăm độ chính xác trung bình</strong> trong một năm, và tới tuần 52 thì mô hình chỉ còn 45,5% — <strong>tệ hơn đoán bừa</strong> trên bài toán hai lớp cân bằng. Đáng chú ý là nó tụt <em>dần</em>, nên không có ngày nào báo động nổ.</li>
+<li><strong>Lợi ích giảm dần rất nhanh.</strong> Từ &quot;không bao giờ&quot; lên &quot;mỗi quý&quot; được thêm 12,3 điểm. Từ &quot;mỗi quý&quot; lên &quot;mỗi tuần&quot; chỉ được thêm <strong>0,91 điểm</strong>. Nhịp hằng tuần đắt hơn hằng quý khoảng 13 lần về chi phí vận hành, để đổi lấy chưa tới một điểm.</li>
+<li><strong>Vì vậy nhịp đúng là một quyết định kinh tế, không phải kỹ thuật.</strong> Nó được xác định bằng cách đo đường cong này trên chính bài toán của mình, rồi so giá trị của một điểm phần trăm với chi phí một chu kỳ huấn luyện.</li>
+</ol>
+<h3 id="sec-11-2" class="heading">11.2. Bốn loại kích hoạt<a class="anchor" href="#sec-11-2" aria-label="Liên kết tới mục này">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Kích hoạt</th>
+<th>Cơ chế</th>
+<th>Ưu</th>
+<th>Nhược</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Theo lịch</strong></td>
+<td>cron: mỗi tuần / mỗi tháng</td>
+<td>đơn giản, dễ dự đoán tài nguyên</td>
+<td>huấn luyện lại vô ích khi yên ổn; quá muộn khi có cú sốc</td>
+</tr>
+<tr>
+<td><strong>Theo chất lượng</strong></td>
+<td>chỉ số tụt quá ngưỡng</td>
+<td>phản ứng đúng lúc cần</td>
+<td><strong>cần nhãn</strong>, nên bị chặn bởi độ trễ nhãn</td>
+</tr>
+<tr>
+<td><strong>Theo dịch chuyển</strong></td>
+<td>phép dò ở <a href="mlops-ch09.html#sec-9" class="xref">Chương 9</a> báo</td>
+<td>không cần nhãn</td>
+<td>bắt được covariate shift, <strong>mù với concept drift</strong></td>
+</tr>
+<tr>
+<td><strong>Theo lượng dữ liệu</strong></td>
+<td>đủ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> mẫu mới</td>
+<td>hợp khi dữ liệu tới không đều</td>
+<td>không liên quan gì tới việc mô hình có còn tốt không</td>
+</tr>
+</tbody>
+</table></div>
+<p>Cấu hình thực tế thường là <strong>theo lịch làm nền, cộng thêm kích hoạt theo chất lượng hoặc theo dịch chuyển để cắt ngang khi cần</strong>. Nghiên cứu phỏng vấn ghi nhận một thực hành đơn giản hơn nhiều so với những gì người ta hay nghĩ: <strong>huấn luyện lại thường xuyên trên dữ liệu và nhãn trực tiếp</strong>, coi đó là cách tạo phiên bản mới — thay vì xây một cơ chế kích hoạt thông minh.</p>
+<h3 id="sec-11-3" class="heading">11.3. Huấn luyện lại từ đầu hay học liên tục<a class="anchor" href="#sec-11-3" aria-label="Liên kết tới mục này">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Huấn luyện lại từ đầu</th>
+<th>Học liên tục (continual / online)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dữ liệu dùng</td>
+<td>toàn bộ cửa sổ lịch sử</td>
+<td>chỉ dữ liệu mới</td>
+</tr>
+<tr>
+<td>Chi phí mỗi lần</td>
+<td>cao</td>
+<td>thấp</td>
+</tr>
+<tr>
+<td>Khả năng lặp lại</td>
+<td><strong>tốt</strong> — dựng lại được từ dữ liệu + hạt giống</td>
+<td><strong>kém</strong> — trạng thái phụ thuộc toàn bộ chuỗi cập nhật đã qua</td>
+</tr>
+<tr>
+<td>Quay lui</td>
+<td>dễ: nạp lại tạo tác cũ</td>
+<td>khó: phải phát lại lịch sử</td>
+</tr>
+<tr>
+<td>Rủi ro riêng</td>
+<td>không có</td>
+<td><strong>quên thảm hoạ</strong> (catastrophic forgetting); một lô dữ liệu bẩn làm hỏng vĩnh viễn</td>
+</tr>
+</tbody>
+</table></div>
+<p>Lời khuyên: <strong>mặc định là huấn luyện lại từ đầu</strong>, và chỉ chuyển sang học liên tục khi có ràng buộc thật sự buộc phải làm thế (dữ liệu quá lớn để giữ, hoặc yêu cầu thích ứng trong vài phút). Lý do nằm ở hai hàng giữa bảng — khả năng lặp lại và khả năng quay lui là hai thứ bạn chỉ thấy quý vào đúng ngày xảy ra sự cố.</p>
+<h3 id="sec-11-4" class="heading">11.4. Nguyên tắc: huấn luyện lại phải đi qua đúng những cửa đó<a class="anchor" href="#sec-11-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Sai lầm nguy hiểm nhất trong tự động hoá huấn luyện lại là để nó <strong>đi tắt</strong>. Một pipeline huấn luyện lại tự động phải đi qua <strong>chính những cửa kiểm định</strong> mà một lần phát hành thủ công phải đi qua:</p>
+<div class="code-block is-output"><div class="code-head"><span class="code-lang">Kết quả chạy</span></div><pre><code>dữ liệu mới
+  → kiểm định dữ liệu            (Chương 3; hỏng thì DỪNG, không huấn luyện)
+  → huấn luyện
+  → đánh giá trên tập cố định    (Chương 6, có chia lát cắt)
+  → SO VỚI MÔ HÌNH ĐANG CHẠY     ← cửa hay bị quên nhất
+  → kiểm thử hành vi             (Mục 6.4)
+  → đăng ký vào sổ (staging)
+  → shadow → canary → toàn bộ    (Chương 8)
+</code></pre></div>
+<p>Cửa &quot;so với mô hình đang chạy&quot; đáng nói riêng. Tài liệu Google Cloud đặt bước <strong>kiểm định mô hình</strong> (model validation) tách hẳn khỏi bước <strong>đánh giá mô hình</strong> (model evaluation) trong tám bước ở <a href="mlops-ch02.html#sec-2-3" class="xref">Mục 2.3</a>, đúng vì lý do này: đánh giá trả lời &quot;mô hình này tốt đến đâu&quot;, còn kiểm định trả lời &quot;<strong>có nên thay thế cái đang chạy bằng nó không</strong>&quot;. Một mô hình huấn luyện lại tự động mà kém hơn bản cũ thì phải bị chặn tự động, không cần ai nhìn thấy.</p>
+<p>Và vì mọi thứ đều tự động, <strong>cơ chế quay lui cũng phải tự động</strong> — đó là <strong>Infra 7</strong> của ML Test Score: <em>mô hình phải quay lui được nhanh và an toàn</em>.</p>
+<hr>
+<section class="quiz" data-quiz data-chapter="11"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">4 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Trong thí nghiệm về độ cũ ở <a href="mlops-ch11.html#sec-11-1" class="xref">Mục 11.1</a>, không huấn luyện lại suốt một năm làm mất bao nhiêu?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Khoảng 1 điểm phần trăm</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Khoảng 5 điểm phần trăm</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">13,19 điểm phần trăm trung bình, và tới tuần 52 thì mô hình còn 45,5% — tệ hơn đoán bừa</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Mô hình giữ nguyên chất lượng</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Đáng sợ nhất là nó tụt <strong>dần</strong>, nên không có ngày nào báo động nổ.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">So với huấn luyện lại hằng quý, huấn luyện lại hằng tuần cho thêm bao nhiêu trong thí nghiệm ấy?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Hơn 10 điểm</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Khoảng 5 điểm</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ 0,91 điểm, đổi lại chi phí vận hành gấp khoảng 13 lần</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Không có chênh lệch nào</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Lợi ích giảm dần rất nhanh, nên <strong>nhịp huấn luyện lại là một quyết định kinh tế, không phải kỹ thuật</strong>: đo đường cong này trên bài toán của mình rồi so giá trị một điểm phần trăm với chi phí một chu kỳ.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">Kích hoạt huấn luyện lại &quot;theo dịch chuyển&quot; có điểm mù nào?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó cần nhãn</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó mù với concept drift, vì concept drift giữ nguyên <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span></span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó chỉ chạy được theo lô</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó không dùng được cho mô hình học sâu</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Kích hoạt theo chất lượng thì ngược lại: bắt được concept drift nhưng <strong>cần nhãn</strong>, nên bị chặn bởi độ trễ nhãn.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">4</span><span class="quiz-text">Cửa nào hay bị quên nhất trong pipeline huấn luyện lại tự động?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Kiểm định dữ liệu đầu vào</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đánh giá trên tập cố định</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text"><strong>So với mô hình đang chạy</strong> trước khi thay thế</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đăng ký vào sổ mô hình</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Tài liệu Google Cloud tách <strong>kiểm định mô hình</strong> khỏi <strong>đánh giá mô hình</strong> đúng vì lý do này: đánh giá trả lời &quot;mô hình này tốt đến đâu&quot;, kiểm định trả lời &quot;có nên thay cái đang chạy bằng nó không&quot;.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/4</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="mlops-ch10.html"><span class="pager-dir">← Trước</span><span class="pager-title">Giám sát và cảnh báo</span></a><a class="pager-link pager-next" href="mlops-ch12.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Vòng phản hồi</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-11-1">11.1. Mô hình cũ đi nhanh đến mức nào</a></li><li class="toc-l3"><a href="#sec-11-2">11.2. Bốn loại kích hoạt</a></li><li class="toc-l3"><a href="#sec-11-3">11.3. Huấn luyện lại từ đầu hay học liên tục</a></li><li class="toc-l3"><a href="#sec-11-4">11.4. Nguyên tắc: huấn luyện lại phải đi qua đúng những cửa đó</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

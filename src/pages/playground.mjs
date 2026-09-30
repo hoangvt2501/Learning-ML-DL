@@ -21,8 +21,8 @@ const stat = (id, label, hint = '') =>
   (hint ? '<span class="stat-hint">' + hint + '</span>' : '') + '</div>';
 
 export function buildPlaygroundPage(ctx) {
-  const { md, nav, page, write, neighbours, registry } = ctx;
-  registry.currentFile = 'thuc-hanh.html';
+  const { md, nav, page, write, neighbours, registry, f } = ctx;
+  registry.currentFile = f('thuc-hanh.html');
 
   // Công thức trong phần mô tả được KaTeX dựng sẵn lúc build.
   const t = (s) => md.renderInline(s);
@@ -222,15 +222,15 @@ export function buildPlaygroundPage(ctx) {
     '</article>';
 
   write(
-    'thuc-hanh.html',
+    f('thuc-hanh.html'),
     page({
       title: 'Phòng thí nghiệm — Quantization trong Deep Learning',
       description:
         'Năm công cụ tương tác: máy lượng tử affine, đánh đổi làm tròn – cắt, soi bit số thực, requantization dấu chấm tĩnh, tính dung lượng mô hình và KV cache.',
       body,
       nav,
-      file: 'thuc-hanh.html',
-      ...neighbours('thuc-hanh.html'),
+      file: f('thuc-hanh.html'),
+      ...neighbours(f('thuc-hanh.html')),
       scripts: ['assets/playground.js'],
     })
   );

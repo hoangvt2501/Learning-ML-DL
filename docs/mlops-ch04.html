@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4. Đặc trưng: kho đặc trưng và tính đúng theo thời điểm — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
+<meta name="description" content="Hai nỗi đau sinh ra kho đặc trưng: lệch giữa huấn luyện và phục vụ, và rò rỉ nhãn. Point-in-time correctness giải thích bằng SQL và bằng hình.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>MLOps</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group">Giáo trình 2 · MLOps</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li><li><a href="mlops-ch04.html" class="is-active" aria-current="page"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 4</span><span class="kicker-time">7 phút đọc</span></div><h2 id="sec-4" class="heading">4. Đặc trưng: kho đặc trưng và tính đúng theo thời điểm<a class="anchor" href="#sec-4" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Hai nỗi đau sinh ra kho đặc trưng: lệch giữa huấn luyện và phục vụ, và rò rỉ nhãn. Point-in-time correctness giải thích bằng SQL và bằng hình.</p>
+<h3 id="sec-4-1" class="heading">4.1. Hai nỗi đau sinh ra kho đặc trưng<a class="anchor" href="#sec-4-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Kho đặc trưng (feature store) thường được giới thiệu như một loại cơ sở dữ liệu. Cách hiểu ấy làm người ta trả lời phỏng vấn rất nông. Nó ra đời để chữa <strong>hai nỗi đau cụ thể</strong>, và nếu bạn không có hai nỗi đau ấy thì bạn không cần nó.</p>
+<p><strong>Nỗi đau 1 — lệch giữa huấn luyện và phục vụ (training–serving skew).</strong> Lúc huấn luyện, đặc trưng &quot;tổng chi tiêu 30 ngày qua&quot; được tính bằng một truy vấn SQL trên kho dữ liệu. Lúc phục vụ, nó được tính lại bằng Python trong một dịch vụ, vì truy vấn kho dữ liệu quá chậm. Hai đoạn mã ấy do hai người viết, ở hai thời điểm, và chúng <strong>không bao giờ khớp nhau hoàn toàn</strong>: một bên tính 30 ngày theo lịch, bên kia theo 720 giờ; một bên loại giao dịch hoàn tiền, bên kia không.</p>
+<p>Tài liệu Google Cloud định nghĩa thẳng: training–serving skew xảy ra khi <strong>đặc trưng cần cho việc phục vụ độ trễ thấp trong sản xuất khác với đặc trưng dùng lúc huấn luyện</strong>, khiến chất lượng mô hình tụt sau khi triển khai.</p>
+<p>Điểm khó chịu nhất của loại lỗi này: <strong>nó không tạo ra lỗi nào</strong>. Mô hình vẫn chạy. Chỉ là nó nhận đầu vào hơi khác thứ nó đã học, và mất vài điểm phần trăm mà không ai biết vì sao.</p>
+<p><strong>Nỗi đau 2 — rò rỉ nhãn khi dựng tập huấn luyện.</strong> Đây là nội dung mục tiếp theo, và là khái niệm quan trọng nhất của cả chương.</p>
+<h3 id="sec-4-2" class="heading">4.2. Tính đúng theo thời điểm<a class="anchor" href="#sec-4-2" aria-label="Liên kết tới mục này">#</a></h3>
+<blockquote>
+<p><strong>Tính đúng theo thời điểm (point-in-time correctness).</strong> Với mỗi dòng huấn luyện có thời điểm cần dự đoán <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mtext>pred</mtext></msub></mrow><annotation encoding="application/x-tex">t_{\text{pred}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9012em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">pred</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>, giá trị đặc trưng dùng cho dòng ấy phải là <strong>giá trị quan sát được tại đúng <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mtext>pred</mtext></msub></mrow><annotation encoding="application/x-tex">t_{\text{pred}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9012em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">pred</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></strong>, chứ không phải giá trị của hôm nay.</p>
+</blockquote>
+<p>Nghe hiển nhiên. Vi phạm nó thì cực kỳ dễ, và đây là cách nó xảy ra.</p>
+<figure class="figure" id="hinh-5">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 5"><img src="figs/mlops05_pit.png" alt="Hình 5" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 5.</strong> Đặc trưng &quot;tổng số đơn hàng của khách&quot; thay đổi theo thời gian: 12 vào 1/3, 31 vào 15/3, 480 vào hôm nay. Một dòng huấn luyện cần dự đoán cho ngày 1/4 phải dùng giá trị <strong>31</strong>. Dùng 480 là đưa thông tin của tương lai vào quá khứ.</figcaption>
+</figure>
+<p>Viết bằng SQL thì vi phạm trông như thế này — và nó là một trong những câu SQL vô hại nhất mà bạn từng thấy:</p>
+<div class="code-block" data-lang="sql"><div class="code-head"><span class="code-lang">sql</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-sql"><span class="hljs-comment">-- SAI: lấy giá trị đặc trưng HIỆN TẠI cho mọi dòng lịch sử</span>
+<span class="hljs-keyword">SELECT</span>  l.user_id, l.event_time, l.label,
+        f.total_orders                      <span class="hljs-comment">-- giá trị của hôm nay!</span>
+<span class="hljs-keyword">FROM</span>    labels l
+<span class="hljs-keyword">JOIN</span>    user_features f  <span class="hljs-keyword">ON</span> f.user_id <span class="hljs-operator">=</span> l.user_id;
+</code></pre></div>
+<p>Bản đúng phải ghép thêm theo trục thời gian — mỗi dòng lấy bản ghi đặc trưng <strong>mới nhất nhưng không muộn hơn</strong> thời điểm dự đoán:</p>
+<div class="code-block" data-lang="sql"><div class="code-head"><span class="code-lang">sql</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-sql"><span class="hljs-comment">-- ĐÚNG: point-in-time join (as-of join)</span>
+<span class="hljs-keyword">SELECT</span>  l.user_id, l.event_time, l.label, f.total_orders
+<span class="hljs-keyword">FROM</span>    labels l
+<span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> <span class="hljs-keyword">LATERAL</span> (
+    <span class="hljs-keyword">SELECT</span> total_orders
+    <span class="hljs-keyword">FROM</span>   user_features_history h
+    <span class="hljs-keyword">WHERE</span>  h.user_id    <span class="hljs-operator">=</span> l.user_id
+      <span class="hljs-keyword">AND</span>  h.valid_from <span class="hljs-operator">&lt;=</span> l.event_time          <span class="hljs-comment">-- chỉ nhìn về quá khứ</span>
+    <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> h.valid_from <span class="hljs-keyword">DESC</span>
+    LIMIT <span class="hljs-number">1</span>
+) f <span class="hljs-keyword">ON</span> <span class="hljs-literal">TRUE</span>;
+</code></pre></div>
+<p><strong>Vì sao vi phạm này nguy hiểm hơn mọi lỗi khác trong tài liệu.</strong> Nó không làm chỉ số xấu đi — nó làm chỉ số <strong>đẹp lên</strong>. Mô hình học được rằng &quot;khách có 480 đơn hàng thì không rời bỏ&quot;, trong khi con số 480 chỉ tồn tại <em>vì</em> khách ấy đã ở lại. Offline bạn thấy AUC 0,94; online bạn thấy một mô hình vô dụng. Và vì offline đẹp nên không ai nghi ngờ gì cho tới khi đã triển khai.</p>
+<p>Nghiên cứu phỏng vấn xếp <strong>rò rỉ dữ liệu</strong> là ví dụ đầu tiên của nỗi đau &quot;lệch giữa môi trường phát triển và môi trường sản xuất&quot;, với đúng định nghĩa: <em>giả định lúc huấn luyện rằng có quyền truy cập thứ dữ liệu mà lúc phục vụ không hề có</em> — và ghi nhận rằng lỗi này <strong>thường chỉ bị phát hiện sau khi mô hình đã triển khai và đã ra vài dự đoán sai</strong>.</p>
+<h3 id="sec-4-3" class="heading">4.3. Ba cách một đặc trưng rò rỉ tương lai<a class="anchor" href="#sec-4-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Rò rỉ không chỉ đến từ phép ghép sai. Ba đường vào, xếp theo mức độ khó phát hiện:</p>
+<ol>
+<li><strong>Rò rỉ theo thời gian</strong> — như trên. Chữa bằng point-in-time join và bằng ràng buộc <code>event_time &lt;= feature_valid_from</code> ở <a href="mlops-ch03.html#sec-3-3" class="xref">Mục 3.3</a>.</li>
+<li><strong>Rò rỉ theo thực thể</strong> — cùng một người dùng xuất hiện ở cả tập huấn luyện lẫn tập kiểm tra khi chia ngẫu nhiên. Chữa bằng <strong>chia theo nhóm (group split) theo thực thể</strong>, và với dữ liệu có thời gian thì luôn <strong>chia theo thời gian</strong> chứ không chia ngẫu nhiên.</li>
+<li><strong>Rò rỉ qua đặc trưng thay mặt cho nhãn (proxy leakage)</strong> — đặc trưng &quot;số lần gọi tổng đài chăm sóc sau sự cố&quot; để dự đoán &quot;khách có gặp sự cố không&quot;. Về thời gian thì hợp lệ, nhưng nó là hệ quả của nhãn chứ không phải nguyên nhân. Đây là loại khó nhất vì không có kiểm tra máy nào bắt được; chỉ có cách hỏi với từng đặc trưng: <strong>&quot;tại thời điểm cần dự đoán, giá trị này đã tồn tại chưa, và nó có tồn tại <em>vì</em> nhãn hay không?&quot;</strong></li>
+</ol>
+<h3 id="sec-4-4" class="heading">4.4. Kho đặc trưng giải quyết chuyện gì<a class="anchor" href="#sec-4-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Bây giờ mới nên nói tới công cụ. Kho đặc trưng là một lớp hạ tầng gồm hai kho và một sổ đăng ký:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Thành phần</th>
+<th>Nội dung</th>
+<th>Đặc tính cần</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Kho ngoại tuyến</strong> (offline store)</td>
+<td>toàn bộ lịch sử giá trị đặc trưng, có <code>valid_from</code></td>
+<td>thông lượng cao, chịu được truy vấn lớn, hỗ trợ point-in-time join</td>
+</tr>
+<tr>
+<td><strong>Kho trực tuyến</strong> (online store)</td>
+<td>chỉ giá trị <strong>mới nhất</strong> của mỗi thực thể</td>
+<td>độ trễ thấp (thường dưới 10 ms), tra theo khoá</td>
+</tr>
+<tr>
+<td><strong>Sổ đăng ký</strong> (registry)</td>
+<td><strong>một định nghĩa duy nhất</strong> cho mỗi đặc trưng</td>
+<td>là nguồn sự thật cho cả hai kho</td>
+</tr>
+</tbody>
+</table></div>
+<p>Sổ đăng ký mới là phần quan trọng. Nó chữa nỗi đau 1 bằng cách buộc hai đường huấn luyện và phục vụ <strong>dùng chung một định nghĩa</strong> thay vì hai bản cài đặt song song. Kho ngoại tuyến chữa nỗi đau 2 bằng cách giữ lịch sử để ghép được theo thời điểm.</p>
+<p><strong>Điều cần nói rõ:</strong> kho đặc trưng <strong>không tự động</strong> xoá bỏ skew. Nó chỉ tạo điều kiện. Nếu đội vẫn viết một đường tính riêng cho phục vụ vì lý do độ trễ, skew vẫn quay lại. Đây là chỗ các công cụ khác nhau: có công cụ chỉ cung cấp hạ tầng và để bạn tự giữ kỷ luật, có công cụ ép một định nghĩa duy nhất bằng thiết kế.</p>
+<h3 id="sec-4-5" class="heading">4.5. Khi nào <strong>không</strong> cần kho đặc trưng<a class="anchor" href="#sec-4-5" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Một câu trả lời phỏng vấn tốt luôn có phần này. Kho đặc trưng là hạ tầng nặng; nó xứng đáng khi:</p>
+<ul>
+<li>có <strong>nhiều mô hình dùng chung đặc trưng</strong> (nếu chỉ một mô hình, lợi ích tái sử dụng bằng 0);</li>
+<li>có <strong>phục vụ trực tuyến độ trễ thấp</strong> (nếu chỉ chấm điểm theo lô hằng đêm, dùng thẳng kho dữ liệu là đủ và đúng hơn);</li>
+<li>đặc trưng <strong>phụ thuộc thời gian và cập nhật thường xuyên</strong> (nếu đặc trưng tĩnh, point-in-time là chuyện không tồn tại).</li>
+</ul>
+<p>Thiếu cả ba điều kiện ấy thì một bảng trong kho dữ liệu cộng với kỷ luật viết một hàm biến đổi dùng chung sẽ rẻ hơn nhiều và đạt cùng mục tiêu.</p>
+<hr>
+<section class="quiz" data-quiz data-chapter="4"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">4 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Training–serving skew là gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Mô hình huấn luyện trên GPU nhưng phục vụ trên CPU</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đặc trưng lúc phục vụ được tính khác với lúc huấn luyện</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Tập huấn luyện và tập kiểm tra có phân phối khác nhau</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Độ trễ lúc phục vụ cao hơn lúc huấn luyện</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Thường vì hai bên có hai bản cài đặt riêng: một bản SQL trên kho dữ liệu, một bản viết lại trong dịch vụ cho đủ nhanh. Điểm khó chịu nhất là <strong>nó không tạo ra lỗi nào</strong> — mô hình vẫn chạy, chỉ là kém đi.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Point-in-time correctness đòi hỏi điều gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đặc trưng phải được cập nhật theo thời gian thực</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Giá trị đặc trưng dùng cho một dòng huấn luyện phải là giá trị <strong>quan sát được tại thời điểm cần dự đoán</strong></span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Tập huấn luyện phải được sắp xếp theo thời gian</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Mọi bản ghi phải có dấu thời gian</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Vi phạm nó là rò rỉ nhãn. Nguy hiểm đặc biệt vì nó <strong>làm chỉ số ngoại tuyến đẹp lên</strong>, nên không ai nghi ngờ cho tới khi đã triển khai và đã ra vài dự đoán sai.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">Khi nào <strong>không</strong> nên xây kho đặc trưng?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Khi đội chưa có kinh nghiệm vận hành</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Khi chỉ có một mô hình, chỉ chấm điểm theo lô, và đặc trưng gần như tĩnh</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Khi dữ liệu quá lớn</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Khi chưa có CI/CD</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Ba điều kiện để nó xứng đáng: nhiều mô hình dùng chung đặc trưng, có phục vụ trực tuyến độ trễ thấp, đặc trưng phụ thuộc thời gian. Thiếu cả ba thì một bảng trong kho dữ liệu cộng kỷ luật dùng chung một hàm biến đổi là đủ và rẻ hơn nhiều.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">4</span><span class="quiz-text">Loại rò rỉ nào <strong>không</strong> có kiểm tra máy nào bắt được?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Rò rỉ theo thời gian</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Rò rỉ theo thực thể khi chia ngẫu nhiên</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Rò rỉ qua đặc trưng thay mặt cho nhãn (proxy leakage)</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Rò rỉ do trộn tập huấn luyện và tập kiểm tra</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> &quot;Số lần gọi tổng đài sau sự cố&quot; để dự đoán &quot;có gặp sự cố không&quot; là hợp lệ về mặt thời gian nhưng là <strong>hệ quả</strong> của nhãn. Chỉ có cách hỏi từng đặc trưng: tại thời điểm dự đoán, giá trị này đã tồn tại chưa, và nó tồn tại <em>vì</em> nhãn hay không?</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/4</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="mlops-ch03.html"><span class="pager-dir">← Trước</span><span class="pager-title">Dữ liệu: hợp đồng và phổ lỗi</span></a><a class="pager-link pager-next" href="mlops-ch05.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Thí nghiệm lặp lại được</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-4-1">4.1. Hai nỗi đau sinh ra kho đặc trưng</a></li><li class="toc-l3"><a href="#sec-4-2">4.2. Tính đúng theo thời điểm</a></li><li class="toc-l3"><a href="#sec-4-3">4.3. Ba cách một đặc trưng rò rỉ tương lai</a></li><li class="toc-l3"><a href="#sec-4-4">4.4. Kho đặc trưng giải quyết chuyện gì</a></li><li class="toc-l3"><a href="#sec-4-5">4.5. Khi nào không cần kho đặc trưng</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

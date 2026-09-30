@@ -911,3 +911,84 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
   background: var(--accent-soft); color: var(--accent-2);
   font-family: var(--font-ui); font-size: .68rem; font-weight: 600;
 }
+
+/* --------------------------------------------- bộ chuyển giáo trình */
+.book-switch {
+  display: flex; gap: .25rem; padding: .25rem;
+  margin: 0 .35rem .35rem; border-radius: var(--radius-sm);
+  background: var(--bg-soft); border: 1px solid var(--line);
+}
+.book-tab {
+  flex: 1; text-align: center; padding: .32rem .5rem; border-radius: 5px;
+  font-family: var(--font-ui); font-size: .8rem; font-weight: 500;
+  color: var(--text-3); text-decoration: none;
+}
+.book-tab:hover { color: var(--text); }
+.book-tab.is-active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow); }
+
+/* ------------------------------------------- trang chủ nhiều giáo trình */
+.book-block { margin: 0 0 4rem; scroll-margin-top: calc(var(--topbar-h) + 1rem); }
+.book-head { padding-bottom: 1.5rem; margin-bottom: 1.75rem; border-bottom: 1px solid var(--line); }
+.book-kicker {
+  margin: 0 0 .4rem; font-family: var(--font-ui); font-size: .72rem; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--accent);
+}
+.book-head h2 { font-size: clamp(1.5rem, 3vw, 2rem); margin: 0 0 .6rem; line-height: 1.2; }
+.book-head h2 a { color: inherit; text-decoration: none; }
+.book-head h2 a:hover { color: var(--accent); }
+.book-blurb { font-size: 1.02rem; color: var(--text-2); max-width: 58ch; margin: 0 0 1.25rem; }
+.tool-pills { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1.25rem; }
+.tool-pill {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .3rem .7rem; border-radius: 99px;
+  background: var(--surface); border: 1px solid var(--line);
+  font-family: var(--font-ui); font-size: .78rem; color: var(--text-2); text-decoration: none;
+}
+.tool-pill:hover { border-color: var(--accent); color: var(--accent); }
+.tool-pill span { color: var(--accent); }
+.home-h3 {
+  font-family: var(--font-ui); font-size: 1.05rem; font-weight: 650;
+  margin: 2rem 0 .9rem; letter-spacing: -.01em;
+}
+.path-card h4, .ch-card h4, .tool-card h3 {
+  font-family: var(--font-ui); font-size: 1rem; font-weight: 600; margin: .1rem 0 .3rem;
+}
+.ch-card h4 { font-size: .98rem; }
+
+/* ------------------------------------------------ máy tính ML Test Score */
+.mts-wrap { padding: 1.25rem 1.3rem 1.4rem; }
+.mts-total { margin-bottom: 1rem; }
+.mts-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); margin: 1.25rem 0; }
+.mts-group { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.mts-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .55rem .85rem; background: var(--bg-soft); border-bottom: 1px solid var(--line);
+}
+.mts-head h4 { margin: 0; font-family: var(--font-ui); font-size: .92rem; font-weight: 650; }
+.mts-score {
+  font-family: var(--font-mono); font-size: .95rem; font-weight: 500; color: var(--accent);
+}
+.mts-list { list-style: none; margin: 0; padding: 0; }
+.mts-item {
+  display: flex; align-items: center; gap: .6rem; padding: .45rem .85rem;
+  border-bottom: 1px solid var(--line); font-family: var(--font-ui); font-size: .82rem;
+}
+.mts-item:last-child { border-bottom: none; }
+.mts-text { flex: 1; line-height: 1.4; color: var(--text-2); }
+.mts-opts { display: flex; gap: 2px; flex: none; }
+.mts-opt {
+  padding: .18rem .45rem; border: 1px solid var(--line); background: var(--bg);
+  font-family: var(--font-ui); font-size: .68rem; color: var(--text-3);
+}
+.mts-opt:first-child { border-radius: 4px 0 0 4px; }
+.mts-opt:last-child { border-radius: 0 4px 4px 0; }
+.mts-opt:hover { color: var(--text); }
+.mts-opt.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+:root[data-theme='dark'] .mts-opt.is-on { color: #10211f; }
+.mts-opt[data-v="0"].is-on { background: var(--text-3); border-color: var(--text-3); color: var(--surface); }
+.mts-opt[data-v="0.5"].is-on { background: var(--warn); border-color: var(--warn); color: var(--surface); }
+
+@media (max-width: 860px) {
+  .mts-item { flex-wrap: wrap; }
+  .mts-text { flex: 1 1 100%; }
+}

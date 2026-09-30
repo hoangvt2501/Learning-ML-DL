@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10. Giám sát và cảnh báo — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
+<meta name="description" content="Bốn lớp giám sát, độ lệch dự đoán, giới hạn hành động, và cách thiết kế cảnh báo để nó không bị mất niềm tin.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>MLOps</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group">Giáo trình 2 · MLOps</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html" class="is-active" aria-current="page"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 10</span><span class="kicker-time">7 phút đọc</span></div><h2 id="sec-10" class="heading">10. Giám sát và cảnh báo<a class="anchor" href="#sec-10" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Bốn lớp giám sát, độ lệch dự đoán, giới hạn hành động, và cách thiết kế cảnh báo để nó không bị mất niềm tin.</p>
+<h3 id="sec-10-1" class="heading">10.1. Hai loại chỉ số, đừng trộn<a class="anchor" href="#sec-10-1" aria-label="Liên kết tới mục này">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Loại</th>
+<th>Ví dụ</th>
+<th>Ai lo</th>
+<th>Khi hỏng thì biết ngay?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Chỉ số vận hành</strong></td>
+<td>độ trễ, thông lượng, tỉ lệ lỗi, mức dùng CPU/GPU/bộ nhớ, thời gian hoạt động</td>
+<td>giống hệt mọi dịch vụ khác</td>
+<td><strong>Có</strong></td>
+</tr>
+<tr>
+<td><strong>Chỉ số riêng của ML</strong></td>
+<td>độ chính xác, phân phối dự đoán, phân phối đặc trưng, chất lượng dữ liệu vào</td>
+<td>chỉ ML mới có</td>
+<td><strong>Không</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Hệ thống ML sập vì lý do vận hành thì cũng giống mọi hệ thống khác, và ngành phần mềm đã biết cách xử lý từ lâu. Phần đáng viết ra trong tài liệu này là loại thứ hai.</p>
+<h3 id="sec-10-2" class="heading">10.2. Bốn lớp để giám sát<a class="anchor" href="#sec-10-2" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Xếp theo thứ tự <strong>càng gần nhãn thì càng có ý nghĩa, nhưng càng khó lấy</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Lớp</th>
+<th>Giám sát cái gì</th>
+<th>Có ngay không</th>
+<th>Ý nghĩa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. <strong>Đầu vào thô</strong></td>
+<td>tệp/luồng tới có đúng số lượng, đúng giờ, đúng schema không</td>
+<td>ngay</td>
+<td>thấp — chỉ bắt lỗi cứng</td>
+</tr>
+<tr>
+<td>2. <strong>Đặc trưng</strong></td>
+<td>phân phối từng đặc trưng, tỉ lệ null, danh mục lạ</td>
+<td>ngay</td>
+<td>vừa — bắt được covariate shift và skew</td>
+</tr>
+<tr>
+<td>3. <strong>Dự đoán</strong></td>
+<td>phân phối <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{y}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span></span></span></span>, tỉ lệ theo lớp, độ tin cậy trung bình</td>
+<td>ngay</td>
+<td>khá — bắt được nhiều sự cố mà không cần nhãn</td>
+</tr>
+<tr>
+<td>4. <strong>Chỉ số chất lượng</strong></td>
+<td>độ chính xác, AUC, chỉ số sản phẩm</td>
+<td><strong>chỉ khi có nhãn</strong></td>
+<td>cao nhất — nhưng thường tới trễ</td>
+</tr>
+</tbody>
+</table></div>
+<p>Nguyên tắc dùng: <strong>báo động ở lớp 4 khi có thể, điều tra ở lớp 1–3 khi lớp 4 chưa tới.</strong> Đội không có nhãn nhanh thì lớp 3 là tuyến phòng thủ chính.</p>
+<h3 id="sec-10-3" class="heading">10.3. Độ lệch dự đoán<a class="anchor" href="#sec-10-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Sculley và cộng sự đề xuất một phép kiểm tra đơn giản đến bất ngờ mà lại hữu dụng:</p>
+<blockquote>
+<p><strong>Prediction bias.</strong> Trong một hệ thống chạy đúng, phân phối <strong>nhãn được dự đoán</strong> thường phải bằng phân phối <strong>nhãn quan sát được</strong>.</p>
+</blockquote>
+<p>Bài báo cũng tự nêu giới hạn của nó rất thành thật: đây không phải phép kiểm tra đầy đủ, vì một mô hình rỗng chỉ đoán tỉ lệ trung bình cũng thoả mãn. <strong>Nhưng thay đổi của chỉ số này thường là dấu hiệu của sự cố cần chú ý.</strong></p>
+<p>Sức mạnh của nó nằm ở chỗ: nó không cần nhãn <em>tức thời</em> cho từng dự đoán, chỉ cần biết <strong>tỉ lệ nền theo thời gian</strong>. Nếu tỉ lệ gian lận lịch sử là 1,2% mà mô hình đột nhiên gắn cờ 4,5% giao dịch, thì có chuyện — dù chưa có nhãn nào cho ngày hôm nay.</p>
+<p>Cách dùng thực hành là chia theo lát cắt: độ lệch dự đoán theo từng thị trường, từng kênh, từng phiên bản ứng dụng. Độ lệch tổng thể bằng 0 vẫn có thể che giấu hai lát cắt lệch ngược chiều nhau.</p>
+<h3 id="sec-10-4" class="heading">10.4. Hai cơ chế nữa từ cùng bài báo<a class="anchor" href="#sec-10-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p><strong>Giới hạn hành động (action limits).</strong> Với hệ thống đưa ra hành động thật — đặt giá thầu, chặn tin nhắn, khoá tài khoản — cần đặt và <strong>cưỡng chế</strong> giới hạn hành động như một phép kiểm tra tỉnh táo. Giới hạn phải đủ rộng để không nổ vu vơ; khi chạm giới hạn thì báo động tự động và có người vào xem.</p>
+<p>Đây là loại biện pháp rẻ và cứu được nhiều thảm hoạ: nó không cần biết mô hình đúng hay sai, chỉ cần biết <strong>&quot;khoá 50 000 tài khoản trong một giờ&quot; là điều chưa từng xảy ra và không nên xảy ra</strong>.</p>
+<p><strong>Nhà cung cấp thượng nguồn (up-stream producers).</strong> Dữ liệu chảy vào hệ thống học từ nhiều nguồn thượng nguồn. Các nguồn ấy phải được <strong>giám sát, kiểm thử và đạt một SLO có tính đến nhu cầu của hệ thống ML ở hạ nguồn</strong>. Quan trọng hơn: mọi cảnh báo ở thượng nguồn <strong>phải được truyền tới mặt phẳng điều khiển của hệ thống ML</strong>, và ngược lại, nếu hệ ML không đạt SLO thì phải báo xuống mọi bên tiêu thụ.</p>
+<p>Đây chính là cách chặn dạng nợ <strong>undeclared consumer</strong> ở <a href="mlops-ch01.html#sec-1-4" class="xref">Mục 1.4</a> — biến quan hệ ngầm thành hợp đồng có tên và có cảnh báo hai chiều.</p>
+<h3 id="sec-10-5" class="heading">10.5. Cảnh báo: kẻ thù là báo động giả<a class="anchor" href="#sec-10-5" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Nhắc lại nỗi đau được nêu nhiều nhất trong nghiên cứu phỏng vấn: <strong>báo động giả</strong>. Hậu quả không phải là phiền toái mà là <strong>mất niềm tin</strong>, và một hệ cảnh báo không được tin thì tệ hơn không có hệ cảnh báo, vì nó tạo cảm giác an toàn giả.</p>
+<p>Bốn nguyên tắc thiết kế:</p>
+<ol>
+<li><strong>Mỗi cảnh báo phải gắn với một hành động.</strong> Nếu người nhận không biết phải làm gì, đó không phải cảnh báo — đó là một biểu đồ. Cho nó vào bảng điều khiển, đừng cho nó đánh thức ai.</li>
+<li><strong>Phân tầng theo mức độ.</strong> <em>Trang</em> (đánh thức người) cho lỗi cứng và sập dịch vụ; <em>vé</em> (ticket) cho dịch chuyển và suy giảm chậm; <em>bảng điều khiển</em> cho phần còn lại.</li>
+<li><strong>Cảnh báo trên triệu chứng, không trên nguyên nhân.</strong> &quot;Tỉ lệ chuyển đổi giảm 15%&quot; đáng đánh thức người. &quot;PSI của đặc trưng số 37 vượt 0,2&quot; thì không — đó là một manh mối cho cuộc điều tra, không phải một sự cố.</li>
+<li><strong>Đòi hỏi độ dai (persistence).</strong> Một điểm dữ liệu vượt ngưỡng là nhiễu; vượt ngưỡng trong ba cửa sổ liên tiếp mới là tín hiệu.</li>
+</ol>
+<h3 id="sec-10-6" class="heading">10.6. Ngưỡng cố định trong hệ thống động<a class="anchor" href="#sec-10-6" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Một dạng nợ riêng mà Sculley và cộng sự đặt tên, và rất hay gặp trong thực tế:</p>
+<blockquote>
+<p><strong>Fixed thresholds in dynamic systems.</strong> Mô hình nào cũng cần một ngưỡng quyết định — báo đúng hay sai, đánh dấu thư rác hay không. Ngưỡng ấy thường được <strong>đặt bằng tay</strong> để cân bằng precision và recall. Nhưng khi mô hình được huấn luyện lại trên dữ liệu mới, <strong>ngưỡng cũ có thể không còn hợp lệ.</strong></p>
+</blockquote>
+<p>Cập nhật tay ngưỡng cho nhiều mô hình vừa tốn công vừa dễ quên. Cách chữa đúng là <strong>học ngưỡng cùng mô hình</strong> trên một tập kiểm định giữ riêng, và coi ngưỡng là <strong>một phần của tạo tác mô hình</strong> chứ không phải một hằng số trong cấu hình dịch vụ.</p>
+<p>Đây là một ví dụ rất gọn của CACE: huấn luyện lại đã đổi phân phối điểm số đầu ra, nên mọi thứ phụ thuộc vào thang điểm ấy đều đã đổi theo — kể cả một con số nằm trong tệp YAML mà không ai nghĩ là một phần của mô hình.</p>
+<hr>
+<section class="quiz" data-quiz data-chapter="10"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">4 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Trong bốn lớp giám sát, lớp nào là tuyến phòng thủ chính khi nhãn tới trễ?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đầu vào thô</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Đặc trưng</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Dự đoán</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ số chất lượng</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Càng gần nhãn thì càng có ý nghĩa nhưng càng khó lấy. Không có nhãn nhanh thì phân phối dự đoán, tỉ lệ theo lớp và <strong>độ lệch dự đoán</strong> là thứ dùng được ngay.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Phép kiểm tra &quot;độ lệch dự đoán&quot; (prediction bias) nói gì, và giới hạn của nó là gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó chứng minh mô hình đúng; không có giới hạn nào</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Phân phối nhãn dự đoán thường phải bằng phân phối nhãn quan sát; giới hạn là một mô hình rỗng chỉ đoán tỉ lệ trung bình cũng thoả mãn</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó đo độ lệch giữa tập huấn luyện và tập kiểm tra</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó chỉ dùng được cho hồi quy</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Chính bài báo tự nêu giới hạn ấy, nhưng vẫn khẳng định <strong>thay đổi của chỉ số này thường là dấu hiệu sự cố cần chú ý</strong>. Sức mạnh của nó là không cần nhãn cho từng dự đoán, chỉ cần tỉ lệ nền theo thời gian.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">Nguyên tắc &quot;cảnh báo trên triệu chứng, không trên nguyên nhân&quot; nghĩa là gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ cảnh báo khi đã biết nguyên nhân gốc</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">&quot;Tỉ lệ chuyển đổi giảm 15%&quot; đáng đánh thức người; &quot;PSI của đặc trưng số 37 vượt 0,2&quot; thì không — đó là manh mối điều tra</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Cảnh báo phải ghi rõ nguyên nhân</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ cảnh báo những gì tự động sửa được</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Kèm ba nguyên tắc nữa: mỗi cảnh báo phải gắn với một hành động; phân tầng trang / vé / bảng điều khiển; và đòi hỏi <strong>độ dai</strong> qua nhiều cửa sổ liên tiếp.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">4</span><span class="quiz-text">&quot;Fixed threshold in dynamic system&quot; là dạng nợ gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Ngưỡng cảnh báo đặt quá thấp</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Ngưỡng quyết định đặt tay không còn hợp lệ sau khi mô hình được huấn luyện lại</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Ngưỡng học được nhưng không lưu phiên bản</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Ngưỡng khác nhau giữa các môi trường</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Đây là một ví dụ rất gọn của CACE: huấn luyện lại đã đổi phân phối điểm số đầu ra, nên mọi thứ phụ thuộc thang điểm ấy đều đã đổi. Cách chữa: <strong>học ngưỡng cùng mô hình và coi nó là một phần của tạo tác mô hình.</strong></div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/4</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="mlops-ch09.html"><span class="pager-dir">← Trước</span><span class="pager-title">Dịch chuyển phân phối</span></a><a class="pager-link pager-next" href="mlops-ch11.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Huấn luyện lại</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-10-1">10.1. Hai loại chỉ số, đừng trộn</a></li><li class="toc-l3"><a href="#sec-10-2">10.2. Bốn lớp để giám sát</a></li><li class="toc-l3"><a href="#sec-10-3">10.3. Độ lệch dự đoán</a></li><li class="toc-l3"><a href="#sec-10-4">10.4. Hai cơ chế nữa từ cùng bài báo</a></li><li class="toc-l3"><a href="#sec-10-5">10.5. Cảnh báo: kẻ thù là báo động giả</a></li><li class="toc-l3"><a href="#sec-10-6">10.6. Ngưỡng cố định trong hệ thống động</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

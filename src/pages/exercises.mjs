@@ -48,18 +48,16 @@ const DRILLS = [
   { id: 'kv', label: 'Dung lượng KV cache' },
 ];
 
-export function buildExercisePage(ctx, chapter14Html, chapter14) {
-  const { md, nav, page, escapeHtml, write, read, neighbours, registry, searchIndex } = ctx;
+export function buildExercisePage(ctx, exChapter) {
+  const { md, nav, page, escapeHtml, write, read, neighbours, registry, searchIndex, f, book } = ctx;
 
-  registry.currentFile = 'bai-tap.html';
+  registry.currentFile = f('bai-tap.html');
 
-  const exercises = parseExercises(chapter14.markdown);
-  const solutions = parseSolutions(read('content/loi-giai.md'));
-  const quizzes = parseQuizzes(read('content/trac-nghiem.md'));
+  const exercises = parseExercises(exChapter.markdown);
+  const solutions = parseSolutions(read(book.solutions));
+  const quizzes = parseQuizzes(read(book.quiz));
 
-  if (exercises.length !== 9) {
-    throw new Error('Kỳ vọng 9 bài tập, đọc được ' + exercises.length);
-  }
+  if (!exercises.length) throw new Error('[' + book.id + '] Không đọc được bài tập nào');
 
   // Đề bài và lời giải cũng nên tìm được qua ô tìm kiếm.
   for (const ex of exercises) {
@@ -68,7 +66,7 @@ export function buildExercisePage(ctx, chapter14Html, chapter14) {
     searchIndex.push({
       c: '14',
       t: 'Bài ' + ex.num + (ex.tag ? ' — ' + ex.tag : ''),
-      h: 'bai-tap.html#bai-' + ex.num,
+      h: f('bai-tap.html') + '#bai-' + ex.num,
       x: plain(ex.statement + ' ' + ex.hint + ' ' + (sol ? sol.markdown : '')).slice(0, 900),
     });
   }
@@ -159,9 +157,9 @@ export function buildExercisePage(ctx, chapter14Html, chapter14) {
   // ------------------------------------------------------------------ trang
   const body =
     '<article class="prose">' +
-    '<div class="chapter-kicker"><span class="kicker-badge">Chương 14</span>' +
+    '<div class="chapter-kicker"><span class="kicker-badge">Chương ' + exChapter.num + '</span>' +
     '<span class="kicker-time">' + exercises.length + ' bài · ' + totalQuestions + ' câu trắc nghiệm</span></div>' +
-    '<h2 class="heading" id="sec-14">14. Bài tập<a class="anchor" href="#sec-14">#</a></h2>' +
+    '<h2 class="heading" id="sec-' + exChapter.num + '">' + escapeHtml(exChapter.title) + '<a class="anchor" href="#sec-' + exChapter.num + '">#</a></h2>' +
     '<p class="chapter-lede">Chín bài tập của giáo trình, mỗi bài kèm lời giải chi tiết ẩn sẵn. Hãy tự làm trước khi mở. Bên dưới là phần luyện tính tay tự chấm và ngân hàng trắc nghiệm theo từng chương.</p>' +
     '<nav class="ex-jump">' +
     exercises
@@ -184,17 +182,17 @@ export function buildExercisePage(ctx, chapter14Html, chapter14) {
     '</article>';
 
   write(
-    'bai-tap.html',
+    f('bai-tap.html'),
     page({
-      title: 'Bài tập — Quantization trong Deep Learning',
+      title: 'Bài tập — ' + ctx.docTitle,
       description:
         'Chín bài tập có lời giải chi tiết, bài luyện tính tay tự chấm và ' +
         totalQuestions + ' câu trắc nghiệm theo chương.',
       body,
       nav,
-      file: 'bai-tap.html',
-      ...neighbours('bai-tap.html'),
-      scripts: ['assets/exercises.js'],
+      file: f('bai-tap.html'),
+      ...neighbours(f('bai-tap.html')),
+      scripts: [book.drills === false ? 'assets/quiz-filter.js' : 'assets/exercises.js'],
     })
   );
 

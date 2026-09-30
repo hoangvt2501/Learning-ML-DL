@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>15. Ôn phỏng vấn — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
+<meta name="description" content="Khung trả lời bốn bước, các nhóm câu hỏi thường gặp kèm câu trả lời mẫu có số liệu, và những câu trả lời tự tố cáo.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>MLOps</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group">Giáo trình 2 · MLOps</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html" class="is-active" aria-current="page"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 15</span><span class="kicker-time">18 phút đọc</span></div><h2 id="sec-15" class="heading">15. Ôn phỏng vấn<a class="anchor" href="#sec-15" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Khung trả lời bốn bước, các nhóm câu hỏi thường gặp kèm câu trả lời mẫu có số liệu, và những câu trả lời tự tố cáo.</p>
+<p>Chương này không thêm kiến thức mới. Nó sắp xếp lại những gì đã có thành dạng dùng được trong phòng phỏng vấn.</p>
+<h3 id="sec-15-1" class="heading">15.1. Khung trả lời<a class="anchor" href="#sec-15-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Phần lớn câu hỏi MLOps là câu hỏi mở, và người phỏng vấn nghe <strong>cách bạn nghĩ</strong> chứ không nghe danh sách công cụ. Khung bốn bước dưới đây dùng được cho gần như mọi câu:</p>
+<ol>
+<li><strong>Nêu ràng buộc trước.</strong> &quot;Điều này phụ thuộc độ trễ nhãn&quot; hay &quot;phụ thuộc có bao nhiêu mô hình dùng chung đặc trưng&quot; — nêu được ràng buộc là đã chứng minh bạn hiểu bài toán.</li>
+<li><strong>Nêu đánh đổi.</strong> Mọi lựa chọn trong tài liệu này đều là đánh đổi. Câu trả lời không có đánh đổi là câu trả lời thuộc lòng.</li>
+<li><strong>Chọn một phương án và nói vì sao.</strong> Không được dừng ở &quot;còn tuỳ&quot;.</li>
+<li><strong>Nói cách đo xem mình có chọn đúng không.</strong> Đây là bước phân biệt rõ nhất người đã vận hành thật.</li>
+</ol>
+<p>Và một mẹo: <strong>nhắc được một con số cụ thể</strong> làm câu trả lời nặng ký hẳn lên. Tài liệu này cố tình cung cấp sẵn những con số đó.</p>
+<h3 id="sec-15-2" class="heading">15.2. Nhóm câu hỏi nền tảng<a class="anchor" href="#sec-15-2" aria-label="Liên kết tới mục này">#</a></h3>
+<p><strong>&quot;MLOps là gì, khác DevOps chỗ nào?&quot;</strong></p>
+<blockquote>
+<p><em>Ý chính:</em> DevOps quản một tạo tác thay đổi khi có người sửa mã. MLOps quản <strong>ba</strong> tạo tác — mã, dữ liệu, mô hình — với ba nhịp thay đổi khác nhau, trong đó <strong>dữ liệu thay đổi mà không ai chạm vào repo</strong>.</p>
+<p><em>Ghi điểm thêm:</em> vì thế ML có chữ C thứ ba là <strong>CT — huấn luyện liên tục</strong> bên cạnh CI/CD. Và hệ quả vận hành là ML hỏng <strong>im lặng</strong>: một mô hình nhận đầu vào lệch phân phối vẫn trả về đúng kiểu dữ liệu, đúng thời hạn, và sai.</p>
+</blockquote>
+<p><strong>&quot;Vì sao mô hình tốt lại chết trong sản xuất?&quot;</strong></p>
+<blockquote>
+<p>Trả lời bằng bốn nguyên nhân có tên, mỗi cái một câu: <strong>training–serving skew</strong> (đặc trưng tính khác nhau hai bên), <strong>dịch chuyển phân phối</strong> (thế giới đổi), <strong>phụ thuộc dữ liệu không ổn định</strong> (nguồn thượng nguồn đổi mà không ai báo), <strong>vòng phản hồi</strong> (mô hình làm hỏng dữ liệu huấn luyện của chính nó).</p>
+<p><em>Ghi điểm thêm:</em> nhắc <strong>nguyên lý CACE</strong> — đổi bất cứ thứ gì là đổi tất cả — và giải thích vì sao nó làm mọi trực giác &quot;sửa cục bộ&quot; của kỹ sư phần mềm thành vô hiệu.</p>
+</blockquote>
+<p><strong>&quot;Con số 5% mã ML nghĩa là gì?&quot;</strong></p>
+<p>Đây là câu bẫy, vì phần lớn người trả lời theo trí nhớ mơ hồ. Trả lời đúng gồm ba ý ở <a href="mlops-ch01.html#sec-1-5" class="xref">Mục 1.5</a>: nó là phát biểu về <strong>mã keo</strong> chứ không phải chú thích của hình vẽ; nó có biên (<em>nhiều nhất</em> 5% / <em>ít nhất</em> 95%); và kết luận đi kèm là <strong>đôi khi viết gọn từ đầu còn rẻ hơn tái dùng một gói đa dụng</strong>.</p>
+<p><strong>&quot;Kể tên các mức trưởng thành MLOps.&quot;</strong></p>
+<blockquote>
+<p>Mức 0: mọi thứ thủ công, bàn giao <strong>một mô hình</strong>. Mức 1: pipeline huấn luyện tự động, bàn giao <strong>cả pipeline</strong>, có CT. Mức 2: CI/CD cho chính pipeline, bàn giao <strong>một hệ thống tự cập nhật</strong>.</p>
+<p><em>Ghi điểm thêm:</em> nêu được rằng <strong>thứ được bàn giao lớn dần</strong> chính là trục của thang đo này, và đội ở mức 1 mà không có giám sát thì vẫn không an toàn hơn mức 0 bao nhiêu.</p>
+</blockquote>
+<h3 id="sec-15-3" class="heading">15.3. Nhóm dữ liệu và đặc trưng<a class="anchor" href="#sec-15-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p><strong>&quot;Training–serving skew là gì, chống thế nào?&quot;</strong></p>
+<blockquote>
+<p>Là khi đặc trưng lúc phục vụ được tính khác lúc huấn luyện — thường vì hai bên có hai bản cài đặt riêng, một bản SQL trên kho dữ liệu, một bản mã dịch vụ viết lại cho đủ nhanh.</p>
+<p><em>Chống:</em> một định nghĩa đặc trưng duy nhất dùng chung cho cả hai đường; đóng gói hàm biến đổi cùng mô hình; và <strong>đo nó</strong> bằng cách so giá trị đặc trưng ở hai bên trên cùng lưu lượng — đúng mục <strong>Monitor 3</strong> của ML Test Score. Chạy shadow là cách rẻ nhất để đo trên lưu lượng thật.</p>
+</blockquote>
+<p><strong>&quot;Point-in-time correctness là gì?&quot;</strong> — Câu này gần như luôn được hỏi.</p>
+<blockquote>
+<p>Với mỗi dòng huấn luyện có thời điểm dự đoán <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span>, giá trị đặc trưng phải là giá trị <strong>quan sát được tại <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span></strong>, không phải giá trị hôm nay.</p>
+<p><em>Cách kể cho rõ:</em> dùng ví dụ &quot;tổng số đơn hàng&quot;: một dòng của tháng 3 phải dùng con số của tháng 3, không dùng con số của hôm nay. Nếu dùng con số hôm nay thì mô hình học rằng &quot;khách có 480 đơn thì không rời bỏ&quot;, trong khi 480 tồn tại <strong>vì</strong> khách đã ở lại.</p>
+<p><em>Ghi điểm thêm:</em> chỉ ra vì sao lỗi này nguy hiểm hơn mọi lỗi khác — <strong>nó làm chỉ số ngoại tuyến đẹp lên</strong>, nên không ai nghi ngờ cho tới khi đã triển khai.</p>
+</blockquote>
+<p><strong>&quot;Khi nào cần feature store?&quot;</strong></p>
+<blockquote>
+<p>Khi có <strong>đồng thời</strong> ba điều: nhiều mô hình dùng chung đặc trưng, có phục vụ trực tuyến độ trễ thấp, và đặc trưng phụ thuộc thời gian. Thiếu cả ba thì một bảng trong kho dữ liệu cộng với kỷ luật dùng chung một hàm biến đổi là đủ và rẻ hơn nhiều.</p>
+<p><em>Ghi điểm thêm:</em> feature store <strong>không tự động</strong> xoá skew, nó chỉ tạo điều kiện; nếu đội vẫn viết đường tính riêng cho phục vụ thì skew quay lại ngay.</p>
+</blockquote>
+<p><strong>&quot;Làm sao biết dữ liệu có vấn đề?&quot;</strong></p>
+<blockquote>
+<p>Dùng khung <strong>cứng → mềm → dịch chuyển</strong>: lỗi cứng thì <strong>chặn pipeline</strong>; lỗi mềm thì <strong>cảnh báo và theo dõi tỉ lệ</strong>; dịch chuyển thì <strong>điều tra, có thể huấn luyện lại</strong>. Ba loại đòi hỏi ba cách phản ứng khác nhau, và trộn chúng vào một cơ chế cảnh báo là nguồn gốc của báo động giả.</p>
+</blockquote>
+<h3 id="sec-15-4" class="heading">15.4. Nhóm đánh giá và ra mắt<a class="anchor" href="#sec-15-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p><strong>&quot;Vì sao một chỉ số là không đủ?&quot;</strong></p>
+<blockquote>
+<p>Vì chỉ số gộp là trung bình có trọng số theo lưu lượng, nên nhóm đa số chi phối hoàn toàn.</p>
+<p><em>Kể một con số:</em> trong thí nghiệm ở <a href="mlops-ch06.html#sec-6-3" class="xref">Mục 6.3</a>, thêm một đặc trưng làm độ chính xác tổng thể tăng <strong>19,8 điểm</strong>, nhóm đa số tăng 25,5 điểm, còn nhóm 15% người dùng mới <strong>mất 11,6 điểm</strong> và tụt xuống dưới cả mô hình cũ. Cơ chế: đặc trưng ấy chỉ có tín hiệu với nhóm đa số, nên với nhóm thiểu số trọng số lớn của nó bơm nhiễu thẳng vào dự đoán.</p>
+</blockquote>
+<p><strong>&quot;Shadow, canary và A/B khác nhau thế nào?&quot;</strong></p>
+<blockquote>
+<p>Mỗi cái trả lời một câu hỏi khác nhau. <strong>Shadow</strong>: mô hình mới có chịu nổi tải không, đặc trưng có khớp không — rủi ro cho người dùng bằng 0, nhưng không biết họ phản ứng ra sao. <strong>Canary</strong>: có chỉ số vận hành nào xấu đi ở quy mô nhỏ không — hạn chế bán kính thiệt hại. <strong>A/B</strong>: mô hình mới có làm chỉ số sản phẩm tốt lên một cách <strong>nhân quả</strong> không.</p>
+<p><em>Ghi điểm thêm:</em> nói rõ <strong>canary không đo được chỉ số sản phẩm</strong>, vì ở 1% lưu lượng không đủ mẫu để có ý nghĩa thống kê. Canary bảo vệ khỏi thảm hoạ; A/B trả lời câu hỏi về giá trị. Lẫn hai vai trò này là lỗi quy trình phổ biến nhất.</p>
+</blockquote>
+<p><strong>&quot;Vì sao không A/B test mọi thay đổi?&quot;</strong></p>
+<blockquote>
+<p>Vì lưu lượng là tài nguyên khan hiếm và cỡ mẫu tỉ lệ nghịch với <strong>bình phương</strong> mức cải thiện.</p>
+<p><em>Kể một con số:</em> với tỉ lệ nền 5%, để bắt một cải thiện tương đối 1% ở lực kiểm định 80% cần <strong>khoảng 3 triệu mẫu mỗi nhánh</strong> — tức một tháng lưu lượng cho một ý tưởng. Vì vậy quy trình tốt được thiết kế để loại ý tưởng tồi ở giai đoạn rẻ hơn, trước khi tiêu lưu lượng.</p>
+</blockquote>
+<p><strong>&quot;Nêu ba cái bẫy khi đọc kết quả A/B.&quot;</strong> — Peeking, so nhiều chỉ số cùng lúc, và ô nhiễm giữa hai nhánh. Với mỗi cái nêu cách chữa (cố định cỡ mẫu hoặc kiểm định tuần tự; khai báo trước một chỉ số chính; chia ngẫu nhiên theo cụm).</p>
+<p><strong>&quot;ML Test Score tính thế nào?&quot;</strong></p>
+<blockquote>
+<p>28 mục, chia đều bốn nhóm: dữ liệu, mô hình, hạ tầng, giám sát. Mỗi mục được <strong>0,5 điểm nếu làm thủ công có ghi chép</strong>, <strong>1 điểm nếu có hệ thống chạy tự động định kỳ</strong>. Cộng điểm riêng từng nhóm, rồi <strong>điểm cuối là giá trị nhỏ nhất trong bốn nhóm</strong>.</p>
+<p><em>Ghi điểm thêm:</em> giải thích vì sao lấy nhỏ nhất — vì cả bốn đều cần thiết, nên đội có hạ tầng hoàn hảo mà không giám sát gì thì <strong>điểm bằng 0</strong>. Đây thường là nhóm yếu nhất trong thực tế.</p>
+</blockquote>
+<h3 id="sec-15-5" class="heading">15.5. Nhóm giám sát và dịch chuyển<a class="anchor" href="#sec-15-5" aria-label="Liên kết tới mục này">#</a></h3>
+<p><strong>&quot;Ba loại dịch chuyển phân phối?&quot;</strong></p>
+<blockquote>
+<p>Covariate shift: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span> đổi, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>Y</mi><mi mathvariant="normal">∣</mi><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(Y|X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span> giữ. Label shift: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>Y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(Y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span><span class="mclose">)</span></span></span></span> đổi, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mi mathvariant="normal">∣</mi><mi>Y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(X|Y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span><span class="mclose">)</span></span></span></span> giữ. Concept drift: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>Y</mi><mi mathvariant="normal">∣</mi><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(Y|X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span> đổi, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span> giữ.</p>
+</blockquote>
+<p><strong>&quot;Cái nào dò được mà không cần nhãn?&quot;</strong> — Đây là câu hỏi quan trọng nhất của cả nhóm.</p>
+<blockquote>
+<p>Chỉ hai loại đầu. <strong>Concept drift về nguyên tắc không dò được bằng cách giám sát <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi></mrow><annotation encoding="application/x-tex">X</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span></span></span></span></strong>, vì theo đúng định nghĩa nó giữ nguyên <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span>.</p>
+<p><em>Kể một con số:</em> trong thí nghiệm ở <a href="mlops-ch09.html#sec-9-2" class="xref">Mục 9.2</a>, concept drift làm độ chính xác rơi từ 75,6% xuống <strong>26,9%</strong> — tệ hơn đoán bừa — trong khi kiểm định KS trên các đặc trưng cho <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0,48</mn></mrow><annotation encoding="application/x-tex">p = 0{,}48</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">48</span></span></span></span>, tức hoàn toàn bình thường. Ngược lại, covariate shift làm KS hét toáng lên trong khi độ chính xác gần như không đổi: đó chính là báo động giả.</p>
+<p><em>Kết luận:</em> vì vậy <strong>độ trễ nhãn quyết định bạn có nhìn thấy loại dịch chuyển nguy hiểm nhất hay không</strong>, và mọi thiết kế giám sát phải bắt đầu từ câu hỏi &quot;bao lâu tôi mới biết đáp án thật&quot;.</p>
+</blockquote>
+<p><strong>&quot;Bạn dùng ngưỡng PSI nào?&quot;</strong> — Câu bẫy. Trả lời &quot;0,25&quot; là trả lời như người chưa đo bao giờ.</p>
+<blockquote>
+<p>PSI thực chất là <strong>phân kỳ Jeffreys</strong>, tức <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mrow><mi>K</mi><mi>L</mi></mrow></msub><mo stretchy="false">(</mo><mi>T</mi><mi mathvariant="normal">∥</mi><mi>B</mi><mo stretchy="false">)</mo><mo>+</mo><msub><mi>D</mi><mrow><mi>K</mi><mi>L</mi></mrow></msub><mo stretchy="false">(</mo><mi>B</mi><mi mathvariant="normal">∥</mi><mi>T</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">D_{KL}(T\|B) + D_{KL}(B\|T)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0715em;">K</span><span class="mord mathnormal mtight">L</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mord">∥</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0715em;">K</span><span class="mord mathnormal mtight">L</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mord">∥</span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mclose">)</span></span></span></span>. Ngưỡng 0,1 và 0,25 là <strong>quy tắc kinh nghiệm từ chấm điểm tín dụng</strong>, không phải kết quả thống kê, và chúng <strong>không tính tới cỡ mẫu lẫn số bin</strong>.</p>
+<p><em>Kể một con số:</em> khi hai mẫu <strong>cùng một phân phối</strong>, PSI kỳ vọng xấp xỉ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo stretchy="false">(</mo><mi>k</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">2(k-1)/n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mord">/</span><span class="mord mathnormal">n</span></span></span></span>. Với <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>200</mn></mrow><annotation encoding="application/x-tex">n = 200</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">200</span></span></span></span> và 20 bin, PSI trung bình là <strong>0,205 dù không có dịch chuyển nào</strong> — sát ngay ngưỡng &quot;dịch chuyển mạnh&quot;. Đo thực tế: ở <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>50</mn></mrow><annotation encoding="application/x-tex">n = 50</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">50</span></span></span></span>, quy tắc PSI &gt; 0,25 báo động <strong>73% số lần khi không có gì xảy ra</strong>; còn ở <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>1000</mn></mrow><annotation encoding="application/x-tex">n = 1000</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1000</span></span></span></span> với dịch chuyển thật <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0,3</mn><mi>σ</mi></mrow><annotation encoding="application/x-tex">0{,}3\sigma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">3</span><span class="mord mathnormal" style="margin-right:0.0359em;">σ</span></span></span></span> thì nó <strong>không báo lần nào</strong>, trong khi kiểm định KS báo 100%.</p>
+<p><em>Nên làm gì:</em> dùng kiểm định có p-value và hiệu chỉnh đa kiểm định; nếu buộc phải dùng PSI thì <strong>hiệu chuẩn ngưỡng bằng mô phỏng trên chính <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> và <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> của mình</strong>, và giữ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> cố định giữa các kỳ đo.</p>
+</blockquote>
+<p><strong>&quot;Giám sát gì khi không có nhãn?&quot;</strong></p>
+<blockquote>
+<p>Bốn lớp, càng gần nhãn càng có ý nghĩa nhưng càng khó lấy: đầu vào thô → đặc trưng → <strong>dự đoán</strong> → chỉ số chất lượng. Không có nhãn thì lớp <strong>dự đoán</strong> là tuyến phòng thủ chính.</p>
+<p><em>Ghi điểm thêm:</em> nhắc <strong>độ lệch dự đoán</strong> — phân phối nhãn dự đoán thường phải bằng phân phối nhãn quan sát — và nêu luôn giới hạn của nó (một mô hình rỗng chỉ đoán tỉ lệ trung bình cũng thoả mãn), nhưng <strong>thay đổi của chỉ số này thường là dấu hiệu sự cố</strong>. Và nhắc <strong>giới hạn hành động</strong>: đặt trần cho số hành động thật mỗi cửa sổ thời gian, chạm trần thì báo người.</p>
+</blockquote>
+<p><strong>&quot;Vì sao cảnh báo hay bị bỏ qua?&quot;</strong></p>
+<blockquote>
+<p>Vì báo động giả. Hậu quả không phải là phiền mà là <strong>mất niềm tin</strong>, và một hệ cảnh báo không được tin thì tệ hơn không có, vì nó tạo cảm giác an toàn giả. Chữa bằng bốn nguyên tắc: mỗi cảnh báo phải gắn với một hành động; phân tầng trang / vé / bảng điều khiển; <strong>cảnh báo trên triệu chứng chứ không trên nguyên nhân</strong>; và đòi hỏi độ dai qua nhiều cửa sổ liên tiếp.</p>
+</blockquote>
+<h3 id="sec-15-6" class="heading">15.6. Nhóm thiết kế hệ thống<a class="anchor" href="#sec-15-6" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Với câu &quot;thiết kế hệ thống ML cho X&quot;, đi theo đúng thứ tự này và bạn sẽ không bỏ sót:</p>
+<ol>
+<li><strong>Làm rõ bài toán:</strong> chỉ số sản phẩm là gì, chỉ số ML nào đại diện cho nó, và hai chỉ số ấy tương quan tới đâu.</li>
+<li><strong>Hỏi về nhãn:</strong> lấy từ đâu, <strong>trễ bao lâu</strong>, có thiên lệch do chính hệ thống gây ra không. Câu trả lời quyết định phần lớn thiết kế còn lại.</li>
+<li><strong>Chế độ phục vụ:</strong> lô, trực tuyến hay luồng — chọn cái rẻ nhất đủ dùng; lập <strong>ngân sách độ trễ</strong> nếu trực tuyến.</li>
+<li><strong>Dữ liệu và đặc trưng:</strong> nguồn, hợp đồng dữ liệu, có cần point-in-time không, có cần feature store không.</li>
+<li><strong>Huấn luyện:</strong> nhịp huấn luyện lại và <strong>kích hoạt</strong> nào, ghim gì để lặp lại được.</li>
+<li><strong>Đánh giá:</strong> tập cố định, <strong>các lát cắt</strong>, kiểm thử hành vi, cửa so với mô hình đang chạy.</li>
+<li><strong>Ra mắt:</strong> shadow → canary → A/B, và cơ chế quay lui.</li>
+<li><strong>Giám sát:</strong> bốn lớp, chỉ số nào đánh thức người, phản ứng khi báo động.</li>
+<li><strong>Vòng phản hồi:</strong> hệ thống có ảnh hưởng tới dữ liệu tương lai của mình không, có cần nhóm đối chứng không.</li>
+</ol>
+<p>Bước 2 và bước 9 là hai bước ứng viên hay bỏ nhất, và cũng là hai bước gây ấn tượng nhất khi có.</p>
+<h3 id="sec-15-7" class="heading">15.7. Nhóm LLMOps<a class="anchor" href="#sec-15-7" aria-label="Liên kết tới mục này">#</a></h3>
+<p><strong>&quot;LLMOps khác MLOps chỗ nào?&quot;</strong></p>
+<blockquote>
+<p>Phần lớn không đổi: vẫn cần hợp đồng dữ liệu, quản phiên bản, shadow/canary, giám sát, quay lui. Cái đổi là năm ràng buộc: không tự huấn luyện; đầu ra là văn bản tự do nên <strong>không có hàm đúng/sai hiển nhiên</strong>; không tất định và nhà cung cấp có thể đổi mô hình dưới chân ta; chi phí là <strong>chi phí suy luận theo token, biến thiên từng yêu cầu</strong>; và có thêm lớp rủi ro về an toàn nội dung và prompt injection.</p>
+<p><em>Ghi điểm thêm:</em> gọi tên việc nhà cung cấp đổi mô hình là <strong>dạng cực đoan của unstable data dependency</strong>, và nêu cách chữa giống hệt: <strong>ghim phiên bản</strong>, coi mỗi lần đổi là một lần phát hành đầy đủ.</p>
+</blockquote>
+<p><strong>&quot;Đánh giá một hệ LLM thế nào?&quot;</strong></p>
+<blockquote>
+<p>Ba tầng theo chi phí: <strong>kiểm tra quy tắc trên 100% số lượt</strong> (định dạng, JSON, trích dẫn, độ dài); <strong>LLM làm giám khảo trên mẫu 10–20%</strong> (hoặc 1–5% khi lưu lượng lớn) cho chất lượng ngữ nghĩa; <strong>người chấm trên mẫu nhỏ định kỳ</strong> để hiệu chuẩn lại giám khảo. Cộng thêm hai vòng: <strong>tập vàng</strong> làm cửa CI cho mỗi lần phát hành, và chấm mẫu trực tuyến trên lưu lượng thật.</p>
+<p><em>Ghi điểm thêm:</em> nêu các <strong>thiên lệch của giám khảo</strong> — vị trí, độ dài, tự ưu ái — kèm cách chữa từng cái, và nhấn rằng <strong>giám khảo cũng là một mô hình nên nó cũng trôi</strong>; không có tầng người chấm thì bạn sẽ có một hệ đánh giá tự tin báo rằng mọi thứ đều ổn.</p>
+</blockquote>
+<p><strong>&quot;Câu trả lời RAG sai thì điều tra thế nào?&quot;</strong></p>
+<blockquote>
+<p>Tách ngay thành hai câu hỏi: tài liệu đúng <strong>có nằm trong ngữ cảnh không</strong>? Nếu không, đó là lỗi <strong>truy hồi</strong> — đo bằng recall@k, chữa bằng chia đoạn, embedding, truy hồi lai, rerank. Nếu có mà vẫn sai, đó là lỗi <strong>sinh</strong> — đo bằng <strong>độ bám nguồn</strong>, chữa bằng prompt, đổi mô hình, buộc trích dẫn.</p>
+<p><em>Ghi điểm thêm:</em> nói rằng gộp hai loại lỗi vào một chỉ số duy nhất là lý do phổ biến nhất khiến đội không biết nên đi sửa chỗ nào.</p>
+</blockquote>
+<p><strong>&quot;Giảm chi phí LLM thế nào?&quot;</strong> — Ba đòn bẩy theo thứ tự nên thử: <strong>lưu đệm</strong> (chính xác, ngữ nghĩa, tiền tố), <strong>định tuyến</strong> theo độ khó, <strong>nén ngữ cảnh</strong>. Nói thêm rằng chi phí gọi giám khảo phải ghi thành <strong>dòng chi phí riêng</strong>, nếu không sẽ cắt nhầm chỗ khi chi phí tăng.</p>
+<h3 id="sec-15-8" class="heading">15.8. Những câu trả lời tự tố cáo<a class="anchor" href="#sec-15-8" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Cuối cùng, những câu nghe thì trơn tru nhưng lập tức cho thấy người nói chưa vận hành hệ thống thật:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Câu trả lời</th>
+<th>Vì sao nó tố cáo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&quot;Tôi giám sát độ chính xác trong sản xuất.&quot;</td>
+<td>Chỉ đúng khi có nhãn ngay. Không hỏi lại về <strong>độ trễ nhãn</strong> là bỏ qua ràng buộc quan trọng nhất.</td>
+</tr>
+<tr>
+<td>&quot;Ngưỡng PSI là 0,25.&quot;</td>
+<td>Không phụ thuộc <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> và số bin — xem <a href="mlops-ch09.html#sec-9-5" class="xref">Mục 9.5</a>.</td>
+</tr>
+<tr>
+<td>&quot;Dùng feature store để hết skew.&quot;</td>
+<td>Feature store tạo điều kiện, không bảo đảm.</td>
+</tr>
+<tr>
+<td>&quot;A/B test mọi thứ.&quot;</td>
+<td>Không biết cỡ mẫu tỉ lệ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi mathvariant="normal">/</mi><msup><mi mathvariant="normal">Δ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">1/\Delta^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord">1/</span><span class="mord"><span class="mord">Δ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>, tức chưa từng phải phân bổ lưu lượng.</td>
+</tr>
+<tr>
+<td>&quot;Huấn luyện lại hằng ngày cho chắc.&quot;</td>
+<td>Không biết lợi ích giảm dần rất nhanh (<a href="mlops-ch11.html#sec-11-1" class="xref">Mục 11.1</a>) và không nói tới chi phí.</td>
+</tr>
+<tr>
+<td>&quot;Mô hình đạt 99% nên rất tốt.&quot;</td>
+<td>Không hỏi về mất cân bằng lớp, về lát cắt, và về <strong>trần trên là mức đồng thuận giữa người gán nhãn</strong>.</td>
+</tr>
+<tr>
+<td>&quot;Chúng tôi dùng công cụ X nên chuyện đó được lo.&quot;</td>
+<td>Công cụ không lo được các đánh đổi; nêu tên công cụ trước khi nêu ràng buộc là dấu hiệu học thuộc.</td>
+</tr>
+<tr>
+<td>&quot;CI/CD là đủ cho ML.&quot;</td>
+<td>Bỏ mất <strong>CT</strong> và bỏ mất chuyện dữ liệu thay đổi mà không ai sửa mã.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+</article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="mlops-bai-tap.html"><span class="pager-dir">← Trước</span><span class="pager-title">Bài tập</span></a><a class="pager-link pager-next" href="mlops-ch16.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Tài liệu tham khảo</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-15-1">15.1. Khung trả lời</a></li><li class="toc-l3"><a href="#sec-15-2">15.2. Nhóm câu hỏi nền tảng</a></li><li class="toc-l3"><a href="#sec-15-3">15.3. Nhóm dữ liệu và đặc trưng</a></li><li class="toc-l3"><a href="#sec-15-4">15.4. Nhóm đánh giá và ra mắt</a></li><li class="toc-l3"><a href="#sec-15-5">15.5. Nhóm giám sát và dịch chuyển</a></li><li class="toc-l3"><a href="#sec-15-6">15.6. Nhóm thiết kế hệ thống</a></li><li class="toc-l3"><a href="#sec-15-7">15.7. Nhóm LLMOps</a></li><li class="toc-l3"><a href="#sec-15-8">15.8. Những câu trả lời tự tố cáo</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

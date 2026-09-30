@@ -87,7 +87,8 @@
     "num": "14",
     "file": "bai-tap.html",
     "label": "Bài tập",
-    "summary": "Chín bài tập của giáo trình kèm lời giải chi tiết, bộ câu hỏi trắc nghiệm theo chương và các bài luyện tính tay."
+    "summary": "Chín bài tập của giáo trình kèm lời giải chi tiết, bộ câu hỏi trắc nghiệm theo chương và các bài luyện tính tay.",
+    "kind": "exercises"
   },
   {
     "num": "15",

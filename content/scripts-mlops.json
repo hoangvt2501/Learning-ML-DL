@@ -1,0 +1,12 @@
+[
+  {
+    "file": "experiments.py",
+    "added": true,
+    "note": "Sinh Hình 6, 7 và 9–14 cùng mọi số liệu thực nghiệm của giáo trình: đánh giá theo lát cắt, đuôi độ trễ khi toả nhánh, cỡ mẫu A/B, ba loại dịch chuyển phân phối, PSI dưới giả thuyết không, so sánh phép dò dịch chuyển, độ cũ của mô hình, và vòng phản hồi thoái hoá."
+  },
+  {
+    "file": "fig_diagrams.py",
+    "added": true,
+    "note": "Sinh Hình 1–5 và Hình 8: hộp mã ML giữa hạ tầng bao quanh, vòng đời ML là vòng lặp, ba mức tự động hoá, phổ lỗi dữ liệu, tính đúng theo thời điểm, và bốn chiến lược ra mắt. Đây là hình vẽ tay bằng matplotlib, để trong mã nguồn cho sửa được và cho khớp với chữ trong bài."
+  }
+]

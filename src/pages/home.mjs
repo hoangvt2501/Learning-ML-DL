@@ -1,173 +1,134 @@
-// Trang chủ: giới thiệu, lộ trình học, và lưới thẻ 17 chương.
+// Trang chủ của site: giới thiệu và mục lục cho mọi giáo trình có trong repo.
 
-const PATHS = [
-  {
-    tag: 'Lần đầu tiếp xúc',
-    title: 'Hiểu bản chất trước đã',
-    note: 'Bốn chương liền mạch, đọc hết là nắm trọn phần lõi toán học.',
-    steps: ['1', '2', '3', '4'],
-  },
-  {
-    tag: 'Triển khai CNN trên thiết bị',
-    title: 'Từ mô hình FP32 tới file INT8',
-    note: 'Đi theo đúng thứ tự một quy trình thật: chuẩn bị, calibrate, đo, sửa.',
-    steps: ['3', '5', '6', '7', '8', '9', '10', '12'],
-  },
-  {
-    tag: 'Chỉ quan tâm LLM',
-    title: 'Vì sao LLM cần kỹ thuật riêng',
-    note: 'Nắm phần lõi vừa đủ rồi rẽ thẳng sang GPTQ, AWQ, NF4 và KV cache.',
-    steps: ['1', '3', '5', '11'],
-  },
-];
+const SITE_TITLE = 'Hai giáo trình tự học: Quantization và MLOps';
 
-export function buildHomePage(ctx) {
-  const {
-    md, nav, page, escapeHtml, write, chapters, minutes, docTitle, intro, neighbours,
-    quizCount, noteCount,
-  } = ctx;
+function bookSection(b, escapeHtml) {
+  const spec = b.spec;
+  const f = (name) => spec.slug + name;
+  const byNum = new Map(b.chapters.map((c) => [c.num, c]));
 
-  const byNum = new Map(chapters.map((c) => [c.num, c]));
-  const fileOf = (c) => (c.num === '14' ? 'bai-tap.html' : c.file);
+  const pathCards = (spec.paths || [])
+    .map((p) => {
+      const chips = p.steps
+        .map((num) => {
+          const c = byNum.get(num);
+          if (!c) return '';
+          return (
+            '<a class="path-chip" href="' + b.fileOf(c) + '"><b>' + num + '</b>' +
+            escapeHtml(c.label) + '</a>'
+          );
+        })
+        .join('<span class="path-arrow" aria-hidden="true">→</span>');
+      return (
+        '<article class="path-card">' +
+        '<p class="path-tag">' + escapeHtml(p.tag) + '</p>' +
+        '<h4>' + escapeHtml(p.title) + '</h4>' +
+        '<p class="path-note">' + escapeHtml(p.note) + '</p>' +
+        '<div class="path-steps">' + chips + '</div></article>'
+      );
+    })
+    .join('');
 
-  const stats = [
-    { n: '15', l: 'chương' },
-    { n: '17', l: 'hình sinh bằng mã' },
-    { n: '9', l: 'bài tập có lời giải' },
-    { n: String(quizCount), l: 'câu trắc nghiệm' },
-    { n: '5', l: 'công cụ tương tác' },
-  ];
-
-  const pathCards = PATHS.map((p) => {
-    const chips = p.steps
-      .map((num) => {
-        const c = byNum.get(num);
-        return (
-          '<a class="path-chip" href="' + fileOf(c) + '"><b>' + num + '</b>' +
-          escapeHtml(c.label) + '</a>'
-        );
-      })
-      .join('<span class="path-arrow" aria-hidden="true">→</span>');
-    return (
-      '<article class="path-card">' +
-      '<p class="path-tag">' + escapeHtml(p.tag) + '</p>' +
-      '<h3>' + escapeHtml(p.title) + '</h3>' +
-      '<p class="path-note">' + escapeHtml(p.note) + '</p>' +
-      '<div class="path-steps">' + chips + '</div>' +
-      '</article>'
-    );
-  }).join('');
-
-  const chapterCards = chapters
+  const chapterCards = b.chapters
     .map((c) => {
       const kicker = c.num === 'PL' ? 'Phụ lục' : 'Chương ' + c.num;
       return (
-        '<a class="ch-card" href="' + fileOf(c) + '">' +
+        '<a class="ch-card" href="' + b.fileOf(c) + '">' +
         '<span class="ch-num">' + (c.num === 'PL' ? '·' : c.num) + '</span>' +
-        '<span class="ch-body"><span class="ch-kicker">' + kicker + ' · ' + minutes[c.num] +
-        ' phút</span><h3>' + escapeHtml(c.label) + '</h3>' +
+        '<span class="ch-body"><span class="ch-kicker">' + kicker + ' · ' + b.minutes[c.num] +
+        ' phút</span><h4>' + escapeHtml(c.label) + '</h4>' +
         '<p>' + escapeHtml(c.summary) + '</p></span></a>'
       );
     })
     .join('');
 
-  const tools = [
-    {
-      href: 'thuc-hanh.html',
-      icon: '⚙',
-      title: 'Phòng thí nghiệm',
-      note: 'Năm công cụ chạy ngay trên trình duyệt: máy lượng tử affine, đánh đổi làm tròn–cắt, soi bit số thực, requantization, tính dung lượng.',
-    },
-    {
-      href: 'bai-tap.html',
-      icon: '✎',
-      title: 'Bài tập và trắc nghiệm',
-      note: 'Chín bài của giáo trình kèm lời giải đầy đủ, ' + quizCount +
-        ' câu trắc nghiệm theo chương và các bài luyện tính tay có tự chấm.',
-    },
-    {
-      href: 'ghi-chu.html',
-      icon: '!',
-      title: 'Ghi chú biên tập',
-      note: noteCount + ' chỗ trong giáo trình được phát biểu chặt lại, mỗi chỗ kèm kiểm chứng bằng mã — ' +
-        'ghi chú cũng hiện ngay cuối mục tương ứng khi bạn đọc chương.',
-    },
-    {
-      href: 'hinh-anh.html',
-      icon: '◳',
-      title: 'Thư viện 17 hình',
-      note: 'Toàn bộ hình minh hoạ ở một chỗ, kèm chú thích và liên kết về đúng mục đã dùng nó.',
-    },
-    {
-      href: 'thuat-ngu.html',
-      icon: '¶',
-      title: 'Từ điển thuật ngữ',
-      note: 'Hơn 60 thuật ngữ đối chiếu Việt – Anh, có định nghĩa ngắn và tìm kiếm tại chỗ.',
-    },
-    {
-      href: 'ma-nguon.html',
-      icon: '{}',
-      title: 'Mã nguồn thí nghiệm',
-      note: 'Bảy script sinh ra mọi hình và mọi con số trong tài liệu, kèm kết quả in ra của từng script.',
-    },
-    {
-      href: 'toan-van.html',
-      icon: '≡',
-      title: 'Toàn văn một trang',
-      note: 'Cả giáo trình trên một trang — tiện Ctrl+F, đọc ngoại tuyến hoặc in ra giấy.',
-    },
-  ]
-    .map(
-      (t) =>
-        '<a class="tool-card" href="' + t.href + '">' +
-        '<span class="tool-icon" aria-hidden="true">' + t.icon + '</span>' +
-        '<h3>' + escapeHtml(t.title) + '</h3><p>' + escapeHtml(t.note) + '</p></a>'
-    )
+  const totalMinutes = Object.values(b.minutes).reduce((a, x) => a + x, 0);
+  const stats = [
+    { n: String(b.chapters.length), l: 'chương' },
+    { n: String(b.figures), l: 'hình sinh bằng mã' },
+    { n: String(b.quizCount), l: 'câu trắc nghiệm' },
+    { n: '~' + Math.round(totalMinutes / 60) + 'h', l: 'thời gian đọc' },
+  ].filter((s) => s.n !== '0');
+
+  const tools = b.nav.extras
+    .map((e) =>
+      '<a class="tool-pill" href="' + e.file + '"><span aria-hidden="true">' + e.icon + '</span>' +
+      escapeHtml(e.label) + '</a>')
     .join('');
+
+  return (
+    '<section class="book-block" id="' + spec.id + '">' +
+    '<header class="book-head">' +
+    '<p class="book-kicker">' + escapeHtml(spec.kicker) + '</p>' +
+    '<h2><a href="' + b.fileOf(b.chapters[1] || b.chapters[0]) + '">' +
+    escapeHtml(b.docTitle) + '</a></h2>' +
+    '<p class="book-blurb">' + escapeHtml(spec.blurb) + '</p>' +
+    '<dl class="hero-stats">' +
+    stats.map((s) => '<div><dt>' + s.n + '</dt><dd>' + escapeHtml(s.l) + '</dd></div>').join('') +
+    '</dl>' +
+    '<div class="tool-pills">' + tools + '</div>' +
+    '</header>' +
+    (pathCards ? '<h3 class="home-h3">Nên bắt đầu từ đâu</h3>' +
+      '<div class="path-grid">' + pathCards + '</div>' : '') +
+    '<h3 class="home-h3">Toàn bộ chương</h3>' +
+    '<div class="ch-grid">' + chapterCards + '</div>' +
+    '</section>'
+  );
+}
+
+export function buildHomePage(ctx) {
+  const { books, page, escapeHtml, write } = ctx;
+
+  const nav = {
+    books: books.map((b) => b.spec),
+    book: null,
+    groupLabel: 'Giáo trình',
+    chapters: books.map((b) => ({
+      file: b.fileOf(b.chapters[1] || b.chapters[0]),
+      num: b.spec.kicker.replace(/\D+/g, '') || '·',
+      label: b.spec.short,
+    })),
+    // Trên trang chủ, nhãn phải kèm tên sách vì hai sách có cùng loại trang.
+    extras: books.flatMap((b) =>
+      b.nav.extras
+        .filter((e) => /thuc-hanh\.html$/.test(e.file))
+        .map((e) => ({ ...e, label: e.label + ' · ' + b.spec.short }))
+        .concat([{
+          file: b.spec.slug + 'bai-tap.html',
+          icon: '✎',
+          label: 'Bài tập · ' + b.spec.short,
+        }])),
+  };
+
+  const jump =
+    '<div class="hero-actions">' +
+    books
+      .map((b, i) =>
+        '<a class="btn ' + (i === 0 ? 'btn-primary' : 'btn-ghost') + '" href="#' + b.spec.id + '">' +
+        escapeHtml(b.spec.short) + ' →</a>')
+      .join('') +
+    '</div>';
 
   const body =
     '<article class="prose home">' +
     '<header class="hero">' +
-    '<p class="hero-kicker">Giáo trình tự học · tiếng Việt</p>' +
-    '<h1>' + escapeHtml(docTitle) + '</h1>' +
-    '<p class="hero-lede">Từ công thức <b>S</b> và <b>Z</b> cho tới GPTQ, NF4 và KV cache — viết theo lối bài giảng, có hình vẽ sinh bằng mã, bài tập kèm lời giải và công cụ tự thử ngay trên trang.</p>' +
-    '<div class="hero-actions">' +
-    '<a class="btn btn-primary" href="ch01.html">Bắt đầu từ Chương 1 →</a>' +
-    '<a class="btn btn-ghost" href="thuc-hanh.html">Thử công cụ tương tác</a>' +
-    '</div>' +
-    '<dl class="hero-stats">' +
-    stats.map((s) => '<div><dt>' + s.n + '</dt><dd>' + escapeHtml(s.l) + '</dd></div>').join('') +
-    '</dl>' +
+    '<p class="hero-kicker">Tự học · tiếng Việt · mọi con số đều chạy lại được</p>' +
+    '<h1>' + escapeHtml(SITE_TITLE) + '</h1>' +
+    '<p class="hero-lede">Hai giáo trình viết theo cùng một lối: <b>động cơ → định nghĩa → suy luận → ví dụ số → thí nghiệm kiểm chứng</b>. Mỗi chương có phần tự kiểm tra, mỗi bài tập có lời giải đầy đủ, và mọi khẳng định đều truy được về bài báo gốc hoặc về mã chạy lại được.</p>' +
+    jump +
     '</header>' +
-
-    '<section class="home-section"><h2 class="home-h2">Về độ tin cậy của tài liệu</h2>' +
-    '<div class="callout callout-note">' + md.render(intro.replace(/^>\s?/gm, '')) + '</div>' +
-    '</section>' +
-
-    '<section class="home-section"><h2 class="home-h2">Nên bắt đầu từ đâu</h2>' +
-    '<p class="home-sub">Ba lộ trình tuỳ theo việc bạn đang cần làm. Chương 0 luôn nên xem lướt trước để quen ký hiệu.</p>' +
-    '<div class="path-grid">' + pathCards + '</div>' +
-    '</section>' +
-
-    '<section class="home-section"><h2 class="home-h2">Công cụ đi kèm</h2>' +
-    '<div class="tool-grid">' + tools + '</div>' +
-    '</section>' +
-
-    '<section class="home-section"><h2 class="home-h2">Toàn bộ chương</h2>' +
-    '<div class="ch-grid">' + chapterCards + '</div>' +
-    '</section>' +
+    books.map((b) => bookSection(b, escapeHtml)).join('') +
     '</article>';
 
   write(
     'index.html',
     page({
-      title: docTitle,
+      title: SITE_TITLE,
       description:
-        'Giáo trình tự học quantization trong deep learning bằng tiếng Việt: 15 chương, 17 hình sinh bằng mã, bài tập có lời giải và công cụ tương tác.',
+        'Giáo trình tự học bằng tiếng Việt về quantization trong deep learning và về MLOps: lý thuyết, hình sinh bằng mã, bài tập có lời giải và công cụ tương tác.',
       body,
       nav,
       file: 'index.html',
-      ...neighbours('index.html'),
       bodyClass: 'is-home',
     })
   );

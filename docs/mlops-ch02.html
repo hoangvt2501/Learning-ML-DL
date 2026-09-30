@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2. Vòng đời, ba chữ V và ba mức tự động hoá — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
+<meta name="description" content="Vòng đời ML là vòng lặp; ba biến quyết định thành bại Velocity – Validation – Versioning; ba mức tự động hoá và vì sao ML cần thêm chữ CT.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>MLOps</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group">Giáo trình 2 · MLOps</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html" class="is-active" aria-current="page"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon">⚙</span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 2</span><span class="kicker-time">7 phút đọc</span></div><h2 id="sec-2" class="heading">2. Vòng đời, ba chữ V và ba mức tự động hoá<a class="anchor" href="#sec-2" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Vòng đời ML là vòng lặp; ba biến quyết định thành bại Velocity – Validation – Versioning; ba mức tự động hoá và vì sao ML cần thêm chữ CT.</p>
+<h3 id="sec-2-1" class="heading">2.1. Vòng đời là vòng lặp<a class="anchor" href="#sec-2-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Cách vẽ quen thuộc &quot;thu thập dữ liệu → huấn luyện → triển khai&quot; là một đường thẳng, và chính vì thế nó sai. Vòng đời thật có ít nhất ba đường quay lại.</p>
+<figure class="figure" id="hinh-2">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 2"><img src="figs/mlops02_lifecycle.png" alt="Hình 2" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 2.</strong> Ba đường quay lại mới là nơi phần lớn công sức thực sự đổ vào. Một hệ thống ML sống được là hệ thống đi vòng này nhanh và rẻ, không phải hệ thống đi một lượt thật giỏi.</figcaption>
+</figure>
+<p>Nghiên cứu phỏng vấn <em>Operationalizing Machine Learning: An Interview Study</em> (Shankar và cộng sự, 2022) phỏng vấn 18 kỹ sư ML đang làm sản xuất và gom công việc của họ thành <strong>bốn nhiệm vụ</strong>:</p>
+<ol>
+<li><strong>Thu thập và gán nhãn dữ liệu</strong> — tìm nguồn, kéo về kho tập trung, làm sạch, gán nhãn (thuê ngoài hoặc đội nội bộ).</li>
+<li><strong>Tạo đặc trưng và thí nghiệm mô hình</strong> — cải thiện chỉ số ML; thí nghiệm có thể hướng dữ liệu hoặc hướng mô hình.</li>
+<li><strong>Đánh giá và triển khai mô hình</strong>.</li>
+<li><strong>Giám sát và phản ứng khi chất lượng tụt trong sản xuất</strong>.</li>
+</ol>
+<h3 id="sec-2-2" class="heading">2.2. Ba chữ V<a class="anchor" href="#sec-2-2" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Cùng nghiên cứu ấy rút ra <strong>ba biến quyết định thành bại</strong> của một lần triển khai. Đây là khung tóm tắt gọn nhất mà tài liệu này biết, và rất đáng thuộc:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Chữ V</th>
+<th>Nội dung</th>
+<th>Vì sao nó quyết định</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Velocity</strong> (tốc độ vòng lặp)</td>
+<td>Đi từ một ý tưởng mới tới một mô hình đã huấn luyện trong vòng một ngày.</td>
+<td>ML mang bản chất thí nghiệm, nên số ý tưởng thử được trên một đơn vị thời gian chính là năng suất.</td>
+</tr>
+<tr>
+<td><strong>Validation</strong> (kiểm định sớm)</td>
+<td>Thử, loại ý tưởng tồi và giám sát pipeline <strong>càng sớm càng tốt</strong>.</td>
+<td>Lỗi càng để người dùng nhìn thấy thì càng đắt.</td>
+</tr>
+<tr>
+<td><strong>Versioning</strong> (quản phiên bản)</td>
+<td>Lưu và quản nhiều phiên bản mô hình và dữ liệu cùng lúc.</td>
+<td>Không thể lường trước mọi lỗi, nên phải <strong>quay lui được</strong>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Một câu trích trong bài báo tóm đúng cả ba: <em>&quot;Chủ đề chung khi chúng tôi trưởng thành lên là: làm sao kiểm định được nhiều hơn ở giai đoạn sớm hơn, để vòng lặp nhanh hơn?&quot;</em></p>
+<p>Chú ý điểm tinh tế: <strong>Velocity và Validation kéo nhau về hai phía</strong>. Kiểm định thêm thì chậm lại. Nhưng bài báo chỉ ra chúng cũng <em>cộng hưởng</em>: nếu ý tưởng tồi bị loại ở giai đoạn sớm thì tổng tốc độ lại tăng. Nghệ thuật nằm ở chỗ đặt cửa kiểm định ở đâu, chứ không phải đặt nhiều hay ít.</p>
+<h3 id="sec-2-3" class="heading">2.3. Ba mức tự động hoá<a class="anchor" href="#sec-2-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Kiến trúc tham chiếu được trích dẫn nhiều nhất là tài liệu <em>MLOps: Continuous delivery and automation pipelines in machine learning</em> của Google Cloud. Nó chia độ trưởng thành thành ba mức.</p>
+<figure class="figure" id="hinh-3">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 3"><img src="figs/mlops03_levels.png" alt="Hình 3" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 3.</strong> Thứ được bàn giao lớn dần theo mức: mức 0 bàn giao một mô hình, mức 1 bàn giao một pipeline, mức 2 bàn giao một hệ thống tự cập nhật.</figcaption>
+</figure>
+<p><strong>Mức 0 — quy trình thủ công.</strong> Mọi bước làm tay: phân tích dữ liệu, chuẩn bị dữ liệu, huấn luyện, kiểm định. Nhà khoa học dữ liệu bàn giao <em>mô hình đã huấn luyện</em> cho kỹ sư đem triển khai. Hai bên làm việc tách rời nhau. Phát hành thưa thớt và <strong>không giám sát hiệu năng</strong>.</p>
+<p><strong>Mức 1 — tự động hoá pipeline ML.</strong> Trọng tâm là <strong>huấn luyện liên tục (CT)</strong>: tự động hoá cả pipeline huấn luyện. Thành phần được đóng gói, tái sử dụng được, có bước <strong>kiểm định dữ liệu và kiểm định mô hình tự động</strong>. Thứ được triển khai không còn là mô hình mà là <strong>toàn bộ pipeline huấn luyện</strong>.</p>
+<p><strong>Mức 2 — tự động hoá CI/CD.</strong> Có hệ thống CI/CD mạnh cho chính pipeline, để thử ý tưởng mới và đưa ra sản xuất nhanh. Tài liệu Google đặt tên sáu giai đoạn:</p>
+<ol>
+<li>Phát triển và thí nghiệm</li>
+<li>Tích hợp liên tục cho pipeline</li>
+<li>Bàn giao liên tục cho pipeline</li>
+<li>Kích hoạt tự động</li>
+<li>Bàn giao liên tục cho mô hình</li>
+<li>Giám sát</li>
+</ol>
+<p><strong>Tám bước của pipeline ML</strong> mà tài liệu ấy liệt kê — đáng thuộc vì rất hay được hỏi dưới dạng &quot;hãy mô tả pipeline của bạn&quot;: trích xuất dữ liệu → phân tích dữ liệu → chuẩn bị dữ liệu → huấn luyện → đánh giá → <strong>kiểm định mô hình</strong> → phục vụ → giám sát.</p>
+<h3 id="sec-2-4" class="heading">2.4. CT khác gì CI/CD<a class="anchor" href="#sec-2-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Đây là câu hỏi phỏng vấn kinh điển, và câu trả lời ngắn là:</p>
+<blockquote>
+<p>CI/CD lo việc <strong>mã thay đổi</strong>. CT lo việc <strong>dữ liệu thay đổi</strong>.</p>
+</blockquote>
+<p>Trong phần mềm thường, hệ thống chỉ đổi khi có người sửa mã. Trong ML có thêm một nguồn thay đổi mà không ai chạm vào repo cả: thế giới. Vì vậy ML có thêm một chữ C thứ ba — <strong>Continuous Training</strong> — tức tự động huấn luyện lại và phục vụ lại, kích hoạt bởi dữ liệu mới, bởi chất lượng tụt, hoặc bởi dịch chuyển phân phối (<a href="mlops-ch11.html#sec-11" class="xref">Chương 11</a>).</p>
+<p>Một cách nói khác giúp nhớ: trong CI/CD của phần mềm thường, <strong>tạo tác (artifact) là mã đã biên dịch</strong>. Trong ML, tạo tác gồm <strong>mã + dữ liệu + mô hình</strong>, và ba thứ này có nhịp thay đổi khác nhau. Đó là toàn bộ lý do MLOps tồn tại như một nghề riêng.</p>
+<h3 id="sec-2-5" class="heading">2.5. Bốn thói xấu có tên<a class="anchor" href="#sec-2-5" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Shankar và cộng sự quan sát được bốn <strong>anti-pattern</strong>, đều đáng nhận mặt:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Thói xấu</th>
+<th>Mô tả</th>
+<th>Vì sao nó hại</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Industry–Classroom Mismatch</strong></td>
+<td>Kiến thức học ở trường không khớp với lỗi gặp ở chỗ làm; người mới phải học lại bằng cách vấp.</td>
+<td>Có thể chữa bằng tài liệu và quy trình, không nhất thiết phải trả giá bằng sự cố.</td>
+</tr>
+<tr>
+<td><strong>Keeping GPUs Warm</strong></td>
+<td>&quot;Giữ cho GPU luôn ấm&quot;: chạy càng nhiều thí nghiệm càng tốt để không phí tài nguyên.</td>
+<td>Nhiều thí nghiệm không có giả thuyết thì chỉ sinh ra nhiễu và nhiều phiên bản phải quản.</td>
+</tr>
+<tr>
+<td><strong>Retrofitting an Explanation</strong></td>
+<td>Thấy kết quả tốt, đưa ra sản xuất, rồi mới đi tìm lý do vì sao nó tốt.</td>
+<td>Lời giải thích gắn sau thường sai, và nó dẫn hướng sai cho các quyết định tiếp theo.</td>
+</tr>
+<tr>
+<td><strong>Undocumented Tribal Knowledge</strong></td>
+<td>Tri thức về pipeline chỉ nằm trong đầu vài người.</td>
+<td>Tốc độ cao sinh ra rất nhiều phiên bản, tài liệu không theo kịp; người đó nghỉ việc là mất.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Anti-pattern thứ hai đáng nói thêm. Nó nghe như một đức tính (tận dụng tài nguyên) nhưng thực ra là một sự nhầm lẫn về thứ cần tối ưu: <strong>cái khan hiếm không phải GPU, mà là số giả thuyết tốt và thời gian của con người để đọc kết quả.</strong></p>
+<hr>
+<section class="quiz" data-quiz data-chapter="2"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">4 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Ba chữ V của MLOps theo nghiên cứu phỏng vấn của Shankar và cộng sự là gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Volume, Variety, Velocity</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Velocity, Validation, Versioning</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Validation, Visualization, Versioning</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Velocity, Value, Versioning</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Velocity: đi từ ý tưởng tới mô hình đã huấn luyện trong một ngày. Validation: loại ý tưởng tồi càng sớm càng tốt. Versioning: giữ nhiều phiên bản để <strong>quay lui được</strong>.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">CT (Continuous Training) khác CI/CD ở chỗ nào?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">CT chạy nhanh hơn CI/CD</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">CI/CD lo việc <strong>mã</strong> thay đổi; CT lo việc <strong>dữ liệu</strong> thay đổi mà không ai chạm vào repo</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">CT chỉ áp dụng cho mô hình học sâu</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">CT thay thế hoàn toàn CI/CD trong ML</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Trong phần mềm thường, hệ thống chỉ đổi khi có người sửa mã. Trong ML có thêm một nguồn thay đổi: thế giới. Tạo tác của ML gồm <strong>mã + dữ liệu + mô hình</strong>, ba thứ có nhịp thay đổi khác nhau — đó là lý do MLOps tồn tại như một nghề riêng.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">Ở mức 1 của thang trưởng thành MLOps, thứ được bàn giao là gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Một mô hình đã huấn luyện</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text"><strong>Toàn bộ pipeline huấn luyện</strong></span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Một hệ thống CI/CD hoàn chỉnh</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Một tập dữ liệu đã được kiểm định</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Đây chính là trục của thang đo: mức 0 bàn giao một mô hình, mức 1 bàn giao một pipeline, mức 2 bàn giao một hệ thống tự cập nhật.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">4</span><span class="quiz-text">Anti-pattern &quot;Keeping GPUs Warm&quot; sai ở chỗ nào?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó làm hỏng phần cứng</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó tối ưu nhầm thứ khan hiếm — cái khan hiếm là giả thuyết tốt và thời gian đọc kết quả, không phải GPU</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó tốn điện</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó chỉ sai với đội nhỏ</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Chạy càng nhiều thí nghiệm càng tốt nghe như một đức tính, nhưng thí nghiệm không có giả thuyết chỉ sinh ra nhiễu và rất nhiều phiên bản phải quản.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/4</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="mlops-ch01.html"><span class="pager-dir">← Trước</span><span class="pager-title">Vì sao mô hình tốt vẫn chết</span></a><a class="pager-link pager-next" href="mlops-ch03.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Dữ liệu: hợp đồng và phổ lỗi</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-2-1">2.1. Vòng đời là vòng lặp</a></li><li class="toc-l3"><a href="#sec-2-2">2.2. Ba chữ V</a></li><li class="toc-l3"><a href="#sec-2-3">2.3. Ba mức tự động hoá</a></li><li class="toc-l3"><a href="#sec-2-4">2.4. CT khác gì CI/CD</a></li><li class="toc-l3"><a href="#sec-2-5">2.5. Bốn thói xấu có tên</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>
