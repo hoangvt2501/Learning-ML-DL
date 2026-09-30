@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>15. Tài liệu tham khảo — Mô hình và kiến trúc: từ hồi quy tuyến tính tới Transformer</title>
+<meta name="description" content="Ba mươi bốn nguồn, mỗi nguồn kèm ghi chú nó là nguồn gốc của kết quả nào được dùng trong tài liệu.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>Mô hình &amp; Kiến trúc</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a><span class="book-tab is-active" aria-current="true">Mô hình &amp; Kiến trúc</span></div><p class="nav-group">Giáo trình 3 · Mô hình &amp; Kiến trúc</p><ul class="nav-list"><li><a href="models-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="models-ch01.html"><span class="nav-num">1</span><span class="nav-label">Bản đồ các họ mô hình</span></a></li><li><a href="models-ch02.html"><span class="nav-num">2</span><span class="nav-label">Đánh đổi thiên lệch – phương sai</span></a></li><li><a href="models-ch03.html"><span class="nav-num">3</span><span class="nav-label">Cây quyết định và học tập hợp</span></a></li><li><a href="models-ch04.html"><span class="nav-num">4</span><span class="nav-label">Mạng nơ-ron nhiều lớp</span></a></li><li><a href="models-ch05.html"><span class="nav-num">5</span><span class="nav-label">Lan truyền ngược và tối ưu hoá</span></a></li><li><a href="models-ch06.html"><span class="nav-num">6</span><span class="nav-label">Khởi tạo, chuẩn hoá và kết nối tắt</span></a></li><li><a href="models-ch07.html"><span class="nav-num">7</span><span class="nav-label">Mạng tích chập</span></a></li><li><a href="models-ch08.html"><span class="nav-num">8</span><span class="nav-label">Mạng hồi quy và giới hạn của nó</span></a></li><li><a href="models-ch09.html"><span class="nav-num">9</span><span class="nav-label">Attention và Transformer</span></a></li><li><a href="models-ch10.html"><span class="nav-num">10</span><span class="nav-label">Transformer hiện đại</span></a></li><li><a href="models-ch11.html"><span class="nav-num">11</span><span class="nav-label">Sinh văn bản: các chiến lược giải mã</span></a></li><li><a href="models-ch12.html"><span class="nav-num">12</span><span class="nav-label">Đếm tham số, FLOP và bộ nhớ</span></a></li><li><a href="models-bai-tap.html"><span class="nav-num">13</span><span class="nav-label">Bài tập</span></a></li><li><a href="models-ch14.html"><span class="nav-num">14</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="models-ch15.html" class="is-active" aria-current="page"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="models-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="models-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="models-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="models-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="models-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 15</span><span class="kicker-time">4 phút đọc</span></div><h2 id="sec-15" class="heading">15. Tài liệu tham khảo<a class="anchor" href="#sec-15" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Ba mươi bốn nguồn, mỗi nguồn kèm ghi chú nó là nguồn gốc của kết quả nào được dùng trong tài liệu.</p>
+<p><strong>Nền tảng</strong></p>
+<ol>
+<li>T. Hastie, R. Tibshirani, J. Friedman. <em>The Elements of Statistical Learning.</em> Springer, 2009. — nguồn chuẩn cho phân rã thiên lệch–phương sai, cây, bagging và boosting.</li>
+<li>C. Bishop. <em>Pattern Recognition and Machine Learning.</em> Springer, 2006.</li>
+<li>I. Goodfellow, Y. Bengio, A. Courville. <em>Deep Learning.</em> MIT Press, 2016. — nguồn chuẩn cho lan truyền ngược, khởi tạo, tối ưu hoá.</li>
+<li>L. Breiman. <em>Random Forests.</em> Machine Learning, 2001. — nguồn của lập luận về tương quan giữa các cây.</li>
+<li>J. Friedman. <em>Greedy Function Approximation: A Gradient Boosting Machine.</em> Annals of Statistics, 2001.</li>
+<li>T. Chen, C. Guestrin. <em>XGBoost: A Scalable Tree Boosting System.</em> KDD 2016.</li>
+</ol>
+<p><strong>Huấn luyện mạng sâu</strong></p>
+<ol start="7">
+<li>X. Glorot, Y. Bengio. <em>Understanding the difficulty of training deep feedforward neural networks.</em> AISTATS 2010. — khởi tạo Xavier.</li>
+<li>K. He và cộng sự. <em>Delving Deep into Rectifiers.</em> ICCV 2015. — khởi tạo He và hệ số 2 cho ReLU.</li>
+<li>S. Ioffe, C. Szegedy. <em>Batch Normalization.</em> ICML 2015.</li>
+<li>J. L. Ba, J. Kiros, G. Hinton. <em>Layer Normalization.</em> arXiv:1607.06450, 2016.</li>
+<li>B. Zhang, R. Sennrich. <em>Root Mean Square Layer Normalization.</em> NeurIPS 2019. — RMSNorm.</li>
+<li>K. He và cộng sự. <em>Deep Residual Learning for Image Recognition.</em> CVPR 2016. — nguồn của <strong>vấn đề suy thoái</strong> và kết nối tắt.</li>
+<li>D. Kingma, J. Ba. <em>Adam: A Method for Stochastic Optimization.</em> ICLR 2015. — nguồn của hiệu chỉnh thiên lệch.</li>
+<li>I. Loshchilov, F. Hutter. <em>Decoupled Weight Decay Regularization.</em> ICLR 2019. — AdamW.</li>
+<li>N. Srivastava và cộng sự. <em>Dropout: A Simple Way to Prevent Neural Networks from Overfitting.</em> JMLR 2014.</li>
+</ol>
+<p><strong>Tích chập và hồi quy</strong></p>
+<ol start="16">
+<li>K. Simonyan, A. Zisserman. <em>Very Deep Convolutional Networks.</em> ICLR 2015. — lập luận hai lớp <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mo>×</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">3\times3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">3</span></span></span></span> thay một lớp <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn><mo>×</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">5\times5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">5</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span>.</li>
+<li>A. Howard và cộng sự. <em>MobileNets.</em> arXiv:1704.04861, 2017. — depthwise separable.</li>
+<li>W. Luo và cộng sự. <em>Understanding the Effective Receptive Field in Deep CNNs.</em> NeurIPS 2016. — nguồn của kết quả trường tiếp nhận hiệu dụng tăng theo <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msqrt><mi>L</mi></msqrt><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\sqrt{L})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1767em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9267em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord" style="padding-left:0.833em;"><span class="mord mathnormal">L</span></span></span><span style="top:-2.8867em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail" style="min-width:0.853em;height:1.08em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="1.08em" viewBox="0 0 400000 1080" preserveAspectRatio="xMinYMin slice"><path d="M95,702
+c-2.7,0,-7.17,-2.7,-13.5,-8c-5.8,-5.3,-9.5,-10,-9.5,-14
+c0,-2,0.3,-3.3,1,-4c1.3,-2.7,23.83,-20.7,67.5,-54
+c44.2,-33.3,65.8,-50.3,66.5,-51c1.3,-1.3,3,-2,5,-2c4.7,0,8.7,3.3,12,10
+s173,378,173,378c0.7,0,35.3,-71,104,-213c68.7,-142,137.5,-285,206.5,-429
+c69,-144,104.5,-217.7,106.5,-221
+l0 -0
+c5.3,-9.3,12,-14,20,-14
+H400000v40H845.2724
+s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
+c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
+M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1133em;"><span></span></span></span></span></span><span class="mclose">)</span></span></span></span>.</li>
+<li>S. Hochreiter, J. Schmidhuber. <em>Long Short-Term Memory.</em> Neural Computation, 1997.</li>
+<li>R. Pascanu, T. Mikolov, Y. Bengio. <em>On the difficulty of training Recurrent Neural Networks.</em> ICML 2013. — bán kính phổ, cắt ngưỡng gradient.</li>
+<li>R. Jozefowicz, W. Zaremba, I. Sutskever. <em>An Empirical Exploration of Recurrent Network Architectures.</em> ICML 2015. — nguồn của thủ thuật khởi tạo độ lệch cổng quên dương.</li>
+</ol>
+<p><strong>Transformer</strong></p>
+<ol start="22">
+<li>A. Vaswani và cộng sự. <em>Attention Is All You Need.</em> NeurIPS 2017. — nguồn của scaled dot-product attention, lập luận <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msqrt><msub><mi>d</mi><mi>k</mi></msub></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{d_k}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.04em;vertical-align:-0.1828em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8572em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord" style="padding-left:0.833em;"><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-2.8172em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail" style="min-width:0.853em;height:1.08em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="1.08em" viewBox="0 0 400000 1080" preserveAspectRatio="xMinYMin slice"><path d="M95,702
+c-2.7,0,-7.17,-2.7,-13.5,-8c-5.8,-5.3,-9.5,-10,-9.5,-14
+c0,-2,0.3,-3.3,1,-4c1.3,-2.7,23.83,-20.7,67.5,-54
+c44.2,-33.3,65.8,-50.3,66.5,-51c1.3,-1.3,3,-2,5,-2c4.7,0,8.7,3.3,12,10
+s173,378,173,378c0.7,0,35.3,-71,104,-213c68.7,-142,137.5,-285,206.5,-429
+c69,-144,104.5,-217.7,106.5,-221
+l0 -0
+c5.3,-9.3,12,-14,20,-14
+H400000v40H845.2724
+s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
+c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
+M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1828em;"><span></span></span></span></span></span></span></span></span> (chú thích 4), multi-head, và bảng so sánh số bước tuần tự.</li>
+<li>J. Su và cộng sự. <em>RoFormer: Enhanced Transformer with Rotary Position Embedding.</em> arXiv:2104.09864. — nguồn của RoPE, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>θ</mi><mi>i</mi></msub><mo>=</mo><msup><mn>10000</mn><mrow><mo>−</mo><mn>2</mn><mi>i</mi><mi mathvariant="normal">/</mi><mi>d</mi></mrow></msup></mrow><annotation encoding="application/x-tex">\theta_i = 10000^{-2i/d}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.888em;"></span><span class="mord">1000</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.888em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">2</span><span class="mord mathnormal mtight">i</span><span class="mord mtight">/</span><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span></span> và tính chất suy giảm theo khoảng cách.</li>
+<li>N. Shazeer. <em>GLU Variants Improve Transformer.</em> arXiv:2002.05202, 2020. — nguồn của SwiGLU và của việc giảm <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mtext>ff</mtext></msub></mrow><annotation encoding="application/x-tex">d_{\text{ff}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">ff</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> còn <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi mathvariant="normal">/</mi><mn>3</mn></mrow><annotation encoding="application/x-tex">2/3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2/3</span></span></span></span> để khớp tham số.</li>
+<li>N. Shazeer. <em>Fast Transformer Decoding: One Write-Head is All You Need.</em> arXiv:1911.02150, 2019. — MQA.</li>
+<li>J. Ainslie và cộng sự. <em>GQA: Training Generalized Multi-Query Transformer Models.</em> EMNLP 2023.</li>
+<li>R. Xiong và cộng sự. <em>On Layer Normalization in the Transformer Architecture.</em> ICML 2020. — phân tích pre-LN so với post-LN.</li>
+<li>J. Kaplan và cộng sự. <em>Scaling Laws for Neural Language Models.</em> arXiv:2001.08361, 2020. — nguồn của <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>12</mn><mi>L</mi><msup><mi>d</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">N = 12 L d^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">12</span><span class="mord mathnormal">L</span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mtext>xu</mtext><mover accent="true"><mtext>o</mtext><mo>ˆ</mo></mover><mtext>i</mtext></mrow></msub><mo>≈</mo><mn>2</mn><mi>N</mi></mrow><annotation encoding="application/x-tex">C_{\text{xuôi}} \approx 2N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">xu</span><span class="mord accent mtight"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-2.7em;"><span class="pstrut" style="height:2.7em;"></span><span class="mord mtight">o</span></span><span style="top:-2.7em;"><span class="pstrut" style="height:2.7em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord mtight">ˆ</span></span></span></span></span></span></span><span class="mord mtight">i</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> và <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo>≈</mo><mn>6</mn><mi>N</mi><mi>B</mi><mi>S</mi></mrow><annotation encoding="application/x-tex">C \approx 6NBS</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">6</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span></span></span></span>.</li>
+<li>J. Hoffmann và cộng sự. <em>Training Compute-Optimal Large Language Models.</em> NeurIPS 2022. — Chinchilla.</li>
+<li>A. Dosovitskiy và cộng sự. <em>An Image is Worth 16x16 Words.</em> ICLR 2021. — ViT và đánh đổi thiên lệch quy nạp.</li>
+<li>H. Touvron và cộng sự. <em>Llama 2: Open Foundation and Fine-Tuned Chat Models.</em> arXiv:2307.09288, 2023. — nguồn của cấu hình và con số 184 320 giờ-GPU dùng để đối chiếu ở <a href="models-ch12.html#sec-12-4" class="xref">Mục 12.4</a>.</li>
+</ol>
+<p><strong>Giải mã</strong></p>
+<ol start="32">
+<li>A. Holtzman và cộng sự. <em>The Curious Case of Neural Text Degeneration.</em> ICLR 2020. — nguồn của top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> và của lập luận vì sao beam search cho văn bản nhạt.</li>
+<li>Y. Leviathan, M. Kalman, Y. Matias. <em>Fast Inference from Transformers via Speculative Decoding.</em> ICML 2023.</li>
+</ol>
+<p><strong>Chế độ quá tham số</strong></p>
+<ol start="34">
+<li>M. Belkin và cộng sự. <em>Reconciling modern machine-learning practice and the classical bias–variance trade-off.</em> PNAS, 2019. — double descent.</li>
+</ol>
+<hr>
+</article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="models-ch14.html"><span class="pager-dir">← Trước</span><span class="pager-title">Ôn phỏng vấn</span></a><a class="pager-link pager-next" href="models-phu-luc.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Phụ lục: chạy lại thí nghiệm</span></a></nav>
+</main>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

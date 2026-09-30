@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11. Sinh văn bản: các chiến lược giải mã — Mô hình và kiến trúc: từ hồi quy tuyến tính tới Transformer</title>
+<meta name="description" content="Greedy, beam, nhiệt độ, top-k và top-p nhào nặn cùng một phân phối theo những cách khác nhau — đo bằng entropy và bằng số token còn sống sót.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>Mô hình &amp; Kiến trúc</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a><span class="book-tab is-active" aria-current="true">Mô hình &amp; Kiến trúc</span></div><p class="nav-group">Giáo trình 3 · Mô hình &amp; Kiến trúc</p><ul class="nav-list"><li><a href="models-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="models-ch01.html"><span class="nav-num">1</span><span class="nav-label">Bản đồ các họ mô hình</span></a></li><li><a href="models-ch02.html"><span class="nav-num">2</span><span class="nav-label">Đánh đổi thiên lệch – phương sai</span></a></li><li><a href="models-ch03.html"><span class="nav-num">3</span><span class="nav-label">Cây quyết định và học tập hợp</span></a></li><li><a href="models-ch04.html"><span class="nav-num">4</span><span class="nav-label">Mạng nơ-ron nhiều lớp</span></a></li><li><a href="models-ch05.html"><span class="nav-num">5</span><span class="nav-label">Lan truyền ngược và tối ưu hoá</span></a></li><li><a href="models-ch06.html"><span class="nav-num">6</span><span class="nav-label">Khởi tạo, chuẩn hoá và kết nối tắt</span></a></li><li><a href="models-ch07.html"><span class="nav-num">7</span><span class="nav-label">Mạng tích chập</span></a></li><li><a href="models-ch08.html"><span class="nav-num">8</span><span class="nav-label">Mạng hồi quy và giới hạn của nó</span></a></li><li><a href="models-ch09.html"><span class="nav-num">9</span><span class="nav-label">Attention và Transformer</span></a></li><li><a href="models-ch10.html"><span class="nav-num">10</span><span class="nav-label">Transformer hiện đại</span></a></li><li><a href="models-ch11.html" class="is-active" aria-current="page"><span class="nav-num">11</span><span class="nav-label">Sinh văn bản: các chiến lược giải mã</span></a></li><li><a href="models-ch12.html"><span class="nav-num">12</span><span class="nav-label">Đếm tham số, FLOP và bộ nhớ</span></a></li><li><a href="models-bai-tap.html"><span class="nav-num">13</span><span class="nav-label">Bài tập</span></a></li><li><a href="models-ch14.html"><span class="nav-num">14</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="models-ch15.html"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="models-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="models-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="models-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="models-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="models-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 11</span><span class="kicker-time">5 phút đọc</span></div><h2 id="sec-11" class="heading">11. Sinh văn bản: các chiến lược giải mã<a class="anchor" href="#sec-11" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Greedy, beam, nhiệt độ, top-k và top-p nhào nặn cùng một phân phối theo những cách khác nhau — đo bằng entropy và bằng số token còn sống sót.</p>
+<h3 id="sec-11-1" class="heading">11.1. Bài toán<a class="anchor" href="#sec-11-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Mô hình cho một phân phối <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo stretchy="false">(</mo><mrow><mtext>token k</mtext><mover accent="true"><mover accent="true"><mtext>e</mtext><mo>ˆ</mo></mover><mo>ˊ</mo></mover><mtext> ti</mtext><mover accent="true"><mover accent="true"><mtext>e</mtext><mo>ˆ</mo></mover><mo>ˊ</mo></mover><mtext>p</mtext></mrow><mo>∣</mo><mtext>ngữ cảnh</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p(\text{token kế tiếp} \mid \text{ngữ cảnh})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2079em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord text"><span class="mord">token k</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">e</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˆ</span></span></span></span></span></span></span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˊ</span></span></span></span></span></span></span><span class="mord"> ti</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">e</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˆ</span></span></span></span></span></span></span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˊ</span></span></span></span></span></span></span><span class="mord">p</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">ngữ cảnh</span></span><span class="mclose">)</span></span></span></span> trên toàn bộ từ vựng. <strong>Giải mã</strong> là quy tắc biến phân phối ấy thành một token cụ thể. Đây là một quyết định <strong>hoàn toàn nằm ngoài mô hình</strong> — cùng một mô hình với hai chiến lược giải mã khác nhau cho ra hai hệ thống rất khác nhau.</p>
+<h3 id="sec-11-2" class="heading">11.2. Các chiến lược<a class="anchor" href="#sec-11-2" aria-label="Liên kết tới mục này">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Chiến lược</th>
+<th>Quy tắc</th>
+<th>Hợp với</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Greedy</strong></td>
+<td>luôn lấy token xác suất cao nhất</td>
+<td>bài toán có một đáp án đúng: dịch, trích xuất, phân loại</td>
+</tr>
+<tr>
+<td><strong>Beam search</strong></td>
+<td>giữ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> chuỗi tốt nhất, mở rộng song song</td>
+<td>dịch máy, tóm tắt — nơi cần xác suất chuỗi cao</td>
+</tr>
+<tr>
+<td><strong>Lấy mẫu + nhiệt độ</strong></td>
+<td>chia logits cho <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span></span></span></span> rồi lấy mẫu</td>
+<td>sáng tạo, hội thoại</td>
+</tr>
+<tr>
+<td><strong>Top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span></strong></td>
+<td>chỉ giữ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> token cao nhất rồi lấy mẫu</td>
+<td>chặn đuôi rác với ngưỡng cố định</td>
+</tr>
+<tr>
+<td><strong>Top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> (nucleus)</strong></td>
+<td>giữ tập nhỏ nhất có tổng xác suất <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">\ge p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span></td>
+<td>chặn đuôi rác với ngưỡng <strong>thích ứng</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="sec-11-3" class="heading">11.3. Đo thật: mỗi chiến lược nhào nặn phân phối thế nào<a class="anchor" href="#sec-11-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Thí nghiệm trong <code>code/models/experiments.py</code>: một phân phối 50 000 token có dạng đuôi dài giống thực tế, rồi đo entropy, số token phủ 90% xác suất, và xác suất của token đứng đầu.</p>
+<figure class="figure" id="hinh-14">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 14"><img src="figs/models13_decode.png" alt="Hình 14" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 14.</strong> Trái: hình dạng phân phối sau mỗi phép biến đổi (thang log). Phải: số token còn thực sự nằm trong cuộc chơi.</figcaption>
+</figure>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Chiến lược</th>
+<th>Entropy (nat)</th>
+<th>Số token phủ 90%</th>
+<th>Xác suất top-1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gốc (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">T = 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>)</td>
+<td>8,223</td>
+<td><strong>8 362</strong></td>
+<td>0,027</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>0,7</mn></mrow><annotation encoding="application/x-tex">T = 0{,}7</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">7</span></span></span></span></td>
+<td>5,886</td>
+<td>1 215</td>
+<td>0,128</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>1,3</mn></mrow><annotation encoding="application/x-tex">T = 1{,}3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">1</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">3</span></span></span></span></td>
+<td>9,305</td>
+<td>16 766</td>
+<td>0,008</td>
+</tr>
+<tr>
+<td>Top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> = 40</td>
+<td>3,449</td>
+<td><strong>33</strong></td>
+<td>0,139</td>
+</tr>
+<tr>
+<td>Top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> = 0,9</td>
+<td>7,669</td>
+<td>4 141</td>
+<td>0,030</td>
+</tr>
+<tr>
+<td>Top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> = 0,5</td>
+<td>5,673</td>
+<td>376</td>
+<td>0,055</td>
+</tr>
+</tbody>
+</table></div>
+<p>Ba điều đọc ra:</p>
+<ol>
+<li><strong>Phân phối gốc có đuôi khổng lồ.</strong> Cần 8 362 token để phủ 90% xác suất. Nếu lấy mẫu thẳng từ nó thì xác suất chọn phải một token vô nghĩa là rất đáng kể ở mỗi bước — và một bước sai sẽ kéo theo cả phần còn lại.</li>
+<li><strong>Nhiệt độ co giãn toàn bộ phân phối, top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span>/top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> thì cắt.</strong> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>0,7</mn></mrow><annotation encoding="application/x-tex">T = 0{,}7</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">7</span></span></span></span> vẫn để lại 1 215 token trong cuộc chơi; top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> = 40 chỉ để lại 33. Hai cơ chế khác hẳn nhau, và <strong>thường dùng chung</strong>: cắt đuôi bằng top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> rồi chỉnh độ sắc bằng nhiệt độ.</li>
+<li><strong>Vì sao top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> thường hơn top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span></strong>: với ngữ cảnh mà mô hình rất chắc chắn, top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> = 40 vẫn ép giữ 40 lựa chọn, trong đó 39 là rác; với ngữ cảnh mơ hồ, nó lại cắt mất những lựa chọn hợp lý. Top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> <strong>tự co giãn theo độ chắc chắn</strong> của từng bước.</li>
+</ol>
+<h3 id="sec-11-4" class="heading">11.4. Vì sao không phải lúc nào cũng greedy<a class="anchor" href="#sec-11-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Greedy tối đa hoá xác suất <strong>từng bước</strong>, không phải xác suất của cả chuỗi — một dạng tham lam như thuật toán dựng cây ở <a href="models-ch03.html#sec-3-2" class="xref">Mục 3.2</a>. Beam search giảm nhẹ điều đó bằng cách giữ nhiều ứng viên.</p>
+<p>Nhưng với văn bản mở, <strong>beam search cho kết quả tệ một cách đáng ngạc nhiên</strong>: nó sinh ra văn bản lặp lại, nhạt nhẽo và chung chung. Lý do được chấp nhận rộng rãi: văn bản do người viết <strong>không</strong> có xác suất cao một cách đều đặn — nó có những chỗ bất ngờ. Tối đa hoá xác suất chuỗi vì thế đẩy mô hình về phía văn bản &quot;an toàn&quot; và nhàm chán. Đây là lý do văn bản mở dùng <strong>lấy mẫu</strong>, còn dịch máy — nơi có một đáp án đúng — vẫn dùng beam.</p>
+<p>Hai công cụ chữa lặp thường gặp: <strong>phạt lặp</strong> (giảm logit của token đã xuất hiện) và <strong>chặn n-gram lặp</strong> (cấm lặp lại một cụm <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> từ). Cả hai là biện pháp vá, không phải lời giải gốc.</p>
+<h3 id="sec-11-5" class="heading">11.5. Giải mã và hệ thống<a class="anchor" href="#sec-11-5" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Ba điều thuộc về vận hành nhưng phải quyết ở đây:</p>
+<ul>
+<li><strong>Nhiệt độ 0 không phải lúc nào cũng tất định.</strong> Với <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">T = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> thì quy tắc là greedy, nhưng thứ tự cộng dồn trên GPU có thể đổi giữa các lần chạy, và với kích thước lô khác nhau thì kết quả cũng có thể khác. Hứa &quot;tất định&quot; với người dùng là hứa liều.</li>
+<li><strong>Giải mã suy đoán</strong> (speculative decoding) dùng một mô hình nhỏ đề xuất vài token rồi mô hình lớn kiểm tra một lượt. Nó tăng tốc mà <strong>không đổi phân phối đầu ra</strong> — một trong số rất ít bữa trưa miễn phí trong lĩnh vực này.</li>
+<li><strong>Chi phí sinh tỉ lệ với số token sinh ra</strong>, và mỗi token cần một lượt xuôi đầy đủ. Đó là vì sao &quot;bảo mô hình trả lời ngắn gọn&quot; là một đòn bẩy chi phí thật sự, không phải mẹo vặt.</li>
+</ul>
+<hr>
+<section class="quiz" data-quiz data-chapter="11"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">2 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Vì sao beam search cho văn bản mở thường nhạt và lặp?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó chọn sai token đầu tiên</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó tối đa hoá xác suất, và văn bản người viết <strong>không</strong> phải văn bản xác suất cao nhất</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó quá chậm nên phải cắt ngắn</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó không dùng được mặt nạ nhân quả</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Đây là nội dung chính của bài báo về top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span>: văn bản người viết có entropy dao động, còn chuỗi xác suất cao nhất thì đơn điệu và lặp. Beam search vẫn tốt cho dịch máy, nơi đầu ra bị ràng buộc chặt bởi đầu vào.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Top-p khác top-k ở điểm bản chất nào?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Top-p nhanh hơn</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Kích thước tập ứng viên của top-p <strong>tự thích ứng</strong> theo độ chắc chắn của từng bước</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Top-p không cần nhiệt độ</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Top-k cho kết quả xác định</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Đo ở <a href="models-ch11.html#sec-11-3" class="xref">Mục 11.3</a>: với top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0,9</mn></mrow><annotation encoding="application/x-tex">p = 0{,}9</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">9</span></span></span></span> số token còn sống là 4141 ở bước lưỡng lự, trong khi top-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>40</mn></mrow><annotation encoding="application/x-tex">k = 40</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">40</span></span></span></span> luôn cố định ở 40 dù mô hình chắc chắn hay không.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/2</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="models-ch10.html"><span class="pager-dir">← Trước</span><span class="pager-title">Transformer hiện đại</span></a><a class="pager-link pager-next" href="models-ch12.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Đếm tham số, FLOP và bộ nhớ</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-11-1">11.1. Bài toán</a></li><li class="toc-l3"><a href="#sec-11-2">11.2. Các chiến lược</a></li><li class="toc-l3"><a href="#sec-11-3">11.3. Đo thật: mỗi chiến lược nhào nặn phân phối thế nào</a></li><li class="toc-l3"><a href="#sec-11-4">11.4. Vì sao không phải lúc nào cũng greedy</a></li><li class="toc-l3"><a href="#sec-11-5">11.5. Giải mã và hệ thống</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

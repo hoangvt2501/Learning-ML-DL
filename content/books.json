@@ -113,5 +113,70 @@
     "scripts": "content/scripts-mlops.json",
     "figuresNote": "Mọi hình đều do mã nguồn trong thư mục code/mlops/ sinh ra, chạy thật và chạy lại được.",
     "drills": false
+  },
+  {
+    "id": "models",
+    "slug": "models-",
+    "kicker": "Giáo trình 3",
+    "short": "Mô hình & Kiến trúc",
+    "source": "content/models.md",
+    "chapters": "content/models-chapters.json",
+    "quiz": "content/models-trac-nghiem.md",
+    "glossary": "content/models-thuat-ngu.md",
+    "solutions": "content/models-loi-giai.md",
+    "code": "models",
+    "figures": true,
+    "blurb": "Từ đánh đổi thiên lệch–phương sai tới RoPE, GQA và SwiGLU. Mỗi cơ chế đi kèm vấn đề nó sinh ra để chữa, một con số đo được, và cái giá phải trả.",
+    "paths": [
+      {
+        "tag": "Lần đầu học mô hình",
+        "title": "Nền tảng trước đã",
+        "note": "Bốn chương đầu cho bạn khung tư duy: bản đồ các họ, phân rã sai số, cây, và mạng nơ-ron.",
+        "steps": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ]
+      },
+      {
+        "tag": "Sắp đi phỏng vấn",
+        "title": "Lối đi ngắn nhất tới câu trả lời chắc",
+        "note": "Bốn chương bị hỏi nhiều nhất, rồi vào thẳng phần ôn phỏng vấn.",
+        "steps": [
+          "2",
+          "6",
+          "9",
+          "12",
+          "14"
+        ]
+      },
+      {
+        "tag": "Chỉ quan tâm LLM",
+        "title": "Từ attention tới Llama",
+        "note": "Đi thẳng vào Transformer, những gì đã đổi từ 2017, giải mã, và cách đếm tài nguyên.",
+        "steps": [
+          "9",
+          "10",
+          "11",
+          "12"
+        ]
+      },
+      {
+        "tag": "Huấn luyện mạng sâu",
+        "title": "Vì sao nó không chịu học",
+        "note": "Ba chương về lan truyền ngược, khởi tạo, chuẩn hoá, kết nối tắt và gradient theo thời gian.",
+        "steps": [
+          "5",
+          "6",
+          "7",
+          "8"
+        ]
+      }
+    ],
+    "codeDir": "code/models",
+    "scripts": "content/scripts-models.json",
+    "figuresNote": "Mười hình do mã nguồn trong code/models/ sinh ra từ thí nghiệm chạy thật. Bốn kết quả ở Chương 12 là đối chiếu với số tham số và ngân sách giờ-GPU đã công bố của GPT-2 và Llama-2.",
+    "drills": false
   }
 ]

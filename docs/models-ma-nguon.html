@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mã nguồn thí nghiệm — Mô hình và kiến trúc: từ hồi quy tuyến tính tới Transformer</title>
+<meta name="description" content="2 script Python sinh ra toàn bộ hình vẽ và số liệu của giáo trình, kèm kết quả in ra.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>Mô hình &amp; Kiến trúc</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a><span class="book-tab is-active" aria-current="true">Mô hình &amp; Kiến trúc</span></div><p class="nav-group">Giáo trình 3 · Mô hình &amp; Kiến trúc</p><ul class="nav-list"><li><a href="models-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="models-ch01.html"><span class="nav-num">1</span><span class="nav-label">Bản đồ các họ mô hình</span></a></li><li><a href="models-ch02.html"><span class="nav-num">2</span><span class="nav-label">Đánh đổi thiên lệch – phương sai</span></a></li><li><a href="models-ch03.html"><span class="nav-num">3</span><span class="nav-label">Cây quyết định và học tập hợp</span></a></li><li><a href="models-ch04.html"><span class="nav-num">4</span><span class="nav-label">Mạng nơ-ron nhiều lớp</span></a></li><li><a href="models-ch05.html"><span class="nav-num">5</span><span class="nav-label">Lan truyền ngược và tối ưu hoá</span></a></li><li><a href="models-ch06.html"><span class="nav-num">6</span><span class="nav-label">Khởi tạo, chuẩn hoá và kết nối tắt</span></a></li><li><a href="models-ch07.html"><span class="nav-num">7</span><span class="nav-label">Mạng tích chập</span></a></li><li><a href="models-ch08.html"><span class="nav-num">8</span><span class="nav-label">Mạng hồi quy và giới hạn của nó</span></a></li><li><a href="models-ch09.html"><span class="nav-num">9</span><span class="nav-label">Attention và Transformer</span></a></li><li><a href="models-ch10.html"><span class="nav-num">10</span><span class="nav-label">Transformer hiện đại</span></a></li><li><a href="models-ch11.html"><span class="nav-num">11</span><span class="nav-label">Sinh văn bản: các chiến lược giải mã</span></a></li><li><a href="models-ch12.html"><span class="nav-num">12</span><span class="nav-label">Đếm tham số, FLOP và bộ nhớ</span></a></li><li><a href="models-bai-tap.html"><span class="nav-num">13</span><span class="nav-label">Bài tập</span></a></li><li><a href="models-ch14.html"><span class="nav-num">14</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="models-ch15.html"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="models-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="models-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="models-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="models-ma-nguon.html" class="is-active" aria-current="page"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="models-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Tra cứu</span><span class="kicker-time">2 script</span></div><h1>Mã nguồn thí nghiệm</h1><p class="chapter-lede">Mọi hình và mọi con số thực nghiệm trong giáo trình đều do các script dưới đây sinh ra. Chúng được chép nguyên vẹn vào site nên tải về là chạy được ngay.</p><h3 class="heading" id="cach-chay">Cách chạy lại toàn bộ<a class="anchor" href="#cach-chay">#</a></h3><p>Hai script dưới đây sinh ra toàn bộ 14 hình và mọi con số đo được của giáo trình.
+Chúng đặt hạt giống cố định nên chạy lại cho kết quả y hệt.</p>
+<div class="code-block" data-lang="bash"><div class="code-head"><span class="code-lang">Bash</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-bash">pip install numpy scipy matplotlib scikit-learn
+python code/models/experiments.py     <span class="hljs-comment"># Hình 2, 4, 5, 7, 9, 10, 13, 14 — vài phút</span>
+python code/models/fig_diagrams.py    <span class="hljs-comment"># Hình 1, 3, 6, 8, 11, 12</span>
+</code></pre></div>
+<p>Môi trường đã dùng để sinh số liệu trong tài liệu: Python 3.13, NumPy 2.3, SciPy 1.16,
+scikit-learn 1.7, matplotlib 3.10.</p>
+<p>Lưu ý về phạm vi, và ở giáo trình này nó có hai nửa khác nhau.</p>
+<p>Phần lớn số liệu đến từ <strong>dữ liệu mô phỏng</strong>, được thiết kế để cô lập đúng một cơ chế mỗi
+lần — ví dụ thí nghiệm gradient qua 40 lớp chỉ đổi một biến là cách dựng lớp. Chúng chứng
+minh cơ chế tồn tại và có độ lớn đáng kể, không dùng để suy ra con số cho một mô hình cụ thể.</p>
+<p>Nhưng bốn kết quả là <strong>đối chiếu với con số đã công bố</strong>, không phải mô phỏng: số tham số của
+GPT-2 small, medium, large; số tham số của Llama-2 7B và 13B; ngân sách giờ-GPU của Llama-2 7B;
+và phương sai tích vô hướng nêu trong chú thích 4 của bài báo Transformer. Bốn kết quả ấy là
+phép kiểm tra rằng các công thức ở <a href="models-ch12.html#sec-12" class="xref">Chương 12</a> đúng chứ không chỉ hợp lý — chúng khớp tới từng
+tham số, và với ngân sách giờ-GPU thì lệch 0,17%.</p>
+<h3 class="heading" id="danh-sach">Từng script<a class="anchor" href="#danh-sach">#</a></h3><div class="src-list"><section class="src-card" id="experiments-py"><header class="src-head"><h3 class="src-title"><code>code/models/experiments.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">528 dòng</span><a class="src-dl" href="code/models/experiments.py" download>Tải về</a></header><p class="src-note">Sinh Hình 2, 4, 5, 7, 9, 10, 13, 14 cùng mọi số liệu đo được của giáo trình: phân rã thiên lệch–phương sai trên 400 tập huấn luyện, bagging so với boosting, chứng minh kiến tạo cho độ sâu bằng hàm lều, gradient qua 40 lớp với năm cách dựng lớp, RNN so với LSTM theo thời gian, phương sai tích vô hướng và entropy softmax, tính chất tương đối của RoPE, các chiến lược giải mã, và đếm tham số khớp chính xác với GPT-2 cùng Llama-2.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Thí nghiệm sinh số liệu và hình cho giáo trình &quot;Mô hình và kiến trúc&quot;.
+
+Mọi con số thực nghiệm trong tài liệu đều in ra từ script này. Hạt giống cố định
+nên chạy lại cho kết quả y hệt. Chỉ cần NumPy, SciPy, scikit-learn, matplotlib.
+
+    python code/models/experiments.py
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib
+matplotlib.use(<span class="hljs-string">&quot;Agg&quot;</span>)
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> sklearn.tree <span class="hljs-keyword">import</span> DecisionTreeRegressor
+<span class="hljs-keyword">from</span> sklearn.ensemble <span class="hljs-keyword">import</span> BaggingRegressor, GradientBoostingRegressor
+<span class="hljs-keyword">from</span> sklearn.neural_network <span class="hljs-keyword">import</span> MLPRegressor
+
+OUT = <span class="hljs-string">&quot;figs/&quot;</span>
+rng = np.random.default_rng(<span class="hljs-number">7</span>)
+plt.rcParams.update({
+    <span class="hljs-string">&quot;figure.dpi&quot;</span>: <span class="hljs-number">150</span>, <span class="hljs-string">&quot;font.size&quot;</span>: <span class="hljs-number">9</span>, <span class="hljs-string">&quot;axes.grid&quot;</span>: <span class="hljs-literal">True</span>,
+    <span class="hljs-string">&quot;grid.alpha&quot;</span>: <span class="hljs-number">.25</span>, <span class="hljs-string">&quot;axes.spines.top&quot;</span>: <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;axes.spines.right&quot;</span>: <span class="hljs-literal">False</span>,
+})
+C_MAIN, C_WARN, C_BAD, C_DIM = <span class="hljs-string">&quot;#1f6f68&quot;</span>, <span class="hljs-string">&quot;#b8860b&quot;</span>, <span class="hljs-string">&quot;#b0413e&quot;</span>, <span class="hljs-string">&quot;#8a857c&quot;</span>
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">head</span>(<span class="hljs-params">t</span>):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">74</span> + <span class="hljs-string">&quot;\n&quot;</span> + t + <span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">74</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (A) Hình 2 — Phân rã thiên lệch / phương sai, đo thật</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(A) Phan ra thien lech - phuong sai cua da thuc&quot;</span>)
+
+NOISE, N_TRAIN, N_SETS = <span class="hljs-number">0.35</span>, <span class="hljs-number">40</span>, <span class="hljs-number">250</span>
+f_true = <span class="hljs-keyword">lambda</span> x: np.sin(<span class="hljs-number">2.2</span> * x) + <span class="hljs-number">0.35</span> * x
+x_test = np.linspace(-<span class="hljs-number">3</span>, <span class="hljs-number">3</span>, <span class="hljs-number">200</span>)
+y_true = f_true(x_test)
+
+degrees = <span class="hljs-built_in">list</span>(<span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, <span class="hljs-number">15</span>))
+bias2, var, total = [], [], []
+<span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> degrees:
+    preds = np.empty((N_SETS, <span class="hljs-built_in">len</span>(x_test)))
+    <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(N_SETS):
+        r = np.random.default_rng(<span class="hljs-number">1000</span> + s)
+        xt = r.uniform(-<span class="hljs-number">3</span>, <span class="hljs-number">3</span>, N_TRAIN)
+        yt = f_true(xt) + r.normal(<span class="hljs-number">0</span>, NOISE, N_TRAIN)
+        <span class="hljs-comment"># Polynomial.fit chuan hoa mien truoc khi khop nen on dinh so o bac cao</span>
+        pf = np.polynomial.Polynomial.fit(xt, yt, d)
+        preds[s] = pf(x_test)
+    mean_pred = preds.mean(axis=<span class="hljs-number">0</span>)
+    b2 = np.mean((mean_pred - y_true) ** <span class="hljs-number">2</span>)
+    v = np.mean(preds.var(axis=<span class="hljs-number">0</span>))
+    bias2.append(b2); var.append(v); total.append(b2 + v + NOISE ** <span class="hljs-number">2</span>)
+
+best = <span class="hljs-built_in">int</span>(np.argmin(total))
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;bậc&#x27;</span>:&gt;<span class="hljs-number">4</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;thiên lệch²&#x27;</span>:&gt;<span class="hljs-number">14</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;phương sai&#x27;</span>:&gt;<span class="hljs-number">13</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;nhiễu²&#x27;</span>:&gt;<span class="hljs-number">10</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;tổng MSE&#x27;</span>:&gt;<span class="hljs-number">12</span>}</span>&quot;</span>)
+<span class="hljs-keyword">for</span> i, d <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(degrees):
+    star = <span class="hljs-string">&quot;  &lt;- nhỏ nhất&quot;</span> <span class="hljs-keyword">if</span> i == best <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;&quot;</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{d:4d}</span><span class="hljs-subst">{bias2[i]:<span class="hljs-number">14.4</span>f}</span><span class="hljs-subst">{var[i]:<span class="hljs-number">13.4</span>f}</span><span class="hljs-subst">{NOISE**<span class="hljs-number">2</span>:<span class="hljs-number">10.4</span>f}</span><span class="hljs-subst">{total[i]:<span class="hljs-number">12.4</span>f}</span><span class="hljs-subst">{star}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nBac toi uu = <span class="hljs-subst">{degrees[best]}</span>; tai do thien lech^2=<span class="hljs-subst">{bias2[best]:<span class="hljs-number">.4</span>f}</span>, phuong sai=<span class="hljs-subst">{var[best]:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Bac 1  : thien lech^2 = <span class="hljs-subst">{bias2[<span class="hljs-number">0</span>]:<span class="hljs-number">.3</span>f}</span> (chiem <span class="hljs-subst">{bias2[<span class="hljs-number">0</span>]/total[<span class="hljs-number">0</span>]*<span class="hljs-number">100</span>:<span class="hljs-number">.0</span>f}</span>% MSE) -&gt; THIEU KHOP&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Bac <span class="hljs-subst">{degrees[-<span class="hljs-number">1</span>]}</span>: phuong sai  = <span class="hljs-subst">{var[-<span class="hljs-number">1</span>]:<span class="hljs-number">.3</span>f}</span> (chiem <span class="hljs-subst">{var[-<span class="hljs-number">1</span>]/total[-<span class="hljs-number">1</span>]*<span class="hljs-number">100</span>:<span class="hljs-number">.0</span>f}</span>% MSE) -&gt; QUA KHOP&quot;</span>)
+
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">6.0</span>, <span class="hljs-number">3.2</span>))
+ax.plot(degrees, bias2, <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">4</span>, color=C_MAIN, label=<span class="hljs-string">&quot;thiên lệch²&quot;</span>)
+ax.plot(degrees, var, <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">4</span>, color=C_BAD, label=<span class="hljs-string">&quot;phương sai&quot;</span>)
+ax.plot(degrees, total, <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">4</span>, color=C_WARN, label=<span class="hljs-string">&quot;tổng MSE&quot;</span>)
+ax.axhline(NOISE ** <span class="hljs-number">2</span>, ls=<span class="hljs-string">&quot;:&quot;</span>, color=C_DIM, lw=<span class="hljs-number">1.2</span>)
+ax.annotate(<span class="hljs-string">&quot;nhiễu không thể giảm&quot;</span>, (<span class="hljs-number">1.2</span>, NOISE ** <span class="hljs-number">2</span> * <span class="hljs-number">1.15</span>), fontsize=<span class="hljs-number">8</span>, color=C_DIM)
+ax.axvline(degrees[best], ls=<span class="hljs-string">&quot;--&quot;</span>, lw=<span class="hljs-number">1.1</span>, color=C_DIM)
+ax.set_yscale(<span class="hljs-string">&quot;log&quot;</span>); ax.set_xlabel(<span class="hljs-string">&quot;bậc đa thức&quot;</span>); ax.set_ylabel(<span class="hljs-string">&quot;sai số bình phương (log)&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Phân rã đo được: MSE = thiên lệch² + phương sai + nhiễu²&quot;</span>)
+ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models02_biasvar.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (B) Hình 4 — Bagging cắt phương sai, boosting cắt thiên lệch</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(B) Bagging va boosting cat vao thanh phan nao&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">make</span>(<span class="hljs-params">seed, n=<span class="hljs-number">120</span></span>):
+    r = np.random.default_rng(seed)
+    x = r.uniform(-<span class="hljs-number">3</span>, <span class="hljs-number">3</span>, n)
+    <span class="hljs-keyword">return</span> x.reshape(-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), f_true(x) + r.normal(<span class="hljs-number">0</span>, NOISE, n)
+
+models = {
+    <span class="hljs-string">&quot;Một cây (sâu 8)&quot;</span>: <span class="hljs-keyword">lambda</span>: DecisionTreeRegressor(max_depth=<span class="hljs-number">8</span>, random_state=<span class="hljs-number">0</span>),
+    <span class="hljs-string">&quot;Bagging 100 cây&quot;</span>: <span class="hljs-keyword">lambda</span>: BaggingRegressor(
+        DecisionTreeRegressor(max_depth=<span class="hljs-number">8</span>), n_estimators=<span class="hljs-number">100</span>, random_state=<span class="hljs-number">0</span>),
+    <span class="hljs-string">&quot;Boosting 100 gốc&quot;</span>: <span class="hljs-keyword">lambda</span>: GradientBoostingRegressor(
+        n_estimators=<span class="hljs-number">100</span>, max_depth=<span class="hljs-number">2</span>, learning_rate=<span class="hljs-number">0.1</span>, random_state=<span class="hljs-number">0</span>),
+}
+Xte = x_test.reshape(-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+rows = []
+<span class="hljs-keyword">for</span> name, mk <span class="hljs-keyword">in</span> models.items():
+    preds = np.empty((<span class="hljs-number">40</span>, <span class="hljs-built_in">len</span>(x_test)))
+    <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">40</span>):
+        X, y = make(<span class="hljs-number">2000</span> + s)
+        preds[s] = mk().fit(X, y).predict(Xte)
+    mp = preds.mean(axis=<span class="hljs-number">0</span>)
+    b2 = np.mean((mp - y_true) ** <span class="hljs-number">2</span>); v = np.mean(preds.var(axis=<span class="hljs-number">0</span>))
+    rows.append((name, b2, v, b2 + v))
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{name:&lt;<span class="hljs-number">20</span>}</span> thiên lệch²=<span class="hljs-subst">{b2:<span class="hljs-number">.4</span>f}</span>  phương sai=<span class="hljs-subst">{v:<span class="hljs-number">.4</span>f}</span>  tổng=<span class="hljs-subst">{b2+v:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+base = rows[<span class="hljs-number">0</span>]
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nBagging giam phuong sai <span class="hljs-subst">{base[<span class="hljs-number">2</span>]/rows[<span class="hljs-number">1</span>][<span class="hljs-number">2</span>]:<span class="hljs-number">.1</span>f}</span> lan, thien lech doi <span class="hljs-subst">{rows[<span class="hljs-number">1</span>][<span class="hljs-number">1</span>]/base[<span class="hljs-number">1</span>]:<span class="hljs-number">.2</span>f}</span> lan&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Boosting giam thien lech <span class="hljs-subst">{base[<span class="hljs-number">1</span>]/rows[<span class="hljs-number">2</span>][<span class="hljs-number">1</span>]:<span class="hljs-number">.1</span>f}</span> lan, phuong sai doi <span class="hljs-subst">{rows[<span class="hljs-number">2</span>][<span class="hljs-number">2</span>]/base[<span class="hljs-number">2</span>]:<span class="hljs-number">.2</span>f}</span> lan&quot;</span>)
+
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">5.6</span>, <span class="hljs-number">3.1</span>))
+xs = np.arange(<span class="hljs-built_in">len</span>(rows)); w = <span class="hljs-number">.38</span>
+ax.bar(xs - w/<span class="hljs-number">2</span>, [r[<span class="hljs-number">1</span>] <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> rows], w, label=<span class="hljs-string">&quot;thiên lệch²&quot;</span>, color=C_MAIN)
+ax.bar(xs + w/<span class="hljs-number">2</span>, [r[<span class="hljs-number">2</span>] <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> rows], w, label=<span class="hljs-string">&quot;phương sai&quot;</span>, color=C_BAD)
+ax.set_xticks(xs); ax.set_xticklabels([r[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> rows], fontsize=<span class="hljs-number">8</span>)
+ax.set_ylabel(<span class="hljs-string">&quot;đóng góp vào MSE&quot;</span>); ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
+ax.set_title(<span class="hljs-string">&quot;Hai họ tập hợp tấn công hai thành phần khác nhau&quot;</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models04_ensemble.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (C) Hình 5 — Độ sâu mua được sự gọn gàng: chứng minh bằng kiến tạo</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(C) Sau mua duoc su gon gang (chung minh kien tao, khong phu thuoc toi uu)&quot;</span>)
+
+<span class="hljs-comment"># Ham leu: g(x) = 2*relu(x) - 4*relu(x - 1/2). Dung DUNG 2 don vi ReLU.</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">tent</span>(<span class="hljs-params">x</span>):
+    <span class="hljs-keyword">return</span> <span class="hljs-number">2</span> * np.maximum(x, <span class="hljs-number">0.0</span>) - <span class="hljs-number">4</span> * np.maximum(x - <span class="hljs-number">0.5</span>, <span class="hljs-number">0.0</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">deep_sawtooth</span>(<span class="hljs-params">x, k</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Hop k lan ham leu -&gt; song rang cua co 2^k doan tuyen tinh, dung 2k don vi.&quot;&quot;&quot;</span>
+    h = x
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(k):
+        h = tent(h)
+    <span class="hljs-keyword">return</span> h
+
+xg = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">20001</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">one_layer_best_mse</span>(<span class="hljs-params">y, width</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Mang MOT lop an tot nhat co the voi `width` don vi ReLU.
+
+    Dat diem gay deu tren (0,1) roi giai binh phuong toi thieu cho lop ra.
+    Day la CAN TREN cua sai so ma mang mot lop dat duoc, va vi diem gay dat deu
+    la vi tri toi uu cho ham tuan hoan nay nen no rat sat can duoi.
+    &quot;&quot;&quot;</span>
+    b = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, width + <span class="hljs-number">2</span>)[<span class="hljs-number">1</span>:-<span class="hljs-number">1</span>]
+    Phi = np.concatenate([np.maximum(xg[:, <span class="hljs-literal">None</span>] - b[<span class="hljs-literal">None</span>, :], <span class="hljs-number">0.0</span>),
+                          xg[:, <span class="hljs-literal">None</span>], np.ones((<span class="hljs-built_in">len</span>(xg), <span class="hljs-number">1</span>))], axis=<span class="hljs-number">1</span>)
+    coef, *_ = np.linalg.lstsq(Phi, y, rcond=<span class="hljs-literal">None</span>)
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">float</span>(np.mean((Phi @ coef - y) ** <span class="hljs-number">2</span>))
+
+widths = [<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">8</span>, <span class="hljs-number">16</span>, <span class="hljs-number">32</span>, <span class="hljs-number">64</span>, <span class="hljs-number">128</span>, <span class="hljs-number">256</span>]
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;k lớp sâu&#x27;</span>:&gt;<span class="hljs-number">10</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;đoạn 2^k&#x27;</span>:&gt;<span class="hljs-number">10</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;tham số sâu&#x27;</span>:&gt;<span class="hljs-number">13</span>}</span>   sai số của mạng MỘT lớp theo bề rộng&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;&#x27;</span>:&gt;<span class="hljs-number">33</span>}</span>   &quot;</span> + <span class="hljs-string">&quot;&quot;</span>.join(<span class="hljs-string">f&quot;<span class="hljs-subst">{w:&gt;<span class="hljs-number">9</span>}</span>&quot;</span> <span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> widths))
+Crows = []
+<span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> [<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>]:
+    y = deep_sawtooth(xg, k)
+    deep_params = <span class="hljs-number">6</span> * k          <span class="hljs-comment"># moi lop: 2 trong so vao + 2 do lech + 2 trong so ra</span>
+    errs = [one_layer_best_mse(y, w) <span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> widths]
+    <span class="hljs-comment"># be rong nho nhat de tot hon DANG KE so voi du doan hang so</span>
+    baseline = <span class="hljs-built_in">float</span>(np.var(y))
+    need = <span class="hljs-built_in">next</span>((w <span class="hljs-keyword">for</span> w, e <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(widths, errs) <span class="hljs-keyword">if</span> e &lt; <span class="hljs-number">0.5</span> * baseline), <span class="hljs-literal">None</span>)
+    Crows.append((k, <span class="hljs-number">2</span> ** k, deep_params, need, errs))
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{k:&gt;<span class="hljs-number">10</span>}</span><span class="hljs-subst">{<span class="hljs-number">2</span>**k:&gt;<span class="hljs-number">10</span>}</span><span class="hljs-subst">{deep_params:&gt;<span class="hljs-number">13</span>}</span>   &quot;</span> + <span class="hljs-string">&quot;&quot;</span>.join(<span class="hljs-string">f&quot;<span class="hljs-subst">{e:&gt;<span class="hljs-number">9.1</span>e}</span>&quot;</span> <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> errs))
+<span class="hljs-built_in">print</span>()
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;k&#x27;</span>:&gt;<span class="hljs-number">3</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;đoạn 2^k&#x27;</span>:&gt;<span class="hljs-number">10</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;tham số mạng sâu&#x27;</span>:&gt;<span class="hljs-number">19</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;bề rộng 1 lớp cần&#x27;</span>:&gt;<span class="hljs-number">20</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;tham số 1 lớp&#x27;</span>:&gt;<span class="hljs-number">16</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;gấp&#x27;</span>:&gt;<span class="hljs-number">7</span>}</span>&quot;</span>)
+<span class="hljs-keyword">for</span> k, npieces, dp, need, _ <span class="hljs-keyword">in</span> Crows:
+    sp = need * <span class="hljs-number">3</span> + <span class="hljs-number">2</span> <span class="hljs-keyword">if</span> need <span class="hljs-keyword">else</span> <span class="hljs-built_in">float</span>(<span class="hljs-string">&quot;nan&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{k:&gt;<span class="hljs-number">3</span>}</span><span class="hljs-subst">{npieces:&gt;<span class="hljs-number">10</span>}</span><span class="hljs-subst">{dp:&gt;<span class="hljs-number">19</span>}</span><span class="hljs-subst">{need <span class="hljs-keyword">if</span> need <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>:&gt;<span class="hljs-number">20</span>}</span><span class="hljs-subst">{sp:&gt;<span class="hljs-number">16.0</span>f}</span><span class="hljs-subst">{sp/dp:&gt;<span class="hljs-number">7.1</span>f}</span>x&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nBe rong can thiet dung bang so DOAN TUYEN TINH = 2^k, tuc TANG THEO HAM MU cua do sau,&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;trong khi mang sau chi can TUYEN TINH theo k. Day la &#x27;do sau mua duoc su gon gang&#x27;.&quot;</span>)
+
+fig, ax = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">8.6</span>, <span class="hljs-number">3.1</span>))
+<span class="hljs-keyword">for</span> k, npieces, _, _, errs <span class="hljs-keyword">in</span> Crows:
+    ax[<span class="hljs-number">0</span>].plot(widths, np.maximum(errs, <span class="hljs-number">1e-12</span>), <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">4</span>, label=<span class="hljs-string">f&quot;$k=<span class="hljs-subst">{k}</span>$ (<span class="hljs-subst">{npieces}</span> đoạn)&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_xscale(<span class="hljs-string">&quot;log&quot;</span>, base=<span class="hljs-number">2</span>); ax[<span class="hljs-number">0</span>].set_yscale(<span class="hljs-string">&quot;log&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&quot;bề rộng của mạng MỘT lớp ẩn&quot;</span>); ax[<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&quot;MSE nhỏ nhất đạt được (log)&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Sai số sụp đúng khi bề rộng chạm số đoạn&quot;</span>)
+ax[<span class="hljs-number">0</span>].legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">7.5</span>)
+ks = [c[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> Crows]
+ax[<span class="hljs-number">1</span>].plot(ks, [c[<span class="hljs-number">2</span>] <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> Crows], <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">5</span>, color=C_MAIN, label=<span class="hljs-string">&quot;mạng sâu $k$ lớp&quot;</span>)
+ax[<span class="hljs-number">1</span>].plot(ks, [c[<span class="hljs-number">3</span>] * <span class="hljs-number">3</span> + <span class="hljs-number">2</span> <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> Crows], <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">5</span>, color=C_BAD, label=<span class="hljs-string">&quot;mạng một lớp&quot;</span>)
+ax[<span class="hljs-number">1</span>].set_yscale(<span class="hljs-string">&quot;log&quot;</span>); ax[<span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&quot;số lớp $k$ của mạng sâu&quot;</span>)
+ax[<span class="hljs-number">1</span>].set_ylabel(<span class="hljs-string">&quot;số tham số cần (log)&quot;</span>); ax[<span class="hljs-number">1</span>].set_xticks(ks)
+ax[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Tuyến tính theo $k$ so với hàm mũ theo $k$&quot;</span>)
+ax[<span class="hljs-number">1</span>].legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models05_depth.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (D) Hình 7 — Gradient tiêu biến, và ba cách chữa</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(D) Gradient truyen nguoc qua 40 lop: do bang |dL/da| tung lop&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">layernorm_fwd</span>(<span class="hljs-params">z, eps=<span class="hljs-number">1e-5</span></span>):
+    mu = z.mean(-<span class="hljs-number">1</span>, keepdims=<span class="hljs-literal">True</span>)
+    sd = np.sqrt(z.var(-<span class="hljs-number">1</span>, keepdims=<span class="hljs-literal">True</span>) + eps)
+    <span class="hljs-keyword">return</span> (z - mu) / sd, sd
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">layernorm_bwd</span>(<span class="hljs-params">dy, y, sd</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Dao ham chinh xac cua LayerNorm theo truc dac trung.&quot;&quot;&quot;</span>
+    n = y.shape[-<span class="hljs-number">1</span>]
+    <span class="hljs-keyword">return</span> (dy - dy.mean(-<span class="hljs-number">1</span>, keepdims=<span class="hljs-literal">True</span>) - y * (dy * y).mean(-<span class="hljs-number">1</span>, keepdims=<span class="hljs-literal">True</span>)) / sd
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">act_grad_profile</span>(<span class="hljs-params">depth=<span class="hljs-number">40</span>, width=<span class="hljs-number">128</span>, gain=np.sqrt(<span class="hljs-params"><span class="hljs-number">2.0</span></span>), mode=<span class="hljs-string">&quot;plain&quot;</span>, seed=<span class="hljs-number">0</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;Tra ve |dL/da_i| tai tung lop, chuan hoa theo lop tren cung.&quot;&quot;&quot;</span>
+    r = np.random.default_rng(seed)
+    Ws = [r.normal(<span class="hljs-number">0</span>, gain / np.sqrt(width), (width, width)) <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(depth)]
+    a = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (<span class="hljs-number">128</span>, width))
+    cache = []
+    <span class="hljs-keyword">for</span> W <span class="hljs-keyword">in</span> Ws:
+        z = a @ W
+        y, sd = (<span class="hljs-literal">None</span>, <span class="hljs-literal">None</span>)
+        <span class="hljs-keyword">if</span> mode <span class="hljs-keyword">in</span> (<span class="hljs-string">&quot;layernorm&quot;</span>, <span class="hljs-string">&quot;prenorm&quot;</span>):
+            z, sd = layernorm_fwd(z)
+            y = z
+        h = np.maximum(z, <span class="hljs-number">0</span>)
+        <span class="hljs-keyword">if</span> mode <span class="hljs-keyword">in</span> (<span class="hljs-string">&quot;residual&quot;</span>, <span class="hljs-string">&quot;prenorm&quot;</span>):
+            h = h + a
+        cache.append((a, z, y, sd)); a = h
+    g = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, a.shape); g /= np.linalg.norm(g)
+    norms = [np.linalg.norm(g)]
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(depth - <span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>):
+        a_in, z, y, sd = cache[i]
+        g_skip = g <span class="hljs-keyword">if</span> mode <span class="hljs-keyword">in</span> (<span class="hljs-string">&quot;residual&quot;</span>, <span class="hljs-string">&quot;prenorm&quot;</span>) <span class="hljs-keyword">else</span> <span class="hljs-literal">None</span>
+        gz = g * (z &gt; <span class="hljs-number">0</span>)
+        <span class="hljs-keyword">if</span> mode <span class="hljs-keyword">in</span> (<span class="hljs-string">&quot;layernorm&quot;</span>, <span class="hljs-string">&quot;prenorm&quot;</span>):
+            gz = layernorm_bwd(gz, y, sd)
+        g = gz @ Ws[i].T
+        <span class="hljs-keyword">if</span> g_skip <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            g = g + g_skip
+        norms.append(np.linalg.norm(g))
+    <span class="hljs-keyword">return</span> np.array(norms[::-<span class="hljs-number">1</span>]) / norms[<span class="hljs-number">0</span>]
+
+cases = [(<span class="hljs-string">&quot;gain 0,5 — khởi tạo quá nhỏ&quot;</span>, <span class="hljs-built_in">dict</span>(gain=<span class="hljs-number">0.5</span>, mode=<span class="hljs-string">&quot;plain&quot;</span>)),
+         (<span class="hljs-string">&quot;gain √2 — khởi tạo He&quot;</span>, <span class="hljs-built_in">dict</span>(gain=np.sqrt(<span class="hljs-number">2.0</span>), mode=<span class="hljs-string">&quot;plain&quot;</span>)),
+         (<span class="hljs-string">&quot;gain 2,0 — khởi tạo quá lớn&quot;</span>, <span class="hljs-built_in">dict</span>(gain=<span class="hljs-number">2.0</span>, mode=<span class="hljs-string">&quot;plain&quot;</span>)),
+         (<span class="hljs-string">&quot;He + LayerNorm&quot;</span>, <span class="hljs-built_in">dict</span>(gain=np.sqrt(<span class="hljs-number">2.0</span>), mode=<span class="hljs-string">&quot;layernorm&quot;</span>)),
+         (<span class="hljs-string">&quot;He + kết nối tắt, KHÔNG chuẩn hoá&quot;</span>, <span class="hljs-built_in">dict</span>(gain=np.sqrt(<span class="hljs-number">2.0</span>), mode=<span class="hljs-string">&quot;residual&quot;</span>)),
+         (<span class="hljs-string">&quot;He + chuẩn hoá + kết nối tắt (pre-LN)&quot;</span>, <span class="hljs-built_in">dict</span>(gain=np.sqrt(<span class="hljs-number">2.0</span>), mode=<span class="hljs-string">&quot;prenorm&quot;</span>))]
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;cách dựng lớp&#x27;</span>:&lt;<span class="hljs-number">40</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;|∇a| lớp 40&#x27;</span>:&gt;<span class="hljs-number">14</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;lớp 20&#x27;</span>:&gt;<span class="hljs-number">13</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;lớp 1&#x27;</span>:&gt;<span class="hljs-number">13</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;lớp1/lớp40&#x27;</span>:&gt;<span class="hljs-number">14</span>}</span>&quot;</span>)
+Dprof = {}
+<span class="hljs-keyword">for</span> lab, kw <span class="hljs-keyword">in</span> cases:
+    p = np.mean([act_grad_profile(seed=s, **kw) <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>)], axis=<span class="hljs-number">0</span>)
+    Dprof[lab] = p
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{lab:&lt;<span class="hljs-number">40</span>}</span><span class="hljs-subst">{p[-<span class="hljs-number">1</span>]:<span class="hljs-number">14.3</span>e}</span><span class="hljs-subst">{p[<span class="hljs-number">20</span>]:<span class="hljs-number">13.3</span>e}</span><span class="hljs-subst">{p[<span class="hljs-number">0</span>]:<span class="hljs-number">13.3</span>e}</span><span class="hljs-subst">{p[<span class="hljs-number">0</span>]/p[-<span class="hljs-number">1</span>]:<span class="hljs-number">14.3</span>e}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nDoc bang: ti le lop1/lop40 &lt;&lt; 1 la TIEU BIEN, &gt;&gt; 1 la BUNG NO, ~1 la on dinh.&quot;</span>)
+
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">6.2</span>, <span class="hljs-number">3.2</span>))
+<span class="hljs-keyword">for</span> lab, p <span class="hljs-keyword">in</span> Dprof.items():
+    ax.plot(np.arange(<span class="hljs-built_in">len</span>(p)), p, lw=<span class="hljs-number">1.7</span>, label=lab)
+ax.set_yscale(<span class="hljs-string">&quot;log&quot;</span>); ax.set_xlabel(<span class="hljs-string">&quot;chỉ số lớp (0 = gần đầu vào, 40 = gần hàm mất mát)&quot;</span>)
+ax.set_ylabel(<span class="hljs-string">&quot;$\\|\\partial L/\\partial a\\|$ tương đối (log)&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Cùng độ sâu 40, chỉ khác khởi tạo và cách dựng lớp&quot;</span>)
+ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">7.8</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models07_vanish.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (E) Hình 10 — Vì sao attention phải chia cho căn d_k</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(E) Vi sao chia cho can d_k&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">softmax</span>(<span class="hljs-params">z, axis=-<span class="hljs-number">1</span></span>):
+    z = z - z.<span class="hljs-built_in">max</span>(axis=axis, keepdims=<span class="hljs-literal">True</span>)
+    e = np.exp(z); <span class="hljs-keyword">return</span> e / e.<span class="hljs-built_in">sum</span>(axis=axis, keepdims=<span class="hljs-literal">True</span>)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;d_k&#x27;</span>:&gt;<span class="hljs-number">6</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;Var(q·k)&#x27;</span>:&gt;<span class="hljs-number">12</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;Var lý thuyết&#x27;</span>:&gt;<span class="hljs-number">15</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;entropy KHÔNG chia&#x27;</span>:&gt;<span class="hljs-number">21</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;entropy CÓ chia&#x27;</span>:&gt;<span class="hljs-number">18</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;max softmax&#x27;</span>:&gt;<span class="hljs-number">13</span>}</span>&quot;</span>)
+dks = [<span class="hljs-number">4</span>, <span class="hljs-number">16</span>, <span class="hljs-number">64</span>, <span class="hljs-number">256</span>, <span class="hljs-number">1024</span>]
+E = []
+<span class="hljs-keyword">for</span> dk <span class="hljs-keyword">in</span> dks:
+    r = np.random.default_rng(<span class="hljs-number">3</span>)
+    q = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (<span class="hljs-number">4000</span>, dk)); k = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (<span class="hljs-number">64</span>, dk))
+    s = q @ k.T
+    ent_raw = -np.<span class="hljs-built_in">sum</span>(softmax(s) * np.log(softmax(s) + <span class="hljs-number">1e-12</span>), axis=-<span class="hljs-number">1</span>).mean()
+    ps = softmax(s / np.sqrt(dk))
+    ent_sc = -np.<span class="hljs-built_in">sum</span>(ps * np.log(ps + <span class="hljs-number">1e-12</span>), axis=-<span class="hljs-number">1</span>).mean()
+    mx = softmax(s).<span class="hljs-built_in">max</span>(axis=-<span class="hljs-number">1</span>).mean()
+    E.append((dk, s.var(), dk, ent_raw, ent_sc, mx))
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{dk:6d}</span><span class="hljs-subst">{s.var():<span class="hljs-number">12.2</span>f}</span><span class="hljs-subst">{dk:15d}</span><span class="hljs-subst">{ent_raw:<span class="hljs-number">21.4</span>f}</span><span class="hljs-subst">{ent_sc:<span class="hljs-number">18.4</span>f}</span><span class="hljs-subst">{mx:<span class="hljs-number">13.4</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nEntropy toi da khi deu tren 64 khoa: ln(64) = <span class="hljs-subst">{np.log(<span class="hljs-number">64</span>):<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Khong chia: entropy sup ve 0 -&gt; softmax bao hoa -&gt; gradient gan bang 0.&quot;</span>)
+
+fig, ax = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">8.4</span>, <span class="hljs-number">3.0</span>))
+ax[<span class="hljs-number">0</span>].plot(dks, [e[<span class="hljs-number">1</span>] <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> E], <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">4</span>, color=C_MAIN, label=<span class="hljs-string">&quot;đo được&quot;</span>)
+ax[<span class="hljs-number">0</span>].plot(dks, dks, <span class="hljs-string">&quot;:&quot;</span>, color=C_DIM, lw=<span class="hljs-number">1.4</span>, label=<span class="hljs-string">&quot;lý thuyết $d_k$&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_xscale(<span class="hljs-string">&quot;log&quot;</span>); ax[<span class="hljs-number">0</span>].set_yscale(<span class="hljs-string">&quot;log&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&quot;$d_k$&quot;</span>); ax[<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&quot;phương sai của $q\\cdot k$&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Tích vô hướng phình theo $d_k$&quot;</span>); ax[<span class="hljs-number">0</span>].legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
+ax[<span class="hljs-number">1</span>].plot(dks, [e[<span class="hljs-number">3</span>] <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> E], <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">4</span>, color=C_BAD, label=<span class="hljs-string">&quot;không chia&quot;</span>)
+ax[<span class="hljs-number">1</span>].plot(dks, [e[<span class="hljs-number">4</span>] <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> E], <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">4</span>, color=C_MAIN, label=<span class="hljs-string">&quot;chia $\\sqrt{d_k}$&quot;</span>)
+ax[<span class="hljs-number">1</span>].axhline(np.log(<span class="hljs-number">64</span>), ls=<span class="hljs-string">&quot;:&quot;</span>, color=C_DIM, lw=<span class="hljs-number">1.2</span>)
+ax[<span class="hljs-number">1</span>].annotate(<span class="hljs-string">&quot;entropy tối đa ln 64&quot;</span>, (dks[<span class="hljs-number">0</span>], np.log(<span class="hljs-number">64</span>) * <span class="hljs-number">0.93</span>), fontsize=<span class="hljs-number">7.5</span>, color=C_DIM)
+ax[<span class="hljs-number">1</span>].set_xscale(<span class="hljs-string">&quot;log&quot;</span>); ax[<span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&quot;$d_k$&quot;</span>); ax[<span class="hljs-number">1</span>].set_ylabel(<span class="hljs-string">&quot;entropy của softmax (nat)&quot;</span>)
+ax[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Không chia thì attention hoá cứng&quot;</span>); ax[<span class="hljs-number">1</span>].legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models10_scaling.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (F) Hình 9 — RNN quên, LSTM nhớ</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(F) Gradient theo thoi gian: RNN so voi LSTM&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">rnn_grad</span>(<span class="hljs-params">T=<span class="hljs-number">100</span>, n=<span class="hljs-number">64</span>, gain=<span class="hljs-number">1.0</span>, seed=<span class="hljs-number">0</span></span>):
+    r = np.random.default_rng(seed)
+    W = r.normal(<span class="hljs-number">0</span>, gain / np.sqrt(n), (n, n))
+    h = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, n) * <span class="hljs-number">0.1</span>
+    hs, zs = [h], []
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(T):
+        z = W @ h; h = np.tanh(z); zs.append(z); hs.append(h)
+    g = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, n); g /= np.linalg.norm(g)
+    out = []
+    <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(T - <span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>):
+        g = (W.T @ (g * (<span class="hljs-number">1</span> - np.tanh(zs[t]) ** <span class="hljs-number">2</span>)))
+        out.append(np.linalg.norm(g))
+    <span class="hljs-keyword">return</span> np.array(out[::-<span class="hljs-number">1</span>])
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">lstm_grad</span>(<span class="hljs-params">T=<span class="hljs-number">100</span>, n=<span class="hljs-number">64</span>, f_bias=<span class="hljs-number">2.0</span>, seed=<span class="hljs-number">0</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;Chi theo duong trang thai o nho c_t: dc_{t-1} = dc_t * f_t.&quot;&quot;&quot;</span>
+    r = np.random.default_rng(seed)
+    g = <span class="hljs-number">1.0</span>; out = []
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(T):
+        f = <span class="hljs-number">1</span> / (<span class="hljs-number">1</span> + np.exp(-(r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">0.5</span>) + f_bias)))   <span class="hljs-comment"># cong quen mo san</span>
+        g = g * f; out.append(g)
+    <span class="hljs-keyword">return</span> np.array(out[::-<span class="hljs-number">1</span>])
+
+F = {}
+<span class="hljs-keyword">for</span> gain, lab <span class="hljs-keyword">in</span> [(<span class="hljs-number">0.9</span>, <span class="hljs-string">&quot;RNN, gain 0,9&quot;</span>), (<span class="hljs-number">1.0</span>, <span class="hljs-string">&quot;RNN, gain 1,0&quot;</span>), (<span class="hljs-number">1.2</span>, <span class="hljs-string">&quot;RNN, gain 1,2&quot;</span>)]:
+    F[lab] = np.mean([rnn_grad(gain=gain, seed=s) <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">8</span>)], axis=<span class="hljs-number">0</span>)
+<span class="hljs-keyword">for</span> fb, lab <span class="hljs-keyword">in</span> [(<span class="hljs-number">1.0</span>, <span class="hljs-string">&quot;LSTM, bias cổng quên = 1&quot;</span>), (<span class="hljs-number">4.0</span>, <span class="hljs-string">&quot;LSTM, bias cổng quên = 4&quot;</span>)]:
+    F[lab] = np.mean([lstm_grad(f_bias=fb, seed=s) <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">8</span>)], axis=<span class="hljs-number">0</span>)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;mô hình&#x27;</span>:&lt;<span class="hljs-number">26</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;|∇| sau 10 bước&#x27;</span>:&gt;<span class="hljs-number">18</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;sau 50 bước&#x27;</span>:&gt;<span class="hljs-number">14</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;sau 100 bước&#x27;</span>:&gt;<span class="hljs-number">15</span>}</span>&quot;</span>)
+<span class="hljs-keyword">for</span> lab, gs <span class="hljs-keyword">in</span> F.items():
+    g0 = gs[-<span class="hljs-number">1</span>]
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{lab:&lt;<span class="hljs-number">26</span>}</span><span class="hljs-subst">{gs[-<span class="hljs-number">10</span>]/g0:<span class="hljs-number">18.3</span>e}</span><span class="hljs-subst">{gs[-<span class="hljs-number">50</span>]/g0:<span class="hljs-number">14.3</span>e}</span><span class="hljs-subst">{gs[<span class="hljs-number">0</span>]/g0:<span class="hljs-number">15.3</span>e}</span>&quot;</span>)
+
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">6.0</span>, <span class="hljs-number">3.1</span>))
+<span class="hljs-keyword">for</span> lab, gs <span class="hljs-keyword">in</span> F.items():
+    ax.plot(np.arange(<span class="hljs-built_in">len</span>(gs))[::-<span class="hljs-number">1</span>], gs / gs[-<span class="hljs-number">1</span>], lw=<span class="hljs-number">1.6</span>, label=lab)
+ax.set_yscale(<span class="hljs-string">&quot;log&quot;</span>); ax.set_xlabel(<span class="hljs-string">&quot;số bước lùi về quá khứ&quot;</span>)
+ax.set_ylabel(<span class="hljs-string">&quot;chuẩn gradient tương đối (log)&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Gradient truyền ngược qua thời gian&quot;</span>)
+ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models09_rnn.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (G) Hình 12 — RoPE chỉ phụ thuộc khoảng cách tương đối</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(G) RoPE: tich vo huong chi phu thuoc m - n&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">rope</span>(<span class="hljs-params">x, pos, base=<span class="hljs-number">10000.0</span></span>):
+    d = x.shape[-<span class="hljs-number">1</span>]
+    i = np.arange(<span class="hljs-number">0</span>, d, <span class="hljs-number">2</span>)
+    theta = base ** (-i / d)
+    ang = pos * theta
+    c, s = np.cos(ang), np.sin(ang)
+    out = x.copy()
+    out[..., <span class="hljs-number">0</span>::<span class="hljs-number">2</span>] = x[..., <span class="hljs-number">0</span>::<span class="hljs-number">2</span>] * c - x[..., <span class="hljs-number">1</span>::<span class="hljs-number">2</span>] * s
+    out[..., <span class="hljs-number">1</span>::<span class="hljs-number">2</span>] = x[..., <span class="hljs-number">0</span>::<span class="hljs-number">2</span>] * s + x[..., <span class="hljs-number">1</span>::<span class="hljs-number">2</span>] * c
+    <span class="hljs-keyword">return</span> out
+
+d = <span class="hljs-number">64</span>
+r = np.random.default_rng(<span class="hljs-number">11</span>)
+q, k = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, d), r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, d)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;m&#x27;</span>:&gt;<span class="hljs-number">5</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;n&#x27;</span>:&gt;<span class="hljs-number">5</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;m-n&#x27;</span>:&gt;<span class="hljs-number">6</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;&lt;R_m q, R_n k&gt;&#x27;</span>:&gt;<span class="hljs-number">18</span>}</span>&quot;</span>)
+vals = {}
+<span class="hljs-keyword">for</span> m, n <span class="hljs-keyword">in</span> [(<span class="hljs-number">5</span>, <span class="hljs-number">2</span>), (<span class="hljs-number">105</span>, <span class="hljs-number">102</span>), (<span class="hljs-number">500</span>, <span class="hljs-number">497</span>), (<span class="hljs-number">7</span>, <span class="hljs-number">4</span>), (<span class="hljs-number">9</span>, <span class="hljs-number">3</span>), (<span class="hljs-number">109</span>, <span class="hljs-number">103</span>)]:
+    v = <span class="hljs-built_in">float</span>(rope(q, m) @ rope(k, n))
+    vals.setdefault(m - n, []).append(v)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{m:5d}</span><span class="hljs-subst">{n:5d}</span><span class="hljs-subst">{m-n:6d}</span><span class="hljs-subst">{v:<span class="hljs-number">18.6</span>f}</span>&quot;</span>)
+ok = <span class="hljs-built_in">all</span>(np.allclose(v, v[<span class="hljs-number">0</span>], atol=<span class="hljs-number">1e-9</span>) <span class="hljs-keyword">for</span> v <span class="hljs-keyword">in</span> vals.values())
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nCung m-n thi tich vo huong giong nhau: <span class="hljs-subst">{ok}</span>&quot;</span>)
+
+<span class="hljs-comment"># Suy giam theo khoang cach: do bang CUNG mot vector o hai vi tri, chuan hoa theo |q|^2.</span>
+dists = np.arange(<span class="hljs-number">0</span>, <span class="hljs-number">256</span>)
+sims = []
+<span class="hljs-keyword">for</span> D_ <span class="hljs-keyword">in</span> dists:
+    acc = []
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">300</span>):
+        v = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, d)
+        acc.append(<span class="hljs-built_in">float</span>(rope(v, D_) @ rope(v, <span class="hljs-number">0</span>)) / <span class="hljs-built_in">float</span>(v @ v))
+    sims.append(np.mean(acc))
+sims = np.array(sims)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;&lt;R_m q, R_0 q&gt;/|q|^2 trung binh: khoang cach 0 -&gt; <span class="hljs-subst">{sims[<span class="hljs-number">0</span>]:<span class="hljs-number">.3</span>f}</span>; &quot;</span>
+      <span class="hljs-string">f&quot;8 -&gt; <span class="hljs-subst">{sims[<span class="hljs-number">8</span>]:<span class="hljs-number">.3</span>f}</span>; 64 -&gt; <span class="hljs-subst">{sims[<span class="hljs-number">64</span>]:<span class="hljs-number">.3</span>f}</span>; 255 -&gt; <span class="hljs-subst">{sims[<span class="hljs-number">255</span>]:<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+
+fig, ax = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">8.4</span>, <span class="hljs-number">3.0</span>))
+ds = <span class="hljs-built_in">sorted</span>(vals)
+ax[<span class="hljs-number">0</span>].bar([<span class="hljs-built_in">str</span>(x) <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> ds], [vals[x][<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> ds], color=C_MAIN)
+ax[<span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&quot;khoảng cách tương đối $m-n$&quot;</span>); ax[<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&quot;$\\langle R_m q, R_n k\\rangle$&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Cùng $m-n$ cho cùng một giá trị&quot;</span>)
+ax[<span class="hljs-number">1</span>].plot(dists, sims, lw=<span class="hljs-number">1.4</span>, color=C_MAIN)
+ax[<span class="hljs-number">1</span>].axhline(<span class="hljs-number">0</span>, lw=<span class="hljs-number">.8</span>, color=C_DIM)
+ax[<span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&quot;khoảng cách tương đối&quot;</span>); ax[<span class="hljs-number">1</span>].set_ylabel(<span class="hljs-string">r&quot;$\langle R_m q, R_0 q\rangle / |q|^2$&quot;</span>)
+ax[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Suy giảm theo khoảng cách&quot;</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models12_rope.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (H) Hình 13 — Các chiến lược giải mã nhào nặn phân phối thế nào</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(H) Nhiet do, top-k, top-p&quot;</span>)
+
+V = <span class="hljs-number">50000</span>
+r = np.random.default_rng(<span class="hljs-number">1</span>)
+logits = np.sort(r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">2.2</span>, V))[::-<span class="hljs-number">1</span>]        <span class="hljs-comment"># phan phoi dang Zipf thoai</span>
+p0 = softmax(logits)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Phan phoi goc: entropy <span class="hljs-subst">{-(p0*np.log(p0+<span class="hljs-number">1e-12</span>)).<span class="hljs-built_in">sum</span>():<span class="hljs-number">.3</span>f}</span> nat, &quot;</span>
+      <span class="hljs-string">f&quot;top-1 <span class="hljs-subst">{p0[<span class="hljs-number">0</span>]:<span class="hljs-number">.3</span>f}</span>, so token phu 90% xac suat: <span class="hljs-subst">{np.searchsorted(np.cumsum(p0), <span class="hljs-number">0.9</span>)+<span class="hljs-number">1</span>}</span>&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">apply_temp</span>(<span class="hljs-params">lg, T</span>): <span class="hljs-keyword">return</span> softmax(lg / T)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">apply_topk</span>(<span class="hljs-params">lg, k</span>):
+    out = np.full_like(lg, -np.inf); out[:k] = lg[:k]; <span class="hljs-keyword">return</span> softmax(out)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">apply_topp</span>(<span class="hljs-params">lg, p</span>):
+    pr = softmax(lg); c = np.cumsum(pr); n = <span class="hljs-built_in">int</span>(np.searchsorted(c, p)) + <span class="hljs-number">1</span>
+    out = np.full_like(lg, -np.inf); out[:n] = lg[:n]; <span class="hljs-keyword">return</span> softmax(out)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n<span class="hljs-subst">{<span class="hljs-string">&#x27;chiến lược&#x27;</span>:&lt;<span class="hljs-number">22</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;entropy (nat)&#x27;</span>:&gt;<span class="hljs-number">15</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;số token phủ 90%&#x27;</span>:&gt;<span class="hljs-number">20</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;top-1&#x27;</span>:&gt;<span class="hljs-number">10</span>}</span>&quot;</span>)
+H = []
+rows2 = [(<span class="hljs-string">&quot;gốc (T = 1)&quot;</span>, p0), (<span class="hljs-string">&quot;T = 0,7&quot;</span>, apply_temp(logits, <span class="hljs-number">0.7</span>)),
+         (<span class="hljs-string">&quot;T = 1,3&quot;</span>, apply_temp(logits, <span class="hljs-number">1.3</span>)), (<span class="hljs-string">&quot;top-k = 40&quot;</span>, apply_topk(logits, <span class="hljs-number">40</span>)),
+         (<span class="hljs-string">&quot;top-p = 0,9&quot;</span>, apply_topp(logits, <span class="hljs-number">0.9</span>)), (<span class="hljs-string">&quot;top-p = 0,5&quot;</span>, apply_topp(logits, <span class="hljs-number">0.5</span>))]
+<span class="hljs-keyword">for</span> name, p <span class="hljs-keyword">in</span> rows2:
+    ent = -(p * np.log(p + <span class="hljs-number">1e-12</span>)).<span class="hljs-built_in">sum</span>()
+    n90 = <span class="hljs-built_in">int</span>(np.searchsorted(np.cumsum(p), <span class="hljs-number">0.9</span>)) + <span class="hljs-number">1</span>
+    H.append((name, ent, n90, p[<span class="hljs-number">0</span>]))
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{name:&lt;<span class="hljs-number">22</span>}</span><span class="hljs-subst">{ent:<span class="hljs-number">15.4</span>f}</span><span class="hljs-subst">{n90:20d}</span><span class="hljs-subst">{p[<span class="hljs-number">0</span>]:<span class="hljs-number">10.4</span>f}</span>&quot;</span>)
+
+fig, ax = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">8.4</span>, <span class="hljs-number">3.0</span>))
+<span class="hljs-keyword">for</span> name, p <span class="hljs-keyword">in</span> rows2[:<span class="hljs-number">4</span>]:
+    ax[<span class="hljs-number">0</span>].plot(np.arange(<span class="hljs-number">1</span>, <span class="hljs-number">201</span>), p[:<span class="hljs-number">200</span>], lw=<span class="hljs-number">1.4</span>, label=name)
+ax[<span class="hljs-number">0</span>].set_yscale(<span class="hljs-string">&quot;log&quot;</span>); ax[<span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&quot;hạng của token&quot;</span>); ax[<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&quot;xác suất (log)&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Hình dạng phân phối&quot;</span>); ax[<span class="hljs-number">0</span>].legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">7.5</span>)
+ax[<span class="hljs-number">1</span>].barh([h[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> h <span class="hljs-keyword">in</span> H], [h[<span class="hljs-number">2</span>] <span class="hljs-keyword">for</span> h <span class="hljs-keyword">in</span> H], color=C_MAIN)
+ax[<span class="hljs-number">1</span>].set_xscale(<span class="hljs-string">&quot;log&quot;</span>); ax[<span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&quot;số token phủ 90% xác suất (log)&quot;</span>)
+ax[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Không gian lựa chọn còn lại&quot;</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models13_decode.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (I) Đếm tham số và FLOP, đối chiếu với GPT-2 đã công bố</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(I) Dem tham so Transformer, doi chieu GPT-2&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">gpt2_params</span>(<span class="hljs-params">n_layer, d_model, d_ff, vocab, n_ctx, tie=<span class="hljs-literal">True</span></span>):
+    emb = vocab * d_model
+    pos = n_ctx * d_model
+    attn = n_layer * (d_model * <span class="hljs-number">3</span> * d_model + <span class="hljs-number">3</span> * d_model      <span class="hljs-comment"># W_qkv + bias</span>
+                      + d_model * d_model + d_model)          <span class="hljs-comment"># W_o + bias</span>
+    ffn = n_layer * (d_model * d_ff + d_ff + d_ff * d_model + d_model)
+    ln = n_layer * <span class="hljs-number">2</span> * <span class="hljs-number">2</span> * d_model + <span class="hljs-number">2</span> * d_model               <span class="hljs-comment"># 2 LN/lop + LN cuoi, moi LN co gamma &amp; beta</span>
+    total = emb + pos + attn + ffn + ln + (<span class="hljs-number">0</span> <span class="hljs-keyword">if</span> tie <span class="hljs-keyword">else</span> vocab * d_model)
+    non_emb = <span class="hljs-number">12</span> * n_layer * d_model ** <span class="hljs-number">2</span>                      <span class="hljs-comment"># cong thuc Kaplan, bo bias va LN</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">dict</span>(emb=emb, pos=pos, attn=attn, ffn=ffn, ln=ln, total=total, non_emb=non_emb)
+
+specs = [(<span class="hljs-string">&quot;GPT-2 small&quot;</span>, <span class="hljs-number">12</span>, <span class="hljs-number">768</span>, <span class="hljs-number">3072</span>, <span class="hljs-number">50257</span>, <span class="hljs-number">1024</span>, <span class="hljs-number">124_439_808</span>),
+         (<span class="hljs-string">&quot;GPT-2 medium&quot;</span>, <span class="hljs-number">24</span>, <span class="hljs-number">1024</span>, <span class="hljs-number">4096</span>, <span class="hljs-number">50257</span>, <span class="hljs-number">1024</span>, <span class="hljs-number">354_823_168</span>),
+         (<span class="hljs-string">&quot;GPT-2 large&quot;</span>, <span class="hljs-number">36</span>, <span class="hljs-number">1280</span>, <span class="hljs-number">5120</span>, <span class="hljs-number">50257</span>, <span class="hljs-number">1024</span>, <span class="hljs-number">774_030_080</span>)]
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;mô hình&#x27;</span>:&lt;<span class="hljs-number">15</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;công thức&#x27;</span>:&gt;<span class="hljs-number">16</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;đã công bố&#x27;</span>:&gt;<span class="hljs-number">16</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;lệch&#x27;</span>:&gt;<span class="hljs-number">8</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;phi-embedding&#x27;</span>:&gt;<span class="hljs-number">16</span>}</span>&quot;</span>)
+<span class="hljs-keyword">for</span> name, L, dm, dff, V_, ctx, published <span class="hljs-keyword">in</span> specs:
+    p = gpt2_params(L, dm, dff, V_, ctx)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{name:&lt;<span class="hljs-number">15</span>}</span><span class="hljs-subst">{p[<span class="hljs-string">&#x27;total&#x27;</span>]:<span class="hljs-number">16</span>,d}</span><span class="hljs-subst">{published:<span class="hljs-number">16</span>,d}</span><span class="hljs-subst">{p[<span class="hljs-string">&#x27;total&#x27;</span>]-published:8d}</span><span class="hljs-subst">{p[<span class="hljs-string">&#x27;non_emb&#x27;</span>]:<span class="hljs-number">16</span>,d}</span>&quot;</span>)
+
+p = gpt2_params(<span class="hljs-number">12</span>, <span class="hljs-number">768</span>, <span class="hljs-number">3072</span>, <span class="hljs-number">50257</span>, <span class="hljs-number">1024</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nGPT-2 small tach nho: embedding <span class="hljs-subst">{p[<span class="hljs-string">&#x27;emb&#x27;</span>]:,}</span> (<span class="hljs-subst">{p[<span class="hljs-string">&#x27;emb&#x27;</span>]/p[<span class="hljs-string">&#x27;total&#x27;</span>]*<span class="hljs-number">100</span>:<span class="hljs-number">.1</span>f}</span>%), &quot;</span>
+      <span class="hljs-string">f&quot;vi tri <span class="hljs-subst">{p[<span class="hljs-string">&#x27;pos&#x27;</span>]:,}</span>, attention <span class="hljs-subst">{p[<span class="hljs-string">&#x27;attn&#x27;</span>]:,}</span>, FFN <span class="hljs-subst">{p[<span class="hljs-string">&#x27;ffn&#x27;</span>]:,}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Kiem tra 12*L*d^2 = <span class="hljs-subst">{p[<span class="hljs-string">&#x27;non_emb&#x27;</span>]:,}</span> ; FFN chiem <span class="hljs-subst">{p[<span class="hljs-string">&#x27;ffn&#x27;</span>]/(p[<span class="hljs-string">&#x27;attn&#x27;</span>]+p[<span class="hljs-string">&#x27;ffn&#x27;</span>])*<span class="hljs-number">100</span>:<span class="hljs-number">.0</span>f}</span>% khoi Transformer&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;FLOP suy luan moi token ~ 2N = <span class="hljs-subst">{<span class="hljs-number">2</span>*p[<span class="hljs-string">&#x27;non_emb&#x27;</span>]:,}</span> ; huan luyen ~ 6N = <span class="hljs-subst">{<span class="hljs-number">6</span>*p[<span class="hljs-string">&#x27;non_emb&#x27;</span>]:,}</span>&quot;</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (J) Kiến trúc kiểu Llama: tham số, FLOP huấn luyện, và tác dụng của GQA</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(J) Kien truc kieu Llama: RoPE, RMSNorm, SwiGLU, GQA&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">llama_params</span>(<span class="hljs-params">n_layer, d_model, d_ff, vocab, n_kv_heads, n_heads</span>):
+    <span class="hljs-string">&quot;&quot;&quot;RoPE nen khong co embedding vi tri; RMSNorm chi co gamma; khong do lech;
+    FFN SwiGLU dung BA ma tran; lop ra khong dung chung trong so voi embedding.&quot;&quot;&quot;</span>
+    d_head = d_model // n_heads
+    attn = n_layer * (d_model * d_model                      <span class="hljs-comment"># W_Q</span>
+                      + <span class="hljs-number">2</span> * d_model * n_kv_heads * d_head    <span class="hljs-comment"># W_K, W_V (GQA)</span>
+                      + d_model * d_model)                   <span class="hljs-comment"># W_O</span>
+    ffn = n_layer * <span class="hljs-number">3</span> * d_model * d_ff                       <span class="hljs-comment"># SwiGLU: W, V, W_2</span>
+    norms = n_layer * <span class="hljs-number">2</span> * d_model + d_model
+    emb = vocab * d_model
+    head_ = vocab * d_model
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">dict</span>(emb=emb, head=head_, attn=attn, ffn=ffn, norms=norms,
+                total=emb + head_ + attn + ffn + norms, non_emb=attn + ffn)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;mô hình&#x27;</span>:&lt;<span class="hljs-number">16</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;công thức&#x27;</span>:&gt;<span class="hljs-number">18</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;đã công bố&#x27;</span>:&gt;<span class="hljs-number">18</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;lệch&#x27;</span>:&gt;<span class="hljs-number">8</span>}</span>&quot;</span>)
+<span class="hljs-keyword">for</span> name, L, dm, dff, V_, nkv, nh, published <span class="hljs-keyword">in</span> [
+        (<span class="hljs-string">&quot;Llama-2 7B&quot;</span>, <span class="hljs-number">32</span>, <span class="hljs-number">4096</span>, <span class="hljs-number">11008</span>, <span class="hljs-number">32000</span>, <span class="hljs-number">32</span>, <span class="hljs-number">32</span>, <span class="hljs-number">6_738_415_616</span>),
+        (<span class="hljs-string">&quot;Llama-2 13B&quot;</span>, <span class="hljs-number">40</span>, <span class="hljs-number">5120</span>, <span class="hljs-number">13824</span>, <span class="hljs-number">32000</span>, <span class="hljs-number">40</span>, <span class="hljs-number">40</span>, <span class="hljs-number">13_015_864_320</span>)]:
+    q = llama_params(L, dm, dff, V_, nkv, nh)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{name:&lt;<span class="hljs-number">16</span>}</span><span class="hljs-subst">{q[<span class="hljs-string">&#x27;total&#x27;</span>]:<span class="hljs-number">18</span>,d}</span><span class="hljs-subst">{published:<span class="hljs-number">18</span>,d}</span><span class="hljs-subst">{q[<span class="hljs-string">&#x27;total&#x27;</span>]-published:8d}</span>&quot;</span>)
+
+q = llama_params(<span class="hljs-number">32</span>, <span class="hljs-number">4096</span>, <span class="hljs-number">11008</span>, <span class="hljs-number">32000</span>, <span class="hljs-number">32</span>, <span class="hljs-number">32</span>)
+N = q[<span class="hljs-string">&quot;non_emb&quot;</span>]
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  d_ff = 11008 so voi 8/3*d = <span class="hljs-subst">{<span class="hljs-number">8</span>/<span class="hljs-number">3</span>*<span class="hljs-number">4096</span>:<span class="hljs-number">.0</span>f}</span>  -&gt; lam tron len boi cua 256&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  Llama-2 7B phi-embedding N = <span class="hljs-subst">{N:,}</span>&quot;</span>)
+
+D_tok = <span class="hljs-number">2e12</span>
+C = <span class="hljs-number">6</span> * N * D_tok
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nHuan luyen tren <span class="hljs-subst">{D_tok:<span class="hljs-number">.0</span>e}</span> token: C = 6ND = <span class="hljs-subst">{C:<span class="hljs-number">.4</span>e}</span> FLOP&quot;</span>)
+<span class="hljs-keyword">for</span> mfu <span class="hljs-keyword">in</span> (<span class="hljs-number">0.30</span>, <span class="hljs-number">0.376</span>, <span class="hljs-number">0.40</span>):
+    hours = C / (<span class="hljs-number">312e12</span> * mfu) / <span class="hljs-number">3600</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  o <span class="hljs-subst">{mfu*<span class="hljs-number">100</span>:<span class="hljs-number">5.1</span>f}</span>% MFU tren A100 (312 TFLOPS bf16): <span class="hljs-subst">{hours:<span class="hljs-number">9</span>,<span class="hljs-number">.0</span>f}</span> gio-GPU&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;  Bao cao cua Llama 2 cho ban 7B: 184.320 gio-GPU&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">kv_bytes</span>(<span class="hljs-params">L, n_kv, d_head, T, B, bpe=<span class="hljs-number">2</span></span>):
+    <span class="hljs-keyword">return</span> <span class="hljs-number">2</span> * L * n_kv * d_head * T * B * bpe
+
+mha = kv_bytes(<span class="hljs-number">80</span>, <span class="hljs-number">64</span>, <span class="hljs-number">128</span>, <span class="hljs-number">4096</span>, <span class="hljs-number">8</span>)
+gqa = kv_bytes(<span class="hljs-number">80</span>, <span class="hljs-number">8</span>, <span class="hljs-number">128</span>, <span class="hljs-number">4096</span>, <span class="hljs-number">8</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nKV cache mo hinh 70B (80 lop, d_head 128), ngu canh 4096, batch 8, FP16:&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  MHA, 64 KV head: <span class="hljs-subst">{mha / <span class="hljs-number">2</span>**<span class="hljs-number">30</span>:<span class="hljs-number">7.2</span>f}</span> GiB&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  GQA,  8 KV head: <span class="hljs-subst">{gqa / <span class="hljs-number">2</span>**<span class="hljs-number">30</span>:<span class="hljs-number">7.2</span>f}</span> GiB   -&gt; giam dung <span class="hljs-subst">{mha / gqa:<span class="hljs-number">.0</span>f}</span> lan&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  moi token moi chuoi voi GQA: <span class="hljs-subst">{kv_bytes(<span class="hljs-number">80</span>, <span class="hljs-number">8</span>, <span class="hljs-number">128</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>) / <span class="hljs-number">2</span>**<span class="hljs-number">20</span>:<span class="hljs-number">.4</span>f}</span> MiB&quot;</span>)
+
+<span class="hljs-comment"># Khi nao attention chi phoi chi phi</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nTi le chi phi attention tren phan con lai = T / (6d):&quot;</span>)
+<span class="hljs-keyword">for</span> d_, T_ <span class="hljs-keyword">in</span> [(<span class="hljs-number">768</span>, <span class="hljs-number">1024</span>), (<span class="hljs-number">4096</span>, <span class="hljs-number">4096</span>), (<span class="hljs-number">4096</span>, <span class="hljs-number">32768</span>), (<span class="hljs-number">4096</span>, <span class="hljs-number">131072</span>)]:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  d=<span class="hljs-subst">{d_:5d}</span>, T=<span class="hljs-subst">{T_:6d}</span>: <span class="hljs-subst">{T_ / (<span class="hljs-number">6</span> * d_):<span class="hljs-number">7.2</span>f}</span>   &quot;</span>
+          <span class="hljs-string">f&quot;(<span class="hljs-subst">{<span class="hljs-string">&#x27;attention chi phoi&#x27;</span> <span class="hljs-keyword">if</span> T_ &gt; <span class="hljs-number">6</span> * d_ <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;phan con lai chi phoi&#x27;</span>}</span>)&quot;</span>)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nDa luu 8 hinh vao &quot;</span> + OUT)
+</code></pre></div></details><details class="src-details"><summary>Kết quả chạy — <code>experiments_output.txt</code></summary><div class="code-block is-output"><div class="code-head"><span class="code-lang">Kết quả chạy</span></div><pre><code>
+==========================================================================
+(A) Phan ra thien lech - phuong sai cua da thuc
+==========================================================================
+ bậc   thiên lệch²   phương sai    nhiễu²    tổng MSE
+   1        0.4221       0.0231    0.1225      0.5677
+   2        0.4223       0.0418    0.1225      0.5866
+   3        0.4098       0.0857    0.1225      0.6180
+   4        0.4191       0.1852    0.1225      0.7268
+   5        0.0836       0.0767    0.1225      0.2828  &lt;- nhỏ nhất
+   6        0.1137       0.3914    0.1225      0.6276
+   7        0.0058       0.3415    0.1225      0.4699
+   8        0.0181       0.2455    0.1225      0.3861
+   9        0.0024       1.2645    0.1225      1.3894
+  10        0.0052       6.7742    0.1225      6.9019
+  11        0.0251      25.4582    0.1225     25.6058
+  12        0.0276      52.2156    0.1225     52.3657
+  13        6.2261     871.8100    0.1225    878.1586
+  14       35.1402    7392.2751    0.1225   7427.5379
+
+Bac toi uu = 5; tai do thien lech^2=0.0836, phuong sai=0.0767
+Bac 1  : thien lech^2 = 0.422 (chiem 74% MSE) -&gt; THIEU KHOP
+Bac 14: phuong sai  = 7392.275 (chiem 100% MSE) -&gt; QUA KHOP
+
+==========================================================================
+(B) Bagging va boosting cat vao thanh phan nao
+==========================================================================
+Một cây (sâu 8)      thiên lệch²=0.0031  phương sai=0.1089  tổng=0.1120
+Bagging 100 cây      thiên lệch²=0.0016  phương sai=0.0534  tổng=0.0550
+Boosting 100 gốc     thiên lệch²=0.0032  phương sai=0.0371  tổng=0.0403
+
+Bagging giam phuong sai 2.0 lan, thien lech doi 0.52 lan
+Boosting giam thien lech 1.0 lan, phuong sai doi 0.34 lan
+
+==========================================================================
+(C) Sau mua duoc su gon gang (chung minh kien tao, khong phu thuoc toi uu)
+==========================================================================
+ k lớp sâu  đoạn 2^k  tham số sâu   sai số của mạng MỘT lớp theo bề rộng
+                                            2        4        8       16       32       64      128      256
+         2         4           12     7.9e-02  1.5e-02  1.8e-03  2.9e-04  4.0e-05  5.3e-06  6.8e-07  8.6e-08
+         3         8           18     8.3e-02  8.3e-02  2.6e-02  2.1e-03  3.2e-04  4.2e-05  5.4e-06  6.9e-07
+         4        16           24     8.3e-02  8.3e-02  8.3e-02  3.3e-02  2.2e-03  3.4e-04  4.3e-05  5.5e-06
+         5        32           30     8.3e-02  8.3e-02  8.3e-02  8.3e-02  3.8e-02  2.3e-03  3.4e-04  4.4e-05
+         6        64           36     8.3e-02  8.3e-02  8.3e-02  8.3e-02  8.3e-02  4.0e-02  2.3e-03  3.5e-04
+         7       128           42     8.3e-02  8.3e-02  8.3e-02  8.3e-02  8.3e-02  8.3e-02  4.2e-02  2.4e-03
+
+  k  đoạn 2^k   tham số mạng sâu   bề rộng 1 lớp cần   tham số 1 lớp    gấp
+  2         4                 12                   4              14    1.2x
+  3         8                 18                   8              26    1.4x
+  4        16                 24                  16              50    2.1x
+  5        32                 30                  32              98    3.3x
+  6        64                 36                  64             194    5.4x
+  7       128                 42                 128             386    9.2x
+
+Be rong can thiet dung bang so DOAN TUYEN TINH = 2^k, tuc TANG THEO HAM MU cua do sau,
+trong khi mang sau chi can TUYEN TINH theo k. Day la 'do sau mua duoc su gon gang'.
+
+==========================================================================
+(D) Gradient truyen nguoc qua 40 lop: do bang |dL/da| tung lop
+==========================================================================
+cách dựng lớp                              |∇a| lớp 40       lớp 20        lớp 1    lớp1/lớp40
+gain 0,5 — khởi tạo quá nhỏ                  1.000e+00    1.015e-09    1.233e-18     1.233e-18
+gain √2 — khởi tạo He                        1.000e+00    1.090e+00    1.421e+00     1.421e+00
+gain 2,0 — khởi tạo quá lớn                  1.000e+00    1.116e+03    1.490e+06     1.490e+06
+He + LayerNorm                               1.000e+00    1.081e+00    1.151e+00     1.151e+00
+He + kết nối tắt, KHÔNG chuẩn hoá            1.000e+00    6.829e+03    2.446e+08     2.446e+08
+He + chuẩn hoá + kết nối tắt (pre-LN)        1.000e+00    1.037e+00    2.222e+00     2.222e+00
+
+Doc bang: ti le lop1/lop40 &lt;&lt; 1 la TIEU BIEN, &gt;&gt; 1 la BUNG NO, ~1 la on dinh.
+
+==========================================================================
+(E) Vi sao chia cho can d_k
+==========================================================================
+   d_k    Var(q·k)  Var lý thuyết   entropy KHÔNG chia   entropy CÓ chia  max softmax
+     4        3.63              4               2.8920            3.7391       0.2580
+    16       15.99             16               1.3597            3.6854       0.5837
+    64       64.66             64               0.5818            3.6803       0.7913
+   256      251.67            256               0.2746            3.6923       0.8943
+  1024     1021.97           1024               0.1179            3.6847       0.9533
+
+Entropy toi da khi deu tren 64 khoa: ln(64) = 4.1589
+Khong chia: entropy sup ve 0 -&gt; softmax bao hoa -&gt; gradient gan bang 0.
+
+==========================================================================
+(F) Gradient theo thoi gian: RNN so voi LSTM
+==========================================================================
+mô hình                      |∇| sau 10 bước   sau 50 bước   sau 100 bước
+RNN, gain 0,9                      3.182e-01     6.815e-02      3.236e-02
+RNN, gain 1,0                      4.180e-01     1.765e-01      1.089e+00
+RNN, gain 1,2                      6.390e-01     3.780e-01      3.014e+00
+LSTM, bias cổng quên = 1           5.032e-02     8.027e-08      2.972e-15
+LSTM, bias cổng quên = 4           8.305e-01     3.597e-01      1.266e-01
+
+==========================================================================
+(G) RoPE: tich vo huong chi phu thuoc m - n
+==========================================================================
+    m    n   m-n    &lt;R_m q, R_n k&gt;
+    5    2     3          6.851342
+  105  102     3          6.851342
+  500  497     3          6.851342
+    7    4     3          6.851342
+    9    3     6          5.861634
+  109  103     6          5.861634
+
+Cung m-n thi tich vo huong giong nhau: True
+&lt;R_m q, R_0 q&gt;/|q|^2 trung binh: khoang cach 0 -&gt; 1.000; 8 -&gt; 0.708; 64 -&gt; 0.439; 255 -&gt; 0.319
+
+==========================================================================
+(H) Nhiet do, top-k, top-p
+==========================================================================
+Phan phoi goc: entropy 8.223 nat, top-1 0.027, so token phu 90% xac suat: 8362
+
+chiến lược              entropy (nat)    số token phủ 90%     top-1
+gốc (T = 1)                    8.2232                8362    0.0274
+T = 0,7                        5.8857                1215    0.1279
+T = 1,3                        9.3050               16766    0.0082
+top-k = 40                     3.4488                  33    0.1386
+top-p = 0,9                    7.6690                4141    0.0304
+top-p = 0,5                    5.6727                 376    0.0547
+
+==========================================================================
+(I) Dem tham so Transformer, doi chieu GPT-2
+==========================================================================
+mô hình               công thức      đã công bố    lệch   phi-embedding
+GPT-2 small         124,439,808     124,439,808       0      84,934,656
+GPT-2 medium        354,823,168     354,823,168       0     301,989,888
+GPT-2 large         774,030,080     774,030,080       0     707,788,800
+
+GPT-2 small tach nho: embedding 38,597,376 (31.0%), vi tri 786,432, attention 28,348,416, FFN 56,669,184
+Kiem tra 12*L*d^2 = 84,934,656 ; FFN chiem 67% khoi Transformer
+FLOP suy luan moi token ~ 2N = 169,869,312 ; huan luyen ~ 6N = 509,607,936
+
+==========================================================================
+(J) Kien truc kieu Llama: RoPE, RMSNorm, SwiGLU, GQA
+==========================================================================
+mô hình                  công thức        đã công bố    lệch
+Llama-2 7B           6,738,415,616     6,738,415,616       0
+Llama-2 13B         13,015,864,320    13,015,864,320       0
+  d_ff = 11008 so voi 8/3*d = 10923  -&gt; lam tron len boi cua 256
+  Llama-2 7B phi-embedding N = 6,476,005,376
+
+Huan luyen tren 2e+12 token: C = 6ND = 7.7712e+22 FLOP
+  o  30.0% MFU tren A100 (312 TFLOPS bf16):   230,627 gio-GPU
+  o  37.6% MFU tren A100 (312 TFLOPS bf16):   184,011 gio-GPU
+  o  40.0% MFU tren A100 (312 TFLOPS bf16):   172,970 gio-GPU
+  Bao cao cua Llama 2 cho ban 7B: 184.320 gio-GPU
+
+KV cache mo hinh 70B (80 lop, d_head 128), ngu canh 4096, batch 8, FP16:
+  MHA, 64 KV head:   80.00 GiB
+  GQA,  8 KV head:   10.00 GiB   -&gt; giam dung 8 lan
+  moi token moi chuoi voi GQA: 0.3125 MiB
+
+Ti le chi phi attention tren phan con lai = T / (6d):
+  d=  768, T=  1024:    0.22   (phan con lai chi phoi)
+  d= 4096, T=  4096:    0.17   (phan con lai chi phoi)
+  d= 4096, T= 32768:    1.33   (attention chi phoi)
+  d= 4096, T=131072:    5.33   (attention chi phoi)
+
+Da luu 8 hinh vao figs/
+</code></pre></div></details></section><section class="src-card" id="fig_diagrams-py"><header class="src-head"><h3 class="src-title"><code>code/models/fig_diagrams.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">266 dòng</span><a class="src-dl" href="code/models/fig_diagrams.py" download>Tải về</a></header><p class="src-note">Sinh Hình 1, 3, 6, 8, 11, 12: bản đồ bốn họ mô hình, một cây quyết định và vùng nó chia, đồ thị tính toán của lan truyền ngược, trường tiếp nhận của CNN, cấu trúc một khối Transformer đọc từ dưới lên, và bảng so sánh 2017 với kiến trúc hiện nay. Đây là hình vẽ tay bằng matplotlib, để trong mã nguồn cho sửa được và cho khớp với chữ trong bài.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Sinh Hình 1, 3, 6, 8, 11 và 14 của giáo trình &quot;Mô hình và kiến trúc&quot;: các sơ đồ.
+
+Đây là hình vẽ tay bằng matplotlib chứ không phải kết quả thí nghiệm, nhưng vẫn để
+trong mã nguồn để sửa được và để mọi chi tiết khớp với chữ trong bài.
+
+    python code/models/fig_diagrams.py
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib
+matplotlib.use(<span class="hljs-string">&quot;Agg&quot;</span>)
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> matplotlib.patches <span class="hljs-keyword">import</span> FancyBboxPatch, FancyArrowPatch, Rectangle, Circle
+
+OUT = <span class="hljs-string">&quot;figs/&quot;</span>
+plt.rcParams.update({<span class="hljs-string">&quot;figure.dpi&quot;</span>: <span class="hljs-number">150</span>, <span class="hljs-string">&quot;font.size&quot;</span>: <span class="hljs-number">9</span>})
+
+INK, DIM = <span class="hljs-string">&quot;#1f1d1a&quot;</span>, <span class="hljs-string">&quot;#8a857c&quot;</span>
+TEAL, TEAL_BG = <span class="hljs-string">&quot;#1f6f68&quot;</span>, <span class="hljs-string">&quot;#e0efed&quot;</span>
+AMBER, AMBER_BG = <span class="hljs-string">&quot;#8a5300&quot;</span>, <span class="hljs-string">&quot;#fbf0db&quot;</span>
+RED, RED_BG = <span class="hljs-string">&quot;#a13328&quot;</span>, <span class="hljs-string">&quot;#fbe9e6&quot;</span>
+BLUE, BLUE_BG = <span class="hljs-string">&quot;#1a5aa8&quot;</span>, <span class="hljs-string">&quot;#dceafb&quot;</span>
+GREEN, GREEN_BG = <span class="hljs-string">&quot;#2c6b39&quot;</span>, <span class="hljs-string">&quot;#e6f2e8&quot;</span>
+PURPLE, PURPLE_BG = <span class="hljs-string">&quot;#6b3b8a&quot;</span>, <span class="hljs-string">&quot;#efe4f7&quot;</span>
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">box</span>(<span class="hljs-params">ax, x, y, w, h, text, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=INK, fs=<span class="hljs-number">8.5</span>, weight=<span class="hljs-string">&quot;normal&quot;</span>, lw=<span class="hljs-number">1.1</span>, r=<span class="hljs-number">0.02</span></span>):
+    ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle=<span class="hljs-string">f&quot;round,pad=0,rounding_size=<span class="hljs-subst">{r}</span>&quot;</span>,
+                                fc=fc, ec=ec, lw=lw, zorder=<span class="hljs-number">2</span>))
+    <span class="hljs-keyword">if</span> text:
+        ax.text(x + w / <span class="hljs-number">2</span>, y + h / <span class="hljs-number">2</span>, text, ha=<span class="hljs-string">&quot;center&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontsize=fs,
+                color=INK, weight=weight, zorder=<span class="hljs-number">3</span>, linespacing=<span class="hljs-number">1.45</span>)
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">arrow</span>(<span class="hljs-params">ax, p, q, color=INK, lw=<span class="hljs-number">1.2</span>, ls=<span class="hljs-string">&quot;-&quot;</span>, rad=<span class="hljs-number">0.0</span></span>):
+    ax.add_patch(FancyArrowPatch(p, q, arrowstyle=<span class="hljs-string">&quot;-|&gt;&quot;</span>, mutation_scale=<span class="hljs-number">10</span>, color=color,
+                                 lw=lw, linestyle=ls, shrinkA=<span class="hljs-number">2</span>, shrinkB=<span class="hljs-number">2</span>, zorder=<span class="hljs-number">4</span>,
+                                 connectionstyle=<span class="hljs-string">f&quot;arc3,rad=<span class="hljs-subst">{rad}</span>&quot;</span>))
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">canvas</span>(<span class="hljs-params">w, h, xlim=(<span class="hljs-params"><span class="hljs-number">0</span>, <span class="hljs-number">12</span></span>), ylim=(<span class="hljs-params"><span class="hljs-number">0</span>, <span class="hljs-number">6</span></span>)</span>):
+    fig, ax = plt.subplots(figsize=(w, h))
+    ax.set_xlim(*xlim); ax.set_ylim(*ylim); ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
+    <span class="hljs-keyword">return</span> fig, ax
+
+
+<span class="hljs-comment"># ==================================================== Hình 1 — bản đồ họ mô hình</span>
+fig, ax = canvas(<span class="hljs-number">8.6</span>, <span class="hljs-number">4.0</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">12</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">7.4</span>))
+ax.text(<span class="hljs-number">6</span>, <span class="hljs-number">7.1</span>, <span class="hljs-string">&quot;Bốn câu hỏi thiết kế, và các họ mô hình trả lời chúng khác nhau&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=INK)
+cols = [
+    (<span class="hljs-string">&quot;Mô hình tuyến tính&quot;</span>, BLUE_BG, BLUE, <span class="hljs-number">0.2</span>,
+     [<span class="hljs-string">&quot;giả thiết: quan hệ tuyến tính&quot;</span>, <span class="hljs-string">&quot;tham số: ít, giải thích được&quot;</span>,
+      <span class="hljs-string">&quot;mạnh: dữ liệu ít, cần diễn giải&quot;</span>, <span class="hljs-string">&quot;yếu: quan hệ phi tuyến&quot;</span>]),
+    (<span class="hljs-string">&quot;Cây và tập hợp&quot;</span>, GREEN_BG, GREEN, <span class="hljs-number">3.15</span>,
+     [<span class="hljs-string">&quot;giả thiết: chia trục toạ độ&quot;</span>, <span class="hljs-string">&quot;tham số: nhiều, phi tham số&quot;</span>,
+      <span class="hljs-string">&quot;mạnh: dữ liệu bảng, đặc trưng lẫn lộn&quot;</span>, <span class="hljs-string">&quot;yếu: ngoại suy, dữ liệu thô&quot;</span>]),
+    (<span class="hljs-string">&quot;Mạng nơ-ron&quot;</span>, AMBER_BG, AMBER, <span class="hljs-number">6.1</span>,
+     [<span class="hljs-string">&quot;giả thiết: hợp thành nhiều tầng&quot;</span>, <span class="hljs-string">&quot;tham số: rất nhiều&quot;</span>,
+      <span class="hljs-string">&quot;mạnh: dữ liệu thô có cấu trúc&quot;</span>, <span class="hljs-string">&quot;yếu: cần nhiều dữ liệu&quot;</span>]),
+    (<span class="hljs-string">&quot;Transformer&quot;</span>, PURPLE_BG, PURPLE, <span class="hljs-number">9.05</span>,
+     [<span class="hljs-string">&quot;giả thiết: quan hệ cặp giữa vị trí&quot;</span>, <span class="hljs-string">&quot;tham số: rất nhiều, song song tốt&quot;</span>,
+      <span class="hljs-string">&quot;mạnh: chuỗi dài, mọi phương thức&quot;</span>, <span class="hljs-string">&quot;yếu: chi phí bậc hai theo độ dài&quot;</span>]),
+]
+<span class="hljs-keyword">for</span> name, fc, ec, x, items <span class="hljs-keyword">in</span> cols:
+    box(ax, x, <span class="hljs-number">0.5</span>, <span class="hljs-number">2.75</span>, <span class="hljs-number">5.9</span>, <span class="hljs-string">&quot;&quot;</span>, fc=fc, ec=ec, lw=<span class="hljs-number">1.3</span>)
+    ax.text(x + <span class="hljs-number">1.375</span>, <span class="hljs-number">5.95</span>, name, ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=ec)
+    <span class="hljs-keyword">for</span> i, it <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(items):
+        ax.text(x + <span class="hljs-number">0.18</span>, <span class="hljs-number">5.25</span> - i * <span class="hljs-number">1.28</span>, <span class="hljs-string">&quot;•&quot;</span>, fontsize=<span class="hljs-number">9</span>, color=ec, va=<span class="hljs-string">&quot;top&quot;</span>)
+        ax.text(x + <span class="hljs-number">0.45</span>, <span class="hljs-number">5.25</span> - i * <span class="hljs-number">1.28</span>, it, fontsize=<span class="hljs-number">7.8</span>, va=<span class="hljs-string">&quot;top&quot;</span>, color=INK,
+                linespacing=<span class="hljs-number">1.4</span>, wrap=<span class="hljs-literal">True</span>)
+<span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> (<span class="hljs-number">2.98</span>, <span class="hljs-number">5.93</span>, <span class="hljs-number">8.88</span>):
+    arrow(ax, (x, <span class="hljs-number">3.4</span>), (x + <span class="hljs-number">0.15</span>, <span class="hljs-number">3.4</span>), color=DIM)
+ax.text(<span class="hljs-number">6</span>, <span class="hljs-number">0.1</span>, <span class="hljs-string">&quot;Trục chung: càng sang phải thì càng ít giả thiết về dạng hàm, &quot;</span>
+                <span class="hljs-string">&quot;càng cần nhiều dữ liệu và càng khó diễn giải.&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8</span>, color=DIM)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models01_families.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># ============================================ Hình 3 — cây chia không gian</span>
+fig, axes = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">8.2</span>, <span class="hljs-number">3.2</span>))
+rng = np.random.default_rng(<span class="hljs-number">4</span>)
+X = rng.uniform(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (<span class="hljs-number">260</span>, <span class="hljs-number">2</span>))
+y = ((X[:, <span class="hljs-number">0</span>] &gt; <span class="hljs-number">0.45</span>) &amp; (X[:, <span class="hljs-number">1</span>] &gt; <span class="hljs-number">0.55</span>)) | ((X[:, <span class="hljs-number">0</span>] &lt;= <span class="hljs-number">0.45</span>) &amp; (X[:, <span class="hljs-number">1</span>] &gt; <span class="hljs-number">0.25</span>))
+ax = axes[<span class="hljs-number">0</span>]
+ax.scatter(X[~y, <span class="hljs-number">0</span>], X[~y, <span class="hljs-number">1</span>], s=<span class="hljs-number">11</span>, color=RED, alpha=<span class="hljs-number">.7</span>, label=<span class="hljs-string">&quot;lớp 0&quot;</span>)
+ax.scatter(X[y, <span class="hljs-number">0</span>], X[y, <span class="hljs-number">1</span>], s=<span class="hljs-number">11</span>, color=TEAL, alpha=<span class="hljs-number">.7</span>, label=<span class="hljs-string">&quot;lớp 1&quot;</span>)
+ax.axvline(<span class="hljs-number">0.45</span>, color=INK, lw=<span class="hljs-number">1.4</span>)
+ax.plot([<span class="hljs-number">0</span>, <span class="hljs-number">0.45</span>], [<span class="hljs-number">0.25</span>, <span class="hljs-number">0.25</span>], color=INK, lw=<span class="hljs-number">1.4</span>)
+ax.plot([<span class="hljs-number">0.45</span>, <span class="hljs-number">1</span>], [<span class="hljs-number">0.55</span>, <span class="hljs-number">0.55</span>], color=INK, lw=<span class="hljs-number">1.4</span>)
+ax.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.set_xlabel(<span class="hljs-string">&quot;$x_1$&quot;</span>); ax.set_ylabel(<span class="hljs-string">&quot;$x_2$&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Cây chia không gian bằng các nhát cắt\nvuông góc với trục&quot;</span>, fontsize=<span class="hljs-number">9</span>)
+ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>, loc=<span class="hljs-string">&quot;lower left&quot;</span>)
+
+ax = axes[<span class="hljs-number">1</span>]; ax.axis(<span class="hljs-string">&quot;off&quot;</span>); ax.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>)
+box(ax, <span class="hljs-number">3.4</span>, <span class="hljs-number">8.2</span>, <span class="hljs-number">3.2</span>, <span class="hljs-number">1.2</span>, <span class="hljs-string">&quot;$x_1 \\leq 0{,}45$ ?&quot;</span>, fc=BLUE_BG, ec=BLUE, fs=<span class="hljs-number">9</span>)
+box(ax, <span class="hljs-number">0.6</span>, <span class="hljs-number">5.4</span>, <span class="hljs-number">3.0</span>, <span class="hljs-number">1.2</span>, <span class="hljs-string">&quot;$x_2 \\leq 0{,}25$ ?&quot;</span>, fc=BLUE_BG, ec=BLUE, fs=<span class="hljs-number">9</span>)
+box(ax, <span class="hljs-number">6.4</span>, <span class="hljs-number">5.4</span>, <span class="hljs-number">3.0</span>, <span class="hljs-number">1.2</span>, <span class="hljs-string">&quot;$x_2 \\leq 0{,}55$ ?&quot;</span>, fc=BLUE_BG, ec=BLUE, fs=<span class="hljs-number">9</span>)
+<span class="hljs-keyword">for</span> x, lab, col, bg <span class="hljs-keyword">in</span> [(<span class="hljs-number">0.2</span>, <span class="hljs-string">&quot;lớp 0&quot;</span>, RED, RED_BG), (<span class="hljs-number">2.4</span>, <span class="hljs-string">&quot;lớp 1&quot;</span>, TEAL, TEAL_BG),
+                        (<span class="hljs-number">5.9</span>, <span class="hljs-string">&quot;lớp 0&quot;</span>, RED, RED_BG), (<span class="hljs-number">8.1</span>, <span class="hljs-string">&quot;lớp 1&quot;</span>, TEAL, TEAL_BG)]:
+    box(ax, x, <span class="hljs-number">2.9</span>, <span class="hljs-number">1.8</span>, <span class="hljs-number">1.0</span>, lab, fc=bg, ec=col, fs=<span class="hljs-number">8.5</span>)
+<span class="hljs-keyword">for</span> a, b, lab <span class="hljs-keyword">in</span> [((<span class="hljs-number">4.4</span>, <span class="hljs-number">8.2</span>), (<span class="hljs-number">2.1</span>, <span class="hljs-number">6.6</span>), <span class="hljs-string">&quot;đúng&quot;</span>), ((<span class="hljs-number">5.6</span>, <span class="hljs-number">8.2</span>), (<span class="hljs-number">7.9</span>, <span class="hljs-number">6.6</span>), <span class="hljs-string">&quot;sai&quot;</span>),
+                  ((<span class="hljs-number">1.4</span>, <span class="hljs-number">5.4</span>), (<span class="hljs-number">1.1</span>, <span class="hljs-number">3.9</span>), <span class="hljs-string">&quot;đúng&quot;</span>), ((<span class="hljs-number">2.8</span>, <span class="hljs-number">5.4</span>), (<span class="hljs-number">3.3</span>, <span class="hljs-number">3.9</span>), <span class="hljs-string">&quot;sai&quot;</span>),
+                  ((<span class="hljs-number">7.2</span>, <span class="hljs-number">5.4</span>), (<span class="hljs-number">6.8</span>, <span class="hljs-number">3.9</span>), <span class="hljs-string">&quot;đúng&quot;</span>), ((<span class="hljs-number">8.6</span>, <span class="hljs-number">5.4</span>), (<span class="hljs-number">9.0</span>, <span class="hljs-number">3.9</span>), <span class="hljs-string">&quot;sai&quot;</span>)]:
+    arrow(ax, a, b, color=DIM)
+    ax.text((a[<span class="hljs-number">0</span>] + b[<span class="hljs-number">0</span>]) / <span class="hljs-number">2</span> - <span class="hljs-number">0.35</span>, (a[<span class="hljs-number">1</span>] + b[<span class="hljs-number">1</span>]) / <span class="hljs-number">2</span>, lab, fontsize=<span class="hljs-number">7</span>, color=DIM)
+ax.set_title(<span class="hljs-string">&quot;Cùng một mô hình, viết dưới dạng cây&quot;</span>, fontsize=<span class="hljs-number">9</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models03_tree.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># =============================== Hình 6 — đồ thị tính toán và lan truyền ngược</span>
+fig, ax = canvas(<span class="hljs-number">8.6</span>, <span class="hljs-number">3.4</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">12</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">6.2</span>))
+ax.text(<span class="hljs-number">6</span>, <span class="hljs-number">5.9</span>, <span class="hljs-string">&quot;Lan truyền ngược = quy tắc dây chuyền áp dụng theo thứ tự ngược&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=INK)
+nodes = [(<span class="hljs-string">&quot;$x$&quot;</span>, <span class="hljs-number">0.3</span>), (<span class="hljs-string">&quot;$z_1 = W_1 x$&quot;</span>, <span class="hljs-number">2.0</span>), (<span class="hljs-string">&quot;$a_1 = \\sigma(z_1)$&quot;</span>, <span class="hljs-number">4.5</span>),
+         (<span class="hljs-string">&quot;$z_2 = W_2 a_1$&quot;</span>, <span class="hljs-number">7.0</span>), (<span class="hljs-string">&quot;$\\hat{y}$&quot;</span>, <span class="hljs-number">9.5</span>), (<span class="hljs-string">&quot;$L$&quot;</span>, <span class="hljs-number">11.0</span>)]
+<span class="hljs-keyword">for</span> t, x <span class="hljs-keyword">in</span> nodes:
+    w = <span class="hljs-number">2.1</span> <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(t) &gt; <span class="hljs-number">6</span> <span class="hljs-keyword">else</span> <span class="hljs-number">1.0</span>
+    box(ax, x, <span class="hljs-number">3.3</span>, w, <span class="hljs-number">1.0</span>, t, fc=TEAL_BG, ec=TEAL, fs=<span class="hljs-number">8.5</span>)
+xs = [<span class="hljs-number">0.3</span> + <span class="hljs-number">1.0</span>, <span class="hljs-number">2.0</span> + <span class="hljs-number">2.1</span>, <span class="hljs-number">4.5</span> + <span class="hljs-number">2.1</span>, <span class="hljs-number">7.0</span> + <span class="hljs-number">2.1</span>, <span class="hljs-number">9.5</span> + <span class="hljs-number">1.0</span>]
+tos = [<span class="hljs-number">2.0</span>, <span class="hljs-number">4.5</span>, <span class="hljs-number">7.0</span>, <span class="hljs-number">9.5</span>, <span class="hljs-number">11.0</span>]
+<span class="hljs-keyword">for</span> a, b <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(xs, tos):
+    arrow(ax, (a, <span class="hljs-number">3.8</span>), (b, <span class="hljs-number">3.8</span>), color=TEAL, lw=<span class="hljs-number">1.4</span>)
+ax.text(<span class="hljs-number">0.3</span>, <span class="hljs-number">4.6</span>, <span class="hljs-string">&quot;lượt xuôi: tính và GHI LẠI mọi giá trị trung gian&quot;</span>, fontsize=<span class="hljs-number">8</span>, color=TEAL)
+
+<span class="hljs-keyword">for</span> t, x, w <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;$\\frac{\\partial L}{\\partial x}$&quot;</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">1.0</span>),
+                (<span class="hljs-string">&quot;$\\frac{\\partial L}{\\partial z_1}$&quot;</span>, <span class="hljs-number">2.0</span>, <span class="hljs-number">2.1</span>),
+                (<span class="hljs-string">&quot;$\\frac{\\partial L}{\\partial a_1}$&quot;</span>, <span class="hljs-number">4.5</span>, <span class="hljs-number">2.1</span>),
+                (<span class="hljs-string">&quot;$\\frac{\\partial L}{\\partial z_2}$&quot;</span>, <span class="hljs-number">7.0</span>, <span class="hljs-number">2.1</span>),
+                (<span class="hljs-string">&quot;$\\frac{\\partial L}{\\partial \\hat{y}}$&quot;</span>, <span class="hljs-number">9.5</span>, <span class="hljs-number">1.0</span>)]:
+    box(ax, x, <span class="hljs-number">1.2</span>, w, <span class="hljs-number">1.0</span>, t, fc=RED_BG, ec=RED, fs=<span class="hljs-number">8.5</span>)
+<span class="hljs-keyword">for</span> a, b <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>([<span class="hljs-number">2.0</span>, <span class="hljs-number">4.5</span>, <span class="hljs-number">7.0</span>, <span class="hljs-number">9.5</span>], [<span class="hljs-number">0.3</span> + <span class="hljs-number">1.0</span>, <span class="hljs-number">2.0</span> + <span class="hljs-number">2.1</span>, <span class="hljs-number">4.5</span> + <span class="hljs-number">2.1</span>, <span class="hljs-number">7.0</span> + <span class="hljs-number">2.1</span>]):
+    arrow(ax, (a, <span class="hljs-number">1.7</span>), (b, <span class="hljs-number">1.7</span>), color=RED, lw=<span class="hljs-number">1.4</span>)
+arrow(ax, (<span class="hljs-number">11.0</span>, <span class="hljs-number">3.3</span>), (<span class="hljs-number">10.5</span>, <span class="hljs-number">2.2</span>), color=RED, lw=<span class="hljs-number">1.4</span>, rad=-<span class="hljs-number">0.2</span>)
+ax.text(<span class="hljs-number">0.3</span>, <span class="hljs-number">0.55</span>, <span class="hljs-string">&quot;lượt ngược: nhân dần các đạo hàm địa phương, &quot;</span>
+                   <span class="hljs-string">&quot;dùng lại đúng những giá trị đã ghi ở lượt xuôi&quot;</span>, fontsize=<span class="hljs-number">8</span>, color=RED)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models06_backprop.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># ===================================== Hình 8 — tích chập và trường tiếp nhận</span>
+fig, ax = canvas(<span class="hljs-number">8.6</span>, <span class="hljs-number">3.4</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">12</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">6.4</span>))
+ax.text(<span class="hljs-number">6</span>, <span class="hljs-number">6.1</span>, <span class="hljs-string">&quot;Mỗi lớp tích chập 3×3 nới trường tiếp nhận thêm 2 ô&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=INK)
+<span class="hljs-keyword">for</span> li, (x0, rf, col, bg) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>([(<span class="hljs-number">0.3</span>, <span class="hljs-number">1</span>, BLUE, BLUE_BG), (<span class="hljs-number">4.2</span>, <span class="hljs-number">3</span>, GREEN, GREEN_BG),
+                                        (<span class="hljs-number">8.1</span>, <span class="hljs-number">5</span>, AMBER, AMBER_BG)]):
+    n = <span class="hljs-number">7</span>
+    cell = <span class="hljs-number">0.42</span>
+    ox, oy = x0 + <span class="hljs-number">0.35</span>, <span class="hljs-number">1.5</span>
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(n):
+        <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(n):
+            inside = <span class="hljs-built_in">abs</span>(i - <span class="hljs-number">3</span>) &lt;= rf // <span class="hljs-number">2</span> <span class="hljs-keyword">and</span> <span class="hljs-built_in">abs</span>(j - <span class="hljs-number">3</span>) &lt;= rf // <span class="hljs-number">2</span>
+            ax.add_patch(Rectangle((ox + j * cell, oy + i * cell), cell * <span class="hljs-number">.92</span>, cell * <span class="hljs-number">.92</span>,
+                                   fc=bg <span class="hljs-keyword">if</span> inside <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;white&quot;</span>, ec=DIM, lw=<span class="hljs-number">.6</span>, zorder=<span class="hljs-number">2</span>))
+    ax.add_patch(Rectangle((ox + <span class="hljs-number">3</span> * cell, oy + <span class="hljs-number">3</span> * cell), cell * <span class="hljs-number">.92</span>, cell * <span class="hljs-number">.92</span>,
+                           fc=col, ec=col, lw=<span class="hljs-number">.6</span>, zorder=<span class="hljs-number">3</span>))
+    ax.text(x0 + <span class="hljs-number">1.8</span>, oy - <span class="hljs-number">0.45</span>, <span class="hljs-string">f&quot;sau <span class="hljs-subst">{li}</span> lớp: trường tiếp nhận <span class="hljs-subst">{rf}</span>×<span class="hljs-subst">{rf}</span>&quot;</span>,
+            ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8.2</span>, color=col, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+    ax.text(x0 + <span class="hljs-number">1.8</span>, oy + n * cell + <span class="hljs-number">0.25</span>, [<span class="hljs-string">&quot;đầu vào&quot;</span>, <span class="hljs-string">&quot;một lớp 3×3&quot;</span>, <span class="hljs-string">&quot;hai lớp 3×3&quot;</span>][li],
+            ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8.5</span>, color=INK)
+<span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> (<span class="hljs-number">3.85</span>, <span class="hljs-number">7.75</span>):
+    arrow(ax, (x, <span class="hljs-number">3.0</span>), (x + <span class="hljs-number">0.3</span>, <span class="hljs-number">3.0</span>), color=DIM)
+ax.text(<span class="hljs-number">6</span>, <span class="hljs-number">0.45</span>, <span class="hljs-string">&quot;Trường tiếp nhận lý thuyết tăng TUYẾN TÍNH theo số lớp: $r_L = 1 + L(k-1)$ với bước nhảy 1.\n&quot;</span>
+                 <span class="hljs-string">&quot;Muốn nó tăng nhanh hơn thì phải giảm độ phân giải (bước nhảy &gt; 1, gộp) hoặc giãn hạt nhân.&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8</span>, color=DIM, linespacing=<span class="hljs-number">1.5</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models08_cnn.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># ======================================= Hình 11 — một khối Transformer đầy đủ</span>
+fig, ax = canvas(<span class="hljs-number">7.6</span>, <span class="hljs-number">6.4</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">12</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">14.0</span>))
+ax.text(<span class="hljs-number">5.6</span>, <span class="hljs-number">13.65</span>, <span class="hljs-string">&quot;Một khối Transformer: hai khối con, mỗi khối con có kết nối tắt&quot;</span>,
+        ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">9.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=INK)
+
+CX, CW = <span class="hljs-number">2.4</span>, <span class="hljs-number">6.6</span>            <span class="hljs-comment"># cot chinh</span>
+RES = <span class="hljs-number">9.9</span>                     <span class="hljs-comment"># duong tat ben phai</span>
+mid = CX + CW / <span class="hljs-number">2</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">up</span>(<span class="hljs-params">y0, y1, color=INK, lw=<span class="hljs-number">1.3</span>, x=<span class="hljs-literal">None</span></span>):
+    arrow(ax, (x <span class="hljs-keyword">if</span> x <span class="hljs-keyword">else</span> mid, y0), (x <span class="hljs-keyword">if</span> x <span class="hljs-keyword">else</span> mid, y1), color=color, lw=lw)
+
+<span class="hljs-comment"># --- dau vao</span>
+box(ax, CX + <span class="hljs-number">1.5</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">3.6</span>, <span class="hljs-number">0.8</span>, <span class="hljs-string">&quot;$x \\in \\mathbb{R}^{T \\times d}$&quot;</span>, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=DIM, fs=<span class="hljs-number">9</span>)
+
+<span class="hljs-comment"># --- khoi con 1 (doc tu duoi len)</span>
+box(ax, CX - <span class="hljs-number">0.45</span>, <span class="hljs-number">1.9</span>, CW + <span class="hljs-number">0.9</span>, <span class="hljs-number">5.3</span>, <span class="hljs-string">&quot;&quot;</span>, fc=TEAL_BG, ec=TEAL, lw=<span class="hljs-number">1.3</span>)
+ax.text(CX - <span class="hljs-number">0.25</span>, <span class="hljs-number">6.95</span>, <span class="hljs-string">&quot;Khối con 1 — trộn thông tin GIỮA các vị trí&quot;</span>,
+        fontsize=<span class="hljs-number">8.2</span>, color=TEAL, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+box(ax, CX + <span class="hljs-number">1.9</span>, <span class="hljs-number">2.15</span>, <span class="hljs-number">2.8</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;LayerNorm&quot;</span>, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=TEAL, fs=<span class="hljs-number">8.2</span>)
+<span class="hljs-keyword">for</span> lab, x <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;$W_Q$&quot;</span>, CX + <span class="hljs-number">0.1</span>), (<span class="hljs-string">&quot;$W_K$&quot;</span>, CX + <span class="hljs-number">2.4</span>), (<span class="hljs-string">&quot;$W_V$&quot;</span>, CX + <span class="hljs-number">4.7</span>)]:
+    box(ax, x, <span class="hljs-number">3.45</span>, <span class="hljs-number">1.8</span>, <span class="hljs-number">0.65</span>, lab, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=TEAL, fs=<span class="hljs-number">8.5</span>)
+    arrow(ax, (mid, <span class="hljs-number">2.85</span>), (x + <span class="hljs-number">0.9</span>, <span class="hljs-number">3.45</span>), color=TEAL, rad=-<span class="hljs-number">0.06</span>)
+    up(<span class="hljs-number">4.1</span>, <span class="hljs-number">4.55</span>, color=TEAL, x=x + <span class="hljs-number">0.9</span>)
+box(ax, CX, <span class="hljs-number">4.55</span>, CW, <span class="hljs-number">0.95</span>,
+    <span class="hljs-string">&quot;softmax$\\left(\\frac{QK^\\top}{\\sqrt{d_k}} + M\\right)V$   ·   $h$ đầu song song&quot;</span>,
+    fc=<span class="hljs-string">&quot;white&quot;</span>, ec=TEAL, fs=<span class="hljs-number">8.5</span>)
+box(ax, CX + <span class="hljs-number">1.9</span>, <span class="hljs-number">6.0</span>, <span class="hljs-number">2.8</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;$W_O$&quot;</span>, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=TEAL, fs=<span class="hljs-number">8.5</span>)
+up(<span class="hljs-number">5.5</span>, <span class="hljs-number">6.0</span>, color=TEAL)
+up(<span class="hljs-number">1.1</span>, <span class="hljs-number">2.15</span>, color=DIM)                      <span class="hljs-comment"># x -&gt; LayerNorm</span>
+
+<span class="hljs-comment"># --- cong tat 1</span>
+ax.add_patch(Circle((mid, <span class="hljs-number">8.0</span>), <span class="hljs-number">0.34</span>, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=INK, lw=<span class="hljs-number">1.3</span>, zorder=<span class="hljs-number">5</span>))
+ax.text(mid, <span class="hljs-number">8.0</span>, <span class="hljs-string">&quot;+&quot;</span>, ha=<span class="hljs-string">&quot;center&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">13</span>, color=INK, zorder=<span class="hljs-number">6</span>)
+up(<span class="hljs-number">6.7</span>, <span class="hljs-number">7.66</span>, color=TEAL)
+
+arrow(ax, (mid + <span class="hljs-number">1.9</span>, <span class="hljs-number">0.7</span>), (RES, <span class="hljs-number">0.7</span>), color=DIM, ls=(<span class="hljs-number">0</span>, (<span class="hljs-number">4</span>, <span class="hljs-number">2</span>)))
+arrow(ax, (RES, <span class="hljs-number">0.7</span>), (RES, <span class="hljs-number">8.0</span>), color=DIM, ls=(<span class="hljs-number">0</span>, (<span class="hljs-number">4</span>, <span class="hljs-number">2</span>)))
+arrow(ax, (RES, <span class="hljs-number">8.0</span>), (mid + <span class="hljs-number">0.36</span>, <span class="hljs-number">8.0</span>), color=DIM)
+
+<span class="hljs-comment"># --- khoi con 2 (doc tu duoi len)</span>
+box(ax, CX - <span class="hljs-number">0.45</span>, <span class="hljs-number">9.1</span>, CW + <span class="hljs-number">0.9</span>, <span class="hljs-number">2.9</span>, <span class="hljs-string">&quot;&quot;</span>, fc=AMBER_BG, ec=AMBER, lw=<span class="hljs-number">1.3</span>)
+ax.text(CX - <span class="hljs-number">0.25</span>, <span class="hljs-number">11.75</span>, <span class="hljs-string">&quot;Khối con 2 — biến đổi TỪNG vị trí, độc lập nhau&quot;</span>,
+        fontsize=<span class="hljs-number">8.2</span>, color=AMBER, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+box(ax, CX + <span class="hljs-number">1.9</span>, <span class="hljs-number">9.35</span>, <span class="hljs-number">2.8</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;LayerNorm&quot;</span>, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=AMBER, fs=<span class="hljs-number">8.2</span>)
+box(ax, CX, <span class="hljs-number">10.45</span>, CW, <span class="hljs-number">0.95</span>,
+    <span class="hljs-string">&quot;$W_2\\,\\phi(W_1 x)$   ·   $d_{\\mathrm{ff}} = 4d$   ·   $\\phi$ = ReLU / GELU / SwiGLU&quot;</span>,
+    fc=<span class="hljs-string">&quot;white&quot;</span>, ec=AMBER, fs=<span class="hljs-number">8.2</span>)
+up(<span class="hljs-number">10.05</span>, <span class="hljs-number">10.45</span>, color=AMBER)
+up(<span class="hljs-number">8.34</span>, <span class="hljs-number">9.35</span>, color=DIM)
+
+<span class="hljs-comment"># --- cong tat 2</span>
+ax.add_patch(Circle((mid, <span class="hljs-number">12.6</span>), <span class="hljs-number">0.34</span>, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=INK, lw=<span class="hljs-number">1.3</span>, zorder=<span class="hljs-number">5</span>))
+ax.text(mid, <span class="hljs-number">12.6</span>, <span class="hljs-string">&quot;+&quot;</span>, ha=<span class="hljs-string">&quot;center&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">13</span>, color=INK, zorder=<span class="hljs-number">6</span>)
+up(<span class="hljs-number">11.4</span>, <span class="hljs-number">12.26</span>, color=AMBER)
+arrow(ax, (mid + <span class="hljs-number">1.2</span>, <span class="hljs-number">8.55</span>), (RES, <span class="hljs-number">8.55</span>), color=DIM, ls=(<span class="hljs-number">0</span>, (<span class="hljs-number">4</span>, <span class="hljs-number">2</span>)))
+arrow(ax, (RES, <span class="hljs-number">8.55</span>), (RES, <span class="hljs-number">12.6</span>), color=DIM, ls=(<span class="hljs-number">0</span>, (<span class="hljs-number">4</span>, <span class="hljs-number">2</span>)))
+arrow(ax, (RES, <span class="hljs-number">12.6</span>), (mid + <span class="hljs-number">0.36</span>, <span class="hljs-number">12.6</span>), color=DIM)
+ax.text(RES + <span class="hljs-number">0.2</span>, <span class="hljs-number">6.0</span>, <span class="hljs-string">&quot;kết nối tắt&quot;</span>, fontsize=<span class="hljs-number">7.8</span>, color=DIM, rotation=<span class="hljs-number">90</span>, va=<span class="hljs-string">&quot;center&quot;</span>)
+
+box(ax, CX + <span class="hljs-number">1.5</span>, <span class="hljs-number">12.95</span>, <span class="hljs-number">3.6</span>, <span class="hljs-number">0.55</span>, <span class="hljs-string">&quot;sang khối tiếp theo&quot;</span>, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=DIM, fs=<span class="hljs-number">8.2</span>)
+up(<span class="hljs-number">12.94</span>, <span class="hljs-number">12.95</span>, color=INK)
+
+ax.text(<span class="hljs-number">0.05</span>, <span class="hljs-number">3.6</span>,
+        <span class="hljs-string">&quot;Thứ tự ở đây\nlà pre-LN:\nchuẩn hoá TRƯỚC\nkhối con, nên\nđường tắt đi\nthẳng từ đầu vào\ntới đầu ra mà\nkhông qua phép\nchuẩn hoá nào.&quot;</span>,
+        fontsize=<span class="hljs-number">7.4</span>, color=INK, va=<span class="hljs-string">&quot;center&quot;</span>, linespacing=<span class="hljs-number">1.7</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models11_block.png&quot;</span>); plt.close(fig)
+
+
+<span class="hljs-comment"># ============================ Hình 14 — Transformer 2017 so với Transformer nay</span>
+fig, ax = canvas(<span class="hljs-number">8.6</span>, <span class="hljs-number">4.2</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">12</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">8.0</span>))
+ax.text(<span class="hljs-number">6</span>, <span class="hljs-number">7.7</span>, <span class="hljs-string">&quot;Cùng một bộ khung, năm chi tiết đã đổi&quot;</span>, ha=<span class="hljs-string">&quot;center&quot;</span>,
+        fontsize=<span class="hljs-number">9.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>, color=INK)
+rows = [
+    (<span class="hljs-string">&quot;Vị trí trong khối&quot;</span>, <span class="hljs-string">&quot;Post-LN: $x + \\mathrm{Sublayer}(x)$ rồi mới LN&quot;</span>,
+     <span class="hljs-string">&quot;Pre-LN: LN trước, tắt đi thẳng&quot;</span>, <span class="hljs-string">&quot;huấn luyện ổn định, bỏ được warmup dài&quot;</span>),
+    (<span class="hljs-string">&quot;Chuẩn hoá&quot;</span>, <span class="hljs-string">&quot;LayerNorm (trừ trung bình, chia độ lệch)&quot;</span>,
+     <span class="hljs-string">&quot;RMSNorm (chỉ chia chuẩn bậc hai)&quot;</span>, <span class="hljs-string">&quot;rẻ hơn, gần như không mất chất lượng&quot;</span>),
+    (<span class="hljs-string">&quot;Vị trí token&quot;</span>, <span class="hljs-string">&quot;Sin/cos cộng vào embedding&quot;</span>,
+     <span class="hljs-string">&quot;RoPE: xoay $Q$, $K$ theo vị trí&quot;</span>, <span class="hljs-string">&quot;ngoại suy độ dài tốt hơn, quan hệ tương đối&quot;</span>),
+    (<span class="hljs-string">&quot;Đầu attention&quot;</span>, <span class="hljs-string">&quot;MHA: mỗi đầu một cặp $K$, $V$&quot;</span>,
+     <span class="hljs-string">&quot;GQA/MQA: nhiều đầu dùng chung $K$, $V$&quot;</span>, <span class="hljs-string">&quot;KV cache nhỏ đi theo đúng tỉ lệ nhóm&quot;</span>),
+    (<span class="hljs-string">&quot;Hàm kích hoạt FFN&quot;</span>, <span class="hljs-string">&quot;ReLU, $d_{\\mathrm{ff}} = 4d$&quot;</span>,
+     <span class="hljs-string">&quot;SwiGLU, $d_{\\mathrm{ff}} \\approx \\frac{2}{3}\\cdot 4d$&quot;</span>, <span class="hljs-string">&quot;ba ma trận thay vì hai, bù bằng bề rộng nhỏ hơn&quot;</span>),
+]
+box(ax, <span class="hljs-number">0.2</span>, <span class="hljs-number">6.3</span>, <span class="hljs-number">2.6</span>, <span class="hljs-number">0.85</span>, <span class="hljs-string">&quot;Thành phần&quot;</span>, fc=<span class="hljs-string">&quot;#f4f2ec&quot;</span>, ec=DIM, fs=<span class="hljs-number">8.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+box(ax, <span class="hljs-number">2.9</span>, <span class="hljs-number">6.3</span>, <span class="hljs-number">3.4</span>, <span class="hljs-number">0.85</span>, <span class="hljs-string">&quot;Transformer 2017&quot;</span>, fc=RED_BG, ec=RED, fs=<span class="hljs-number">8.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+box(ax, <span class="hljs-number">6.4</span>, <span class="hljs-number">6.3</span>, <span class="hljs-number">3.4</span>, <span class="hljs-number">0.85</span>, <span class="hljs-string">&quot;Phổ biến hiện nay&quot;</span>, fc=GREEN_BG, ec=GREEN, fs=<span class="hljs-number">8.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+box(ax, <span class="hljs-number">9.9</span>, <span class="hljs-number">6.3</span>, <span class="hljs-number">1.9</span>, <span class="hljs-number">0.85</span>, <span class="hljs-string">&quot;Vì sao đổi&quot;</span>, fc=<span class="hljs-string">&quot;#f4f2ec&quot;</span>, ec=DIM, fs=<span class="hljs-number">8.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+<span class="hljs-keyword">for</span> i, (comp, old, new, why) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(rows):
+    y = <span class="hljs-number">5.1</span> - i * <span class="hljs-number">1.12</span>
+    box(ax, <span class="hljs-number">0.2</span>, y, <span class="hljs-number">2.6</span>, <span class="hljs-number">1.0</span>, comp, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=DIM, fs=<span class="hljs-number">7.8</span>)
+    box(ax, <span class="hljs-number">2.9</span>, y, <span class="hljs-number">3.4</span>, <span class="hljs-number">1.0</span>, old, fc=RED_BG, ec=RED, fs=<span class="hljs-number">7.6</span>)
+    box(ax, <span class="hljs-number">6.4</span>, y, <span class="hljs-number">3.4</span>, <span class="hljs-number">1.0</span>, new, fc=GREEN_BG, ec=GREEN, fs=<span class="hljs-number">7.6</span>)
+    box(ax, <span class="hljs-number">9.9</span>, y, <span class="hljs-number">1.9</span>, <span class="hljs-number">1.0</span>, why, fc=<span class="hljs-string">&quot;white&quot;</span>, ec=DIM, fs=<span class="hljs-number">7.0</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models14_modern.png&quot;</span>); plt.close(fig)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Đã lưu Hình 1, 3, 6, 8, 11 và 14 vào &quot;</span> + OUT)
+</code></pre></div></details></section></div></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="models-thuat-ngu.html"><span class="pager-dir">← Trước</span><span class="pager-title">Từ điển thuật ngữ</span></a><a class="pager-link pager-next" href="models-toan-van.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Toàn văn một trang</span></a></nav>
+</main>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

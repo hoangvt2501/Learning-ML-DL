@@ -1,6 +1,16 @@
 // Trang chủ của site: giới thiệu và mục lục cho mọi giáo trình có trong repo.
 
-const SITE_TITLE = 'Hai giáo trình tự học: Quantization và MLOps';
+// Tiêu đề và câu mở đầu sinh ra từ books.json: thêm một giáo trình thì không phải sửa ở đây.
+const SO_CHU = ['Không', 'Một', 'Hai', 'Ba', 'Bốn', 'Năm', 'Sáu'];
+const demSach = (n) => SO_CHU[n] || String(n);
+
+function lietKe(ten) {
+  if (ten.length === 1) return ten[0];
+  return ten.slice(0, -1).join(', ') + ' và ' + ten[ten.length - 1];
+}
+
+const siteTitle = (books) =>
+  demSach(books.length) + ' giáo trình tự học: ' + lietKe(books.map((b) => b.spec.short));
 
 function bookSection(b, escapeHtml) {
   const spec = b.spec;
@@ -113,8 +123,8 @@ export function buildHomePage(ctx) {
     '<article class="prose home">' +
     '<header class="hero">' +
     '<p class="hero-kicker">Tự học · tiếng Việt · mọi con số đều chạy lại được</p>' +
-    '<h1>' + escapeHtml(SITE_TITLE) + '</h1>' +
-    '<p class="hero-lede">Hai giáo trình viết theo cùng một lối: <b>động cơ → định nghĩa → suy luận → ví dụ số → thí nghiệm kiểm chứng</b>. Mỗi chương có phần tự kiểm tra, mỗi bài tập có lời giải đầy đủ, và mọi khẳng định đều truy được về bài báo gốc hoặc về mã chạy lại được.</p>' +
+    '<h1>' + escapeHtml(siteTitle(books)) + '</h1>' +
+    '<p class="hero-lede">' + demSach(books.length) + ' giáo trình viết theo cùng một lối: <b>động cơ → định nghĩa → suy luận → ví dụ số → thí nghiệm kiểm chứng</b>. Mỗi chương có phần tự kiểm tra, mỗi bài tập có lời giải đầy đủ, và mọi khẳng định đều truy được về bài báo gốc hoặc về mã chạy lại được.</p>' +
     jump +
     '</header>' +
     books.map((b) => bookSection(b, escapeHtml)).join('') +
@@ -123,7 +133,7 @@ export function buildHomePage(ctx) {
   write(
     'index.html',
     page({
-      title: SITE_TITLE,
+      title: siteTitle(books),
       description:
         'Giáo trình tự học bằng tiếng Việt về quantization trong deep learning và về MLOps: lý thuyết, hình sinh bằng mã, bài tập có lời giải và công cụ tương tác.',
       body,

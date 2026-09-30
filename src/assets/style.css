@@ -914,12 +914,15 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
 
 /* --------------------------------------------- bộ chuyển giáo trình */
 .book-switch {
-  display: flex; gap: .25rem; padding: .25rem;
+  display: flex; flex-wrap: wrap; gap: .25rem; padding: .25rem;
   margin: 0 .35rem .35rem; border-radius: var(--radius-sm);
   background: var(--bg-soft); border: 1px solid var(--line);
 }
+/* flex-basis 0 với grow cho các tab chia đều một hàng, nhưng nhãn dài thì
+   xuống hàng nguyên khối thay vì bị ngắt giữa từ. */
 .book-tab {
-  flex: 1; text-align: center; padding: .32rem .5rem; border-radius: 5px;
+  flex: 1 1 auto; min-width: 0; white-space: nowrap;
+  text-align: center; padding: .32rem .5rem; border-radius: 5px;
   font-family: var(--font-ui); font-size: .8rem; font-weight: 500;
   color: var(--text-3); text-decoration: none;
 }

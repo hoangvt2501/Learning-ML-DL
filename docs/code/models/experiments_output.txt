@@ -1,0 +1,159 @@
+
+==========================================================================
+(A) Phan ra thien lech - phuong sai cua da thuc
+==========================================================================
+ bậc   thiên lệch²   phương sai    nhiễu²    tổng MSE
+   1        0.4221       0.0231    0.1225      0.5677
+   2        0.4223       0.0418    0.1225      0.5866
+   3        0.4098       0.0857    0.1225      0.6180
+   4        0.4191       0.1852    0.1225      0.7268
+   5        0.0836       0.0767    0.1225      0.2828  <- nhỏ nhất
+   6        0.1137       0.3914    0.1225      0.6276
+   7        0.0058       0.3415    0.1225      0.4699
+   8        0.0181       0.2455    0.1225      0.3861
+   9        0.0024       1.2645    0.1225      1.3894
+  10        0.0052       6.7742    0.1225      6.9019
+  11        0.0251      25.4582    0.1225     25.6058
+  12        0.0276      52.2156    0.1225     52.3657
+  13        6.2261     871.8100    0.1225    878.1586
+  14       35.1402    7392.2751    0.1225   7427.5379
+
+Bac toi uu = 5; tai do thien lech^2=0.0836, phuong sai=0.0767
+Bac 1  : thien lech^2 = 0.422 (chiem 74% MSE) -> THIEU KHOP
+Bac 14: phuong sai  = 7392.275 (chiem 100% MSE) -> QUA KHOP
+
+==========================================================================
+(B) Bagging va boosting cat vao thanh phan nao
+==========================================================================
+Một cây (sâu 8)      thiên lệch²=0.0031  phương sai=0.1089  tổng=0.1120
+Bagging 100 cây      thiên lệch²=0.0016  phương sai=0.0534  tổng=0.0550
+Boosting 100 gốc     thiên lệch²=0.0032  phương sai=0.0371  tổng=0.0403
+
+Bagging giam phuong sai 2.0 lan, thien lech doi 0.52 lan
+Boosting giam thien lech 1.0 lan, phuong sai doi 0.34 lan
+
+==========================================================================
+(C) Sau mua duoc su gon gang (chung minh kien tao, khong phu thuoc toi uu)
+==========================================================================
+ k lớp sâu  đoạn 2^k  tham số sâu   sai số của mạng MỘT lớp theo bề rộng
+                                            2        4        8       16       32       64      128      256
+         2         4           12     7.9e-02  1.5e-02  1.8e-03  2.9e-04  4.0e-05  5.3e-06  6.8e-07  8.6e-08
+         3         8           18     8.3e-02  8.3e-02  2.6e-02  2.1e-03  3.2e-04  4.2e-05  5.4e-06  6.9e-07
+         4        16           24     8.3e-02  8.3e-02  8.3e-02  3.3e-02  2.2e-03  3.4e-04  4.3e-05  5.5e-06
+         5        32           30     8.3e-02  8.3e-02  8.3e-02  8.3e-02  3.8e-02  2.3e-03  3.4e-04  4.4e-05
+         6        64           36     8.3e-02  8.3e-02  8.3e-02  8.3e-02  8.3e-02  4.0e-02  2.3e-03  3.5e-04
+         7       128           42     8.3e-02  8.3e-02  8.3e-02  8.3e-02  8.3e-02  8.3e-02  4.2e-02  2.4e-03
+
+  k  đoạn 2^k   tham số mạng sâu   bề rộng 1 lớp cần   tham số 1 lớp    gấp
+  2         4                 12                   4              14    1.2x
+  3         8                 18                   8              26    1.4x
+  4        16                 24                  16              50    2.1x
+  5        32                 30                  32              98    3.3x
+  6        64                 36                  64             194    5.4x
+  7       128                 42                 128             386    9.2x
+
+Be rong can thiet dung bang so DOAN TUYEN TINH = 2^k, tuc TANG THEO HAM MU cua do sau,
+trong khi mang sau chi can TUYEN TINH theo k. Day la 'do sau mua duoc su gon gang'.
+
+==========================================================================
+(D) Gradient truyen nguoc qua 40 lop: do bang |dL/da| tung lop
+==========================================================================
+cách dựng lớp                              |∇a| lớp 40       lớp 20        lớp 1    lớp1/lớp40
+gain 0,5 — khởi tạo quá nhỏ                  1.000e+00    1.015e-09    1.233e-18     1.233e-18
+gain √2 — khởi tạo He                        1.000e+00    1.090e+00    1.421e+00     1.421e+00
+gain 2,0 — khởi tạo quá lớn                  1.000e+00    1.116e+03    1.490e+06     1.490e+06
+He + LayerNorm                               1.000e+00    1.081e+00    1.151e+00     1.151e+00
+He + kết nối tắt, KHÔNG chuẩn hoá            1.000e+00    6.829e+03    2.446e+08     2.446e+08
+He + chuẩn hoá + kết nối tắt (pre-LN)        1.000e+00    1.037e+00    2.222e+00     2.222e+00
+
+Doc bang: ti le lop1/lop40 << 1 la TIEU BIEN, >> 1 la BUNG NO, ~1 la on dinh.
+
+==========================================================================
+(E) Vi sao chia cho can d_k
+==========================================================================
+   d_k    Var(q·k)  Var lý thuyết   entropy KHÔNG chia   entropy CÓ chia  max softmax
+     4        3.63              4               2.8920            3.7391       0.2580
+    16       15.99             16               1.3597            3.6854       0.5837
+    64       64.66             64               0.5818            3.6803       0.7913
+   256      251.67            256               0.2746            3.6923       0.8943
+  1024     1021.97           1024               0.1179            3.6847       0.9533
+
+Entropy toi da khi deu tren 64 khoa: ln(64) = 4.1589
+Khong chia: entropy sup ve 0 -> softmax bao hoa -> gradient gan bang 0.
+
+==========================================================================
+(F) Gradient theo thoi gian: RNN so voi LSTM
+==========================================================================
+mô hình                      |∇| sau 10 bước   sau 50 bước   sau 100 bước
+RNN, gain 0,9                      3.182e-01     6.815e-02      3.236e-02
+RNN, gain 1,0                      4.180e-01     1.765e-01      1.089e+00
+RNN, gain 1,2                      6.390e-01     3.780e-01      3.014e+00
+LSTM, bias cổng quên = 1           5.032e-02     8.027e-08      2.972e-15
+LSTM, bias cổng quên = 4           8.305e-01     3.597e-01      1.266e-01
+
+==========================================================================
+(G) RoPE: tich vo huong chi phu thuoc m - n
+==========================================================================
+    m    n   m-n    <R_m q, R_n k>
+    5    2     3          6.851342
+  105  102     3          6.851342
+  500  497     3          6.851342
+    7    4     3          6.851342
+    9    3     6          5.861634
+  109  103     6          5.861634
+
+Cung m-n thi tich vo huong giong nhau: True
+<R_m q, R_0 q>/|q|^2 trung binh: khoang cach 0 -> 1.000; 8 -> 0.708; 64 -> 0.439; 255 -> 0.319
+
+==========================================================================
+(H) Nhiet do, top-k, top-p
+==========================================================================
+Phan phoi goc: entropy 8.223 nat, top-1 0.027, so token phu 90% xac suat: 8362
+
+chiến lược              entropy (nat)    số token phủ 90%     top-1
+gốc (T = 1)                    8.2232                8362    0.0274
+T = 0,7                        5.8857                1215    0.1279
+T = 1,3                        9.3050               16766    0.0082
+top-k = 40                     3.4488                  33    0.1386
+top-p = 0,9                    7.6690                4141    0.0304
+top-p = 0,5                    5.6727                 376    0.0547
+
+==========================================================================
+(I) Dem tham so Transformer, doi chieu GPT-2
+==========================================================================
+mô hình               công thức      đã công bố    lệch   phi-embedding
+GPT-2 small         124,439,808     124,439,808       0      84,934,656
+GPT-2 medium        354,823,168     354,823,168       0     301,989,888
+GPT-2 large         774,030,080     774,030,080       0     707,788,800
+
+GPT-2 small tach nho: embedding 38,597,376 (31.0%), vi tri 786,432, attention 28,348,416, FFN 56,669,184
+Kiem tra 12*L*d^2 = 84,934,656 ; FFN chiem 67% khoi Transformer
+FLOP suy luan moi token ~ 2N = 169,869,312 ; huan luyen ~ 6N = 509,607,936
+
+==========================================================================
+(J) Kien truc kieu Llama: RoPE, RMSNorm, SwiGLU, GQA
+==========================================================================
+mô hình                  công thức        đã công bố    lệch
+Llama-2 7B           6,738,415,616     6,738,415,616       0
+Llama-2 13B         13,015,864,320    13,015,864,320       0
+  d_ff = 11008 so voi 8/3*d = 10923  -> lam tron len boi cua 256
+  Llama-2 7B phi-embedding N = 6,476,005,376
+
+Huan luyen tren 2e+12 token: C = 6ND = 7.7712e+22 FLOP
+  o  30.0% MFU tren A100 (312 TFLOPS bf16):   230,627 gio-GPU
+  o  37.6% MFU tren A100 (312 TFLOPS bf16):   184,011 gio-GPU
+  o  40.0% MFU tren A100 (312 TFLOPS bf16):   172,970 gio-GPU
+  Bao cao cua Llama 2 cho ban 7B: 184.320 gio-GPU
+
+KV cache mo hinh 70B (80 lop, d_head 128), ngu canh 4096, batch 8, FP16:
+  MHA, 64 KV head:   80.00 GiB
+  GQA,  8 KV head:   10.00 GiB   -> giam dung 8 lan
+  moi token moi chuoi voi GQA: 0.3125 MiB
+
+Ti le chi phi attention tren phan con lai = T / (6d):
+  d=  768, T=  1024:    0.22   (phan con lai chi phoi)
+  d= 4096, T=  4096:    0.17   (phan con lai chi phoi)
+  d= 4096, T= 32768:    1.33   (attention chi phoi)
+  d= 4096, T=131072:    5.33   (attention chi phoi)
+
+Da luu 8 hinh vao figs/

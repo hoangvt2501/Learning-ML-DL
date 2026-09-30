@@ -137,7 +137,8 @@ export function page(o) {
   <a class="brand" href="index.html">
     <span class="brand-mark" aria-hidden="true">${o.nav.book ? escapeHtml(o.nav.book.short[0]) : 'G'}</span>
     <span class="brand-text"><b>${o.nav.book ? escapeHtml(o.nav.book.short) : 'Giáo trình'}</b><i>${
-      o.nav.book ? 'giáo trình tự học' : 'Quantization · MLOps'}</i></span>
+      o.nav.book ? 'giáo trình tự học'
+        : escapeHtml((o.nav.books || []).map((b) => b.short).join(' · '))}</i></span>
   </a>
   <button class="search-btn" id="searchBtn" type="button">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>

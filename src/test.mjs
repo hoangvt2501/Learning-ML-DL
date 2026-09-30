@@ -276,5 +276,103 @@ check('Bài 6: min(2; 0; 4; 0) = 0', M.mtsScore([2, 0, 4, 0]), 0);
 check('hạ tầng hoàn hảo mà không giám sát vẫn bằng 0', M.mtsScore([7, 7, 7, 0]), 0);
 check('bốn nhóm cân nhau thì điểm bằng chính mức đó', M.mtsScore([3, 3, 3, 3]), 3);
 
+// ---------------------------------------------------------------------------
+// Giáo trình 3 — các công thức đếm ở Chương 12.
+// Đây là những khẳng định kiểm chứng được: chúng phải khớp với số đã công bố.
+// ---------------------------------------------------------------------------
+
+// Tham số của một Transformer kiểu GPT-2: post-LN, học embedding vị trí,
+// FFN hai ma trận với d_ff = 4d, lớp ra dùng chung trọng số với embedding.
+function gpt2Params(nLayer, d, vocab, nCtx) {
+  const attn = nLayer * 4 * d * d + nLayer * 4 * d;        // W_Q,K,V,O và độ lệch
+  const ffn = nLayer * 8 * d * d + nLayer * 5 * d;         // hai ma trận và độ lệch
+  const norms = nLayer * 4 * d + 2 * d;                    // hai LayerNorm mỗi lớp, một cuối
+  const emb = vocab * d + nCtx * d;
+  return { nonEmb: nLayer * 12 * d * d, total: attn + ffn + norms + emb };
+}
+
+// Tham số của một Transformer kiểu Llama: RoPE (không có embedding vị trí),
+// RMSNorm (chỉ γ), không độ lệch, FFN SwiGLU ba ma trận, lớp ra riêng.
+function llamaParams(nLayer, d, dFF, vocab, nKV, nHeads) {
+  const dHead = d / nHeads;
+  const attn = nLayer * (2 * d * d + 2 * d * nKV * dHead);
+  const ffn = nLayer * 3 * d * dFF;
+  const norms = nLayer * 2 * d + d;
+  return { nonEmb: attn + ffn, total: attn + ffn + norms + 2 * vocab * d };
+}
+
+group('Mô hình Mục 12.2–12.3 — đếm tham số khớp số đã công bố');
+const g2s = gpt2Params(12, 768, 50257, 1024);
+check('GPT-2 small = 124.439.808 tham số', g2s.total, 124439808);
+check('GPT-2 small phi-embedding = 12·12·768² = 84.934.656', g2s.nonEmb, 84934656);
+check('embedding từ vựng chiếm 31,0% GPT-2 small', 50257 * 768 / g2s.total, 0.310, 5e-4);
+check('kể thêm embedding vị trí thì thành 31,6%',
+  (50257 * 768 + 1024 * 768) / g2s.total, 0.3165, 5e-4);
+check('GPT-2 medium = 354.823.168 tham số', gpt2Params(24, 1024, 50257, 1024).total, 354823168);
+check('GPT-2 large = 774.030.080 tham số', gpt2Params(36, 1280, 50257, 1024).total, 774030080);
+check('công thức 12Ld² cho GPT-2 large', gpt2Params(36, 1280, 50257, 1024).nonEmb,
+  12 * 36 * 1280 * 1280);
+check('FFN chiếm 2/3 khối khi d_ff = 4d', 8 / 12, 2 / 3, 1e-12);
+
+group('Mô hình Mục 12.3 — kiến trúc kiểu Llama');
+const l7 = llamaParams(32, 4096, 11008, 32000, 32, 32);
+const l13 = llamaParams(40, 5120, 13824, 32000, 40, 40);
+check('Llama-2 7B = 6.738.415.616 tham số', l7.total, 6738415616);
+check('Llama-2 13B = 13.015.864.320 tham số', l13.total, 13015864320);
+check('Llama-2 7B phi-embedding = 6.476.005.376', l7.nonEmb, 6476005376);
+check('Bài 1: FFN SwiGLU của 7B = 4.328.521.728', 32 * 3 * 4096 * 11008, 4328521728);
+check('d_ff của 7B là 8/3·d làm tròn lên bội 256',
+  Math.ceil((8 / 3) * 4096 / 256) * 256, 11008);
+check('SwiGLU giảm bề rộng còn 2/3 để khớp tham số', (2 / 3) * 4 * 4096, 10922.67, 0.01);
+
+group('Mô hình Mục 12.4 — quy tắc 6ND và ngân sách giờ-GPU');
+const C7 = 6 * l7.nonEmb * 2e12;
+check('C = 6ND = 7,7712e22 FLOP', C7 / 1e22, 7.7712, 1e-4);
+check('lượt xuôi 2N, lượt ngược 4N, tổng 6N', 2 + 4, 6);
+const hours = C7 / (312e12 * 0.376) / 3600;
+check('ở 37,6% MFU cho 184.011 giờ-GPU', hours, 184011, 1);
+check('lệch dưới 0,2% so với 184.320 giờ đã công bố',
+  Math.abs(hours - 184320) / 184320 < 0.002, true);
+
+group('Mô hình Mục 12.5 — KV cache và ngưỡng T > 6d');
+const kvBytes = (L, nKV, dHead, T, B) => 2 * L * nKV * dHead * T * B * 2;
+const mha = kvBytes(80, 64, 128, 4096, 8);
+const gqa = kvBytes(80, 8, 128, 4096, 8);
+check('Bài 8: MHA cần 80,00 GiB', mha / 2 ** 30, 80, 1e-9);
+check('Bài 8: GQA 8 nhóm cần 10,00 GiB', gqa / 2 ** 30, 10, 1e-9);
+check('GQA giảm đúng bằng tỉ lệ nhóm: 8 lần', mha / gqa, 8, 1e-12);
+check('mỗi token mỗi chuỗi với GQA là 0,3125 MiB', kvBytes(80, 8, 128, 1, 1) / 2 ** 20, 0.3125, 1e-12);
+check('trạng thái Adam cho 7B ở FP32 là 56 GB', 7e9 * 2 * 4 / 1e9, 56, 1e-9);
+check('ngưỡng attention chi phối với d=4096 là 24.576 token', 6 * 4096, 24576);
+check('ở T=4096, d=4096 attention chỉ chiếm 17%', 4096 / (6 * 4096), 0.1667, 1e-4);
+check('ở T=131072, d=4096 attention chi phối', 131072 / (6 * 4096) > 1, true);
+
+group('Mô hình Chương 2–9 — các con số suy ra được');
+check('Var(q·k) = d_k khi các thành phần có phương sai 1', 1024, 1024);
+check('entropy tối đa trên 64 khoá là ln 64 = 4,1589', Math.log(64), 4.1589, 1e-4);
+check('Bài 4a: 112 lớp 3×3 để phủ 224 (r = 2L+1)', Math.ceil((224 - 1) / 2), 112);
+check('Bài 4b: 10 lớp có bước nhảy xen kẽ cho r = 125', (() => {
+  let r = 1, P = 1;
+  const s = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2];
+  for (const si of s) { r += 2 * P; P *= si; }
+  return r;
+})(), 125);
+check('Bài 7a: RNN ρ=0,9 sau 100 bước còn 2,66e-5', Math.pow(0.9, 100), 2.656e-5, 1e-8);
+check('Bài 7a: RNN ρ=1,1 sau 100 bước thành 1,38e4', Math.pow(1.1, 100), 1.378e4, 10);
+const sigmoid = (z) => 1 / (1 + Math.exp(-z));
+check('σ(1) = 0,7311', sigmoid(1), 0.7311, 1e-4);
+check('σ(4) = 0,9820', sigmoid(4), 0.9820, 1e-4);
+check('Bài 7b: LSTM độ lệch cổng quên 1 -> sau 100 bước còn 2,48e-14',
+  Math.pow(sigmoid(1), 100), 2.484e-14, 1e-17);
+check('Bài 7b: LSTM độ lệch cổng quên 4 -> sau 100 bước còn 0,163',
+  Math.pow(sigmoid(4), 100), 0.1628, 1e-4);
+check('chênh gần 13 bậc độ lớn chỉ do một giá trị khởi tạo',
+  Math.log10(Math.pow(sigmoid(4), 100) / Math.pow(sigmoid(1), 100)), 12.82, 0.01);
+check('Bài 6: bề rộng cần cho sóng răng cưa 2^7 là 128', Math.pow(2, 7), 128);
+check('Bài 6: mạng sâu k=7 dùng 6k=42 tham số so với 3·2^7+2=386',
+  (3 * 128 + 2) / 42, 9.2, 0.05);
+check('bagging: phương sai trung bình dừng ở ρσ² khi B→∞',
+  0.3 * 1 + (1 - 0.3) / 1e9, 0.3, 1e-8);
+
 console.log('\n' + (fail === 0 ? 'Tất cả ' + pass + ' phép kiểm tra đều đạt.' : pass + ' đạt, ' + fail + ' HỎNG.'));
 process.exit(fail === 0 ? 0 : 1);

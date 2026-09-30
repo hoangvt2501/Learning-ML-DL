@@ -1,0 +1,105 @@
+[
+  {
+    "num": "0",
+    "file": "models-ch00.html",
+    "label": "Kiến thức nền và quy ước",
+    "summary": "Bảng ký hiệu dùng xuyên suốt và quy ước dịch thuật — trong đó chỗ dễ nhầm nhất là hai nghĩa khác nhau của chữ bias."
+  },
+  {
+    "num": "1",
+    "file": "models-ch01.html",
+    "label": "Bản đồ các họ mô hình",
+    "summary": "Bốn câu hỏi thiết kế mà mọi kiến trúc đều phải trả lời, và bốn họ mô hình đọc như bốn bộ câu trả lời khác nhau cho cùng bốn câu hỏi ấy."
+  },
+  {
+    "num": "2",
+    "file": "models-ch02.html",
+    "label": "Đánh đổi thiên lệch – phương sai",
+    "summary": "Phân rã sai số thành thiên lệch², phương sai và nhiễu — đo thật trên 400 tập huấn luyện — rồi dùng nó để phân biệt \"cần mô hình mạnh hơn\" với \"cần nhiều dữ liệu hơn\"."
+  },
+  {
+    "num": "3",
+    "file": "models-ch03.html",
+    "label": "Cây quyết định và học tập hợp",
+    "summary": "Cây chia không gian bằng các nhát cắt trực giao; bagging cắt phương sai, boosting cắt thiên lệch. Có số đo cho thấy đúng mỗi cách cắt vào đâu."
+  },
+  {
+    "num": "4",
+    "file": "models-ch04.html",
+    "label": "Mạng nơ-ron nhiều lớp",
+    "summary": "Vì sao hợp các phép biến đổi tuyến tính không được gì, các hàm kích hoạt thay nhau vì lý do gì, và một chứng minh kiến tạo cho câu \"độ sâu mua được sự gọn gàng\"."
+  },
+  {
+    "num": "5",
+    "file": "models-ch05.html",
+    "label": "Lan truyền ngược và tối ưu hoá",
+    "summary": "Lan truyền ngược là quy tắc chuỗi nhân từ phải sang trái, và lý do của thứ tự ấy là chi phí. Kèm SGD, momentum, Adam, AdamW và lý do có bước hiệu chỉnh thiên lệch."
+  },
+  {
+    "num": "6",
+    "file": "models-ch06.html",
+    "label": "Khởi tạo, chuẩn hoá và kết nối tắt",
+    "summary": "Ba cơ chế cùng chữa một bệnh: tín hiệu co lại hoặc phình ra qua nhiều lớp. Đo trên mạng 40 lớp cho thấy chúng cộng dồn, và kết nối tắt một mình thì làm bùng nổ."
+  },
+  {
+    "num": "7",
+    "file": "models-ch07.html",
+    "label": "Mạng tích chập",
+    "summary": "Ba giả thiết quy nạp của tích chập và ba món lợi tương ứng; cách tính trường tiếp nhận; vì sao tích chập tách được theo chiều sâu lại rẻ tới vậy."
+  },
+  {
+    "num": "8",
+    "file": "models-ch08.html",
+    "label": "Mạng hồi quy và giới hạn của nó",
+    "summary": "Gradient của RNN là một tích các Jacobi, nên nó tiêu biến hoặc bùng nổ. LSTM chữa được phần nào, nhưng giới hạn thật sự là tính tuần tự — và đó là điều Transformer phá bỏ."
+  },
+  {
+    "num": "9",
+    "file": "models-ch09.html",
+    "label": "Attention và Transformer",
+    "summary": "Attention như một phép tra cứu từ điển lấy đạo hàm được, phép chia √dₖ được suy ra và đo bằng entropy, nhiều đầu mua được gì, và bên trong một khối có những gì."
+  },
+  {
+    "num": "10",
+    "file": "models-ch10.html",
+    "label": "Transformer hiện đại",
+    "summary": "Năm chi tiết đã đổi từ 2017 tới nay: pre-LN, RMSNorm, RoPE, GQA và SwiGLU — mỗi cái kèm vấn đề nó sinh ra để chữa và cái giá phải trả."
+  },
+  {
+    "num": "11",
+    "file": "models-ch11.html",
+    "label": "Sinh văn bản: các chiến lược giải mã",
+    "summary": "Greedy, beam, nhiệt độ, top-k và top-p nhào nặn cùng một phân phối theo những cách khác nhau — đo bằng entropy và bằng số token còn sống sót."
+  },
+  {
+    "num": "12",
+    "file": "models-ch12.html",
+    "label": "Đếm tham số, FLOP và bộ nhớ",
+    "summary": "Các công thức 12Ld², C ≈ 6ND và ngưỡng T > 6d, kiểm chứng khớp chính xác với số tham số công bố của GPT-2 và Llama-2 cùng ngân sách giờ-GPU của Llama-2 7B."
+  },
+  {
+    "num": "13",
+    "file": "models-bai-tap.html",
+    "label": "Bài tập",
+    "summary": "Mười bài tập kèm lời giải chi tiết, và ngân hàng trắc nghiệm theo từng chương.",
+    "kind": "exercises"
+  },
+  {
+    "num": "14",
+    "file": "models-ch14.html",
+    "label": "Ôn phỏng vấn",
+    "summary": "Khung trả lời ba bước cho mọi câu \"vì sao X\", các câu hỏi thường gặp theo bốn nhóm kèm con số để dẫn ra, và mười câu trả lời tự tố cáo người nói chỉ học thuộc."
+  },
+  {
+    "num": "15",
+    "file": "models-ch15.html",
+    "label": "Tài liệu tham khảo",
+    "summary": "Ba mươi bốn nguồn, mỗi nguồn kèm ghi chú nó là nguồn gốc của kết quả nào được dùng trong tài liệu."
+  },
+  {
+    "num": "PL",
+    "file": "models-phu-luc.html",
+    "label": "Phụ lục: chạy lại thí nghiệm",
+    "summary": "Cây thư mục mã nguồn, các lệnh để tái lập toàn bộ hình vẽ cùng số liệu, và ranh giới giữa phần mô phỏng và phần đối chiếu với số đã công bố."
+  }
+]

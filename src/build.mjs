@@ -337,7 +337,7 @@ const pages = fs.readdirSync(OUT).filter((x) => x.endsWith('.html')).length;
 console.log(
   'Đã dựng ' + pages + ' trang HTML cho ' + built.length + ' giáo trình:\n' +
   built.map((b) =>
-    '  · ' + b.spec.short.padEnd(14) + b.chapters.length + ' chương, ' +
+    '  · ' + (b.spec.short + '  ').padEnd(22) + b.chapters.length + ' chương, ' +
     b.figures + ' hình, ' + b.sections + ' mục tra cứu, ' + b.quizCount + ' câu trắc nghiệm'
   ).join('\n') +
   '\n  → ' + searchIndex.length + ' bản ghi tìm kiếm.'

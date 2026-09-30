@@ -1,0 +1,12 @@
+[
+  {
+    "file": "experiments.py",
+    "added": true,
+    "note": "Sinh Hình 2, 4, 5, 7, 9, 10, 13, 14 cùng mọi số liệu đo được của giáo trình: phân rã thiên lệch–phương sai trên 400 tập huấn luyện, bagging so với boosting, chứng minh kiến tạo cho độ sâu bằng hàm lều, gradient qua 40 lớp với năm cách dựng lớp, RNN so với LSTM theo thời gian, phương sai tích vô hướng và entropy softmax, tính chất tương đối của RoPE, các chiến lược giải mã, và đếm tham số khớp chính xác với GPT-2 cùng Llama-2."
+  },
+  {
+    "file": "fig_diagrams.py",
+    "added": true,
+    "note": "Sinh Hình 1, 3, 6, 8, 11, 12: bản đồ bốn họ mô hình, một cây quyết định và vùng nó chia, đồ thị tính toán của lan truyền ngược, trường tiếp nhận của CNN, cấu trúc một khối Transformer đọc từ dưới lên, và bảng so sánh 2017 với kiến trúc hiện nay. Đây là hình vẽ tay bằng matplotlib, để trong mã nguồn cho sửa được và cho khớp với chữ trong bài."
+  }
+]

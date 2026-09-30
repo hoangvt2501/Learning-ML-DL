@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1. Bản đồ các họ mô hình — Mô hình và kiến trúc: từ hồi quy tuyến tính tới Transformer</title>
+<meta name="description" content="Bốn câu hỏi thiết kế mà mọi kiến trúc đều phải trả lời, và bốn họ mô hình đọc như bốn bộ câu trả lời khác nhau cho cùng bốn câu hỏi ấy.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-text"><b>Mô hình &amp; Kiến trúc</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a><span class="book-tab is-active" aria-current="true">Mô hình &amp; Kiến trúc</span></div><p class="nav-group">Giáo trình 3 · Mô hình &amp; Kiến trúc</p><ul class="nav-list"><li><a href="models-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="models-ch01.html" class="is-active" aria-current="page"><span class="nav-num">1</span><span class="nav-label">Bản đồ các họ mô hình</span></a></li><li><a href="models-ch02.html"><span class="nav-num">2</span><span class="nav-label">Đánh đổi thiên lệch – phương sai</span></a></li><li><a href="models-ch03.html"><span class="nav-num">3</span><span class="nav-label">Cây quyết định và học tập hợp</span></a></li><li><a href="models-ch04.html"><span class="nav-num">4</span><span class="nav-label">Mạng nơ-ron nhiều lớp</span></a></li><li><a href="models-ch05.html"><span class="nav-num">5</span><span class="nav-label">Lan truyền ngược và tối ưu hoá</span></a></li><li><a href="models-ch06.html"><span class="nav-num">6</span><span class="nav-label">Khởi tạo, chuẩn hoá và kết nối tắt</span></a></li><li><a href="models-ch07.html"><span class="nav-num">7</span><span class="nav-label">Mạng tích chập</span></a></li><li><a href="models-ch08.html"><span class="nav-num">8</span><span class="nav-label">Mạng hồi quy và giới hạn của nó</span></a></li><li><a href="models-ch09.html"><span class="nav-num">9</span><span class="nav-label">Attention và Transformer</span></a></li><li><a href="models-ch10.html"><span class="nav-num">10</span><span class="nav-label">Transformer hiện đại</span></a></li><li><a href="models-ch11.html"><span class="nav-num">11</span><span class="nav-label">Sinh văn bản: các chiến lược giải mã</span></a></li><li><a href="models-ch12.html"><span class="nav-num">12</span><span class="nav-label">Đếm tham số, FLOP và bộ nhớ</span></a></li><li><a href="models-bai-tap.html"><span class="nav-num">13</span><span class="nav-label">Bài tập</span></a></li><li><a href="models-ch14.html"><span class="nav-num">14</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="models-ch15.html"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="models-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="models-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="models-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="models-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="models-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 1</span><span class="kicker-time">4 phút đọc</span></div><h2 id="sec-1" class="heading">1. Bản đồ các họ mô hình<a class="anchor" href="#sec-1" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Bốn câu hỏi thiết kế mà mọi kiến trúc đều phải trả lời, và bốn họ mô hình đọc như bốn bộ câu trả lời khác nhau cho cùng bốn câu hỏi ấy.</p>
+<h3 id="sec-1-1" class="heading">1.1. Vì sao cần một bản đồ<a class="anchor" href="#sec-1-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Học máy có hàng trăm thuật toán. Nhưng chúng chỉ trả lời <strong>bốn câu hỏi thiết kế</strong>, và mọi thuật toán là một bộ câu trả lời cụ thể:</p>
+<ol>
+<li><strong>Giả thiết gì về dạng của hàm cần học?</strong> Tuyến tính? Bậc thang theo từng trục? Hợp thành nhiều tầng?</li>
+<li><strong>Tham số hoá thế nào?</strong> Cố định số tham số, hay để số tham số lớn dần theo dữ liệu?</li>
+<li><strong>Tối ưu bằng cách nào?</strong> Có nghiệm đóng? Tìm tham lam? Xuống dốc?</li>
+<li><strong>Chống quá khớp bằng gì?</strong> Phạt chuẩn? Cắt tỉa? Lấy trung bình nhiều mô hình? Dừng sớm?</li>
+</ol>
+<p>Trả lời được bốn câu này cho một mô hình là hiểu mô hình ấy. Phần còn lại là chi tiết cài đặt.</p>
+<figure class="figure" id="hinh-1">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 1"><img src="figs/models01_families.png" alt="Hình 1" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 1.</strong> Bốn họ lớn và vị trí của chúng trên cùng một trục. Càng sang phải, mô hình càng ít giả thiết về dạng hàm — nên càng linh hoạt, nhưng càng cần nhiều dữ liệu và càng khó diễn giải.</figcaption>
+</figure>
+<h3 id="sec-1-2" class="heading">1.2. Bốn họ, bốn bộ câu trả lời<a class="anchor" href="#sec-1-2" aria-label="Liên kết tới mục này">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Mô hình tuyến tính</th>
+<th>Cây và tập hợp</th>
+<th>Mạng nơ-ron</th>
+<th>Transformer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Giả thiết dạng hàm</strong></td>
+<td>tổ hợp tuyến tính của đặc trưng</td>
+<td>hằng số trên các hộp chữ nhật song song trục</td>
+<td>hợp thành nhiều tầng biến đổi affine + phi tuyến</td>
+<td>như mạng nơ-ron, cộng thêm <strong>quan hệ cặp giữa các vị trí</strong></td>
+</tr>
+<tr>
+<td><strong>Số tham số</strong></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">d + 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>, cố định</td>
+<td>lớn dần theo dữ liệu (phi tham số)</td>
+<td>rất nhiều, cố định trước</td>
+<td>rất nhiều, cố định trước</td>
+</tr>
+<tr>
+<td><strong>Tối ưu</strong></td>
+<td>nghiệm đóng hoặc lồi</td>
+<td>tham lam theo từng nhát cắt</td>
+<td>xuống dốc + lan truyền ngược</td>
+<td>như mạng nơ-ron</td>
+</tr>
+<tr>
+<td><strong>Chống quá khớp</strong></td>
+<td>phạt <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">ℓ</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\ell_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord">ℓ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">ℓ</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\ell_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord">ℓ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></td>
+<td>giới hạn độ sâu, cắt tỉa, lấy trung bình</td>
+<td>dừng sớm, dropout, phạt chuẩn, tăng cường dữ liệu</td>
+<td>như mạng nơ-ron</td>
+</tr>
+<tr>
+<td><strong>Mạnh nhất khi</strong></td>
+<td>dữ liệu ít, cần giải thích, quan hệ gần tuyến tính</td>
+<td>dữ liệu <strong>bảng</strong>, đặc trưng lẫn số và hạng mục, thang đo khác nhau</td>
+<td>dữ liệu <strong>thô có cấu trúc</strong>: ảnh, âm thanh, văn bản</td>
+<td>chuỗi dài, quan hệ xa, mọi phương thức dữ liệu</td>
+</tr>
+<tr>
+<td><strong>Yếu nhất khi</strong></td>
+<td>quan hệ phi tuyến</td>
+<td>phải ngoại suy ra ngoài miền dữ liệu; dữ liệu thô</td>
+<td>dữ liệu ít; dữ liệu bảng thuần</td>
+<td>chuỗi rất dài (chi phí bậc hai)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Một điểm hay bị bỏ qua và rất đáng nhớ: <strong>trên dữ liệu bảng, cây tăng cường gradient vẫn thường thắng mạng nơ-ron sâu.</strong> Đây không phải nghịch lý. Dữ liệu bảng có đặc trưng đã được con người thiết kế, thang đo lệch nhau, nhiều biến hạng mục và quan hệ dạng bậc thang — đúng loại cấu trúc mà nhát cắt song song trục mô tả tự nhiên, còn phép biến đổi affine thì không.</p>
+<h3 id="sec-1-3" class="heading">1.3. Cái gì thực sự quyết định<a class="anchor" href="#sec-1-3" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Với cùng một bài toán, thứ tự ảnh hưởng tới kết quả thường là:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mrow><mtext>ch</mtext><mover accent="true"><mover accent="true"><mtext>a</mtext><mo>ˆ</mo></mover><mo>ˊ</mo></mover><mtext>t lượng dữ liệu v</mtext><mover accent="true"><mtext>a</mtext><mo>ˋ</mo></mover><mtext> nh</mtext><mover accent="true"><mtext>a</mtext><mo>˜</mo></mover><mtext>n</mtext></mrow><mtext>  </mtext><mo>&gt;</mo><mtext>  </mtext><mtext>đặc trưng</mtext><mtext>  </mtext><mo>&gt;</mo><mtext>  </mtext><mrow><mtext>họ m</mtext><mover accent="true"><mtext>o</mtext><mo>ˆ</mo></mover><mtext> h</mtext><mover accent="true"><mtext>ı</mtext><mo>ˋ</mo></mover><mtext>nh</mtext></mrow><mtext>  </mtext><mo>&gt;</mo><mtext>  </mtext><mrow><mtext>si</mtext><mover accent="true"><mtext>e</mtext><mo>ˆ</mo></mover><mtext>u tham s</mtext><mover accent="true"><mover accent="true"><mtext>o</mtext><mo>ˆ</mo></mover><mo>ˊ</mo></mover></mrow><mtext>  </mtext><mo>&gt;</mo><mtext>  </mtext><mrow><mtext>ki</mtext><mover accent="true"><mover accent="true"><mtext>e</mtext><mo>ˆ</mo></mover><mo>ˊ</mo></mover><mtext>n tr</mtext><mover accent="true"><mtext>u</mtext><mo>ˊ</mo></mover><mtext>c chi ti</mtext><mover accent="true"><mover accent="true"><mtext>e</mtext><mo>ˆ</mo></mover><mo>ˊ</mo></mover><mtext>t</mtext></mrow><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">\text{chất lượng dữ liệu và nhãn} \;&gt;\; \text{đặc trưng} \;&gt;\; \text{họ mô hình} \;&gt;\; \text{siêu tham số} \;&gt;\; \text{kiến trúc chi tiết}.
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1523em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">ch</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">a</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˆ</span></span></span></span></span></span></span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˊ</span></span></span></span></span></span></span><span class="mord">t l</span><span class="mord latin_fallback">ư</span><span class="mord">ợng dữ liệu v</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">a</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˋ</span></span></span></span></span></span></span><span class="mord"> nh</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6679em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">a</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">˜</span></span></span></span></span></span></span><span class="mord">n</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord latin_fallback">đ</span><span class="mord">ặc tr</span><span class="mord latin_fallback">ư</span><span class="mord">ng</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7335em;vertical-align:-0.0391em;"></span><span class="mord text"><span class="mord">họ m</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">o</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˆ</span></span></span></span></span></span></span><span class="mord"> h</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord latin_fallback">ı</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˋ</span></span></span></span></span></span></span><span class="mord">nh</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.997em;vertical-align:-0.0391em;"></span><span class="mord text"><span class="mord">si</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">e</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˆ</span></span></span></span></span></span></span><span class="mord">u tham s</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">o</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˆ</span></span></span></span></span></span></span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˊ</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9579em;"></span><span class="mord text"><span class="mord">ki</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">e</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˆ</span></span></span></span></span></span></span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˊ</span></span></span></span></span></span></span><span class="mord">n tr</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">u</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˊ</span></span></span></span></span></span></span><span class="mord">c chi ti</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">e</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˆ</span></span></span></span></span></span></span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˊ</span></span></span></span></span></span></span><span class="mord">t</span></span><span class="mord">.</span></span></span></span></span></p>
+<p>Tài liệu này nói về ba mức sau, nhưng nói trước điều ấy để bạn đặt chúng đúng chỗ. Hai giáo trình còn lại trong repo lo hai mức đầu (MLOps) và mức triển khai (Quantization).</p>
+<hr>
+</article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="models-ch00.html"><span class="pager-dir">← Trước</span><span class="pager-title">Kiến thức nền và quy ước</span></a><a class="pager-link pager-next" href="models-ch02.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Đánh đổi thiên lệch – phương sai</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-1-1">1.1. Vì sao cần một bản đồ</a></li><li class="toc-l3"><a href="#sec-1-2">1.2. Bốn họ, bốn bộ câu trả lời</a></li><li class="toc-l3"><a href="#sec-1-3">1.3. Cái gì thực sự quyết định</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>
