@@ -11,12 +11,12 @@
     "solutions": "content/nentang-loi-giai.md",
     "code": "nentang",
     "figures": true,
-    "blurb": "Từ đại số tuyến tính tới SVM: phần đứng trước mọi thứ còn lại. Mười đẳng thức được kiểm chứng tới sai số máy, trong đó ridge đúng bằng MAP với tiên nghiệm Gauss.",
+    "blurb": "Đại số tuyến tính, xác suất và các thuật toán học máy cổ điển: hồi quy, phân loại, đánh giá mô hình, regularization, MLE và MAP, tối ưu lồi, SVM, PCA, K-means và hệ thống gợi ý. Mỗi khái niệm có định nghĩa, ví dụ tính tay và thí nghiệm kiểm chứng.",
     "paths": [
       {
-        "tag": "Lần đầu học máy",
-        "title": "Đi từ số không",
-        "note": "Năm chương đầu cho bạn khung tư duy và đủ toán để đọc tiếp, không ôn thừa.",
+        "tag": "Mới bắt đầu",
+        "title": "Từ khái niệm tới mô hình đầu tiên",
+        "note": "Tổng quan, phần toán cần thiết, rồi hồi quy tuyến tính và gradient descent.",
         "steps": [
           "1",
           "2",
@@ -26,9 +26,9 @@
         ]
       },
       {
-        "tag": "Sắp đi phỏng vấn",
-        "title": "Lối đi ngắn nhất tới câu trả lời chắc",
-        "note": "Năm chương bị hỏi nhiều nhất, rồi vào thẳng phần ôn phỏng vấn.",
+        "tag": "Chuẩn bị phỏng vấn",
+        "title": "Các chủ đề được hỏi nhiều nhất",
+        "note": "Hồi quy, phân loại tuyến tính, đánh giá mô hình, regularization và MLE/MAP, sau đó là chương câu hỏi phỏng vấn.",
         "steps": [
           "4",
           "6",
@@ -39,9 +39,9 @@
         ]
       },
       {
-        "tag": "Muốn hiểu SVM cho tới nơi",
-        "title": "Từ tập lồi tới thủ thuật nhân",
-        "note": "SVM không học thuộc được; phải đi qua đối ngẫu Lagrange và KKT mới thấy vector hỗ trợ từ đâu ra.",
+        "tag": "Tối ưu và SVM",
+        "title": "Từ tính lồi tới kernel",
+        "note": "Tính lồi, đối ngẫu Lagrange và điều kiện KKT là nền để hiểu vector hỗ trợ và kernel.",
         "steps": [
           "6",
           "11",
@@ -50,9 +50,9 @@
         ]
       },
       {
-        "tag": "Làm việc với dữ liệu không nhãn",
+        "tag": "Dữ liệu không nhãn",
         "title": "Giảm chiều, phân cụm, gợi ý",
-        "note": "Ba chương cuối, kèm những chỗ mà mỗi phương pháp âm thầm hỏng.",
+        "note": "PCA và LDA, K-means, phân rã ma trận, cùng những giả định mà mỗi phương pháp dựa vào.",
         "steps": [
           "14",
           "15",
@@ -62,7 +62,7 @@
     ],
     "codeDir": "code/nentang",
     "scripts": "content/scripts-nentang.json",
-    "figuresNote": "Mười ba hình đều do mã nguồn trong code/nentang/ sinh ra. Mười kết quả trong đó là kiểm chứng một đẳng thức chứ không phải mô phỏng — Phụ lục liệt kê đủ kèm sai số thật của từng cái.",
+    "figuresNote": "Mười ba hình đều do mã nguồn trong code/nentang/ sinh ra. Mười kết quả là kiểm chứng một đẳng thức chứ không phải mô phỏng; Phụ lục liệt kê đủ kèm sai số đo được của từng kết quả.",
     "drills": false,
     "lab": "nentang"
   },
@@ -70,7 +70,7 @@
     "id": "models",
     "slug": "models-",
     "kicker": "Giáo trình 2",
-    "short": "Mô hình & Kiến trúc",
+    "short": "Học sâu",
     "source": "content/models.md",
     "chapters": "content/models-chapters.json",
     "quiz": "content/models-trac-nghiem.md",

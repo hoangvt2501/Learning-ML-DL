@@ -1,3 +1,4 @@
+import { icon } from '../icons.mjs';
 // Trang chủ của site: giới thiệu và mục lục cho mọi giáo trình có trong repo.
 
 // Tiêu đề và câu mở đầu sinh ra từ books.json: thêm một giáo trình thì không phải sửa ở đây.
@@ -62,7 +63,7 @@ function bookSection(b, escapeHtml) {
 
   const tools = b.nav.extras
     .map((e) =>
-      '<a class="tool-pill" href="' + e.file + '"><span aria-hidden="true">' + e.icon + '</span>' +
+      '<a class="tool-pill" href="' + e.file + '">' + (e.icon ? icon(e.icon) : '') +
       escapeHtml(e.label) + '</a>')
     .join('');
 
@@ -105,7 +106,7 @@ export function buildHomePage(ctx) {
         .map((e) => ({ ...e, label: e.label + ' · ' + b.spec.short }))
         .concat([{
           file: b.spec.slug + 'bai-tap.html',
-          icon: '✎',
+          icon: 'bai-tap',
           label: 'Bài tập · ' + b.spec.short,
         }])),
   };

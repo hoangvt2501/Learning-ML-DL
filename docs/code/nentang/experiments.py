@@ -97,12 +97,12 @@ rhos = [a[0] for a in Arows]
 ax[0].plot(rhos, [a[1] for a in Arows], "-o", ms=5, color=C_BAD)
 ax[0].set_yscale("log"); ax[0].set_xlabel("tương quan giữa hai cột")
 ax[0].set_ylabel("$\\mathrm{cond}(X^\\top X)$ (log)")
-ax[0].set_title("Số điều kiện bùng nổ theo cộng tuyến")
+ax[0].set_title("Số điều kiện theo mức tương quan")
 ax[1].plot(rhos, [a[2] for a in Arows], "-o", ms=5, color=C_BAD, label="độ lệch chuẩn của $w_1$")
-ax[1].plot(rhos, [a[3] for a in Arows], "-o", ms=5, color=C_MAIN, label="độ lệch chuẩn của dự báo")
+ax[1].plot(rhos, [a[3] for a in Arows], "-o", ms=5, color=C_MAIN, label="độ lệch chuẩn của dự đoán")
 ax[1].set_yscale("log"); ax[1].set_xlabel("tương quan giữa hai cột")
 ax[1].set_ylabel("độ lệch chuẩn (log)"); ax[1].legend(frameon=False, fontsize=8)
-ax[1].set_title("Hệ số dao động, dự báo thì không")
+ax[1].set_title("Độ lệch chuẩn của hệ số và của dự đoán")
 fig.tight_layout(); fig.savefig(OUT + "nt02_linreg.png"); plt.close(fig)
 
 
@@ -142,12 +142,12 @@ print("Cot 'ti le' bam sat cot 'can kappa' -> dung nhu ly thuyet du doan.")
 fig, ax = plt.subplots(figsize=(5.6, 3.1))
 ks = [b[0] for b in Brows]
 ax.plot(ks, [b[1] for b in Brows], "-o", ms=5, color=C_BAD, label="gradient descent")
-ax.plot(ks, [b[2] for b in Brows], "-o", ms=5, color=C_MAIN, label="thêm quán tính")
+ax.plot(ks, [b[2] for b in Brows], "-o", ms=5, color=C_MAIN, label="có momentum")
 ax.plot(ks, ks, ":", color=C_DIM, lw=1.2, label="$O(\\kappa)$")
 ax.plot(ks, np.sqrt(ks) * 3, "--", color=C_DIM, lw=1.2, label="$O(\\sqrt{\\kappa})$")
 ax.set_xscale("log"); ax.set_yscale("log")
 ax.set_xlabel("số điều kiện $\\kappa$"); ax.set_ylabel("số vòng lặp tới sai số $10^{-8}$")
-ax.set_title("Quán tính đổi $\\kappa$ thành $\\sqrt{\\kappa}$")
+ax.set_title("Số vòng lặp theo số điều kiện")
 ax.legend(frameon=False, fontsize=8)
 fig.tight_layout(); fig.savefig(OUT + "nt03_gd.png"); plt.close(fig)
 
@@ -186,7 +186,7 @@ ax.axvline(u ** (1 / 3), color=C_DIM, ls=":", lw=1.2)
 ax.text(u ** (1 / 3) * 1.3, 1e-4, "$u^{1/3}$", fontsize=8, color=C_DIM)
 ax.set_xlabel("$\\varepsilon$"); ax.set_ylabel("sai số tuyệt đối")
 ax.invert_xaxis(); ax.legend(frameon=False, fontsize=8)
-ax.set_title("Hình chữ V: sai số cắt cụt gặp sai số làm tròn")
+ax.set_title("Sai số cắt cụt và sai số làm tròn")
 fig.tight_layout(); fig.savefig(OUT + "nt04_gradcheck.png"); plt.close(fig)
 
 
@@ -455,7 +455,7 @@ o = np.argsort(-sg); ys = yg[o]
 tpr = np.r_[0, np.cumsum(ys) / ys.sum()]; fpr = np.r_[0, np.cumsum(1 - ys) / (len(ys) - ys.sum())]
 ax[0].plot(fpr, tpr, color=C_MAIN, lw=1.8); ax[0].plot([0, 1], [0, 1], ":", color=C_DIM)
 ax[0].set_xlabel("FPR"); ax[0].set_ylabel("TPR")
-ax[0].set_title(f"ROC — AUC = {roc_auc(yg, sg):.3f} (trông rất tốt)")
+ax[0].set_title(f"ROC — AUC = {roc_auc(yg, sg):.3f}")
 tpc = np.cumsum(ys); fpc = np.cumsum(1 - ys)
 ax[1].plot(tpc / ys.sum(), tpc / (tpc + fpc), color=C_BAD, lw=1.8)
 ax[1].axhline(rate, ls=":", color=C_DIM)
@@ -529,8 +529,8 @@ pl_ = np.array([Lasso(alpha=l / n_h, max_iter=50000, tol=1e-10).fit(Xh, yh).coef
 for j in range(p_h):
     ax[0].plot(lams, pr[:, j], lw=1.2, color=C_MAIN if w_star[j] != 0 else C_DIM, alpha=.85)
     ax[1].plot(lams, pl_[:, j], lw=1.2, color=C_MAIN if w_star[j] != 0 else C_DIM, alpha=.85)
-for a, t in [(ax[0], "Ridge: co dần nhưng không bao giờ chạm 0"),
-             (ax[1], "Lasso: cắt hẳn về 0")]:
+for a, t in [(ax[0], "Ridge"),
+             (ax[1], "Lasso")]:
     a.set_xscale("log"); a.axhline(0, color="k", lw=.7)
     a.set_xlabel("$\\lambda$"); a.set_ylabel("hệ số"); a.set_title(t, fontsize=9)
 fig.tight_layout(); fig.savefig(OUT + "nt07_regular.png"); plt.close(fig)
@@ -708,7 +708,7 @@ Z = mk.decision_function(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
 ax[2].contourf(xx, yy, Z > 0, alpha=.13, cmap="coolwarm")
 ax[2].contour(xx, yy, Z, levels=[0], colors="k", linewidths=1.4)
 ax[2].scatter(*Xk[yk == -1].T, s=11, color=C_MAIN); ax[2].scatter(*Xk[yk == 1].T, s=11, color=C_BAD)
-ax[2].set_title("Nhân RBF trên dữ liệu vòng tròn", fontsize=9)
+ax[2].set_title("Kernel RBF, hai đường tròn đồng tâm", fontsize=9)
 fig.tight_layout(); fig.savefig(OUT + "nt09_svm.png"); plt.close(fig)
 
 
@@ -785,14 +785,14 @@ fig, ax = plt.subplots(1, 2, figsize=(8.4, 3.1))
 ax[0].bar(np.arange(1, p_k + 1), eigval / tong * 100, color=C_MAIN, alpha=.85)
 ax[0].plot(np.arange(1, p_k + 1), np.cumsum(eigval) / tong * 100, "-o", ms=4, color=C_BAD)
 ax[0].set_xlabel("thành phần chính"); ax[0].set_ylabel("% phương sai")
-ax[0].set_title("Phương sai từng trục và luỹ kế", fontsize=9)
+ax[0].set_title("Phương sai từng thành phần và tích luỹ", fontsize=9)
 ax[1].scatter(*Xl_[yl_ == 0].T, s=8, color=C_MAIN, alpha=.6)
 ax[1].scatter(*Xl_[yl_ == 1].T, s=8, color=C_BAD, alpha=.6)
-for vec, lab, col in [(pc1, "trục PCA", C_DIM), (w_lda, "hướng LDA", "k")]:
+for vec, lab, col in [(pc1, "thành phần chính thứ nhất", C_DIM), (w_lda, "hướng LDA", "k")]:
     ax[1].plot([-8 * vec[0], 8 * vec[0]], [-8 * vec[1], 8 * vec[1]], lw=1.8,
                color=col, label=lab)
 ax[1].legend(frameon=False, fontsize=8); ax[1].set_aspect("equal")
-ax[1].set_title("PCA chọn hướng vô dụng cho phân loại", fontsize=9)
+ax[1].set_title("Thành phần chính thứ nhất và hướng LDA", fontsize=9)
 fig.tight_layout(); fig.savefig(OUT + "nt10_pca.png"); plt.close(fig)
 
 
@@ -889,10 +889,10 @@ print("Quan tinh LUON giam khi k tang (k = n thi bang 0), nen KHONG the chon k b
 print("cach toi thieu no. 'Khuyu tay' la cho muc giam dot ngot cham han lai.")
 
 fig, ax = plt.subplots(1, 3, figsize=(10.2, 3.0))
-C8, l8, _ = kmeans(Xm, K_M, "k-means++", 0)
-ax[0].scatter(*Xm.T, c=l8, s=6, cmap="tab10", alpha=.75)
-ax[0].scatter(*C8.T, marker="X", s=80, color="k", edgecolor="w", linewidth=1)
-ax[0].set_title(f"Cụm tròn, tách rời — đúng {acc_sph * 100:.0f}% (ví dụ 3 cụm)", fontsize=8.5)
+C3, l3, _ = kmeans(Xsph, 3, "k-means++", 0)
+ax[0].scatter(*Xsph.T, c=l3, s=7, cmap="viridis", alpha=.75)
+ax[0].scatter(*C3.T, marker="X", s=80, color="k", edgecolor="w", linewidth=1)
+ax[0].set_title(f"Ba cụm tròn — đúng {acc_sph * 100:.0f}%", fontsize=9)
 ax[1].scatter(*Xmoon.T, c=lab_moon, s=7, cmap="viridis", alpha=.75)
 ax[1].set_title(f"Hai lưỡi liềm — đúng {acc_moon * 100:.0f}%", fontsize=9)
 ax[2].scatter(*Xan.T, c=lab_an, s=7, cmap="viridis", alpha=.75)
@@ -983,12 +983,12 @@ print("du phong dua tren NOI DUNG: dac trung cua muc va ho so khai bao cua nguoi
 fig, ax = plt.subplots(1, 2, figsize=(8.4, 3.1))
 ax[0].plot([m[1] for m in Mrows], [m[2] for m in Mrows], "-o", ms=5, color=C_MAIN)
 ax[0].axhline(R_sach.std(), ls=":", color=C_DIM)
-ax[0].text(28, R_sach.std() * 1.05, "mức đoán bừa bằng 0", fontsize=7.5, color=C_DIM)
+ax[0].text(28, R_sach.std() * 1.05, "đoán mọi ô bằng 0", fontsize=7.5, color=C_DIM)
 ax[0].axvline(5 * rank_true, ls="--", color=C_BAD, lw=1)
 ax[0].text(5 * rank_true * 1.1, 1.2, "$5k$", fontsize=8, color=C_BAD)
 ax[0].set_yscale("log"); ax[0].set_xlabel("số đánh giá trung bình mỗi người")
-ax[0].set_ylabel("RMSE trên ô chưa thấy (log)")
-ax[0].set_title("Ngưỡng dữ liệu để phân rã ma trận chạy được", fontsize=9)
+ax[0].set_ylabel("RMSE trên ô chưa quan sát (log)")
+ax[0].set_title("Sai số theo số đánh giá mỗi người", fontsize=9)
 im = ax[1].imshow(R_sach[:40, :40], cmap="coolwarm", aspect="auto")
 ax[1].set_title("Ma trận đánh giá thật (hạng 4)", fontsize=9)
 fig.colorbar(im, ax=ax[1], fraction=.046)

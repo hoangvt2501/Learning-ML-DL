@@ -110,11 +110,11 @@ Chương 12 tới 15 nói về cách sửa điều đó. Và ở đây có một
 | Softmax, entropy chéo, hợp lý cực đại | [Chương 6](nentang-ch06.html) và [Chương 10 của *Nền tảng*](nentang-ch10.html) |
 | Phân rã SVD và xấp xỉ hạng thấp | [Chương 14 của *Nền tảng*](nentang-ch14.html) |
 | Tối ưu có ràng buộc, nhân tử Lagrange | [Chương 12 của *Nền tảng*](nentang-ch12.html) |
-| Kiến trúc Transformer, attention | [Chương 9 của *Mô hình & Kiến trúc*](models-ch09.html) |
-| Đếm tham số, bộ nhớ huấn luyện | [Chương 12 của *Mô hình & Kiến trúc*](models-ch12.html) |
+| Kiến trúc Transformer, attention | [Chương 9 của *Học sâu*](models-ch09.html) |
+| Đếm tham số, bộ nhớ huấn luyện | [Chương 12 của *Học sâu*](models-ch12.html) |
 | Vận hành mô hình ngôn ngữ trong sản xuất | [Chương 13 của *MLOps*](mlops-ch13.html) |
 
-Đặc biệt, Chương 7 về LoRA dùng thẳng kết quả đếm tham số ở [Chương 12 của *Mô hình & Kiến trúc*](models-ch12.html), và Chương 15 về DPO dùng lại cách suy luận về tối ưu có ràng buộc ở [Chương 12 của *Nền tảng*](nentang-ch12.html). Nếu hai chỗ đó còn mờ thì nên quay lại trước.
+Đặc biệt, Chương 7 về LoRA dùng thẳng kết quả đếm tham số ở [Chương 12 của *Học sâu*](models-ch12.html), và Chương 15 về DPO dùng lại cách suy luận về tối ưu có ràng buộc ở [Chương 12 của *Nền tảng*](nentang-ch12.html). Nếu hai chỗ đó còn mờ thì nên quay lại trước.
 
 ---
 
@@ -321,7 +321,7 @@ Một vector duy nhất cho "đường" phải là một thoả hiệp giữa ha
 
 Cách chữa là hiển nhiên khi đã nhìn ra vấn đề: đừng gán vector cho **từ**, hãy gán vector cho **một lần xuất hiện của từ trong một câu cụ thể**. Cùng chữ "đường" trong hai câu trên sẽ nhận hai vector khác nhau, vì ngữ cảnh khác nhau.
 
-Đó chính xác là thứ mà Transformer làm — xem [Chương 9 của *Mô hình & Kiến trúc*](models-ch09.html). Mỗi lớp attention trộn thông tin giữa các vị trí, nên biểu diễn của một token ở lớp thứ 12 đã chứa thông tin từ cả câu.
+Đó chính xác là thứ mà Transformer làm — xem [Chương 9 của *Học sâu*](models-ch09.html). Mỗi lớp attention trộn thông tin giữa các vị trí, nên biểu diễn của một token ở lớp thứ 12 đã chứa thông tin từ cả câu.
 
 Từ đó sinh ra một cách dùng rất phổ biến: lấy một mô hình đã tiền huấn luyện, cho câu chạy qua, rồi lấy trạng thái ẩn làm embedding của câu. Nhưng ở đây có một cái bẫy mà rất nhiều người vấp phải.
 
@@ -469,7 +469,7 @@ Dữ liệu mô phỏng đúng tình huống thật: có một phép chiếu "th
 
 **Tầng ba — cột đóng băng gần như đứng yên từ $n = 500$ trở đi** (0,6220 → 0,6375 → 0,6452). Đây là hiện tượng đáng chú ý nhất trong bảng và nó có tên: **trần chặn**. Khi đặc trưng bị cố định, mô hình chỉ còn là hồi quy softmax trên những đặc trưng ấy. Thêm dữ liệu giúp ước lượng lớp tuyến tính chính xác hơn, nhưng không phá được giới hạn do bản thân đặc trưng đặt ra.
 
-Nhận ra trần chặn này có giá trị thực tế ngay: nếu đang đóng băng và thấy độ chính xác không nhích lên dù thêm dữ liệu, thì **thêm dữ liệu nữa cũng vô ích**. Phải mở đóng băng ra. Đây chính là chẩn đoán thiên lệch cao ở [Mục 2.4 của *Mô hình & Kiến trúc*](models-ch02.html), xuất hiện lại ở một dạng khác.
+Nhận ra trần chặn này có giá trị thực tế ngay: nếu đang đóng băng và thấy độ chính xác không nhích lên dù thêm dữ liệu, thì **thêm dữ liệu nữa cũng vô ích**. Phải mở đóng băng ra. Đây chính là chẩn đoán thiên lệch cao ở [Mục 2.4 của *Học sâu*](models-ch02.html), xuất hiện lại ở một dạng khác.
 
 **Và một điều nữa đáng để ý:** tinh chỉnh **luôn** tốt hơn huấn luyện từ đầu, ở mọi cỡ dữ liệu từ 150 trở lên. Trọng số tiền huấn luyện không chỉ giúp khi thiếu dữ liệu — nó là một điểm khởi đầu tốt hơn về mọi mặt.
 
@@ -489,7 +489,7 @@ Những điều dưới đây là kinh nghiệm chung của ngành chứ không 
 
 Chương 6 kết luận rằng tinh chỉnh toàn phần thắng khi có đủ dữ liệu. Nhưng "đủ bộ nhớ" là một điều kiện nặng hơn người ta tưởng.
 
-Hãy tính cho Llama-2 7B, dùng lại cách đếm ở [Chương 12 của *Mô hình & Kiến trúc*](models-ch12.html). Mô hình có 6 476 005 376 tham số phi-embedding. Tinh chỉnh toàn phần bằng Adam ở FP32 cần:
+Hãy tính cho Llama-2 7B, dùng lại cách đếm ở [Chương 12 của *Học sâu*](models-ch12.html). Mô hình có 6 476 005 376 tham số phi-embedding. Tinh chỉnh toàn phần bằng Adam ở FP32 cần:
 
 | Thành phần | Dung lượng |
 |---|---|
@@ -556,7 +556,7 @@ Chênh nhau **1 540 lần**. Đó là khác biệt giữa "chạy được trên
 
 **"LoRA chất lượng bằng tinh chỉnh toàn phần."** Bài báo gốc báo cáo chất lượng **rất gần** trên các nhiệm vụ họ thử, nhưng "rất gần" không phải "bằng". Với nhiệm vụ đòi mô hình học kiến thức thật sự mới — không chỉ đổi văn phong — thì giả thiết hạng thấp yếu đi và khoảng cách rộng ra.
 
-**"Hạng càng cao càng tốt."** Không. Hạng cao hơn nghĩa là nhiều tham số hơn, tức nhiều phương sai hơn với cùng lượng dữ liệu — đúng câu chuyện ở [Chương 2 của *Mô hình & Kiến trúc*](models-ch02.html). Trên ít dữ liệu, $r = 4$ hoặc $r = 8$ thường cho kết quả tốt hơn $r = 64$.
+**"Hạng càng cao càng tốt."** Không. Hạng cao hơn nghĩa là nhiều tham số hơn, tức nhiều phương sai hơn với cùng lượng dữ liệu — đúng câu chuyện ở [Chương 2 của *Học sâu*](models-ch02.html). Trên ít dữ liệu, $r = 4$ hoặc $r = 8$ thường cho kết quả tốt hơn $r = 64$.
 
 ### 7.5. Món lợi về vận hành mà người ta hay quên
 

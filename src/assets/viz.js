@@ -341,7 +341,7 @@ window.QZ_VIZ = (function () {
    *
    * Ba số mũ dưới đây là cách TÓM TẮT hành vi, không phải mô phỏng lại phép
    * truyền ngược đầy đủ. Chúng được chỉnh cho khớp sáu số đo ở Mục 6.3 của giáo
-   * trình Mô hình & Kiến trúc, và src/test.mjs kiểm lại sự khớp ấy — nên nếu ai
+   * trình Học sâu, và src/test.mjs kiểm lại sự khớp ấy — nên nếu ai
    * sửa chúng mà làm lệch khỏi số đã in thì bộ kiểm tra báo ngay.
    */
   function doLonGradient(gain, sau, chuanHoa, tat) {

@@ -1,346 +1,510 @@
-# Nền tảng Machine Learning: từ đại số tuyến tính tới SVM
+# Nền tảng học máy
 
-> **Giáo trình tự học, viết theo lối bài giảng.** Mỗi khái niệm đi theo trình tự *động cơ → định nghĩa → suy luận → ví dụ số → thí nghiệm kiểm chứng*, giống ba giáo trình còn lại trong repo này.
+> **Giáo trình 1 của lộ trình.** Tài liệu trình bày phần toán và các thuật toán học máy cổ điển mà mọi giáo trình phía sau đều dùng tới: đại số tuyến tính, xác suất, hồi quy, phân loại, đánh giá mô hình, regularization, tối ưu lồi, SVM, giảm chiều, phân cụm và hệ thống gợi ý.
 >
-> **Đây là phần đứng trước.** Giáo trình *Mô hình & Kiến trúc* mở đầu bằng đánh đổi thiên lệch – phương sai, tức đã giả định người đọc biết sẵn hồi quy tuyến tính, hồi quy logistic, gradient descent và xác suất. Tài liệu này lấp đúng khoảng trống ấy, và dừng lại đúng chỗ giáo trình kia bắt đầu.
+> **Cách trình bày.** Mỗi khái niệm được giới thiệu theo trình tự: bài toán cần giải, định nghĩa, suy luận, ví dụ tính tay, rồi thí nghiệm kiểm chứng bằng mã. Các định nghĩa, định lý và ví dụ quan trọng được đặt trong hộp riêng để dễ tra lại.
 >
-> **Về độ tin cậy của số liệu.** Mọi con số trong tài liệu đều **đo được trong chính repo này**, sinh bởi hai script trong `code/nentang/`, hạt giống cố định, chạy lại cho kết quả y hệt. Một số kết quả không phải mô phỏng mà là **kiểm chứng một đẳng thức** — ridge đúng bằng MAP với tiên nghiệm Gauss, sai số tái dựng của PCA đúng bằng tổng các trị riêng bị bỏ, hồi quy logistic đúng bằng softmax với $K = 2$. Những chỗ ấy phải khớp tới sai số máy, và tài liệu in ra sai số thật để người đọc tự kiểm.
->
-> **Tài liệu này dạy cái gì.** Không dạy dùng thư viện. Nó trả lời câu hỏi: *mỗi thuật toán cổ điển giả định điều gì, giả định ấy hỏng khi nào, và vì sao người ta vẫn dùng nó.* Nắm được điều đó thì học mạng nơ-ron về sau chỉ còn là thay một trong ba thành phần ở Chương 1.
+> **Về số liệu.** Mọi con số trong tài liệu được sinh bởi hai script trong `code/nentang/` với hạt giống cố định, nên chạy lại cho kết quả giống hệt. Một phần kết quả là kiểm chứng đẳng thức (ví dụ ridge trùng với ước lượng MAP khi tiên nghiệm là Gauss), và những kết quả đó khớp tới sai số của máy tính.
 
 ---
 
 ## Mục lục
 
-0. [Kiến thức nền và quy ước](#0-kiến-thức-nền-và-quy-ước)
-1. [Bài toán học máy là gì](#1-bài-toán-học-máy-là-gì)
-2. [Đại số tuyến tính cho học máy](#2-đại-số-tuyến-tính-cho-học-máy)
-3. [Xác suất và thống kê cho học máy](#3-xác-suất-và-thống-kê-cho-học-máy)
-4. [Hồi quy tuyến tính](#4-hồi-quy-tuyến-tính)
-5. [Gradient descent](#5-gradient-descent)
-6. [Phân loại tuyến tính: perceptron, logistic, softmax](#6-phân-loại-tuyến-tính-perceptron-logistic-softmax)
-7. [K láng giềng gần nhất và Naive Bayes](#7-k-láng-giềng-gần-nhất-và-naive-bayes)
-8. [Đánh giá mô hình phân loại](#8-đánh-giá-mô-hình-phân-loại)
-9. [Quá khớp, phạt chuẩn và kiểm định chéo](#9-quá-khớp-phạt-chuẩn-và-kiểm-định-chéo)
-10. [Hợp lý cực đại và hậu nghiệm cực đại](#10-hợp-lý-cực-đại-và-hậu-nghiệm-cực-đại)
-11. [Tập lồi và hàm lồi](#11-tập-lồi-và-hàm-lồi)
-12. [Tối ưu lồi và đối ngẫu Lagrange](#12-tối-ưu-lồi-và-đối-ngẫu-lagrange)
-13. [Support Vector Machine](#13-support-vector-machine)
-14. [Giảm chiều: PCA, SVD và LDA](#14-giảm-chiều-pca-svd-và-lda)
-15. [Phân cụm: K-means](#15-phân-cụm-k-means)
-16. [Hệ gợi ý](#16-hệ-gợi-ý)
-17. [Bài tập](#17-bài-tập)
-18. [Ôn phỏng vấn](#18-ôn-phỏng-vấn)
-19. [Tài liệu tham khảo](#19-tài-liệu-tham-khảo)
+0. Ký hiệu và quy ước
+1. Tổng quan về học máy
+2. Đại số tuyến tính
+3. Xác suất và thống kê
+4. Hồi quy tuyến tính
+5. Gradient descent
+6. Phân loại tuyến tính
+7. k láng giềng gần nhất và Naive Bayes
+8. Đánh giá mô hình phân loại
+9. Overfitting và regularization
+10. Ước lượng hợp lý cực đại và hậu nghiệm cực đại
+11. Tập lồi và hàm lồi
+12. Tối ưu lồi và đối ngẫu Lagrange
+13. Máy vector hỗ trợ
+14. Giảm chiều dữ liệu
+15. Phân cụm K-means
+16. Hệ thống gợi ý
+17. Bài tập
+18. Câu hỏi phỏng vấn
+19. Tài liệu tham khảo
 
 ---
 
-## 0. Kiến thức nền và quy ước
+## 0. Ký hiệu và quy ước
 
-Người đọc cần biết: đạo hàm một biến, nhân ma trận ở mức cơ học, và Python/NumPy ở mức đọc hiểu. **Không** cần biết trước xác suất hay đại số tuyến tính ở mức nâng cao — Chương 2 và Chương 3 ôn lại đúng phần cần dùng, và không ôn thừa.
+Để đọc giáo trình này, người học cần biết đạo hàm của hàm một biến, phép nhân ma trận và đọc được mã Python dùng NumPy. Kiến thức đại số tuyến tính và xác suất ở mức cần thiết được nhắc lại trong Chương 2 và Chương 3, nên không đòi hỏi học trước.
+
+### 0.1. Bảng ký hiệu
 
 | Ký hiệu | Ý nghĩa |
 |---|---|
-| $x \in \mathbb{R}^{d}$ | một mẫu đầu vào, $d$ chiều |
-| $X \in \mathbb{R}^{n \times d}$ | ma trận dữ liệu: $n$ mẫu xếp theo hàng |
-| $y_i$, $\hat{y}_i$ | nhãn thật và nhãn dự đoán của mẫu thứ $i$ |
-| $w$, $b$ | vector trọng số và độ lệch |
-| $\theta$ | gọi chung mọi tham số của mô hình |
+| $x \in \mathbb{R}^{d}$ | một điểm dữ liệu đầu vào có $d$ đặc trưng |
+| $X \in \mathbb{R}^{n \times d}$ | ma trận dữ liệu gồm $n$ điểm, mỗi điểm là một hàng |
+| $y_i$, $\hat{y}_i$ | nhãn thật và giá trị dự đoán của điểm thứ $i$ |
+| $w$, $b$ | vector trọng số và hệ số chặn của mô hình tuyến tính |
+| $\theta$ | ký hiệu chung cho mọi tham số của mô hình |
 | $L(\theta)$ | hàm mất mát |
-| $\eta$ | tốc độ học |
-| $\lambda$ | hệ số phạt chuẩn |
+| $\eta$ | tốc độ học (learning rate) |
+| $\lambda$ | hệ số regularization |
 | $\nabla_\theta L$ | gradient của $L$ theo $\theta$ |
 | $\Sigma$ | ma trận hiệp phương sai |
 | $\lambda_i$, $v_i$ | trị riêng và vector riêng thứ $i$ |
-| $d_i$ | trị kỳ dị thứ $i$ trong phân rã SVD |
-| $\kappa$ | số điều kiện |
+| $d_i$ | giá trị suy biến thứ $i$ trong phân tích SVD |
+| $\kappa$ | số điều kiện của ma trận |
 | $\alpha_i$ | nhân tử Lagrange ứng với ràng buộc thứ $i$ |
 | $K$ | số lớp trong bài toán phân loại |
-| $k$ | số cụm, số láng giềng, hoặc số chiều giữ lại — tuỳ ngữ cảnh, luôn nói rõ |
+| $k$ | số cụm, số láng giềng hoặc số chiều giữ lại, tuỳ ngữ cảnh |
 
-**Một quy ước về chữ, và nó quan trọng.** Tiếng Anh dùng chung chữ *bias* cho hai thứ khác hẳn nhau. Tài liệu này phân biệt rạch ròi:
+Chữ $\lambda$ được dùng cho hai việc: hệ số regularization (Chương 9) và trị riêng (Chương 2, Chương 14). Hai cách dùng không xuất hiện trong cùng một công thức, trừ Mục 9.3 là nơi trị riêng được viết qua giá trị suy biến $d_i$ để tránh nhầm.
 
-- **thiên lệch** — bias theo nghĩa thống kê: sai lệch có hệ thống giữa ước lượng trung bình và giá trị thật.
-- **độ lệch** — bias theo nghĩa tham số cộng thêm $b$ trong $w^\top x + b$.
+### 0.2. Quy ước thuật ngữ
 
-Ngoài ra: *phạt chuẩn* cho regularization, *quá khớp* cho overfitting, *thiếu khớp* cho underfitting, *kiểm định chéo* cho cross-validation, *lề* cho margin, *nhân* cho kernel, *hàm hợp lý* cho likelihood, *tiên nghiệm* / *hậu nghiệm* cho prior / posterior, *trị riêng* / *vector riêng* cho eigenvalue / eigenvector, *trị kỳ dị* cho singular value. Khi một thuật ngữ đã thành tên riêng (softmax, sigmoid, hinge, kernel RBF, bootstrap) thì giữ nguyên. Toàn bộ đối chiếu Việt – Anh nằm ở trang **Từ điển thuật ngữ**.
+Giáo trình dùng thuật ngữ theo cách phổ biến trong cộng đồng học máy tiếng Việt, tham khảo bản dịch tiếng Việt các cheatsheet CS229 và CS230 của Đại học Stanford. Thuật ngữ nào đã có tên tiếng Việt thông dụng thì dùng tiếng Việt; thuật ngữ nào người làm nghề vẫn gọi bằng tiếng Anh thì giữ nguyên tiếng Anh.
 
-**Quy ước về chiều.** Ma trận dữ liệu $X$ có $n$ hàng (mẫu) và $d$ cột (đặc trưng) — đúng như `X.shape` trong NumPy. Công thức toán viết $w^\top x$ với $x$ là vector cột; trong mã thì thành `X @ w`. Hai cách chỉ khác phép chuyển vị, chỗ nào dễ nhầm thì có ghi rõ.
+| Tiếng Anh | Dùng trong giáo trình |
+|---|---|
+| supervised / unsupervised learning | học có giám sát / học không giám sát |
+| regression / classification | hồi quy / phân loại |
+| loss function | hàm mất mát |
+| learning rate | tốc độ học |
+| normal equations | phương trình chuẩn |
+| training / validation / test set | tập huấn luyện / tập xác thực / tập kiểm tra |
+| confusion matrix | ma trận nhầm lẫn |
+| accuracy | độ chính xác (accuracy) |
+| precision, recall, F1 score | precision, recall, điểm F1 |
+| bias (của một ước lượng) | độ chệch |
+| variance | phương sai |
+| overfitting / underfitting | overfitting / underfitting |
+| regularization | regularization |
+| cross-validation | cross-validation |
+| gradient descent, momentum, mini-batch | giữ nguyên tiếng Anh |
+| likelihood | hàm hợp lý (likelihood) |
+| prior / posterior | phân phối tiên nghiệm / phân phối hậu nghiệm |
+| cross-entropy | cross-entropy |
+| eigenvalue / eigenvector | trị riêng / vector riêng |
+| singular value decomposition | phân tích giá trị suy biến (SVD) |
+| support vector machine | máy vector hỗ trợ (SVM) |
+| kernel, margin | kernel, lề |
+| principal component analysis | phân tích thành phần chính (PCA) |
 
-**Quy ước về dấu phẩy thập phân.** Phần chữ dùng dấu phẩy theo lối Việt (0,15); phần mã và phần in ra từ script giữ dấu chấm theo lối Python (0.15).
+Chữ *bias* trong tiếng Anh có hai nghĩa khác nhau. Nghĩa thứ nhất là sai lệch có hệ thống của một ước lượng so với giá trị thật; giáo trình gọi là **độ chệch**, theo cách gọi "ước lượng không chệch" quen thuộc của thống kê. Nghĩa thứ hai là tham số cộng thêm $b$ trong $w^\top x + b$; giáo trình gọi là **hệ số chặn**. Bảng đối chiếu đầy đủ nằm ở trang Từ điển thuật ngữ.
+
+### 0.3. Quy ước về chiều và cách viết số
+
+Ma trận dữ liệu $X$ có $n$ hàng ứng với $n$ điểm dữ liệu và $d$ cột ứng với $d$ đặc trưng, đúng như `X.shape == (n, d)` trong NumPy. Trong công thức, $x$ là vector cột nên tích với trọng số viết là $w^\top x$; trong mã, cả tập dữ liệu nhân với trọng số viết là `X @ w`. Hai cách viết chỉ khác nhau một phép chuyển vị.
+
+Phần chữ dùng dấu phẩy thập phân theo lối Việt Nam (0,15). Phần mã và kết quả in ra từ script giữ dấu chấm như Python (0.15).
 
 ---
 
-## 1. Bài toán học máy là gì
+## 1. Tổng quan về học máy
 
-### 1.1. Vì sao chương này đứng đầu
+Chương này định nghĩa học máy, giới thiệu ba thành phần có mặt trong mọi thuật toán học có giám sát, phân loại các dạng bài toán, và mô tả quy trình làm một bài toán học máy từ đầu tới cuối. Các chương sau đều quay lại khung ba thành phần ở Mục 1.1.
 
-Người mới học thường tiếp cận học máy như một danh sách thuật toán cần thuộc: hồi quy tuyến tính, SVM, cây quyết định, mạng nơ-ron. Danh sách ấy dài ra mỗi năm và không bao giờ học hết.
+### 1.1. Học máy là gì
 
-Có một cách nhìn khác, gọn hơn nhiều và không cũ đi. **Mọi thuật toán học có giám sát đều gồm đúng ba thứ**, và chỉ ba:
+Một định nghĩa hay được trích dẫn là của Tom Mitchell (1997): một chương trình được gọi là **học** từ kinh nghiệm $E$ đối với một lớp nhiệm vụ $T$ và một thước đo hiệu năng $P$, nếu hiệu năng của nó trên các nhiệm vụ trong $T$, đo bằng $P$, tăng lên theo kinh nghiệm $E$. Với bài toán lọc thư rác, $T$ là việc gắn nhãn "rác" hoặc "không rác" cho một thư, $P$ là tỉ lệ thư được gắn nhãn đúng, còn $E$ là tập thư đã được người dùng đánh dấu.
+
+Định nghĩa trên đúng nhưng chưa nói cách làm. Để thấy cách làm, ta nhìn vào cấu tạo của các thuật toán. Mỗi thuật toán học có giám sát đều gồm ba thành phần:
 
 ![Hình 1](figs/nt01_bando.png)
 
-**Hình 1.** Ba thành phần, và năm thuật toán đọc theo đúng ba cột ấy. Đổi một cột là ra một thuật toán khác.
+**Hình 1.** Ba thành phần của một thuật toán học có giám sát, và năm thuật toán quen thuộc đọc theo ba thành phần ấy.
 
-1. **Mô hình** — tập các hàm $f_\theta$ mà ta cho phép mình dùng. Hồi quy tuyến tính cho phép các hàm affine; cây quyết định cho phép các hàm hằng từng khúc; mạng nơ-ron cho phép hợp của nhiều lớp affine và phi tuyến.
-2. **Hàm mất mát** — định nghĩa thế nào là đoán sai, và sai bao nhiêu. Đây là chỗ ta phát biểu cái mình thực sự muốn.
-3. **Thuật toán tối ưu** — cách đi tìm $\theta$ làm tổng mất mát nhỏ nhất.
+1. **Mô hình** là tập các hàm $f_\theta$ mà ta cho phép thuật toán chọn. Hồi quy tuyến tính chỉ cho phép các hàm tuyến tính (chính xác hơn là affine) của đầu vào; cây quyết định cho phép các hàm hằng trên từng vùng; mạng nơ-ron cho phép hợp của nhiều phép biến đổi tuyến tính xen với các hàm phi tuyến.
+2. **Hàm mất mát** đo mức sai của một dự đoán so với nhãn thật. Đây là nơi ta nói ra điều mình thực sự muốn: sai lệch lớn có bị phạt nặng hơn không, đoán sai lớp dương có đắt hơn đoán sai lớp âm không.
+3. **Thuật toán tối ưu** là cách tìm tham số $\theta$ làm tổng mất mát trên dữ liệu huấn luyện nhỏ nhất. Có bài toán giải được bằng công thức, có bài toán phải lặp như gradient descent.
 
-Giá trị của cách nhìn này là nó biến việc học một thuật toán mới thành việc trả lời ba câu hỏi, và biến rất nhiều "thuật toán khác nhau" thành cùng một thứ nhìn từ góc khác. Chương 6 sẽ cho thấy perceptron, hồi quy logistic và SVM **dùng chung một mô hình** (hàm tuyến tính) và **chung một thuật toán tối ưu** (xuống dốc); chúng chỉ khác nhau ở cột thứ hai.
+Khung ba thành phần giúp việc học một thuật toán mới trở thành việc trả lời ba câu hỏi: mô hình là họ hàm nào, mất mát là gì, tối ưu bằng cách nào. Nó cũng cho thấy nhiều thuật toán mang tên khác nhau thực ra rất gần nhau. Chương 6 sẽ chỉ ra rằng perceptron, hồi quy logistic và SVM dùng chung một mô hình (hàm tuyến tính) và chung một cách tối ưu (gradient descent), chúng chỉ khác nhau ở hàm mất mát.
 
-### 1.2. Học có giám sát, không giám sát, và ranh giới giữa chúng
+> **Định nghĩa 1.1 (Bài toán học có giám sát).** Cho tập huấn luyện $\mathcal{D} = \{(x_i, y_i)\}_{i=1}^{n}$, một họ hàm $\{f_\theta\}$ và một hàm mất mát $\ell$. Bài toán học có giám sát là tìm
+> $$\hat\theta = \arg\min_\theta \; \frac{1}{n}\sum_{i=1}^{n} \ell\big(y_i, f_\theta(x_i)\big),$$
+> với mục đích cuối cùng là $f_{\hat\theta}$ dự đoán tốt trên những điểm dữ liệu **chưa gặp** khi huấn luyện.
+
+Vế cuối của định nghĩa là chỗ tạo ra toàn bộ độ khó của học máy. Tối thiểu hoá mất mát trên dữ liệu huấn luyện chỉ là phương tiện; mục tiêu thật là khả năng **tổng quát hoá** (generalization) sang dữ liệu mới. Một mô hình ghi nhớ nguyên văn tập huấn luyện có mất mát huấn luyện bằng 0 nhưng có thể vô dụng trên dữ liệu mới. Hiện tượng này gọi là overfitting và được bàn kỹ ở Chương 9.
+
+### 1.2. Các dạng bài toán học máy
+
+Cách phân loại thông dụng nhất dựa vào việc dữ liệu có nhãn hay không.
+
+- **Học có giám sát** (supervised learning): mỗi điểm dữ liệu $x_i$ đi kèm một nhãn $y_i$. Nếu nhãn là số thực, bài toán là **hồi quy** (dự đoán giá nhà, nhiệt độ ngày mai). Nếu nhãn thuộc một tập hữu hạn các lớp, bài toán là **phân loại** (thư rác hay không, ảnh chứa chữ số nào).
+- **Học không giám sát** (unsupervised learning): chỉ có $x_i$, không có nhãn. Mục tiêu là tìm cấu trúc trong dữ liệu: gom các điểm giống nhau thành cụm, tìm vài hướng chứa phần lớn thông tin, ước lượng mật độ phân phối.
+- **Học tăng cường** (reinforcement learning): tác tử tương tác với môi trường và nhận tín hiệu thưởng, thay vì nhận nhãn đúng cho từng đầu vào. Giáo trình *Biểu diễn & Căn chỉnh* trình bày dạng này.
+
+Bảng sau xếp các chương của giáo trình theo cách phân loại trên.
 
 | | Có nhãn $y$ | Không có nhãn |
 |---|---|---|
-| **Đoán một số** | hồi quy (Chương 4) | — |
-| **Đoán một lớp** | phân loại (Chương 6, 7, 13) | phân cụm (Chương 15) |
-| **Tìm cấu trúc** | LDA (Mục 14.4) | PCA, SVD (Chương 14) |
-| **Điền chỗ trống** | — | phân rã ma trận (Chương 16) |
+| Dự đoán một số thực | hồi quy (Chương 4) | |
+| Dự đoán một lớp | phân loại (Chương 6, 7, 13) | phân cụm (Chương 15) |
+| Tìm cấu trúc, giảm chiều | LDA (Mục 14.4) | PCA, SVD (Chương 14) |
+| Điền giá trị còn thiếu | | phân rã ma trận (Chương 16) |
 
-Ranh giới này không cứng như bảng gợi ý. Hệ gợi ý ở Chương 16 có "nhãn" là các ô đánh giá đã quan sát được, nhưng phần lớn ma trận lại trống — nó nằm giữa hai cột. Và Chương 10 sẽ cho thấy rất nhiều thuật toán ở cả hai cột đều là **ước lượng hợp lý cực đại** dưới các giả thiết phân phối khác nhau, tức chúng có chung một gốc.
+Ranh giới giữa hai cột không cứng. Trong hệ thống gợi ý ở Chương 16, các ô đánh giá đã biết đóng vai trò nhãn, nhưng phần lớn ma trận là ô trống cần điền, nên bài toán nằm giữa hai loại. Ngoài ra còn các dạng lai như học bán giám sát (một phần nhỏ dữ liệu có nhãn) và học tự giám sát (nhãn được tạo ra từ chính dữ liệu, ví dụ đoán từ tiếp theo trong câu). Học tự giám sát là cách các mô hình ngôn ngữ lớn được huấn luyện, và được trình bày trong giáo trình *Biểu diễn & Căn chỉnh*.
 
-### 1.3. Ba câu hỏi phải trả lời trước khi chọn thuật toán
+### 1.3. Các yếu tố cần xét trước khi chọn thuật toán
 
-Trước khi nghĩ tới mô hình nào, có ba câu hỏi quyết định nhiều hơn:
+Trước khi chọn một mô hình cụ thể, có ba câu hỏi về dữ liệu và mục tiêu ảnh hưởng tới lựa chọn nhiều hơn bản thân thuật toán.
 
-**Dữ liệu có bao nhiêu mẫu so với bao nhiêu đặc trưng?** Tỉ lệ $n/d$ quyết định gần như mọi thứ. $n \gg d$ thì mô hình linh hoạt được; $n \approx d$ hoặc $n < d$ thì bắt buộc phải phạt chuẩn mạnh (Chương 9), và một số phương pháp sụp đổ hẳn — Mục 4.3 cho thấy phương trình chuẩn tắc không giải được khi các cột phụ thuộc tuyến tính.
+**Số điểm dữ liệu so với số đặc trưng.** Tỉ lệ $n/d$ quyết định mô hình được phép linh hoạt tới mức nào. Khi $n$ lớn hơn $d$ rất nhiều, ta có thể dùng mô hình nhiều tham số mà ít lo overfitting. Khi $n$ xấp xỉ hoặc nhỏ hơn $d$, regularization trở thành bắt buộc (Chương 9), và một số phương pháp không dùng được nữa: Mục 4.3 cho thấy phương trình chuẩn của hồi quy tuyến tính không có nghiệm duy nhất khi các cột của $X$ phụ thuộc tuyến tính, điều chắc chắn xảy ra khi $d > n$.
 
-**Quan hệ cần học có gì đặc biệt về cấu trúc?** Ảnh có tính cục bộ và bất biến dịch chuyển; chuỗi có thứ tự; dữ liệu bảng thì không có gì cả. Đây là chỗ mà mô hình tuyến tính và cây quyết định thường thắng mạng nơ-ron trên dữ liệu bảng — không có cấu trúc để mạng sâu khai thác.
+**Cấu trúc của dữ liệu.** Ảnh có tính cục bộ (điểm ảnh gần nhau liên quan với nhau) và bất biến theo dịch chuyển (con mèo ở góc trái hay góc phải vẫn là con mèo). Văn bản và chuỗi thời gian có thứ tự. Dữ liệu dạng bảng, như bảng thông tin khách hàng, không có cấu trúc nào như vậy: đổi thứ tự các cột không làm thay đổi ý nghĩa. Mạng nơ-ron tích chập và Transformer mạnh vì khai thác được cấu trúc của ảnh và chuỗi. Trên dữ liệu dạng bảng, mô hình tuyến tính và các mô hình dựa trên cây quyết định thường cho kết quả tương đương hoặc tốt hơn mạng nơ-ron với chi phí thấp hơn nhiều.
 
-**Ta cần dự báo hay cần giải thích?** Hai mục tiêu này khác nhau, và đôi khi ngược nhau. Mục 4.4 đo được một trường hợp rất rõ: khi hai đặc trưng gần cộng tuyến, **hệ số dao động gấp 25 lần trong khi dự báo gần như không đổi**. Nếu chỉ cần dự báo thì không việc gì; nếu cần nói "đặc trưng này ảnh hưởng bao nhiêu" thì con số ấy vô nghĩa.
+**Mục tiêu là dự đoán hay giải thích.** Có bài toán chỉ cần dự đoán đúng, ví dụ xếp hạng quảng cáo. Có bài toán cần trả lời câu hỏi "đặc trưng này ảnh hưởng tới kết quả bao nhiêu", ví dụ đánh giá tác dụng của một chính sách. Hai mục tiêu có thể dẫn tới hai lựa chọn khác nhau. Mục 4.4 đo một trường hợp cụ thể: khi hai đặc trưng gần như trùng nhau, độ dao động của hệ số hồi quy tăng khoảng 25 lần trong khi độ dao động của dự đoán gần như không đổi. Nếu chỉ cần dự đoán thì hiện tượng này vô hại; nếu cần đọc ý nghĩa của hệ số thì các hệ số đó không đáng tin.
 
-### 1.4. Tài liệu này đứng ở đâu trong bộ bốn giáo trình
+### 1.4. Vị trí của giáo trình trong lộ trình
+
+Giáo trình này là chặng đầu của một lộ trình sáu giáo trình, xây dựng theo roadmap *AI Engineer* của roadmap.sh và bổ sung phần kiến thức nền mà roadmap đó giả định người học đã có.
 
 ![Hình 13](figs/nt13_mach.png)
 
-**Hình 13.** Bốn giáo trình trong repo đọc như một mạch. Mũi tên là thứ tự ít phải quay lại nhất, không phải thứ tự bắt buộc.
+**Hình 13.** Sáu giáo trình của lộ trình và thứ tự đọc đề nghị. Mũi tên chỉ thứ tự ít phải quay lại nhất, không phải thứ tự bắt buộc.
 
-Cụ thể mối nối giữa tài liệu này và các tài liệu kia:
+Các kiến thức của giáo trình này được dùng lại ở những chỗ sau:
 
-- **Chương 5 (gradient descent)** ở đây dựng nền cho [Chương 5 của *Mô hình & Kiến trúc*](models-ch05.html), nơi cùng một ý tưởng được mở rộng thành momentum, Adam và lan truyền ngược.
-- **Chương 6 (hồi quy logistic)** là trường hợp một lớp của mạng nơ-ron: [Chương 4 của *Mô hình & Kiến trúc*](models-ch04.html) mở đầu đúng bằng câu "hồi quy logistic chồng lên nhau thì được gì".
-- **Chương 9 (phạt chuẩn)** và **Chương 10 (MAP)** giải thích vì sao weight decay tồn tại, thứ mà [Chương 5 của *Mô hình & Kiến trúc*](models-ch05.html) dùng như một mặc định.
-- **Chương 8 (đánh giá)** là nền cho [Chương 6 của *MLOps*](mlops-ch06.html), nơi bàn đánh giá theo lát cắt và ML Test Score.
-- **Chương 14 (PCA, SVD)** cho công cụ để đọc [Chương 11 của *Quantization*](ch11.html), nơi các phương pháp như GPTQ dựa trên phân rã ma trận.
+- Gradient descent ở Chương 5 là nền cho [Chương 5 của *Học sâu*](models-ch05.html), nơi thuật toán được mở rộng thành momentum, Adam và lan truyền ngược qua nhiều lớp.
+- Hồi quy logistic ở Chương 6 là một mạng nơ-ron một lớp. [Chương 4 của *Học sâu*](models-ch04.html) bắt đầu bằng việc chồng nhiều lớp như vậy lên nhau.
+- Regularization ở Chương 9 và ước lượng MAP ở Chương 10 giải thích nguồn gốc của weight decay, kỹ thuật được dùng mặc định khi huấn luyện mạng sâu ([Chương 5 của *Học sâu*](models-ch05.html)).
+- Các độ đo đánh giá ở Chương 8 là nền cho việc đánh giá mô hình trong sản xuất ở [Chương 6 của *MLOps*](mlops-ch06.html).
+- Tích vô hướng, cosine và PCA ở Chương 2 và Chương 14 là công cụ để hiểu embedding và tìm kiếm vector trong giáo trình *Biểu diễn & Căn chỉnh* và *Ứng dụng LLM*.
+- SVD ở Mục 2.6 là công cụ để đọc [Chương 11 của *Quantization*](ch11.html), nơi các phương pháp như GPTQ dựa trên phân rã ma trận.
+
+### 1.5. Quy trình giải một bài toán học máy
+
+Các chương sau đi sâu vào từng thuật toán. Mục này mô tả quy trình bao quanh thuật toán, vì trên thực tế phần lớn lỗi nằm ở quy trình chứ không nằm ở thuật toán.
+
+1. **Xác định bài toán và thước đo.** Viết rõ đầu vào, đầu ra và thước đo thành công trước khi đụng tới dữ liệu. Thước đo phải phản ánh chi phí thật: với bài toán phát hiện gian lận, bỏ sót một ca gian lận thường đắt hơn nhiều so với báo động nhầm, nên độ chính xác không phải thước đo phù hợp (Mục 8.1).
+2. **Thu thập và chia dữ liệu.** Chia dữ liệu thành tập huấn luyện, tập xác thực và tập kiểm tra ngay từ đầu. Tập huấn luyện dùng để học tham số; tập xác thực dùng để chọn siêu tham số và so sánh mô hình; tập kiểm tra chỉ dùng một lần ở cuối để báo cáo kết quả. Cách chia phải khớp với cách mô hình sẽ được dùng: dữ liệu có yếu tố thời gian thì chia theo thời gian (Mục 8.5).
+3. **Dựng mô hình cơ sở.** Bắt đầu bằng mô hình đơn giản nhất có thể: đoán giá trị trung bình, đoán lớp phổ biến nhất, hoặc một mô hình tuyến tính. Mô hình cơ sở cho biết một mô hình phức tạp hơn có thật sự mang lại gì hay không.
+4. **Xây dựng đặc trưng và huấn luyện.** Chuẩn hoá đặc trưng, mã hoá biến hạng mục, xử lý giá trị thiếu. Mọi phép biến đổi có tham số (như trung bình và độ lệch chuẩn khi chuẩn hoá) chỉ được ước lượng trên tập huấn luyện.
+5. **Đánh giá và điều chỉnh.** Dùng tập xác thực hoặc cross-validation (Mục 9.5) để chọn siêu tham số. Xem xét lỗi theo từng nhóm dữ liệu chứ không chỉ một con số tổng.
+6. **Kiểm tra lần cuối và triển khai.** Đo trên tập kiểm tra đúng một lần. Sau khi triển khai, mô hình cần được giám sát vì phân phối dữ liệu thay đổi theo thời gian. Giáo trình *MLOps* trình bày phần này.
+
+> **Lưu ý.** Nếu tập kiểm tra được dùng nhiều lần để chọn mô hình, nó trở thành một tập xác thực thứ hai và con số báo cáo sẽ lạc quan hơn thực tế. Đây là lỗi phổ biến nhất khi so sánh mô hình, và Mục 9.5 nói cách tránh.
 
 ---
 
-## 2. Đại số tuyến tính cho học máy
+## 2. Đại số tuyến tính
 
-### 2.1. Chỉ cần đúng bằng này
+Mọi thuật toán trong giáo trình đều viết bằng ngôn ngữ vector và ma trận. Chương này nhắc lại những khái niệm được dùng ở các chương sau, kèm lý do chúng cần thiết. Người đã vững đại số tuyến tính có thể đọc lướt bảng ở Mục 2.1 rồi chuyển sang Chương 3.
 
-Chương này không ôn lại đại số tuyến tính. Nó chỉ nêu **những thứ sẽ được dùng ở các chương sau**, cùng lý do chúng được dùng. Ai đã vững có thể đọc lướt bảng dưới rồi sang Chương 3.
+### 2.1. Vector, ma trận và hạng
 
-| Khái niệm | Dùng ở đâu trong tài liệu này |
+Một **vector** $x \in \mathbb{R}^d$ là một danh sách $d$ số thực, quy ước viết thành cột. Trong học máy, mỗi điểm dữ liệu là một vector: một căn nhà được mô tả bằng diện tích, số phòng, khoảng cách tới trung tâm là một vector ba chiều. Một **ma trận** $X \in \mathbb{R}^{n \times d}$ là một bảng $n$ hàng, $d$ cột; ma trận dữ liệu xếp $n$ điểm dữ liệu thành $n$ hàng.
+
+Tích ma trận với vector có hai cách đọc, và cả hai đều được dùng:
+
+$$Xw = \begin{pmatrix} x_1^\top w \\ \vdots \\ x_n^\top w \end{pmatrix} = w_1 X_{:,1} + w_2 X_{:,2} + \dots + w_d X_{:,d}.$$
+
+Cách đọc theo hàng cho biết $Xw$ là vector chứa dự đoán của mô hình tuyến tính cho từng điểm dữ liệu. Cách đọc theo cột cho biết $Xw$ là một **tổ hợp tuyến tính** của các cột của $X$. Tập mọi tổ hợp tuyến tính như vậy gọi là **không gian cột** của $X$, và hồi quy tuyến tính chính là tìm điểm trong không gian cột gần $y$ nhất (Chương 4).
+
+> **Định nghĩa 2.1 (Hạng).** **Hạng** của ma trận $X$, ký hiệu $\operatorname{rank}(X)$, là số cột độc lập tuyến tính lớn nhất của $X$ (bằng số hàng độc lập tuyến tính lớn nhất). Ma trận $X \in \mathbb{R}^{n \times d}$ gọi là **đủ hạng cột** nếu $\operatorname{rank}(X) = d$, tức không cột nào là tổ hợp tuyến tính của các cột còn lại.
+
+Vì hạng không vượt quá số hàng, một ma trận có nhiều cột hơn hàng ($d > n$) không thể đủ hạng cột. Đây là lý do toán học của nhận xét ở Mục 1.3 rằng dữ liệu có nhiều đặc trưng hơn số điểm cần được xử lý đặc biệt.
+
+Bảng sau liệt kê các khái niệm của chương và nơi chúng được dùng.
+
+| Khái niệm | Dùng ở đâu |
 |---|---|
 | Tích vô hướng $w^\top x$ | mọi mô hình tuyến tính (Chương 4, 6, 13) |
-| Chuẩn $\|w\|_2$, $\|w\|_1$ | phạt chuẩn (Chương 9), lề SVM (Chương 13) |
-| Hạng của ma trận | khi nào phương trình chuẩn tắc giải được (Mục 4.3) |
+| Chuẩn $\|w\|_2$, $\|w\|_1$ | regularization (Chương 9), lề của SVM (Chương 13) |
+| Hạng của ma trận | điều kiện có nghiệm của phương trình chuẩn (Mục 4.3) |
 | Trị riêng, vector riêng | PCA (Chương 14), số điều kiện (Mục 5.3) |
 | Ma trận xác định dương | hàm lồi bậc hai (Chương 11) |
-| Phân rã SVD | PCA, ridge, phân rã ma trận (Chương 14, 16) |
-| Đạo hàm theo vector | mọi phép suy ra công thức cập nhật |
+| Phân tích SVD | PCA, ridge, phân rã ma trận (Chương 9, 14, 16) |
+| Đạo hàm theo vector | mọi phép suy ra công thức cập nhật tham số |
 
-### 2.2. Tích vô hướng là phép đo sự giống nhau
+### 2.2. Tích vô hướng và siêu phẳng
 
-$$w^\top x = \sum_{j=1}^{d} w_j x_j = \|w\|\,\|x\|\cos\vartheta.$$
+> **Định nghĩa 2.2 (Tích vô hướng).** Tích vô hướng của hai vector $w, x \in \mathbb{R}^d$ là
+> $$w^\top x = \sum_{j=1}^{d} w_j x_j = \|w\|_2\,\|x\|_2\cos\vartheta,$$
+> trong đó $\vartheta$ là góc giữa hai vector.
 
-Hai cách đọc, và cả hai đều cần:
+Hai cách viết ứng với hai cách hiểu. Theo cách đại số, $w^\top x$ là tổng có trọng số của các đặc trưng: đặc trưng nào có trọng số lớn thì đóng góp nhiều vào kết quả. Theo cách hình học, $w^\top x$ bằng độ dài hình chiếu của $x$ lên hướng của $w$ nhân với độ dài của $w$. Khi hai vector cùng hướng, tích vô hướng lớn và dương; khi vuông góc, nó bằng 0; khi ngược hướng, nó âm. Chia cho tích hai độ dài ta được $\cos\vartheta$, gọi là **độ tương đồng cosine**, thước đo dùng khắp nơi khi so sánh embedding.
 
-- **Đại số:** tổng có trọng số của các đặc trưng. Đây là cách đọc tự nhiên khi $w$ là "mức quan trọng" của từng đặc trưng.
-- **Hình học:** phép chiếu của $x$ lên hướng $w$, nhân với độ dài $w$. Đây là cách đọc cần thiết để hiểu vì sao $w^\top x + b = 0$ là một **siêu phẳng** có vector pháp tuyến $w$ — nền tảng của toàn bộ Chương 13.
+Cách hiểu hình học cho biết tập nghiệm của phương trình $w^\top x + b = 0$ là gì. Đó là tập các điểm mà hình chiếu lên hướng $w$ có cùng một giá trị, tức một **siêu phẳng** vuông góc với $w$. Trong không gian hai chiều, siêu phẳng là một đường thẳng; trong ba chiều, là một mặt phẳng. Vector $w$ gọi là **vector pháp tuyến** của siêu phẳng. Mọi bộ phân loại tuyến tính ở Chương 6 và Chương 13 đều chia không gian bằng một siêu phẳng như vậy: phía $w^\top x + b > 0$ là một lớp, phía còn lại là lớp kia.
 
-Khoảng cách từ điểm $x_0$ tới siêu phẳng ấy là
+> **Định lý 2.1 (Khoảng cách từ một điểm tới siêu phẳng).** Khoảng cách từ điểm $x_0$ tới siêu phẳng $w^\top x + b = 0$ là
+> $$\operatorname{dist}(x_0) = \frac{|w^\top x_0 + b|}{\|w\|_2}.$$
 
-$$\frac{|w^\top x_0 + b|}{\|w\|}.$$
+> **Chứng minh.** Gọi $x_p$ là hình chiếu vuông góc của $x_0$ lên siêu phẳng. Vì $x_0 - x_p$ vuông góc với siêu phẳng nên nó cùng phương với $w$: $x_0 - x_p = t\,w/\|w\|$ với $|t|$ là khoảng cách cần tìm. Nhân vô hướng hai vế với $w$ và dùng $w^\top x_p = -b$ ta được $w^\top x_0 + b = t\,\|w\|$, suy ra $|t| = |w^\top x_0 + b|/\|w\|$.
 
-Công thức này xuất hiện lại ở Mục 13.2 và là toàn bộ lý do SVM tối thiểu hoá $\|w\|$.
+> **Ví dụ 2.1.** Cho $w = (3, 4)$, $b = -5$ và điểm $x_0 = (2, 1)$. Ta có $w^\top x_0 + b = 6 + 4 - 5 = 5$ và $\|w\| = \sqrt{9 + 16} = 5$, nên khoảng cách từ $x_0$ tới đường thẳng $3x_1 + 4x_2 = 5$ bằng 1. Dấu của $w^\top x_0 + b$ là dương, nên $x_0$ nằm về phía mà $w$ chỉ tới.
 
-### 2.3. Các chuẩn, và vì sao chọn chuẩn nào lại quan trọng
+Công thức khoảng cách xuất hiện lại ở Mục 13.2. Trong SVM, khoảng cách từ điểm dữ liệu gần nhất tới siêu phẳng tỉ lệ nghịch với $\|w\|$, nên cực đại khoảng cách đó tương đương với cực tiểu $\|w\|$.
+
+### 2.3. Chuẩn của vector
+
+**Chuẩn** là cách đo độ dài của một vector. Ba chuẩn hay gặp:
 
 $$\|w\|_1 = \sum_j |w_j|, \qquad \|w\|_2 = \sqrt{\textstyle\sum_j w_j^2}, \qquad \|w\|_\infty = \max_j |w_j|.$$
 
-Nghe như ba cách đo cùng một thứ, nhưng lựa chọn giữa $\ell_1$ và $\ell_2$ cho ra hai thuật toán có hành vi khác hẳn nhau. Mục 9.4 đo được điều ấy: phạt $\ell_2$ **không bao giờ** đưa một hệ số về đúng 0, còn phạt $\ell_1$ thì có — ở $\lambda = 100$ nó đưa đúng 9 trong 12 hệ số về 0, mà mô hình sinh dữ liệu cũng có đúng 9 hệ số bằng 0.
+Chuẩn $\ell_2$ là độ dài Euclid thông thường. Chuẩn $\ell_1$ là tổng trị tuyệt đối, còn gọi là khoảng cách Manhattan khi dùng để đo khoảng cách giữa hai điểm (đi theo các khối nhà vuông góc). Chuẩn $\ell_\infty$ là thành phần có trị tuyệt đối lớn nhất. Ví dụ với $w = (3, -4, 0)$: $\|w\|_1 = 7$, $\|w\|_2 = 5$, $\|w\|_\infty = 4$.
 
-Lý do nằm ở đạo hàm tại gốc: $|w|$ có **điểm gãy** ở 0 nên nghiệm bị "dính" vào đó, còn $w^2$ trơn nên lực kéo về 0 yếu dần khi đã gần 0.
+Cách dễ nhất để thấy khác biệt giữa các chuẩn là vẽ **quả cầu đơn vị** $\{w : \|w\| \le 1\}$ trong hai chiều. Với $\ell_2$ đó là hình tròn. Với $\ell_1$ đó là hình vuông xoay 45 độ, có bốn đỉnh nằm trên các trục toạ độ. Với $\ell_\infty$ đó là hình vuông có cạnh song song với các trục.
 
-### 2.4. Trị riêng: hướng mà ma trận chỉ kéo dãn
+Nghe như ba cách đo cùng một thứ, nhưng khi dùng làm thành phần regularization, chọn $\ell_1$ hay $\ell_2$ cho ra hai thuật toán có hành vi khác nhau về bản chất. Mục 9.4 đo được rằng phạt $\ell_2$ (ridge) không bao giờ đưa một hệ số về đúng 0, còn phạt $\ell_1$ (lasso) thì có: ở $\lambda = 100$, lasso đưa đúng 9 trong 12 hệ số về 0, trùng với số hệ số bằng 0 của mô hình sinh ra dữ liệu. Nguyên nhân hình học là các đỉnh nhọn của quả cầu $\ell_1$ nằm trên trục toạ độ, và nghiệm tối ưu hay rơi vào các đỉnh đó; nguyên nhân giải tích là hàm $|w|$ không khả vi tại 0. Mục 9.4 trình bày cả hai cách giải thích.
 
-$$A v = \lambda v.$$
+### 2.4. Trị riêng và vector riêng
 
-Vector riêng là hướng mà phép biến đổi $A$ **không làm đổi hướng**, chỉ kéo dãn hệ số $\lambda$. Với ma trận đối xứng — và mọi ma trận hiệp phương sai đều đối xứng — ta luôn có $d$ vector riêng trực giao nhau và $d$ trị riêng thực. Đây là định lý phổ, và nó là toàn bộ nền móng của PCA.
+> **Định nghĩa 2.3 (Trị riêng, vector riêng).** Cho ma trận vuông $A \in \mathbb{R}^{d \times d}$. Số $\lambda$ là một **trị riêng** và vector khác không $v$ là một **vector riêng** tương ứng nếu
+> $$A v = \lambda v.$$
 
-Hai đại lượng dùng liên tục về sau:
+Phép nhân với $A$ nói chung vừa xoay vừa kéo dãn một vector. Vector riêng là những hướng đặc biệt mà $A$ không xoay, chỉ kéo dãn với hệ số $\lambda$ (hoặc lật ngược nếu $\lambda < 0$). Trong học máy, ma trận ta gặp nhiều nhất là ma trận hiệp phương sai và ma trận $X^\top X$, cả hai đều đối xứng. Với ma trận đối xứng có một kết quả rất mạnh:
+
+> **Định lý 2.2 (Định lý phổ).** Mọi ma trận đối xứng thực $A \in \mathbb{R}^{d\times d}$ có $d$ trị riêng thực $\lambda_1, \dots, \lambda_d$ và một hệ $d$ vector riêng trực chuẩn $v_1, \dots, v_d$. Viết $V = [v_1, \dots, v_d]$ và $\Lambda = \operatorname{diag}(\lambda_1, \dots, \lambda_d)$ thì
+> $$A = V \Lambda V^\top = \sum_{i=1}^{d} \lambda_i v_i v_i^\top.$$
+
+Định lý phổ nói rằng một ma trận đối xứng chỉ làm một việc đơn giản: trong hệ toạ độ gồm các vector riêng, nó kéo dãn mỗi trục một hệ số $\lambda_i$. Đây là nền tảng của PCA ở Chương 14: các thành phần chính chính là các vector riêng của ma trận hiệp phương sai.
+
+> **Ví dụ 2.2.** Ma trận $A = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}$ có hai trị riêng $\lambda_1 = 3$ và $\lambda_2 = 1$, với vector riêng $v_1 = \tfrac{1}{\sqrt2}(1, 1)$ và $v_2 = \tfrac{1}{\sqrt2}(1, -1)$. Kiểm tra: $A v_1 = \tfrac{1}{\sqrt2}(3, 3) = 3 v_1$. Như vậy $A$ kéo dãn gấp ba theo đường chéo $x_1 = x_2$ và giữ nguyên theo đường chéo $x_1 = -x_2$.
+
+Hai đẳng thức dùng thường xuyên về sau:
 
 $$\operatorname{tr}(A) = \sum_i \lambda_i, \qquad \det(A) = \prod_i \lambda_i.$$
 
-**Số điều kiện** của một ma trận đối xứng xác định dương:
+Với ma trận ở Ví dụ 2.2: vết bằng $2 + 2 = 4 = 3 + 1$ và định thức bằng $4 - 1 = 3 = 3 \times 1$.
 
-$$\kappa(A) = \frac{\lambda_{\max}}{\lambda_{\min}}.$$
+> **Định nghĩa 2.4 (Số điều kiện).** Với ma trận đối xứng xác định dương $A$, **số điều kiện** là tỉ số giữa trị riêng lớn nhất và nhỏ nhất:
+> $$\kappa(A) = \frac{\lambda_{\max}}{\lambda_{\min}} \ge 1.$$
 
-Con số này quyết định gradient descent chạy nhanh hay chậm — Mục 5.3 đo được rằng số vòng lặp tỉ lệ thuận với $\kappa$, và với $\kappa = 10\,000$ thì cần **92 104 vòng** thay vì 1 vòng khi $\kappa = 1$.
+Số điều kiện đo độ "dẹt" của ma trận: $\kappa = 1$ nghĩa là $A$ kéo dãn mọi hướng như nhau, $\kappa$ lớn nghĩa là có hướng bị kéo rất mạnh và có hướng gần như bị ép dẹt. Đại lượng này quyết định tốc độ của gradient descent. Mục 5.3 đo được rằng số vòng lặp cần thiết tỉ lệ thuận với $\kappa$: khi $\kappa$ tăng từ 1 lên 10 000, số vòng lặp tăng từ 1 lên 92 104.
 
 ### 2.5. Ma trận xác định dương
 
-$A$ đối xứng gọi là **xác định dương** nếu $z^\top A z > 0$ với mọi $z \neq 0$; tương đương: mọi trị riêng đều dương. Ba chỗ cần đến:
+> **Định nghĩa 2.5 (Ma trận xác định dương).** Ma trận đối xứng $A$ gọi là **xác định dương** nếu $z^\top A z > 0$ với mọi $z \neq 0$, và **nửa xác định dương** nếu $z^\top A z \ge 0$ với mọi $z$. Tương đương: mọi trị riêng của $A$ dương (tương ứng, không âm).
 
-1. Hàm bậc hai $f(z) = \tfrac12 z^\top A z$ **lồi** khi và chỉ khi $A$ nửa xác định dương (Chương 11).
-2. $X^\top X$ luôn nửa xác định dương, và **xác định dương khi và chỉ khi $X$ đủ hạng cột** — đây đúng là điều kiện để phương trình chuẩn tắc giải được (Mục 4.3).
-3. Thêm $\lambda I$ vào một ma trận nửa xác định dương làm nó thành xác định dương với mọi $\lambda > 0$. Đây là lý do toán học khiến ridge **luôn** có nghiệm duy nhất kể cả khi OLS thì không (Mục 9.2).
+Sự tương đương với trị riêng suy ra ngay từ định lý phổ: viết $z$ trong hệ toạ độ vector riêng, $z = \sum_i c_i v_i$, thì $z^\top A z = \sum_i \lambda_i c_i^2$. Tổng này dương với mọi $z \ne 0$ khi và chỉ khi mọi $\lambda_i > 0$.
 
-### 2.6. Phân rã SVD
+Ba chỗ các chương sau cần tới khái niệm này:
 
-Mọi ma trận $X \in \mathbb{R}^{n \times d}$ đều viết được thành
+1. Hàm bậc hai $f(z) = \tfrac12 z^\top A z + c^\top z$ là hàm lồi khi và chỉ khi $A$ nửa xác định dương (Chương 11). Khi $A$ xác định dương, $f$ có đúng một điểm cực tiểu.
+2. Ma trận $X^\top X$ luôn nửa xác định dương, vì $z^\top X^\top X z = \|Xz\|_2^2 \ge 0$. Nó xác định dương khi và chỉ khi $Xz \ne 0$ với mọi $z \ne 0$, tức khi $X$ đủ hạng cột. Đây chính là điều kiện để phương trình chuẩn của hồi quy tuyến tính có nghiệm duy nhất (Mục 4.3).
+3. Nếu $A$ nửa xác định dương và $\lambda > 0$ thì $A + \lambda I$ xác định dương, vì $z^\top (A + \lambda I) z = z^\top A z + \lambda\|z\|^2 > 0$ với mọi $z \ne 0$. Các trị riêng của $A + \lambda I$ là $\lambda_i + \lambda$, đều lớn hơn hoặc bằng $\lambda$. Đây là lý do hồi quy ridge luôn có nghiệm duy nhất, kể cả khi hồi quy tuyến tính thông thường không có (Mục 9.2).
 
-$$X = U D V^\top,$$
+### 2.6. Phân tích giá trị suy biến (SVD)
 
-với $U$, $V$ trực giao và $D$ đường chéo chứa các **trị kỳ dị** $d_1 \geq d_2 \geq \dots \geq 0$. Ba hệ quả dùng về sau:
+Định lý phổ chỉ áp dụng cho ma trận vuông đối xứng. Ma trận dữ liệu $X$ thường chữ nhật, và công cụ tương ứng cho nó là SVD.
 
-- $X^\top X = V D^2 V^\top$, nên **trị riêng của ma trận hiệp phương sai bằng $d_i^2/(n-1)$**. Mục 14.2 kiểm chứng điều này bằng số: hai đường tính cho kết quả lệch nhau $7{,}1 \times 10^{-15}$.
-- $\kappa(X^\top X) = \kappa(X)^2$ — số điều kiện **bình phương lên** khi lập phương trình chuẩn tắc. Đây là lý do thực tế người ta giải bình phương tối thiểu bằng phân rã QR chứ không bằng $(X^\top X)^{-1}X^\top y$.
-- Cắt bớt $D$ còn $k$ giá trị lớn nhất cho **xấp xỉ hạng $k$ tốt nhất** theo chuẩn Frobenius (định lý Eckart–Young). Mục 14.3 kiểm chứng đẳng thức này tới $10^{-13}$.
+> **Định lý 2.3 (Phân tích giá trị suy biến).** Mọi ma trận $X \in \mathbb{R}^{n \times d}$ viết được dưới dạng
+> $$X = U D V^\top,$$
+> trong đó $U \in \mathbb{R}^{n \times n}$ và $V \in \mathbb{R}^{d \times d}$ là ma trận trực giao, còn $D \in \mathbb{R}^{n \times d}$ có các phần tử trên đường chéo $d_1 \ge d_2 \ge \dots \ge 0$ và bằng 0 ở mọi chỗ khác. Các số $d_i$ gọi là **giá trị suy biến** của $X$.
 
-### 2.7. Đạo hàm theo vector: bốn công thức đủ dùng
+Về mặt hình học, SVD nói rằng mọi phép biến đổi tuyến tính đều gồm ba bước: xoay (nhân $V^\top$), kéo dãn theo các trục toạ độ (nhân $D$), rồi xoay lần nữa (nhân $U$). Ba hệ quả của SVD được dùng ở các chương sau:
 
-| Hàm | Gradient |
+- **Liên hệ với trị riêng.** $X^\top X = V D^\top D\, V^\top$, nên các vector riêng của $X^\top X$ là các cột của $V$ và các trị riêng là $d_i^2$. Khi $X$ đã được trừ trung bình theo cột, ma trận hiệp phương sai mẫu là $X^\top X/(n-1)$, nên trị riêng của nó bằng $d_i^2/(n-1)$. Mục 14.2 kiểm chứng điều này bằng số: tính theo hai cách, kết quả lệch nhau $7{,}1 \times 10^{-15}$.
+- **Số điều kiện bị bình phương.** Vì trị riêng của $X^\top X$ là bình phương giá trị suy biến của $X$, ta có $\kappa(X^\top X) = \kappa(X)^2$, trong đó $\kappa(X) = d_1/d_{\min}$. Nếu $\kappa(X) = 100$ thì $\kappa(X^\top X) = 10^4$. Khi giải một hệ tuyến tính có số điều kiện $\kappa$ bằng số thực dấu phẩy động, ta có thể mất khoảng $\log_{10}\kappa$ chữ số có nghĩa. Lập $X^\top X$ vì vậy làm mất gấp đôi số chữ số so với làm việc trực tiếp trên $X$. Đây là lý do các thư viện giải bài toán bình phương tối thiểu bằng phân tích QR hoặc SVD của $X$ thay vì dùng công thức $(X^\top X)^{-1}X^\top y$.
+- **Xấp xỉ hạng thấp tốt nhất.** Giữ lại $k$ giá trị suy biến lớn nhất và đặt các giá trị còn lại bằng 0 cho ma trận hạng $k$ gần $X$ nhất theo chuẩn Frobenius (định lý Eckart–Young). Mục 14.3 kiểm chứng đẳng thức sai số của định lý này tới $10^{-13}$.
+
+### 2.7. Đạo hàm theo vector
+
+Hầu hết thuật toán học máy tìm tham số bằng cách cho gradient của hàm mất mát bằng 0 hoặc đi ngược hướng gradient. Vì vậy cần tính được đạo hàm của hàm nhiều biến.
+
+> **Định nghĩa 2.6 (Gradient).** Với hàm $f: \mathbb{R}^d \to \mathbb{R}$, **gradient** của $f$ tại $w$ là vector các đạo hàm riêng
+> $$\nabla_w f = \Big(\frac{\partial f}{\partial w_1}, \dots, \frac{\partial f}{\partial w_d}\Big)^\top.$$
+> Ma trận các đạo hàm riêng cấp hai $\big[\partial^2 f / \partial w_j \partial w_k\big]$ gọi là **ma trận Hessian**, ký hiệu $\nabla^2 f$.
+
+Bốn công thức sau đủ cho toàn bộ giáo trình:
+
+| Hàm $f(w)$ | Gradient $\nabla_w f$ |
 |---|---|
 | $a^\top w$ | $a$ |
 | $w^\top A w$ | $(A + A^\top)w$, bằng $2Aw$ khi $A$ đối xứng |
 | $\|w\|_2^2 = w^\top w$ | $2w$ |
 | $\|y - Xw\|_2^2$ | $-2X^\top(y - Xw)$ |
 
-Công thức cuối là công thức được dùng nhiều nhất trong cả tài liệu. Cho nó bằng 0 là ra ngay phương trình chuẩn tắc của Chương 4.
+Công thức cuối là công thức được dùng nhiều nhất, và suy ra được từ ba công thức đầu. Khai triển:
 
-> **Cách kiểm tra mọi công thức đạo hàm.** Đừng tin công thức mình vừa suy ra — hãy so nó với sai phân số. Mục 5.5 nêu cách làm đúng, kể cả cái bẫy khiến chọn $\varepsilon$ **quá nhỏ** lại cho kết quả tệ hơn.
+$$\|y - Xw\|_2^2 = (y - Xw)^\top(y - Xw) = y^\top y - 2\,(X^\top y)^\top w + w^\top (X^\top X)\, w.$$
+
+Số hạng đầu không phụ thuộc $w$ nên có gradient bằng 0. Số hạng thứ hai có dạng $a^\top w$ với $a = -2X^\top y$. Số hạng thứ ba có dạng $w^\top A w$ với $A = X^\top X$ đối xứng, nên gradient là $2X^\top X w$. Cộng lại:
+
+$$\nabla_w \|y - Xw\|_2^2 = -2X^\top y + 2X^\top X w = -2X^\top (y - Xw).$$
+
+Cho gradient này bằng 0 ta được phương trình chuẩn của Chương 4. Ma trận Hessian của hàm này là $2X^\top X$, nửa xác định dương theo Mục 2.5, nên hàm lồi và mọi điểm có gradient bằng 0 đều là cực tiểu.
+
+> **Lưu ý.** Công thức gradient tự suy ra bằng tay rất dễ sai dấu hoặc thiếu hệ số 2. Cách kiểm tra đáng tin là so sánh với đạo hàm tính bằng sai phân hữu hạn. Mục 5.5 trình bày cách làm và cách chọn bước sai phân $\varepsilon$, trong đó $\varepsilon$ quá nhỏ lại cho kết quả kém hơn.
 
 ---
 
-## 3. Xác suất và thống kê cho học máy
+## 3. Xác suất và thống kê
 
-### 3.1. Vì sao cần xác suất
+Dữ liệu thật luôn có nhiễu, và mô hình học từ một mẫu hữu hạn nên kết quả của nó cũng mang tính ngẫu nhiên. Chương này nhắc lại các khái niệm xác suất cần để mô tả sự không chắc chắn đó: kỳ vọng, phương sai, hiệp phương sai, phân phối Gauss, định lý Bayes, và khái niệm độ chệch của một ước lượng.
 
-Ba lý do cụ thể, và cả ba đều được dùng ở các chương sau:
+### 3.1. Vai trò của xác suất trong học máy
 
-1. **Để phát biểu "mô hình không chắc chắn".** Hồi quy logistic (Chương 6) không trả về nhãn mà trả về xác suất; sự khác biệt ấy quyết định cách chọn ngưỡng ở Chương 8.
-2. **Để giải thích hàm mất mát đến từ đâu.** Chương 10 cho thấy bình phương sai lệch và entropy chéo không phải hai lựa chọn tuỳ tiện — chúng là hợp lý cực đại dưới hai giả thiết nhiễu khác nhau.
-3. **Để giải thích phạt chuẩn đến từ đâu.** Mục 10.4 kiểm chứng bằng số rằng ridge **đúng bằng** MAP với tiên nghiệm Gauss.
+Xác suất xuất hiện trong giáo trình này theo ba cách.
+
+1. **Mô tả dự đoán không chắc chắn.** Hồi quy logistic (Chương 6) không chỉ trả về nhãn mà trả về xác suất một điểm thuộc lớp dương. Nhờ có xác suất, ta có thể chọn ngưỡng quyết định theo chi phí của từng loại sai (Chương 8).
+2. **Giải thích nguồn gốc của hàm mất mát.** Bình phương sai số và cross-entropy không phải hai lựa chọn tuỳ ý. Chương 10 chỉ ra rằng chúng là hệ quả của nguyên lý hợp lý cực đại dưới hai giả thiết khác nhau về nhiễu.
+3. **Giải thích nguồn gốc của regularization.** Mục 10.4 chỉ ra rằng hồi quy ridge trùng với ước lượng hậu nghiệm cực đại khi tiên nghiệm của trọng số là phân phối Gauss, và kiểm chứng điều này bằng số.
 
 ### 3.2. Kỳ vọng và phương sai
 
-$$\mathbb{E}[X] = \sum_x x\,p(x) \;\;\text{hoặc}\;\; \int x\,p(x)\,dx, \qquad \operatorname{Var}(X) = \mathbb{E}[(X - \mathbb{E}X)^2] = \mathbb{E}[X^2] - (\mathbb{E}X)^2.$$
+> **Định nghĩa 3.1 (Kỳ vọng, phương sai).** Với biến ngẫu nhiên $X$ có hàm xác suất (hoặc hàm mật độ) $p$, **kỳ vọng** của $X$ là
+> $$\mathbb{E}[X] = \sum_x x\,p(x) \quad \text{(rời rạc)}, \qquad \mathbb{E}[X] = \int x\,p(x)\,dx \quad \text{(liên tục)},$$
+> và **phương sai** của $X$ là $\operatorname{Var}(X) = \mathbb{E}\big[(X - \mathbb{E}X)^2\big] = \mathbb{E}[X^2] - (\mathbb{E}X)^2$.
 
-Bốn tính chất được dùng đi dùng lại:
+Kỳ vọng là giá trị trung bình nếu lặp lại phép thử rất nhiều lần. Phương sai đo mức phân tán quanh giá trị trung bình đó; căn bậc hai của nó là **độ lệch chuẩn**, có cùng đơn vị với $X$.
 
-$$\mathbb{E}[aX + b] = a\,\mathbb{E}[X] + b, \qquad \operatorname{Var}(aX + b) = a^2 \operatorname{Var}(X),$$
-$$\mathbb{E}[X + Y] = \mathbb{E}[X] + \mathbb{E}[Y] \;\text{(luôn đúng)}, \qquad \operatorname{Var}(X + Y) = \operatorname{Var}(X) + \operatorname{Var}(Y) \;\text{(chỉ khi độc lập)}.$$
+Các tính chất sau được dùng nhiều lần. Với hằng số $a, b$:
 
-Dòng cuối là chỗ hay sai nhất. Kỳ vọng thì cộng được vô điều kiện; phương sai thì **không**. Nếu $X$ và $Y$ có tương quan $\rho$ thì
+$$\mathbb{E}[aX + b] = a\,\mathbb{E}[X] + b, \qquad \operatorname{Var}(aX + b) = a^2 \operatorname{Var}(X).$$
 
-$$\operatorname{Var}(X + Y) = \operatorname{Var}(X) + \operatorname{Var}(Y) + 2\rho\sqrt{\operatorname{Var}(X)\operatorname{Var}(Y)}.$$
+Kỳ vọng của tổng luôn bằng tổng các kỳ vọng, không cần điều kiện gì: $\mathbb{E}[X + Y] = \mathbb{E}[X] + \mathbb{E}[Y]$. Phương sai của tổng thì phụ thuộc vào mức độ hai biến liên quan với nhau:
 
-Công thức này chính là toàn bộ lý thuyết của bagging — xem [Mục 3.3 của *Mô hình & Kiến trúc*](models-ch03.html), nơi nó giải thích vì sao lấy trung bình nhiều mô hình **tương quan** thì không giảm phương sai được bao nhiêu.
+$$\operatorname{Var}(X + Y) = \operatorname{Var}(X) + \operatorname{Var}(Y) + 2\operatorname{Cov}(X, Y),$$
+
+trong đó **hiệp phương sai** $\operatorname{Cov}(X, Y) = \mathbb{E}\big[(X - \mathbb{E}X)(Y - \mathbb{E}Y)\big]$. Chuẩn hoá hiệp phương sai bằng tích hai độ lệch chuẩn ta được **hệ số tương quan** $\rho = \operatorname{Cov}(X,Y)/(\sigma_X\sigma_Y) \in [-1, 1]$. Chỉ khi $X$ và $Y$ không tương quan ($\rho = 0$), chẳng hạn khi chúng độc lập, phương sai của tổng mới bằng tổng các phương sai.
+
+> **Ví dụ 3.1 (Trung bình của nhiều mô hình).** Giả sử có $n$ mô hình, dự đoán của mỗi mô hình là một biến ngẫu nhiên có phương sai $\sigma^2$, và mỗi cặp mô hình có hệ số tương quan $\rho$. Phương sai của trung bình $n$ dự đoán là
+> $$\operatorname{Var}\Big(\frac1n\sum_{i=1}^n X_i\Big) = \rho\,\sigma^2 + \frac{1-\rho}{n}\,\sigma^2.$$
+> Với $\sigma^2 = 1$ và $n = 10$: nếu các mô hình không tương quan ($\rho = 0$), phương sai giảm còn $0{,}1$; nếu $\rho = 0{,}5$, phương sai chỉ giảm còn $0{,}5 + 0{,}05 = 0{,}55$. Dù có thêm bao nhiêu mô hình, phương sai không xuống dưới $\rho\sigma^2$.
+
+Ví dụ này là cơ sở lý thuyết của phương pháp bagging và rừng ngẫu nhiên: lấy trung bình nhiều mô hình chỉ giảm phương sai hiệu quả khi các mô hình ít tương quan với nhau. Rừng ngẫu nhiên chọn ngẫu nhiên một tập con đặc trưng ở mỗi nhát cắt của cây chính là để giảm $\rho$. [Mục 3.3 của *Học sâu*](models-ch03.html) đo hiện tượng này trên dữ liệu.
 
 ### 3.3. Ma trận hiệp phương sai
 
-Với vector ngẫu nhiên $x \in \mathbb{R}^d$:
+Khi dữ liệu có nhiều chiều, ta cần biết phương sai của từng chiều và hiệp phương sai giữa mọi cặp chiều. Các con số đó được xếp vào một ma trận.
 
-$$\Sigma = \mathbb{E}\big[(x - \mu)(x - \mu)^\top\big], \qquad \Sigma_{jk} = \operatorname{Cov}(x_j, x_k).$$
+> **Định nghĩa 3.2 (Ma trận hiệp phương sai).** Với vector ngẫu nhiên $x \in \mathbb{R}^d$ có kỳ vọng $\mu$, **ma trận hiệp phương sai** là
+> $$\Sigma = \mathbb{E}\big[(x - \mu)(x - \mu)^\top\big] \in \mathbb{R}^{d \times d}, \qquad \Sigma_{jk} = \operatorname{Cov}(x_j, x_k).$$
+> Từ $n$ điểm dữ liệu, gọi $X_c$ là ma trận dữ liệu đã trừ trung bình của từng cột, ước lượng mẫu của $\Sigma$ là
+> $$\hat\Sigma = \frac{1}{n-1} X_c^\top X_c.$$
 
-Ước lượng từ dữ liệu, với $X_c$ là ma trận đã trừ trung bình theo cột:
+Đường chéo của $\Sigma$ chứa phương sai của từng đặc trưng; các phần tử ngoài đường chéo chứa hiệp phương sai giữa từng cặp đặc trưng. Ba tính chất của $\Sigma$ ứng với ba chỗ dùng ở các chương sau:
 
-$$\hat\Sigma = \frac{1}{n-1} X_c^\top X_c.$$
+- $\Sigma$ đối xứng và nửa xác định dương, vì $z^\top \Sigma z = \operatorname{Var}(z^\top x) \ge 0$ với mọi $z$. Theo định lý phổ, $\Sigma$ có hệ vector riêng trực chuẩn, và đó là các thành phần chính của PCA (Chương 14).
+- Trị riêng lớn nhất của $\Sigma$ là phương sai lớn nhất mà một phép chiếu lên một hướng đơn vị có thể đạt được. Hướng đạt giá trị đó là vector riêng tương ứng.
+- Giả thiết "naive" của thuật toán Naive Bayes Gauss tương đương với việc ép $\Sigma$ của mỗi lớp thành ma trận đường chéo, tức coi mọi cặp đặc trưng là không tương quan khi đã biết lớp. Mục 7.4 kiểm chứng điều này bằng số và cho thấy Naive Bayes, LDA và QDA chỉ khác nhau ở ràng buộc đặt lên $\Sigma$.
 
-Ba điều cần nhớ về $\Sigma$, mỗi điều ứng với một chương sau:
-
-- Nó **đối xứng và nửa xác định dương**, nên có phân rã phổ — đó là PCA (Chương 14).
-- Đường chéo là phương sai từng đặc trưng; ngoài đường chéo là hiệp phương sai.
-- **Ép $\Sigma$ thành ma trận đường chéo chính là giả thiết "naive" của Naive Bayes.** Mục 7.4 kiểm chứng điều này bằng số và cho thấy Naive Bayes, LDA và QDA chỉ khác nhau đúng ở ràng buộc đặt lên $\Sigma$.
+Mẫu số $n - 1$ thay cho $n$ trong ước lượng mẫu có lý do, được giải thích ở Ví dụ 3.4.
 
 ### 3.4. Phân phối Gauss
 
-Một chiều:
+Phân phối Gauss (phân phối chuẩn) là phân phối được dùng nhiều nhất, vì hai lý do. Về lý thuyết, định lý giới hạn trung tâm nói rằng tổng của nhiều biến ngẫu nhiên độc lập nhỏ xấp xỉ phân phối Gauss, nên nhiễu tổng hợp từ nhiều nguồn thường có dạng Gauss. Về tính toán, logarit của mật độ Gauss là một hàm bậc hai, nên các bài toán tối ưu dẫn xuất từ nó thường có nghiệm dạng đóng.
 
-$$p(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right).$$
+> **Định nghĩa 3.3 (Phân phối Gauss).** Biến ngẫu nhiên một chiều $x \sim \mathcal{N}(\mu, \sigma^2)$ có mật độ
+> $$p(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right).$$
+> Vector ngẫu nhiên $x \in \mathbb{R}^d$ có phân phối Gauss nhiều chiều $\mathcal{N}(\mu, \Sigma)$, với $\Sigma$ xác định dương, nếu có mật độ
+> $$p(x) = \frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}\exp\!\left(-\tfrac12 (x-\mu)^\top \Sigma^{-1}(x-\mu)\right).$$
 
-Nhiều chiều:
+Đại lượng trong hàm mũ, $\Delta^2(x) = (x-\mu)^\top \Sigma^{-1}(x-\mu)$, gọi là bình phương **khoảng cách Mahalanobis** từ $x$ tới $\mu$. Các điểm có cùng khoảng cách Mahalanobis nằm trên một đường elip, có các trục là vector riêng của $\Sigma$ và độ dài bán trục tỉ lệ với căn bậc hai của trị riêng tương ứng.
 
-$$p(x) = \frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}\exp\!\left(-\tfrac12 (x-\mu)^\top \Sigma^{-1}(x-\mu)\right).$$
+> **Ví dụ 3.2.** Cho $\mu = 0$ và $\Sigma = \operatorname{diag}(4, 1)$, tức độ lệch chuẩn theo trục thứ nhất là 2 và theo trục thứ hai là 1. Hai điểm $a = (2, 0)$ và $b = (0, 2)$ cùng cách gốc 2 đơn vị theo khoảng cách Euclid. Nhưng $\Delta^2(a) = 2^2/4 = 1$ còn $\Delta^2(b) = 2^2/1 = 4$, tức $a$ cách tâm 1 độ lệch chuẩn còn $b$ cách tâm 2 độ lệch chuẩn. Theo phân phối này, điểm $a$ bình thường hơn điểm $b$ nhiều.
 
-Đại lượng $(x-\mu)^\top \Sigma^{-1}(x-\mu)$ gọi là **khoảng cách Mahalanobis** bình phương. Nó là khoảng cách Euclid sau khi đã "chuẩn hoá" theo hình dạng của đám mây dữ liệu: đi xa 1 đơn vị theo hướng dữ liệu trải rộng thì rẻ, theo hướng dữ liệu bó hẹp thì đắt.
+Ví dụ trên cho thấy khoảng cách Mahalanobis là khoảng cách Euclid sau khi đã quy mỗi hướng về đơn vị độ lệch chuẩn của dữ liệu theo hướng đó. Đi một đơn vị theo hướng dữ liệu trải rộng thì "gần", theo hướng dữ liệu co hẹp thì "xa".
 
-Một quan sát nhỏ nhưng dùng nhiều: **lấy logarit của mật độ Gauss thì được một hàm bậc hai**. Đó là lý do hợp lý cực đại dưới giả thiết nhiễu Gauss cho ra đúng bình phương tối thiểu (Mục 10.2), và là lý do bộ phân lớp Gauss có biên quyết định bậc hai (Mục 7.4).
+Lấy logarit của mật độ Gauss ta được
 
-### 3.5. Quy tắc Bayes
+$$\log p(x) = -\tfrac12 (x-\mu)^\top \Sigma^{-1}(x-\mu) + \text{hằng số},$$
+
+một hàm bậc hai của $x$. Nhận xét đơn giản này có hai hệ quả lớn: hợp lý cực đại dưới giả thiết nhiễu Gauss dẫn tới bài toán bình phương tối thiểu (Mục 10.2), và bộ phân loại dùng phân phối Gauss cho mỗi lớp có biên quyết định là mặt bậc hai (Mục 7.4).
+
+### 3.5. Định lý Bayes
+
+> **Định lý 3.1 (Định lý Bayes).** Với hai biến cố (hoặc biến ngẫu nhiên) $A$ và $B$, $p(B) > 0$:
+> $$p(A \mid B) = \frac{p(B \mid A)\, p(A)}{p(B)}, \qquad p(B) = \sum_{A'} p(B \mid A')\,p(A').$$
+
+Định lý Bayes cho phép đổi chiều một xác suất có điều kiện: biết xác suất quan sát được $B$ khi $A$ xảy ra, suy ra xác suất $A$ xảy ra khi đã quan sát được $B$. Hai chiều này rất khác nhau, và nhầm lẫn chúng là lỗi suy luận phổ biến.
+
+> **Ví dụ 3.3 (Xét nghiệm bệnh hiếm).** Một bệnh có tỉ lệ mắc 1% dân số. Xét nghiệm cho kết quả dương tính với 99% người mắc bệnh, và dương tính nhầm với 5% người không mắc bệnh. Một người có kết quả dương tính. Xác suất người đó thật sự mắc bệnh là
+> $$p(\text{bệnh} \mid +) = \frac{0{,}99 \times 0{,}01}{0{,}99 \times 0{,}01 + 0{,}05 \times 0{,}99} = \frac{0{,}0099}{0{,}0594} \approx 0{,}167.$$
+> Chỉ khoảng 1 trong 6 người có kết quả dương tính thật sự mắc bệnh, dù xét nghiệm "đúng 99%". Lý do là số người khoẻ rất lớn, nên 5% dương tính nhầm của họ vẫn nhiều hơn số người bệnh được phát hiện.
+
+Hiện tượng trong Ví dụ 3.3 xuất hiện lại ở Chương 8 dưới tên gọi khác: khi lớp dương hiếm, precision của bộ phân loại có thể rất thấp dù tỉ lệ báo động nhầm nhỏ.
+
+Trong học máy, định lý Bayes được dùng với $A$ là tham số $\theta$ của mô hình và $B$ là dữ liệu $\mathcal{D}$:
 
 $$\underbrace{p(\theta \mid \mathcal{D})}_{\text{hậu nghiệm}} = \frac{\overbrace{p(\mathcal{D} \mid \theta)}^{\text{hợp lý}} \; \overbrace{p(\theta)}^{\text{tiên nghiệm}}}{\underbrace{p(\mathcal{D})}_{\text{bằng chứng}}}.$$
 
-Bốn chữ này là xương sống của Chương 10. Điểm cần nhớ ngay: mẫu số $p(\mathcal{D})$ **không phụ thuộc $\theta$**, nên khi đi tìm $\theta$ tốt nhất thì bỏ được. Vì vậy
+Phân phối **tiên nghiệm** $p(\theta)$ mô tả hiểu biết về tham số trước khi thấy dữ liệu. Hàm **hợp lý** $p(\mathcal{D} \mid \theta)$ cho biết dữ liệu quan sát được có khả năng xảy ra tới mức nào nếu tham số là $\theta$. Phân phối **hậu nghiệm** $p(\theta \mid \mathcal{D})$ là hiểu biết đã được cập nhật sau khi thấy dữ liệu. Mẫu số $p(\mathcal{D})$ không phụ thuộc $\theta$, nên khi tìm $\theta$ làm hậu nghiệm lớn nhất có thể bỏ qua nó:
 
 $$\arg\max_\theta p(\theta \mid \mathcal{D}) = \arg\max_\theta \; p(\mathcal{D} \mid \theta)\,p(\theta) = \arg\min_\theta \;\big[-\log p(\mathcal{D} \mid \theta) - \log p(\theta)\big].$$
 
-Vế phải đọc là: **mất mát + phạt chuẩn**. Toàn bộ Chương 10 là khai triển của dòng này.
+Vế phải có dạng "mất mát cộng thành phần phạt". Chương 10 khai triển đẳng thức này và cho thấy thành phần phạt chính là regularization.
 
-### 3.6. Ước lượng, thiên lệch và phương sai
+### 3.6. Ước lượng tham số: độ chệch và phương sai
 
-Một **ước lượng** $\hat\theta$ là một hàm của dữ liệu, nên bản thân nó là biến ngẫu nhiên. Hai đại lượng mô tả nó:
+Học một mô hình từ dữ liệu là ước lượng tham số của nó. Vì dữ liệu là một mẫu ngẫu nhiên, ước lượng thu được cũng là ngẫu nhiên: lấy một mẫu khác thì được một giá trị khác.
 
-$$\text{thiên lệch} = \mathbb{E}[\hat\theta] - \theta, \qquad \text{phương sai} = \operatorname{Var}(\hat\theta),$$
+> **Định nghĩa 3.4 (Độ chệch, phương sai của ước lượng).** Một **ước lượng** $\hat\theta$ của tham số $\theta$ là một hàm của dữ liệu. **Độ chệch** (bias) và **phương sai** của nó là
+> $$\operatorname{Bias}(\hat\theta) = \mathbb{E}[\hat\theta] - \theta, \qquad \operatorname{Var}(\hat\theta) = \mathbb{E}\big[(\hat\theta - \mathbb{E}\hat\theta)^2\big].$$
+> Ước lượng có độ chệch bằng 0 gọi là **ước lượng không chệch**.
 
-và sai số bình phương trung bình tách ra đúng thành
+Ở đây kỳ vọng được lấy **trên mọi tập dữ liệu có thể rút ra** từ cùng một phân phối, không phải trên các điểm trong một tập dữ liệu. Để hình dung: lặp lại việc thu thập dữ liệu và huấn luyện rất nhiều lần; độ chệch là khoảng cách từ trung bình các kết quả tới giá trị thật, phương sai là mức các kết quả tản ra quanh trung bình của chúng.
 
-$$\mathbb{E}\big[(\hat\theta - \theta)^2\big] = \text{thiên lệch}^2 + \text{phương sai}.$$
+> **Định lý 3.2 (Phân tích sai số bình phương trung bình).** Với mọi ước lượng $\hat\theta$,
+> $$\mathbb{E}\big[(\hat\theta - \theta)^2\big] = \operatorname{Bias}(\hat\theta)^2 + \operatorname{Var}(\hat\theta).$$
 
-> **Chú ý về từ "kỳ vọng" ở đây.** Kỳ vọng lấy **trên các tập dữ liệu khác nhau có thể rút ra được**, không phải trên các điểm trong một tập. Đây là chỗ nhầm phổ biến nhất khi trả lời phỏng vấn, và [Chương 2 của *Mô hình & Kiến trúc*](models-ch02.html) khai triển đầy đủ ý này cho trường hợp mô hình dự báo.
+> **Chứng minh.** Đặt $m = \mathbb{E}[\hat\theta]$. Viết $\hat\theta - \theta = (\hat\theta - m) + (m - \theta)$ rồi bình phương và lấy kỳ vọng. Số hạng chéo $2(m - \theta)\,\mathbb{E}[\hat\theta - m]$ bằng 0 vì $\mathbb{E}[\hat\theta - m] = 0$. Hai số hạng còn lại là $\operatorname{Var}(\hat\theta)$ và $(m - \theta)^2$.
 
-Một ví dụ cụ thể sẽ dùng lại ở Chương 9: **ridge là ước lượng có thiên lệch**, trong khi OLS không thiên lệch. Vậy mà ridge thường cho sai số nhỏ hơn — vì nó đổi một ít thiên lệch lấy rất nhiều phương sai. Mục 9.5 đo được phần phương sai ấy bị cắt ở đâu.
+> **Ví dụ 3.4 (Vì sao chia cho $n-1$).** Với $n$ quan sát độc lập có phương sai $\sigma^2$, ước lượng $\hat\sigma^2_n = \frac1n\sum_i (x_i - \bar x)^2$ có kỳ vọng $\frac{n-1}{n}\sigma^2$, tức luôn nhỏ hơn giá trị thật. Nguyên nhân là $\bar x$ được tính từ chính dữ liệu, nên các điểm luôn gần $\bar x$ hơn so với gần giá trị trung bình thật. Chia cho $n - 1$ thay cho $n$ cho ước lượng không chệch. Với $n = 5$ và $\sigma^2 = 1$, mô phỏng 200 000 lần cho giá trị trung bình của $\hat\sigma^2_n$ là $0{,}802$, khớp với $4/5 = 0{,}8$.
+
+Định lý 3.2 cho thấy một ước lượng không chệch chưa chắc là ước lượng tốt: nếu phương sai lớn, sai số tổng vẫn lớn. Ngược lại, chấp nhận một chút độ chệch để đổi lấy phương sai nhỏ hơn nhiều có thể làm sai số tổng giảm. Hồi quy ridge ở Chương 9 là ví dụ điển hình: nó là ước lượng có chệch, trong khi bình phương tối thiểu thông thường là ước lượng không chệch, vậy mà ridge thường có sai số nhỏ hơn. Mục 9.3 chỉ ra phần phương sai mà ridge cắt đi nằm ở những hướng nào.
+
+Cùng ý tưởng này áp dụng cho dự đoán của cả mô hình, dưới tên gọi **đánh đổi độ chệch – phương sai** (bias–variance tradeoff). [Chương 2 của *Học sâu*](models-ch02.html) trình bày đầy đủ phân tích đó và đo nó trên 400 tập huấn luyện.
 
 ---
 
 ## 4. Hồi quy tuyến tính
 
-### 4.1. Bài toán, và vì sao nó đáng học kỹ
+Hồi quy tuyến tính là thuật toán học có giám sát đơn giản nhất, nhưng nó đáng được học kỹ vì một lý do cụ thể: bài toán có nghiệm dạng đóng. Nhờ vậy, các hiện tượng sẽ gặp lại ở mọi mô hình phức tạp hơn, như overfitting, regularization, ảnh hưởng của số điều kiện và đánh đổi độ chệch – phương sai, đều quan sát được trực tiếp mà không bị lẫn với câu hỏi thuật toán tối ưu có hội tụ hay không.
 
-Hồi quy tuyến tính là thuật toán đơn giản nhất có ích, nhưng lý do học nó kỹ không phải vì nó hay được dùng. Lý do là **nó có nghiệm dạng đóng**, nên mọi hiện tượng về sau — quá khớp, phạt chuẩn, số điều kiện, thiên lệch đổi lấy phương sai — đều nhìn thấy được ở đây mà không bị che bởi chuyện tối ưu hoá có hội tụ hay không.
+### 4.1. Bài toán hồi quy tuyến tính
 
-Mô hình, hàm mất mát, và cách giải, đúng theo ba cột của Hình 1:
+Cho $n$ điểm dữ liệu $(x_i, y_i)$ với $x_i \in \mathbb{R}^d$ và $y_i \in \mathbb{R}$. Ta muốn tìm một hàm tuyến tính dự đoán $y$ từ $x$. Để công thức gọn, ta thêm vào mỗi $x_i$ một thành phần hằng bằng 1 ở vị trí đầu; khi đó hệ số chặn trở thành trọng số $w_0$ ứng với thành phần này, và mô hình viết được là $f_w(x) = w^\top x$. Giáo trình dùng quy ước này ở mọi chỗ: cột đầu tiên của ma trận dữ liệu $X$ gồm toàn số 1.
 
-$$f_w(x) = w^\top x, \qquad L(w) = \frac{1}{n}\sum_{i=1}^{n}(y_i - w^\top x_i)^2 = \frac{1}{n}\|y - Xw\|_2^2.$$
+> **Định nghĩa 4.1 (Hồi quy tuyến tính bình phương tối thiểu).** Với ma trận dữ liệu $X \in \mathbb{R}^{n\times d}$ và vector nhãn $y \in \mathbb{R}^n$, hồi quy tuyến tính tìm
+> $$\hat w = \arg\min_w L(w), \qquad L(w) = \frac1n\sum_{i=1}^{n}\big(y_i - w^\top x_i\big)^2 = \frac1n\,\|y - Xw\|_2^2.$$
+> Phương pháp này còn gọi là bình phương tối thiểu thông thường (ordinary least squares, OLS).
 
-Quy ước: cột đầu của $X$ là toàn số 1, nên $w_0$ chính là độ lệch. Cách này gọn hơn việc viết $b$ riêng và được dùng suốt tài liệu.
+Theo khung ở Hình 1: mô hình là họ hàm tuyến tính $w^\top x$, hàm mất mát là bình phương sai số, còn thuật toán tối ưu là giải một hệ phương trình tuyến tính, như Mục 4.2 sẽ trình bày. Câu hỏi "vì sao là bình phương mà không phải trị tuyệt đối" có câu trả lời chính xác ở Mục 10.2: bình phương sai số là hệ quả của giả thiết nhiễu có phân phối Gauss.
 
-### 4.2. Nghiệm giải tích
+Bài toán còn có một cách hiểu hình học hữu ích. Khi $w$ chạy khắp $\mathbb{R}^d$, vector dự đoán $Xw$ chạy khắp không gian cột của $X$ (Mục 2.1). Cực tiểu $\|y - Xw\|_2$ nghĩa là tìm điểm trong không gian cột gần $y$ nhất, tức **hình chiếu vuông góc** của $y$ lên không gian cột. Vector phần dư $r = y - X\hat w$ vì thế phải vuông góc với mọi cột của $X$.
 
-Dùng công thức cuối trong bảng ở Mục 2.7 rồi cho gradient bằng 0:
+### 4.2. Phương trình chuẩn
 
-$$\nabla_w L = -\frac{2}{n}X^\top(y - Xw) = 0 \;\Longrightarrow\; X^\top X\,w = X^\top y.$$
+Mục 2.7 đã tính gradient của $\|y - Xw\|_2^2$. Chia cho $n$ và cho gradient bằng 0:
 
-Đây là **phương trình chuẩn tắc**. Khi $X^\top X$ khả nghịch:
+$$\nabla_w L = -\frac{2}{n}X^\top(y - Xw) = 0 \;\Longleftrightarrow\; X^\top X\,w = X^\top y.$$
 
-$$\boxed{\;\hat w = (X^\top X)^{-1}X^\top y\;}$$
+Hệ phương trình tuyến tính này gọi là **phương trình chuẩn** (normal equations). Tên gọi đến từ cách hiểu hình học ở Mục 4.1: $X^\top(y - Xw) = 0$ nói rằng phần dư vuông góc (normal) với mọi cột của $X$.
 
-Vì sao đây là **cực tiểu** chứ không phải cực đại hay điểm yên ngựa? Vì ma trận Hessian là $\tfrac{2}{n}X^\top X$, luôn nửa xác định dương (Mục 2.5), nên $L$ là hàm lồi và mọi điểm dừng đều là cực tiểu toàn cục. Chương 11 nói kỹ hơn, nhưng ý ấy đã đủ dùng ngay tại đây.
+> **Định lý 4.1 (Nghiệm của bình phương tối thiểu).** Nếu $X$ đủ hạng cột thì $X^\top X$ khả nghịch và bài toán ở Định nghĩa 4.1 có nghiệm duy nhất
+> $$\hat w = (X^\top X)^{-1}X^\top y.$$
 
-**Ba cách tính, một nghiệm.** Thí nghiệm trong `code/nentang/experiments.py` giải cùng một bài toán bằng ba đường khác hẳn nhau:
+Nghiệm này là cực tiểu chứ không phải cực đại hay điểm yên ngựa, vì ma trận Hessian của $L$ bằng $\tfrac{2}{n}X^\top X$, nửa xác định dương theo Mục 2.5. Do đó $L$ là hàm lồi và mọi điểm có gradient bằng 0 đều là cực tiểu toàn cục. Khi $X$ đủ hạng cột, Hessian xác định dương và cực tiểu là duy nhất. Chương 11 trình bày tính lồi một cách đầy đủ.
+
+> **Ví dụ 4.1.** Cho ba điểm $(x, y) = (0, 1), (1, 3), (2, 4)$ và mô hình $y = w_0 + w_1 x$. Ma trận dữ liệu và các tích cần thiết là
+> $$X = \begin{pmatrix}1&0\\1&1\\1&2\end{pmatrix}, \qquad X^\top X = \begin{pmatrix}3&3\\3&5\end{pmatrix}, \qquad X^\top y = \begin{pmatrix}8\\11\end{pmatrix}.$$
+> Định thức của $X^\top X$ là $15 - 9 = 6$, nên
+> $$\hat w = \frac16\begin{pmatrix}5&-3\\-3&3\end{pmatrix}\begin{pmatrix}8\\11\end{pmatrix} = \frac16\begin{pmatrix}7\\9\end{pmatrix} \approx \begin{pmatrix}1{,}1667\\1{,}5\end{pmatrix}.$$
+> Các dự đoán là $1{,}1667$; $2{,}6667$; $4{,}1667$ và phần dư là $-0{,}1667$; $0{,}3333$; $-0{,}1667$. Tổng phần dư bằng 0, đúng như dòng đầu của phương trình chuẩn đòi hỏi: hàng đầu của $X^\top$ gồm toàn số 1, nên $X^\top r = 0$ cho $\sum_i r_i = 0$. Điều này đúng với mọi mô hình có hệ số chặn.
+
+Trên dữ liệu lớn hơn, ta có thể kiểm tra rằng các cách tính khác nhau cho cùng một nghiệm. Thí nghiệm trong `code/nentang/experiments.py` sinh 200 điểm với bốn hệ số thật $(2; -1{,}5; 0{,}8; 3)$ cộng nhiễu, rồi giải bằng ba cách:
 
 | Cách giải | $w_0$ | $w_1$ | $w_2$ | $w_3$ |
 |---|---|---|---|---|
-| Phương trình chuẩn tắc | 1,9906 | −1,4985 | 0,7992 | 2,9749 |
+| Phương trình chuẩn | 1,9906 | −1,4985 | 0,7992 | 2,9749 |
 | Giả nghịch đảo Moore–Penrose | 1,9906 | −1,4985 | 0,7992 | 2,9749 |
-| `lstsq` (phân rã QR) | 1,9906 | −1,4985 | 0,7992 | 2,9749 |
+| `lstsq` (phân tích QR/SVD) | 1,9906 | −1,4985 | 0,7992 | 2,9749 |
 
-Lệch lớn nhất giữa ba cách là $1{,}2 \times 10^{-15}$ — tức bằng nhau tới sai số máy.
+Ba cách lệch nhau lớn nhất $1{,}2 \times 10^{-15}$, tức bằng nhau tới sai số làm tròn của máy tính. Các hệ số ước lượng cũng gần hệ số thật, sai lệch còn lại là do nhiễu.
 
-> **Nhưng đừng dùng công thức nghịch đảo trong mã thật.** Mục 2.6 đã nêu lý do: $\kappa(X^\top X) = \kappa(X)^2$, nên lập phương trình chuẩn tắc **bình phương** số điều kiện và mất một nửa số chữ số có nghĩa. `np.linalg.lstsq` dùng phân rã QR hoặc SVD, tránh được việc ấy. Công thức $(X^\top X)^{-1}X^\top y$ là để **suy luận**, không phải để chạy.
+> **Lưu ý.** Công thức $(X^\top X)^{-1}X^\top y$ dùng để suy luận, không nên dùng để tính trong mã. Theo Mục 2.6, $\kappa(X^\top X) = \kappa(X)^2$, nên lập ma trận $X^\top X$ làm mất khoảng gấp đôi số chữ số có nghĩa so với làm việc trực tiếp với $X$. Hàm `np.linalg.lstsq` giải bài toán bằng phân tích SVD của $X$ và tránh được vấn đề này.
 
-### 4.3. Khi nào không giải được, và làm gì
+### 4.3. Trường hợp ma trận $X^\top X$ suy biến
 
-$X^\top X$ khả nghịch khi và chỉ khi $X$ đủ hạng cột, tức không cột nào là tổ hợp tuyến tính của các cột khác. Hai trường hợp hỏng thường gặp:
+Theo Mục 2.5, $X^\top X$ khả nghịch khi và chỉ khi $X$ đủ hạng cột. Có hai tình huống thực tế khiến điều kiện này không thoả:
 
-- **Nhiều đặc trưng hơn mẫu** ($d > n$). Khi ấy hạng tối đa là $n < d$, nên chắc chắn suy biến.
-- **Đặc trưng lặp hoặc phụ thuộc tuyến tính.** Ví dụ hay gặp nhất: mã hoá one-hot đủ $K$ mức cho một biến hạng mục **và** vẫn giữ cột hằng số — tổng $K$ cột ấy đúng bằng cột hằng số.
+- **Số đặc trưng lớn hơn số điểm dữ liệu** ($d > n$). Hạng của $X$ không vượt quá $n < d$, nên $X$ không thể đủ hạng cột.
+- **Có đặc trưng phụ thuộc tuyến tính vào các đặc trưng khác.** Ví dụ hay gặp là mã hoá one-hot một biến hạng mục có $K$ giá trị thành đủ $K$ cột trong khi vẫn giữ cột hằng số: tổng $K$ cột one-hot đúng bằng cột hằng số. Cách xử lý thông thường là bỏ một cột one-hot, hoặc bỏ cột hằng số.
 
-Thí nghiệm lặp lại một cột rồi thử giải:
+Thí nghiệm sao chép một cột của $X$ rồi thử giải:
 
 ```text
 hang cua X = 4 nhung X co 5 cot  ->  X^T X suy bien
@@ -349,233 +513,288 @@ hang cua X = 4 nhung X co 5 cot  ->  X^T X suy bien
   mot nghiem khac cung du bao y het: ||w|| = 4.0711 (sai so du bao lech 0.00e+00)
 ```
 
-Đọc kỹ dòng cuối: có **vô số** vector $w$ cho ra **đúng cùng một dự báo**. Bài toán không phải là "không có nghiệm" mà là "có quá nhiều nghiệm". Giả nghịch đảo chọn giúp ta một cái — cái có **chuẩn nhỏ nhất**. Đó là một lựa chọn hợp lý, nhưng phải biết là mình đang chọn, vì nó chính là ridge với $\lambda \to 0^+$ (Mục 9.2).
+Dòng cuối cho thấy bản chất của trường hợp suy biến. Bài toán không phải vô nghiệm mà có **vô số nghiệm** cho cùng một dự đoán: cộng một lượng $t$ vào hệ số của cột gốc và trừ đi đúng lượng đó ở cột bản sao thì $Xw$ không đổi. Tập nghiệm là một đường thẳng (tổng quát là một không gian affine) trong không gian tham số.
 
-### 4.4. Cộng tuyến: hệ số loạn, dự báo thì không
+Khi có nhiều nghiệm, ta cần một quy tắc chọn. **Giả nghịch đảo Moore–Penrose** $X^{+}$ chọn nghiệm có chuẩn $\ell_2$ nhỏ nhất: $X^{+}y$ là nghiệm của phương trình chuẩn có $\|w\|_2$ nhỏ nhất trong mọi nghiệm. Trong thí nghiệm, nghiệm của `pinv` có chuẩn 3,8176, nhỏ hơn nghiệm khác có chuẩn 4,0711 dù hai nghiệm cho cùng dự đoán. Quy tắc này hợp lý, và Mục 9.2 sẽ cho thấy nó trùng với giới hạn của hồi quy ridge khi hệ số regularization $\lambda$ tiến về 0 từ phía dương.
 
-Ngay cả khi chưa suy biến hẳn, gần suy biến đã đủ gây chuyện. Thí nghiệm dựng hai cột có tương quan $\rho$ tăng dần, rồi lặp lại 300 lần với nhiễu khác nhau để đo độ dao động:
+### 4.4. Đa cộng tuyến
+
+Ngay cả khi $X$ đủ hạng cột, nếu có các cột **gần** phụ thuộc tuyến tính thì nghiệm vẫn không ổn định. Hiện tượng này gọi là **đa cộng tuyến** (multicollinearity). Thí nghiệm sau dựng hai đặc trưng có hệ số tương quan $\rho$ tăng dần. Với mỗi $\rho$, ma trận $X$ được giữ cố định và nhãn được sinh lại 300 lần với nhiễu khác nhau, để đo xem hệ số và dự đoán dao động bao nhiêu:
 
 ![Hình 2](figs/nt02_linreg.png)
 
-**Hình 2.** Trái: số điều kiện bùng nổ theo cộng tuyến. Phải: hệ số dao động dữ dội trong khi dự báo đứng yên.
+**Hình 2.** Trái: số điều kiện của $X^\top X$ theo mức tương quan giữa hai cột. Phải: độ lệch chuẩn của hệ số $w_1$ và của dự đoán qua 300 lần sinh lại nhiễu.
 
-| Tương quan hai cột | $\mathrm{cond}(X^\top X)$ | Độ lệch chuẩn của $w_1$ | Độ lệch chuẩn của dự báo |
+| Tương quan hai cột | $\mathrm{cond}(X^\top X)$ | Độ lệch chuẩn của $w_1$ | Độ lệch chuẩn của dự đoán |
 |---|---|---|---|
 | 0,000 | 1,3 | 0,0324 | 0,0586 |
 | 0,900 | 20,0 | 0,0772 | 0,0588 |
 | 0,990 | 180,3 | 0,2373 | 0,0590 |
-| 0,999 | 1958,9 | **0,8196** | **0,0585** |
+| 0,999 | 1958,9 | 0,8196 | 0,0585 |
 
-Hai cột cuối là cả bài học. Khi tương quan đi từ 0 tới 0,999:
+Khi tương quan tăng từ 0 lên 0,999, độ lệch chuẩn của hệ số $w_1$ tăng khoảng 25 lần, trong khi độ lệch chuẩn của dự đoán gần như không đổi (từ 0,0586 xuống 0,0585).
 
-- độ dao động của **hệ số** tăng **25,3 lần**;
-- độ dao động của **dự báo** đi từ 0,0586 xuống 0,0585, tức không đổi.
+Nguyên nhân: khi hai cột gần trùng nhau, dữ liệu chỉ xác định được **tổng ảnh hưởng** của hai đặc trưng, còn cách chia ảnh hưởng đó cho từng đặc trưng thì gần như tuỳ ý. Tổng ảnh hưởng ổn định nên dự đoán ổn định; cách chia phụ thuộc vào nhiễu nên từng hệ số dao động mạnh.
 
-**Vì sao vậy?** Khi hai cột gần trùng nhau, mô hình không phân biệt được nên gán bao nhiêu cho cột này, bao nhiêu cho cột kia — nó chỉ xác định được **tổng** ảnh hưởng của chúng. Tổng ấy ổn định, nên dự báo ổn định; cách chia thì tuỳ nhiễu, nên hệ số loạn.
+Mức tăng này có thể dự đoán bằng lý thuyết. Với mô hình có hệ số chặn, phương sai của hệ số $w_j$ bằng phương sai khi các đặc trưng không tương quan nhân với **hệ số phóng đại phương sai** (variance inflation factor)
 
-> **Hệ quả thực tế, và nó trả lời một câu hỏi phỏng vấn hay gặp.** Cộng tuyến là vấn đề của **diễn giải**, không phải của dự báo. Nếu mô hình chỉ để dự báo thì không cần làm gì. Nếu ai đó định đọc hệ số để nói "đặc trưng này ảnh hưởng chừng này" thì con số đó vô nghĩa — và cách chữa là ridge (Chương 9), gộp các đặc trưng, hoặc bỏ bớt.
+$$\text{VIF}_j = \frac{1}{1 - R_j^2},$$
 
-### 4.5. Ba giả định, và cách kiểm
+trong đó $R_j^2$ là hệ số xác định khi hồi quy đặc trưng $j$ theo các đặc trưng còn lại. Với hai đặc trưng có tương quan $\rho$ thì $R_j^2 = \rho^2$, nên độ lệch chuẩn của hệ số tăng theo $\sqrt{\text{VIF}} = 1/\sqrt{1-\rho^2}$, tức khoảng 2,3; 7,1 và 22,4 lần tại $\rho = 0{,}9$; $0{,}99$; $0{,}999$. Số đo trong bảng là 2,4; 7,3 và 25,3 lần. Chênh lệch nhỏ đến từ việc mỗi hàng dùng một ma trận $X$ sinh ngẫu nhiên riêng, nên tương quan mẫu và phương sai mẫu của các cột không đúng bằng giá trị danh nghĩa.
 
-Hồi quy tuyến tính chỉ có ý nghĩa nếu:
+> **Nhận xét.** Đa cộng tuyến là vấn đề của việc **diễn giải hệ số**, không phải của dự đoán. Nếu mô hình chỉ dùng để dự đoán trên dữ liệu có cùng cấu trúc tương quan, không cần xử lý gì. Nếu cần đọc hệ số để kết luận "đặc trưng này ảnh hưởng bao nhiêu", các hệ số đó không đáng tin; cách xử lý là dùng hồi quy ridge (Chương 9), gộp các đặc trưng tương quan thành một, hoặc bỏ bớt đặc trưng. Quy tắc kinh nghiệm thường dùng: VIF lớn hơn 10 là dấu hiệu đa cộng tuyến đáng kể.
 
-1. **Quan hệ là tuyến tính theo tham số.** Chú ý "theo tham số": $y = w_0 + w_1 x + w_2 x^2$ vẫn là hồi quy tuyến tính, vì nó tuyến tính theo $w$. Kiểm bằng cách vẽ phần dư theo giá trị dự báo — có hình cong là hỏng.
-2. **Nhiễu có phương sai không đổi.** Nếu phương sai nhiễu tăng theo $y$ (rất hay gặp với dữ liệu tiền tệ) thì bình phương tối thiểu vẫn cho ước lượng không thiên lệch nhưng **không còn hiệu quả nhất**, và mọi khoảng tin cậy đều sai. Cách chữa thường dùng: lấy logarit của $y$.
-3. **Các quan sát độc lập.** Chuỗi thời gian gần như luôn vi phạm điều này.
+### 4.5. Các giả định của mô hình
 
-Giả định 2 và 3 không ảnh hưởng tới **giá trị** của $\hat w$, chỉ ảnh hưởng tới **độ tin cậy** ta gán cho nó. Đây là phân biệt đáng nhớ.
+Phương pháp bình phương tối thiểu luôn cho ra một nghiệm, nhưng việc diễn giải nghiệm đó (khoảng tin cậy của hệ số, kiểm định ý nghĩa thống kê) dựa trên ba giả định:
+
+1. **Tuyến tính theo tham số.** Kỳ vọng của $y$ là hàm tuyến tính của $w$. Chú ý là tuyến tính theo tham số, không nhất thiết theo đầu vào: $y = w_0 + w_1 x + w_2 x^2$ vẫn là hồi quy tuyến tính vì nó tuyến tính theo $w$, chỉ cần coi $x^2$ là một đặc trưng mới. Cách kiểm tra: vẽ phần dư theo giá trị dự đoán; nếu thấy dạng cong có hệ thống thì giả định bị vi phạm và cần thêm đặc trưng phi tuyến.
+2. **Phương sai của nhiễu không đổi.** Nếu độ lớn của nhiễu thay đổi theo $x$ (hiện tượng phương sai thay đổi, rất hay gặp với dữ liệu tiền tệ: sai số dự đoán giá một căn nhà đắt lớn hơn sai số với căn nhà rẻ), bình phương tối thiểu vẫn cho ước lượng không chệch nhưng không còn là ước lượng có phương sai nhỏ nhất, và các khoảng tin cậy tính theo công thức chuẩn bị sai. Cách xử lý thường dùng là lấy logarit của $y$, hoặc dùng bình phương tối thiểu có trọng số.
+3. **Các quan sát độc lập.** Dữ liệu chuỗi thời gian hầu như luôn vi phạm giả định này, vì sai số ở thời điểm liền nhau thường tương quan.
+
+Giả định thứ hai và thứ ba không ảnh hưởng tới giá trị của $\hat w$, mà ảnh hưởng tới **độ tin cậy** ta gán cho nó. Khi mục tiêu chỉ là dự đoán, việc vi phạm hai giả định này ít nghiêm trọng hơn; khi mục tiêu là suy luận thống kê về hệ số, chúng cần được kiểm tra.
 
 ---
 
 ## 5. Gradient descent
 
-### 5.1. Vì sao cần, khi đã có nghiệm giải tích
+Chương 4 giải hồi quy tuyến tính bằng công thức. Đa số bài toán học máy không có công thức như vậy, và phải tìm nghiệm bằng phương pháp lặp. Chương này trình bày phương pháp lặp cơ bản nhất, gradient descent, cùng hai kết quả quan trọng về nó: tốc độ hội tụ phụ thuộc số điều kiện, và cách kiểm tra gradient bằng số.
 
-Chương 4 cho nghiệm dạng đóng. Vậy sao vẫn cần phương pháp lặp? Ba lý do, theo thứ tự quan trọng tăng dần:
+### 5.1. Khi nào cần phương pháp lặp
 
-1. **Đa số bài toán không có nghiệm dạng đóng.** Cho gradient của mất mát logistic bằng 0 sẽ ra một hệ phương trình siêu việt, không giải tay được.
-2. **Nghiệm dạng đóng có thể quá đắt.** Giải $X^\top X w = X^\top y$ tốn $O(nd^2 + d^3)$. Với $d = 10^6$ thì $d^3 = 10^{18}$ — bất khả thi.
-3. **Dữ liệu có thể không vừa bộ nhớ.** Xuống dốc ngẫu nhiên chỉ cần một lô nhỏ mỗi bước.
+Có ba lý do khiến ta dùng phương pháp lặp thay cho nghiệm dạng đóng:
 
-### 5.2. Ý tưởng và công thức
+1. **Nhiều bài toán không có nghiệm dạng đóng.** Cho gradient của hàm mất mát logistic bằng 0 dẫn tới một hệ phương trình phi tuyến không giải được bằng biểu thức tường minh. Mọi mạng nơ-ron cũng thuộc loại này.
+2. **Nghiệm dạng đóng quá đắt.** Lập và giải $X^\top X w = X^\top y$ tốn khoảng $O(nd^2 + d^3)$ phép tính. Với $d = 10^6$ đặc trưng, riêng $d^3 = 10^{18}$ đã vượt khả năng tính toán thông thường, trong khi một bước gradient chỉ tốn $O(nd)$.
+3. **Dữ liệu không vừa bộ nhớ.** Các biến thể ngẫu nhiên của gradient descent (Mục 5.6) chỉ cần một phần nhỏ dữ liệu ở mỗi bước.
 
-Gradient chỉ hướng **tăng nhanh nhất** của hàm. Muốn giảm thì đi ngược lại:
+### 5.2. Thuật toán gradient descent
 
-$$\theta_{t+1} = \theta_t - \eta\,\nabla_\theta L(\theta_t).$$
+Gradient của hàm $L$ tại một điểm chỉ hướng mà $L$ tăng nhanh nhất. Muốn giảm $L$, ta đi một bước nhỏ theo hướng ngược lại, rồi lặp lại.
 
-Vì sao "ngược gradient" là hướng giảm nhanh nhất? Khai triển Taylor bậc nhất: $L(\theta + \delta) \approx L(\theta) + \nabla L^\top \delta$. Trong mọi $\delta$ có cùng độ dài, cái làm $\nabla L^\top \delta$ âm nhất là $\delta \propto -\nabla L$, theo bất đẳng thức Cauchy–Schwarz. Đó là toàn bộ chứng minh — và nó cũng cho thấy giới hạn: lập luận chỉ đúng **cục bộ**, với bước đi đủ nhỏ.
+> **Định nghĩa 5.1 (Gradient descent).** Bắt đầu từ $\theta_0$, lặp
+> $$\theta_{t+1} = \theta_t - \eta\,\nabla_\theta L(\theta_t), \qquad t = 0, 1, 2, \dots$$
+> trong đó $\eta > 0$ là **tốc độ học** (learning rate). Thuật toán dừng khi gradient đủ nhỏ hoặc khi đạt số vòng lặp tối đa.
 
-### 5.3. Tốc độ hội tụ phụ thuộc số điều kiện, không phụ thuộc số chiều
+Vì sao hướng ngược gradient là hướng giảm nhanh nhất? Với bước dịch chuyển nhỏ $\delta$, khai triển Taylor bậc nhất cho
 
-Đây là kết quả quan trọng nhất của chương, và nó đo được chính xác.
+$$L(\theta + \delta) \approx L(\theta) + \nabla L(\theta)^\top \delta.$$
 
-Xét hàm bậc hai $f(x) = \tfrac12(x_1^2 + \kappa x_2^2)$, cực tiểu tại gốc. Lý thuyết nói: với tốc độ học tối ưu $\eta = 2/(\kappa+1)$, sai số co mỗi vòng theo hệ số $(\kappa-1)/(\kappa+1)$, nên số vòng cần để đạt sai số $\varepsilon$ là $O(\kappa \log \tfrac1\varepsilon)$.
+Trong mọi $\delta$ có cùng độ dài, số hạng $\nabla L^\top \delta$ âm nhất khi $\delta$ ngược hướng với $\nabla L$, theo bất đẳng thức Cauchy–Schwarz. Lập luận này chỉ đúng cục bộ: xấp xỉ bậc nhất chỉ chính xác khi bước đi đủ nhỏ. Nếu $\eta$ quá lớn, bước đi có thể vượt qua cực tiểu và làm $L$ tăng lên.
 
-Nếu thêm **quán tính** (heavy ball) với tham số tối ưu, tốc độ co thành $(\sqrt\kappa-1)/(\sqrt\kappa+1)$, tức số vòng chỉ còn $O(\sqrt\kappa \log\tfrac1\varepsilon)$.
+> **Ví dụ 5.1.** Xét $L(w) = (w - 3)^2$ với cực tiểu tại $w^* = 3$. Gradient là $L'(w) = 2(w - 3)$. Với $\eta = 0{,}1$ và $w_0 = 0$:
+> $$w_1 = 0 - 0{,}1 \cdot 2(0 - 3) = 0{,}6, \quad w_2 = 0{,}6 - 0{,}1 \cdot 2(0{,}6 - 3) = 1{,}08, \quad w_3 = 1{,}464.$$
+> Khoảng cách tới cực tiểu lần lượt là $3$; $2{,}4$; $1{,}92$; $1{,}536$, tức mỗi bước nhân với $0{,}8$. Tổng quát, $w_{t+1} - 3 = (1 - 2\eta)(w_t - 3)$, nên thuật toán hội tụ khi $|1 - 2\eta| < 1$, tức $0 < \eta < 1$. Với $\eta = 0{,}5$ nó tới cực tiểu sau đúng một bước; với $\eta = 1$ nó nhảy qua lại giữa $0$ và $6$ mãi mãi; với $\eta > 1$ nó phân kỳ.
+
+Ví dụ này chứa gần như mọi điều cần biết về tốc độ học, và Mục 5.4 tổng quát hoá nó.
+
+### 5.3. Tốc độ hội tụ và số điều kiện
+
+Với hàm một biến ở Ví dụ 5.1, có thể chọn $\eta$ để hội tụ sau một bước. Với hàm nhiều biến thì không, vì mỗi hướng cần một tốc độ học khác nhau. Xét hàm bậc hai hai biến
+
+$$f(x) = \tfrac12\big(x_1^2 + \kappa\, x_2^2\big), \qquad \kappa \ge 1,$$
+
+có cực tiểu tại gốc. Ma trận Hessian là $\operatorname{diag}(1, \kappa)$, nên số điều kiện đúng bằng $\kappa$ (Định nghĩa 2.4). Các đường mức của $f$ là elip, dẹt theo trục $x_2$ khi $\kappa$ lớn. Một bước gradient descent cập nhật hai toạ độ độc lập:
+
+$$x_1 \leftarrow (1 - \eta)\,x_1, \qquad x_2 \leftarrow (1 - \eta\kappa)\,x_2.$$
+
+Toạ độ $x_2$ chỉ hội tụ nếu $|1 - \eta\kappa| < 1$, tức $\eta < 2/\kappa$. Nhưng với $\eta$ nhỏ như vậy, toạ độ $x_1$ chỉ co lại theo hệ số $1 - \eta \approx 1 - 2/\kappa$ mỗi bước, rất chậm. Tốc độ học tối ưu cân bằng hai hệ số co, $|1 - \eta| = |1 - \eta\kappa|$, cho $\eta = 2/(\kappa + 1)$ và hệ số co chung
+
+$$\rho = \frac{\kappa - 1}{\kappa + 1} \approx 1 - \frac{2}{\kappa}.$$
+
+Sai số sau $t$ bước là $\rho^t$ lần sai số ban đầu. Để giảm sai số đi $10^8$ lần cần $t \approx \frac{\kappa}{2}\ln 10^8$ bước; với $\kappa = 10^4$ con số này là $92\,103$.
+
+**Momentum** (còn gọi là phương pháp heavy ball của Polyak) sửa đổi bước cập nhật bằng cách cộng thêm một phần của bước trước, $\theta_{t+1} = \theta_t - \eta\nabla L(\theta_t) + \beta(\theta_t - \theta_{t-1})$. Với tham số chọn tối ưu cho hàm bậc hai, hệ số co trở thành $(\sqrt\kappa - 1)/(\sqrt\kappa + 1)$, nên số vòng lặp chỉ còn tỉ lệ với $\sqrt\kappa$ thay vì $\kappa$.
 
 ![Hình 3](figs/nt03_gd.png)
 
-**Hình 3.** Số vòng lặp tới sai số $10^{-8}$, hai trục log. Quán tính đổi $\kappa$ thành $\sqrt\kappa$ — đó là một thay đổi về **bậc**, không phải về hằng số.
+**Hình 3.** Số vòng lặp để đạt sai số $10^{-8}$ theo số điều kiện $\kappa$, hai trục thang logarit. Momentum làm số vòng lặp tăng theo $\sqrt\kappa$ thay vì $\kappa$.
 
-| $\kappa$ | Gradient descent | Thêm quán tính | Tỉ lệ | $\sqrt\kappa$ |
+| $\kappa$ | Gradient descent | Có momentum | Tỉ số | $\sqrt\kappa$ |
 |---|---|---|---|---|
 | 1 | 1 | 1 | 1,00 | 1,00 |
 | 10 | 92 | 34 | 2,71 | 3,16 |
 | 100 | 922 | 117 | 7,88 | 10,00 |
 | 1 000 | 9 211 | 391 | 23,56 | 31,62 |
-| 10 000 | **92 104** | **1 297** | 71,01 | 100,00 |
+| 10 000 | 92 104 | 1 297 | 71,01 | 100,00 |
 
-Ba điều đọc ra được:
+Bảng khớp với phân tích ở trên theo ba cách. Cột gradient descent tăng đúng 10 lần mỗi khi $\kappa$ tăng 10 lần, và ở $\kappa = 10^4$ số đo 92 104 gần như trùng với ước lượng 92 103. Cột momentum tăng khoảng 3,3 lần mỗi hàng, xấp xỉ $\sqrt{10} \approx 3{,}16$. Tỉ số giữa hai cột tăng theo $\sqrt\kappa$ với hệ số khoảng 0,7.
 
-1. **Cột gradient descent tăng đúng 10 lần mỗi hàng** — tuyến tính theo $\kappa$, đúng như lý thuyết.
-2. **Cột quán tính tăng khoảng 3,3 lần mỗi hàng**, tức xấp xỉ $\sqrt{10} = 3{,}16$.
-3. Tỉ lệ giữa hai cột bám sát $\sqrt\kappa$ với hệ số khoảng 0,7. Hằng số ấy không quan trọng; **bậc** mới quan trọng.
-
-> **Vì sao kết quả này đáng nhớ.** Nó nói rằng tốc độ hội tụ **không phụ thuộc số chiều** mà phụ thuộc **hình dạng** của hàm mất mát. Một bài toán 1 triệu chiều nhưng tròn trịa ($\kappa$ nhỏ) dễ hơn nhiều một bài toán 2 chiều nhưng dẹt. Và nó nói luôn cách chữa: **chuẩn hoá đặc trưng về cùng thang đo là cách rẻ nhất để giảm $\kappa$.** Đó là lý do bước tiền xử lý tưởng như tầm thường ấy lại quan trọng đến vậy.
+> **Nhận xét.** Tốc độ hội tụ của gradient descent phụ thuộc vào **hình dạng** của hàm mất mát, đo bằng số điều kiện, chứ không phụ thuộc vào số chiều. Một bài toán một triệu chiều có $\kappa$ nhỏ dễ hơn nhiều một bài toán hai chiều có $\kappa$ lớn. Với hồi quy tuyến tính, $\kappa$ lớn thường do các đặc trưng có thang đo rất khác nhau (một cột tính bằng mét, một cột tính bằng milimét). **Chuẩn hoá đặc trưng** về cùng thang đo, ví dụ trừ trung bình và chia độ lệch chuẩn, là cách rẻ nhất để giảm $\kappa$ và tăng tốc huấn luyện.
 
 ### 5.4. Chọn tốc độ học
 
-| $\eta$ | Hiện tượng | Dấu hiệu nhận ra |
+Ví dụ 5.1 cho thấy với hàm bậc hai một biến có đạo hàm cấp hai bằng $\lambda$, gradient descent hội tụ khi và chỉ khi $0 < \eta < 2/\lambda$. Với hàm bậc hai nhiều biến, mỗi hướng riêng của Hessian có một điều kiện như vậy, và hướng khắt khe nhất là hướng có trị riêng lớn nhất:
+
+$$0 < \eta < \frac{2}{\lambda_{\max}}.$$
+
+Vượt ngưỡng này thì thuật toán chắc chắn phân kỳ theo hướng đó, không chỉ là chậm. Với hàm không phải bậc hai, không có ngưỡng chính xác như vậy, nhưng các biểu hiện sau vẫn giúp chẩn đoán:
+
+| Tốc độ học | Hiện tượng | Dấu hiệu trên đường cong mất mát |
 |---|---|---|
-| Quá nhỏ | hội tụ đúng nhưng rất chậm | mất mát giảm đều, gần như tuyến tính, mãi không tới |
-| Vừa | hội tụ nhanh | mất mát giảm dốc rồi phẳng dần |
-| Hơi lớn | dao động quanh nghiệm | mất mát giảm rồi nhấp nhô, không phẳng hẳn |
+| Quá nhỏ | hội tụ nhưng rất chậm | mất mát giảm đều và chậm, chưa phẳng khi hết số vòng lặp |
+| Phù hợp | hội tụ nhanh | mất mát giảm nhanh lúc đầu rồi phẳng dần |
+| Hơi lớn | dao động quanh cực tiểu | mất mát giảm rồi dao động, không phẳng hẳn |
 | Quá lớn | phân kỳ | mất mát tăng, rồi thành `inf` hoặc `nan` |
 
-Với hàm bậc hai có trị riêng lớn nhất $\lambda_{\max}$, điều kiện hội tụ là $\eta < 2/\lambda_{\max}$ — vượt ngưỡng ấy là phân kỳ chắc chắn, không phải chậm. Đây là một trong số rất ít trường hợp có ngưỡng chính xác.
+Cách làm thực tế: thử các giá trị cách nhau 3 tới 10 lần (ví dụ 0,3; 0,1; 0,03; 0,01), chạy một số vòng lặp ngắn, rồi chọn giá trị lớn nhất mà mất mát vẫn giảm ổn định. Nhiều quy trình huấn luyện còn giảm dần tốc độ học theo thời gian. [Chương 5 của *Học sâu*](models-ch05.html) trình bày các lịch tốc độ học và các thuật toán tự điều chỉnh tốc độ học theo từng tham số như RMSProp, Adam và AdamW.
 
-[Chương 5 của *Mô hình & Kiến trúc*](models-ch05.html) mở rộng phần này thành momentum, RMSProp, Adam và AdamW, cùng lý do có bước hiệu chỉnh thiên lệch.
+### 5.5. Kiểm tra gradient bằng sai phân hữu hạn
 
-### 5.5. Kiểm tra đạo hàm, và cái bẫy về $\varepsilon$
-
-Suy ra gradient bằng tay rất dễ sai. Cách kiểm duy nhất đáng tin là so với sai phân số:
+Suy ra công thức gradient bằng tay, hoặc cài đặt nó trong mã, rất dễ sai: sai dấu, thiếu hệ số, nhầm chiều ma trận. Một lỗi như vậy thường không làm chương trình báo lỗi, mà chỉ làm mô hình học kém đi một cách khó giải thích. Cách phát hiện đáng tin cậy là so sánh gradient tính bằng công thức với gradient xấp xỉ bằng **sai phân hữu hạn**:
 
 $$\text{sai phân tiến:}\;\; \frac{f(x+\varepsilon) - f(x)}{\varepsilon}, \qquad \text{sai phân trung tâm:}\;\; \frac{f(x+\varepsilon) - f(x-\varepsilon)}{2\varepsilon}.$$
 
-Câu hỏi: chọn $\varepsilon$ bao nhiêu? Trực giác nói "càng nhỏ càng chính xác". **Trực giác ấy sai**, và sai một cách đo được.
+Với hàm nhiều biến, ta áp dụng công thức cho từng toạ độ, mỗi lần dịch chuyển một toạ độ một lượng $\varepsilon$.
+
+Câu hỏi là chọn $\varepsilon$ bao nhiêu. Theo định nghĩa đạo hàm, $\varepsilon$ càng nhỏ thì xấp xỉ càng chính xác. Trên máy tính điều đó không đúng, vì có hai nguồn sai số ngược chiều nhau.
 
 ![Hình 4](figs/nt04_gradcheck.png)
 
-**Hình 4.** Sai số theo $\varepsilon$, hai trục log. Hình chữ V: nhánh phải là sai số cắt cụt, nhánh trái là sai số làm tròn.
+**Hình 4.** Sai số của gradient xấp xỉ theo $\varepsilon$, hai trục thang logarit. Đồ thị có dạng chữ V: nhánh phải là sai số cắt cụt, nhánh trái là sai số làm tròn.
 
 | $\varepsilon$ | Sai phân trung tâm | Sai phân tiến |
 |---|---|---|
 | $10^{-1}$ | $2{,}22 \times 10^{-3}$ | $6{,}08 \times 10^{-2}$ |
 | $10^{-4}$ | $2{,}23 \times 10^{-9}$ | $5{,}86 \times 10^{-5}$ |
-| $3{,}2 \times 10^{-6}$ | $\mathbf{1{,}72 \times 10^{-11}}$ | $1{,}85 \times 10^{-6}$ |
+| $3{,}2 \times 10^{-6}$ | $1{,}72 \times 10^{-11}$ | $1{,}85 \times 10^{-6}$ |
 | $10^{-10}$ | $4{,}25 \times 10^{-7}$ | $8{,}01 \times 10^{-7}$ |
 | $10^{-13}$ | $6{,}27 \times 10^{-4}$ | $9{,}38 \times 10^{-4}$ |
 
-Có hai nguồn sai số đánh nhau:
+- **Sai số cắt cụt** sinh ra do bỏ các số hạng bậc cao trong khai triển Taylor. Khai triển $f(x \pm \varepsilon)$ tới bậc ba cho thấy sai số này tỉ lệ với $\varepsilon$ ở sai phân tiến và với $\varepsilon^2$ ở sai phân trung tâm (các số hạng bậc chẵn triệt tiêu nhau khi lấy hiệu). Nó giảm khi $\varepsilon$ nhỏ đi.
+- **Sai số làm tròn** sinh ra do mỗi giá trị $f$ chỉ được lưu với độ chính xác tương đối khoảng $u \approx 2{,}22 \times 10^{-16}$ (epsilon máy của số thực 64 bit). Lấy hiệu hai số gần bằng nhau rồi chia cho $\varepsilon$ khuếch đại sai số này lên cỡ $u/\varepsilon$. Nó tăng khi $\varepsilon$ nhỏ đi.
 
-- **Sai số cắt cụt** — do bỏ các số hạng bậc cao trong khai triển Taylor. Nó tỉ lệ $\varepsilon^2$ với sai phân trung tâm và $\varepsilon$ với sai phân tiến. Nguồn này **giảm** khi $\varepsilon$ nhỏ.
-- **Sai số làm tròn** — do trừ hai số gần bằng nhau rồi chia cho một số rất nhỏ. Nó tỉ lệ $u/\varepsilon$ với $u \approx 2{,}22\times10^{-16}$ là epsilon máy. Nguồn này **tăng** khi $\varepsilon$ nhỏ.
+Tổng sai số của sai phân trung tâm có dạng $C_1\varepsilon^2 + C_2 u/\varepsilon$. Đạo hàm theo $\varepsilon$ và cho bằng 0 được điểm tối ưu $\varepsilon^* \propto u^{1/3}$. Làm tương tự với sai phân tiến, $C_1\varepsilon + C_2u/\varepsilon$, được $\varepsilon^* \propto u^{1/2}$:
 
-Cân bằng hai nguồn:
+$$\varepsilon^{*}_{\text{trung tâm}} \sim u^{1/3} \approx 6{,}06 \times 10^{-6}, \qquad \varepsilon^{*}_{\text{tiến}} \sim u^{1/2} \approx 1{,}49 \times 10^{-8}.$$
 
-$$\varepsilon^{*}_{\text{trung tâm}} \sim u^{1/3} = 6{,}06 \times 10^{-6}, \qquad \varepsilon^{*}_{\text{tiến}} \sim u^{1/2} = 1{,}49 \times 10^{-8}.$$
+Giá trị đo được trong thí nghiệm là $5{,}62 \times 10^{-6}$ và $1{,}78 \times 10^{-8}$, khớp với lý thuyết trong phạm vi độ mịn của lưới quét. Tại điểm tối ưu của từng cách, sai số của sai phân trung tâm xuống tới $1{,}2 \times 10^{-11}$, còn sai số của sai phân tiến chỉ xuống tới khoảng $4 \times 10^{-8}$, kém hơn hơn ba bậc độ lớn. Sai phân trung tâm tốn gấp đôi số lần tính $f$, nhưng độ chính xác tăng thêm xứng đáng với chi phí đó.
 
-Giá trị đo được: **$5{,}62 \times 10^{-6}$** và **$1{,}78 \times 10^{-8}$**. Cả hai khớp với lý thuyết trong phạm vi lưới quét.
+> **Lưu ý (Quy tắc kiểm tra gradient).** Dùng sai phân trung tâm với $\varepsilon$ khoảng $10^{-5}$ tới $10^{-6}$ khi tính bằng số thực 64 bit. So sánh bằng sai số tương đối
+> $$\frac{|g_{\text{công thức}} - g_{\text{số}}|}{\max\big(|g_{\text{công thức}}|, |g_{\text{số}}|, 10^{-8}\big)}.$$
+> Sai số tương đối dưới $10^{-7}$ cho thấy công thức đúng; trên $10^{-4}$ gần như chắc chắn có lỗi. Không chọn $\varepsilon = 10^{-12}$ với suy nghĩ nhỏ hơn là chính xác hơn: bảng trên cho thấy $\varepsilon = 10^{-13}$ cho sai số lớn gấp khoảng $5 \times 10^{7}$ lần so với $\varepsilon$ tối ưu.
 
-> **Quy tắc dùng được ngay.** Dùng sai phân **trung tâm** với $\varepsilon \approx 10^{-5}$ hoặc $10^{-6}$. Xem **sai số tương đối** $\frac{|g_{\text{giải tích}} - g_{\text{số}}|}{\max(|g_{\text{giải tích}}|, |g_{\text{số}}|, 10^{-8})}$; dưới $10^{-7}$ là yên tâm, trên $10^{-4}$ là gần như chắc chắn có lỗi. Và đừng bao giờ đặt $\varepsilon = 10^{-12}$ vì nghĩ rằng nhỏ hơn thì tốt hơn.
+### 5.6. Batch, stochastic và mini-batch gradient descent
 
-### 5.6. Xuống dốc theo lô, ngẫu nhiên và lô nhỏ
+Với hàm mất mát là trung bình trên $n$ điểm dữ liệu, $L(\theta) = \frac1n\sum_i \ell_i(\theta)$, gradient cũng là trung bình của $n$ gradient thành phần. Ba biến thể của gradient descent khác nhau ở số điểm dữ liệu dùng để tính gradient mỗi bước:
 
-| Biến thể | Mỗi bước dùng | Ưu | Nhược |
+| Biến thể | Mỗi bước dùng | Ưu điểm | Nhược điểm |
 |---|---|---|---|
-| Theo lô đầy đủ | cả $n$ mẫu | gradient chính xác, hội tụ trơn | một bước rất đắt; cần cả dữ liệu trong bộ nhớ |
-| Ngẫu nhiên (SGD) | 1 mẫu | bước cực rẻ, thoát được điểm yên ngựa | nhiễu lớn, đường đi nhấp nhô |
-| Lô nhỏ | $B$ mẫu | dung hoà, tận dụng được phép tính song song | thêm một siêu tham số $B$ |
+| Batch gradient descent | toàn bộ $n$ điểm | gradient chính xác, đường đi trơn | mỗi bước đắt, cần toàn bộ dữ liệu trong bộ nhớ |
+| Stochastic gradient descent (SGD) | 1 điểm chọn ngẫu nhiên | mỗi bước rất rẻ | gradient nhiễu lớn, đường đi dao động |
+| Mini-batch gradient descent | $B$ điểm chọn ngẫu nhiên | cân bằng hai cách trên, tận dụng tính toán song song | thêm siêu tham số $B$ |
 
-Lô nhỏ thắng trên thực tế không phải vì toán học đẹp hơn mà vì **phần cứng**: nhân ma trận $B \times d$ tận dụng GPU tốt hơn $B$ phép nhân vector rời rạc. Nhiễu của SGD hoá ra còn **có ích** ở bài toán không lồi, vì nó giúp thoát khỏi cực tiểu địa phương nông — nhưng với hàm lồi thì nhiễu chỉ là cái giá phải trả.
+Gradient tính trên một mini-batch chọn ngẫu nhiên là một **ước lượng không chệch** của gradient đầy đủ: kỳ vọng của nó đúng bằng $\nabla L$. Phương sai của ước lượng này giảm tỉ lệ với $1/B$, nên tăng kích thước mini-batch làm hướng đi chính xác hơn, nhưng lợi ích giảm dần: tăng $B$ gấp 4 lần chỉ giảm độ lệch chuẩn của gradient đi 2 lần.
+
+Vì gradient ngẫu nhiên luôn có nhiễu, SGD với tốc độ học cố định không hội tụ hẳn về cực tiểu mà dao động trong một vùng quanh nó. Để hội tụ, tốc độ học phải giảm dần theo thời gian. Điều kiện cổ điển của Robbins và Monro (1951) là $\sum_t \eta_t = \infty$ (đủ xa để tới được cực tiểu) và $\sum_t \eta_t^2 < \infty$ (nhiễu bị dập dần), ví dụ $\eta_t \propto 1/t$.
+
+Mini-batch được dùng phổ biến nhất trên thực tế, chủ yếu vì lý do phần cứng: nhân một ma trận $B \times d$ với vector trọng số tận dụng GPU tốt hơn nhiều so với $B$ phép nhân vector riêng lẻ. Nhiễu của gradient ngẫu nhiên còn có ích với các bài toán không lồi như mạng nơ-ron, vì nó giúp thuật toán thoát khỏi các điểm yên ngựa và các cực tiểu địa phương nông. Với bài toán lồi, nhiễu chỉ là cái giá phải trả để đổi lấy các bước tính rẻ.
 
 ---
 
-## 6. Phân loại tuyến tính: perceptron, logistic, softmax
+## 6. Phân loại tuyến tính
 
-### 6.1. Cùng một mô hình, ba hàm mất mát
+Chương này trình bày ba thuật toán phân loại dùng mô hình tuyến tính: perceptron, hồi quy logistic và hồi quy softmax. Ba thuật toán dùng chung mô hình, chung cách tối ưu, và chỉ khác nhau ở hàm mất mát. So sánh các hàm mất mát giải thích vì sao perceptron có hạn chế, vì sao hồi quy logistic cho ra xác suất, và chuẩn bị cho SVM ở Chương 13.
 
-Ba thuật toán của chương này dùng **chung một mô hình** — điểm số tuyến tính $s = w^\top x + b$ — và **chung một thuật toán tối ưu** — xuống dốc. Theo khung ở Hình 1, chúng chỉ khác nhau ở cột giữa.
+### 6.1. Mô hình tuyến tính và các hàm mất mát cho phân loại
 
-Định nghĩa **biên** (margin) của một mẫu:
+Xét bài toán phân loại hai lớp với nhãn $y_i \in \{-1, +1\}$. Một bộ phân loại tuyến tính tính **điểm số** $s = w^\top x + b$ rồi dự đoán lớp $+1$ nếu $s > 0$ và lớp $-1$ nếu $s < 0$. Theo Mục 2.2, biên quyết định $w^\top x + b = 0$ là một siêu phẳng.
 
-$$m_i = y_i\,(w^\top x_i + b), \qquad y_i \in \{-1, +1\}.$$
+> **Định nghĩa 6.1 (Lề của một điểm).** **Lề** (margin) của điểm $(x_i, y_i)$ đối với bộ phân loại $(w, b)$ là
+> $$m_i = y_i\,(w^\top x_i + b).$$
 
-$m_i > 0$ nghĩa là đoán đúng, và $|m_i|$ đo mức độ tự tin. Mọi hàm mất mát phân loại đều là hàm của $m$:
+Lề dương nghĩa là điểm được phân loại đúng, lề âm nghĩa là phân loại sai, và trị tuyệt đối của lề cho biết điểm nằm xa biên quyết định tới mức nào (tỉ lệ với khoảng cách ở Định lý 2.1). Mọi hàm mất mát cho phân loại hai lớp trong chương này đều viết được như một hàm của lề:
 
 ![Hình 5](figs/nt05_matmat.png)
 
-**Hình 5.** Bốn hàm mất mát theo biên $m$. Cái ta thực sự muốn là mất mát 0–1; ba cái còn lại là các cách làm trơn nó.
+**Hình 5.** Bốn hàm mất mát theo lề $m$. Mất mát 0–1 là thứ ta thực sự muốn giảm; ba hàm còn lại là các hàm thay thế lồi của nó.
 
-| Hàm mất mát | Công thức | Tính chất | Cho ra thuật toán |
+| Hàm mất mát | Công thức | Tính chất | Thuật toán tương ứng |
 |---|---|---|---|
-| 0–1 | $\mathbb{1}[m \le 0]$ | không lồi, đạo hàm 0 khắp nơi | — (không tối ưu trực tiếp được) |
-| Perceptron | $\max(0, -m)$ | lồi, phẳng khi $m > 0$ | perceptron |
-| Hinge | $\max(0, 1-m)$ | lồi, phẳng khi $m > 1$ | SVM (Chương 13) |
-| Logistic | $\log(1 + e^{-m})$ | lồi, trơn, không bao giờ phẳng hẳn | hồi quy logistic |
+| 0–1 | $\mathbb{1}[m \le 0]$ | không lồi, đạo hàm bằng 0 hầu khắp nơi | không tối ưu trực tiếp được |
+| Perceptron | $\max(0, -m)$ | lồi, bằng 0 khi $m \ge 0$ | perceptron |
+| Hinge | $\max(0, 1-m)$ | lồi, bằng 0 khi $m \ge 1$ | SVM (Chương 13) |
+| Logistic | $\log_2(1 + e^{-m})$ | lồi, trơn, luôn dương | hồi quy logistic |
 
-**Đây là ý trung tâm của chương.** Thứ ta thực sự muốn tối thiểu là tỉ lệ đoán sai, tức mất mát 0–1. Nhưng nó không lồi và có đạo hàm bằng 0 ở mọi nơi nó khả vi, nên không tối ưu được. Ba hàm còn lại đều là **chặn trên lồi** của nó, nên giảm chúng là gián tiếp giảm tỉ lệ đoán sai. Chọn chặn trên nào là chọn thuật toán.
+Mất mát 0–1 đếm số điểm bị phân loại sai, đúng là thứ ta muốn giảm. Nhưng nó là hàm bậc thang: đạo hàm bằng 0 ở mọi chỗ khả vi và không tồn tại tại $m = 0$, nên gradient không chỉ ra hướng nào để cải thiện. Hơn nữa, bài toán cực tiểu hoá mất mát 0–1 trên một tập dữ liệu là bài toán NP-khó. Vì vậy người ta thay nó bằng một **hàm thay thế lồi** (convex surrogate) để có thể tối ưu bằng gradient.
 
-### 6.2. Perceptron: cái đầu tiên, và giới hạn của nó
+Hinge và logistic viết theo logarit cơ số 2 còn là **chặn trên** của mất mát 0–1: với mọi $m$, giá trị của chúng lớn hơn hoặc bằng $\mathbb{1}[m \le 0]$. Do đó làm nhỏ tổng mất mát hinge hoặc logistic kéo theo làm nhỏ số điểm bị phân loại sai trên tập huấn luyện. Mất mát perceptron không có tính chất này: tại $m = 0$ nó bằng 0 trong khi mất mát 0–1 bằng 1, và với lề âm rất nhỏ nó gần bằng 0. Đây là một cách nhìn vì sao perceptron yếu hơn hai thuật toán kia, như Mục 6.2 sẽ cho thấy bằng thí nghiệm. (Dùng logarit tự nhiên thay cho cơ số 2 chỉ nhân hàm mất mát logistic với hằng số $\ln 2$, không làm thay đổi nghiệm.)
 
-Quy tắc cập nhật, chỉ chạm vào các mẫu đang bị đoán sai:
+### 6.2. Perceptron
 
-$$\text{nếu } y_i(w^\top x_i) \le 0: \quad w \leftarrow w + y_i x_i.$$
+Perceptron (Rosenblatt, 1958) là thuật toán học đầu tiên cho bộ phân loại tuyến tính. Để đơn giản, gộp hệ số chặn vào $w$ bằng cách thêm thành phần hằng 1 vào $x$ như ở Chương 4.
 
-Đây chính là xuống dốc trên mất mát perceptron với $\eta = 1$: đạo hàm của $\max(0,-m)$ theo $w$ bằng $-y_i x_i$ khi $m < 0$ và bằng 0 khi $m > 0$.
+> **Định nghĩa 6.2 (Thuật toán perceptron).** Khởi tạo $w = 0$. Lần lượt duyệt các điểm dữ liệu; mỗi khi gặp một điểm bị phân loại sai hoặc nằm đúng trên biên, tức $y_i\, w^\top x_i \le 0$, cập nhật
+> $$w \leftarrow w + y_i x_i.$$
+> Dừng khi một lượt duyệt toàn bộ dữ liệu không có cập nhật nào.
 
-**Định lý Novikoff.** Nếu dữ liệu tách được tuyến tính với lề $\gamma$ và mọi điểm nằm trong hình cầu bán kính $R$, thì perceptron mắc **nhiều nhất $(R/\gamma)^2$ lần sai** trước khi dừng hẳn — bất kể có bao nhiêu điểm và bao nhiêu chiều.
+Ý nghĩa của bước cập nhật: nếu một điểm lớp $+1$ bị đoán sai, cộng $x_i$ vào $w$ làm tăng $w^\top x_i$ thêm $\|x_i\|^2$, kéo điểm số của nó về phía dương. Quy tắc này chính là SGD trên mất mát perceptron với tốc độ học 1: đạo hàm của $\max(0, -m_i)$ theo $w$ bằng $-y_i x_i$ khi $m_i < 0$ và bằng 0 khi $m_i > 0$.
 
-Thí nghiệm sinh dữ liệu nằm sát lề để chặn có ý nghĩa:
+Với dữ liệu tách được tuyến tính, perceptron có một bảo đảm hội tụ rất gọn.
 
-| Lề $\gamma$ | $R = \max\|x\|$ | Chặn $(R/\gamma)^2$ | Số lần sai đo được | Hội tụ |
+> **Định lý 6.1 (Novikoff, 1962).** Giả sử mọi điểm dữ liệu thoả $\|x_i\| \le R$, và tồn tại vector đơn vị $u$ sao cho $y_i\,u^\top x_i \ge \gamma > 0$ với mọi $i$ (dữ liệu tách được với lề $\gamma$). Khi đó perceptron thực hiện không quá $(R/\gamma)^2$ lần cập nhật.
+
+Điểm đáng chú ý của định lý là chặn trên không phụ thuộc số điểm dữ liệu $n$ hay số chiều $d$, chỉ phụ thuộc tỉ số giữa kích thước của dữ liệu và độ rộng của lề. Thí nghiệm sinh dữ liệu tách được với lề $\gamma$ cho trước:
+
+| Lề $\gamma$ | $R = \max_i\|x_i\|$ | Chặn $(R/\gamma)^2$ | Số lần cập nhật đo được | Hội tụ |
 |---|---|---|---|---|
 | 0,300 | 1,3273 | 19,5 | 4 | có |
 | 0,201 | 1,2631 | 39,5 | 4 | có |
 | 0,100 | 1,1703 | 136,8 | 10 | có |
 | 0,050 | 1,1519 | 526,9 | 14 | có |
 
-Chặn đúng ở cả bốn dòng, và số lần sai tăng lên khi lề co lại — đúng chiều lý thuyết dự đoán. Chặn khá lỏng, nhưng điều đáng giá là nó **không chứa $n$ và không chứa $d$**.
+Ở cả bốn trường hợp, số lần cập nhật nằm dưới chặn lý thuyết, và tăng lên khi lề hẹp lại, đúng xu hướng mà định lý dự báo. Chặn khá lỏng so với số đo, điều thường gặp với các chặn trong trường hợp xấu nhất.
 
-**Và đây là chỗ perceptron gãy.** Cùng thuật toán ấy chạy trên dữ liệu **không** tách được tuyến tính:
+Trên dữ liệu **không** tách được tuyến tính, tình hình khác hẳn:
 
 ```text
 hoi tu = False, so lan sai sau 2000 luot = 17,977
 ```
 
-Nó không dừng, và không có bảo đảm gì cả. Định lý Novikoff chỉ nói về trường hợp tách được; ngoài trường hợp ấy perceptron có thể dao động mãi mãi. Lý do nằm ở Hình 5: mất mát perceptron **phẳng hoàn toàn khi $m > 0$**, nên thuật toán mất động lực ngay khi vừa đúng, không có khái niệm "đúng chắc chắn hơn".
+Thuật toán không dừng. Định lý Novikoff chỉ áp dụng cho dữ liệu tách được; ngoài trường hợp đó, perceptron không có bảo đảm nào và có thể dao động mãi mãi. Nguyên nhân nhìn thấy được trên Hình 5: mất mát perceptron bằng 0 ngay khi $m \ge 0$, nên thuật toán ngừng điều chỉnh một điểm ngay khi điểm đó vừa được phân loại đúng, dù nó nằm sát biên. Khi các lớp chồng lấn, sửa một điểm sai này lại làm một điểm khác thành sai, và quá trình lặp lại không kết thúc.
 
 ### 6.3. Hồi quy logistic
 
-Chữa đúng hai khuyết điểm trên bằng cách đổi sang hàm mất mát trơn và không bao giờ phẳng hẳn. Mô hình cho ra **xác suất**:
+Hồi quy logistic khắc phục hạn chế của perceptron bằng một hàm mất mát trơn và không bao giờ bằng 0. Thay vì chỉ đưa ra nhãn, mô hình đưa ra xác suất. Trong mục này dùng nhãn $y_i \in \{0, 1\}$, cách viết thuận tiện hơn cho xác suất.
 
-$$p(y=1 \mid x) = \sigma(w^\top x) = \frac{1}{1 + e^{-w^\top x}}.$$
+> **Định nghĩa 6.3 (Hồi quy logistic).** Mô hình hồi quy logistic cho xác suất lớp dương là
+> $$p(y = 1 \mid x) = \sigma(w^\top x), \qquad \sigma(z) = \frac{1}{1 + e^{-z}},$$
+> trong đó $\sigma$ là **hàm sigmoid**. Tham số được học bằng cách cực tiểu hoá hàm mất mát **cross-entropy**
+> $$L(w) = -\frac{1}{n}\sum_{i=1}^{n}\Big[y_i \log p_i + (1-y_i)\log(1-p_i)\Big], \qquad p_i = \sigma(w^\top x_i).$$
 
-Hàm mất mát là **entropy chéo**, mà Mục 10.3 sẽ cho thấy chính là âm log hợp lý:
+Hàm sigmoid ép mọi số thực vào khoảng $(0, 1)$, với $\sigma(0) = 0{,}5$. Nghịch đảo của nó cho một cách hiểu hệ số rất cụ thể: $w^\top x = \log\frac{p}{1-p}$, tức mô hình tuyến tính đang dự đoán **log tỉ lệ cược** (log-odds). Tăng đặc trưng $x_j$ thêm một đơn vị làm log tỉ lệ cược tăng $w_j$, tức nhân tỉ lệ cược với $e^{w_j}$. Tên gọi "hồi quy" đến từ đây: mô hình hồi quy log tỉ lệ cược theo $x$, dù bài toán là phân loại.
 
-$$L(w) = -\frac{1}{n}\sum_{i=1}^{n}\Big[y_i \log p_i + (1-y_i)\log(1-p_i)\Big], \qquad p_i = \sigma(w^\top x_i).$$
+> **Ví dụ 6.1.** Cho $w = (0{,}5;\ -1)$, hệ số chặn $0{,}25$ và điểm $x = (2, 1)$. Điểm số là $0{,}5 \cdot 2 - 1 \cdot 1 + 0{,}25 = 0{,}25$, nên $p(y=1 \mid x) = \sigma(0{,}25) \approx 0{,}562$. Nếu $x_1$ tăng thêm 1 đơn vị, tỉ lệ cược được nhân với $e^{0{,}5} \approx 1{,}65$.
 
-Gradient của nó gọn đến bất ngờ:
+Gradient của cross-entropy có dạng rất gọn. Dùng tính chất $\sigma'(z) = \sigma(z)\,(1 - \sigma(z))$, đạo hàm của số hạng thứ $i$ theo $w$ là
+
+$$\frac{\partial}{\partial w}\Big[-y_i\log p_i - (1-y_i)\log(1-p_i)\Big] = -y_i(1-p_i)\,x_i + (1-y_i)\,p_i\, x_i = (p_i - y_i)\,x_i.$$
+
+Lấy trung bình trên mọi điểm:
 
 $$\nabla_w L = \frac{1}{n}X^\top(p - y).$$
 
-So với gradient của hồi quy tuyến tính $\tfrac{2}{n}X^\top(Xw - y)$ thì **cùng một dạng**: ma trận thiết kế chuyển vị nhân với sai lệch. Đây không phải trùng hợp — Mục 10.3 giải thích rằng cả hai đều thuộc họ mũ, và mọi mô hình trong họ ấy đều có gradient dạng này.
+Công thức có cùng dạng với gradient của hồi quy tuyến tính, $\tfrac{2}{n}X^\top(Xw - y)$: ma trận dữ liệu chuyển vị nhân với vector sai lệch giữa dự đoán và nhãn. Đây không phải trùng hợp. Mục 10.3 giải thích rằng cả hai mô hình đều là mô hình tuyến tính tổng quát với hàm liên kết chính tắc, và mọi mô hình như vậy đều có gradient dạng này.
 
-**Vì sao không dùng bình phương sai lệch cho phân loại?** Hai lý do. Thứ nhất, $\sum(y_i - \sigma(w^\top x_i))^2$ **không lồi** theo $w$, nên mất hết bảo đảm của Chương 11. Thứ hai, khi mô hình đoán sai mà rất tự tin, đạo hàm của bình phương sai lệch **triệt tiêu** (vì $\sigma$ bão hoà), còn entropy chéo thì không — nó phạt mạnh đúng lúc cần.
+Hàm mất mát cross-entropy của hồi quy logistic là hàm lồi theo $w$ (Mục 11.4 kiểm tra bằng số), nên gradient descent với tốc độ học phù hợp hội tụ về cực tiểu toàn cục, nếu cực tiểu đó tồn tại. Mục 6.5 trình bày trường hợp nó không tồn tại.
 
-### 6.4. Softmax: nhiều lớp
+> **Lưu ý (Vì sao không dùng bình phương sai số cho phân loại).** Có hai lý do. Thứ nhất, $\sum_i (y_i - \sigma(w^\top x_i))^2$ không lồi theo $w$, nên mất bảo đảm hội tụ về cực tiểu toàn cục. Thứ hai, khi mô hình đoán sai với độ tự tin cao, ví dụ $p_i \approx 0$ trong khi $y_i = 1$, đạo hàm của bình phương sai số chứa thừa số $\sigma'(z) = p_i(1-p_i) \approx 0$ nên gần như triệt tiêu, và mô hình học rất chậm từ chính những lỗi nặng nhất. Gradient của cross-entropy là $(p_i - y_i)x_i \approx -x_i$, không bị triệt tiêu.
 
-Với $K$ lớp, thay $K$ vector trọng số và chuẩn hoá bằng softmax:
+### 6.4. Hồi quy softmax
 
-$$p(y = k \mid x) = \frac{\exp(w_k^\top x)}{\sum_{j=1}^{K}\exp(w_j^\top x)}.$$
+Khi có $K > 2$ lớp, mỗi lớp $k$ có một vector trọng số $w_k$ và một điểm số $s_k = w_k^\top x$. Hàm softmax biến $K$ điểm số thành $K$ xác suất.
 
-Softmax có một tính chất cần biết: **cộng cùng một vector vào mọi $w_k$ thì xác suất không đổi**, vì tử và mẫu cùng nhân thêm một hệ số. Nên chỉ **hiệu** giữa các vector trọng số là xác định được; bản thân chúng thì không.
+> **Định nghĩa 6.4 (Hồi quy softmax).** Mô hình hồi quy softmax cho
+> $$p(y = k \mid x) = \frac{\exp(w_k^\top x)}{\sum_{j=1}^{K}\exp(w_j^\top x)}, \qquad k = 1, \dots, K,$$
+> và được huấn luyện bằng cross-entropy nhiều lớp $L = -\frac1n\sum_i \log p(y = y_i \mid x_i)$.
 
-Hệ quả đẹp, và kiểm chứng được:
+Softmax có một tính chất cần biết: cộng cùng một vector $c$ vào mọi $w_k$ không làm thay đổi xác suất, vì cả tử số và mẫu số đều nhân thêm $\exp(c^\top x)$. Do đó chỉ **hiệu** giữa các vector trọng số được dữ liệu xác định; bản thân từng vector thì không. Trên thực tế người ta cố định một vector bằng 0, hoặc thêm regularization để chọn ra một nghiệm.
 
-> **Hồi quy logistic chính là softmax với $K = 2$.**
+Tính chất này dẫn tới một liên hệ quan trọng: với $K = 2$,
 
-Thí nghiệm khớp cả hai mô hình trên cùng dữ liệu, không phạt chuẩn, chạy tới hội tụ:
+$$p(y = 1 \mid x) = \frac{e^{w_1^\top x}}{e^{w_1^\top x} + e^{w_0^\top x}} = \frac{1}{1 + e^{-(w_1 - w_0)^\top x}} = \sigma\big((w_1 - w_0)^\top x\big).$$
+
+Vậy hồi quy softmax với hai lớp chính là hồi quy logistic, với vector trọng số $w = w_1 - w_0$. Thí nghiệm khớp cả hai mô hình trên cùng dữ liệu, không dùng regularization, chạy tới hội tụ:
 
 ```text
 Sai khac lon nhat giua xac suat cua logistic va cua softmax(K=2): 3.331e-16
@@ -585,103 +804,123 @@ Trong so cua hoi quy logistic:      [ 0.10864027  1.53215349 -1.83422929]
 Tong hai cot trong so cua softmax (phai bang 0): 6.661e-16
 ```
 
-Khớp tới $1{,}6\times10^{-15}$, tức sai số máy. Đây không phải "hai mô hình cho kết quả giống nhau" mà là **một mô hình viết theo hai cách**.
+Hai mô hình cho xác suất lệch nhau $3{,}3 \times 10^{-16}$ và trọng số lệch nhau $1{,}6 \times 10^{-15}$, tức trùng nhau tới sai số làm tròn. Dòng cuối cho thấy thuật toán, xuất phát từ $w_0 = w_1 = 0$, luôn giữ tổng hai vector bằng 0, vì gradient của hai lớp luôn đối nhau.
 
-### 6.5. Cái bẫy: dữ liệu tách được thì hợp lý cực đại không có nghiệm
+> **Lưu ý (Tính softmax ổn định số học).** Khi các điểm số lớn, $\exp(s_k)$ có thể vượt quá giới hạn của số thực dấu phẩy động. Vì cộng cùng một hằng số vào mọi điểm số không đổi kết quả, các thư viện luôn tính $\operatorname{softmax}(s - \max_k s_k)$ để số mũ lớn nhất bằng 0.
 
-Đây là chi tiết ít được dạy nhưng gặp thật, và nó giải thích vì sao thư viện nào cũng bật phạt chuẩn mặc định.
+### 6.5. Dữ liệu tách được và sự cần thiết của regularization
 
-Nếu dữ liệu **tách được hoàn toàn**, thì với mọi $w$ tách đúng, nhân $w$ lên gấp đôi sẽ làm mọi $p_i$ tiến gần 0 hoặc 1 hơn, tức hợp lý **tăng**. Nên không tồn tại cực đại hữu hạn: $\|w\| \to \infty$.
+Có một trường hợp hồi quy logistic không có nghiệm, và trường hợp này gặp trên thực tế nhiều hơn người ta nghĩ.
+
+Giả sử dữ liệu **tách được hoàn toàn**: tồn tại $w$ sao cho mọi điểm lớp 1 có $w^\top x > 0$ và mọi điểm lớp 0 có $w^\top x < 0$. Nhân $w$ với một số $c > 1$ không đổi biên quyết định, nhưng đẩy mọi xác suất $p_i$ về gần 0 hoặc 1 hơn, tức gần nhãn đúng hơn, nên hàm mất mát giảm. Hàm mất mát giảm mãi khi $c \to \infty$ mà không bao giờ đạt giá trị nhỏ nhất. Do đó không tồn tại nghiệm hữu hạn, và gradient descent làm $\|w\|$ tăng không giới hạn.
 
 | Số vòng lặp | $\|w\|$ khi $\lambda = 0$ | $\|w\|$ khi $\lambda = 0{,}01$ |
 |---|---|---|
 | 500 | 10,164 | 3,993 |
 | 2 000 | 15,930 | 3,993 |
 | 10 000 | 24,703 | 3,993 |
-| 50 000 | **34,784** | **3,993** |
+| 50 000 | 34,784 | 3,993 |
 
-Cột giữa không có dấu hiệu dừng — nó sẽ cứ tăng mãi. Cột phải đứng yên từ vòng 500.
+Không có regularization, chuẩn của $w$ tăng chậm dần nhưng không có dấu hiệu dừng. Về lý thuyết, trên dữ liệu tách được, gradient descent làm $\|w\|$ tăng theo logarit của số vòng lặp, còn hướng của $w$ tiến dần tới hướng của siêu phẳng có lề lớn nhất (Soudry và cộng sự, 2018). Thêm thành phần regularization $\lambda\|w\|^2$ với $\lambda = 0{,}01$ làm hàm mất mát có cực tiểu duy nhất, và $\|w\|$ đứng yên ở 3,993 từ vòng lặp thứ 500.
 
-> **Ba hệ quả thực tế.** (1) `sklearn.linear_model.LogisticRegression` mặc định $C = 1{,}0$, tức **luôn có phạt chuẩn** — đó là chủ ý, không phải mặc định tuỳ tiện. (2) Nếu thấy hệ số hồi quy logistic lớn bất thường, hãy kiểm xem có đặc trưng nào rò rỉ nhãn không: tách được hoàn toàn thường là dấu hiệu rò rỉ. (3) Cùng hiện tượng ấy xuất hiện lại ở mạng nơ-ron, và là một trong các lý do weight decay tồn tại — xem [Mục 6.6 của *Mô hình & Kiến trúc*](models-ch06.html).
+> **Nhận xét.** Hiện tượng này có ba hệ quả thực tế. Thứ nhất, `LogisticRegression` của scikit-learn mặc định dùng regularization $\ell_2$ với $C = 1{,}0$ (với $C$ là nghịch đảo của cường độ regularization), và đây là lựa chọn có chủ đích. Thứ hai, khi thấy hệ số hồi quy logistic lớn bất thường, nên kiểm tra xem có đặc trưng nào làm lộ nhãn không: dữ liệu tách được hoàn toàn thường là dấu hiệu của rò rỉ dữ liệu. Thứ ba, hiện tượng tương tự xuất hiện với mạng nơ-ron phân loại, và là một trong các lý do dùng weight decay (xem [Chương 6 của *Học sâu*](models-ch06.html)).
 
-### 6.6. Những chỗ hay nhầm
+### 6.6. Các lỗi thường gặp
 
-| Phát biểu | Thực tế |
+| Phát biểu sai | Thực tế |
 |---|---|
-| "Hồi quy logistic là thuật toán hồi quy." | Nó là phân loại. Chữ "hồi quy" đến từ việc nó hồi quy **log tỉ lệ cược** theo $x$. |
-| "Perceptron và SVM là hai thứ khác hẳn nhau." | Cùng mô hình tuyến tính, khác đúng một chỗ: hinge phẳng ở $m>1$ thay vì $m>0$. Chỗ khác ấy sinh ra khái niệm lề. |
-| "Softmax cần $K$ vector trọng số độc lập." | Chỉ $K-1$ là tự do; cộng cùng một vector vào tất cả thì không đổi gì. |
-| "Xác suất của hồi quy logistic là xác suất thật." | Chỉ khi mô hình được **hiệu chuẩn**. Dữ liệu mất cân bằng hoặc phạt chuẩn mạnh đều làm lệch — xem [Mục 9.4 của *MLOps*](mlops-ch09.html). |
-| "Đoán sai thì tăng tốc độ học." | Với dữ liệu không tách được, perceptron dao động bất kể tốc độ học. Vấn đề ở hàm mất mát chứ không ở $\eta$. |
-
+| Hồi quy logistic là thuật toán hồi quy. | Nó là thuật toán phân loại. Chữ "hồi quy" đến từ việc nó hồi quy log tỉ lệ cược theo $x$ (Mục 6.3). |
+| Perceptron và SVM là hai loại mô hình khác nhau. | Cả hai dùng mô hình tuyến tính. Khác biệt nằm ở hàm mất mát: hinge bằng 0 khi $m \ge 1$ thay vì $m \ge 0$, và khác biệt đó sinh ra khái niệm lề. |
+| Softmax với $K$ lớp có $K$ vector trọng số độc lập. | Chỉ $K - 1$ vector là tự do, vì cộng cùng một vector vào tất cả không đổi kết quả (Mục 6.4). |
+| Xác suất do hồi quy logistic đưa ra là xác suất thật. | Chỉ đúng khi mô hình được hiệu chuẩn (calibrated) tốt. Regularization mạnh kéo xác suất về gần 0,5; lấy mẫu lại để cân bằng lớp làm xác suất lệch khỏi tỉ lệ thật. Kiểm tra bằng biểu đồ độ tin cậy (reliability diagram) và hiệu chỉnh bằng Platt scaling hoặc hồi quy isotonic trên tập xác thực. |
+| Perceptron không hội tụ thì giảm tốc độ học. | Trên dữ liệu không tách được, perceptron dao động với mọi tốc độ học (khởi tạo từ 0, tốc độ học chỉ nhân $w$ với một hằng số). Vấn đề nằm ở hàm mất mát. |
 ---
 
-## 7. K láng giềng gần nhất và Naive Bayes
+## 7. k láng giềng gần nhất và Naive Bayes
 
-### 7.1. Hai cách nghĩ hoàn toàn khác nhau
+Chương 6 học trực tiếp một biên quyết định. Chương này trình bày hai cách tiếp cận khác: k láng giềng gần nhất không học tham số nào mà dự đoán bằng cách tra cứu dữ liệu, còn Naive Bayes mô tả dữ liệu của từng lớp rồi suy ngược bằng định lý Bayes. Phần cuối chương chỉ ra rằng Naive Bayes, LDA và QDA là cùng một mô hình với ba ràng buộc khác nhau trên ma trận hiệp phương sai.
 
-Chương 6 học một **biên** rồi dùng nó để phân loại. Chương này trình bày hai cách khác hẳn, và chúng đại diện cho hai trường phái lớn:
+### 7.1. Mô hình phân biệt và mô hình sinh
 
-- **KNN** không học gì cả. Nó giữ nguyên dữ liệu và trả lời bằng cách tra cứu. Gọi là phương pháp **phi tham số** và **lười**.
-- **Naive Bayes** mô hình hoá $p(x \mid y)$ — tức mô tả dữ liệu của từng lớp trông thế nào — rồi lật ngược bằng quy tắc Bayes. Gọi là phương pháp **sinh**.
+Có hai cách để xây dựng một bộ phân loại theo xác suất.
 
-Phân biệt **sinh** (generative) và **phân biệt** (discriminative) đáng nắm vì nó hay được hỏi:
+- **Mô hình phân biệt** (discriminative model) mô hình hoá trực tiếp $p(y \mid x)$, tức xác suất của nhãn khi đã biết đầu vào. Hồi quy logistic ở Chương 6 là ví dụ điển hình. SVM và cây quyết định cũng được xếp vào nhóm này, dù chúng học thẳng biên quyết định mà không qua xác suất.
+- **Mô hình sinh** (generative model) mô hình hoá $p(x \mid y)$ và $p(y)$, tức mô tả dữ liệu của mỗi lớp trông như thế nào và mỗi lớp phổ biến tới đâu, rồi dùng định lý Bayes để tính $p(y \mid x) \propto p(x \mid y)\,p(y)$. Naive Bayes, LDA và QDA thuộc nhóm này.
 
-| | Mô hình hoá gì | Ví dụ | Mạnh khi |
+| | Mô hình hoá | Ví dụ | Thường phù hợp khi |
 |---|---|---|---|
-| Phân biệt | $p(y \mid x)$ trực tiếp | logistic, SVM, cây | nhiều dữ liệu; chỉ cần dự báo |
-| Sinh | $p(x \mid y)$ rồi lật | Naive Bayes, LDA, QDA | ít dữ liệu; cần sinh mẫu mới; cần xử lý dữ liệu thiếu |
+| Phân biệt | $p(y \mid x)$ | hồi quy logistic, SVM, cây quyết định | nhiều dữ liệu, chỉ cần dự đoán nhãn |
+| Sinh | $p(x \mid y)$ và $p(y)$ | Naive Bayes, LDA, QDA | ít dữ liệu, cần sinh mẫu mới hoặc xử lý giá trị thiếu |
 
-### 7.2. K láng giềng gần nhất
+Mô hình sinh đặt nhiều giả định hơn về dữ liệu. Khi giả định đúng, nó cần ít dữ liệu hơn để đạt hiệu năng tốt; khi giả định sai, nó bị giới hạn bởi chính giả định đó. Ng và Jordan (2002) đã so sánh cặp Naive Bayes và hồi quy logistic và thấy đúng xu hướng này: Naive Bayes đạt tới mức sai số tiệm cận của nó nhanh hơn theo số mẫu, nhưng hồi quy logistic thường đạt mức sai số tiệm cận thấp hơn khi có đủ dữ liệu.
 
-Thuật toán vỏn vẹn: để phân loại $x$, tìm $k$ điểm huấn luyện gần $x$ nhất rồi lấy nhãn theo đa số.
+### 7.2. Thuật toán k láng giềng gần nhất
 
-Ba quyết định phải làm, và cả ba đều quan trọng hơn vẻ ngoài:
+> **Định nghĩa 7.1 (k láng giềng gần nhất, k-NN).** Để phân loại một điểm mới $x$, tìm $k$ điểm trong tập huấn luyện gần $x$ nhất theo một khoảng cách cho trước, rồi dự đoán lớp chiếm đa số trong $k$ điểm đó. Với hồi quy, dự đoán trung bình nhãn của $k$ điểm đó.
 
-1. **Chọn $k$.** $k=1$ cho biên rất gấp khúc, thiên lệch thấp phương sai cao; $k$ lớn làm trơn biên, thiên lệch cao phương sai thấp. Đây là đánh đổi thiên lệch–phương sai ở dạng dễ thấy nhất, và $k$ chính là nút điều chỉnh.
-2. **Chọn khoảng cách.** Euclid là mặc định nhưng chỉ hợp lý khi các đặc trưng cùng thang đo. **Không chuẩn hoá đặc trưng thì KNN gần như luôn sai** — một đặc trưng đo bằng đồng sẽ át hoàn toàn một đặc trưng đo bằng năm.
-3. **Chọn cách đánh trọng số.** Lấy đa số đơn thuần, hay đánh trọng số theo $1/d$?
+k-NN không có bước huấn luyện theo nghĩa thông thường: nó chỉ lưu lại dữ liệu. Vì vậy nó được gọi là phương pháp **lười** (lazy learning) và **phi tham số** (số "tham số" chính là toàn bộ dữ liệu, tăng theo $n$). Toàn bộ chi phí dồn vào lúc dự đoán: tìm láng giềng gần nhất bằng cách so với mọi điểm tốn $O(nd)$ cho mỗi truy vấn.
 
-**Lời nguyền số chiều.** Đây là giới hạn nghiêm trọng nhất của KNN, và nó là một sự thật hình học chứ không phải vấn đề kỹ thuật. Trong không gian $d$ chiều, để một hình cầu chứa được tỉ lệ $f$ số điểm phân bố đều trong khối lập phương đơn vị, bán kính của nó phải là $f^{1/d}$. Với $d = 100$ và $f = 0{,}01$, bán kính cần là $0{,}01^{1/100} \approx 0{,}955$ — tức gần bằng toàn bộ cạnh khối lập phương. **"Láng giềng gần nhất" ở chiều cao thì không còn gần.**
+Ba lựa chọn quyết định chất lượng của k-NN:
 
-Hệ quả: KNN chỉ dùng được ở số chiều thấp, hoặc sau khi đã giảm chiều (Chương 14), hoặc trong không gian nhúng đã học được — đó đúng là cách các hệ tìm kiếm ảnh hiện đại làm.
+1. **Số láng giềng $k$.** Với $k = 1$, biên quyết định bám theo từng điểm dữ liệu, rất gồ ghề: độ chệch thấp nhưng phương sai cao, vì chỉ cần một điểm nhiễu là đủ đổi dự đoán của cả vùng quanh nó. Tăng $k$ làm biên trơn hơn: phương sai giảm, độ chệch tăng. Ở cực điểm $k = n$, mọi dự đoán đều là lớp phổ biến nhất. Đây là đánh đổi độ chệch – phương sai ở dạng dễ thấy nhất, và $k$ được chọn bằng cross-validation (Mục 9.5).
+2. **Khoảng cách.** Khoảng cách Euclid là lựa chọn mặc định, nhưng nó chỉ có nghĩa khi các đặc trưng cùng thang đo. Nếu một đặc trưng là thu nhập tính bằng đồng (hàng triệu) và một đặc trưng là tuổi (hàng chục), khoảng cách gần như chỉ phản ánh thu nhập.
+3. **Cách bỏ phiếu.** Có thể cho mỗi láng giềng một phiếu như nhau, hoặc cho láng giềng gần hơn trọng số lớn hơn, ví dụ tỉ lệ với nghịch đảo khoảng cách.
+
+> **Lưu ý.** Luôn chuẩn hoá đặc trưng trước khi dùng k-NN hoặc bất kỳ phương pháp nào dựa trên khoảng cách (K-means ở Chương 15 cũng vậy). Tham số chuẩn hoá (trung bình, độ lệch chuẩn) chỉ ước lượng trên tập huấn luyện.
+
+Dù đơn giản, k-NN có một bảo đảm lý thuyết đáng chú ý. Gọi sai số Bayes $R^*$ là sai số nhỏ nhất mà bất kỳ bộ phân loại nào có thể đạt được trên phân phối dữ liệu.
+
+> **Định lý 7.1 (Cover và Hart, 1967).** Với bài toán hai lớp, khi số điểm huấn luyện $n \to \infty$, sai số $R_{1\text{-NN}}$ của bộ phân loại 1 láng giềng gần nhất thoả
+> $$R^* \le R_{1\text{-NN}} \le 2R^*(1 - R^*) \le 2R^*.$$
+
+Nói cách khác, với đủ dữ liệu, chỉ nhìn vào một láng giềng gần nhất đã cho sai số không quá hai lần sai số tốt nhất có thể. Nhưng "đủ dữ liệu" có thể là một lượng không tưởng khi số chiều lớn, vì hiện tượng sau.
+
+**Lời nguyền số chiều.** Giả sử dữ liệu phân bố đều trong hình lập phương đơn vị $[0, 1]^d$. Để một hình lập phương con quanh một điểm chứa được tỉ lệ $f$ số điểm dữ liệu, cạnh của nó phải dài $f^{1/d}$. Với $f = 0{,}01$ (láng giềng là 1% dữ liệu gần nhất), cạnh cần dài $0{,}1$ khi $d = 2$, $0{,}63$ khi $d = 10$ và $0{,}955$ khi $d = 100$. Ở 100 chiều, "vùng lân cận" chứa 1% dữ liệu trải gần hết chiều dài mỗi cạnh, tức láng giềng gần nhất không còn gần theo nghĩa thông thường. Một hệ quả liên quan: ở số chiều cao, khoảng cách từ một điểm tới điểm gần nhất và tới điểm xa nhất trở nên gần bằng nhau, nên thứ hạng theo khoảng cách mang ít thông tin.
+
+Vì vậy k-NN trên dữ liệu thô chỉ hiệu quả ở số chiều thấp. Ở số chiều cao, người ta áp dụng nó sau khi giảm chiều (Chương 14), hoặc trong một không gian embedding đã được học sao cho khoảng cách phản ánh độ giống nhau về nghĩa. Tìm kiếm ảnh, tìm kiếm văn bản theo ngữ nghĩa và bước truy xuất trong hệ thống RAG đều là k-NN trong không gian embedding, kết hợp với các chỉ mục tìm kiếm gần đúng để tránh chi phí $O(nd)$ mỗi truy vấn. Giáo trình *Ứng dụng LLM* trình bày các chỉ mục đó.
 
 ### 7.3. Naive Bayes
 
-Xuất phát từ quy tắc Bayes:
+Theo định lý Bayes, bộ phân loại tối ưu chọn lớp có hậu nghiệm lớn nhất:
 
-$$p(y = k \mid x) \propto p(x \mid y=k)\,p(y=k).$$
+$$\hat y = \arg\max_k \; p(y = k \mid x) = \arg\max_k \; p(x \mid y = k)\,p(y = k).$$
 
-Khó khăn là ước lượng $p(x \mid y=k)$ khi $x$ có nhiều chiều. Giả thiết **naive** cắt phăng khó khăn ấy: **các đặc trưng độc lập có điều kiện khi đã biết lớp.**
+Ước lượng $p(y = k)$ đơn giản: tỉ lệ các điểm thuộc lớp $k$ trong tập huấn luyện. Khó khăn nằm ở $p(x \mid y = k)$ khi $x$ có nhiều chiều. Với $d$ đặc trưng nhị phân, một phân phối tổng quát trên $x$ cần $2^d - 1$ tham số cho mỗi lớp, quá nhiều để ước lượng từ dữ liệu.
 
-$$p(x \mid y=k) = \prod_{j=1}^{d} p(x_j \mid y=k).$$
+> **Định nghĩa 7.2 (Giả thiết Naive Bayes).** Các đặc trưng **độc lập có điều kiện** khi đã biết lớp:
+> $$p(x \mid y = k) = \prod_{j=1}^{d} p(x_j \mid y = k).$$
 
-Thay vì một phân phối $d$ chiều, ta chỉ cần $d$ phân phối một chiều. Số tham số giảm từ cỡ $d^2$ xuống cỡ $d$.
+Với giả thiết này, thay vì một phân phối $d$ chiều ta chỉ cần ước lượng $d$ phân phối một chiều cho mỗi lớp, và số tham số giảm từ cấp số mũ xuống tuyến tính theo $d$. Mỗi phân phối một chiều có thể là Bernoulli (đặc trưng nhị phân, như từ có xuất hiện trong thư hay không), đa thức (số lần xuất hiện của từ) hoặc Gauss (đặc trưng liên tục).
 
-Giả thiết này gần như luôn **sai** — từ ngữ trong văn bản rõ ràng không độc lập. Nhưng Naive Bayes vẫn chạy tốt, vì để phân loại đúng ta chỉ cần **thứ tự** giữa các $p(y=k \mid x)$ đúng, chứ không cần bản thân các xác suất đúng. Ước lượng xác suất của nó thường rất tệ (dồn về 0 hoặc 1); nhãn thì thường ổn.
+Chú ý chữ "có điều kiện". Giả thiết không nói các đặc trưng độc lập với nhau, mà nói chúng độc lập **khi đã biết lớp**. Trong một thư rác, từ "miễn phí" và từ "khuyến mãi" hay cùng xuất hiện, tức không độc lập; Naive Bayes giả định rằng trong riêng nhóm thư rác, biết thư có "miễn phí" không cho thêm thông tin gì về việc có "khuyến mãi". Giả thiết này gần như luôn sai với dữ liệu thật. Tuy vậy Naive Bayes vẫn thường phân loại tốt, vì để chọn đúng nhãn chỉ cần **thứ tự** của các $p(y = k \mid x)$ đúng, không cần giá trị của chúng đúng. Ngược lại, các xác suất do Naive Bayes đưa ra thường bị đẩy về gần 0 hoặc 1 quá mức, vì những bằng chứng tương quan với nhau bị đếm nhiều lần như thể độc lập. Không nên dùng đầu ra của nó như xác suất đã hiệu chuẩn.
 
-**Làm trơn Laplace.** Với dữ liệu đếm, nếu một từ chưa từng xuất hiện cùng lớp $k$ thì $p(x_j \mid y=k) = 0$, và vì ta **nhân** các xác suất nên cả tích thành 0 — một từ duy nhất phủ quyết toàn bộ bằng chứng còn lại. Cách chữa là cộng thêm một lượng nhỏ vào mọi ô đếm:
+> **Ví dụ 7.1 (Lọc thư rác với hai từ).** Tập huấn luyện có 4 thư rác và 6 thư thường. Từ "miễn phí" xuất hiện trong 3 thư rác và 1 thư thường; từ "cuộc họp" xuất hiện trong 0 thư rác và 4 thư thường. Dùng mô hình Bernoulli với làm trơn Laplace $\alpha = 1$ (công thức ở dưới):
+> $$p(\text{miễn phí} \mid \text{rác}) = \tfrac{3+1}{4+2} = 0{,}667, \quad p(\text{miễn phí} \mid \text{thường}) = \tfrac{1+1}{6+2} = 0{,}25,$$
+> $$p(\text{cuộc họp} \mid \text{rác}) = \tfrac{0+1}{4+2} = 0{,}167, \quad p(\text{cuộc họp} \mid \text{thường}) = \tfrac{4+1}{6+2} = 0{,}625.$$
+> Một thư mới chứa cả hai từ. Điểm của lớp rác là $0{,}4 \times 0{,}667 \times 0{,}167 = 0{,}0444$; điểm của lớp thường là $0{,}6 \times 0{,}25 \times 0{,}625 = 0{,}0938$. Chuẩn hoá, $p(\text{rác} \mid x) = 0{,}0444/(0{,}0444 + 0{,}0938) \approx 0{,}32$, nên thư được xếp là thư thường. Nếu thư chỉ chứa "miễn phí" mà không chứa "cuộc họp", cùng cách tính cho $p(\text{rác} \mid x) \approx 0{,}80$.
 
-$$p(x_j = v \mid y=k) = \frac{N_{kjv} + \alpha}{N_k + \alpha\,V}.$$
+**Làm trơn Laplace.** Trong ví dụ trên, nếu không làm trơn thì $p(\text{cuộc họp} \mid \text{rác}) = 0/4 = 0$. Vì Naive Bayes **nhân** các xác suất, một thừa số bằng 0 làm cả tích bằng 0: mọi thư chứa "cuộc họp" sẽ có xác suất là rác bằng đúng 0, bất kể nó chứa bao nhiêu từ đáng ngờ khác. Một từ chưa từng gặp trong một lớp đủ để phủ quyết mọi bằng chứng còn lại. Cách khắc phục là cộng thêm một lượng nhỏ vào mọi ô đếm. Với đặc trưng rời rạc có $V$ giá trị:
 
-Mục 10.5 cho thấy đây **chính là** MAP với tiên nghiệm Dirichlet, chứ không phải một thủ thuật kỹ thuật.
+$$p(x_j = v \mid y = k) = \frac{N_{kjv} + \alpha}{N_k + \alpha V},$$
 
-### 7.4. Naive Bayes, LDA và QDA chỉ khác nhau đúng một chỗ
+trong đó $N_{kjv}$ là số lần đặc trưng $j$ nhận giá trị $v$ trong lớp $k$, và $N_k$ là số điểm của lớp $k$. Với $\alpha = 1$ ta có làm trơn Laplace; với $0 < \alpha < 1$ gọi là làm trơn Lidstone. Mục 10.4 chỉ ra rằng công thức này là một ước lượng MAP với tiên nghiệm Dirichlet.
 
-Đây là kết quả gọn nhất của chương, và nó đo được.
+> **Lưu ý (Tính trong không gian logarit).** Tích của hàng nghìn xác suất nhỏ nhanh chóng nhỏ hơn số dương nhỏ nhất biểu diễn được bằng số thực dấu phẩy động và bị làm tròn về 0. Các cài đặt thực tế luôn cộng logarit thay vì nhân xác suất: $\log p(y=k) + \sum_j \log p(x_j \mid y = k)$.
 
-Khi $p(x \mid y=k)$ được mô hình bằng phân phối Gauss, **cả ba phương pháp là một**, chỉ khác ràng buộc đặt lên ma trận hiệp phương sai $\Sigma$:
+### 7.4. Naive Bayes, LDA và QDA
 
-| Mô hình | Ràng buộc trên $\Sigma$ | Biên quyết định | Độ chính xác đo được |
+Khi đặc trưng liên tục, lựa chọn tự nhiên cho $p(x \mid y = k)$ là phân phối Gauss nhiều chiều $\mathcal{N}(\mu_k, \Sigma_k)$. Mô hình này gọi chung là **phân tích biệt thức Gauss** (Gaussian discriminant analysis). Ba thuật toán quen thuộc là ba cách ràng buộc các ma trận hiệp phương sai $\Sigma_k$:
+
+| Mô hình | Ràng buộc trên $\Sigma_k$ | Biên quyết định | Độ chính xác đo được |
 |---|---|---|---|
-| Naive Bayes Gauss | riêng từng lớp, **chéo** | bậc hai | 0,8550 |
-| LDA | **dùng chung**, đầy đủ | **tuyến tính** | 0,8550 |
-| QDA | riêng từng lớp, đầy đủ | bậc hai | 0,8600 |
-| NB dùng chung $\Sigma$ chéo | dùng chung, chéo | tuyến tính | 0,8550 |
+| Naive Bayes Gauss | riêng từng lớp, **đường chéo** | bậc hai | 0,8550 |
+| LDA (Linear Discriminant Analysis) | **dùng chung** cho mọi lớp, đầy đủ | tuyến tính | 0,8550 |
+| QDA (Quadratic Discriminant Analysis) | riêng từng lớp, đầy đủ | bậc hai | 0,8600 |
+| Naive Bayes, $\Sigma$ đường chéo dùng chung | dùng chung, đường chéo | tuyến tính | 0,8550 |
 
-**Giả thiết "naive" chính là ép $\Sigma$ thành ma trận đường chéo.** Nói cách khác, Naive Bayes không phải một thuật toán riêng biệt — nó là bộ phân lớp Gauss với một ràng buộc cụ thể.
+Dòng đầu thể hiện ý chính của mục này: với đặc trưng Gauss, giả thiết độc lập có điều kiện của Naive Bayes tương đương với việc ép $\Sigma_k$ thành ma trận đường chéo. Lý do: một phân phối Gauss nhiều chiều có ma trận hiệp phương sai đường chéo phân tích được thành tích các phân phối Gauss một chiều, và ngược lại. Naive Bayes Gauss vì vậy không phải một thuật toán riêng biệt mà là bộ phân loại Gauss với một ràng buộc cụ thể.
 
-Thí nghiệm kiểm chứng đẳng thức ấy bằng hai cài đặt **hoàn toàn độc lập** trong mã nguồn: một bên nhân các mật độ Gauss **một chiều** lại với nhau (đúng định nghĩa Naive Bayes, không đụng tới ma trận hiệp phương sai ở bất kỳ đâu), một bên dùng mật độ Gauss **nhiều chiều** với $\Sigma$ chéo.
+Thí nghiệm kiểm tra điều này bằng hai cài đặt độc lập: một bên nhân các mật độ Gauss một chiều lại với nhau đúng như định nghĩa Naive Bayes, không đụng tới ma trận hiệp phương sai; một bên dùng mật độ Gauss nhiều chiều với $\Sigma$ đường chéo.
 
 ```text
 sai khac lon nhat cua hieu diem phan biet: 1.222e-08
@@ -690,120 +929,174 @@ ham quyet dinh cua LDA co TUYEN TINH khong? sai so khop tuyen tinh = 4.441e-15  
 con QDA thi sao? sai so khop tuyen tinh = 1.780e+01 -> khong, no bac hai
 ```
 
-Hai dòng cuối kiểm chứng một khẳng định lý thuyết quan trọng. Khi hai lớp **dùng chung** $\Sigma$, các số hạng bậc hai $x^\top\Sigma^{-1}x$ triệt tiêu nhau lúc lấy hiệu, nên biên quyết định là **tuyến tính** — khớp tuyến tính sai lệch $4{,}4\times10^{-15}$. Khi mỗi lớp có $\Sigma$ riêng thì không triệt tiêu, và biên là bậc hai — khớp tuyến tính sai lệch 17,8, tức trật hẳn.
+Hai cài đặt cho hàm phân biệt lệch nhau $1{,}2 \times 10^{-8}$ (giới hạn bởi lượng nhỏ thêm vào đường chéo để nghịch đảo ma trận ổn định) và dự đoán trùng nhau trên 100% số mẫu.
 
-> **Cách trả lời khi được hỏi "LDA khác QDA thế nào".** Đừng nói "một cái tuyến tính một cái bậc hai" rồi dừng. Nói **vì sao**: dùng chung $\Sigma$ thì số hạng bậc hai triệt tiêu khi lấy hiệu hai hàm phân biệt. Và nói **cái giá**: QDA cần ước lượng $K$ ma trận $d\times d$ thay vì một, nên tốn dữ liệu gấp $K$ lần và hỏng sớm khi $n$ nhỏ.
+Hai dòng cuối kiểm chứng một kết quả lý thuyết. Viết logarit tỉ số hậu nghiệm của hai lớp:
+
+$$\log\frac{p(y=1 \mid x)}{p(y=0 \mid x)} = -\tfrac12 (x-\mu_1)^\top\Sigma_1^{-1}(x-\mu_1) + \tfrac12 (x-\mu_0)^\top\Sigma_0^{-1}(x-\mu_0) + \text{hằng số}.$$
+
+Khai triển hai dạng toàn phương, số hạng bậc hai theo $x$ là $-\tfrac12 x^\top(\Sigma_1^{-1} - \Sigma_0^{-1})\,x$. Nếu hai lớp dùng chung ma trận hiệp phương sai, $\Sigma_1 = \Sigma_0 = \Sigma$, số hạng này triệt tiêu và phần còn lại tuyến tính theo $x$:
+
+$$\log\frac{p(y=1 \mid x)}{p(y=0 \mid x)} = (\mu_1 - \mu_0)^\top \Sigma^{-1} x + \text{hằng số}.$$
+
+Đó là lý do LDA có biên quyết định tuyến tính: trong thí nghiệm, khớp hàm quyết định của LDA bằng một hàm tuyến tính cho sai số $4{,}4 \times 10^{-15}$. Khi mỗi lớp có ma trận riêng, số hạng bậc hai còn lại và biên là mặt bậc hai: khớp tuyến tính cho sai số 17,8.
+
+> **Nhận xét (LDA và hồi quy logistic).** Công thức trên cho thấy hậu nghiệm của LDA có dạng $p(y = 1 \mid x) = \sigma(w^\top x + b)$, đúng dạng của hồi quy logistic. Hai phương pháp cho ra cùng họ hàm nhưng ước lượng tham số theo hai cách: LDA ước lượng $\mu_k$ và $\Sigma$ rồi suy ra $w$, hồi quy logistic tối ưu trực tiếp $w$ trên $p(y \mid x)$. Khi dữ liệu đúng là Gauss với $\Sigma$ chung, LDA dùng dữ liệu hiệu quả hơn; khi giả định sai, hồi quy logistic thường bền vững hơn. Đây là một trường hợp cụ thể của so sánh mô hình sinh và mô hình phân biệt ở Mục 7.1.
+
+Về chi phí: QDA cần ước lượng $K$ ma trận hiệp phương sai, mỗi ma trận có $d(d+1)/2$ tham số, trong khi LDA chỉ cần một ma trận. Với $d = 100$ và $K = 10$, QDA cần khoảng 50 000 tham số cho các ma trận hiệp phương sai, LDA cần khoảng 5 000 và Naive Bayes Gauss chỉ cần 1 000. Khi $n$ nhỏ, QDA dễ overfitting và ma trận ước lượng có thể suy biến.
 
 ---
 
 ## 8. Đánh giá mô hình phân loại
 
-### 8.1. Vì sao độ chính xác không đủ
+Một mô hình chỉ tốt hay xấu so với một thước đo. Chương này trình bày các thước đo cho bài toán phân loại, giải thích vì sao độ chính xác thường là thước đo sai trên dữ liệu mất cân bằng, và nêu các lỗi chia dữ liệu làm mọi con số đánh giá mất ý nghĩa.
 
-Dữ liệu thật hiếm khi cân bằng: gian lận thẻ, lỗi thiết bị, bệnh hiếm — lớp cần quan tâm luôn là lớp thiểu số. Trên dữ liệu như vậy độ chính xác không chỉ kém thông tin mà còn **đánh lừa một cách chủ động**.
+### 8.1. Hạn chế của độ chính xác
 
-Thí nghiệm dựng 20 000 mẫu với 0,98% thuộc lớp dương:
+**Độ chính xác** (accuracy) là tỉ lệ điểm được phân loại đúng. Thước đo này dễ hiểu nhưng có một điểm yếu lớn: nó không phân biệt các loại lỗi. Trong nhiều bài toán thật, lớp cần quan tâm là lớp hiếm: giao dịch gian lận, thiết bị sắp hỏng, bệnh hiếm gặp. Trên dữ liệu như vậy, độ chính xác không chỉ ít thông tin mà còn dẫn tới kết luận sai.
+
+Thí nghiệm dựng 20 000 điểm dữ liệu, trong đó 0,98% thuộc lớp dương, và một bộ phân loại cho điểm số cao hơn một chút với lớp dương. Bảng so sánh bộ phân loại này ở ba ngưỡng với một bộ phân loại luôn đoán lớp âm:
 
 | Bộ phân loại | Độ chính xác | Precision | Recall | F1 |
 |---|---|---|---|---|
-| **Đoán TẤT CẢ là âm** | **0,9902** | — | 0,0000 | 0,0000 |
-| Ngưỡng 2,6 | 0,9900 | 0,4928 | 0,5204 | **0,5062** |
+| Luôn đoán lớp âm | 0,9902 | không xác định | 0,0000 | 0,0000 |
+| Ngưỡng 2,6 | 0,9900 | 0,4928 | 0,5204 | 0,5062 |
 | Ngưỡng 1,0 | 0,8408 | 0,0559 | 0,9592 | 0,1056 |
 | Ngưỡng −1,0 | 0,1699 | 0,0117 | 1,0000 | 0,0231 |
 
-Đọc kỹ hai dòng đầu. **Bộ phân loại vô dụng có độ chính xác 0,9902, cao hơn bộ phân loại dùng được (0,9900).** Nếu chọn mô hình theo độ chính xác thì ta đã chọn cái không bắt được một ca dương nào.
+Bộ phân loại luôn đoán lớp âm không phát hiện được ca dương nào, nhưng có độ chính xác 0,9902, cao hơn bộ phân loại ở ngưỡng 2,6 (0,9900) vốn phát hiện được hơn một nửa số ca dương. Nếu chọn mô hình theo độ chính xác, ta sẽ chọn mô hình vô dụng. Các mục sau giới thiệu những thước đo phân biệt được hai mô hình này.
 
-### 8.2. Ma trận nhầm lẫn và các đại lượng dẫn xuất
+### 8.2. Ma trận nhầm lẫn, precision và recall
+
+Với bài toán hai lớp, mỗi dự đoán rơi vào một trong bốn ô:
 
 | | Dự đoán dương | Dự đoán âm |
 |---|---|---|
-| **Thật dương** | TP | FN |
-| **Thật âm** | FP | TN |
+| **Thật sự dương** | TP (dương thật) | FN (âm giả) |
+| **Thật sự âm** | FP (dương giả) | TN (âm thật) |
 
-$$\text{precision} = \frac{TP}{TP + FP}, \qquad \text{recall} = \frac{TP}{TP + FN}, \qquad F_1 = \frac{2\,PR}{P + R}.$$
+Bảng này gọi là **ma trận nhầm lẫn** (confusion matrix). Các thước đo phổ biến đều tính từ bốn ô của nó.
 
-Cách nhớ bằng câu hỏi, và đây là cách nhớ đúng bản chất:
+> **Định nghĩa 8.1 (Precision, recall, F1).**
+> $$\text{precision} = \frac{TP}{TP + FP}, \qquad \text{recall} = \frac{TP}{TP + FN}, \qquad F_1 = \frac{2\cdot \text{precision}\cdot\text{recall}}{\text{precision} + \text{recall}}.$$
+> Recall còn gọi là độ nhạy (sensitivity) hoặc tỉ lệ dương thật (true positive rate, TPR). Tỉ lệ dương giả (false positive rate) là $\text{FPR} = FP/(FP + TN)$.
 
-- **Precision** trả lời: *trong những ca tôi báo động, bao nhiêu phần là thật?* Mẫu số là những gì **mô hình nói**.
-- **Recall** trả lời: *trong những ca thật sự có, tôi bắt được bao nhiêu phần?* Mẫu số là những gì **thực tế có**.
+Cách nhớ đúng bản chất là đặt mỗi thước đo thành một câu hỏi:
 
-Bảng ở Mục 8.1 cho thấy chúng đánh đổi nhau theo ngưỡng: hạ ngưỡng thì recall lên (0,52 → 0,96 → 1,00) còn precision xuống (0,49 → 0,056 → 0,012). **Không có ngưỡng nào tốt cho cả hai**, và chọn ngưỡng là quyết định nghiệp vụ chứ không phải quyết định kỹ thuật: nó phụ thuộc giá của một lần bỏ sót so với giá của một lần báo động nhầm.
+- **Precision** trả lời: trong những trường hợp mô hình báo là dương, bao nhiêu phần đúng là dương? Mẫu số là những gì mô hình **khẳng định**.
+- **Recall** trả lời: trong những trường hợp thật sự dương, mô hình phát hiện được bao nhiêu phần? Mẫu số là những gì **thực tế có**.
 
-$F_1$ là trung bình điều hoà của precision và recall. Dùng trung bình điều hoà chứ không phải trung bình cộng vì nó **phạt nặng sự mất cân đối**: bộ phân loại ở dòng cuối có recall hoàn hảo 1,00 nhưng $F_1$ chỉ 0,023.
+> **Ví dụ 8.1.** Trên 1 000 giao dịch có 50 giao dịch gian lận, một mô hình cho TP = 40, FN = 10, FP = 20, TN = 930. Khi đó precision $= 40/60 = 0{,}667$, recall $= 40/50 = 0{,}80$, và $F_1 = 2 \cdot 0{,}667 \cdot 0{,}8/(0{,}667 + 0{,}8) \approx 0{,}727$. Độ chính xác là $970/1000 = 0{,}97$, trong khi mô hình luôn đoán "không gian lận" đã đạt $950/1000 = 0{,}95$.
 
-### 8.3. ROC và Precision–Recall
+Precision và recall đánh đổi nhau qua ngưỡng quyết định. Bảng ở Mục 8.1 cho thấy khi hạ ngưỡng từ 2,6 xuống 1,0 rồi −1,0, recall tăng từ 0,52 lên 0,96 rồi 1,00, còn precision giảm từ 0,49 xuống 0,056 rồi 0,012. Không có ngưỡng nào tốt nhất cho cả hai, và chọn ngưỡng là quyết định dựa trên chi phí của từng loại lỗi: bỏ sót một ca gian lận tốn bao nhiêu so với chặn nhầm một giao dịch hợp lệ.
+
+$F_1$ là trung bình điều hoà của precision và recall. Trung bình điều hoà bị kéo mạnh về phía giá trị nhỏ hơn, nên $F_1$ chỉ cao khi cả hai cùng cao: ở ngưỡng −1,0, recall bằng 1,00 nhưng $F_1$ chỉ bằng 0,023. Khi hai loại lỗi có chi phí khác nhau, dùng dạng tổng quát
+
+$$F_\beta = \frac{(1 + \beta^2)\cdot\text{precision}\cdot\text{recall}}{\beta^2\cdot\text{precision} + \text{recall}},$$
+
+trong đó $\beta > 1$ coi recall quan trọng hơn precision (ví dụ $F_2$ trong sàng lọc bệnh), còn $\beta < 1$ coi precision quan trọng hơn.
+
+### 8.3. Đường cong ROC và đường cong precision–recall
+
+Mỗi ngưỡng cho một cặp giá trị thước đo. Để đánh giá mô hình không phụ thuộc ngưỡng, ta quét mọi ngưỡng và vẽ đường cong.
+
+- **Đường cong ROC** vẽ TPR (recall) theo FPR khi ngưỡng thay đổi. Diện tích dưới đường cong, **ROC-AUC**, bằng xác suất một điểm dương chọn ngẫu nhiên được mô hình cho điểm số cao hơn một điểm âm chọn ngẫu nhiên. Bộ phân loại ngẫu nhiên có ROC-AUC bằng 0,5, bộ phân loại hoàn hảo có ROC-AUC bằng 1.
+- **Đường cong precision–recall (PR)** vẽ precision theo recall. Diện tích dưới đường cong, **PR-AUC** (thường tính bằng average precision), của bộ phân loại ngẫu nhiên bằng tỉ lệ lớp dương trong dữ liệu.
 
 ![Hình 6](figs/nt06_metrics.png)
 
-**Hình 6.** Cùng một bộ phân loại, cùng một bộ dữ liệu. Trái: ROC trông rất tốt. Phải: Precision–Recall kể một câu chuyện khác hẳn.
+**Hình 6.** Cùng một bộ phân loại trên cùng dữ liệu mất cân bằng. Trái: đường cong ROC. Phải: đường cong precision–recall.
 
-Trên đúng dữ liệu của Mục 8.1:
+Trên dữ liệu của Mục 8.1:
 
-$$\text{ROC-AUC} = 0{,}9715 \qquad \text{nhưng} \qquad \text{PR-AUC} = 0{,}4931.$$
+$$\text{ROC-AUC} = 0{,}9715, \qquad \text{PR-AUC} = 0{,}4931.$$
 
-**Vì sao chênh lệch lớn đến thế?** Nằm ở mẫu số của trục hoành ROC:
+Hai con số chênh nhau nhiều vì mẫu số của FPR là **toàn bộ lớp âm**:
 
 $$\text{FPR} = \frac{FP}{FP + TN}.$$
 
-Mẫu số là **toàn bộ lớp âm**, mà lớp âm ở đây có 19 804 mẫu. Thêm 100 báo động nhầm chỉ làm FPR nhúc nhích 0,005 — gần như không thấy trên đồ thị. Nhưng cũng 100 báo động nhầm ấy có thể làm precision sụp đổ, vì mẫu số của precision chỉ gồm những ca được báo động.
+Lớp âm ở đây có 19 804 điểm, nên thêm 100 dương giả chỉ làm FPR tăng khoảng 0,005, gần như không thấy trên đồ thị ROC. Cũng 100 dương giả đó có thể làm precision giảm mạnh, vì mẫu số của precision chỉ gồm những điểm được báo là dương, và số điểm này nhỏ.
 
-Một mốc cần nhớ: **PR-AUC của bộ đoán ngẫu nhiên bằng đúng tỉ lệ lớp dương**, ở đây là 0,0100. Còn ROC-AUC của bộ đoán ngẫu nhiên luôn là 0,5 bất kể mất cân bằng. Nên 0,4931 phải so với 0,0100, và khi so như vậy thì mô hình thực ra khá tốt — nhưng con số 0,9715 vẫn là con số không nên đem đi báo cáo.
+Để đọc đúng hai con số, cần so với mốc của bộ phân loại ngẫu nhiên. ROC-AUC = 0,9715 so với mốc 0,5. PR-AUC = 0,4931 so với mốc bằng tỉ lệ lớp dương, tức 0,0100: mô hình tốt hơn đoán ngẫu nhiên khoảng 49 lần, nhưng vẫn còn nhiều dương giả so với số ca dương thật.
 
-> **Quy tắc chọn.** Lớp cân bằng, và cả hai lớp đều đáng quan tâm ngang nhau → ROC-AUC. Lớp mất cân bằng, và chỉ lớp thiểu số đáng quan tâm → **PR-AUC**. Đây là câu hỏi phỏng vấn rất hay gặp, và trả lời được kèm lý do về mẫu số là dấu hiệu hiểu thật.
+> **Nhận xét (Chọn ROC-AUC hay PR-AUC).** Khi hai lớp tương đối cân bằng và cả hai đều quan trọng, ROC-AUC là thước đo phù hợp. Khi lớp dương hiếm và điều cần quan tâm là chất lượng của các cảnh báo dương, PR-AUC phản ánh thực tế tốt hơn, vì ROC-AUC có thể rất cao trong khi phần lớn cảnh báo là sai (Davis và Goadrich, 2006; Saito và Rehmsmeier, 2015).
 
-### 8.4. Nhiều lớp: ba cách lấy trung bình
+### 8.4. Đánh giá bài toán nhiều lớp
 
-| Cách | Tính thế nào | Khi nào dùng |
+Với $K > 2$ lớp, precision, recall và F1 được tính cho từng lớp theo cách "lớp đó so với tất cả các lớp còn lại", rồi gộp lại theo một trong ba cách:
+
+| Cách gộp | Tính thế nào | Khi nào dùng |
 |---|---|---|
-| Macro | tính chỉ số cho từng lớp rồi lấy trung bình **không trọng số** | mọi lớp quan trọng như nhau, kể cả lớp hiếm |
-| Micro | gộp toàn bộ TP, FP, FN rồi tính một lần | quan tâm hiệu năng tổng thể; lớp lớn chi phối |
-| Weighted | trung bình có trọng số theo số mẫu mỗi lớp | dung hoà, nhưng lại che mất lớp hiếm |
+| Macro | tính thước đo cho từng lớp rồi lấy trung bình không trọng số | mọi lớp quan trọng như nhau, kể cả lớp hiếm |
+| Micro | cộng dồn TP, FP, FN của mọi lớp rồi tính một lần | quan tâm hiệu năng tổng thể; lớp đông chi phối kết quả |
+| Weighted | trung bình có trọng số theo số điểm của mỗi lớp | cân bằng giữa hai cách trên, nhưng che khuất lớp hiếm |
 
-Với phân loại đơn nhãn nhiều lớp, micro-F1 **đúng bằng** độ chính xác — nên nếu ai báo cáo "micro-F1" trên bài toán đơn nhãn thì họ đang báo cáo độ chính xác dưới một cái tên khác.
+Với bài toán phân loại đơn nhãn nhiều lớp (mỗi điểm thuộc đúng một lớp), micro-F1 bằng đúng độ chính xác. Lý do: mỗi dự đoán sai đồng thời là một dương giả của lớp được dự đoán và một âm giả của lớp thật, nên tổng FP bằng tổng FN, kéo theo micro-precision bằng micro-recall bằng tỉ lệ dự đoán đúng. Báo cáo micro-F1 cho bài toán đơn nhãn vì vậy không cung cấp thêm thông tin gì so với độ chính xác.
 
-### 8.5. Một cảnh báo về chia dữ liệu
+### 8.5. Chia dữ liệu và rò rỉ dữ liệu
 
-Mọi con số ở chương này đều vô nghĩa nếu tập kiểm tra bị nhiễm. Ba lỗi hay gặp nhất:
+Mọi thước đo ở chương này chỉ có ý nghĩa nếu tập kiểm tra phản ánh đúng dữ liệu mà mô hình sẽ gặp khi sử dụng. **Rò rỉ dữ liệu** (data leakage) là khi thông tin không có ở thời điểm dự đoán lọt vào quá trình huấn luyện, làm kết quả đánh giá tốt hơn thực tế. Ba dạng hay gặp nhất:
 
-1. **Chuẩn hoá trước khi chia.** Tính trung bình và độ lệch chuẩn trên toàn bộ dữ liệu rồi mới chia là đã để thông tin tập kiểm tra rò vào tập huấn luyện. Phải khớp bộ chuẩn hoá **chỉ trên tập huấn luyện**.
-2. **Chia ngẫu nhiên trên dữ liệu chuỗi thời gian.** Phải chia theo thời gian, nếu không mô hình được nhìn cả tương lai lẫn quá khứ của điểm cần dự báo.
-3. **Chia ngẫu nhiên khi có nhóm.** Nếu một bệnh nhân có nhiều bản ghi, phải chia theo **bệnh nhân** chứ không theo bản ghi.
+1. **Chuẩn hoá trước khi chia dữ liệu.** Tính trung bình và độ lệch chuẩn trên toàn bộ dữ liệu rồi mới chia tập là đã đưa thông tin của tập kiểm tra vào tập huấn luyện. Mọi bước tiền xử lý có tham số (chuẩn hoá, điền giá trị thiếu, chọn đặc trưng) chỉ được khớp trên tập huấn luyện, rồi áp dụng nguyên vẹn cho tập kiểm tra.
+2. **Chia ngẫu nhiên dữ liệu có yếu tố thời gian.** Với bài toán dự báo, mô hình chỉ được dùng quá khứ để dự đoán tương lai. Chia ngẫu nhiên cho phép mô hình học từ các điểm nằm sau thời điểm cần dự đoán. Cần chia theo thời gian: huấn luyện trên giai đoạn trước, kiểm tra trên giai đoạn sau.
+3. **Chia ngẫu nhiên khi dữ liệu có nhóm.** Nếu một bệnh nhân có nhiều lần khám, hoặc một người dùng có nhiều phiên, các bản ghi của cùng một người rất giống nhau. Chia ngẫu nhiên theo bản ghi khiến mô hình được kiểm tra trên chính những người nó đã thấy. Cần chia theo nhóm (theo bệnh nhân, theo người dùng).
 
-Ba lỗi này đều làm kết quả kiểm định tốt lên một cách giả tạo, và đều chỉ lộ ra khi mô hình đã ra sản xuất. [Chương 5 của *MLOps*](mlops-ch05.html) bàn kỹ hơn về tính đúng theo thời điểm.
+Cả ba lỗi làm kết quả đánh giá tốt lên giả tạo, và thường chỉ bị phát hiện khi mô hình đã được đưa vào sử dụng. [Chương 4 của *MLOps*](mlops-ch04.html) trình bày cách bảo đảm đặc trưng được tính đúng theo thời điểm để tránh dạng rò rỉ thứ hai.
 
 ---
 
-## 9. Quá khớp, phạt chuẩn và kiểm định chéo
+## 9. Overfitting và regularization
 
-### 9.1. Quá khớp nhìn từ góc độ chương này
+Chương này trình bày hai hiện tượng cơ bản của học máy, overfitting và underfitting, cùng công cụ chính để kiểm soát chúng: regularization. Hồi quy tuyến tính một lần nữa là nơi quan sát cơ chế rõ nhất, vì ridge và lasso đều có thể phân tích chính xác. Phần cuối chương trình bày cross-validation, cách chọn cường độ regularization và các siêu tham số khác.
 
-[Chương 2 của *Mô hình & Kiến trúc*](models-ch02.html) trình bày đầy đủ phân rã thiên lệch–phương sai. Chương này không lặp lại mà đi thẳng vào **công cụ chữa**, và vào chỗ mà hồi quy tuyến tính cho ta nhìn thấy cơ chế rõ nhất.
+### 9.1. Overfitting và underfitting
 
-Nhắc lại đủ dùng: quá khớp là trạng thái **phương sai cao** — mô hình đổi nhiều khi đổi tập huấn luyện vì nó đủ linh hoạt để bám cả nhiễu.
+> **Định nghĩa 9.1 (Overfitting, underfitting).** Mô hình bị **overfitting** (quá khớp) khi nó khớp tốt dữ liệu huấn luyện nhưng dự đoán kém trên dữ liệu mới: sai số huấn luyện nhỏ, sai số trên tập xác thực lớn hơn nhiều. Mô hình bị **underfitting** (chưa khớp) khi nó quá đơn giản để nắm được quan hệ trong dữ liệu: cả sai số huấn luyện lẫn sai số xác thực đều lớn.
 
-### 9.2. Ridge: thêm $\lambda I$ và mọi thứ đổi
+Ví dụ kinh điển là khớp đa thức vào 10 điểm dữ liệu có nhiễu sinh từ một đường cong trơn. Đa thức bậc 1 là đường thẳng, không theo được độ cong: underfitting. Đa thức bậc 3 theo được hình dạng chung mà bỏ qua nhiễu. Đa thức bậc 9 có đủ 10 hệ số để đi qua chính xác mọi điểm, kể cả phần nhiễu, và dao động mạnh giữa các điểm: sai số huấn luyện bằng 0 nhưng dự đoán ở các điểm mới rất tệ.
 
-$$L(w) = \|y - Xw\|_2^2 + \lambda\|w\|_2^2 \;\Longrightarrow\; \hat w_{\text{ridge}} = (X^\top X + \lambda I)^{-1}X^\top y.$$
+Theo ngôn ngữ của Mục 3.6, overfitting là tình trạng **phương sai cao**: mô hình thay đổi nhiều khi tập huấn luyện thay đổi, vì nó đủ linh hoạt để khớp cả nhiễu của từng tập. Underfitting là tình trạng **độ chệch cao**: dù có bao nhiêu dữ liệu, mô hình vẫn sai theo cùng một cách vì họ hàm của nó không chứa quan hệ thật. [Chương 2 của *Học sâu*](models-ch02.html) trình bày phân tích độ chệch – phương sai đầy đủ và đo từng thành phần trên dữ liệu.
 
-Số hạng $\lambda I$ nhỏ bé ấy làm được ba việc cùng lúc:
+Cách chẩn đoán thông dụng là so sánh sai số trên tập huấn luyện và tập xác thực:
 
-1. **Luôn khả nghịch.** Mục 2.5 đã nêu: thêm $\lambda I$ vào ma trận nửa xác định dương làm nó thành xác định dương với mọi $\lambda > 0$. Nên ridge có nghiệm duy nhất **kể cả khi $d > n$**, còn OLS thì không.
-2. **Giảm số điều kiện**, nên gradient descent chạy nhanh hơn (Mục 5.3).
-3. **Co các hệ số lại**, nên giảm phương sai.
+| Sai số huấn luyện | Sai số xác thực | Chẩn đoán | Hướng xử lý |
+|---|---|---|---|
+| lớn | lớn, gần sai số huấn luyện | underfitting | mô hình linh hoạt hơn, thêm đặc trưng, giảm regularization |
+| nhỏ | lớn hơn nhiều | overfitting | thêm dữ liệu, mô hình đơn giản hơn, tăng regularization |
+| nhỏ | nhỏ, gần sai số huấn luyện | phù hợp | |
 
-### 9.3. Ridge co ngót không đều — và đó là cái hay của nó
+Regularization là cách xử lý overfitting mà không cần đổi họ mô hình: giữ nguyên mô hình nhưng thêm vào hàm mất mát một thành phần phạt các tham số lớn, để mô hình ưu tiên các nghiệm "đơn giản" hơn.
 
-Viết ridge qua SVD $X = UDV^\top$:
+### 9.2. Hồi quy ridge
 
-$$\hat w_{\text{ridge}} = \sum_{i} v_i \,\frac{d_i}{d_i^2 + \lambda}\, u_i^\top y, \qquad\text{so với}\qquad \hat w_{\text{OLS}} = \sum_{i} v_i \,\frac{1}{d_i}\, u_i^\top y.$$
+> **Định nghĩa 9.2 (Hồi quy ridge).** Hồi quy ridge thêm thành phần phạt bình phương chuẩn $\ell_2$ của trọng số vào bình phương tối thiểu:
+> $$L(w) = \|y - Xw\|_2^2 + \lambda\|w\|_2^2, \qquad \lambda > 0.$$
+> Cho gradient bằng 0 được nghiệm
+> $$\hat w_{\text{ridge}} = (X^\top X + \lambda I)^{-1}X^\top y.$$
 
-Tỉ số giữa hai công thức cho **hệ số co ngót** theo từng hướng riêng:
+Gradient của thành phần phạt là $2\lambda w$ (Mục 2.7), nên phương trình chuẩn chỉ thay đổi một chỗ: $X^\top X$ được cộng thêm $\lambda I$. Thay đổi nhỏ này có ba tác dụng:
 
-$$\frac{d_i^2}{d_i^2 + \lambda}.$$
+1. **Luôn có nghiệm duy nhất.** Theo Mục 2.5, $X^\top X + \lambda I$ xác định dương với mọi $\lambda > 0$, kể cả khi $X$ không đủ hạng cột. Ridge vì vậy giải được cả những bài toán mà bình phương tối thiểu thông thường không có nghiệm duy nhất, như $d > n$ hoặc đặc trưng trùng lặp (Mục 4.3).
+2. **Cải thiện số điều kiện.** Trị riêng của $X^\top X + \lambda I$ là $\lambda_i + \lambda$, nên số điều kiện giảm từ $\lambda_{\max}/\lambda_{\min}$ xuống $(\lambda_{\max} + \lambda)/(\lambda_{\min} + \lambda)$. Gradient descent trên hàm mất mát ridge vì vậy hội tụ nhanh hơn (Mục 5.3).
+3. **Co các hệ số về phía 0,** qua đó giảm phương sai của ước lượng. Mục 9.3 chỉ ra việc co này diễn ra không đều giữa các hướng.
 
-Đo được với $\lambda = 10$ (và nghiệm qua SVD khớp với dạng đóng tới $2{,}3\times10^{-15}$):
+Khi $\lambda \to 0^{+}$, nghiệm ridge tiến tới nghiệm có chuẩn nhỏ nhất của bình phương tối thiểu, tức nghiệm của giả nghịch đảo ở Mục 4.3. Khi $\lambda \to \infty$, mọi hệ số tiến về 0.
 
-| Trị kỳ dị $d_i$ | Hệ số co ngót |
+> **Lưu ý.** Thành phần phạt $\lambda\|w\|^2$ phụ thuộc vào thang đo của các đặc trưng: một đặc trưng đo bằng milimét có hệ số nhỏ hơn 1 000 lần so với khi đo bằng mét, nên bị phạt ít hơn hẳn. Vì vậy cần chuẩn hoá đặc trưng trước khi dùng ridge hoặc lasso. Ngoài ra, hệ số chặn thường **không** bị phạt, vì dịch toàn bộ $y$ đi một hằng số không nên làm thay đổi mô hình.
+
+### 9.3. Hồi quy ridge nhìn qua SVD
+
+Để thấy ridge co các hệ số như thế nào, viết $X$ dưới dạng SVD, $X = UDV^\top$ (Mục 2.6), với $u_i$, $v_i$ là các cột của $U$, $V$ và $d_i$ là các giá trị suy biến. Thay vào công thức nghiệm và rút gọn:
+
+$$\hat w_{\text{ridge}} = \sum_{i} v_i \,\frac{d_i}{d_i^2 + \lambda}\, u_i^\top y, \qquad \hat w_{\text{OLS}} = \sum_{i} v_i \,\frac{1}{d_i}\, u_i^\top y.$$
+
+So sánh từng số hạng, ridge nhân thành phần theo hướng $v_i$ của nghiệm bình phương tối thiểu với **hệ số co**
+
+$$\frac{d_i^2}{d_i^2 + \lambda} \in (0, 1).$$
+
+Thí nghiệm dùng 80 điểm dữ liệu với 12 đặc trưng và $\lambda = 10$; nghiệm tính qua SVD khớp với nghiệm dạng đóng tới $2{,}3\times10^{-15}$. Bảng liệt kê năm trong mười hai giá trị suy biến (hai lớn nhất, một ở giữa, hai nhỏ nhất) cùng hệ số co tương ứng:
+
+| Giá trị suy biến $d_i$ | Hệ số co $d_i^2/(d_i^2 + \lambda)$ |
 |---|---|
 | 12,2680 | 0,9377 |
 | 12,0678 | 0,9357 |
@@ -811,224 +1104,266 @@ $$\frac{d_i^2}{d_i^2 + \lambda}.$$
 | 6,4450 | 0,8060 |
 | 6,1730 | 0,7921 |
 
-**Hướng có trị kỳ dị lớn gần như không bị động tới; hướng yếu bị co mạnh.** Đây là điều ridge làm đúng: nó co mạnh nhất đúng những hướng mà dữ liệu nói ít nhất — tức những hướng mà ước lượng OLS kém tin cậy nhất. Đây cũng là chỗ nối trực tiếp với Mục 4.4: cộng tuyến sinh ra trị kỳ dị nhỏ, và ridge chính là cách chữa cộng tuyến.
+Hướng có giá trị suy biến lớn gần như giữ nguyên; hướng có giá trị suy biến nhỏ bị co mạnh hơn. Giá trị suy biến nhỏ nghĩa là dữ liệu trải rất ít theo hướng đó, nên dữ liệu cung cấp ít thông tin về thành phần của $w$ theo hướng đó, và ước lượng bình phương tối thiểu $u_i^\top y/d_i$ có phương sai lớn (chia cho số nhỏ khuếch đại nhiễu). Ridge co mạnh nhất đúng những hướng ước lượng kém tin cậy nhất. Đây cũng là mối liên hệ với Mục 4.4: đa cộng tuyến tạo ra giá trị suy biến rất nhỏ, và ridge là một cách xử lý đa cộng tuyến.
 
-### 9.4. Lasso: điểm gãy ở gốc tạo ra hệ số bằng 0
+Tổng các hệ số co, $\operatorname{df}(\lambda) = \sum_i d_i^2/(d_i^2 + \lambda)$, gọi là **số bậc tự do hiệu dụng** của mô hình ridge. Nó bằng số đặc trưng $d$ khi $\lambda = 0$ và giảm dần về 0 khi $\lambda$ tăng, cho một cách đo độ phức tạp của mô hình liên tục theo $\lambda$ (Hastie, Tibshirani và Friedman, 2009).
 
-$$L(w) = \|y - Xw\|_2^2 + \lambda\|w\|_1.$$
+### 9.4. Lasso
 
-Khác biệt tưởng nhỏ mà hệ quả lớn:
+> **Định nghĩa 9.3 (Lasso).** Lasso (Tibshirani, 1996) dùng chuẩn $\ell_1$ trong thành phần phạt:
+> $$L(w) = \tfrac12\|y - Xw\|_2^2 + \lambda\|w\|_1.$$
+
+Hệ số $\tfrac12$ trước bình phương sai số là quy ước thường dùng cho lasso, và cũng là quy ước của thư viện scikit-learn (sau khi nhân hàm mục tiêu của thư viện với $n$). Nó chỉ làm thay đổi thang đo của $\lambda$. Khác với ridge, lasso không có nghiệm dạng đóng tổng quát và được giải bằng các thuật toán lặp như coordinate descent.
+
+Đổi $\ell_2$ thành $\ell_1$ nghe như một thay đổi nhỏ, nhưng hành vi của nghiệm khác hẳn:
 
 ![Hình 7](figs/nt07_regular.png)
 
-**Hình 7.** Đường đi của các hệ số theo $\lambda$. Trái: ridge co dần nhưng không bao giờ chạm 0. Phải: lasso cắt hẳn về 0, từng hệ số một.
+**Hình 7.** Đường đi của các hệ số theo $\lambda$. Trái: ridge co các hệ số dần về 0 nhưng không hệ số nào chạm 0. Phải: lasso đưa từng hệ số về đúng 0.
 
-| $\lambda$ | $\|w\|_2$ (ridge) | Số hệ số bằng 0 — **ridge** | Số hệ số bằng 0 — **lasso** |
+Thí nghiệm dùng dữ liệu 80 điểm, 12 đặc trưng, trong đó mô hình sinh dữ liệu chỉ có 3 hệ số khác 0 và 9 hệ số bằng 0:
+
+| $\lambda$ | $\|w\|_2$ của ridge | Số hệ số bằng 0, ridge | Số hệ số bằng 0, lasso |
 |---|---|---|---|
 | 0,01 | 4,0106 | 0 | 0 |
 | 0,10 | 4,0056 | 0 | 1 |
 | 1,00 | 3,9559 | 0 | 1 |
 | 10,00 | 3,5234 | 0 | 7 |
-| 100,00 | 1,7090 | **0** | **9** |
+| 100,00 | 1,7090 | 0 | 9 |
 
-Mô hình sinh dữ liệu có đúng **9** hệ số bằng 0 trong 12. Ở $\lambda = 100$, lasso tìm ra đúng 9; ridge tìm ra 0.
+Ở $\lambda = 100$, lasso đưa đúng 9 hệ số về 0, trùng với 9 hệ số bằng 0 của mô hình thật. Ridge không đưa hệ số nào về 0 ở bất kỳ giá trị $\lambda$ nào, dù chuẩn của vector trọng số giảm dần.
 
-**Vì sao?** Đạo hàm của $|w|$ tại 0 không tồn tại — có một **điểm gãy**, và dưới vi phân của nó là cả đoạn $[-1, 1]$. Nghĩa là để kéo một hệ số ra khỏi 0, gradient của phần mất mát phải thắng được một lực có độ lớn cố định $\lambda$. Nếu không thắng nổi, hệ số **dính** ở 0. Với $w^2$ thì đạo hàm là $2w$, tiến về 0 khi $w$ tiến về 0 — lực kéo yếu dần nên không bao giờ đẩy được tới đúng 0.
+Có hai cách giải thích vì sao lasso cho nghiệm **thưa** (nhiều hệ số bằng đúng 0).
 
-> **Chọn cái nào.** Cần **chọn đặc trưng** hoặc tin rằng chỉ vài đặc trưng thực sự quan trọng → lasso. Các đặc trưng đều có chút ít tác dụng, hoặc có nhóm đặc trưng tương quan cao → ridge. Không chắc → elastic net, tức dùng cả hai. Lưu ý lasso xử lý nhóm tương quan khá tuỳ tiện: nó thường chọn **một** đại diện và vứt phần còn lại, mà chọn cái nào thì phụ thuộc nhiễu.
+**Cách giải tích.** Xét trường hợp đơn giản các cột của $X$ trực chuẩn, $X^\top X = I$. Gọi $z_j = (X^\top y)_j$ là nghiệm bình phương tối thiểu của hệ số thứ $j$. Bài toán tách thành từng toạ độ, và nghiệm là
 
-### 9.5. Kiểm định chéo
+$$\hat w_j^{\text{ridge}} = \frac{z_j}{1 + \lambda}\ \ (\text{với phạt } \lambda\|w\|_2^2), \qquad \hat w_j^{\text{lasso}} = \operatorname{sign}(z_j)\,\max\big(|z_j| - \lambda,\ 0\big).$$
 
-$\lambda$ không học được từ dữ liệu huấn luyện — tăng $\lambda$ luôn làm mất mát huấn luyện tăng. Nên phải ước lượng hiệu năng ngoài mẫu, và cách chuẩn là **kiểm định chéo $k$ phần**: chia dữ liệu thành $k$ phần, lần lượt giữ một phần để kiểm và huấn luyện trên $k-1$ phần còn lại, rồi lấy trung bình.
+Ridge **nhân** mọi hệ số với cùng một số nhỏ hơn 1, nên hệ số nào khác 0 vẫn khác 0. Lasso **trừ** mỗi hệ số đi một lượng $\lambda$ và cắt về 0 những hệ số có trị tuyệt đối nhỏ hơn $\lambda$; phép toán này gọi là **ngưỡng mềm** (soft thresholding). Nguồn gốc của nó là đạo hàm: đạo hàm của $w^2$ là $2w$, tiến về 0 khi $w$ tiến về 0, nên lực kéo về 0 yếu dần và không bao giờ kéo được tới đúng 0; còn $|w|$ không khả vi tại 0, và dưới vi phân của nó tại 0 là cả đoạn $[-1, 1]$. Để một hệ số rời khỏi 0, gradient của phần bình phương sai số phải lớn hơn $\lambda$; nếu không, hệ số nằm yên ở 0.
+
+**Cách hình học.** Bài toán có phạt tương đương với cực tiểu bình phương sai số trong một quả cầu chuẩn có bán kính phụ thuộc $\lambda$. Các đường mức của bình phương sai số là những elip quanh nghiệm bình phương tối thiểu, và nghiệm có ràng buộc là điểm đầu tiên elip chạm vào quả cầu. Quả cầu $\ell_2$ tròn nên điểm chạm thường nằm ở vị trí bất kỳ. Quả cầu $\ell_1$ là hình thoi có các đỉnh nhọn nằm trên trục toạ độ (Mục 2.3), nên elip hay chạm vào đúng các đỉnh, nơi một số toạ độ bằng 0.
+
+> **Nhận xét (Chọn ridge, lasso hay elastic net).** Khi cần chọn đặc trưng, hoặc khi tin rằng chỉ một số ít đặc trưng thật sự có ảnh hưởng, dùng lasso. Khi nhiều đặc trưng đều có ảnh hưởng nhỏ, hoặc có các nhóm đặc trưng tương quan cao, dùng ridge. Với một nhóm đặc trưng tương quan cao, lasso có xu hướng chọn một đặc trưng đại diện và đưa các đặc trưng còn lại về 0, và việc chọn đặc trưng nào phụ thuộc vào nhiễu. **Elastic net** (Zou và Hastie, 2005) kết hợp cả hai thành phần phạt, $\lambda_1\|w\|_1 + \lambda_2\|w\|_2^2$, để vừa cho nghiệm thưa vừa giữ ổn định với các nhóm đặc trưng tương quan.
+
+### 9.5. Cross-validation
+
+Cường độ regularization $\lambda$ không thể học từ tập huấn luyện: tăng $\lambda$ luôn làm sai số huấn luyện tăng, nên cực tiểu sai số huấn luyện luôn chọn $\lambda = 0$. Ta cần ước lượng sai số trên dữ liệu mới cho từng giá trị $\lambda$ rồi chọn giá trị tốt nhất. Nếu dữ liệu nhiều, một tập xác thực riêng là đủ. Nếu dữ liệu ít, giữ riêng một phần lớn cho xác thực làm lãng phí dữ liệu huấn luyện, và kết quả phụ thuộc nhiều vào cách chia. Cross-validation giải quyết vấn đề này.
+
+> **Định nghĩa 9.4 (k-fold cross-validation).** Chia dữ liệu thành $k$ phần có kích thước gần bằng nhau. Lần lượt với $j = 1, \dots, k$: huấn luyện mô hình trên $k - 1$ phần, đo sai số trên phần thứ $j$. Ước lượng cross-validation là trung bình của $k$ sai số đó.
+
+Mỗi điểm dữ liệu được dùng để đánh giá đúng một lần và để huấn luyện $k - 1$ lần. Để chọn $\lambda$, ta tính ước lượng cross-validation cho mỗi giá trị trong một lưới (ví dụ $10^{-3}, 10^{-2}, \dots, 10^{3}$), chọn giá trị cho sai số nhỏ nhất, rồi huấn luyện lại trên toàn bộ dữ liệu với giá trị đó.
 
 | Biến thể | Dùng khi |
 |---|---|
-| $k$ phần ($k = 5$ hoặc 10) | mặc định |
-| Phân tầng | phân loại, nhất là khi mất cân bằng — giữ tỉ lệ lớp trong mỗi phần |
-| Bỏ một mẫu ($k = n$) | dữ liệu rất ít; tốn kém và có phương sai cao |
-| Theo thời gian | chuỗi thời gian — chỉ huấn luyện trên quá khứ |
-| Theo nhóm | có nhóm tự nhiên trong dữ liệu (bệnh nhân, người dùng) |
+| k-fold với $k = 5$ hoặc 10 | lựa chọn mặc định |
+| Stratified k-fold | phân loại, nhất là khi lớp mất cân bằng: giữ tỉ lệ các lớp trong mỗi phần |
+| Leave-one-out ($k = n$) | dữ liệu rất ít; tốn $n$ lần huấn luyện và ước lượng có phương sai cao |
+| Chia theo thời gian | chuỗi thời gian: luôn huấn luyện trên quá khứ, đánh giá trên tương lai |
+| Chia theo nhóm | dữ liệu có nhóm tự nhiên như bệnh nhân hay người dùng (Mục 8.5) |
 
-> **Lỗi nghiêm trọng nhất khi dùng kiểm định chéo.** Dùng cùng một vòng kiểm định chéo để (a) chọn siêu tham số và (b) báo cáo hiệu năng. Con số báo cáo khi ấy **lạc quan có hệ thống**, vì ta đã chọn cấu hình tốt nhất *trên chính tập đó*. Cách đúng là **kiểm định chéo lồng nhau**, hoặc giữ riêng một tập kiểm tra không bao giờ được chạm tới cho tới lần đo cuối cùng.
+Khi nhiều giá trị $\lambda$ cho sai số cross-validation gần như nhau, một quy tắc thường dùng là **quy tắc một độ lệch chuẩn**: chọn mô hình đơn giản nhất (regularization mạnh nhất) có sai số không vượt quá sai số nhỏ nhất cộng một độ lệch chuẩn của ước lượng.
+
+> **Lưu ý.** Không dùng cùng một vòng cross-validation vừa để chọn siêu tham số vừa để báo cáo hiệu năng cuối cùng. Vì cấu hình được chọn là cấu hình tốt nhất trên chính các phần dữ liệu đó, sai số báo cáo sẽ lạc quan một cách có hệ thống, và càng thử nhiều cấu hình thì càng lạc quan. Cách đúng là dùng **cross-validation lồng nhau** (vòng trong chọn siêu tham số, vòng ngoài đánh giá), hoặc giữ riêng một tập kiểm tra chỉ dùng một lần ở bước cuối cùng.
 
 ---
 
-## 10. Hợp lý cực đại và hậu nghiệm cực đại
+## 10. Ước lượng hợp lý cực đại và hậu nghiệm cực đại
 
-### 10.1. Vì sao chương này đặt ở đây
+Các chương trước đã dùng nhiều hàm mất mát và thành phần phạt khác nhau: bình phương sai số, cross-entropy, phạt $\ell_2$, phạt $\ell_1$, làm trơn Laplace. Nếu nhìn riêng lẻ, chúng giống một danh sách lựa chọn cần ghi nhớ. Chương này chỉ ra rằng phần lớn chúng suy ra được từ hai nguyên lý thống kê: ước lượng hợp lý cực đại cho ra hàm mất mát, và ước lượng hậu nghiệm cực đại cho thêm thành phần regularization.
 
-Chín chương trước đã dùng nhiều hàm mất mát: bình phương sai lệch, entropy chéo, hinge, cộng thêm phạt $\ell_1$ hoặc $\ell_2$. Chúng trông như những lựa chọn rời rạc mà ta phải nhớ.
+### 10.1. Từ mô hình xác suất tới hàm mất mát
 
-Chương này cho thấy chúng **không rời rạc**. Gần hết chúng đều suy ra được từ một nguyên lý duy nhất, và bản thân phạt chuẩn cũng vậy.
+Ý tưởng chung của chương là mô tả quá trình sinh ra dữ liệu bằng một mô hình xác suất có tham số $\theta$, rồi chọn $\theta$ làm dữ liệu quan sát được trở nên "hợp lý" nhất. Mỗi giả thiết về phân phối của nhiễu hay của nhãn sẽ cho ra một hàm mất mát cụ thể. Nhờ vậy, câu hỏi "dùng hàm mất mát nào" được thay bằng một câu hỏi dễ trả lời hơn: "dữ liệu có nhiễu dạng gì".
 
-### 10.2. Hợp lý cực đại
+### 10.2. Ước lượng hợp lý cực đại
 
-Hàm **hợp lý** là xác suất của dữ liệu đã quan sát, xem như hàm của tham số:
+> **Định nghĩa 10.1 (Hàm hợp lý, MLE).** Cho mô hình xác suất $p(y \mid x, \theta)$ và dữ liệu độc lập $\mathcal{D} = \{(x_i, y_i)\}_{i=1}^n$. **Hàm hợp lý** (likelihood) là xác suất của dữ liệu quan sát được, xem như hàm của tham số:
+> $$\mathcal{L}(\theta) = p(\mathcal{D} \mid \theta) = \prod_{i=1}^{n} p(y_i \mid x_i, \theta).$$
+> **Ước lượng hợp lý cực đại** (maximum likelihood estimation, MLE) là tham số làm hàm hợp lý lớn nhất.
 
-$$\mathcal{L}(\theta) = p(\mathcal{D} \mid \theta) = \prod_{i=1}^{n} p(y_i \mid x_i, \theta).$$
-
-Ta lấy logarit rồi đổi dấu — tích thành tổng, và cực đại thành cực tiểu:
+Tích của nhiều xác suất khó tối ưu và dễ bị làm tròn về 0 khi tính bằng máy. Vì logarit là hàm đồng biến, cực đại $\mathcal{L}$ tương đương cực đại $\log\mathcal{L}$, và tương đương cực tiểu âm logarit của nó:
 
 $$\hat\theta_{\text{MLE}} = \arg\min_\theta \; -\sum_{i=1}^{n}\log p(y_i \mid x_i, \theta).$$
 
-**Kết quả then chốt: giả thiết nhiễu Gauss cho ra đúng bình phương tối thiểu.** Giả sử $y_i = w^\top x_i + \epsilon_i$ với $\epsilon_i \sim \mathcal{N}(0, \sigma^2)$. Khi ấy
+Đại lượng $-\log p(y_i \mid x_i, \theta)$ đóng vai trò hàm mất mát của điểm thứ $i$, và bài toán có đúng dạng của Định nghĩa 1.1.
 
-$$-\log p(y_i \mid x_i, w) = \frac{(y_i - w^\top x_i)^2}{2\sigma^2} + \underbrace{\tfrac12\log(2\pi\sigma^2)}_{\text{không phụ thuộc } w}.$$
+> **Định lý 10.1 (Nhiễu Gauss cho bình phương tối thiểu).** Giả sử $y_i = w^\top x_i + \epsilon_i$ với $\epsilon_i \sim \mathcal{N}(0, \sigma^2)$ độc lập. Khi đó ước lượng hợp lý cực đại của $w$ trùng với nghiệm bình phương tối thiểu.
 
-Cộng lại và bỏ hằng số:
+> **Chứng minh.** Theo giả thiết, $y_i \mid x_i \sim \mathcal{N}(w^\top x_i, \sigma^2)$, nên
+> $$-\log p(y_i \mid x_i, w) = \frac{(y_i - w^\top x_i)^2}{2\sigma^2} + \tfrac12\log(2\pi\sigma^2).$$
+> Số hạng thứ hai không phụ thuộc $w$, còn hệ số $1/(2\sigma^2)$ dương không đổi vị trí cực tiểu. Do đó cực tiểu tổng theo $w$ tương đương cực tiểu $\sum_i (y_i - w^\top x_i)^2$.
 
-$$\hat w_{\text{MLE}} = \arg\min_w \sum_i (y_i - w^\top x_i)^2 = \hat w_{\text{OLS}}.$$
+Định lý trả lời câu hỏi đã nêu ở Mục 4.1: bình phương sai số không phải một lựa chọn tuỳ ý, mà là hệ quả của giả thiết nhiễu Gauss. Cực tiểu theo $\sigma^2$ cho thêm ước lượng $\hat\sigma^2 = \frac1n\sum_i (y_i - \hat w^\top x_i)^2$, và giống Ví dụ 3.4, ước lượng hợp lý cực đại này có chệch: mẫu số không chệch là $n - d$.
 
-> **Đây là câu trả lời cho "vì sao lại bình phương sai lệch, sao không phải trị tuyệt đối".** Bình phương sai lệch không phải một lựa chọn thẩm mỹ — nó là hệ quả của giả thiết **nhiễu Gauss**. Nếu tin rằng nhiễu có đuôi dày hơn Gauss thì bình phương tối thiểu là lựa chọn sai, và MLE dưới giả thiết Laplace sẽ cho ra **hồi quy trị tuyệt đối**, thứ bền vững hơn với điểm ngoại lai. Nói được mối nối này là dấu hiệu hiểu chứ không thuộc.
+Đổi giả thiết về nhiễu thì đổi hàm mất mát. Nếu nhiễu có phân phối Laplace, $p(\epsilon) \propto e^{-|\epsilon|/b}$, thì $-\log p = |y_i - w^\top x_i|/b + \text{hằng số}$, và MLE trở thành **hồi quy trị tuyệt đối** (least absolute deviations). Phân phối Laplace có đuôi dày hơn Gauss, tức coi các sai số lớn là bình thường hơn, nên hồi quy trị tuyệt đối ít bị ảnh hưởng bởi điểm ngoại lai hơn bình phương tối thiểu. Một điểm ngoại lai có sai số 10 đóng góp 100 vào bình phương sai số nhưng chỉ đóng góp 10 vào tổng trị tuyệt đối.
 
-### 10.3. Entropy chéo cũng vậy
+### 10.3. Cross-entropy là hợp lý cực đại với phân phối Bernoulli
 
-Với phân loại nhị phân, $y_i \sim \text{Bernoulli}(p_i)$ với $p_i = \sigma(w^\top x_i)$:
+Với phân loại hai lớp, nhãn $y_i \in \{0, 1\}$ được mô hình như một biến Bernoulli có xác suất thành công $p_i = \sigma(w^\top x_i)$:
 
-$$p(y_i \mid x_i, w) = p_i^{y_i}(1-p_i)^{1-y_i} \;\Longrightarrow\; -\log p(y_i \mid x_i, w) = -\big[y_i\log p_i + (1-y_i)\log(1-p_i)\big].$$
+$$p(y_i \mid x_i, w) = p_i^{\,y_i}(1-p_i)^{1-y_i}.$$
 
-Vế phải đúng là hàm mất mát entropy chéo ở Mục 6.3. Nên **entropy chéo không phải định nghĩa mà là hệ quả** — nó là âm log hợp lý dưới giả thiết Bernoulli.
+Lấy âm logarit:
 
-Điều này giải thích luôn hình dạng gradient gọn gàng đã thấy ở Mục 6.3. Cả hồi quy tuyến tính lẫn hồi quy logistic đều thuộc **họ mũ**, và mọi mô hình tuyến tính tổng quát trong họ ấy đều có gradient dạng $X^\top(\hat y - y)$.
+$$-\log p(y_i \mid x_i, w) = -\big[y_i\log p_i + (1-y_i)\log(1-p_i)\big].$$
 
-### 10.4. MAP: phạt chuẩn chính là tiên nghiệm
+Vế phải đúng là số hạng của hàm mất mát cross-entropy ở Mục 6.3. Vậy cross-entropy không phải một định nghĩa độc lập mà là âm log hợp lý dưới giả thiết nhãn có phân phối Bernoulli. Tương tự, với $K$ lớp và nhãn có phân phối phân loại (categorical) với xác suất cho bởi softmax, âm log hợp lý là cross-entropy nhiều lớp của hồi quy softmax.
 
-Hợp lý cực đại không có chỗ nào để đưa vào hiểu biết sẵn có. Quy tắc Bayes ở Mục 3.5 cho chỗ ấy:
+Cross-entropy còn có một cách hiểu theo lý thuyết thông tin. Với phân phối dữ liệu $p$ và phân phối của mô hình $q$, cross-entropy $H(p, q) = -\mathbb{E}_{p}[\log q]$ bằng entropy $H(p)$ cộng với phân kỳ Kullback–Leibler $\operatorname{KL}(p\,\|\,q) \ge 0$. Entropy của dữ liệu không phụ thuộc mô hình, nên cực tiểu cross-entropy tương đương cực tiểu khoảng cách KL từ phân phối dữ liệu tới phân phối của mô hình.
 
-$$\hat\theta_{\text{MAP}} = \arg\max_\theta \; p(\mathcal{D}\mid\theta)\,p(\theta) = \arg\min_\theta\;\big[\underbrace{-\log p(\mathcal{D}\mid\theta)}_{\text{mất mát}} \underbrace{- \log p(\theta)}_{\text{phạt chuẩn}}\big].$$
+Mục 6.3 đã nhận xét rằng gradient của hồi quy logistic, $X^\top(p - y)/n$, có cùng dạng với gradient của hồi quy tuyến tính. Lý do chung là cả phân phối Gauss và phân phối Bernoulli đều thuộc **họ số mũ** (exponential family). Một mô hình trong đó $y$ có phân phối thuộc họ số mũ và tham số tự nhiên của phân phối là hàm tuyến tính của $x$ gọi là **mô hình tuyến tính tổng quát** (generalized linear model, GLM) với hàm liên kết chính tắc. Với mọi GLM như vậy, gradient của âm log hợp lý có dạng $X^\top(\hat y - y)$, trong đó $\hat y$ là kỳ vọng của $y$ theo mô hình. Hồi quy tuyến tính, hồi quy logistic, hồi quy softmax và hồi quy Poisson (cho dữ liệu đếm) đều là các trường hợp riêng.
 
-Đặt tiên nghiệm Gauss $w \sim \mathcal{N}(0, \tau^2 I)$:
+### 10.4. Ước lượng hậu nghiệm cực đại và regularization
 
-$$-\log p(w) = \frac{\|w\|_2^2}{2\tau^2} + \text{hằng số}.$$
+Hợp lý cực đại chỉ dùng dữ liệu. Không có chỗ nào để đưa vào hiểu biết có sẵn, ví dụ "các hệ số hồi quy thường không quá lớn". Định lý Bayes ở Mục 3.5 cho chỗ đó.
 
-Cộng với âm log hợp lý Gauss ở Mục 10.2 và nhân $2\sigma^2$:
+> **Định nghĩa 10.2 (MAP).** Với phân phối tiên nghiệm $p(\theta)$, **ước lượng hậu nghiệm cực đại** (maximum a posteriori, MAP) là tham số làm hậu nghiệm lớn nhất:
+> $$\hat\theta_{\text{MAP}} = \arg\max_\theta \; p(\mathcal{D}\mid\theta)\,p(\theta) = \arg\min_\theta\;\big[-\log p(\mathcal{D}\mid\theta) - \log p(\theta)\big].$$
 
-$$\hat w_{\text{MAP}} = \arg\min_w\; \|y - Xw\|_2^2 + \frac{\sigma^2}{\tau^2}\|w\|_2^2.$$
+Số hạng thứ nhất là hàm mất mát của MLE. Số hạng thứ hai chỉ phụ thuộc tham số, và đóng vai trò thành phần regularization.
 
-So với Mục 9.2 thì đây **đúng là ridge**, với
+> **Định lý 10.2 (Tiên nghiệm Gauss cho hồi quy ridge).** Với mô hình nhiễu Gauss của Định lý 10.1 và tiên nghiệm $w \sim \mathcal{N}(0, \tau^2 I)$, ước lượng MAP của $w$ trùng với nghiệm hồi quy ridge với
+> $$\lambda = \frac{\sigma^2}{\tau^2}.$$
 
-$$\boxed{\;\lambda = \frac{\sigma^2}{\tau^2}\;}$$
+> **Chứng minh.** Âm log tiên nghiệm là $-\log p(w) = \|w\|_2^2/(2\tau^2) + \text{hằng số}$. Cộng với âm log hợp lý ở Mục 10.2, bỏ hằng số và nhân với $2\sigma^2$, hàm cần cực tiểu là
+> $$\|y - Xw\|_2^2 + \frac{\sigma^2}{\tau^2}\|w\|_2^2,$$
+> đúng là hàm mất mát ridge ở Định nghĩa 9.2 với $\lambda = \sigma^2/\tau^2$.
 
-**Kiểm chứng bằng số.** Thí nghiệm tính nghiệm theo hai đường hoàn toàn khác nhau: một bên giải hệ tuyến tính dạng đóng của ridge, một bên chạy BFGS trực tiếp trên âm log hậu nghiệm.
+Công thức $\lambda = \sigma^2/\tau^2$ có cách hiểu tự nhiên. Tiên nghiệm càng chặt ($\tau$ nhỏ, tức tin chắc các hệ số nhỏ) thì $\lambda$ càng lớn. Dữ liệu càng nhiễu ($\sigma$ lớn, tức dữ liệu ít đáng tin) thì tiên nghiệm càng được coi trọng, và $\lambda$ cũng càng lớn.
+
+Thí nghiệm kiểm chứng định lý bằng hai cách tính độc lập: một bên giải hệ tuyến tính dạng đóng của ridge, một bên dùng thuật toán tối ưu BFGS cực tiểu trực tiếp âm log hậu nghiệm.
 
 ```text
 lambda ly thuyet = sigma^2/tau^2 = 1.0/0.49 = 2.040816
 Sai khac giua ridge dang dong va MAP toi uu bang so: 1.973e-08
 ```
 
-Khớp tới dung sai của bộ tối ưu. Đây không phải sự tương tự — nó là **cùng một bài toán**.
+Hai nghiệm khớp nhau tới $2{,}0 \times 10^{-8}$, giới hạn bởi dung sai dừng của thuật toán tối ưu.
 
-Tương tự, tiên nghiệm Laplace $p(w_j) \propto e^{-|w_j|/b}$ cho ra $-\log p(w) = \sum_j |w_j|/b$, tức **lasso**. Và hai tiên nghiệm ấy nói đúng điều ta trông đợi: Gauss nói "các hệ số nên nhỏ", Laplace nói "phần lớn các hệ số nên bằng 0" — vì phân phối Laplace có đỉnh nhọn tại 0.
+Tương tự, tiên nghiệm Laplace cho từng hệ số, $p(w_j) \propto e^{-|w_j|/b}$, cho $-\log p(w) = \|w\|_1/b + \text{hằng số}$, tức ước lượng MAP là lasso. Hai tiên nghiệm diễn đạt hai niềm tin khác nhau: phân phối Gauss phẳng quanh 0 và nói "các hệ số nên nhỏ", còn phân phối Laplace có đỉnh nhọn tại 0 và nói "nhiều hệ số nên bằng 0". Hình dạng của tiên nghiệm tại 0 chính là nguồn gốc của khác biệt giữa ridge và lasso ở Mục 9.4.
 
-| Phạt chuẩn | Tiên nghiệm tương ứng | Niềm tin nó phát biểu |
+Làm trơn Laplace của Naive Bayes (Mục 7.3) cũng là một ước lượng Bayes. Với biến rời rạc có $V$ giá trị và tiên nghiệm Dirichlet có mọi tham số bằng $\alpha + 1$, ước lượng MAP của xác suất mỗi giá trị là $(N_v + \alpha)/(N + \alpha V)$, đúng công thức làm trơn. (Nếu lấy kỳ vọng hậu nghiệm thay vì điểm cực đại, tiên nghiệm Dirichlet với tham số $\alpha$ cho cùng công thức.)
+
+| Thành phần regularization | Tiên nghiệm tương ứng | Niềm tin được diễn đạt |
 |---|---|---|
-| $\ell_2$ (ridge) | Gauss $\mathcal{N}(0, \tau^2)$ | hệ số nên nhỏ và trải đều |
-| $\ell_1$ (lasso) | Laplace | phần lớn hệ số nên đúng bằng 0 |
-| Không phạt | đều (không chính quy) | không có ý kiến gì trước |
-| Làm trơn Laplace (Mục 7.3) | Dirichlet | mọi kết cục đều có thể xảy ra |
+| $\ell_2$ (ridge) | Gauss $\mathcal{N}(0, \tau^2)$ | các hệ số nên nhỏ |
+| $\ell_1$ (lasso) | Laplace | nhiều hệ số nên bằng đúng 0 |
+| không có | tiên nghiệm phẳng | không có hiểu biết trước |
+| làm trơn Laplace (Mục 7.3) | Dirichlet | mọi giá trị đều có thể xảy ra |
 
-### 10.5. Bảng tổng kết: mọi thứ từ một nguyên lý
+### 10.5. Tổng kết: từ giả thiết phân phối tới thuật toán
 
-| Giả thiết về phân phối | Tiên nghiệm | Cho ra |
+| Giả thiết về dữ liệu | Tiên nghiệm | Thuật toán thu được |
 |---|---|---|
 | Nhiễu Gauss | không | bình phương tối thiểu (Chương 4) |
-| Nhiễu Gauss | Gauss | ridge (Mục 9.2) |
+| Nhiễu Gauss | Gauss | hồi quy ridge (Mục 9.2) |
 | Nhiễu Gauss | Laplace | lasso (Mục 9.4) |
 | Nhiễu Laplace | không | hồi quy trị tuyệt đối |
 | Nhãn Bernoulli | không | hồi quy logistic (Mục 6.3) |
-| Nhãn Bernoulli | Gauss | hồi quy logistic có phạt $\ell_2$ |
-| Nhãn nhiều lớp | không | hồi quy softmax (Mục 6.4) |
-| Đếm đa thức + độc lập có điều kiện | Dirichlet | Naive Bayes có làm trơn (Chương 7) |
+| Nhãn Bernoulli | Gauss | hồi quy logistic với regularization $\ell_2$ |
+| Nhãn phân phối phân loại | không | hồi quy softmax (Mục 6.4) |
+| Đặc trưng rời rạc độc lập có điều kiện | Dirichlet | Naive Bayes có làm trơn (Mục 7.3) |
 
-Cột trái là **giả thiết về thế giới**; cột phải là **thuật toán**. Học máy cổ điển phần lớn là bảng này.
+Cột trái là giả thiết về dữ liệu, cột phải là thuật toán. Đọc bảng theo chiều ngược lại cũng hữu ích: khi dùng một thuật toán, ta đang ngầm chấp nhận giả thiết tương ứng, và khi giả thiết đó sai rõ ràng (nhiễu có nhiều điểm ngoại lai, nhãn không phải nhị phân), đó là tín hiệu nên đổi hàm mất mát.
 
-> **Một ranh giới cần nói rõ.** MAP **không phải** suy luận Bayes đầy đủ. Suy luận Bayes giữ cả phân phối hậu nghiệm và lấy trung bình dự báo trên đó; MAP chỉ lấy **một điểm** — đỉnh của hậu nghiệm — rồi vứt phần còn lại. Nên MAP không cho ta độ bất định, và với hậu nghiệm lệch hoặc nhiều đỉnh thì điểm đỉnh có thể chẳng đại diện cho gì. SVM ở Chương 13 thì nằm ngoài bảng này hẳn: hinge không phải âm log hợp lý của phân phối tự nhiên nào, nên SVM không có cách đọc xác suất trực tiếp.
-
+> **Nhận xét (Giới hạn của MAP).** Ước lượng MAP chưa phải suy luận Bayes đầy đủ. Suy luận Bayes giữ toàn bộ phân phối hậu nghiệm và lấy trung bình dự đoán trên phân phối đó; MAP chỉ lấy một điểm, đỉnh của hậu nghiệm. Vì vậy MAP không cho biết mức độ không chắc chắn của tham số, và khi hậu nghiệm lệch hoặc có nhiều đỉnh, điểm đỉnh có thể không đại diện cho phân phối. Một số thuật toán nằm ngoài bảng trên: mất mát hinge của SVM (Chương 13) không phải là âm log hợp lý của một mô hình xác suất chuẩn hoá được, nên SVM không cho xác suất một cách trực tiếp.
 ---
 
 ## 11. Tập lồi và hàm lồi
 
-### 11.1. Vì sao dành hẳn hai chương cho tính lồi
+Tính lồi là ranh giới giữa những bài toán tối ưu có bảo đảm và những bài toán không có. Chương này định nghĩa tập lồi và hàm lồi, nêu các cách kiểm tra tính lồi, và cho thấy bằng thí nghiệm tính lồi ảnh hưởng thế nào tới kết quả của gradient descent. Chương 12 dùng các khái niệm này để xây dựng lý thuyết đối ngẫu, công cụ chính của Chương 13.
 
-Vì nó là ranh giới giữa hai thế giới khác hẳn nhau.
+### 11.1. Vai trò của tính lồi trong tối ưu
 
-Với bài toán lồi, ta có một bảo đảm mạnh đến mức hiếm gặp trong học máy: **mọi cực tiểu địa phương đều là cực tiểu toàn cục**. Nghĩa là điểm khởi tạo không quan trọng, không cần chạy lại nhiều lần, và khi thuật toán dừng thì ta *biết* mình đã ở nghiệm tốt nhất.
+Với bài toán tối ưu lồi, mọi cực tiểu địa phương đều là cực tiểu toàn cục. Hệ quả thực tế rất lớn: điểm khởi tạo không ảnh hưởng tới chất lượng nghiệm, không cần chạy lại nhiều lần với các khởi tạo khác nhau, và khi thuật toán dừng ở một điểm có gradient bằng 0, ta biết chắc đó là nghiệm tốt nhất.
 
-Với bài toán không lồi — tức mọi mạng nơ-ron — không có bảo đảm nào cả. Ta chạy nhiều lần, giữ kết quả tốt nhất, và không bao giờ biết còn nghiệm nào tốt hơn hay không.
+Hồi quy tuyến tính, hồi quy logistic, ridge, lasso và SVM đều là bài toán lồi. Hàm mất mát của mạng nơ-ron có từ hai lớp trở lên thì không lồi, nên không có bảo đảm nào như trên: kết quả phụ thuộc vào khởi tạo, và không có cách nào biết chắc còn nghiệm tốt hơn hay không. Phần lớn kỹ thuật huấn luyện mạng sâu, như khởi tạo cẩn thận, chuẩn hoá và kết nối tắt, tồn tại để xử lý hậu quả của việc mất tính lồi.
 
-Chương này và chương sau cũng là **công cụ để dựng SVM**. Không có đối ngẫu Lagrange thì không có thủ thuật nhân, và không có thủ thuật nhân thì SVM chỉ là một bộ phân loại tuyến tính nữa.
+Chương này và Chương 12 còn là nền cho SVM. Không có lý thuyết đối ngẫu thì không suy ra được bài toán đối ngẫu của SVM, và không có bài toán đối ngẫu thì không thấy được kernel.
 
 ### 11.2. Tập lồi
 
-Tập $C$ là **lồi** nếu đoạn thẳng nối hai điểm bất kỳ của nó nằm trọn trong nó:
+> **Định nghĩa 11.1 (Tập lồi).** Tập $C \subseteq \mathbb{R}^d$ là **tập lồi** nếu đoạn thẳng nối hai điểm bất kỳ của $C$ nằm trọn trong $C$:
+> $$x, y \in C,\; t \in [0,1] \;\Longrightarrow\; t x + (1-t) y \in C.$$
 
-$$x, y \in C,\; t \in [0,1] \;\Longrightarrow\; t x + (1-t) y \in C.$$
-
-| Lồi | Không lồi |
+| Tập lồi | Tập không lồi |
 |---|---|
-| Hình cầu, hình hộp, nửa không gian | Hình vành khuyên, hình chữ U |
-| Siêu phẳng và giao của nhiều nửa không gian | Hợp của hai hình tròn rời nhau |
+| Hình cầu, hình hộp, nửa không gian $\{x : a^\top x \le b\}$ | Hình vành khuyên, hình chữ U |
+| Siêu phẳng, giao của nhiều nửa không gian (khối đa diện) | Hợp của hai hình tròn rời nhau |
 | Bao lồi của một tập điểm bất kỳ | Mặt cầu (chỉ phần vỏ) |
 
-Hai tính chất được dùng ngay ở Chương 13: **giao của các tập lồi là lồi** (nên miền chấp nhận được của một hệ ràng buộc tuyến tính luôn lồi), nhưng **hợp thì thường không**.
+Hình cầu $\{x : \|x - c\| \le r\}$ lồi vì với $x, y$ trong hình cầu, bất đẳng thức tam giác cho $\|tx + (1-t)y - c\| \le t\|x - c\| + (1-t)\|y - c\| \le r$. Lập luận tương tự áp dụng cho quả cầu của mọi chuẩn, trong đó có hình thoi $\ell_1$ ở Mục 2.3.
+
+Hai tính chất được dùng ở Chương 13. **Giao của các tập lồi là tập lồi**: nếu hai điểm cùng thuộc mọi tập thì đoạn nối chúng cũng thuộc mọi tập. Do đó miền thoả mãn một hệ ràng buộc tuyến tính, là giao của các nửa không gian, luôn là tập lồi. Ngược lại, **hợp của các tập lồi thường không lồi**, như hai hình tròn rời nhau.
 
 ### 11.3. Hàm lồi
 
-$f$ là **lồi** nếu với mọi $x, y$ và $t \in [0,1]$:
+> **Định nghĩa 11.2 (Hàm lồi).** Hàm $f$ xác định trên một tập lồi là **hàm lồi** nếu với mọi $x, y$ và mọi $t \in [0,1]$:
+> $$f\big(t x + (1-t)y\big) \;\le\; t f(x) + (1-t) f(y).$$
+> $f$ là **lồi chặt** nếu bất đẳng thức là chặt với mọi $x \ne y$ và $t \in (0, 1)$.
 
-$$f\big(t x + (1-t)y\big) \;\le\; t f(x) + (1-t) f(y).$$
+Bằng lời: đoạn thẳng (dây cung) nối hai điểm trên đồ thị luôn nằm phía trên đồ thị. Với hàm khả vi, có hai điều kiện tương đương dễ dùng hơn định nghĩa.
 
-Đọc bằng lời: **dây cung luôn nằm trên đồ thị.**
+> **Định lý 11.1 (Điều kiện bậc nhất và bậc hai).** Cho $f$ khả vi trên tập lồi mở.
+> 1. $f$ lồi khi và chỉ khi với mọi $x, y$: $\;f(y) \ge f(x) + \nabla f(x)^\top (y - x)$.
+> 2. Nếu $f$ khả vi hai lần, $f$ lồi khi và chỉ khi ma trận Hessian $\nabla^2 f(x)$ nửa xác định dương tại mọi $x$. Với hàm một biến: $f''(x) \ge 0$.
 
-Ba cách kiểm, theo thứ tự dễ dùng tăng dần:
+Điều kiện bậc nhất nói rằng tiếp tuyến (hoặc siêu phẳng tiếp xúc) tại mọi điểm luôn nằm dưới đồ thị. Từ đó suy ra ngay tính chất quan trọng nhất của hàm lồi.
 
-1. **Theo định nghĩa** — luôn đúng nhưng thường khó.
-2. **Đạo hàm bậc hai** — với hàm một biến, $f'' \ge 0$ trên toàn miền. Với hàm nhiều biến, ma trận Hessian nửa xác định dương.
-3. **Theo phép dựng** — xem Mục 11.5.
+> **Định lý 11.2 (Cực tiểu của hàm lồi).** Nếu $f$ lồi và khả vi thì mọi điểm $x^*$ có $\nabla f(x^*) = 0$ là cực tiểu toàn cục. Nếu $f$ lồi chặt thì cực tiểu toàn cục, nếu tồn tại, là duy nhất.
 
-### 11.4. Kiểm bằng số: bác bỏ thì dễ, chứng minh thì không
+> **Chứng minh.** Thay $\nabla f(x^*) = 0$ vào điều kiện bậc nhất: $f(y) \ge f(x^*)$ với mọi $y$. Nếu có hai cực tiểu $x^* \ne y^*$ của hàm lồi chặt, điểm giữa của chúng có giá trị nhỏ hơn giá trị cực tiểu theo định nghĩa lồi chặt, mâu thuẫn.
 
-Thí nghiệm thử trực tiếp bất đẳng thức định nghĩa trên 20 000 cặp điểm ngẫu nhiên:
+> **Ví dụ 11.1.** Hàm mất mát của hồi quy tuyến tính, $f(w) = \|y - Xw\|_2^2$, có Hessian $2X^\top X$, nửa xác định dương (Mục 2.5), nên $f$ lồi. Nếu $X$ đủ hạng cột thì Hessian xác định dương, $f$ lồi chặt và nghiệm duy nhất, đúng như Định lý 4.1. Hàm $f(x) = e^x$ có $f''(x) = e^x > 0$ nên lồi chặt, nhưng không có cực tiểu: nó giảm dần về 0 khi $x \to -\infty$. Ví dụ này cho thấy Định lý 11.2 chỉ nói về tính duy nhất, không bảo đảm cực tiểu tồn tại, và đây đúng là tình huống của hồi quy logistic trên dữ liệu tách được ở Mục 6.5.
+
+### 11.4. Kiểm tra tính lồi bằng thực nghiệm
+
+Định nghĩa 11.2 gợi ý một phép thử bằng số: chọn ngẫu nhiên nhiều cặp điểm $x, y$ và hệ số $t$, rồi kiểm tra bất đẳng thức. Thí nghiệm thực hiện phép thử này trên 20 000 bộ ba cho mỗi hàm, với cột "vi phạm lớn nhất" là giá trị lớn nhất của $f(tx + (1-t)y) - tf(x) - (1-t)f(y)$:
 
 | Hàm | Vi phạm lớn nhất | Tỉ lệ vi phạm | Kết luận |
 |---|---|---|---|
 | $x^2$ | $-1{,}50\times10^{-9}$ | 0,0000 | lồi |
 | $\lvert x\rvert$ | $0$ | 0,0000 | lồi |
 | $e^x$ | $-3{,}99\times10^{-9}$ | 0,0000 | lồi |
-| $\log(1+e^x)$ — mất mát logistic | $-2{,}54\times10^{-11}$ | 0,0000 | lồi |
-| $x^4 - 3x^2$ | $+2{,}237$ | 0,2075 | **không** |
-| $\sin x$ | $+1{,}972$ | 0,5051 | **không** |
-| $x^3$ | $+13{,}17$ | 0,4985 | **không** |
+| $\log(1+e^x)$ (mất mát logistic) | $-2{,}54\times10^{-11}$ | 0,0000 | lồi |
+| $x^4 - 3x^2$ | $+2{,}237$ | 0,2075 | không lồi |
+| $\sin x$ | $+1{,}972$ | 0,5051 | không lồi |
+| $x^3$ | $+13{,}17$ | 0,4985 | không lồi |
 
-Ba dòng đầu có "vi phạm lớn nhất" **âm**, nghĩa là bất đẳng thức luôn đúng với lề dương — số âm nhỏ ấy chỉ là sai số làm tròn.
+Với bốn hàm đầu, giá trị vi phạm lớn nhất không dương: các số âm rất nhỏ chỉ là sai số làm tròn ở những bộ ba có hai điểm gần nhau. Với ba hàm sau, có hàng nghìn bộ ba vi phạm, và độ vi phạm lớn.
 
-> **Phép thử này không chứng minh tính lồi.** Không vi phạm trên 20 000 cặp không loại trừ được một chỗ lõm hẹp ở đâu đó. Nhưng **một** phản ví dụ thì đủ để bác bỏ, và với hàm mất mát tự viết thì đây là cách rẻ nhất để bắt lỗi trước khi ngồi suy luận.
+> **Lưu ý.** Phép thử này có thể bác bỏ tính lồi nhưng không chứng minh được nó. Không tìm thấy vi phạm trong 20 000 lần thử không loại trừ một vùng lõm hẹp ở đâu đó chưa được lấy mẫu. Ngược lại, chỉ một phản ví dụ là đủ để kết luận hàm không lồi. Với một hàm mất mát tự viết, đây là cách rẻ để phát hiện lỗi trước khi đi vào chứng minh.
 
-Dòng thứ tư đáng chú ý riêng: nó xác nhận mất mát logistic là hàm lồi, tức bài toán ở Mục 6.3 có nghiệm toàn cục duy nhất (khi có phạt chuẩn). Đó là lý do hồi quy logistic **không cần chạy lại nhiều lần với nhiều khởi tạo**, khác hẳn mạng nơ-ron.
+Dòng thứ tư xác nhận bằng số điều mà Mục 11.5 sẽ chứng minh: mất mát logistic là hàm lồi, nên bài toán hồi quy logistic có regularization có nghiệm toàn cục duy nhất. Đó là lý do hồi quy logistic không cần chạy nhiều lần với nhiều khởi tạo khác nhau như mạng nơ-ron.
 
-### 11.5. Các phép dựng giữ nguyên tính lồi
+### 11.5. Các phép toán bảo toàn tính lồi
 
-Trong thực tế hiếm ai kiểm định nghĩa. Người ta dựng hàm lồi từ các mảnh đã biết là lồi:
+Trên thực tế, người ta hiếm khi kiểm tra tính lồi bằng định nghĩa. Thay vào đó, hàm lồi được dựng từ những hàm đã biết là lồi bằng các phép toán bảo toàn tính lồi:
 
-| Phép | Giữ tính lồi không |
+| Phép toán | Bảo toàn tính lồi |
 |---|---|
 | $f_1 + f_2$ | có |
 | $\alpha f$ với $\alpha \ge 0$ | có |
-| $\max(f_1, f_2)$ | **có** |
-| $\min(f_1, f_2)$ | **không** |
-| $f(Ax + b)$ — hợp với hàm affine | có |
-| $g(f(x))$ với $g$ lồi **và không giảm** | có |
-| $f_1 \cdot f_2$ | **không** nói chung |
+| $\max(f_1, f_2)$ | có |
+| $\min(f_1, f_2)$ | không |
+| $f(Ax + b)$, hợp với hàm affine | có |
+| $g(f(x))$ với $f$ lồi, $g$ lồi và không giảm | có |
+| $f_1 \cdot f_2$ | không, nói chung |
 
-Dòng $\max$ giải thích ngay vì sao mất mát hinge $\max(0, 1-m)$ lồi: nó là max của hai hàm affine. Và dòng "hợp với affine" giải thích vì sao $\|y - Xw\|^2$ lồi theo $w$: nó là hàm lồi $\|\cdot\|^2$ hợp với một ánh xạ affine của $w$.
+Các phép toán này giải thích tính lồi của mọi hàm mất mát trong giáo trình:
 
-Cộng hai dòng đầu lại: **mất mát lồi cộng phạt chuẩn lồi thì vẫn lồi.** Nên ridge, lasso, hồi quy logistic có phạt chuẩn và SVM đều là bài toán lồi.
+- Mất mát hinge $\max(0, 1 - m)$ là max của hai hàm affine theo $m$, và $m = y(w^\top x + b)$ là hàm affine theo $(w, b)$, nên hinge lồi theo tham số.
+- $\|y - Xw\|^2$ là hàm lồi $\|\cdot\|^2$ hợp với ánh xạ affine $w \mapsto y - Xw$.
+- Mất mát logistic $\log(1 + e^{-m})$ là hàm lồi một biến (đạo hàm cấp hai bằng $\sigma(m)(1-\sigma(m)) > 0$) hợp với hàm affine $m$ của $w$.
+- Tổng của mất mát lồi và thành phần regularization lồi ($\|w\|_2^2$ hoặc $\|w\|_1$) là hàm lồi.
 
-### 11.6. Hậu quả lên tối ưu hoá, đo được
+Vì vậy ridge, lasso, hồi quy logistic có regularization và SVM đều là bài toán tối ưu lồi.
+
+### 11.6. Tính lồi và kết quả của gradient descent
 
 ![Hình 8](figs/nt08_convex.png)
 
-**Hình 8.** Cùng một thuật toán, 21 điểm xuất phát. Trái: hàm lồi, mọi đường đều về cùng một chỗ. Phải: hàm không lồi, kết quả tuỳ chỗ xuất phát.
+**Hình 8.** Cùng một thuật toán gradient descent chạy từ 21 điểm xuất phát. Trái: hàm lồi, mọi lần chạy đều về cùng một điểm. Phải: hàm không lồi, điểm dừng phụ thuộc điểm xuất phát.
 
 ```text
 ham LOI      x^2             : so diem dung khac nhau = 1
@@ -1036,107 +1371,135 @@ ham KHONG LOI x^4-3x^2+x/2   : so diem dung khac nhau = 2, tai x = -1.2645 va 1.
 gia tri ham tai hai diem do  : -2.8725 va -1.6484
 ```
 
-Hai điểm dừng ấy có giá trị hàm **khác nhau**: $-2{,}8725$ và $-1{,}6484$. Nghĩa là gần một nửa số lần chạy kết thúc ở một cực tiểu địa phương **không phải** toàn cục, và thuật toán không có cách nào biết điều đó.
+Với hàm không lồi $x^4 - 3x^2 + x/2$, gradient descent dừng ở hai điểm khác nhau tuỳ điểm xuất phát, và hai điểm này có giá trị hàm khác nhau: $-2{,}8725$ và $-1{,}6484$. Những lần chạy xuất phát ở phía dương đều dừng tại cực tiểu địa phương $x \approx 1{,}18$, không phải cực tiểu toàn cục, và thuật toán không có cách nào nhận ra điều đó vì gradient tại đó cũng bằng 0.
 
-> **Đây là lý do thực tế của mọi thứ ở Chương 6 của *Mô hình & Kiến trúc*.** Hàm mất mát của mạng nơ-ron không lồi, nên khởi tạo, chuẩn hoá và kết nối tắt mới thành vấn đề sống còn — xem [Chương 6 của *Mô hình & Kiến trúc*](models-ch06.html). Với hồi quy logistic thì những thứ ấy không cần thiết, và Hình 8 cho thấy vì sao.
+> **Nhận xét.** Hàm mất mát của mạng nơ-ron không lồi, nên hiện tượng trên xảy ra ở quy mô lớn hơn nhiều. Tuy vậy, kinh nghiệm thực tế cho thấy với mạng đủ lớn, phần lớn cực tiểu địa phương có giá trị mất mát gần nhau, và trở ngại chính là tín hiệu co lại hoặc phình ra qua nhiều lớp. [Chương 6 của *Học sâu*](models-ch06.html) trình bày khởi tạo, chuẩn hoá và kết nối tắt, ba kỹ thuật xử lý trở ngại đó.
 
 ---
 
 ## 12. Tối ưu lồi và đối ngẫu Lagrange
 
-### 12.1. Dạng chuẩn
+Chương này trình bày cách giải bài toán tối ưu có ràng buộc thông qua hàm Lagrange và bài toán đối ngẫu, rồi phát biểu điều kiện KKT, bộ điều kiện đặc trưng cho nghiệm tối ưu. Một ví dụ một biến được dùng xuyên suốt chương để mọi khái niệm đều có thể tính tay.
 
-$$\min_x \; f_0(x) \quad\text{với}\quad f_i(x) \le 0 \;\; (i=1,\dots,m), \qquad h_j(x) = 0 \;\;(j=1,\dots,p).$$
+### 12.1. Bài toán tối ưu có ràng buộc
 
-Bài toán là **lồi** khi $f_0$ và mọi $f_i$ lồi, còn mọi $h_j$ affine. Lưu ý ràng buộc đẳng thức phải **affine**, không chỉ lồi — vì $\{h(x) = 0\}$ với $h$ lồi nhưng không affine thì không phải tập lồi.
+> **Định nghĩa 12.1 (Dạng chuẩn).** Bài toán tối ưu có ràng buộc ở dạng chuẩn là
+> $$\min_x \; f_0(x) \quad\text{với}\quad f_i(x) \le 0 \;\; (i=1,\dots,m), \qquad h_j(x) = 0 \;\;(j=1,\dots,p).$$
+> Điểm thoả mọi ràng buộc gọi là **điểm chấp nhận được**. Giá trị tối ưu ký hiệu là $p^*$. Bài toán gọi là **bài toán lồi** nếu $f_0, f_1, \dots, f_m$ là hàm lồi và mọi $h_j$ là hàm affine.
 
-### 12.2. Hàm Lagrange
+Ràng buộc đẳng thức phải là affine, không chỉ lồi, vì tập $\{x : h(x) = 0\}$ với $h$ lồi nhưng không affine thường không lồi. Ví dụ, $h(x) = \|x\|^2 - 1$ lồi, nhưng $\{x : \|x\|^2 = 1\}$ là mặt cầu, không phải tập lồi.
 
-Ý tưởng: thay vì cấm vi phạm ràng buộc, hãy **tính tiền** mỗi lần vi phạm. Gắn cho mỗi ràng buộc một giá $\alpha_i \ge 0$:
+> **Ví dụ 12.1 (Ví dụ xuyên suốt chương).** Tìm $\min_x x^2$ với ràng buộc $x \ge 1$. Viết ở dạng chuẩn: $f_0(x) = x^2$, $f_1(x) = 1 - x \le 0$. Nghiệm hiển nhiên là $x^* = 1$ với $p^* = 1$: không có ràng buộc thì cực tiểu ở $x = 0$, nhưng điểm này không chấp nhận được, nên nghiệm nằm ở biên của miền ràng buộc.
 
-$$\mathcal{L}(x, \alpha, \nu) = f_0(x) + \sum_{i=1}^{m}\alpha_i f_i(x) + \sum_{j=1}^{p}\nu_j h_j(x).$$
+### 12.2. Hàm Lagrange và hàm đối ngẫu
 
-Các $\alpha_i$, $\nu_j$ gọi là **nhân tử Lagrange**. Điều kiện $\alpha_i \ge 0$ là bắt buộc và có nghĩa rõ ràng: vi phạm ($f_i > 0$) phải **làm tăng** giá trị hàm.
+Ý tưởng của phương pháp Lagrange là thay việc cấm vi phạm ràng buộc bằng việc tính giá cho mỗi đơn vị vi phạm. Gắn cho mỗi ràng buộc bất đẳng thức một giá $\alpha_i \ge 0$ và cho mỗi ràng buộc đẳng thức một giá $\nu_j$:
 
-Hàm **đối ngẫu** là cực tiểu của $\mathcal{L}$ theo $x$:
+> **Định nghĩa 12.2 (Hàm Lagrange, hàm đối ngẫu).** **Hàm Lagrange** của bài toán ở Định nghĩa 12.1 là
+> $$\mathcal{L}(x, \alpha, \nu) = f_0(x) + \sum_{i=1}^{m}\alpha_i f_i(x) + \sum_{j=1}^{p}\nu_j h_j(x),$$
+> với các **nhân tử Lagrange** $\alpha_i \ge 0$ và $\nu_j \in \mathbb{R}$. **Hàm đối ngẫu** là cực tiểu của hàm Lagrange theo $x$:
+> $$g(\alpha, \nu) = \inf_x \mathcal{L}(x, \alpha, \nu).$$
 
-$$g(\alpha, \nu) = \inf_x \mathcal{L}(x, \alpha, \nu).$$
+Điều kiện $\alpha_i \ge 0$ là bắt buộc: khi ràng buộc bị vi phạm ($f_i(x) > 0$), số hạng $\alpha_i f_i(x)$ phải làm tăng giá trị hàm, tức là một khoản phạt.
 
-$g$ **luôn lõm** — kể cả khi bài toán gốc không lồi — vì nó là infimum của một họ hàm affine theo $(\alpha,\nu)$. Đây là một trong những sự thật hữu dụng nhất của toàn bộ lĩnh vực.
+Hàm đối ngẫu $g$ luôn là hàm lõm theo $(\alpha, \nu)$, kể cả khi bài toán gốc không lồi. Lý do: với mỗi $x$ cố định, $\mathcal{L}$ là hàm affine theo $(\alpha, \nu)$, và cận dưới đúng (infimum) của một họ hàm affine luôn là hàm lõm. Nhờ vậy bài toán cực đại $g$ luôn là một bài toán tối ưu lồi, dù bài toán gốc khó tới đâu.
+
+> **Ví dụ 12.2.** Với Ví dụ 12.1, $\mathcal{L}(x, \alpha) = x^2 + \alpha(1 - x)$. Cực tiểu theo $x$: đạo hàm $2x - \alpha = 0$ cho $x = \alpha/2$. Thay vào:
+> $$g(\alpha) = \frac{\alpha^2}{4} + \alpha\Big(1 - \frac{\alpha}{2}\Big) = \alpha - \frac{\alpha^2}{4}, \qquad \alpha \ge 0.$$
+> Đây là một parabol úp xuống, đúng là hàm lõm.
 
 ### 12.3. Đối ngẫu yếu và đối ngẫu mạnh
 
-Với mọi $\alpha \ge 0$:
+> **Định lý 12.1 (Đối ngẫu yếu).** Với mọi $\alpha \ge 0$ và mọi $\nu$: $g(\alpha, \nu) \le p^*$.
 
-$$g(\alpha, \nu) \;\le\; p^{*},$$
+> **Chứng minh.** Lấy $x$ bất kỳ chấp nhận được. Vì $f_i(x) \le 0$, $\alpha_i \ge 0$ và $h_j(x) = 0$, ta có $\mathcal{L}(x, \alpha, \nu) \le f_0(x)$. Do đó $g(\alpha, \nu) \le \mathcal{L}(x, \alpha, \nu) \le f_0(x)$. Lấy cận dưới đúng theo mọi $x$ chấp nhận được, vế phải trở thành $p^*$.
 
-trong đó $p^*$ là giá trị tối ưu của bài toán gốc. Đây là **đối ngẫu yếu**, và nó luôn đúng. Bài toán **đối ngẫu** là đi tìm chặn dưới tốt nhất:
+Mỗi giá trị của hàm đối ngẫu là một chặn dưới của giá trị tối ưu. **Bài toán đối ngẫu** là tìm chặn dưới tốt nhất:
 
 $$d^{*} = \max_{\alpha \ge 0,\, \nu} g(\alpha, \nu) \;\le\; p^{*}.$$
 
-Hiệu $p^* - d^*$ gọi là **khe đối ngẫu**. Khi nó bằng 0 ta có **đối ngẫu mạnh**, và khi ấy giải bài toán đối ngẫu là giải xong bài toán gốc.
+Hiệu $p^* - d^* \ge 0$ gọi là **khe đối ngẫu**. Khi khe bằng 0 ta có **đối ngẫu mạnh**, và giải bài toán đối ngẫu cho đúng giá trị tối ưu của bài toán gốc.
 
-**Điều kiện Slater:** với bài toán lồi, nếu tồn tại một điểm thoả mọi ràng buộc bất đẳng thức một cách **nghiêm ngặt** ($f_i(x) < 0$), thì đối ngẫu mạnh xảy ra. Điều kiện này nhẹ và hầu như luôn thoả trong các bài toán học máy — nên trên thực tế ta được dùng đối ngẫu mạnh gần như miễn phí.
+> **Định lý 12.2 (Điều kiện Slater).** Nếu bài toán là lồi và tồn tại một điểm chấp nhận được thoả mọi ràng buộc bất đẳng thức một cách chặt, $f_i(x) < 0$ với mọi $i$, thì đối ngẫu mạnh xảy ra.
+
+Điều kiện Slater yêu cầu miền chấp nhận được có "phần trong", và hầu hết các bài toán lồi trong học máy thoả điều kiện này. Chẳng hạn, với SVM lề cứng trên dữ liệu tách được, nhân một siêu phẳng tách đúng với một hệ số đủ lớn cho một điểm thoả mọi ràng buộc một cách chặt.
+
+> **Ví dụ 12.3.** Tiếp tục Ví dụ 12.2: $g(\alpha) = \alpha - \alpha^2/4$ đạt cực đại tại $\alpha^* = 2$, với $d^* = g(2) = 1$. Vậy $d^* = p^* = 1$ và khe đối ngẫu bằng 0. Điều kiện Slater thoả vì điểm $x = 2$ có $f_1(2) = -1 < 0$.
 
 ### 12.4. Điều kiện KKT
 
-Khi đối ngẫu mạnh xảy ra và các hàm khả vi, nghiệm tối ưu $(x^*, \alpha^*, \nu^*)$ thoả bốn nhóm điều kiện:
+> **Định lý 12.3 (Điều kiện Karush–Kuhn–Tucker).** Xét bài toán lồi có các hàm khả vi và thoả điều kiện Slater. Điểm $x^*$ là nghiệm tối ưu khi và chỉ khi tồn tại $(\alpha^*, \nu^*)$ sao cho bốn nhóm điều kiện sau thoả:
 
-| Điều kiện | Công thức | Nghĩa |
+| Điều kiện | Công thức | Ý nghĩa |
 |---|---|---|
-| Chấp nhận được (gốc) | $f_i(x^*) \le 0$, $h_j(x^*) = 0$ | nghiệm hợp lệ |
-| Chấp nhận được (đối ngẫu) | $\alpha_i^* \ge 0$ | giá không âm |
-| **Bù trừ** | $\alpha_i^{*} f_i(x^{*}) = 0$ | **ràng buộc lỏng thì giá bằng 0** |
-| Dừng | $\nabla_x \mathcal{L}(x^*,\alpha^*,\nu^*) = 0$ | điểm dừng của Lagrange |
+| Chấp nhận được của bài toán gốc | $f_i(x^*) \le 0$, $h_j(x^*) = 0$ | nghiệm thoả mọi ràng buộc |
+| Chấp nhận được của bài toán đối ngẫu | $\alpha_i^* \ge 0$ | giá không âm |
+| Bù (complementary slackness) | $\alpha_i^{*} f_i(x^{*}) = 0$ | ràng buộc không chặt thì giá bằng 0 |
+| Dừng | $\nabla_x \mathcal{L}(x^*,\alpha^*,\nu^*) = 0$ | $x^*$ là điểm dừng của hàm Lagrange |
 
-Dòng **bù trừ** là dòng quan trọng nhất, và nó là chìa khoá của cả Chương 13. Nó nói: với mỗi ràng buộc, hoặc ràng buộc đó **chặt** ($f_i = 0$), hoặc giá của nó **bằng 0**. Không thể vừa lỏng vừa có giá.
+Điều kiện bù là điều kiện quan trọng nhất cho Chương 13. Nó nói rằng với mỗi ràng buộc, một trong hai điều phải xảy ra: hoặc ràng buộc **chặt** tại nghiệm ($f_i(x^*) = 0$, nghiệm nằm đúng trên biên của ràng buộc đó), hoặc giá của nó **bằng 0** ($\alpha_i^* = 0$). Một ràng buộc không chặt thì không ảnh hưởng tới nghiệm: bỏ nó đi, nghiệm không đổi.
 
-Áp vào SVM ở chương sau, điều này có nghĩa: **chỉ những điểm nằm đúng trên lề mới có $\alpha > 0$**, và chỉ chúng mới ảnh hưởng tới nghiệm. Đó chính là định nghĩa của *vector hỗ trợ*, và nó không phải một thiết kế mà là một **hệ quả** của KKT.
+> **Ví dụ 12.4.** Với Ví dụ 12.1: điều kiện dừng $2x^* - \alpha^* = 0$, điều kiện bù $\alpha^*(1 - x^*) = 0$. Nếu $\alpha^* = 0$ thì $x^* = 0$, vi phạm ràng buộc $x \ge 1$. Vậy $\alpha^* > 0$, kéo theo $x^* = 1$ và $\alpha^* = 2$, khớp với Ví dụ 12.3. Nếu đổi ràng buộc thành $x \ge -1$, nghiệm là $x^* = 0$, ràng buộc không chặt ($0 > -1$), và điều kiện bù cho $\alpha^* = 0$: ràng buộc này không có vai trò gì.
 
-### 12.5. Vì sao lại đi đường vòng qua đối ngẫu
+Nhân tử Lagrange còn có ý nghĩa **giá bóng** (shadow price): nó đo giá trị tối ưu thay đổi bao nhiêu khi ràng buộc được nới lỏng. Nếu ràng buộc $f_i(x) \le 0$ được nới thành $f_i(x) \le u$, thì $\partial p^*/\partial u = -\alpha_i^*$. Trong ví dụ, nới $1 - x \le u$ cho $x \ge 1 - u$ và $p^*(u) = (1-u)^2$, có đạo hàm tại $u = 0$ bằng $-2 = -\alpha^*$. Ràng buộc có giá lớn là ràng buộc đang "cản" nghiệm nhiều nhất.
 
-Ba lý do, và với SVM thì lý do thứ ba mới là lý do thật:
+Áp dụng vào SVM ở chương sau, điều kiện bù có nghĩa là chỉ những điểm dữ liệu nằm đúng trên lề mới có nhân tử $\alpha_i > 0$ và mới ảnh hưởng tới nghiệm. Đó là định nghĩa của vector hỗ trợ, và nó là hệ quả của điều kiện KKT chứ không phải một lựa chọn thiết kế.
 
-1. **Đôi khi đối ngẫu dễ giải hơn.** Bài toán gốc của SVM có $d$ biến; bài toán đối ngẫu có $n$ biến. Khi $d \gg n$ thì đối ngẫu rẻ hơn hẳn.
-2. **Đối ngẫu cho chặn dưới.** Kể cả khi chưa giải xong, $g(\alpha)$ cho ta biết còn cách tối ưu bao xa.
-3. **Đối ngẫu làm lộ ra cấu trúc.** Bài toán đối ngẫu của SVM chỉ phụ thuộc dữ liệu qua các **tích vô hướng** $x_i^\top x_j$. Ngay khi thấy điều đó, thủ thuật nhân trở thành hiển nhiên: thay tích vô hướng bằng một hàm nhân là xong. Không có bước chuyển sang đối ngẫu thì không nhìn ra được điều này.
+### 12.5. Ý nghĩa của bài toán đối ngẫu
+
+Có ba lý do để giải bài toán đối ngẫu thay vì bài toán gốc.
+
+1. **Kích thước.** Bài toán gốc của SVM có $d$ biến (các trọng số); bài toán đối ngẫu có $n$ biến (mỗi điểm dữ liệu một nhân tử). Khi $d$ lớn hơn $n$ nhiều, bài toán đối ngẫu nhỏ hơn.
+2. **Chặn dưới.** Với bất kỳ $\alpha \ge 0$ nào, $g(\alpha)$ là chặn dưới của $p^*$, nên hiệu $f_0(x) - g(\alpha)$ giữa một điểm chấp nhận được và một điểm đối ngẫu cho biết nghiệm hiện tại cách tối ưu tối đa bao xa. Nhiều thuật toán dùng khe này làm tiêu chí dừng.
+3. **Cấu trúc.** Bài toán đối ngẫu của SVM chỉ phụ thuộc vào dữ liệu qua các tích vô hướng $x_i^\top x_j$. Nhận xét này dẫn thẳng tới kernel: thay tích vô hướng bằng một hàm kernel là SVM làm việc được trong không gian đặc trưng phi tuyến. Ở dạng bài toán gốc, cấu trúc này không lộ ra.
 
 ---
 
-## 13. Support Vector Machine
+## 13. Máy vector hỗ trợ
 
-### 13.1. Ý tưởng: trong vô số biên đúng, chọn biên nào
+Máy vector hỗ trợ (support vector machine, SVM) là bộ phân loại tuyến tính chọn siêu phẳng có lề lớn nhất. Chương này suy ra bài toán tối ưu của SVM, dùng lý thuyết đối ngẫu ở Chương 12 để tìm ra vector hỗ trợ, mở rộng sang trường hợp dữ liệu không tách được, và trình bày kernel, kỹ thuật giúp SVM tạo ra biên quyết định phi tuyến.
 
-Với dữ liệu tách được tuyến tính, có **vô số** siêu phẳng tách đúng. Perceptron dừng ở cái đầu tiên nó gặp (Mục 6.2), và cái ấy có thể sát ngay một điểm dữ liệu.
+### 13.1. Ý tưởng lề cực đại
 
-SVM đặt một tiêu chí chọn: **lấy siêu phẳng có lề rộng nhất**, tức cách đều hai lớp nhiều nhất có thể. Trực giác biện minh: biên càng xa dữ liệu thì càng chịu được nhiễu, nên càng tổng quát hoá tốt.
+Khi dữ liệu tách được tuyến tính, có vô số siêu phẳng tách đúng hai lớp. Perceptron (Mục 6.2) dừng ở siêu phẳng đầu tiên nó tìm được, và siêu phẳng đó có thể nằm sát một điểm dữ liệu. Một điểm mới ở gần điểm đó, chỉ lệch đi một chút vì nhiễu, có thể bị phân loại sai.
 
-### 13.2. Từ trực giác tới bài toán tối ưu
+SVM đặt ra một tiêu chí để chọn: lấy siêu phẳng có **lề** lớn nhất, tức khoảng cách từ siêu phẳng tới điểm dữ liệu gần nhất là lớn nhất. Siêu phẳng như vậy nằm "chính giữa" khoảng trống giữa hai lớp. Trực giác là biên càng xa dữ liệu thì càng chịu được nhiễu. Lý thuyết học thống kê (Vapnik, 1995) chính xác hoá trực giác này: với dữ liệu nằm trong hình cầu bán kính $R$, chiều VC của lớp các siêu phẳng có lề ít nhất $\gamma$ không vượt quá $\min\big(\lceil R^2/\gamma^2\rceil, d\big) + 1$. Khi lề đủ rộng, độ phức tạp của mô hình được kiểm soát bởi tỉ số $R/\gamma$ chứ không bởi số chiều. Tỉ số này cũng là đại lượng xuất hiện trong định lý Novikoff ở Mục 6.2.
 
-Khoảng cách từ $x_i$ tới siêu phẳng $w^\top x + b = 0$ là $|w^\top x_i + b| / \|w\|$ (Mục 2.2). Ta được tự do co giãn $w$ và $b$ cùng lúc mà không đổi siêu phẳng, nên **chuẩn hoá** sao cho điểm gần nhất có $|w^\top x_i + b| = 1$. Khi ấy lề — khoảng cách giữa hai mặt $w^\top x + b = \pm 1$ — bằng $2/\|w\|$.
+### 13.2. Bài toán tối ưu của SVM lề cứng
 
-Cực đại $2/\|w\|$ tương đương cực tiểu $\tfrac12\|w\|^2$, nên:
+Theo Định lý 2.1, khoảng cách từ $x_i$ tới siêu phẳng $w^\top x + b = 0$ là $|w^\top x_i + b|/\|w\|$. Siêu phẳng không đổi nếu nhân $w$ và $b$ với cùng một số dương, nên ta có thể chọn thang đo sao cho điểm gần nhất thoả $|w^\top x_i + b| = 1$. Khi đó mọi điểm thoả $y_i(w^\top x_i + b) \ge 1$, và khoảng cách giữa hai siêu phẳng $w^\top x + b = +1$ và $w^\top x + b = -1$, tức độ rộng của lề, bằng $2/\|w\|$.
 
-$$\min_{w,b} \;\tfrac12\|w\|^2 \qquad\text{với}\qquad y_i(w^\top x_i + b) \ge 1 \;\; \forall i.$$
+Cực đại $2/\|w\|$ tương đương cực tiểu $\|w\|$, và tương đương cực tiểu $\tfrac12\|w\|^2$ (dạng thuận tiện hơn vì khả vi):
 
-Hàm mục tiêu lồi (bậc hai với Hessian $I$), ràng buộc affine — đúng dạng chuẩn ở Mục 12.1.
+> **Định nghĩa 13.1 (SVM lề cứng).** Với dữ liệu tách được tuyến tính, SVM lề cứng giải bài toán
+> $$\min_{w,b} \;\tfrac12\|w\|^2 \qquad\text{với}\qquad y_i(w^\top x_i + b) \ge 1, \quad i = 1, \dots, n.$$
 
-### 13.3. Bài toán đối ngẫu, và vì sao nó quan trọng
+Hàm mục tiêu là hàm bậc hai lồi với Hessian bằng ma trận đơn vị, các ràng buộc là affine. Đây là một bài toán quy hoạch toàn phương lồi ở đúng dạng chuẩn của Mục 12.1, nên có nghiệm duy nhất và mọi công cụ của Chương 12 đều áp dụng được.
 
-Lập Lagrange rồi cho đạo hàm theo $w$ và $b$ bằng 0:
+### 13.3. Bài toán đối ngẫu và vector hỗ trợ
 
-$$w = \sum_{i}\alpha_i y_i x_i, \qquad \sum_i \alpha_i y_i = 0.$$
+Viết ràng buộc ở dạng chuẩn, $1 - y_i(w^\top x_i + b) \le 0$, và lập hàm Lagrange:
 
-Thế ngược vào cho bài toán đối ngẫu:
+$$\mathcal{L}(w, b, \alpha) = \tfrac12\|w\|^2 + \sum_{i=1}^n \alpha_i\big[1 - y_i(w^\top x_i + b)\big], \qquad \alpha_i \ge 0.$$
 
-$$\max_{\alpha \ge 0} \;\sum_i \alpha_i - \tfrac12\sum_{i,j}\alpha_i\alpha_j y_i y_j \,\underbrace{x_i^\top x_j}_{\text{chỉ qua tích vô hướng}} \qquad\text{với}\quad \sum_i\alpha_i y_i = 0.$$
+Cho đạo hàm theo $w$ và $b$ bằng 0:
 
-Hai điều rút ra ngay:
+$$\nabla_w \mathcal{L} = w - \sum_i \alpha_i y_i x_i = 0 \;\Longrightarrow\; w = \sum_{i}\alpha_i y_i x_i, \qquad \frac{\partial\mathcal{L}}{\partial b} = -\sum_i \alpha_i y_i = 0.$$
 
-- $w$ là **tổ hợp tuyến tính của các điểm dữ liệu**, với trọng số $\alpha_i y_i$.
-- Theo điều kiện bù trừ (Mục 12.4), $\alpha_i > 0$ **chỉ với** những điểm có $y_i(w^\top x_i + b) = 1$, tức nằm đúng trên lề. Đó là các **vector hỗ trợ**. Mọi điểm khác có $\alpha_i = 0$ và **không ảnh hưởng gì** tới nghiệm.
+Thay $w$ trở lại hàm Lagrange, số hạng chứa $b$ biến mất nhờ $\sum_i \alpha_i y_i = 0$, và ta được bài toán đối ngẫu:
 
-**Kiểm chứng bằng số.** Thí nghiệm giải bài toán bằng libsvm rồi dựng lại mọi thứ từ nghiệm đối ngẫu:
+> **Định lý 13.1 (Bài toán đối ngẫu của SVM lề cứng).**
+> $$\max_{\alpha} \;\sum_i \alpha_i - \tfrac12\sum_{i,j}\alpha_i\alpha_j y_i y_j \, x_i^\top x_j \qquad\text{với}\quad \alpha_i \ge 0,\quad \sum_i\alpha_i y_i = 0.$$
+> Từ nghiệm $\alpha^*$, trọng số là $w^* = \sum_i \alpha_i^* y_i x_i$, và bộ phân loại là $f(x) = \sum_i \alpha_i^* y_i\, x_i^\top x + b^*$.
+
+Hai điều rút ra ngay từ định lý:
+
+- $w^*$ là tổ hợp tuyến tính của các điểm dữ liệu, với trọng số $\alpha_i^* y_i$.
+- Theo điều kiện bù (Mục 12.4), $\alpha_i^*\,[1 - y_i(w^{*\top} x_i + b^*)] = 0$. Vậy $\alpha_i^* > 0$ chỉ có thể xảy ra với những điểm có $y_i(w^{*\top} x_i + b^*) = 1$, tức nằm đúng trên lề. Các điểm đó gọi là **vector hỗ trợ**. Mọi điểm khác có $\alpha_i^* = 0$ và không đóng góp gì vào $w^*$.
+
+Hệ số chặn $b^*$ tính được từ một vector hỗ trợ bất kỳ: vì $y_s(w^{*\top} x_s + b^*) = 1$ và $y_s^2 = 1$, ta có $b^* = y_s - w^{*\top} x_s$. Trên thực tế người ta lấy trung bình trên mọi vector hỗ trợ để giảm sai số số học.
+
+Thí nghiệm giải SVM bằng thư viện libsvm (qua scikit-learn) trên 120 điểm tách được, rồi kiểm tra các khẳng định trên từ nghiệm đối ngẫu:
 
 ```text
 Dung lai w tu nghiem doi ngau: lech so voi coef_ cua sklearn = 0.000e+00
@@ -1150,108 +1513,129 @@ Doi ngau manh:
 Le = 2/||w|| = 1.346085; khoang cach nho nhat tu diem toi sieu phang x 2 = 1.346085
 ```
 
-Bốn khẳng định lý thuyết, bốn lần khớp: công thức $w = \sum\alpha_i y_i x_i$ khớp **chính xác**; vector hỗ trợ nằm đúng trên lề; khe đối ngẫu bằng 0 trong phạm vi dung sai của bộ giải; và lề $2/\|w\|$ đúng bằng hai lần khoảng cách nhỏ nhất.
+Kết quả khớp với lý thuyết ở cả bốn điểm: công thức $w = \sum_i\alpha_i y_i x_i$ cho đúng vector trọng số của thư viện; các vector hỗ trợ nằm trên lề với sai lệch $2{,}5\times10^{-8}$; khe đối ngẫu bằng $4{,}0\times10^{-8}$, tức bằng 0 trong phạm vi dung sai của bộ giải; và độ rộng lề $2/\|w\|$ đúng bằng hai lần khoảng cách từ điểm gần nhất tới siêu phẳng.
 
-Chi tiết đáng chú ý nhất: **3 trên 120 điểm** quyết định toàn bộ nghiệm. Xoá 117 điểm còn lại đi thì kết quả không đổi. Đây là nghĩa thực sự của từ "thưa" khi nói về SVM.
+Chỉ 3 trong 120 điểm là vector hỗ trợ. Bỏ 117 điểm còn lại khỏi tập huấn luyện và huấn luyện lại thì nghiệm không đổi. Tính **thưa** này của SVM là hệ quả trực tiếp của điều kiện bù.
 
-### 13.4. Lề mềm: khi dữ liệu không tách được
+### 13.4. SVM lề mềm
 
-Bài toán ở Mục 13.2 **vô nghiệm** nếu không có siêu phẳng nào tách đúng. Thêm biến bù $\xi_i \ge 0$ cho phép vi phạm, và tính tiền:
+Bài toán ở Định nghĩa 13.1 vô nghiệm khi dữ liệu không tách được tuyến tính, và ngay cả khi tách được, một điểm nhiễu nằm lẫn sang lớp kia có thể ép lề hẹp lại rất nhiều. SVM lề mềm (Cortes và Vapnik, 1995) cho phép vi phạm lề nhưng tính giá cho mỗi vi phạm.
 
-$$\min_{w,b,\xi}\;\tfrac12\|w\|^2 + C\sum_i \xi_i \qquad\text{với}\qquad y_i(w^\top x_i + b) \ge 1 - \xi_i,\quad \xi_i \ge 0.$$
+> **Định nghĩa 13.2 (SVM lề mềm).** Với các biến bù $\xi_i \ge 0$ và tham số $C > 0$:
+> $$\min_{w,b,\xi}\;\tfrac12\|w\|^2 + C\sum_{i=1}^n \xi_i \qquad\text{với}\qquad y_i(w^\top x_i + b) \ge 1 - \xi_i,\quad \xi_i \ge 0.$$
 
-Bài toán đối ngẫu gần như không đổi — chỉ thêm chặn trên $\alpha_i \le C$. Và KKT chia các điểm thành **đúng ba nhóm**:
+Biến bù $\xi_i$ đo mức vi phạm của điểm thứ $i$: $\xi_i = 0$ nếu điểm nằm ngoài lề và đúng phía, $0 < \xi_i \le 1$ nếu điểm nằm trong lề nhưng vẫn đúng phía, $\xi_i > 1$ nếu điểm bị phân loại sai. Tại nghiệm tối ưu, $\xi_i = \max(0, 1 - y_i(w^\top x_i + b))$, đúng bằng mất mát hinge ở Mục 6.1. Do đó bài toán tương đương với
 
-| $\alpha_i$ | Vị trí của điểm | Ảnh hưởng tới nghiệm |
+$$\min_{w,b}\; \tfrac12\|w\|^2 + C\sum_{i=1}^n \max\big(0,\ 1 - y_i(w^\top x_i + b)\big),$$
+
+tức **mất mát hinge cộng regularization $\ell_2$**. Cách viết này cho thấy SVM lề mềm nằm trong cùng khung với hồi quy logistic có regularization: cùng mô hình tuyến tính, cùng thành phần phạt $\|w\|^2$, khác nhau ở hàm mất mát. Tham số $C$ đóng vai trò nghịch đảo của hệ số regularization: $C$ lớn nghĩa là phạt vi phạm nặng, regularization yếu.
+
+Bài toán đối ngẫu của SVM lề mềm giống hệt Định lý 13.1, chỉ thêm chặn trên $\alpha_i \le C$. Điều kiện KKT chia các điểm dữ liệu thành ba nhóm:
+
+| Nhân tử $\alpha_i$ | Vị trí của điểm | Ảnh hưởng tới nghiệm |
 |---|---|---|
-| $\alpha_i = 0$ | nằm ngoài lề, đúng phía | không |
-| $0 < \alpha_i < C$ | nằm **đúng trên** lề | có |
-| $\alpha_i = C$ | vi phạm lề (lọt vào trong, hoặc sai phía) | có |
+| $\alpha_i = 0$ | ngoài lề, đúng phía ($y_i f(x_i) \ge 1$) | không |
+| $0 < \alpha_i < C$ | đúng trên lề ($y_i f(x_i) = 1$) | có |
+| $\alpha_i = C$ | vi phạm lề: trong lề hoặc sai phía ($y_i f(x_i) \le 1$) | có |
 
-Thí nghiệm trên hai lớp chồng lấn, đếm đúng ba nhóm ấy:
+Thí nghiệm trên hai lớp chồng lấn nhau, với năm giá trị $C$, đếm số điểm trong từng nhóm:
 
 ![Hình 9](figs/nt09_svm.png)
 
-**Hình 9.** Trái và giữa: cùng dữ liệu, hai giá trị $C$. Đường liền là biên, hai đường đứt là lề. Phải: nhân RBF trên dữ liệu hai vòng tròn đồng tâm.
+**Hình 9.** Trái và giữa: cùng một tập dữ liệu với hai giá trị $C$; đường liền là biên quyết định, hai đường đứt là hai mép lề. Phải: SVM với kernel RBF trên dữ liệu hai đường tròn đồng tâm.
 
-| $C$ | Lề $2/\|w\|$ | Số VTHT | Đúng trên lề | Vi phạm lề | Sai số huấn luyện | Sai số kiểm tra |
+| $C$ | Lề $2/\|w\|$ | Số vector hỗ trợ | Đúng trên lề | Vi phạm lề | Sai số huấn luyện | Sai số kiểm tra |
 |---|---|---|---|---|---|---|
 | 0,003 | 5,6121 | 114 | 0 | 114 | 0,1500 | 0,1795 |
-| 0,030 | 2,6409 | 66 | 3 | 63 | 0,1750 | **0,1727** |
+| 0,030 | 2,6409 | 66 | 3 | 63 | 0,1750 | 0,1727 |
 | 0,300 | 1,8286 | 48 | 3 | 45 | 0,1583 | 0,1790 |
 | 3,000 | 1,7312 | 45 | 3 | 42 | 0,1667 | 0,1795 |
 | 300,000 | 1,7311 | 45 | 3 | 42 | 0,1667 | 0,1795 |
 
-$C$ là nút điều chỉnh giữa hai mong muốn trái nhau:
+Với $C$ nhỏ, vi phạm rẻ nên lề rộng (5,61) và rất nhiều điểm vi phạm lề: ở $C = 0{,}003$, cả 114 vector hỗ trợ đều là điểm vi phạm, không điểm nào nằm đúng trên lề. Với $C$ lớn, vi phạm đắt nên lề hẹp lại (1,73) và số vector hỗ trợ giảm còn 45. Từ $C = 3$ trở lên nghiệm gần như không đổi, vì các điểm vi phạm còn lại là những điểm nằm sâu trong vùng chồng lấn, không siêu phẳng nào tránh được.
 
-- **$C$ nhỏ** — lề rộng (5,61), chịu nhiều vi phạm, mô hình đơn giản hơn. Ở $C = 0{,}003$ thì **cả 114 vector hỗ trợ đều là điểm vi phạm** và không điểm nào nằm đúng trên lề: lề rộng tới mức nuốt gần hết dữ liệu.
-- **$C$ lớn** — lề hẹp (1,73), cố ép từng điểm cho đúng.
+Sai số kiểm tra chỉ dao động trong khoảng 0,173 tới 0,180, tức $C$ ảnh hưởng ít tới chất lượng trong thí nghiệm này. Điều đó phản ánh bản chất của dữ liệu: biên tối ưu ở đây vốn là tuyến tính, và SVM tuyến tính không đủ linh hoạt để overfitting đáng kể. Với kernel phi tuyến, mô hình linh hoạt hơn nhiều, và $C$ trở thành siêu tham số quan trọng cần chọn bằng cross-validation.
 
-> **Một lưu ý trung thực về bảng này.** Sai số kiểm tra chỉ chênh nhau trong khoảng 0,173–0,180, tức $C$ ảnh hưởng **ít** ở đây. Đó không phải thiếu sót của thí nghiệm mà là một sự thật: với **nhân tuyến tính** trên dữ liệu mà biên tối ưu vốn dĩ tuyến tính, SVM không có mấy chỗ để quá khớp. $C$ trở nên quan trọng hơn nhiều khi dùng nhân phi tuyến, vì khi ấy mô hình đủ linh hoạt để bám nhiễu.
+### 13.5. Kernel
 
-### 13.5. Thủ thuật nhân
-
-Mục 13.3 đã nêu chỗ mấu chốt: bài toán đối ngẫu chỉ phụ thuộc dữ liệu qua **tích vô hướng** $x_i^\top x_j$. Nên nếu muốn làm việc trong một không gian đặc trưng $\varphi(x)$ nào đó, ta **không cần** tính $\varphi(x)$ — chỉ cần tính được
+Bài toán đối ngẫu ở Định lý 13.1 và bộ phân loại $f(x) = \sum_i \alpha_i y_i\, x_i^\top x + b$ chỉ dùng dữ liệu qua các tích vô hướng. Giả sử ta muốn biến đổi dữ liệu sang một không gian đặc trưng mới bằng ánh xạ $\varphi$, ví dụ thêm các đặc trưng bậc hai, rồi chạy SVM tuyến tính trong không gian mới. Ta chỉ cần tính được tích vô hướng trong không gian mới:
 
 $$K(x, x') = \varphi(x)^\top \varphi(x').$$
 
-| Nhân | Công thức | Không gian đặc trưng |
+Hàm $K$ gọi là **kernel**. Nếu $K$ tính được trực tiếp từ $x$ và $x'$ mà không cần tính $\varphi$, ta làm việc được trong không gian đặc trưng mà không bao giờ phải dựng nó. Kỹ thuật này gọi là **thủ thuật kernel** (kernel trick).
+
+> **Ví dụ 13.1.** Với $x \in \mathbb{R}^2$, xét $K(x, z) = (x^\top z)^2$. Khai triển:
+> $$(x_1 z_1 + x_2 z_2)^2 = x_1^2 z_1^2 + 2x_1x_2 z_1z_2 + x_2^2 z_2^2 = \varphi(x)^\top\varphi(z), \qquad \varphi(x) = \big(x_1^2,\ \sqrt2\,x_1x_2,\ x_2^2\big).$$
+> Tính $K$ trực tiếp tốn một tích vô hướng hai chiều và một phép bình phương. Chẳng hạn với $x = (1, 2)$ và $z = (3, -1)$: $x^\top z = 1$ nên $K(x, z) = 1$; còn $\varphi(x) = (1;\ 2\sqrt2;\ 4)$ và $\varphi(z) = (9;\ -3\sqrt2;\ 1)$ cho $\varphi(x)^\top\varphi(z) = 9 - 12 + 4 = 1$. Với $x \in \mathbb{R}^d$ và kernel đa thức bậc $p$, không gian đặc trưng có số chiều cỡ $d^p$, trong khi $K$ vẫn chỉ tốn $O(d)$.
+
+Không phải hàm hai biến nào cũng là một kernel. Điều kiện cần và đủ (định lý Mercer) là với mọi tập điểm $x_1, \dots, x_n$, **ma trận kernel** $[K(x_i, x_j)]_{i,j}$ đối xứng và nửa xác định dương. Điều kiện này bảo đảm bài toán đối ngẫu vẫn lồi.
+
+| Kernel | Công thức | Không gian đặc trưng |
 |---|---|---|
-| Tuyến tính | $x^\top x'$ | chính nó |
-| Đa thức bậc $p$ | $(\gamma x^\top x' + r)^p$ | mọi đơn thức bậc $\le p$ |
-| RBF (Gauss) | $\exp(-\gamma\|x - x'\|^2)$ | **vô hạn chiều** |
+| Tuyến tính | $x^\top x'$ | chính $\mathbb{R}^d$ |
+| Đa thức bậc $p$ | $(\gamma\, x^\top x' + r)^p$ | mọi đơn thức bậc không quá $p$ |
+| RBF (Gauss) | $\exp(-\gamma\|x - x'\|^2)$ | vô hạn chiều |
 
-Dòng cuối là chỗ thủ thuật này trở nên đáng kinh ngạc: ta làm việc trong không gian vô hạn chiều mà mỗi phép tính chỉ tốn $O(d)$.
+Kernel RBF cho giá trị gần 1 khi hai điểm gần nhau và gần 0 khi chúng xa nhau, nên có thể hiểu nó như một thước đo độ giống nhau. Tham số $\gamma$ quyết định "gần" là bao xa: $\gamma$ lớn làm mỗi điểm chỉ ảnh hưởng một vùng rất nhỏ quanh nó, biên quyết định uốn lượn theo từng điểm và dễ overfitting; $\gamma$ nhỏ làm biên trơn. Không gian đặc trưng của kernel RBF có vô hạn chiều, nhưng mỗi lần tính kernel chỉ tốn $O(d)$.
 
-Thí nghiệm trên hai vòng tròn đồng tâm — bài toán không thể tách tuyến tính:
+Thí nghiệm trên dữ liệu hai đường tròn đồng tâm, loại dữ liệu không tách được bằng bất kỳ đường thẳng nào:
 
-| Nhân | Độ chính xác |
+| Kernel | Độ chính xác |
 |---|---|
 | Tuyến tính | 0,6150 |
-| Đa thức bậc 2 | **1,0000** |
-| RBF | **1,0000** |
+| Đa thức bậc 2 | 1,0000 |
+| RBF | 1,0000 |
 
-Nhân đa thức bậc 2 đạt 100% là điều đoán trước được: không gian đặc trưng của nó chứa $x_1^2 + x_2^2$, mà đó đúng là đại lượng phân biệt hai vòng tròn. Đây là minh hoạ sạch cho ý "chọn nhân là phát biểu một giả thiết về dữ liệu".
+Kernel đa thức bậc 2 đạt độ chính xác tuyệt đối vì không gian đặc trưng của nó chứa $x_1^2$ và $x_2^2$, nên chứa $x_1^2 + x_2^2$, bình phương khoảng cách tới tâm, đúng là đại lượng phân biệt hai đường tròn. Ví dụ này minh hoạ một nguyên tắc chung: chọn kernel là đưa vào mô hình một giả thiết về dạng của biên quyết định.
 
-### 13.6. SVM nhiều lớp, và giới hạn thực tế
+### 13.6. SVM nhiều lớp và chi phí tính toán
 
-SVM sinh ra cho hai lớp. Ba cách mở rộng:
+SVM được thiết kế cho hai lớp. Có ba cách mở rộng sang $K$ lớp:
 
 | Cách | Số mô hình | Ghi chú |
 |---|---|---|
-| Một–chọi–tất cả | $K$ | rẻ; điểm số giữa các mô hình không cùng thang đo |
-| Một–chọi–một | $K(K-1)/2$ | mỗi mô hình nhỏ hơn nhiều; là mặc định của libsvm |
-| Crammer–Singer | 1 | một bài toán duy nhất; đẹp về lý thuyết, ít dùng |
+| Một chọi phần còn lại (one-vs-rest) | $K$ | đơn giản; điểm số của các mô hình không cùng thang đo |
+| Một chọi một (one-vs-one) | $K(K-1)/2$ | mỗi mô hình chỉ học trên dữ liệu hai lớp; cách mặc định của libsvm |
+| Crammer–Singer | 1 | một bài toán tối ưu chung cho mọi lớp; ít dùng hơn |
 
-**Vì sao SVM ít được dùng ở quy mô lớn ngày nay.** Không phải vì nó kém chính xác. Lý do là chi phí: huấn luyện SVM nhân tốn khoảng $O(n^2)$ tới $O(n^3)$, và khi **suy luận** phải tính $K(x, x_i)$ với mọi vector hỗ trợ — mà số vector hỗ trợ thường tăng tuyến tính theo $n$. Với $n$ cỡ triệu thì cả hai đều không chấp nhận được, trong khi xuống dốc ngẫu nhiên trên mạng nơ-ron chỉ tốn $O(n)$ mỗi vòng.
+**Chi phí tính toán.** Huấn luyện SVM với kernel cần làm việc với ma trận kernel $n \times n$, và các thuật toán thực tế như SMO có chi phí trong khoảng $O(n^2)$ tới $O(n^3)$ tuỳ dữ liệu. Khi dự đoán, phải tính kernel giữa điểm mới và mọi vector hỗ trợ, mà số vector hỗ trợ thường tăng tuyến tính theo $n$ khi dữ liệu chồng lấn. Với $n$ cỡ hàng triệu, cả hai chi phí đều quá lớn, trong khi mỗi epoch của SGD trên mạng nơ-ron chỉ tốn chi phí tuyến tính theo $n$. Đây là lý do chính SVM với kernel ít được dùng cho dữ liệu rất lớn, không phải vì độ chính xác kém.
 
-> **SVM vẫn là lựa chọn tốt khi:** $n$ vừa phải (dưới vài chục nghìn), $d$ lớn so với $n$, và ta cần một mô hình mạnh mà không muốn chỉnh nhiều siêu tham số. Trên dữ liệu văn bản đã vector hoá thì SVM tuyến tính tới nay vẫn là một chuẩn mực khó vượt.
-
+> **Nhận xét.** SVM vẫn là lựa chọn tốt khi số điểm dữ liệu vừa phải (tới vài chục nghìn), số đặc trưng lớn so với số điểm, và cần một mô hình mạnh với ít siêu tham số. Với dữ liệu văn bản biểu diễn bằng vector TF-IDF, SVM tuyến tính đến nay vẫn là một mô hình cơ sở rất khó vượt qua.
 ---
 
-## 14. Giảm chiều: PCA, SVD và LDA
+## 14. Giảm chiều dữ liệu
 
-### 14.1. Ba lý do giảm chiều
+Chương này trình bày phân tích thành phần chính (PCA), phương pháp giảm chiều tuyến tính phổ biến nhất, cùng định lý Eckart–Young cho biết PCA tối ưu theo nghĩa nào. Phần cuối chương chỉ ra điểm yếu của PCA khi dữ liệu có nhãn và trình bày LDA, phương pháp giảm chiều có dùng nhãn.
 
-1. **Tính toán** — thuật toán chạy nhanh hơn ở ít chiều hơn.
-2. **Thống kê** — số chiều ít đi thì phương sai ước lượng nhỏ đi; đây là phạt chuẩn ở dạng khác.
-3. **Con người** — không ai nhìn được 100 chiều, nhưng ai cũng nhìn được 2.
+### 14.1. Mục đích của giảm chiều
 
-Và một lý do ngầm quan trọng hơn cả ba: **lời nguyền số chiều** ở Mục 7.2. Khoảng cách mất ý nghĩa ở chiều cao, nên mọi phương pháp dựa trên khoảng cách đều cần giảm chiều trước.
+Giảm chiều là biến đổi dữ liệu từ $d$ chiều xuống $k < d$ chiều mà giữ lại càng nhiều thông tin hữu ích càng tốt. Có ba lý do để làm việc này:
 
-### 14.2. PCA: tìm hướng phương sai lớn nhất
+1. **Tính toán.** Thuật toán chạy nhanh hơn và tốn ít bộ nhớ hơn trên dữ liệu ít chiều.
+2. **Thống kê.** Ít chiều hơn nghĩa là ít tham số hơn cho mô hình phía sau, nên phương sai của ước lượng nhỏ hơn. Theo nghĩa này, giảm chiều là một dạng regularization.
+3. **Trực quan hoá.** Con người không nhìn được dữ liệu 100 chiều, nhưng nhìn được hình chiếu của nó lên mặt phẳng hai chiều.
 
-Cho dữ liệu đã trừ trung bình $X_c$, PCA tìm hướng đơn vị $v$ làm phương sai của phép chiếu lớn nhất:
+Ngoài ra, lời nguyền số chiều ở Mục 7.2 khiến khoảng cách mất dần ý nghĩa khi số chiều tăng, nên các phương pháp dựa trên khoảng cách như k-NN và K-means thường cần giảm chiều trước.
 
-$$\max_{\|v\|=1} \; v^\top \Sigma v, \qquad \Sigma = \frac{1}{n-1}X_c^\top X_c.$$
+### 14.2. Phân tích thành phần chính (PCA)
 
-Lập Lagrange với ràng buộc $\|v\|^2 = 1$ rồi cho đạo hàm bằng 0:
+PCA (Pearson, 1901) tìm các hướng mà dữ liệu trải rộng nhất. Hình dung một đám mây điểm có dạng hình elip dẹt trong mặt phẳng: trục dài của elip là hướng giữ được nhiều thông tin nhất về vị trí các điểm, và chiếu mọi điểm lên trục đó mất ít thông tin nhất.
 
-$$\Sigma v = \lambda v.$$
+Gọi $X_c$ là ma trận dữ liệu đã trừ trung bình của từng cột, và $\Sigma = \frac{1}{n-1}X_c^\top X_c$ là ma trận hiệp phương sai mẫu (Mục 3.3). Chiếu dữ liệu lên hướng đơn vị $v$ cho các toạ độ $X_c v$, có phương sai $v^\top \Sigma v$. PCA tìm hướng làm phương sai này lớn nhất:
 
-Tức **nghiệm chính là vector riêng của $\Sigma$**, và phương sai đạt được bằng đúng trị riêng $\lambda$. Các trục tiếp theo là các vector riêng tiếp theo, trực giao với các trục trước. Toàn bộ PCA nằm trong ba dòng này.
+$$\max_{v} \; v^\top \Sigma v \qquad \text{với} \qquad \|v\|_2 = 1.$$
 
-**Hai đường tính, một kết quả.** Có thể tính PCA bằng phân rã phổ của $\Sigma$, hoặc bằng SVD của $X_c$ trực tiếp:
+Ràng buộc $\|v\| = 1$ là cần thiết, vì không có nó thì nhân $v$ với số lớn làm phương sai lớn tuỳ ý. Lập hàm Lagrange $v^\top\Sigma v - \lambda(v^\top v - 1)$ và cho gradient theo $v$ bằng 0:
+
+$$2\Sigma v - 2\lambda v = 0 \;\Longleftrightarrow\; \Sigma v = \lambda v.$$
+
+Vậy hướng tối ưu là một vector riêng của $\Sigma$, và phương sai đạt được $v^\top \Sigma v = \lambda v^\top v = \lambda$ đúng bằng trị riêng tương ứng. Để phương sai lớn nhất, chọn vector riêng ứng với trị riêng lớn nhất.
+
+> **Định nghĩa 14.1 (Thành phần chính).** Gọi $\lambda_1 \ge \lambda_2 \ge \dots \ge \lambda_d \ge 0$ là các trị riêng của ma trận hiệp phương sai $\Sigma$ và $v_1, \dots, v_d$ là các vector riêng trực chuẩn tương ứng. Vector $v_j$ gọi là **thành phần chính** (principal component) thứ $j$. PCA với $k$ thành phần biểu diễn mỗi điểm $x$ bằng $k$ toạ độ $z_j = v_j^\top(x - \bar x)$, $j = 1, \dots, k$.
+
+Thành phần thứ hai là hướng có phương sai lớn nhất trong các hướng vuông góc với thành phần thứ nhất, và cứ tiếp tục như vậy. Theo định lý phổ, các vector riêng của ma trận đối xứng $\Sigma$ trực giao với nhau, nên các thành phần chính tự động vuông góc, và các toạ độ $z_j$ không tương quan với nhau. Tỉ lệ $\lambda_j/\sum_i \lambda_i$ gọi là **tỉ lệ phương sai được giải thích** bởi thành phần thứ $j$.
+
+**Hai cách tính.** Có thể tính PCA bằng phân tích trị riêng của $\Sigma$, hoặc bằng SVD của $X_c$: theo Mục 2.6, các vector riêng của $X_c^\top X_c$ là các cột của $V$ và trị riêng của $\Sigma$ là $d_i^2/(n-1)$. Thí nghiệm tính theo cả hai cách trên dữ liệu 8 chiều (bốn trị riêng đầu được in ra):
 
 ```text
 tri rieng cua ma tran hiep phuong sai : [11.52671  4.855133  2.064187  0.142466]
@@ -1260,37 +1644,37 @@ lech lon nhat tren ca 8 tri: 7.105e-15
 goc giua cac truc chinh: [1. 1. 1. 1.]
 ```
 
-Khớp tới $7{,}1\times10^{-15}$. Trên thực tế **luôn dùng đường SVD**, vì nó tránh phải lập $X_c^\top X_c$ — thứ bình phương số điều kiện (Mục 2.6).
+Hai cách cho cùng trị riêng tới $7{,}1\times10^{-15}$, và các trục chính trùng nhau (trị tuyệt đối cosine giữa các cặp trục tương ứng bằng 1, vì vector riêng chỉ xác định tới dấu). Trên thực tế nên dùng SVD của $X_c$, vì cách này không cần lập $X_c^\top X_c$, phép toán làm bình phương số điều kiện (Mục 2.6).
 
-### 14.3. Định lý Eckart–Young: sai số bằng đúng tổng trị riêng bị bỏ
+> **Lưu ý (Chuẩn hoá trước PCA).** PCA tìm hướng có phương sai lớn, nên kết quả phụ thuộc vào đơn vị đo. Nếu một đặc trưng đo bằng milimét và các đặc trưng khác đo bằng mét, phương sai của đặc trưng đó lớn hơn một triệu lần và thành phần chính thứ nhất gần như trùng với nó. Khi các đặc trưng có đơn vị khác nhau, cần chuẩn hoá mỗi đặc trưng về phương sai bằng 1 trước khi áp dụng PCA.
 
-Đây là kết quả đẹp nhất của chương, và nó đúng **chính xác**, không phải xấp xỉ.
+### 14.3. Định lý Eckart–Young và sai số tái tạo
 
-Giữ $k$ thành phần đầu rồi tái dựng, sai số Frobenius bằng đúng tổng các trị riêng bị vứt, nhân $(n-1)$:
+Từ $k$ toạ độ $z_1, \dots, z_k$ có thể dựng lại gần đúng điểm ban đầu: $\hat x = \bar x + \sum_{j=1}^k z_j v_j$. Câu hỏi tự nhiên là dựng lại được chính xác tới đâu.
 
-$$\|X_c - X_k\|_F^2 = (n-1)\sum_{i > k}\lambda_i.$$
+> **Định lý 14.1 (Eckart–Young, 1936).** Gọi $X_k$ là ma trận tái tạo từ $k$ thành phần chính đầu tiên. Khi đó
+> $$\|X_c - X_k\|_F^2 = (n-1)\sum_{i > k}\lambda_i,$$
+> và $X_k$ là ma trận hạng $k$ gần $X_c$ nhất theo chuẩn Frobenius: không có ma trận hạng $k$ nào cho sai số nhỏ hơn.
+
+Vế phải của đẳng thức là tổng các trị riêng bị bỏ đi, nhân với $n - 1$. Vậy sai số tái tạo bằng đúng phần phương sai không được giữ lại. Đây là đẳng thức chính xác, không phải xấp xỉ. Thí nghiệm dùng 300 điểm 8 chiều sinh từ 3 thành phần thật cộng nhiễu:
 
 ![Hình 10](figs/nt10_pca.png)
 
-**Hình 10.** Trái: phương sai từng trục và luỹ kế. Phải: một trường hợp PCA chọn đúng hướng vô dụng cho phân loại.
+**Hình 10.** Trái: phương sai giải thích bởi từng thành phần chính và phương sai tích luỹ. Phải: một tập dữ liệu mà thành phần chính thứ nhất vô dụng cho việc phân loại.
 
-| $k$ | $\|X_c - X_k\|_F^2$ | $(n-1)\sum_{i>k}\lambda_i$ | Lệch | % phương sai giữ |
+| $k$ | $\|X_c - X_k\|_F^2$ | $(n-1)\sum_{i>k}\lambda_i$ | Chênh lệch | Phương sai giữ lại |
 |---|---|---|---|---|
-| 1 | 2242,010603 | 2242,010603 | $9{,}1\times10^{-13}$ | 60,59 |
-| 2 | 790,325815 | 790,325815 | $4{,}6\times10^{-13}$ | 86,11 |
-| 3 | 173,133807 | 173,133807 | $6{,}3\times10^{-13}$ | **96,96** |
-| 4 | 130,536554 | 130,536554 | $4{,}3\times10^{-13}$ | 97,71 |
-| 8 | 0,000000 | 0,000000 | $3{,}6\times10^{-27}$ | 100,00 |
+| 1 | 2242,010603 | 2242,010603 | $9{,}1\times10^{-13}$ | 60,59% |
+| 2 | 790,325815 | 790,325815 | $4{,}6\times10^{-13}$ | 86,11% |
+| 3 | 173,133807 | 173,133807 | $6{,}3\times10^{-13}$ | 96,96% |
+| 4 | 130,536554 | 130,536554 | $4{,}3\times10^{-13}$ | 97,71% |
+| 8 | 0,000000 | 0,000000 | $3{,}6\times10^{-27}$ | 100,00% |
 
-Dữ liệu được sinh từ 3 thành phần thật cộng nhiễu, và đúng là $k=3$ giữ được 96,96% phương sai — bước nhảy từ 86,11% lên 96,96% rồi chỉ nhích lên 97,71% chính là dấu hiệu nhận ra số chiều thật.
+Hai cột giữa trùng nhau tới $10^{-12}$ ở mọi $k$. Cột cuối cho thấy cách chọn $k$: phương sai giữ lại tăng nhanh tới $k = 3$ (96,96%) rồi gần như dừng lại (97,71% ở $k = 4$). Chỗ đồ thị phương sai tích luỹ gãy gập là dấu hiệu của số chiều thật của dữ liệu, và ở đây nó khớp với 3 thành phần đã dùng để sinh dữ liệu. Một quy tắc thường dùng khác là chọn $k$ nhỏ nhất giữ được một tỉ lệ cho trước, như 90% hoặc 95%, phương sai.
 
-Định lý này nói thêm một điều mạnh hơn: trong **mọi** xấp xỉ hạng $k$ có thể có, PCA là cái tốt nhất theo chuẩn Frobenius. Không có phép chiếu tuyến tính nào làm tốt hơn.
+### 14.4. Hạn chế của PCA và phân tích biệt thức tuyến tính (LDA)
 
-### 14.4. Khi PCA làm hỏng việc — và LDA
-
-PCA có một điểm mù lớn: **nó không nhìn nhãn**. Nó tối đa hoá phương sai, và phương sai lớn không đồng nghĩa có ích.
-
-Thí nghiệm dựng dữ liệu có một hướng nhiễu biên độ lớn và một hướng tín hiệu biên độ nhỏ:
+PCA không dùng nhãn. Nó tìm hướng có phương sai lớn, nhưng phương sai lớn không có nghĩa là hữu ích cho bài toán phân loại. Thí nghiệm dựng dữ liệu hai lớp có một hướng nhiễu biên độ lớn (hai lớp trộn lẫn theo hướng này) và một hướng tín hiệu biên độ nhỏ (hai lớp tách nhau theo hướng này):
 
 ```text
 truc chinh thu nhat cua PCA: [-1.  0.0067]   (giu 96.1% phuong sai)
@@ -1299,178 +1683,187 @@ AUC khi chieu len truc PCA : 0.5020
 AUC khi chieu len huong LDA: 0.9987
 ```
 
-PCA giữ 96,1% phương sai mà **AUC chỉ 0,5020** — tức hoàn toàn vô dụng cho phân loại, không hơn đoán bừa. LDA chọn hướng gần như vuông góc với nó và đạt AUC 0,9987.
+Thành phần chính thứ nhất giữ 96,1% phương sai, nhưng chiếu dữ liệu lên nó cho ROC-AUC 0,502, không tốt hơn đoán ngẫu nhiên. Hướng do LDA chọn gần như vuông góc với trục đó và cho AUC 0,9987.
 
-**LDA** sửa đúng điểm mù ấy bằng cách tối đa hoá tỉ số giữa độ tách giữa các lớp và độ tản bên trong lớp:
+**Phân tích biệt thức tuyến tính** (linear discriminant analysis, LDA; Fisher, 1936) dùng nhãn để tìm hướng tách các lớp tốt nhất. Với hai lớp, gọi $\mu_0, \mu_1$ là trung bình của mỗi lớp, $S_W$ là **ma trận tán xạ trong lớp** (tổng các ma trận hiệp phương sai của hai lớp) và $S_B = (\mu_1 - \mu_0)(\mu_1 - \mu_0)^\top$ là **ma trận tán xạ giữa các lớp**. Chiếu dữ liệu lên hướng $w$, LDA muốn khoảng cách giữa trung bình hai lớp lớn trong khi độ phân tán bên trong mỗi lớp nhỏ:
 
-$$\max_w \;\frac{w^\top S_B\, w}{w^\top S_W\, w} \;\Longrightarrow\; w \propto S_W^{-1}(\mu_1 - \mu_0),$$
+$$\max_w \;J(w) = \frac{w^\top S_B\, w}{w^\top S_W\, w} \;\Longrightarrow\; w \propto S_W^{-1}(\mu_1 - \mu_0).$$
 
-với $S_W$ là ma trận tản trong lớp và $S_B$ giữa các lớp.
+Công thức nghiệm có cách hiểu trực quan: hướng nối hai trung bình $\mu_1 - \mu_0$ là lựa chọn tự nhiên, nhưng cần "chỉnh" lại bằng $S_W^{-1}$ để giảm trọng số của những hướng có phân tán trong lớp lớn. Trong thí nghiệm, hướng nhiễu có phân tán trong lớp lớn nên bị giảm trọng số gần như hoàn toàn.
 
 | | PCA | LDA |
 |---|---|---|
-| Dùng nhãn | không | **có** |
-| Tối đa hoá | phương sai toàn phần | tỉ số tách giữa lớp / tản trong lớp |
+| Dùng nhãn | không | có |
+| Tối đa hoá | phương sai toàn phần | tỉ số tán xạ giữa lớp / tán xạ trong lớp |
 | Số chiều ra tối đa | $d$ | $K - 1$ |
 | Dùng khi | nén, khử nhiễu, trực quan hoá | tiền xử lý cho phân loại |
 
-Giới hạn $K-1$ chiều của LDA là hệ quả trực tiếp: $S_B$ dựng từ $K$ vector trung bình quanh trung bình chung nên chỉ có hạng $K-1$. Với bài toán hai lớp, LDA cho đúng **một** chiều.
+Giới hạn $K - 1$ chiều của LDA đến từ hạng của $S_B$: với $K$ lớp, $S_B$ được dựng từ $K$ vector trung bình lệch khỏi trung bình chung, và các vector này có tổng (có trọng số) bằng 0, nên $S_B$ có hạng không quá $K - 1$. Với hai lớp, LDA cho đúng một chiều.
 
-Và như Mục 7.4 đã cho thấy, LDA ở đây **chính là** bộ phân lớp Gauss dùng chung ma trận hiệp phương sai — hai cách phát biểu, một thuật toán.
+LDA ở đây và bộ phân loại LDA ở Mục 7.4 là cùng một phương pháp nhìn từ hai phía: hướng $w \propto S_W^{-1}(\mu_1 - \mu_0)$ chính là vector trọng số $\Sigma^{-1}(\mu_1 - \mu_0)$ trong hàm phân biệt tuyến tính của bộ phân loại Gauss dùng chung ma trận hiệp phương sai.
 
-> **Quy tắc dùng.** Không có nhãn, hoặc muốn nén/khử nhiễu → PCA. Có nhãn và mục tiêu cuối là phân loại → thử LDA trước. Cần cấu trúc phi tuyến → PCA nhân hoặc t-SNE/UMAP để trực quan hoá (nhưng **không** dùng t-SNE làm bước tiền xử lý cho mô hình, vì nó không cho phép ánh xạ điểm mới).
+> **Nhận xét (Chọn phương pháp giảm chiều).** Không có nhãn, hoặc mục đích là nén và khử nhiễu: dùng PCA. Có nhãn và mục đích cuối là phân loại: thử LDA. Cần giữ cấu trúc phi tuyến: có PCA với kernel (cùng thủ thuật kernel ở Mục 13.5), và t-SNE hoặc UMAP để trực quan hoá. t-SNE không cung cấp ánh xạ cho điểm dữ liệu mới và làm biến dạng khoảng cách toàn cục, nên chỉ dùng để quan sát, không dùng làm bước tiền xử lý cho mô hình.
 
 ---
 
-## 15. Phân cụm: K-means
+## 15. Phân cụm K-means
 
-### 15.1. Bài toán và thuật toán
+Phân cụm là bài toán học không giám sát điển hình: chia dữ liệu không có nhãn thành các nhóm sao cho điểm trong cùng nhóm giống nhau hơn điểm khác nhóm. Chương này trình bày K-means, thuật toán phân cụm phổ biến nhất, cùng ba vấn đề thực tế của nó: phụ thuộc vào khởi tạo, giả định ngầm về hình dạng cụm, và cách chọn số cụm.
 
-Không có nhãn, chỉ có $X$. Chia $n$ điểm thành $k$ cụm sao cho tổng bình phương khoảng cách tới tâm cụm nhỏ nhất:
+### 15.1. Bài toán phân cụm và thuật toán Lloyd
 
-$$\min_{S, \mu}\;\sum_{j=1}^{k}\sum_{x \in S_j}\|x - \mu_j\|^2.$$
+> **Định nghĩa 15.1 (Bài toán K-means).** Cho $n$ điểm $x_1, \dots, x_n \in \mathbb{R}^d$ và số cụm $k$. Tìm cách chia các điểm thành $k$ cụm $S_1, \dots, S_k$ cùng các tâm cụm $\mu_1, \dots, \mu_k$ để cực tiểu tổng bình phương khoảng cách từ mỗi điểm tới tâm cụm của nó:
+> $$\min_{S, \mu}\;\sum_{j=1}^{k}\sum_{x \in S_j}\|x - \mu_j\|^2.$$
+> Giá trị của hàm mục tiêu tại một nghiệm gọi là **inertia** (tổng bình phương trong cụm).
 
-Bài toán này **NP-khó**. Thuật toán Lloyd giải xấp xỉ bằng cách lặp hai bước:
+Tìm nghiệm tối ưu toàn cục của bài toán này là NP-khó, kể cả khi $k = 2$ (với số chiều tuỳ ý) hoặc khi dữ liệu nằm trong mặt phẳng (với $k$ tuỳ ý). Thuật toán thông dụng, thuật toán Lloyd (1957, công bố 1982), tìm nghiệm xấp xỉ bằng cách lặp hai bước:
 
-1. **Gán:** mỗi điểm về tâm gần nhất.
-2. **Cập nhật:** mỗi tâm thành trung bình các điểm thuộc về nó.
+1. **Bước gán:** mỗi điểm được gán vào cụm có tâm gần nó nhất.
+2. **Bước cập nhật:** mỗi tâm được thay bằng trung bình của các điểm thuộc cụm đó.
 
-Cả hai bước đều **không làm tăng** hàm mục tiêu, và số cách phân hoạch là hữu hạn, nên thuật toán chắc chắn dừng. Nhưng nó chỉ dừng ở **cực tiểu địa phương** — đây là hệ quả trực tiếp của Chương 11: hàm mục tiêu không lồi theo $(S,\mu)$.
+Lặp cho tới khi các phép gán không thay đổi. Mỗi bước tối ưu một phần của bài toán khi giữ phần kia cố định: bước gán chọn cụm tốt nhất cho từng điểm khi biết tâm, bước cập nhật chọn tâm tốt nhất cho từng cụm khi biết các điểm (trung bình là điểm làm tổng bình phương khoảng cách nhỏ nhất). Vì vậy hàm mục tiêu không bao giờ tăng. Số cách chia $n$ điểm thành $k$ cụm là hữu hạn, nên thuật toán chắc chắn dừng sau hữu hạn bước. Mỗi vòng lặp tốn $O(nkd)$ phép tính.
 
-### 15.2. Khởi tạo quyết định kết quả
+Tuy nhiên, thuật toán chỉ dừng ở một **cực tiểu địa phương**: một trạng thái mà không bước nào cải thiện được, nhưng chưa chắc tốt nhất. Hàm mục tiêu không lồi theo $(S, \mu)$, nên theo Chương 11 không có bảo đảm nào về chất lượng của điểm dừng.
 
-Thí nghiệm chạy 200 lần trên dữ liệu 8 cụm, mỗi lần một hạt giống khác:
+### 15.2. Khởi tạo và k-means++
 
-| Cách khởi tạo | Quán tính nhỏ nhất | Trung bình | % lần kẹt ở nghiệm tồi |
+Điểm dừng của thuật toán Lloyd phụ thuộc vào các tâm ban đầu. Thí nghiệm chạy K-means 200 lần trên dữ liệu 720 điểm gồm 8 cụm, trong đó một số cụm nằm gần nhau, mỗi lần với một hạt giống ngẫu nhiên khác. Một lần chạy được tính là "kẹt ở nghiệm tồi" nếu inertia lớn hơn giá trị nhỏ nhất tìm được trong mọi lần chạy quá 2%:
+
+| Cách khởi tạo | Inertia nhỏ nhất | Inertia trung bình | Tỉ lệ kẹt ở nghiệm tồi |
 |---|---|---|---|
-| Ngẫu nhiên thuần | 407,992 | 517,838 | **71,5** |
-| k-means++ | 407,992 | 476,529 | **46,5** |
+| Ngẫu nhiên | 407,992 | 517,838 | 71,5% |
+| k-means++ | 407,992 | 476,529 | 46,5% |
 
-Khởi tạo ngẫu nhiên thuần kẹt ở nghiệm tồi **71,5% số lần**. Con số ấy nói rằng chạy K-means đúng một lần rồi tin kết quả là sai lầm nghiêm trọng.
+Chọn ngẫu nhiên $k$ điểm dữ liệu làm tâm ban đầu dẫn tới nghiệm tồi trong 71,5% số lần chạy. Nghiệm tồi điển hình là hai tâm rơi vào cùng một cụm thật trong khi hai cụm thật khác bị gộp chung một tâm; thuật toán Lloyd không sửa được tình huống này vì mỗi bước chỉ dịch chuyển tâm một cách cục bộ.
 
-**k-means++** chọn các tâm ban đầu tuần tự, mỗi tâm mới được rút với xác suất tỉ lệ $d^2$ tới tâm gần nhất đã chọn — tức ưu tiên những chỗ xa. Nó hạ tỉ lệ kẹt xuống 46,5%, tức cải thiện rõ nhưng **không** giải quyết triệt để.
+**k-means++** (Arthur và Vassilvitskii, 2007) chọn tâm ban đầu tuần tự: tâm đầu tiên chọn ngẫu nhiên đều từ dữ liệu, mỗi tâm tiếp theo được chọn với xác suất tỉ lệ với bình phương khoảng cách từ điểm đó tới tâm gần nhất đã chọn. Các điểm xa những tâm hiện có được ưu tiên, nên các tâm ban đầu có xu hướng trải đều ra các cụm. Arthur và Vassilvitskii chứng minh rằng riêng bước khởi tạo này đã cho kỳ vọng inertia không quá $O(\log k)$ lần giá trị tối ưu. Trong thí nghiệm, k-means++ giảm tỉ lệ kẹt từ 71,5% xuống 46,5%: cải thiện rõ, nhưng vẫn gần một nửa số lần chạy cho nghiệm tồi.
 
-> **Hệ quả thực tế.** Luôn chạy nhiều lần rồi giữ kết quả có quán tính nhỏ nhất. `sklearn.cluster.KMeans` mặc định `n_init=10` và `init='k-means++'` đúng vì lý do này.
+> **Lưu ý.** Luôn chạy K-means nhiều lần với các khởi tạo khác nhau và giữ kết quả có inertia nhỏ nhất. Trong scikit-learn từ phiên bản 1.4, tham số `n_init` của `KMeans` mặc định là `'auto'`, nghĩa là chỉ chạy **một lần** khi dùng khởi tạo k-means++. Với dữ liệu như thí nghiệm trên, cần đặt `n_init` tường minh, ví dụ `n_init=10`.
 
-### 15.3. K-means giả định gì
+### 15.3. Các giả định của K-means
 
 ![Hình 11](figs/nt11_kmeans.png)
 
-**Hình 11.** Cùng một thuật toán trên ba hình dạng dữ liệu. Nó chỉ làm tốt ở hình đầu.
+**Hình 11.** Cùng thuật toán K-means trên ba dạng dữ liệu. Chỉ dạng thứ nhất được phân cụm đúng.
 
-| Hình dạng cụm | Độ chính xác gom cụm |
+| Dạng cụm | Độ chính xác phân cụm |
 |---|---|
-| Ba cụm tròn, tách rời | **1,0000** |
+| Ba cụm tròn, tách rời | 1,0000 |
 | Hai hình lưỡi liềm lồng nhau | 0,7517 |
-| Hai dải dẹt nằm ngang | **0,5317** |
+| Hai dải dẹt nằm ngang song song | 0,5317 |
 
-Dòng cuối gần như bằng đoán bừa (0,5) — K-means thất bại hoàn toàn.
+Độ chính xác phân cụm ở đây được tính sau khi thử mọi cách ghép nhãn cụm với nhãn thật và lấy cách tốt nhất, vì tên cụm do K-means đặt là tuỳ ý. Với hai dải dẹt, độ chính xác 0,5317 gần như bằng đoán ngẫu nhiên (0,5).
 
-**Vì sao?** Vì nó gán mỗi điểm cho tâm **gần nhất theo khoảng cách Euclid**, nên biên giữa hai cụm bất kỳ luôn là một **siêu phẳng** — chính xác là mặt trung trực của đoạn nối hai tâm. Ba giả định ngầm theo sau:
+Nguyên nhân nằm ở bước gán: mỗi điểm thuộc về tâm gần nhất theo khoảng cách Euclid, nên biên giới giữa hai cụm luôn là mặt phẳng trung trực của đoạn nối hai tâm. Toàn bộ không gian bị chia thành các ô lồi (sơ đồ Voronoi). Từ đó suy ra ba giả định ngầm của K-means:
 
-1. Cụm có dạng **lồi và gần hình cầu**.
-2. Các cụm có **kích thước tương đương**.
-3. Mọi chiều **cùng thang đo** — nếu không thì khoảng cách Euclid vô nghĩa.
+1. Các cụm có dạng **lồi và gần tròn**.
+2. Các cụm có **kích thước tương đương** nhau.
+3. Mọi chiều có **cùng thang đo**, để khoảng cách Euclid có ý nghĩa.
 
-Hai dải dẹt vi phạm giả định 1: cụm đúng bị kéo dài theo chiều ngang, nên mặt phẳng chia tối ưu theo Euclid lại cắt ngang chúng thay vì tách chúng.
+Hai dải dẹt vi phạm giả định thứ nhất. Mỗi dải dài theo phương ngang và hẹp theo phương dọc; hai dải cách nhau theo phương dọc một khoảng nhỏ hơn chiều dài của chúng. Cách chia có inertia nhỏ nhất vì vậy là cắt đôi theo phương thẳng đứng, mỗi cụm lấy nửa trái hoặc nửa phải của cả hai dải, thay vì tách hai dải ra.
 
-Khi các giả định ấy sai, có lựa chọn khác: **mô hình hỗn hợp Gauss** cho phép cụm hình elip; **DBSCAN** cho phép cụm hình dạng tuỳ ý và tự xác định số cụm; **phân cụm phổ** biến đổi không gian trước rồi mới dùng K-means.
+Khi các giả định trên không thoả, có các phương pháp khác. **Mô hình hỗn hợp Gauss** (Gaussian mixture model) cho phép mỗi cụm có dạng elip với ma trận hiệp phương sai riêng, và K-means là trường hợp giới hạn của nó khi mọi cụm có hiệp phương sai $\sigma^2 I$ với $\sigma \to 0$. **DBSCAN** gom các điểm theo mật độ, cho phép cụm có hình dạng tuỳ ý và tự xác định số cụm. **Phân cụm phổ** (spectral clustering) biến đổi dữ liệu dựa trên đồ thị láng giềng rồi mới áp dụng K-means, và xử lý tốt dữ liệu hình lưỡi liềm.
 
-### 15.4. Chọn $k$
+### 15.4. Chọn số cụm
 
-Hàm mục tiêu **luôn giảm** khi $k$ tăng — với $k = n$ thì quán tính bằng 0. Nên không thể chọn $k$ bằng cách tối thiểu hoá nó.
+Inertia luôn giảm khi $k$ tăng, và bằng 0 khi $k = n$ (mỗi điểm là một cụm). Vì vậy không thể chọn $k$ bằng cách cực tiểu inertia. Bảng sau cho inertia tốt nhất trong 8 lần chạy k-means++ ở mỗi $k$, trên dữ liệu 8 cụm của Mục 15.2:
 
-| $k$ | Quán tính | Giảm so với $k-1$ |
+| $k$ | Inertia | Giảm so với $k - 1$ |
 |---|---|---|
 | 5 | 902,24 | 21,6% |
 | 6 | 727,79 | 19,3% |
 | 7 | 563,93 | 22,5% |
-| **8** | **407,99** | **27,7%** |
-| 9 | 385,82 | **5,4%** |
+| 8 | 407,99 | 27,7% |
+| 9 | 385,82 | 5,4% |
 | 10 | 364,76 | 5,5% |
 
-Dữ liệu có đúng 8 cụm, và bảng chỉ đúng chỗ ấy: mức giảm là 27,7% khi lên $k=8$ rồi rơi xuống 5,4% khi lên $k=9$. Đó là **khuỷu tay** — chỗ mà thêm cụm không còn mua được gì nhiều.
+Mức giảm là 27,7% khi tăng lên $k = 8$ và chỉ 5,4% khi tăng lên $k = 9$. Điểm mà inertia ngừng giảm nhanh gọi là **khuỷu tay** (elbow) của đồ thị inertia theo $k$, và ở đây nó rơi đúng vào số cụm thật. Phương pháp chọn $k$ tại khuỷu tay gọi là phương pháp elbow.
 
-> **Nhưng khuỷu tay không phải một định nghĩa toán học.** Nó là một quy tắc nhìn bằng mắt, và trên dữ liệu thật nó thường không rõ ràng như bảng trên. Các lựa chọn khác: **điểm bóng** (silhouette) đo mức một điểm hợp với cụm của nó hơn cụm gần nhất, hoặc **thống kê khoảng trống** (gap statistic) so quán tính với quán tính trên dữ liệu ngẫu nhiên. Và thường thì $k$ được quyết định bởi nghiệp vụ chứ không bởi dữ liệu.
+> **Lưu ý.** Khuỷu tay không có định nghĩa toán học; nó là một quy tắc quan sát bằng mắt, và trên dữ liệu thật đồ thị thường giảm đều, không có khuỷu rõ ràng. Hai tiêu chí khác có định nghĩa chặt hơn. **Hệ số silhouette** của một điểm là $s = (b - a)/\max(a, b)$, với $a$ là khoảng cách trung bình tới các điểm cùng cụm và $b$ là khoảng cách trung bình tới các điểm của cụm gần nhất khác; chọn $k$ có silhouette trung bình lớn nhất. **Gap statistic** (Tibshirani, Walther và Hastie, 2001) so sánh inertia với inertia trên dữ liệu ngẫu nhiên không có cấu trúc cụm. Trong nhiều ứng dụng, $k$ còn được quyết định bởi yêu cầu nghiệp vụ, ví dụ số nhóm khách hàng mà bộ phận marketing có thể xử lý.
 
 ---
 
-## 16. Hệ gợi ý
+## 16. Hệ thống gợi ý
 
-### 16.1. Bài toán, và vì sao nó khác
+Hệ thống gợi ý dự đoán mức độ một người dùng thích một sản phẩm, bộ phim hay bài hát mà họ chưa đánh giá. Chương này trình bày phương pháp phân rã ma trận, dùng lại gần như mọi công cụ của giáo trình: hạng của ma trận, SVD, hồi quy ridge, regularization và đánh đổi độ chệch – phương sai. Các thí nghiệm tập trung vào một câu hỏi thực tế: cần bao nhiêu dữ liệu thì phương pháp mới hoạt động, và điều gì xảy ra khi không có dữ liệu.
 
-Cho ma trận đánh giá $R \in \mathbb{R}^{n_u \times n_i}$ mà **phần lớn ô để trống**, hãy đoán các ô trống. Đây không hẳn là học có giám sát cũng không hẳn là không giám sát: "nhãn" là các ô đã quan sát, nhưng chúng cũng chính là đặc trưng.
+### 16.1. Bài toán gợi ý
 
-Hai họ phương pháp:
+Dữ liệu được tổ chức thành **ma trận đánh giá** $R \in \mathbb{R}^{n_u \times n_i}$, với $n_u$ người dùng và $n_i$ sản phẩm; ô $r_{ui}$ là đánh giá của người dùng $u$ cho sản phẩm $i$. Phần lớn các ô bị trống, vì mỗi người chỉ đánh giá một phần rất nhỏ trong số sản phẩm. Bài toán là dự đoán giá trị của các ô trống.
 
-- **Dựa trên nội dung** — mô tả mỗi mục bằng đặc trưng (thể loại, đạo diễn, từ khoá), rồi học sở thích của từng người theo các đặc trưng ấy. Về bản chất là một bài hồi quy cho mỗi người.
-- **Lọc cộng tác** — không dùng đặc trưng của mục nào cả; chỉ dùng *mẫu hình* đánh giá. Ý tưởng: những người đồng ý với nhau trong quá khứ thì sẽ đồng ý tiếp.
+Có hai hướng tiếp cận chính:
+
+- **Lọc dựa trên nội dung** (content-based filtering): mô tả mỗi sản phẩm bằng các đặc trưng (thể loại, đạo diễn, từ khoá), rồi học sở thích của từng người theo các đặc trưng đó. Về bản chất, đây là một bài hồi quy riêng cho mỗi người dùng.
+- **Lọc cộng tác** (collaborative filtering): không cần đặc trưng của sản phẩm, chỉ dùng mẫu hình đánh giá của mọi người dùng. Ý tưởng là những người đánh giá giống nhau trong quá khứ sẽ tiếp tục đánh giá giống nhau.
+
+Dữ liệu đánh giá có hai dạng. **Phản hồi tường minh** (explicit feedback) là điểm số người dùng chủ động cho, như số sao. **Phản hồi ngầm** (implicit feedback) là hành vi như lượt xem, lượt nhấp, thời gian nghe; dạng này nhiều hơn hẳn nhưng khó diễn giải, vì không xem một sản phẩm không có nghĩa là không thích nó. Chương này dùng phản hồi tường minh.
 
 ### 16.2. Phân rã ma trận
 
-Cách lọc cộng tác hiệu quả nhất. Giả sử $R$ có **hạng thấp**:
+> **Định nghĩa 16.1 (Phân rã ma trận).** Phương pháp phân rã ma trận (matrix factorization) giả định ma trận đánh giá xấp xỉ được bằng một ma trận hạng thấp:
+> $$R \approx P Q^\top, \qquad P \in \mathbb{R}^{n_u \times k},\; Q \in \mathbb{R}^{n_i \times k},\quad k \ll \min(n_u, n_i).$$
+> Mỗi người dùng $u$ được biểu diễn bằng vector $p_u \in \mathbb{R}^k$ (hàng thứ $u$ của $P$), mỗi sản phẩm $i$ bằng vector $q_i \in \mathbb{R}^k$, và đánh giá dự đoán là $\hat r_{ui} = p_u^\top q_i$.
 
-$$R \approx P Q^\top, \qquad P \in \mathbb{R}^{n_u \times k},\; Q \in \mathbb{R}^{n_i \times k}.$$
+Các toạ độ của $p_u$ và $q_i$ gọi là **nhân tố ẩn** (latent factors). Không ai định nghĩa chúng trước; chúng hình thành từ dữ liệu. Với phim ảnh, một nhân tố có thể tương ứng với mức độ "hành động" của phim và mức độ người dùng thích phim hành động; tích vô hướng $p_u^\top q_i$ lớn khi sở thích của người dùng khớp với đặc điểm của phim. Cách hiểu này chỉ mang tính minh hoạ: các nhân tố học được thường không có nghĩa rõ ràng như vậy.
 
-Mỗi người dùng thành một vector $k$ chiều, mỗi mục cũng vậy, và đánh giá dự đoán là tích vô hướng của chúng. Các chiều ấy là **yếu tố ẩn** — không ai định nghĩa chúng, chúng nổi lên từ dữ liệu.
-
-Hàm mất mát chỉ tính trên các ô đã quan sát:
+Chỉ các ô đã quan sát, ký hiệu tập $\Omega$, được dùng để học. Hàm mất mát là bình phương sai số trên các ô đó cộng regularization:
 
 $$\min_{P,Q}\;\sum_{(u,i) \in \Omega}\big(r_{ui} - p_u^\top q_i\big)^2 + \lambda\big(\|P\|_F^2 + \|Q\|_F^2\big).$$
 
-Bài toán này **không lồi** theo $(P, Q)$ cùng lúc, nhưng **lồi theo từng cái khi cố định cái kia** — mỗi bước chính là một bài ridge. Đó là cơ sở của **bình phương tối thiểu luân phiên** (ALS): cố định $Q$ giải $P$, cố định $P$ giải $Q$, lặp lại.
+Hàm này không lồi theo $(P, Q)$ đồng thời, vì có tích $p_u^\top q_i$. Nhưng khi cố định $Q$, nó tách thành $n_u$ bài toán độc lập theo từng $p_u$, và mỗi bài toán là một hồi quy ridge (Mục 9.2):
 
-Giả thiết hạng thấp là thứ làm bài toán có nghĩa. Với 300 người và 200 mục, mô hình hạng 4 có 2 000 tham số tự do thay cho 60 000 ô — chỉ **3,3%**. Không có giả thiết ấy thì các ô chưa thấy là vô phương đoán.
+$$p_u = \big(Q_u^\top Q_u + \lambda I\big)^{-1} Q_u^\top r_u,$$
 
-### 16.3. Cần bao nhiêu dữ liệu thì nó mới chạy
+trong đó $Q_u$ gồm các hàng của $Q$ ứng với sản phẩm người dùng $u$ đã đánh giá, và $r_u$ là các đánh giá tương ứng. Tương tự khi cố định $P$ để giải $Q$. Thuật toán luân phiên hai bước này gọi là **bình phương tối thiểu luân phiên** (alternating least squares, ALS). Mỗi bước không làm tăng hàm mất mát. Một lựa chọn khác là SGD trên từng ô quan sát. Các hệ thống thực tế thường thêm hệ số chặn riêng cho người dùng và cho sản phẩm, $\hat r_{ui} = \mu + b_u + b_i + p_u^\top q_i$, để mô tả việc có người chấm điểm rộng tay hơn và có sản phẩm được ưa chuộng hơn mặt bằng chung (Koren, Bell và Volinsky, 2009).
 
-Đây là kết quả quan trọng nhất của chương, và nó có một ngưỡng sắc nét.
+Giả thiết hạng thấp là điều làm bài toán có nghĩa. Thí nghiệm của chương dùng 300 người dùng và 200 sản phẩm: ma trận có 60 000 ô, còn mô hình hạng 4 chỉ có $(300 + 200) \times 4 = 2\,000$ tham số, bằng 3,3% số ô. Không có giả thiết như vậy, giá trị của một ô chưa quan sát không liên quan gì tới các ô đã quan sát, và không thể dự đoán.
+
+### 16.3. Lượng dữ liệu cần thiết
+
+Thí nghiệm sinh một ma trận đánh giá hạng 4 thật, cộng nhiễu có độ lệch chuẩn 0,4, rồi che đi phần lớn các ô và giữ lại một tỉ lệ ngẫu nhiên. Mô hình được huấn luyện bằng ALS với $\lambda = 0{,}1$ và đánh giá bằng RMSE trên các ô bị che:
 
 ![Hình 12](figs/nt12_recsys.png)
 
-**Hình 12.** Trái: RMSE trên ô chưa thấy theo số đánh giá mỗi người (trục dọc log). Đường chấm là mức đoán bừa bằng 0; đường đứt là mốc $5k$.
+**Hình 12.** Trái: RMSE trên các ô chưa quan sát theo số đánh giá trung bình mỗi người, trục dọc thang logarit; đường chấm là mức sai số của cách đoán mọi ô bằng 0, đường đứt đánh dấu $5k = 20$ đánh giá. Phải: một góc của ma trận đánh giá thật.
 
-| % ô thấy được | Đánh giá / người | RMSE ô chưa thấy | So với đoán bừa |
+| Tỉ lệ ô quan sát | Đánh giá mỗi người | RMSE trên ô chưa quan sát | Tỉ số với mức đoán bằng 0 |
 |---|---|---|---|
-| 2 | 4,1 | 2,4759 | **1,19** |
-| 3 | 5,9 | 3,0167 | **1,45** |
-| 5 | 10,1 | 3,5444 | **1,71** |
-| 10 | 19,8 | 0,3048 | 0,15 |
-| 20 | 39,6 | 0,1834 | 0,09 |
-| 40 | 80,5 | 0,1237 | 0,06 |
+| 2% | 4,1 | 2,4759 | 1,19 |
+| 3% | 5,9 | 3,0167 | 1,45 |
+| 5% | 10,1 | 3,5444 | 1,71 |
+| 10% | 19,8 | 0,3048 | 0,15 |
+| 20% | 39,6 | 0,1834 | 0,09 |
+| 40% | 80,5 | 0,1237 | 0,06 |
 
-Cột cuối là tỉ số giữa RMSE của mô hình và độ lệch chuẩn của dữ liệu. **Lớn hơn 1 nghĩa là mô hình còn tệ hơn đoán bừa bằng 0.**
+Cột cuối là tỉ số giữa RMSE của mô hình và độ lệch chuẩn của ma trận thật (2,0772), tức sai số của cách đoán mọi ô bằng 0. Tỉ số lớn hơn 1 nghĩa là mô hình còn tệ hơn cách đoán đơn giản đó.
 
-Ba dòng đầu đều lớn hơn 1. Với dưới khoảng 10 đánh giá mỗi người, phân rã ma trận không chỉ kém mà **có hại**. Rồi giữa 10,1 và 19,8 đánh giá, RMSE rơi từ 3,54 xuống 0,30 — **giảm hơn 11 lần**.
+Ba dòng đầu có tỉ số lớn hơn 1: với khoảng 10 đánh giá mỗi người trở xuống, phân rã ma trận không những không giúp được mà còn gây hại. Giữa 10,1 và 19,8 đánh giá mỗi người, RMSE giảm từ 3,54 xuống 0,30, hơn 11 lần. Sau ngưỡng đó, thêm dữ liệu chỉ cải thiện từ từ.
 
-**Vì sao có ngưỡng, và ngưỡng ở đâu.** Mỗi người dùng có $k = 4$ ẩn số cần ước lượng. Về nguyên tắc cần ít nhất 4 ràng buộc, nhưng ràng buộc lại nhiễu và bản thân $Q$ cũng đang được ước lượng, nên thực tế cần vài lần con số ấy. Ngưỡng đo được rơi vào khoảng $5k$.
+Có thể hiểu ngưỡng này bằng cách đếm ẩn số. Mỗi người dùng có $k = 4$ ẩn số trong $p_u$, nên cần ít nhất 4 đánh giá để xác định chúng, kể cả khi $Q$ đã biết chính xác. Nhưng các đánh giá có nhiễu, và $Q$ cũng đang được ước lượng từ chính dữ liệu thưa đó, nên số đánh giá cần thiết lớn hơn nhiều lần mức tối thiểu. Trong thí nghiệm, ngưỡng nằm giữa 10 và 20 đánh giá mỗi người, tức khoảng 2,5 tới 5 lần hạng $k$. Lý thuyết hoàn thiện ma trận (matrix completion) cho kết luận cùng chiều: dưới giả thiết vị trí các ô quan sát ngẫu nhiên, số quan sát cần thiết tăng tuyến tính theo hạng, nhân với một thừa số logarit của kích thước ma trận (Candès và Recht, 2009).
 
-> **Quy tắc bỏ túi:** cần cỡ **5 lần số yếu tố ẩn** đánh giá cho mỗi người dùng thì phân rã ma trận mới bắt đầu có ích. Đây là lý do các hệ thực tế dùng $k$ nhỏ đáng ngạc nhiên (10–200) dù có hàng triệu người dùng.
+> **Nhận xét.** Con số cụ thể của thí nghiệm này phụ thuộc vào mức nhiễu, $\lambda$ và cách chọn ô quan sát, nhưng kết luận định tính là chung: cần số đánh giá mỗi người dùng lớn hơn hạng $k$ nhiều lần thì phân rã ma trận mới có ích. Đây là một lý do các hệ thống thực tế dùng $k$ tương đối nhỏ (vài chục tới vài trăm) dù có hàng triệu người dùng: hạng càng lớn thì càng cần nhiều dữ liệu cho mỗi người.
 
 ### 16.4. Chọn hạng $k$
 
-Đo ở mật độ 30%, nơi việc khớp là đáng tin:
+Đo ở mật độ quan sát 30%, nơi mô hình có đủ dữ liệu:
 
-| Hạng $k$ | RMSE ô **chưa** thấy | RMSE ô **đã** thấy |
+| Hạng $k$ | RMSE trên ô chưa quan sát | RMSE trên ô đã quan sát |
 |---|---|---|
 | 1 | 1,8073 | 1,7769 |
 | 2 | 1,4764 | 1,4206 |
 | 3 | 1,0569 | 1,0128 |
-| **4** | **0,1448** | 0,3762 |
+| 4 | 0,1448 | 0,3762 |
 | 6 | 0,2217 | 0,3535 |
 | 10 | 0,3501 | 0,3076 |
-| 20 | 0,6291 | **0,1903** |
+| 20 | 0,6291 | 0,1903 |
 
-Hai cột kể hai câu chuyện trái ngược, và đó chính là điều cần thấy:
+Hai cột có xu hướng ngược nhau. RMSE trên ô đã quan sát giảm đều khi $k$ tăng: mô hình nhiều tham số hơn khớp dữ liệu huấn luyện sát hơn, và ở $k = 20$ nó đạt 0,1903, thấp hơn cả độ lệch chuẩn của nhiễu (0,4), tức mô hình đã bắt đầu khớp cả nhiễu. RMSE trên ô chưa quan sát đạt nhỏ nhất ở $k = 4$, đúng hạng thật, rồi tăng lại: ở $k = 20$ nó bằng 0,6291, gấp 4,3 lần giá trị tại $k = 4$.
 
-- Cột **đã thấy** giảm đơn điệu theo $k$ — mô hình mạnh hơn thì khớp dữ liệu quan sát chặt hơn. Ở $k=20$ nó đạt 0,1903, tốt nhất bảng.
-- Cột **chưa thấy** chạm đáy tại $k = 4$ — đúng hạng thật — rồi **tăng trở lại**. Ở $k=20$ nó là 0,6291, tệ hơn 4,3 lần so với $k=4$.
+Đây là đánh đổi độ chệch – phương sai (Mục 3.6) dưới dạng chọn hạng: $k$ nhỏ hơn hạng thật gây underfitting, $k$ lớn hơn gây overfitting. Trên dữ liệu thật, hạng thật không biết trước, và $k$ được chọn bằng cách đo sai số trên một tập các ô được giữ lại để xác thực, giống cross-validation ở Mục 9.5.
 
-Đây là đánh đổi thiên lệch–phương sai xuất hiện lần nữa, lần này ở dạng chọn hạng. $k$ nhỏ quá thì thiếu khớp; $k$ lớn quá thì bắt đầu khớp cả nhiễu quan sát.
+### 16.5. Vấn đề khởi đầu lạnh
 
-### 16.5. Khởi đầu lạnh
-
-Người dùng mới không có đánh giá nào. Phân rã ma trận khi ấy không có gì để dựa vào:
+Một người dùng mới chưa đánh giá sản phẩm nào. Thí nghiệm thêm 10 người dùng như vậy vào dữ liệu ở mật độ 30%:
 
 ```text
 RMSE cho nguoi dung cu   : 0.1459
@@ -1480,398 +1873,318 @@ RMSE neu doan bua bang 0 : 2.0772
 ||P|| trung binh, nguoi moi: 1.54e-01
 ```
 
-Ba con số cuối giải thích cơ chế: vector của người dùng mới có chuẩn **0,154** so với 2,084 của người dùng cũ — tức bị kéo gần về 0. Lý do nằm ngay trong hàm mất mát ở Mục 16.2: với người không có ô quan sát nào, số hạng thứ nhất trống rỗng, nên chỉ còn phạt chuẩn $\lambda\|p_u\|^2$, và cực tiểu của nó là $p_u = 0$.
+Với người dùng mới, RMSE là 2,2364, còn tệ hơn đoán mọi đánh giá bằng 0 (2,0772). Hai dòng cuối giải thích cơ chế: vector $p_u$ của người dùng mới có chuẩn trung bình 0,154, so với 2,084 của người dùng cũ. Với người dùng không có ô quan sát nào, tổng bình phương sai số trong hàm mất mát ở Mục 16.2 không chứa số hạng nào liên quan tới $p_u$, chỉ còn thành phần regularization $\lambda\|p_u\|^2$, và giá trị cực tiểu của nó là $p_u = 0$. (Chuẩn đo được khác 0 một chút vì trong thí nghiệm, các vector này chỉ nhận giá trị khởi tạo ngẫu nhiên nhỏ và không được cập nhật.) Mô hình vì vậy dự đoán gần 0 cho mọi sản phẩm với người dùng mới.
 
-Kết quả là mô hình dự báo 0 cho mọi mục, và RMSE 2,2364 **tệ hơn cả đoán bừa** 2,0772.
+Vấn đề này gọi là **khởi đầu lạnh** (cold start), và có ba dạng:
 
-| Dạng khởi đầu lạnh | Cách chữa |
+| Dạng khởi đầu lạnh | Cách xử lý thường dùng |
 |---|---|
-| Người dùng mới | hỏi vài sở thích lúc đăng ký; dùng thông tin nhân khẩu; gợi ý mục phổ biến |
-| Mục mới | dùng **đặc trưng nội dung** của mục |
-| Hệ thống mới | bắt đầu bằng phương pháp dựa trên nội dung, chuyển dần sang cộng tác |
+| Người dùng mới | hỏi vài sở thích khi đăng ký; dùng thông tin nhân khẩu học; gợi ý các sản phẩm phổ biến |
+| Sản phẩm mới | dùng đặc trưng nội dung của sản phẩm (thể loại, mô tả, embedding của văn bản hoặc hình ảnh) |
+| Hệ thống mới | bắt đầu bằng lọc dựa trên nội dung, chuyển dần sang lọc cộng tác khi đã có dữ liệu |
 
-> **Đây là lý do mọi hệ gợi ý thực tế đều là hệ lai.** Lọc cộng tác mạnh hơn khi có đủ dữ liệu, nhưng nó **không có đường lùi** khi không có. Một mô hình dựa trên nội dung yếu hơn nhưng luôn trả lời được là thứ bắt buộc phải có bên cạnh.
+Vì vậy các hệ thống gợi ý thực tế hầu như luôn là **hệ lai** (hybrid): lọc cộng tác cho kết quả tốt hơn khi có đủ dữ liệu, còn lọc dựa trên nội dung bảo đảm luôn có câu trả lời khi chưa có dữ liệu.
 
-Và còn một vấn đề nữa mà chương này không đo được: **vòng phản hồi thoái hoá** — hệ chỉ gợi ý thứ nó đã biết, nên chỉ thu được phản hồi về thứ đó, nên càng ngày càng hẹp. [Mục 12.5 của *MLOps*](mlops-ch12.html) đo hiện tượng ấy và cho thấy không ngẫu nhiên hoá thì hệ vĩnh viễn chỉ nhìn thấy 9,5% danh mục.
-
+Ngoài khởi đầu lạnh còn một vấn đề mà thí nghiệm tĩnh của chương không đo được: **vòng phản hồi** (feedback loop). Hệ thống chỉ gợi ý những sản phẩm nó dự đoán là tốt, nên chỉ thu được phản hồi về những sản phẩm đó, và dữ liệu huấn luyện của lần sau càng lệch về các sản phẩm đã được gợi ý. [Mục 12.3 của *MLOps*](mlops-ch12.html) mô phỏng hiện tượng này và cho thấy một hệ không có cơ chế thăm dò ngẫu nhiên chỉ quan sát được 9,5% danh mục sản phẩm.
 ---
 
 ## 17. Bài tập
 
 **Bài 1 (tính tay).** Cho bốn điểm $(x, y) = (1,2), (2,3), (3,5), (4,6)$ và mô hình $y = w_0 + w_1 x$.
 (a) Lập ma trận $X$ có cột hằng số, rồi tính $X^\top X$ và $X^\top y$.
-(b) Giải phương trình chuẩn tắc để tìm $w_0$, $w_1$.
-(c) Tính phần dư của từng điểm. Tổng của chúng bằng bao nhiêu, và vì sao con số ấy **không** phải trùng hợp?
-(d) Lặp lại với ridge $\lambda = 1$. Hệ số đổi theo chiều nào?
+(b) Giải phương trình chuẩn để tìm $w_0$, $w_1$.
+(c) Tính phần dư của từng điểm. Tổng các phần dư bằng bao nhiêu, và vì sao kết quả đó không phải ngẫu nhiên?
+(d) Lặp lại với hồi quy ridge, $\lambda = 1$. Các hệ số thay đổi theo chiều nào?
 
 **Bài 2 (suy luận).** Giả sử $y_i = w^\top x_i + \epsilon_i$ với $\epsilon_i \sim \mathcal{N}(0,\sigma^2)$ độc lập, và tiên nghiệm $w \sim \mathcal{N}(0, \tau^2 I)$.
 (a) Viết $-\log p(w \mid \mathcal{D})$, bỏ các hằng số không phụ thuộc $w$.
-(b) Suy ra rằng cực tiểu của nó đúng bằng nghiệm ridge, và chỉ ra $\lambda = \sigma^2/\tau^2$.
-(c) Tiên nghiệm càng **chặt** (nghĩa là $\tau$ càng nhỏ) thì $\lambda$ đi theo chiều nào? Giải thích bằng lời tại sao chiều ấy hợp lý.
-(d) Nếu đổi tiên nghiệm sang Laplace thì được thuật toán gì, và điều đó phát biểu niềm tin gì về $w$?
+(b) Chứng minh rằng điểm cực tiểu của biểu thức đó trùng với nghiệm hồi quy ridge, và chỉ ra $\lambda = \sigma^2/\tau^2$.
+(c) Khi tiên nghiệm chặt hơn ($\tau$ nhỏ hơn), $\lambda$ thay đổi theo chiều nào? Giải thích vì sao chiều đó hợp lý.
+(d) Nếu thay tiên nghiệm Gauss bằng tiên nghiệm Laplace thì được thuật toán nào, và tiên nghiệm đó diễn đạt niềm tin gì về $w$?
 
-**Bài 3 (tính tay).** Mục 5.3 đo được: với $\kappa = 10\,000$, gradient descent cần 92 104 vòng còn thêm quán tính chỉ cần 1 297 vòng.
-(a) Ước lượng số vòng của cả hai phương pháp khi $\kappa = 40\,000$, dựa vào bậc lý thuyết $O(\kappa)$ và $O(\sqrt\kappa)$.
-(b) Một bạn nói: "bài toán của tôi có 1 triệu chiều nên gradient descent sẽ rất chậm." Câu ấy đúng hay sai, và vì sao?
-(c) Nêu **một** bước tiền xử lý rẻ tiền làm giảm $\kappa$, và giải thích cơ chế.
+**Bài 3 (tính tay).** Mục 5.3 đo được: với $\kappa = 10\,000$, gradient descent cần 92 104 vòng lặp, còn có momentum chỉ cần 1 297 vòng lặp.
+(a) Ước lượng số vòng lặp của cả hai phương pháp khi $\kappa = 40\,000$, dựa vào bậc lý thuyết $O(\kappa)$ và $O(\sqrt\kappa)$.
+(b) Một người nói: "Bài toán của tôi có một triệu chiều nên gradient descent sẽ rất chậm." Nhận định này đúng hay sai, và vì sao?
+(c) Nêu một bước tiền xử lý đơn giản làm giảm $\kappa$, và giải thích cơ chế.
 
-**Bài 4 (suy luận).** Sai số của sai phân trung tâm gồm hai phần: cắt cụt cỡ $C_1\varepsilon^2$ và làm tròn cỡ $C_2 u/\varepsilon$, với $u \approx 2{,}22\times10^{-16}$.
-(a) Cực tiểu hoá tổng hai phần theo $\varepsilon$ và chứng tỏ $\varepsilon^* \propto u^{1/3}$.
-(b) Làm tương tự cho sai phân tiến (cắt cụt cỡ $C_1\varepsilon$) và chứng tỏ $\varepsilon^* \propto u^{1/2}$.
-(c) Đối chiếu với hai giá trị đo được ở Mục 5.5.
-(d) Vì sao sai phân trung tâm đắt gấp đôi mà vẫn được ưa dùng hơn?
+**Bài 4 (suy luận).** Sai số của sai phân trung tâm gồm hai phần: sai số cắt cụt cỡ $C_1\varepsilon^2$ và sai số làm tròn cỡ $C_2 u/\varepsilon$, với $u \approx 2{,}22\times10^{-16}$.
+(a) Cực tiểu tổng hai phần theo $\varepsilon$ và chứng minh $\varepsilon^* \propto u^{1/3}$.
+(b) Làm tương tự với sai phân tiến (sai số cắt cụt cỡ $C_1\varepsilon$) và chứng minh $\varepsilon^* \propto u^{1/2}$.
+(c) So sánh với hai giá trị đo được ở Mục 5.5.
+(d) Vì sao sai phân trung tâm tốn gấp đôi số lần tính hàm mà vẫn được ưa dùng hơn?
 
-**Bài 5 (tính tay).** Một tập dữ liệu tách được tuyến tính có mọi điểm nằm trong hình cầu bán kính $R = 2$ và lề $\gamma = 0{,}1$.
-(a) Chặn Novikoff cho số lần sai là bao nhiêu?
-(b) Nếu thêm 10 000 điểm nữa (vẫn tách được, vẫn cùng $R$ và $\gamma$) thì chặn đổi thế nào? Điều đó nói lên gì?
-(c) Nếu nhân mọi $x_i$ với 10 thì $R$, $\gamma$ và chặn đổi thế nào?
-(d) Vì sao perceptron **không** có bảo đảm nào khi dữ liệu không tách được? Trả lời bằng hình dạng của hàm mất mát ở Hình 5.
+**Bài 5 (tính tay).** Một tập dữ liệu tách được tuyến tính có mọi điểm nằm trong hình cầu bán kính $R = 2$ và có lề $\gamma = 0{,}1$.
+(a) Chặn của định lý Novikoff cho số lần cập nhật của perceptron bằng bao nhiêu?
+(b) Nếu thêm 10 000 điểm nữa (vẫn tách được, vẫn cùng $R$ và $\gamma$), chặn thay đổi thế nào? Điều đó cho biết gì?
+(c) Nếu nhân mọi $x_i$ với 10, thì $R$, $\gamma$ và chặn thay đổi thế nào?
+(d) Vì sao perceptron không có bảo đảm hội tụ khi dữ liệu không tách được? Trả lời dựa vào hình dạng của hàm mất mát ở Hình 5.
 
 **Bài 6 (tính tay).** Một mô hình phát hiện gian lận cho ma trận nhầm lẫn sau trên 20 000 giao dịch:
 
 | | Dự đoán gian lận | Dự đoán bình thường |
 |---|---|---|
-| **Thật gian lận** | 102 | 94 |
-| **Thật bình thường** | 105 | 19 699 |
+| **Thật sự gian lận** | 102 | 94 |
+| **Thật sự bình thường** | 105 | 19 699 |
 
 (a) Tính độ chính xác, precision, recall và $F_1$.
-(b) Tính độ chính xác của bộ phân loại "luôn đoán bình thường". So với (a).
-(c) Kết quả (b) nói gì về việc dùng độ chính xác để chọn mô hình ở đây?
-(d) Bộ phận rủi ro nói: "bỏ sót một ca gian lận tốn gấp 20 lần một lần báo động nhầm." Nên dịch ngưỡng theo chiều nào, và chỉ số nào nên dùng để chọn ngưỡng?
+(b) Tính độ chính xác của bộ phân loại luôn đoán "bình thường". So sánh với kết quả ở (a).
+(c) Kết quả (b) nói gì về việc dùng độ chính xác để chọn mô hình trong bài toán này?
+(d) Bộ phận quản lý rủi ro cho biết bỏ sót một ca gian lận tốn gấp 20 lần một lần báo động nhầm. Nên dịch ngưỡng theo chiều nào, và nên dùng thước đo nào để chọn ngưỡng?
 
-**Bài 7 (tính tay).** SVM lề cứng trên đúng hai điểm: $x_1 = (1,1)$ nhãn $+1$ và $x_2 = (-1,-1)$ nhãn $-1$.
-(a) Dùng đối xứng để lập luận rằng $b = 0$, rồi giải bài toán gốc tìm $w$.
-(b) Tính lề $2/\|w\|$ và so với khoảng cách giữa hai điểm. Giải thích kết quả.
-(c) Tìm $\alpha_1$, $\alpha_2$ từ $w = \sum\alpha_i y_i x_i$ và ràng buộc $\sum\alpha_i y_i = 0$.
+**Bài 7 (tính tay).** Xét SVM lề cứng trên đúng hai điểm: $x_1 = (1,1)$ có nhãn $+1$ và $x_2 = (-1,-1)$ có nhãn $-1$.
+(a) Dùng tính đối xứng để lập luận rằng $b = 0$, rồi giải bài toán gốc để tìm $w$.
+(b) Tính độ rộng lề $2/\|w\|$ và so sánh với khoảng cách giữa hai điểm. Giải thích kết quả.
+(c) Tìm $\alpha_1$, $\alpha_2$ từ $w = \sum_i\alpha_i y_i x_i$ và ràng buộc $\sum_i\alpha_i y_i = 0$.
 (d) Tính giá trị bài toán gốc $\tfrac12\|w\|^2$ và giá trị bài toán đối ngẫu. Khe đối ngẫu bằng bao nhiêu?
-(e) Thêm một điểm $x_3 = (5,5)$ nhãn $+1$. Nghiệm có đổi không? Trả lời bằng điều kiện bù trừ.
+(e) Thêm điểm $x_3 = (5,5)$ có nhãn $+1$. Nghiệm có thay đổi không? Trả lời bằng điều kiện bù.
 
 **Bài 8 (tính tay).** Một ma trận hiệp phương sai có các trị riêng $\lambda = (10;\, 5;\, 3;\, 1{,}5;\, 0{,}5)$.
-(a) Giữ bao nhiêu thành phần thì được ít nhất 85% phương sai?
-(b) Với $k = 2$ và $n = 101$ mẫu, sai số tái dựng $\|X_c - X_k\|_F^2$ bằng bao nhiêu?
-(c) Một bạn nói: "giữ 90% phương sai nên mô hình phân loại sẽ chỉ kém đi một chút." Dùng kết quả ở Mục 14.4 để bác bỏ.
-(d) Nếu đổi đơn vị của một đặc trưng từ mét sang milimét thì các trị riêng đổi thế nào? Rút ra điều gì về bước chuẩn hoá trước PCA?
+(a) Cần giữ bao nhiêu thành phần chính để giữ được ít nhất 85% phương sai?
+(b) Với $k = 2$ và $n = 101$ điểm dữ liệu, sai số tái tạo $\|X_c - X_k\|_F^2$ bằng bao nhiêu?
+(c) Một người nói: "Giữ 90% phương sai nên mô hình phân loại chỉ kém đi một chút." Dùng kết quả ở Mục 14.4 để phản bác.
+(d) Nếu đổi đơn vị của một đặc trưng từ mét sang milimét, các trị riêng thay đổi thế nào? Từ đó rút ra điều gì về việc chuẩn hoá trước PCA?
 
-**Bài 9 (chẩn đoán).** Với mỗi tình huống, cho biết vấn đề và **hai** việc nên làm:
+**Bài 9 (chẩn đoán).** Với mỗi tình huống sau, nêu nguyên nhân có thể và hai việc nên làm:
 (a) Chạy K-means 5 lần trên cùng dữ liệu, được 5 kết quả khác hẳn nhau.
-(b) K-means chia đôi một cụm dài và dẹt rõ ràng, trong khi gộp hai cụm tròn nhỏ gần nhau.
-(c) Quán tính giảm đều đặn theo $k$, không thấy khuỷu tay nào.
-(d) Một cụm chứa 98% số điểm, bốn cụm còn lại mỗi cụm vài điểm.
+(b) K-means chia đôi một cụm dài và dẹt, trong khi gộp hai cụm tròn nhỏ nằm gần nhau.
+(c) Inertia giảm đều theo $k$, không thấy khuỷu tay.
+(d) Một cụm chứa 98% số điểm, bốn cụm còn lại mỗi cụm chỉ có vài điểm.
 
-**Bài 10 (thiết kế).** Một hệ gợi ý có 1 triệu người dùng và 100 nghìn mục, dự định dùng phân rã ma trận hạng $k = 50$.
-(a) Mô hình có bao nhiêu tham số? Bằng bao nhiêu phần trăm số ô của ma trận đầy đủ?
-(b) Dùng quy tắc ở Mục 16.3, mỗi người cần khoảng bao nhiêu đánh giá? Tổng cộng bao nhiêu, và bằng bao nhiêu phần trăm số ô?
-(c) Thực tế chỉ có trung bình 30 đánh giá mỗi người. Dự đoán chuyện gì xảy ra, và nêu **hai** cách xử lý.
-(d) Sản phẩm yêu cầu mọi người dùng mới đều phải nhận được gợi ý ngay từ phiên đầu tiên. Thiết kế đường dự phòng, và nói rõ khi nào thì chuyển sang phân rã ma trận.
+**Bài 10 (thiết kế).** Một hệ thống gợi ý có 1 triệu người dùng và 100 nghìn sản phẩm, dự định dùng phân rã ma trận hạng $k = 50$.
+(a) Mô hình có bao nhiêu tham số? Con số đó bằng bao nhiêu phần trăm số ô của ma trận đầy đủ?
+(b) Theo kết quả ở Mục 16.3, lấy mức an toàn là khoảng 5 lần hạng $k$ đánh giá mỗi người, thì mỗi người cần khoảng bao nhiêu đánh giá? Tổng cộng cần bao nhiêu đánh giá, bằng bao nhiêu phần trăm số ô?
+(c) Thực tế trung bình mỗi người chỉ có 30 đánh giá. Dự đoán điều gì sẽ xảy ra, và nêu hai cách xử lý.
+(d) Yêu cầu sản phẩm là mọi người dùng mới đều nhận được gợi ý ngay từ phiên đầu tiên. Thiết kế phương án dự phòng, và nêu rõ khi nào chuyển sang dùng phân rã ma trận.
 
 ---
 
-## 18. Ôn phỏng vấn
+## 18. Câu hỏi phỏng vấn
 
-### 18.1. Khung trả lời
+### 18.1. Cách trình bày câu trả lời
 
-Giống ba giáo trình còn lại, khung ba bước dùng được cho gần hết câu hỏi dạng "vì sao X":
+Phần lớn câu hỏi phỏng vấn về học máy cơ bản có dạng "vì sao X" hoặc "X khác Y thế nào". Một câu trả lời tốt thường gồm ba phần:
 
-1. **Nêu vấn đề X sinh ra để chữa.**
-2. **Nêu cơ chế** — tốt nhất là một dòng toán hoặc một con số.
-3. **Nêu cái giá** — X đắt ở đâu, hỏng khi nào.
+1. **Vấn đề mà X giải quyết.** X ra đời để xử lý tình huống nào.
+2. **Cơ chế.** X hoạt động thế nào, tốt nhất bằng một công thức ngắn hoặc một con số cụ thể.
+3. **Giới hạn.** X tốn kém ở đâu, và khi nào nó không còn đúng.
 
-Với phần nền tảng có thêm một bước đáng giá nữa: **nối nó với một thứ khác**. Người phỏng vấn nhớ rất lâu câu trả lời chỉ ra được rằng hai thứ tưởng khác nhau thực ra là một.
+Với các chủ đề nền tảng, có thêm một bước giúp câu trả lời nổi bật: nêu mối liên hệ giữa X với một khái niệm khác. Chẳng hạn, trả lời về ridge mà chỉ ra được nó là ước lượng MAP với tiên nghiệm Gauss cho thấy người trả lời hiểu nguồn gốc của phương pháp chứ không chỉ nhớ công thức.
 
-### 18.2. Nhóm hồi quy và tối ưu hoá
+Các câu trả lời mẫu dưới đây dẫn số liệu từ các thí nghiệm của giáo trình. Khi phỏng vấn, không cần nhớ chính xác từng con số; điều quan trọng là nắm được độ lớn và chiều của hiệu ứng.
 
-**"Vì sao dùng bình phương sai lệch?"**
+### 18.2. Hồi quy và tối ưu
 
-> Vì nó là **âm log hợp lý dưới giả thiết nhiễu Gauss**. Không phải lựa chọn thẩm mỹ — nó suy ra được.
+**Câu hỏi: Vì sao hồi quy tuyến tính dùng bình phương sai số?**
+
+> **Trả lời.** Vì bình phương sai số là âm log hợp lý khi nhiễu có phân phối Gauss (Mục 10.2), nên nghiệm bình phương tối thiểu chính là ước lượng hợp lý cực đại dưới giả thiết đó. Nếu nhiễu có đuôi dày hơn Gauss, ví dụ có nhiều điểm ngoại lai, thì giả thiết nhiễu Laplace hợp lý hơn và cho ra hồi quy trị tuyệt đối, phương pháp ít nhạy với điểm ngoại lai. Đổi giả thiết về nhiễu là đổi hàm mất mát.
+
+**Câu hỏi: Khi nào phương trình chuẩn không có nghiệm duy nhất, và xử lý thế nào?**
+
+> **Trả lời.** Khi $X$ không đủ hạng cột: số đặc trưng lớn hơn số điểm dữ liệu, hoặc có đặc trưng là tổ hợp tuyến tính của các đặc trưng khác. Ví dụ điển hình là mã hoá one-hot đủ $K$ giá trị trong khi vẫn giữ cột hằng số. Khi đó có vô số nghiệm cho cùng một dự đoán. Giả nghịch đảo chọn nghiệm có chuẩn nhỏ nhất, trùng với giới hạn của ridge khi $\lambda \to 0^+$. Trên thực tế thường bỏ cột thừa hoặc dùng ridge.
+
+**Câu hỏi: Đa cộng tuyến gây hại thế nào?**
+
+> **Trả lời.** Nó làm hệ số dao động mạnh nhưng hầu như không ảnh hưởng tới dự đoán. Trong thí nghiệm ở Mục 4.4, khi tương quan giữa hai đặc trưng tăng từ 0 lên 0,999, độ lệch chuẩn của hệ số tăng khoảng 25 lần, trong khi độ lệch chuẩn của dự đoán gần như không đổi. Mức tăng khớp với lý thuyết $\sqrt{\text{VIF}} = 1/\sqrt{1-\rho^2} \approx 22$. Vì vậy đa cộng tuyến là vấn đề của việc diễn giải hệ số, không phải của dự đoán.
+
+**Câu hỏi: Tốc độ hội tụ của gradient descent phụ thuộc vào gì?**
+
+> **Trả lời.** Vào số điều kiện $\kappa$ của hàm mất mát, không phụ thuộc vào số chiều. Với hàm bậc hai, số vòng lặp tỉ lệ với $\kappa\log(1/\varepsilon)$. Mục 5.3 đo được khi $\kappa$ tăng từ 1 lên 10 000, số vòng lặp tăng từ 1 lên 92 104; thêm momentum giảm bậc xuống $\sqrt\kappa$, chỉ còn 1 297 vòng. Hệ quả thực tế: chuẩn hoá đặc trưng về cùng thang đo là cách rẻ nhất để giảm $\kappa$ và tăng tốc huấn luyện.
+
+**Câu hỏi: Kiểm tra gradient bằng cách nào?**
+
+> **Trả lời.** So sánh với sai phân trung tâm, dùng $\varepsilon$ khoảng $10^{-5}$ tới $10^{-6}$ và đánh giá bằng sai số tương đối. Điểm hay bị hiểu sai là $\varepsilon$ không phải càng nhỏ càng tốt: sai số cắt cụt tỉ lệ $\varepsilon^2$ nhưng sai số làm tròn tỉ lệ $u/\varepsilon$, nên điểm tối ưu là $\varepsilon^* \sim u^{1/3} \approx 6\times10^{-6}$. Thí nghiệm ở Mục 5.5 đo được $5{,}6\times10^{-6}$, và $\varepsilon = 10^{-13}$ cho sai số lớn hơn khoảng $5 \times 10^7$ lần.
+
+### 18.3. Phân loại
+
+**Câu hỏi: Perceptron, hồi quy logistic và SVM khác nhau ở đâu?**
+
+> **Trả lời.** Chúng giống nhau ở mô hình (hàm tuyến tính $w^\top x + b$) và thường tối ưu bằng các biến thể của gradient descent. Chúng khác nhau ở hàm mất mát, viết theo lề $m = y(w^\top x + b)$:
 >
-> *Nối sang chỗ khác:* nếu tin nhiễu có đuôi dày hơn, MLE dưới giả thiết Laplace cho ra hồi quy trị tuyệt đối, bền hơn với điểm ngoại lai. Đổi giả thiết về nhiễu là đổi hàm mất mát.
-
-**"Khi nào phương trình chuẩn tắc không giải được, và làm gì?"**
-
-> Khi $X$ không đủ hạng cột — nhiều đặc trưng hơn mẫu, hoặc có đặc trưng phụ thuộc tuyến tính (kinh điển: one-hot đủ $K$ mức mà vẫn giữ cột hằng số).
->
-> *Đọc đúng bản chất:* vấn đề không phải "không có nghiệm" mà là **có vô số nghiệm cho cùng một dự báo**. Giả nghịch đảo chọn cái chuẩn nhỏ nhất, và đó chính là ridge khi $\lambda \to 0^+$.
-
-**"Cộng tuyến gây hại thế nào?"**
-
-> *Kể một con số:* trong thí nghiệm ở Mục 4.4, khi tương quan giữa hai cột đi từ 0 lên 0,999 thì độ dao động của **hệ số** tăng **25 lần**, còn độ dao động của **dự báo** đi từ 0,0586 xuống 0,0585 — tức không đổi.
->
-> *Kết luận:* cộng tuyến là vấn đề của **diễn giải**, không phải của dự báo. Nếu chỉ cần dự báo thì bỏ qua được.
-
-**"Gradient descent chạy nhanh hay chậm phụ thuộc gì?"**
-
-> Phụ thuộc **số điều kiện** $\kappa$, không phụ thuộc số chiều. Số vòng lặp là $O(\kappa\log\frac1\varepsilon)$.
->
-> *Kể một con số:* đo ở Mục 5.3 — $\kappa$ đi từ 1 tới 10 000 làm số vòng đi từ 1 tới **92 104**, tức tăng đúng tuyến tính theo $\kappa$. Thêm quán tính đưa nó về $O(\sqrt\kappa)$, chỉ còn **1 297** vòng.
->
-> *Điều nên nói thêm:* vì vậy **chuẩn hoá đặc trưng về cùng thang đo** là cách rẻ nhất để tăng tốc huấn luyện — nó giảm $\kappa$ trực tiếp.
-
-**"Kiểm tra gradient thế nào?"**
-
-> Sai phân trung tâm với $\varepsilon \approx 10^{-5}$ tới $10^{-6}$, so sai số **tương đối**.
->
-> *Ghi điểm thêm — chỗ hầu hết mọi người nói sai:* $\varepsilon$ **không** phải càng nhỏ càng tốt. Có hai nguồn sai số đánh nhau: cắt cụt cỡ $\varepsilon^2$ và làm tròn cỡ $u/\varepsilon$. Điểm tối ưu là $\varepsilon^* \sim u^{1/3} \approx 6\times10^{-6}$, và đo được là $5{,}6\times10^{-6}$. Đặt $\varepsilon = 10^{-12}$ cho kết quả **tệ hơn** $10^{-6}$ khoảng sáu bậc độ lớn.
-
-### 18.3. Nhóm phân loại
-
-**"Perceptron, hồi quy logistic và SVM khác nhau ở đâu?"**
-
-> Câu trả lời tốt bắt đầu bằng chỗ chúng **giống** nhau: cùng mô hình tuyến tính $w^\top x + b$, cùng tối ưu bằng xuống dốc. Chúng chỉ khác **hàm mất mát**, và cả ba đều là chặn trên lồi của mất mát 0–1:
->
-> | | Mất mát | Hệ quả |
+> | | Hàm mất mát | Hệ quả |
 > |---|---|---|
-> | Perceptron | $\max(0,-m)$ | phẳng khi $m>0$ → dừng ngay khi vừa đúng |
-> | Hinge | $\max(0,1-m)$ | phẳng khi $m>1$ → sinh ra khái niệm **lề** |
-> | Logistic | $\log(1+e^{-m})$ | không bao giờ phẳng → cho ra **xác suất** |
+> | Perceptron | $\max(0,-m)$ | bằng 0 khi $m \ge 0$: dừng ngay khi vừa phân loại đúng, không hội tụ khi dữ liệu không tách được |
+> | SVM | $\max(0,1-m)$ | bằng 0 khi $m \ge 1$: sinh ra khái niệm lề |
+> | Hồi quy logistic | $\log(1+e^{-m})$ | trơn và luôn dương: cho ra xác suất |
 >
-> *Vì sao phải thay mất mát 0–1:* nó không lồi và có đạo hàm bằng 0 ở mọi chỗ khả vi, nên không tối ưu trực tiếp được.
+> Mất mát 0–1 không dùng trực tiếp được vì đạo hàm của nó bằng 0 hầu khắp nơi. Hinge và logistic (theo logarit cơ số 2) là chặn trên lồi của mất mát 0–1; mất mát perceptron chỉ là hàm thay thế lồi, không phải chặn trên.
 
-**"Hồi quy logistic và softmax quan hệ thế nào?"**
+**Câu hỏi: Hồi quy logistic và hồi quy softmax liên hệ thế nào?**
 
-> Softmax với $K=2$ **chính là** hồi quy logistic. Softmax có $K$ vector trọng số nhưng chỉ **hiệu** của chúng là xác định được, và với $K=2$ thì hiệu ấy đúng là $w$ của logistic.
->
-> *Kể một con số:* đo ở Mục 6.4 — khớp cả hai tới hội tụ, xác suất lệch nhau $3{,}3\times10^{-16}$ và trọng số lệch $1{,}6\times10^{-15}$, tức sai số máy.
+> **Trả lời.** Hồi quy softmax với hai lớp chính là hồi quy logistic, với $w = w_1 - w_0$. Softmax có $K$ vector trọng số nhưng chỉ hiệu giữa chúng được dữ liệu xác định, vì cộng cùng một vector vào tất cả không đổi xác suất. Thí nghiệm ở Mục 6.4 khớp cả hai mô hình trên cùng dữ liệu và cho trọng số lệch nhau $1{,}6\times10^{-15}$, tức trùng nhau tới sai số làm tròn.
 
-**"Vì sao hồi quy logistic luôn cần phạt chuẩn?"**
+**Câu hỏi: Vì sao hồi quy logistic thường cần regularization?**
 
-> Vì nếu dữ liệu **tách được hoàn toàn** thì hợp lý cực đại không có nghiệm hữu hạn: nhân $w$ lên bất kỳ hệ số nào cũng làm hợp lý tăng, nên $\|w\| \to \infty$.
->
-> *Kể một con số:* đo ở Mục 6.5 — không phạt chuẩn thì $\|w\|$ đi 10,2 → 15,9 → 24,7 → **34,8** qua các mốc 500 tới 50 000 vòng, không có dấu hiệu dừng; có phạt chuẩn $\lambda = 0{,}01$ thì nó đứng yên ở 3,993 từ vòng 500.
->
-> *Hệ quả dùng được:* `LogisticRegression` của scikit-learn mặc định $C=1$ chính vì lý do này. Và nếu thấy hệ số lớn bất thường thì nên nghi có đặc trưng rò rỉ nhãn.
+> **Trả lời.** Khi dữ liệu tách được hoàn toàn, hàm mất mát giảm mãi khi nhân $w$ với số ngày càng lớn, nên không có nghiệm hữu hạn và $\|w\| \to \infty$. Mục 6.5 đo được: không có regularization, $\|w\|$ tăng từ 10,2 lên 34,8 khi số vòng lặp tăng từ 500 lên 50 000 mà không dừng; với $\lambda = 0{,}01$, $\|w\|$ đứng yên ở 3,993. Vì vậy `LogisticRegression` của scikit-learn mặc định có regularization $\ell_2$. Hệ số lớn bất thường cũng là dấu hiệu nên kiểm tra rò rỉ dữ liệu.
 
-**"Naive Bayes khác LDA và QDA thế nào?"**
+**Câu hỏi: Naive Bayes, LDA và QDA khác nhau thế nào?**
 
-> Cả ba là **cùng một bộ phân lớp sinh Gauss**, chỉ khác ràng buộc đặt lên ma trận hiệp phương sai:
->
-> | | $\Sigma$ | Biên |
-> |---|---|---|
-> | Naive Bayes Gauss | riêng từng lớp, **chéo** | bậc hai |
-> | LDA | **dùng chung**, đầy đủ | tuyến tính |
-> | QDA | riêng từng lớp, đầy đủ | bậc hai |
->
-> *Giả thiết "naive" chính là ép $\Sigma$ thành ma trận đường chéo* — tức giả định các đặc trưng độc lập khi đã biết lớp.
->
-> *Vì sao LDA cho biên tuyến tính:* khi hai lớp dùng chung $\Sigma$, số hạng bậc hai $x^\top\Sigma^{-1}x$ **triệt tiêu** khi lấy hiệu hai hàm phân biệt. Đo được ở Mục 7.4: hàm quyết định của LDA khớp tuyến tính với sai số $4{,}4\times10^{-15}$, còn QDA thì sai số 17,8 — trật hẳn.
->
-> *Cái giá của QDA:* phải ước lượng $K$ ma trận $d\times d$ thay vì một, nên tốn dữ liệu gấp $K$ lần.
+> **Trả lời.** Với đặc trưng liên tục và mô hình Gauss cho mỗi lớp, cả ba là cùng một bộ phân loại sinh, chỉ khác ràng buộc trên ma trận hiệp phương sai: Naive Bayes Gauss dùng ma trận đường chéo riêng cho từng lớp, LDA dùng một ma trận đầy đủ chung cho mọi lớp, QDA dùng ma trận đầy đủ riêng cho từng lớp. LDA có biên tuyến tính vì khi hai lớp dùng chung $\Sigma$, số hạng bậc hai $x^\top\Sigma^{-1}x$ triệt tiêu khi lấy hiệu hai hàm phân biệt; thí nghiệm ở Mục 7.4 khớp hàm quyết định của LDA bằng hàm tuyến tính với sai số $4{,}4\times10^{-15}$. QDA linh hoạt hơn nhưng phải ước lượng $K$ ma trận hiệp phương sai, nên cần nhiều dữ liệu hơn.
 
-**"Vì sao Naive Bayes vẫn chạy tốt dù giả thiết độc lập gần như luôn sai?"**
+**Câu hỏi: Vì sao Naive Bayes vẫn phân loại tốt dù giả thiết độc lập gần như luôn sai?**
 
-> Vì để phân loại đúng ta chỉ cần **thứ tự** giữa các $p(y=k\mid x)$ đúng, không cần bản thân các xác suất đúng. Ước lượng xác suất của Naive Bayes thường rất tệ (dồn về 0 hoặc 1); nhãn thì thường ổn. Đây là lý do không nên dùng đầu ra của nó làm xác suất.
+> **Trả lời.** Vì để chọn đúng nhãn chỉ cần thứ tự của các xác suất hậu nghiệm đúng, không cần giá trị của chúng đúng. Các xác suất do Naive Bayes đưa ra thường bị đẩy về gần 0 hoặc 1 quá mức, vì các bằng chứng tương quan bị đếm lặp lại, nên không nên dùng chúng như xác suất đã hiệu chuẩn.
 
-### 18.4. Nhóm đánh giá
+### 18.4. Đánh giá mô hình
 
-**"Vì sao không dùng độ chính xác?"**
+**Câu hỏi: Vì sao không nên dùng độ chính xác trên dữ liệu mất cân bằng?**
 
-> *Kể một con số, và đây là con số đắt nhất trong cả giáo trình:* trên dữ liệu có 0,98% lớp dương, bộ phân loại **đoán tất cả là âm** đạt độ chính xác **0,9902**, trong khi bộ phân loại thật sự dùng được ($F_1 = 0{,}51$) chỉ đạt **0,9900**. Chọn theo độ chính xác là chọn đúng cái vô dụng.
+> **Trả lời.** Vì một bộ phân loại vô dụng có thể đạt độ chính xác rất cao. Trong thí nghiệm ở Mục 8.1 với 0,98% lớp dương, bộ phân loại luôn đoán lớp âm đạt độ chính xác 0,9902, cao hơn một bộ phân loại phát hiện được hơn nửa số ca dương ($F_1 = 0{,}51$, độ chính xác 0,9900). Nên dùng precision, recall, $F_1$ hoặc PR-AUC.
 
-**"ROC-AUC hay PR-AUC?"**
+**Câu hỏi: Khi nào dùng ROC-AUC, khi nào dùng PR-AUC?**
 
-> *Cùng một mô hình, cùng một bộ dữ liệu:* ROC-AUC = **0,9715** nhưng PR-AUC = **0,4931**.
->
-> *Cơ chế, và đây là chỗ phân biệt hiểu với thuộc:* mẫu số của FPR là **toàn bộ lớp âm**, mà lớp âm chiếm 99%. Thêm hàng trăm báo động nhầm gần như không làm FPR nhúc nhích. Precision thì có mẫu số chỉ gồm những ca được báo động, nên nó cảm nhận được ngay.
->
-> *Mốc so sánh:* PR-AUC của bộ đoán ngẫu nhiên bằng đúng **tỉ lệ lớp dương** (ở đây 0,01), còn ROC-AUC của nó luôn là 0,5 bất kể mất cân bằng.
+> **Trả lời.** Trên cùng mô hình và dữ liệu mất cân bằng ở Mục 8.3, ROC-AUC bằng 0,9715 nhưng PR-AUC chỉ bằng 0,4931. Lý do nằm ở mẫu số: FPR chia cho toàn bộ lớp âm, lớp chiếm 99% dữ liệu, nên hàng trăm dương giả hầu như không làm FPR thay đổi; precision chia cho số điểm được báo dương, nên nhạy với dương giả. Mốc so sánh cũng khác: ROC-AUC của bộ đoán ngẫu nhiên luôn là 0,5, còn PR-AUC của nó bằng tỉ lệ lớp dương, ở đây 0,01. Khi lớp dương hiếm và chất lượng của các cảnh báo là điều quan trọng, dùng PR-AUC.
 
-**"Precision và recall đánh đổi thế nào?"**
+**Câu hỏi: Precision và recall đánh đổi nhau thế nào?**
 
-> Qua ngưỡng. *Đo được ở Mục 8.1:* hạ ngưỡng từ 2,6 xuống −1,0 làm recall đi 0,52 → 1,00 còn precision đi 0,49 → 0,012.
->
-> *Điểm cần nói:* chọn ngưỡng là **quyết định nghiệp vụ**, phụ thuộc giá của một lần bỏ sót so với một lần báo động nhầm. Không có ngưỡng "đúng" về mặt kỹ thuật.
+> **Trả lời.** Qua ngưỡng quyết định. Ở Mục 8.1, hạ ngưỡng từ 2,6 xuống −1,0 làm recall tăng từ 0,52 lên 1,00 và precision giảm từ 0,49 xuống 0,012. Chọn ngưỡng là quyết định dựa trên chi phí của từng loại lỗi, không có ngưỡng đúng về mặt kỹ thuật. Khi một loại lỗi đắt hơn, có thể dùng $F_\beta$ để phản ánh điều đó.
 
-### 18.5. Nhóm phạt chuẩn và xác suất
+### 18.5. Regularization và xác suất
 
-**"Ridge khác lasso thế nào?"**
+**Câu hỏi: Ridge và lasso khác nhau thế nào?**
 
-> Ridge phạt $\|w\|_2^2$, lasso phạt $\|w\|_1$. Lasso cho hệ số **đúng bằng 0**, ridge thì không bao giờ.
->
-> *Cơ chế:* $|w|$ có **điểm gãy** tại 0, dưới vi phân là cả đoạn $[-1,1]$, nên cần gradient thắng một lực có độ lớn cố định mới kéo được hệ số ra khỏi 0. Với $w^2$ thì đạo hàm là $2w$, yếu dần khi gần 0.
->
-> *Kể một con số:* ở $\lambda = 100$, lasso đưa **9 trong 12** hệ số về đúng 0, và mô hình sinh dữ liệu cũng có đúng 9 hệ số bằng 0. Ridge đưa được **0**.
+> **Trả lời.** Ridge phạt $\|w\|_2^2$, lasso phạt $\|w\|_1$. Lasso cho nhiều hệ số bằng đúng 0, ridge thì không. Trong trường hợp các cột trực chuẩn, ridge nhân mỗi hệ số với $1/(1+\lambda)$, còn lasso trừ mỗi hệ số một lượng $\lambda$ và cắt về 0 những hệ số nhỏ hơn (ngưỡng mềm). Nguyên nhân là $|w|$ không khả vi tại 0 và dưới vi phân tại đó là cả đoạn $[-1, 1]$. Mục 9.4 đo được: ở $\lambda = 100$, lasso đưa đúng 9 trong 12 hệ số về 0, trùng với 9 hệ số bằng 0 của mô hình thật, còn ridge không đưa hệ số nào về 0.
 
-**"Ridge co ngót đều mọi hướng phải không?"**
+**Câu hỏi: Ridge có co mọi hệ số như nhau không?**
 
-> **Không** — và đây là chỗ hay bị nói sai. Qua SVD, hệ số co ngót theo hướng riêng thứ $i$ là $d_i^2/(d_i^2+\lambda)$.
->
-> *Kể một con số:* với $\lambda=10$, hướng có $d_i = 12{,}27$ chỉ bị co còn 0,938, trong khi hướng có $d_i = 6{,}17$ bị co còn 0,792. Ridge **co mạnh nhất đúng những hướng dữ liệu nói ít nhất** — đó chính là lý do nó chữa được cộng tuyến.
+> **Trả lời.** Không. Viết qua SVD, ridge nhân thành phần theo hướng riêng thứ $i$ với $d_i^2/(d_i^2+\lambda)$. Ở Mục 9.3 với $\lambda = 10$, hướng có giá trị suy biến 12,27 giữ lại 0,938, hướng có giá trị suy biến 6,17 chỉ giữ lại 0,792. Ridge co mạnh nhất những hướng dữ liệu cung cấp ít thông tin, cũng là những hướng mà ước lượng bình phương tối thiểu có phương sai lớn nhất. Đó là lý do ridge xử lý được đa cộng tuyến.
 
-**"Phạt chuẩn từ đâu ra?"**
+**Câu hỏi: Regularization có nguồn gốc từ đâu?**
 
-> Từ **tiên nghiệm**. MAP cực tiểu $-\log p(\mathcal{D}\mid\theta) - \log p(\theta)$, trong đó số hạng thứ nhất là mất mát và số hạng thứ hai là phạt chuẩn.
->
-> | Phạt | Tiên nghiệm | Niềm tin |
-> |---|---|---|
-> | $\ell_2$ | Gauss | hệ số nên nhỏ |
-> | $\ell_1$ | Laplace | phần lớn hệ số nên bằng 0 |
-> | Làm trơn Laplace | Dirichlet | mọi kết cục đều có thể |
->
-> *Kể một con số:* ridge dạng đóng và MAP tối ưu bằng BFGS trên hậu nghiệm — hai đường tính hoàn toàn khác nhau — cho nghiệm lệch $2{,}0\times10^{-8}$, với $\lambda = \sigma^2/\tau^2$ đúng như lý thuyết.
->
-> *Ranh giới cần nói rõ:* MAP **không phải** suy luận Bayes đầy đủ. Nó lấy một điểm — đỉnh hậu nghiệm — rồi vứt phần còn lại, nên không cho độ bất định.
+> **Trả lời.** Từ phân phối tiên nghiệm. Ước lượng MAP cực tiểu $-\log p(\mathcal{D}\mid\theta) - \log p(\theta)$: số hạng thứ nhất là hàm mất mát, số hạng thứ hai là regularization. Tiên nghiệm Gauss cho ridge với $\lambda = \sigma^2/\tau^2$, tiên nghiệm Laplace cho lasso, tiên nghiệm Dirichlet cho làm trơn Laplace. Mục 10.4 kiểm chứng: nghiệm ridge dạng đóng và nghiệm MAP tìm bằng BFGS lệch nhau $2\times10^{-8}$. Cần nói thêm rằng MAP chỉ lấy đỉnh của hậu nghiệm, không cho biết mức độ không chắc chắn như suy luận Bayes đầy đủ.
 
-### 18.6. Nhóm tối ưu lồi và SVM
+### 18.6. Tối ưu lồi và SVM
 
-**"Vì sao quan tâm tới tính lồi?"**
+**Câu hỏi: Vì sao tính lồi quan trọng?**
 
-> Vì với hàm lồi, **mọi cực tiểu địa phương đều là cực tiểu toàn cục**. Nên điểm khởi tạo không quan trọng và khi dừng thì ta biết mình đã ở nghiệm tốt nhất.
->
-> *Kể một con số:* thí nghiệm ở Mục 11.6 chạy xuống dốc từ 21 điểm xuất phát. Hàm lồi cho **một** điểm dừng; hàm $x^4-3x^2+x/2$ cho **hai**, với giá trị $-2{,}87$ và $-1{,}65$ — tức gần một nửa số lần chạy kết thúc ở nghiệm không phải toàn cục.
->
-> *Nối sang chỗ khác:* hàm mất mát của mạng nơ-ron không lồi, và đó chính là lý do khởi tạo, chuẩn hoá và kết nối tắt trở thành vấn đề sống còn ở đó.
+> **Trả lời.** Với hàm lồi, mọi điểm có gradient bằng 0 là cực tiểu toàn cục, nên kết quả không phụ thuộc điểm khởi tạo. Ở Mục 11.6, gradient descent chạy từ 21 điểm xuất phát cho một điểm dừng duy nhất với hàm lồi, nhưng cho hai điểm dừng với giá trị $-2{,}87$ và $-1{,}65$ với hàm không lồi $x^4 - 3x^2 + x/2$. Hàm mất mát của mạng nơ-ron không lồi, và đó là lý do khởi tạo, chuẩn hoá và kết nối tắt trở nên quan trọng khi huấn luyện mạng sâu.
 
-**"Vì sao SVM đi đường vòng qua bài toán đối ngẫu?"**
+**Câu hỏi: Vì sao SVM được giải qua bài toán đối ngẫu?**
 
-> Ba lý do, nhưng lý do thật là lý do thứ ba: bài toán đối ngẫu chỉ phụ thuộc dữ liệu qua **tích vô hướng** $x_i^\top x_j$. Ngay khi thấy điều đó thì **thủ thuật nhân** trở thành hiển nhiên — thay tích vô hướng bằng $K(x_i,x_j)$ là xong. Không chuyển sang đối ngẫu thì không nhìn ra.
->
-> Hai lý do còn lại: đối ngẫu có $n$ biến thay vì $d$ (thắng khi $d \gg n$), và nó cho chặn dưới để biết còn cách tối ưu bao xa.
+> **Trả lời.** Lý do quan trọng nhất là bài toán đối ngẫu chỉ phụ thuộc vào dữ liệu qua tích vô hướng $x_i^\top x_j$, nên thay tích vô hướng bằng một kernel là SVM làm việc được trong không gian đặc trưng phi tuyến mà không cần dựng không gian đó. Ngoài ra bài toán đối ngẫu có $n$ biến thay vì $d$ biến, có lợi khi $d$ lớn hơn $n$, và giá trị đối ngẫu cho chặn dưới để biết nghiệm hiện tại còn cách tối ưu bao xa.
 
-**"Vector hỗ trợ là gì, và vì sao chỉ chúng quan trọng?"**
+**Câu hỏi: Vector hỗ trợ là gì, và vì sao chỉ chúng ảnh hưởng tới nghiệm?**
 
-> Là những điểm có $\alpha_i > 0$. Theo **điều kiện bù trừ** của KKT, $\alpha_i f_i(x^*) = 0$, nên ràng buộc lỏng thì $\alpha_i = 0$ — tức điểm nằm ngoài lề **không ảnh hưởng gì** tới nghiệm.
->
-> *Điều nên nhấn:* đây không phải một thiết kế mà là một **hệ quả** của KKT.
->
-> *Kể một con số:* đo ở Mục 13.3 — **3 trên 120 điểm** quyết định toàn bộ nghiệm. Xoá 117 điểm còn lại thì kết quả không đổi.
+> **Trả lời.** Là những điểm có nhân tử Lagrange $\alpha_i > 0$. Theo điều kiện bù của KKT, $\alpha_i > 0$ chỉ xảy ra khi ràng buộc của điểm đó chặt, tức điểm nằm đúng trên lề (với SVM lề cứng). Mọi điểm nằm ngoài lề có $\alpha_i = 0$ và không đóng góp vào $w = \sum_i \alpha_i y_i x_i$. Đây là hệ quả của KKT, không phải lựa chọn thiết kế. Thí nghiệm ở Mục 13.3 có 3 vector hỗ trợ trên 120 điểm; bỏ 117 điểm còn lại, nghiệm không đổi.
 
-**"$C$ trong SVM lề mềm làm gì?"**
+**Câu hỏi: Tham số $C$ trong SVM lề mềm có vai trò gì?**
 
-> Điều khiển đánh đổi giữa lề rộng và số điểm được phép vi phạm. Và KKT chia các điểm thành **đúng ba nhóm**: $\alpha=0$ nằm ngoài lề, $0<\alpha<C$ nằm đúng trên lề, $\alpha=C$ vi phạm lề.
->
-> *Kể một con số:* ở $C = 0{,}003$ lề rộng 5,61 với **cả 114 vector hỗ trợ đều là điểm vi phạm**; ở $C=300$ lề hẹp 1,73 với 45 vector hỗ trợ.
->
-> *Trung thực về giới hạn:* với **nhân tuyến tính** trên dữ liệu mà biên tối ưu vốn tuyến tính, $C$ ảnh hưởng ít — sai số kiểm tra chỉ chênh 0,173 so với 0,180. $C$ quan trọng hơn nhiều với nhân phi tuyến.
+> **Trả lời.** $C$ cân bằng giữa lề rộng và mức phạt cho các điểm vi phạm lề; nó đóng vai trò nghịch đảo của hệ số regularization, vì SVM lề mềm tương đương với mất mát hinge cộng $\tfrac{1}{2}\|w\|^2$. KKT chia các điểm thành ba nhóm: $\alpha = 0$ (ngoài lề), $0 < \alpha < C$ (trên lề), $\alpha = C$ (vi phạm lề). Ở Mục 13.4, $C = 0{,}003$ cho lề rộng 5,61 và cả 114 vector hỗ trợ đều vi phạm lề; $C = 300$ cho lề 1,73 với 45 vector hỗ trợ. Với kernel tuyến tính trên dữ liệu có biên tối ưu tuyến tính, $C$ ảnh hưởng ít tới sai số kiểm tra; với kernel phi tuyến, $C$ quan trọng hơn nhiều.
 
-**"Thủ thuật nhân là gì?"**
+**Câu hỏi: Thủ thuật kernel là gì?**
 
-> Tính $K(x,x') = \varphi(x)^\top\varphi(x')$ mà **không bao giờ** tính $\varphi(x)$. Với nhân RBF thì $\varphi(x)$ nằm ở không gian **vô hạn chiều**, nhưng mỗi phép tính chỉ tốn $O(d)$.
->
-> *Kể một con số:* trên dữ liệu hai vòng tròn đồng tâm, nhân tuyến tính đạt 0,615 còn nhân đa thức bậc 2 và RBF đều đạt **1,000**. Nhân bậc 2 đạt trọn vì không gian đặc trưng của nó chứa $x_1^2+x_2^2$ — đúng đại lượng phân biệt hai vòng tròn.
+> **Trả lời.** Là tính tích vô hướng trong không gian đặc trưng, $K(x,x') = \varphi(x)^\top\varphi(x')$, mà không cần tính $\varphi(x)$. Kernel RBF tương ứng với một không gian đặc trưng vô hạn chiều, nhưng mỗi lần tính chỉ tốn $O(d)$. Trên dữ liệu hai đường tròn đồng tâm (Mục 13.5), kernel tuyến tính đạt độ chính xác 0,615, còn kernel đa thức bậc 2 và RBF đều đạt 1,000; kernel bậc 2 đạt tuyệt đối vì không gian đặc trưng của nó chứa $x_1^2 + x_2^2$.
 
-**"Vì sao SVM ít dùng ở quy mô lớn?"**
+**Câu hỏi: Vì sao SVM với kernel ít được dùng cho dữ liệu rất lớn?**
 
-> Không phải vì kém chính xác mà vì chi phí: huấn luyện cỡ $O(n^2)$–$O(n^3)$, và khi suy luận phải tính $K(x, x_i)$ với **mọi** vector hỗ trợ, mà số ấy thường tăng tuyến tính theo $n$. Xuống dốc ngẫu nhiên chỉ tốn $O(n)$ mỗi vòng.
+> **Trả lời.** Vì chi phí, không phải vì độ chính xác. Huấn luyện cần làm việc với ma trận kernel $n\times n$, chi phí khoảng $O(n^2)$ tới $O(n^3)$; khi dự đoán phải tính kernel với mọi vector hỗ trợ, mà số vector hỗ trợ thường tăng theo $n$. Mỗi epoch của SGD trên mạng nơ-ron chỉ tốn chi phí tuyến tính theo $n$.
 
-### 18.7. Nhóm không giám sát
+### 18.7. Học không giám sát
 
-**"PCA làm gì, và khi nào nó phản tác dụng?"**
+**Câu hỏi: PCA làm gì, và khi nào nó không phù hợp?**
 
-> Tìm các hướng trực giao có phương sai lớn nhất; nghiệm là vector riêng của ma trận hiệp phương sai. Sai số tái dựng **đúng bằng** tổng các trị riêng bị bỏ — định lý Eckart–Young, kiểm chứng được tới $10^{-13}$.
->
-> *Khi nào phản tác dụng, kèm con số:* PCA **không nhìn nhãn**. Ở Mục 14.4, trục chính thứ nhất giữ **96,1% phương sai** nhưng cho AUC **0,502** — vô dụng hoàn toàn cho phân loại, trong khi LDA đạt 0,9987.
->
-> *Kết luận đáng nhớ:* phương sai lớn không đồng nghĩa có ích.
+> **Trả lời.** PCA tìm các hướng trực giao có phương sai lớn nhất, là các vector riêng của ma trận hiệp phương sai. Sai số tái tạo khi giữ $k$ thành phần bằng đúng tổng các trị riêng bị bỏ nhân $(n-1)$ (định lý Eckart–Young; Mục 14.3 kiểm chứng tới $10^{-12}$). PCA không dùng nhãn, nên hướng có phương sai lớn có thể vô dụng cho phân loại: ở Mục 14.4, thành phần chính thứ nhất giữ 96,1% phương sai nhưng cho AUC 0,502, trong khi hướng của LDA cho AUC 0,9987.
 
-**"PCA khác LDA thế nào?"**
+**Câu hỏi: PCA và LDA khác nhau thế nào?**
 
-> PCA tối đa hoá phương sai toàn phần và không dùng nhãn; LDA tối đa hoá tỉ số giữa độ tách giữa lớp và độ tản trong lớp, và **dùng nhãn**. LDA cho tối đa $K-1$ chiều, vì $S_B$ chỉ có hạng $K-1$.
->
-> *Nối sang chỗ khác:* LDA ở đây chính là bộ phân lớp Gauss dùng chung $\Sigma$ ở Mục 7.4 — hai cách phát biểu của một thuật toán.
+> **Trả lời.** PCA cực đại phương sai toàn phần và không dùng nhãn. LDA cực đại tỉ số giữa tán xạ giữa các lớp và tán xạ trong lớp, và có dùng nhãn. LDA cho tối đa $K - 1$ chiều vì ma trận tán xạ giữa các lớp có hạng không quá $K - 1$. Hướng của LDA, $S_W^{-1}(\mu_1 - \mu_0)$, trùng với vector trọng số của bộ phân loại Gauss dùng chung ma trận hiệp phương sai ở Mục 7.4.
 
-**"K-means có bảo đảm gì?"**
+**Câu hỏi: K-means bảo đảm được điều gì?**
 
-> Chỉ bảo đảm **hội tụ tới cực tiểu địa phương**, vì bài toán gốc NP-khó và hàm mục tiêu không lồi.
->
-> *Kể một con số:* chạy 200 lần trên dữ liệu 8 cụm — khởi tạo ngẫu nhiên thuần kẹt ở nghiệm tồi **71,5%** số lần; k-means++ hạ xuống **46,5%**, tức cải thiện rõ nhưng không triệt để. Đó là lý do luôn phải chạy nhiều lần.
->
-> *Ba giả định ngầm:* cụm lồi và gần hình cầu, kích thước tương đương, mọi chiều cùng thang đo. Đo được: ba cụm tròn → đúng **100%**; hai hình lưỡi liềm → 75%; hai dải dẹt → **53%**, gần như đoán bừa.
+> **Trả lời.** Chỉ bảo đảm dừng ở một cực tiểu địa phương, vì bài toán tìm nghiệm tối ưu là NP-khó và hàm mục tiêu không lồi. Ở Mục 15.2, trên dữ liệu 8 cụm, khởi tạo ngẫu nhiên cho nghiệm tồi trong 71,5% số lần chạy, k-means++ giảm xuống 46,5%. Vì vậy cần chạy nhiều lần; lưu ý scikit-learn từ phiên bản 1.4 mặc định chỉ chạy một lần với k-means++. K-means còn giả định cụm lồi, gần tròn, kích thước tương đương và các chiều cùng thang đo: trên hai dải dẹt song song nó chỉ đạt độ chính xác 0,53.
 
-**"Chọn $k$ thế nào?"**
+**Câu hỏi: Chọn số cụm $k$ thế nào?**
 
-> Không thể tối thiểu hoá quán tính, vì nó **luôn giảm** theo $k$ và bằng 0 khi $k=n$. Quy tắc khuỷu tay là nhìn chỗ mức giảm chậm hẳn lại.
->
-> *Kể một con số:* trên dữ liệu 8 cụm, mức giảm là **27,7%** khi lên $k=8$ rồi rơi xuống **5,4%** khi lên $k=9$.
->
-> *Trung thực:* khuỷu tay không phải định nghĩa toán học và thường không rõ trên dữ liệu thật. Các lựa chọn khác là điểm bóng và thống kê khoảng trống — nhưng thường $k$ do nghiệp vụ quyết định.
+> **Trả lời.** Không chọn bằng cách cực tiểu inertia, vì inertia luôn giảm theo $k$ và bằng 0 khi $k = n$. Phương pháp elbow tìm chỗ inertia ngừng giảm nhanh: ở Mục 15.4, mức giảm là 27,7% khi lên $k = 8$ rồi chỉ còn 5,4% khi lên $k = 9$. Elbow không có định nghĩa chặt và thường không rõ trên dữ liệu thật; có thể dùng hệ số silhouette hoặc gap statistic, và trong nhiều trường hợp $k$ do yêu cầu nghiệp vụ quyết định.
 
-**"Phân rã ma trận cần bao nhiêu dữ liệu?"**
+**Câu hỏi: Phân rã ma trận cần bao nhiêu dữ liệu?**
 
-> *Có một ngưỡng sắc nét, và đây là con số đáng kể:* với hạng thật $k=4$, ở **10,1 đánh giá mỗi người** thì RMSE là 3,54 — **tệ hơn đoán bừa bằng 0** (2,08). Ở **19,8 đánh giá** thì RMSE rơi xuống 0,30. Giảm hơn 11 lần chỉ vì tăng gấp đôi dữ liệu.
->
-> *Quy tắc bỏ túi:* cần cỡ **5 lần số yếu tố ẩn** đánh giá cho mỗi người. Đó là lý do các hệ thật dùng $k$ nhỏ đáng ngạc nhiên (10–200) dù có hàng triệu người dùng.
+> **Trả lời.** Cần số đánh giá mỗi người dùng lớn hơn hạng $k$ nhiều lần. Trong thí nghiệm ở Mục 16.3 với hạng thật $k = 4$, ở 10,1 đánh giá mỗi người RMSE là 3,54, tệ hơn cả đoán mọi ô bằng 0 (2,08); ở 19,8 đánh giá mỗi người RMSE giảm xuống 0,30. Mỗi người dùng có $k$ ẩn số, và vì đánh giá có nhiễu còn các vector sản phẩm cũng đang được ước lượng, số đánh giá cần thiết lớn hơn $k$ nhiều lần.
 
-**"Khởi đầu lạnh vì sao nghiêm trọng?"**
+**Câu hỏi: Vì sao khởi đầu lạnh là vấn đề nghiêm trọng?**
 
-> Vì với người dùng không có đánh giá nào, hàm mất mát chỉ còn số hạng phạt chuẩn $\lambda\|p_u\|^2$, mà cực tiểu của nó là $p_u = 0$.
->
-> *Kể một con số:* $\|p_u\|$ của người dùng mới đo được là **0,154** so với 2,084 của người cũ, và RMSE của họ là 2,24 — **tệ hơn cả đoán bừa** 2,08.
->
-> *Hệ quả thiết kế:* mọi hệ thực tế phải lai, vì lọc cộng tác **không có đường lùi** khi không có dữ liệu.
+> **Trả lời.** Với người dùng chưa có đánh giá nào, hàm mất mát chỉ còn thành phần regularization $\lambda\|p_u\|^2$, có cực tiểu tại $p_u = 0$, nên mô hình dự đoán gần 0 cho mọi sản phẩm. Ở Mục 16.5, RMSE cho người dùng mới là 2,24, tệ hơn đoán bằng 0 (2,08). Vì vậy hệ thống thực tế cần kết hợp lọc dựa trên nội dung với lọc cộng tác.
 
-### 18.8. Những câu trả lời tự tố cáo
+### 18.8. Các câu trả lời chưa đạt
 
-| Câu trả lời | Vì sao nó tố cáo |
+| Câu trả lời | Vì sao chưa đạt |
 |---|---|
-| "Bình phương sai lệch vì nó phạt sai số lớn nặng hơn." | Đúng nhưng hời hợt. Không nói được nó là MLE dưới nhiễu Gauss là chưa hiểu gốc. |
-| "Cộng tuyến làm mô hình dự báo kém." | Sai. Nó làm **hệ số** loạn; dự báo gần như không đổi. |
-| "Gradient descent chậm vì nhiều chiều quá." | Sai. Phụ thuộc $\kappa$, không phụ thuộc $d$. |
-| "Kiểm tra gradient thì $\varepsilon$ càng nhỏ càng tốt." | Sai, và sai theo hướng ngược hẳn. $\varepsilon^* \sim u^{1/3}$. |
-| "Mô hình đạt 99% độ chính xác nên rất tốt." | Trên dữ liệu 1% lớp dương thì bộ đoán tất cả là âm đạt 99%. |
-| "ROC-AUC 0,97 là mô hình rất tốt." | Trên dữ liệu mất cân bằng, cùng mô hình ấy có PR-AUC 0,49. |
-| "Ridge và lasso về cơ bản giống nhau." | Lasso cho hệ số bằng đúng 0, ridge không bao giờ. Khác nhau về **chất**. |
-| "Phạt chuẩn là một thủ thuật để chống quá khớp." | Nó là **tiên nghiệm**. Ridge = MAP Gauss, kiểm chứng được tới $2\times10^{-8}$. |
-| "SVM tốt vì nó tìm biên tối ưu." | "Tối ưu" theo nghĩa nào? Phải nói: lề rộng nhất, và vì sao lề rộng thì tổng quát hoá tốt. |
-| "Nhân RBF ánh xạ dữ liệu lên chiều cao hơn rồi phân loại ở đó." | Gần đúng nhưng bỏ mất điểm hay nhất: nó **không bao giờ tính** ánh xạ ấy. |
-| "PCA giữ 95% phương sai nên gần như không mất gì." | Đo được: giữ 96,1% phương sai mà AUC còn 0,502. |
-| "K-means tìm được cụm tối ưu." | NP-khó; nó chỉ cho cực tiểu địa phương, kẹt 46,5% số lần ngay cả với k-means++. |
-| "Naive Bayes giả định các đặc trưng độc lập." | Thiếu hai chữ quan trọng: độc lập **có điều kiện** khi đã biết lớp. |
-| "Chọn $k$ cho K-means bằng cách tối thiểu quán tính." | Quán tính luôn giảm theo $k$ và bằng 0 khi $k=n$. |
+| "Bình phương sai số vì nó phạt sai số lớn nặng hơn." | Đúng nhưng chưa đủ: chưa nêu được bình phương sai số là MLE dưới giả thiết nhiễu Gauss. |
+| "Đa cộng tuyến làm mô hình dự đoán kém." | Sai: nó làm hệ số dao động, còn dự đoán gần như không đổi. |
+| "Gradient descent chậm vì bài toán có nhiều chiều." | Sai: tốc độ phụ thuộc số điều kiện, không phụ thuộc số chiều. |
+| "Kiểm tra gradient thì $\varepsilon$ càng nhỏ càng tốt." | Sai: $\varepsilon$ quá nhỏ làm sai số làm tròn lớn lên; điểm tối ưu cỡ $u^{1/3}$. |
+| "Mô hình đạt độ chính xác 99% nên rất tốt." | Trên dữ liệu có 1% lớp dương, bộ phân loại luôn đoán lớp âm cũng đạt 99%. |
+| "ROC-AUC 0,97 nghĩa là mô hình rất tốt." | Trên dữ liệu mất cân bằng, cùng mô hình đó có thể có PR-AUC chỉ 0,49. |
+| "Ridge và lasso về cơ bản giống nhau." | Lasso cho hệ số bằng đúng 0, ridge thì không; đây là khác biệt về bản chất. |
+| "Regularization chỉ là một mẹo để chống overfitting." | Chưa đủ: regularization tương ứng với một phân phối tiên nghiệm (ridge là MAP với tiên nghiệm Gauss). |
+| "SVM tốt vì tìm được biên tối ưu." | Chưa rõ tối ưu theo nghĩa nào: cần nói là lề lớn nhất, và vì sao lề lớn giúp tổng quát hoá. |
+| "Kernel RBF ánh xạ dữ liệu lên không gian nhiều chiều rồi phân loại ở đó." | Thiếu ý chính: phép ánh xạ đó không bao giờ được tính tường minh. |
+| "PCA giữ 95% phương sai nên gần như không mất thông tin." | Phương sai lớn không có nghĩa là hữu ích: có trường hợp giữ 96,1% phương sai mà AUC chỉ 0,502. |
+| "K-means tìm được cụm tối ưu." | Bài toán NP-khó; thuật toán chỉ cho cực tiểu địa phương, kể cả khi dùng k-means++. |
+| "Naive Bayes giả định các đặc trưng độc lập." | Thiếu điều kiện quan trọng: độc lập có điều kiện khi đã biết lớp. |
+| "Chọn $k$ cho K-means bằng cách cực tiểu inertia." | Inertia luôn giảm theo $k$ và bằng 0 khi $k = n$. |
 
 ---
 
 ## 19. Tài liệu tham khảo
 
-**Sách nền tảng**
+**Sách**
 
-1. T. Hastie, R. Tibshirani, J. Friedman. *The Elements of Statistical Learning.* Springer, 2009. — nguồn chuẩn cho ridge, lasso, LDA/QDA, và công thức co ngót $d_i^2/(d_i^2+\lambda)$ ở Mục 9.3.
-2. C. Bishop. *Pattern Recognition and Machine Learning.* Springer, 2006. — nguồn cho cách đọc MAP như phạt chuẩn, và cho phần phân lớp sinh Gauss.
-3. K. Murphy. *Machine Learning: A Probabilistic Perspective.* MIT Press, 2012. — trình bày thống nhất theo góc nhìn xác suất, đúng lối Chương 10 dùng.
-4. S. Boyd, L. Vandenberghe. *Convex Optimization.* Cambridge University Press, 2004. — nguồn chuẩn cho Chương 11 và 12: tập lồi, hàm lồi, đối ngẫu Lagrange, điều kiện Slater và KKT. Sách và bài giảng đều đọc miễn phí.
-5. G. Strang. *Introduction to Linear Algebra.* Wellesley–Cambridge Press. — nền cho Chương 2.
-6. T. Hastie, R. Tibshirani, M. Wainwright. *Statistical Learning with Sparsity.* CRC Press, 2015. — chuyên sâu về lasso và vì sao $\ell_1$ cho nghiệm thưa.
+1. T. Hastie, R. Tibshirani, J. Friedman. *The Elements of Statistical Learning*, 2nd ed. Springer, 2009. Nguồn cho ridge, lasso, LDA và QDA, công thức co $d_i^2/(d_i^2+\lambda)$ và số bậc tự do hiệu dụng ở Mục 9.3.
+2. C. M. Bishop. *Pattern Recognition and Machine Learning*. Springer, 2006. Nguồn cho cách hiểu regularization như ước lượng MAP và cho các bộ phân loại Gauss.
+3. K. P. Murphy. *Machine Learning: A Probabilistic Perspective*. MIT Press, 2012. Trình bày học máy thống nhất theo góc nhìn xác suất như Chương 10.
+4. S. Boyd, L. Vandenberghe. *Convex Optimization*. Cambridge University Press, 2004. Nguồn cho Chương 11 và 12: tập lồi, hàm lồi, đối ngẫu Lagrange, điều kiện Slater và KKT. Sách được phát hành miễn phí trên trang của tác giả.
+5. G. Strang. *Introduction to Linear Algebra*, 5th ed. Wellesley–Cambridge Press, 2016. Nền cho Chương 2.
+6. T. Hastie, R. Tibshirani, M. Wainwright. *Statistical Learning with Sparsity: The Lasso and Generalizations*. CRC Press, 2015. Chuyên sâu về lasso và nghiệm thưa.
+7. T. M. Mitchell. *Machine Learning*. McGraw-Hill, 1997. Nguồn của định nghĩa học máy ở Mục 1.1.
+8. V. N. Vapnik. *The Nature of Statistical Learning Theory*. Springer, 1995. Nguồn cho lý thuyết lề và chiều VC ở Mục 13.1.
 
-**Bài báo gốc của từng thuật toán**
+**Bài báo gốc**
 
-7. A. Hoerl, R. Kennard. *Ridge Regression: Biased Estimation for Nonorthogonal Problems.* Technometrics, 1970. — bài báo giới thiệu ridge, và chính tiêu đề của nó đã nói rõ ridge là ước lượng **có thiên lệch**.
-8. R. Tibshirani. *Regression Shrinkage and Selection via the Lasso.* JRSS-B, 1996.
-9. H. Zou, T. Hastie. *Regularization and Variable Selection via the Elastic Net.* JRSS-B, 2005.
-10. F. Rosenblatt. *The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain.* Psychological Review, 1958.
-11. A. Novikoff. *On Convergence Proofs for Perceptrons.* Symposium on the Mathematical Theory of Automata, 1962. — nguồn của chặn $(R/\gamma)^2$ dùng ở Mục 6.2.
-12. M. Minsky, S. Papert. *Perceptrons.* MIT Press, 1969. — phân tích giới hạn của perceptron trên dữ liệu không tách được.
-13. B. Boser, I. Guyon, V. Vapnik. *A Training Algorithm for Optimal Margin Classifiers.* COLT 1992. — nguồn của thủ thuật nhân.
-14. C. Cortes, V. Vapnik. *Support-Vector Networks.* Machine Learning, 1995. — nguồn của lề mềm và tham số $C$.
-15. V. Vapnik. *The Nature of Statistical Learning Theory.* Springer, 1995.
-16. J. Platt. *Sequential Minimal Optimization.* Microsoft Research TR, 1998. — thuật toán mà libsvm dùng để giải bài toán đối ngẫu.
-17. R. Fisher. *The Use of Multiple Measurements in Taxonomic Problems.* Annals of Eugenics, 1936. — nguồn của LDA.
-18. K. Pearson. *On Lines and Planes of Closest Fit to Systems of Points in Space.* Philosophical Magazine, 1901. — nguồn của PCA.
-19. C. Eckart, G. Young. *The Approximation of One Matrix by Another of Lower Rank.* Psychometrika, 1936. — định lý kiểm chứng ở Mục 14.3.
-20. S. Lloyd. *Least Squares Quantization in PCM.* IEEE Trans. Information Theory, 1982 (bản thảo 1957). — thuật toán K-means.
-21. D. Arthur, S. Vassilvitskii. *k-means++: The Advantages of Careful Seeding.* SODA 2007. — nguồn của cách khởi tạo đo ở Mục 15.2.
-22. Y. Koren, R. Bell, C. Volinsky. *Matrix Factorization Techniques for Recommender Systems.* IEEE Computer, 2009. — nguồn chuẩn cho Chương 16.
-23. Y. Hu, Y. Koren, C. Volinsky. *Collaborative Filtering for Implicit Feedback Datasets.* ICDM 2008. — ALS cho phản hồi ngầm.
+9. A. E. Hoerl, R. W. Kennard. Ridge Regression: Biased Estimation for Nonorthogonal Problems. *Technometrics*, 1970.
+10. R. Tibshirani. Regression Shrinkage and Selection via the Lasso. *Journal of the Royal Statistical Society, Series B*, 1996.
+11. H. Zou, T. Hastie. Regularization and Variable Selection via the Elastic Net. *Journal of the Royal Statistical Society, Series B*, 2005.
+12. F. Rosenblatt. The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain. *Psychological Review*, 1958.
+13. A. B. J. Novikoff. On Convergence Proofs on Perceptrons. *Symposium on the Mathematical Theory of Automata*, 1962. Nguồn của Định lý 6.1.
+14. T. Cover, P. Hart. Nearest Neighbor Pattern Classification. *IEEE Transactions on Information Theory*, 1967. Nguồn của Định lý 7.1.
+15. A. Y. Ng, M. I. Jordan. On Discriminative vs. Generative Classifiers: A Comparison of Logistic Regression and Naive Bayes. *NIPS*, 2002. Nguồn cho so sánh ở Mục 7.1.
+16. D. Soudry, E. Hoffer, M. S. Nacson, S. Gunasekar, N. Srebro. The Implicit Bias of Gradient Descent on Separable Data. *Journal of Machine Learning Research*, 2018. Nguồn cho nhận xét về tốc độ tăng của $\|w\|$ ở Mục 6.5.
+17. B. E. Boser, I. M. Guyon, V. N. Vapnik. A Training Algorithm for Optimal Margin Classifiers. *COLT*, 1992. Nguồn của thủ thuật kernel cho SVM.
+18. C. Cortes, V. Vapnik. Support-Vector Networks. *Machine Learning*, 1995. Nguồn của SVM lề mềm và tham số $C$.
+19. J. Platt. Sequential Minimal Optimization: A Fast Algorithm for Training Support Vector Machines. Microsoft Research Technical Report, 1998. Thuật toán nền của libsvm.
+20. R. A. Fisher. The Use of Multiple Measurements in Taxonomic Problems. *Annals of Eugenics*, 1936. Nguồn của LDA.
+21. K. Pearson. On Lines and Planes of Closest Fit to Systems of Points in Space. *Philosophical Magazine*, 1901. Nguồn của PCA.
+22. C. Eckart, G. Young. The Approximation of One Matrix by Another of Lower Rank. *Psychometrika*, 1936. Định lý ở Mục 14.3.
+23. S. P. Lloyd. Least Squares Quantization in PCM. *IEEE Transactions on Information Theory*, 1982 (báo cáo nội bộ năm 1957). Thuật toán K-means.
+24. D. Arthur, S. Vassilvitskii. k-means++: The Advantages of Careful Seeding. *SODA*, 2007. Nguồn của cách khởi tạo ở Mục 15.2.
+25. R. Tibshirani, G. Walther, T. Hastie. Estimating the Number of Clusters in a Data Set via the Gap Statistic. *Journal of the Royal Statistical Society, Series B*, 2001.
+26. Y. Koren, R. Bell, C. Volinsky. Matrix Factorization Techniques for Recommender Systems. *IEEE Computer*, 2009. Nguồn chính cho Chương 16.
+27. Y. Hu, Y. Koren, C. Volinsky. Collaborative Filtering for Implicit Feedback Datasets. *ICDM*, 2008. ALS cho phản hồi ngầm.
+28. E. J. Candès, B. Recht. Exact Matrix Completion via Convex Optimization. *Foundations of Computational Mathematics*, 2009. Nguồn cho nhận xét lý thuyết ở Mục 16.3.
 
 **Tối ưu hoá**
 
-24. B. Polyak. *Some Methods of Speeding up the Convergence of Iteration Methods.* USSR Computational Mathematics, 1964. — heavy ball, tức phương pháp quán tính đo ở Mục 5.3.
-25. Y. Nesterov. *A Method of Solving a Convex Programming Problem with Convergence Rate $O(1/k^2)$.* Soviet Mathematics Doklady, 1983.
-26. L. Bottou, F. Curtis, J. Nocedal. *Optimization Methods for Large-Scale Machine Learning.* SIAM Review, 2018. — khảo sát tốt về SGD và các biến thể.
+29. H. Robbins, S. Monro. A Stochastic Approximation Method. *Annals of Mathematical Statistics*, 1951. Điều kiện về tốc độ học ở Mục 5.6.
+30. B. T. Polyak. Some Methods of Speeding up the Convergence of Iteration Methods. *USSR Computational Mathematics and Mathematical Physics*, 1964. Phương pháp heavy ball (momentum) ở Mục 5.3.
+31. Y. Nesterov. A Method of Solving a Convex Programming Problem with Convergence Rate $O(1/k^2)$. *Soviet Mathematics Doklady*, 1983.
+32. L. Bottou, F. E. Curtis, J. Nocedal. Optimization Methods for Large-Scale Machine Learning. *SIAM Review*, 2018. Tổng quan về SGD và các biến thể.
 
 **Đánh giá mô hình**
 
-27. T. Fawcett. *An Introduction to ROC Analysis.* Pattern Recognition Letters, 2006.
-28. J. Davis, M. Goadrich. *The Relationship Between Precision-Recall and ROC Curves.* ICML 2006. — nguồn chính cho lập luận ở Mục 8.3 về vì sao PR hợp hơn khi mất cân bằng.
-29. T. Saito, M. Rehmsmeier. *The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets.* PLOS ONE, 2015.
+33. T. Fawcett. An Introduction to ROC Analysis. *Pattern Recognition Letters*, 2006.
+34. J. Davis, M. Goadrich. The Relationship Between Precision-Recall and ROC Curves. *ICML*, 2006. Nguồn cho lập luận ở Mục 8.3.
+35. T. Saito, M. Rehmsmeier. The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets. *PLOS ONE*, 2015.
 
-**Số học dấu phẩy động**
+**Tính toán số**
 
-30. N. Higham. *Accuracy and Stability of Numerical Algorithms.* SIAM, 2002. — nguồn cho phân tích $\varepsilon^* \sim u^{1/3}$ ở Mục 5.5 và cho cảnh báo về $\kappa(X^\top X) = \kappa(X)^2$.
+36. N. J. Higham. *Accuracy and Stability of Numerical Algorithms*, 2nd ed. SIAM, 2002. Nguồn cho phân tích $\varepsilon^* \sim u^{1/3}$ ở Mục 5.5 và cho nhận xét $\kappa(X^\top X) = \kappa(X)^2$.
 
 **Tài liệu tiếng Việt**
 
-31. Vũ Hữu Tiệp. *Machine Learning cơ bản.* machinelearningcoban.com — bộ bài giảng tiếng Việt đầy đủ nhất về mảng này, với ảnh động minh hoạ và mã Python cho từng thuật toán. Cấu trúc của giáo trình hiện tại có tham khảo cách tổ chức theo phần của bản ebook ấy.
-32. Phạm Đình Khánh. *Deep AI KhanhBlog.* phamdinhkhanh.github.io — thiên về mảng ứng dụng thị giác máy tính và xử lý ngôn ngữ.
+37. A. Amidi, S. Amidi. *Cheatsheet CS229 và CS230* (bản dịch tiếng Việt). Stanford University, stanford.edu/~shervine/l/vi. Nguồn tham khảo cho quy ước thuật ngữ ở Mục 0.2.
+38. Vũ Hữu Tiệp. *Machine Learning cơ bản*. machinelearningcoban.com. Bộ bài giảng tiếng Việt đầy đủ về học máy cổ điển, có mã Python cho từng thuật toán.
+39. Phạm Đình Khánh. *Deep AI KhanhBlog*. phamdinhkhanh.github.io. Các bài viết về học máy, thị giác máy tính và xử lý ngôn ngữ tự nhiên.
 
-> **Về hai nguồn tiếng Việt trên.** Chúng được nêu ở đây như tài liệu đọc thêm. Repo này **không** sao chép nội dung của chúng: mọi phần chữ đều tự viết, và mọi con số đều sinh từ mã trong `code/nentang/`. Riêng ebook *Machine Learning cơ bản* có ghi rõ yêu cầu xin phép tác giả trước khi sao chép hay in ấn, nên ai muốn dùng lại nội dung của tài liệu ấy cần liên hệ trực tiếp.
+> **Nhận xét (Về các tài liệu tiếng Việt).** Hai trang 38 và 39 được giới thiệu như tài liệu đọc thêm. Giáo trình này không sao chép nội dung hay hình ảnh của chúng: phần chữ được viết riêng và mọi số liệu, hình vẽ đều sinh từ mã trong `code/nentang/`. Trang *Machine Learning cơ bản* ghi rõ mọi hình thức sao chép cần được tác giả đồng ý.
 
 ---
 
@@ -1890,25 +2203,25 @@ python code/nentang/experiments.py      # vài phút
 python code/nentang/fig_diagrams.py
 ```
 
-Hai script đặt hạt giống cố định nên mọi con số trong tài liệu lặp lại được y hệt trên cùng phiên bản thư viện. Môi trường đã dùng: Python 3.13, NumPy 2.3, SciPy 1.16, scikit-learn 1.7, matplotlib 3.10.
+Hai script đặt hạt giống cố định nên mọi con số trong giáo trình lặp lại được trên cùng phiên bản thư viện. Môi trường đã dùng: Python 3.13, NumPy 2.3, SciPy 1.16, scikit-learn 1.7, matplotlib 3.10.
 
-**Về loại số liệu.** Khác với giáo trình *Mô hình & Kiến trúc* — nơi có bốn kết quả đối chiếu với con số đã công bố của GPT-2 và Llama-2 — tài liệu này không có con số nào trích từ bài báo. Mọi số đều sinh tại chỗ, nhưng chúng chia làm hai loại rất khác nhau:
+Giáo trình không dùng con số nào trích từ bài báo; mọi số liệu đều sinh tại chỗ, và chia làm hai loại.
 
-**Loại thứ nhất — kiểm chứng một đẳng thức.** Những kết quả này phải khớp tới sai số máy, và nếu chúng không khớp thì có lỗi trong mã:
+**Loại thứ nhất: kiểm chứng đẳng thức.** Những kết quả này phải khớp tới sai số của máy tính; nếu không khớp thì mã có lỗi.
 
 | Đẳng thức | Sai số đo được |
 |---|---|
-| Hồi quy logistic $\equiv$ softmax với $K=2$ | $1{,}6\times10^{-15}$ |
+| Hồi quy logistic trùng hồi quy softmax với $K=2$ | $1{,}6\times10^{-15}$ |
 | Ba cách giải bình phương tối thiểu cho cùng nghiệm | $1{,}2\times10^{-15}$ |
-| PCA qua hiệp phương sai $\equiv$ PCA qua SVD | $7{,}1\times10^{-15}$ |
-| Eckart–Young: sai số tái dựng $= (n-1)\sum_{i>k}\lambda_i$ | $\sim 10^{-13}$ |
-| Ridge qua SVD $\equiv$ ridge dạng đóng | $2{,}3\times10^{-15}$ |
+| PCA qua ma trận hiệp phương sai trùng PCA qua SVD | $7{,}1\times10^{-15}$ |
+| Eckart–Young: sai số tái tạo bằng $(n-1)\sum_{i>k}\lambda_i$ | cỡ $10^{-13}$ |
+| Ridge qua SVD trùng ridge dạng đóng | $2{,}3\times10^{-15}$ |
 | Hàm quyết định của LDA là tuyến tính | $4{,}4\times10^{-15}$ |
 | SVM: $w = \sum_i \alpha_i y_i x_i$ | $0$ |
 | SVM: khe đối ngẫu bằng 0 | $4{,}0\times10^{-8}$ |
-| Tích các Gauss một chiều $\equiv$ Gauss nhiều chiều $\Sigma$ chéo | $1{,}2\times10^{-8}$ |
-| Ridge dạng đóng $\equiv$ MAP tối ưu bằng BFGS | $2{,}0\times10^{-8}$ |
+| Tích các Gauss một chiều trùng Gauss nhiều chiều với $\Sigma$ đường chéo | $1{,}2\times10^{-8}$ |
+| Ridge dạng đóng trùng MAP tìm bằng BFGS | $2{,}0\times10^{-8}$ |
 
-Bốn dòng cuối không đạt sai số máy vì chúng bị giới hạn bởi dung sai của bộ giải (libsvm, BFGS) hoặc bởi lượng chính quy nhỏ thêm vào để nghịch đảo ma trận — tài liệu in ra con số thật thay vì làm tròn cho đẹp.
+Bốn dòng cuối không đạt tới sai số làm tròn vì bị giới hạn bởi dung sai dừng của bộ giải (libsvm, BFGS) hoặc bởi lượng nhỏ cộng thêm vào đường chéo để nghịch đảo ma trận ổn định. Giáo trình in ra đúng con số đo được.
 
-**Loại thứ hai — mô phỏng trên dữ liệu sinh ra.** Các bảng về số vòng lặp, độ chính xác, RMSE và tỉ lệ kẹt. Chúng chứng minh *cơ chế* tồn tại và có độ lớn đáng kể, không dùng để suy ra con số cho một bộ dữ liệu cụ thể nào. Chỗ nào kết quả yếu hơn mong đợi — ví dụ ảnh hưởng của $C$ trong SVM nhân tuyến tính ở Mục 13.4 — thì tài liệu nói thẳng như vậy thay vì chọn một thiết lập khác cho số đẹp hơn.
+**Loại thứ hai: mô phỏng trên dữ liệu sinh ngẫu nhiên.** Đó là các bảng về số vòng lặp, độ chính xác, RMSE và tỉ lệ kẹt ở nghiệm tồi. Chúng cho thấy một cơ chế tồn tại và có độ lớn đáng kể, nhưng không dùng để suy ra con số cho một tập dữ liệu thật cụ thể. Ở những chỗ kết quả yếu hơn kỳ vọng, như ảnh hưởng nhỏ của $C$ với SVM tuyến tính ở Mục 13.4, giáo trình ghi nhận đúng như vậy.

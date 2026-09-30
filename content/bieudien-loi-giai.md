@@ -353,7 +353,7 @@ Và một việc thứ ba đáng làm trước cả hai: **kiểm tra xem 80 m�
 
 **Vấn đề: trần chặn của đặc trưng đóng băng.** Đây chính là hiện tượng đo được ở Mục 6.3 (0,6220 → 0,6375 → 0,6452). Đặc trưng cố định đặt ra một giới hạn mà thêm dữ liệu không phá được, vì mô hình chỉ còn là hồi quy softmax trên chúng.
 
-Nhìn theo khung ở [Mục 2.4 của *Mô hình & Kiến trúc*](models-ch02.html), đây là **thiên lệch cao**: sai số huấn luyện và kiểm định sát nhau và cùng phẳng.
+Nhìn theo khung ở [Mục 2.4 của *Học sâu*](models-ch02.html), đây là **thiên lệch cao**: sai số huấn luyện và kiểm định sát nhau và cùng phẳng.
 
 **Hai việc nên làm:**
 1. **Mở đóng băng**, ít nhất vài lớp trên cùng. Bảng ở Mục 6.3 cho thấy ở 8 000 mẫu, tinh chỉnh toàn phần đạt 0,8183 so với 0,6452 của đóng băng — chênh 0,17.
@@ -466,7 +466,7 @@ $$\text{KL}(p\,\|\,q) \qquad\text{hoặc}\qquad \text{số chế độ hiệu d�
 
 **Số chế độ hiệu dụng** đặc biệt dễ đọc: nó bằng 8 khi phân bố đều hoàn hảo, và bằng 1 khi tất cả dồn vào một cụm. Nó cho một con số liên tục trong khoảng $[1, 8]$ thay vì một số nguyên nhị phân.
 
-Đây chính là entropy mũ, cùng đại lượng dùng để đo các chiến lược giải mã ở [Mục 11.3 của *Mô hình & Kiến trúc*](models-ch11.html) — một công cụ, hai lĩnh vực.
+Đây chính là entropy mũ, cùng đại lượng dùng để đo các chiến lược giải mã ở [Mục 11.3 của *Học sâu*](models-ch11.html) — một công cụ, hai lĩnh vực.
 
 **(d) Vì sao "phủ hết chế độ" chưa đủ.**
 

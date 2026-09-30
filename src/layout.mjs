@@ -1,3 +1,4 @@
+import { icon, sprite } from './icons.mjs';
 // Khung HTML dùng chung cho mọi trang của site.
 
 const FONTS =
@@ -20,7 +21,7 @@ function renderSidebar(nav, currentFile) {
     const active = entry.file === currentFile ? ' class="is-active" aria-current="page"' : '';
     const num = entry.num != null
       ? '<span class="nav-num">' + entry.num + '</span>'
-      : '<span class="nav-num nav-num--icon">' + (entry.icon || '') + '</span>';
+      : '<span class="nav-num nav-num--icon">' + (entry.icon ? icon(entry.icon) : '') + '</span>';
     return (
       '<li><a href="' + entry.file + '"' + active + '>' + num +
       '<span class="nav-label">' + escapeHtml(entry.label) + '</span></a></li>'
@@ -57,9 +58,9 @@ function renderSidebar(nav, currentFile) {
         nav.extras.map(item).join('') + '</ul>'
       : '') +
     '<p class="nav-group">Toàn site</p><ul class="nav-list">' +
-    '<li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span>' +
+    '<li><a href="index.html"><span class="nav-num nav-num--icon">' + icon('nha') + '</span>' +
     '<span class="nav-label">Trang chủ</span></a></li>' +
-    '<li><a href="lo-trinh.html"><span class="nav-num nav-num--icon">↗</span>' +
+    '<li><a href="lo-trinh.html"><span class="nav-num nav-num--icon">' + icon('lo-trinh') + '</span>' +
     '<span class="nav-label">Lộ trình cả bộ</span></a></li>' +
     '</ul>' +
     '</div></nav>'
@@ -160,12 +161,13 @@ export function page(o) {
 </script>
 </head>
 <body class="${o.bodyClass || ''}">
+${sprite()}
 <a class="skip-link" href="#main">Bỏ qua điều hướng</a>
 <div class="read-progress" id="readProgress" aria-hidden="true"></div>
 
 <header class="topbar">
   <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    ${icon('menu')}
   </button>
   <a class="brand" href="index.html">
     <span class="brand-mark" aria-hidden="true">${o.nav.book ? escapeHtml(o.nav.book.short[0]) : 'G'}</span>
@@ -174,12 +176,12 @@ export function page(o) {
         : escapeHtml((o.nav.books || []).map((b) => b.short).join(' · '))}</i></span>
   </a>
   <button class="search-btn" id="searchBtn" type="button">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    ${icon('tim')}
     <span>Tìm trong giáo trình</span><kbd>/</kbd>
   </button>
   <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
-    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
-    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+    ${icon('sang', 'ic-sun')}
+    ${icon('toi', 'ic-moon')}
   </button>
 </header>
 
@@ -202,7 +204,7 @@ ${tocAside}
 <div class="searchpanel" id="searchPanel" hidden>
   <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
     <div class="searchpanel-field">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      ${icon('tim')}
       <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
       <kbd>Esc</kbd>
     </div>

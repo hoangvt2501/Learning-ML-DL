@@ -1,4 +1,4 @@
-/* Phòng thí nghiệm của giáo trình Mô hình & Kiến trúc: ba công cụ. */
+/* Phòng thí nghiệm của giáo trình Học sâu: ba công cụ. */
 window.QZ_INIT = window.QZ_INIT || {};
 window.QZ_INIT['labModels'] = function () {
   'use strict';

@@ -847,7 +847,10 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
 /* --------------------------------------------------------------- math */
 .katex { font-family: KaTeX_Main, 'Source Serif 4', 'Times New Roman', serif; }
 .katex-display { margin: 1.4rem 0; padding: .2rem 0; overflow-x: auto; overflow-y: hidden; }
-.katex-display > .katex { white-space: normal; }
+/* Công thức hiển thị không bị bẻ dòng giữa chừng trên màn hình rộng; chỉ
+   trên điện thoại mới cho xuống dòng tại dấu quan hệ để khỏi phải cuộn ngang. */
+.katex-display > .katex { white-space: nowrap; }
+@media (max-width: 720px) { .katex-display > .katex { white-space: normal; } }
 .table-wrap .katex { font-size: 1em; }
 
 /* -------------------------------------------------------- toàn văn */
@@ -1118,27 +1121,6 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
 .lab-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; align-content: start; }
 @media (max-width: 720px) { .lab-stats { grid-template-columns: 1fr; } }
 
-/* ------------------------------------------------- hộp chú thích có kiểu */
-.prose .callout {
-  position: relative; margin: 1.5rem 0; padding: .85rem 1rem .85rem 2.5rem;
-  border-radius: var(--radius-sm); border: 1px solid var(--line);
-  border-left: 3px solid var(--accent); background: var(--bg-soft);
-  font-style: normal; color: var(--text-2);
-}
-.prose .callout > :first-child { margin-top: 0; }
-.prose .callout > :last-child { margin-bottom: 0; }
-.prose .callout::before {
-  position: absolute; left: .8rem; top: .78rem;
-  font-size: .95rem; line-height: 1.4; opacity: .9;
-}
-.callout--ghi-chu::before { content: "i"; font-weight: 700; font-style: italic; color: var(--accent); }
-.callout--canh-bao { border-left-color: #b0413e; }
-.callout--canh-bao::before { content: "!"; font-weight: 700; color: #b0413e; }
-.callout--meo { border-left-color: #b8860b; }
-.callout--meo::before { content: "\25C6"; color: #b8860b; font-size: .8rem; }
-.callout--phong-van { border-left-color: #2f6f9f; }
-.callout--phong-van::before { content: "\275D"; color: #2f6f9f; }
-
 /* ---------------------------------------- ô xem trước khi rê lên liên kết */
 .xpreview {
   position: absolute; z-index: 60; width: min(380px, calc(100vw - 24px));
@@ -1160,3 +1142,96 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
 /* tên phần trên dòng kicker của trang chương */
 .kicker-part { font-family: var(--font-ui); font-size: .76rem; color: var(--text-3); }
 .kicker-part::before { content: "\00B7"; margin: 0 .45rem; opacity: .6; }
+
+/* =====================================================================
+   HỆ THỐNG GIAO DIỆN: icon Lucide, tiêu đề đánh số, hộp kiểu giáo trình
+   ===================================================================== */
+
+/* ------------------------------------------------------------- icon */
+.ic { width: 1em; height: 1em; flex: 0 0 auto; vertical-align: -.14em; stroke-width: 2; }
+.icon-btn .ic, .search-btn .ic { width: 18px; height: 18px; vertical-align: middle; }
+.nav-num--icon .ic { width: 15px; height: 15px; vertical-align: -3px; opacity: .8; }
+.nav-list a.is-active .nav-num--icon .ic { opacity: 1; }
+.tool-pill .ic { width: 14px; height: 14px; color: var(--accent); }
+.kicker-time { display: inline-flex; align-items: center; gap: .3rem; }
+.kicker-time .ic { width: 13px; height: 13px; opacity: .75; }
+
+/* ------------------------------------------------ tiêu đề đánh số */
+/* Số mục đứng riêng, màu nhấn nhạt, cách chữ một khoảng cố định — lối
+   đánh số của giáo trình in (CS229, d2l). Không còn dấu chấm cuối số. */
+.prose h2.heading, .prose h3.heading, .prose h4.heading {
+  display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap;
+}
+.prose .hnum {
+  flex: 0 0 auto; font-variant-numeric: tabular-nums; font-weight: 600;
+  color: var(--accent); opacity: .78; letter-spacing: -.01em;
+}
+.prose h2 .hnum {
+  font-size: .62em; padding: .12em .5em; border-radius: 6px;
+  background: var(--accent-soft, rgba(31,111,104,.10)); opacity: 1;
+  align-self: center; transform: translateY(-.08em);
+}
+.prose h3 .hnum { min-width: 2.4em; }
+.prose h4 .hnum { min-width: 3em; font-size: .92em; }
+.prose h3.heading { margin-top: 2.6rem; padding-bottom: .35rem;
+  border-bottom: 1px solid var(--line); }
+.prose h4.heading { margin-top: 1.8rem; }
+.prose .htext { flex: 1 1 auto; min-width: 0; }
+
+
+/* --------------------------------------------- hộp kiểu giáo trình */
+/* Định nghĩa · Định lý · Chứng minh · Ví dụ · Nhận xét · Lưu ý · Phỏng vấn.
+   Mỗi loại một màu viền và một icon, nhãn in hoa nhỏ ở đầu hộp. */
+.callout { --c: var(--accent); }
+.prose .callout {
+  margin: 1.6rem 0; padding: .15rem 1.05rem .95rem;
+  border: 1px solid var(--line); border-left: 3px solid var(--c);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: color-mix(in srgb, var(--c) 5%, var(--surface));
+  font-style: normal; color: var(--text);
+}
+.prose .callout > p:not(.callout-label) { margin: .55rem 0 0; }
+.prose .callout > :last-child { margin-bottom: 0; }
+.prose .callout-label {
+  display: flex; align-items: baseline; gap: .5rem;
+  margin: .75rem 0 .1rem; padding: 0;
+  font-family: var(--font-ui); font-size: .88rem; font-weight: 650;
+  line-height: 1.45; color: var(--c);
+}
+.prose .callout-label .ic { width: 16px; height: 16px; align-self: center; }
+.prose .callout-label .katex { font-size: 1.05em; }
+.callout--dinh-nghia { --c: #1f6f68; }
+.callout--dinh-ly    { --c: #2f5f9f; }
+.callout--chung-minh { --c: #6b6b6b; }
+.callout--vi-du      { --c: #9a6a00; }
+.callout--nhan-xet   { --c: #5b6b8a; }
+.callout--luu-y      { --c: #b0413e; }
+.callout--phong-van  { --c: #7a4fa0; }
+.callout--tra-loi    { --c: #2e6f8e; }
+/* Chứng minh: nhẹ hơn các hộp khác, không nền, như trong sách in. */
+.prose .callout--chung-minh {
+  background: transparent; border: none; border-left: 2px solid var(--line-2);
+  border-radius: 0; padding-top: 0;
+}
+.prose .callout--chung-minh .callout-label { color: var(--text-2); font-style: italic; }
+
+:root[data-theme='dark'] .callout--dinh-nghia { --c: #4fb3a8; }
+:root[data-theme='dark'] .callout--dinh-ly    { --c: #7aa7e8; }
+:root[data-theme='dark'] .callout--chung-minh { --c: #a7a7a7; }
+:root[data-theme='dark'] .callout--vi-du      { --c: #e0b34a; }
+:root[data-theme='dark'] .callout--nhan-xet   { --c: #9aa9c8; }
+:root[data-theme='dark'] .callout--luu-y      { --c: #e07a76; }
+:root[data-theme='dark'] .callout--phong-van  { --c: #b99ae0; }
+:root[data-theme='dark'] .callout--tra-loi    { --c: #7cc3e0; }
+
+/* công thức đóng khung trong hộp định lý nổi hơn một chút */
+.prose .callout .katex-display { margin: .7rem 0; }
+
+/* số mục trong mục lục bên phải: cột riêng, thẳng hàng */
+.toc-list a { display: flex; gap: .5rem; align-items: baseline; }
+.toc-num {
+  flex: 0 0 auto; min-width: 1.9rem; color: var(--text-3);
+  font-variant-numeric: tabular-nums; font-size: .92em;
+}
+.toc-l4 .toc-num { min-width: 2.5rem; }
+.toc-list a.is-current .toc-num { color: var(--accent); }

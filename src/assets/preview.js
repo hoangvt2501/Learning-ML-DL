@@ -52,7 +52,10 @@
   function trich(doc, id) {
     var el = doc.getElementById(id);
     if (!el) return null;
-    var tieuDe = el.textContent.replace(/#\s*$/, '').trim();
+    var so = el.querySelector('.hnum');
+    var ban = el.cloneNode(true);
+    Array.prototype.forEach.call(ban.querySelectorAll('.hnum, .anchor'), function (x) { x.remove(); });
+    var tieuDe = (so ? so.textContent + '  ' : '') + ban.textContent.trim();
     var chu = '';
     var n = el.nextElementSibling;
     var buoc = 0;

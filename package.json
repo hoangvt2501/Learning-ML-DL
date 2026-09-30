@@ -16,6 +16,7 @@
     "@vscode/markdown-it-katex": "^1.1.1",
     "highlight.js": "^11.11.1",
     "katex": "^0.16.22",
+    "lucide-static": "^1.49.0",
     "markdown-it": "^14.1.0"
   }
 }

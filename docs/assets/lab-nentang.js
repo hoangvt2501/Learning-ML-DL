@@ -103,7 +103,7 @@ window.QZ_INIT['labNentang'] = function () {
           { mau: C.canh, day: 1, mo: .28 });
       });
       p1.duong(xte.map(function (x) { return [x, f(x)]; }), { mau: C.muc, day: 2.2 });
-      p1.chu(lo + .15, 3.0, 'đen = sự thật · đỏ = 14 lần khớp trên 14 tập khác nhau',
+      p1.chu(lo + .15, 3.0, 'đen: hàm thật · đỏ: 14 lần khớp trên 14 tập huấn luyện',
         { co: 9.5, mau: C.mo });
 
       var tong = b2 + va + nz;
@@ -113,14 +113,14 @@ window.QZ_INIT['labNentang'] = function () {
       p2.cot([b2, va, nz], {
         mau: function (k) { return [C.lam, C.canh, C.mo][k]; },
       });
-      ['thiên lệch²', 'phương sai', 'nhiễu²'].forEach(function (t, k) {
+      ['độ chệch²', 'phương sai', 'nhiễu²'].forEach(function (t, k) {
         p2.chu(0.5 + k, 0, t, { canh: 'center', dy: 14, co: 9.5 });
       });
       so('bvB2', fmt(b2)); so('bvVar', fmt(va)); so('bvTot', fmt(tong));
       so('bvNote',
-        b2 > va * 3 ? 'Thiên lệch chiếm phần lớn: thêm dữ liệu sẽ KHÔNG cứu được — phải đổi mô hình.'
-          : va > b2 * 3 ? 'Phương sai chiếm phần lớn: thêm dữ liệu SẼ cứu được, vì phương sai giảm theo cỡ mẫu.'
-            : 'Hai thành phần cân nhau — đây là vùng quanh điểm tổng nhỏ nhất.');
+        b2 > va * 3 ? 'Độ chệch chiếm phần lớn sai số: thêm dữ liệu không giúp được, cần mô hình linh hoạt hơn.'
+          : va > b2 * 3 ? 'Phương sai chiếm phần lớn sai số: thêm dữ liệu hoặc regularization sẽ giúp, vì phương sai giảm theo cỡ mẫu.'
+            : 'Hai thành phần xấp xỉ nhau: đây là vùng quanh điểm có tổng sai số nhỏ nhất.');
     }
     nghe(['bvDeg'], chay);
   })();
@@ -200,15 +200,15 @@ window.QZ_INIT['labNentang'] = function () {
       }
       p.duong([[Math.log10(lam), -2.6], [Math.log10(lam), 3.6]], { mau: C.canh, day: 1.4 });
       p.duong([[-2, 0], [2.5, 0]], { mau: C.duong, day: 1 });
-      p.chu(-1.9, 3.35, 'liền = ridge · đứt = lasso · xanh = hệ số thật khác 0',
+      p.chu(-1.9, 3.35, 'liền: ridge · đứt: lasso · xanh: hệ số thật khác 0',
         { co: 9.5, mau: C.mo });
 
       so('rlZR', zr); so('rlZL', zl);
       so('rlNR', fmt(Math.sqrt(wr.reduce(function (a, v) { return a + v * v; }, 0)), 3));
       so('rlNL', fmt(Math.sqrt(wl.reduce(function (a, v) { return a + v * v; }, 0)), 3));
       so('rlNote', zl >= 9
-        ? 'Lasso đã tìm đúng 9 hệ số bằng 0 — bằng số hệ số bằng 0 của mô hình sinh dữ liệu.'
-        : 'Ridge vẫn chưa đưa được hệ số nào về đúng 0, và nó sẽ không bao giờ làm được.');
+        ? 'Lasso đưa đúng 9 hệ số về 0, trùng với số hệ số bằng 0 của mô hình sinh dữ liệu.'
+        : 'Ridge không đưa hệ số nào về đúng 0 ở bất kỳ giá trị λ nào; nó chỉ co các hệ số lại.');
     }
     nghe(['rlLam'], chay);
   })();
@@ -264,10 +264,10 @@ window.QZ_INIT['labNentang'] = function () {
 
       so('gdIter', phanKy ? 'phân kỳ' : (n >= 20000 ? '> 20 000' : n.toLocaleString('vi-VN')));
       so('gdNote', phanKy
-        ? 'Tốc độ học vượt ngưỡng 2/λ_max nên phân kỳ — đây là ngưỡng CHÍNH XÁC, không phải "chậm hơn".'
+        ? 'Tốc độ học vượt ngưỡng 2/λ_max nên thuật toán phân kỳ. Với hàm bậc hai, ngưỡng này là chính xác.'
         : quanTinh
-          ? 'Quán tính đổi bậc từ O(κ) xuống O(√κ). Tắt nó đi rồi so số vòng.'
-          : 'Số vòng tăng TUYẾN TÍNH theo κ. Bật quán tính để thấy nó xuống còn √κ.');
+          ? 'Momentum giảm số vòng lặp từ bậc κ xuống bậc √κ. Tắt momentum để so sánh.'
+          : 'Số vòng lặp tăng tuyến tính theo κ. Bật momentum để thấy nó giảm xuống bậc √κ.');
     }
     ['gdKap', 'gdEta'].forEach(function (i) { var e = $(i); if (e) e.addEventListener('input', chay); });
     var mm = $('gdMom'); if (mm) mm.addEventListener('change', chay);
@@ -356,10 +356,10 @@ window.QZ_INIT['labNentang'] = function () {
       so('svmNgoai', ngoai); so('svmTren', tren); so('svmViPham', viPham);
       so('svmSai', fmt(sai / X.length, 4));
       so('svmNote', Cv < 0.05
-        ? 'C nhỏ: lề rất rộng, gần như mọi điểm đều vi phạm lề. Mô hình đơn giản nhất.'
+        ? 'C nhỏ: lề rộng, phần lớn vector hỗ trợ là điểm vi phạm lề; regularization mạnh.'
         : Cv > 30
-          ? 'C lớn: lề hẹp, mô hình cố ép từng điểm cho đúng và bắt đầu bám vào nhiễu.'
-          : 'Ba nhóm ở trên đúng là ba nhóm mà điều kiện KKT chia ra: ngoài lề, trên lề, vi phạm lề.');
+          ? 'C lớn: lề hẹp, mô hình phạt nặng từng vi phạm và bám sát dữ liệu hơn.'
+          : 'Ba con số ở trên ứng với ba nhóm của điều kiện KKT: ngoài lề, trên lề, vi phạm lề.');
     }
     nghe(['svmC'], chay);
   })();
@@ -457,8 +457,8 @@ window.QZ_INIT['labNentang'] = function () {
       so('pcaAucPC', fmt(r.aucPC));
       so('pcaAucLD', fmt(r.aucLD));
       so('pcaNote', r.aucPC < 0.62
-        ? 'Trục PCA giữ gần hết phương sai mà AUC gần 0,5 — nó vô dụng cho phân loại. PCA không nhìn nhãn.'
-        : 'Lúc này hai trục gần trùng nhau. Hãy kéo các điểm cho một hướng trải rộng hẳn ra mà không mang thông tin lớp.');
+        ? 'Thành phần chính thứ nhất giữ gần hết phương sai nhưng AUC gần 0,5: PCA không dùng nhãn nên không biết hướng nào phân biệt được hai lớp.'
+        : 'Hai hướng đang gần trùng nhau. Kéo các điểm để dữ liệu trải rộng theo một hướng không chứa thông tin về lớp.');
     }
 
     p.keoTha(function () { return pts; }, function (i, x, y) {
@@ -548,7 +548,7 @@ window.QZ_INIT['labNentang'] = function () {
       so('kmBuoc', buoc);
       so('kmQT', fmt(quanTinh(), 2));
       so('kmNote', xong
-        ? 'Đã hội tụ. Bấm "khởi tạo dồn một chỗ" vài lần để thấy nó kẹt ở nghiệm tồi khác nhau.'
+        ? 'Đã hội tụ. Bấm "Khởi tạo dồn một chỗ" vài lần để thấy thuật toán dừng ở các nghiệm tồi khác nhau.'
         : 'Mỗi bước gồm hai việc: gán mỗi điểm cho tâm gần nhất, rồi dời tâm về trung bình cụm.');
     }
 

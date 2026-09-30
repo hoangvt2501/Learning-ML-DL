@@ -1,4 +1,4 @@
-// Phòng thí nghiệm của giáo trình Mô hình & Kiến trúc.
+// Phòng thí nghiệm của giáo trình Học sâu.
 import { range, num, check, select, stat, canvas, khoi, mo } from './lab-ui.mjs';
 
 export function buildModelsLabPage(ctx) {
@@ -70,7 +70,7 @@ export function buildModelsLabPage(ctx) {
 
   const body =
     '<article class="prose lab-page" data-lab-models>' +
-    mo('Mô hình &amp; Kiến trúc · thực hành',
+    mo('Học sâu · thực hành',
       'Ba công cụ cho ba chỗ mà một bảng số không đủ: phép chia $\\sqrt{d_k}$, ' +
       'phép đếm tài nguyên của một Transformer, và chuyện gì xảy ra với gradient qua nhiều lớp.') +
     lab1 + lab2 + lab3 +

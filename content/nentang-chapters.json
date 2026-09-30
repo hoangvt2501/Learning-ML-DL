@@ -2,120 +2,120 @@
   {
     "num": "0",
     "file": "nentang-ch00.html",
-    "label": "Kiến thức nền và quy ước",
-    "summary": "Bảng ký hiệu, quy ước dịch thuật, và chỗ dễ nhầm nhất: hai nghĩa khác hẳn nhau của chữ bias.",
-    "part": "Nhập môn và toán nền"
+    "label": "Ký hiệu và quy ước",
+    "summary": "Bảng ký hiệu, quy ước thuật ngữ theo cheatsheet tiếng Việt của Stanford, và hai nghĩa khác nhau của chữ bias.",
+    "part": "Mở đầu"
   },
   {
     "num": "1",
     "file": "nentang-ch01.html",
-    "label": "Bài toán học máy là gì",
-    "summary": "Ba thành phần mà mọi thuật toán học có giám sát đều có, và cách chúng biến một danh sách thuật toán dài thành ba câu hỏi.",
-    "part": "Nhập môn và toán nền"
+    "label": "Tổng quan về học máy",
+    "summary": "Định nghĩa học máy, ba thành phần của mọi thuật toán học có giám sát, các dạng bài toán, và quy trình giải một bài toán học máy.",
+    "part": "Mở đầu"
   },
   {
     "num": "2",
     "file": "nentang-ch02.html",
-    "label": "Đại số tuyến tính cho học máy",
-    "summary": "Chỉ đúng phần sẽ được dùng: tích vô hướng, các chuẩn, trị riêng, ma trận xác định dương, SVD và bốn công thức đạo hàm theo vector.",
-    "part": "Nhập môn và toán nền"
+    "label": "Đại số tuyến tính",
+    "summary": "Hạng, tích vô hướng và siêu phẳng, chuẩn, trị riêng, ma trận xác định dương, SVD và đạo hàm theo vector, kèm nơi mỗi khái niệm được dùng.",
+    "part": "Toán cho học máy"
   },
   {
     "num": "3",
     "file": "nentang-ch03.html",
-    "label": "Xác suất và thống kê cho học máy",
-    "summary": "Kỳ vọng, phương sai và chỗ hay sai khi cộng chúng; ma trận hiệp phương sai; phân phối Gauss; quy tắc Bayes viết ở dạng sẽ dùng lại ở Chương 10.",
-    "part": "Nhập môn và toán nền"
+    "label": "Xác suất và thống kê",
+    "summary": "Kỳ vọng, phương sai, ma trận hiệp phương sai, phân phối Gauss, định lý Bayes, và độ chệch – phương sai của một ước lượng.",
+    "part": "Toán cho học máy"
   },
   {
     "num": "4",
     "file": "nentang-ch04.html",
     "label": "Hồi quy tuyến tính",
-    "summary": "Phương trình chuẩn tắc và khi nào nó không giải được; đo thật cái giá của cộng tuyến — hệ số dao động gấp 25 lần trong khi dự báo đứng yên.",
-    "part": "Mô hình tuyến tính và tối ưu"
+    "summary": "Bài toán bình phương tối thiểu, phương trình chuẩn, trường hợp ma trận suy biến, đa cộng tuyến và các giả định của mô hình.",
+    "part": "Mô hình tuyến tính"
   },
   {
     "num": "5",
     "file": "nentang-ch05.html",
     "label": "Gradient descent",
-    "summary": "Tốc độ hội tụ phụ thuộc số điều kiện chứ không phụ thuộc số chiều; quán tính đổi κ thành căn κ; và vì sao epsilon quá nhỏ lại làm kiểm tra đạo hàm tệ đi.",
-    "part": "Mô hình tuyến tính và tối ưu"
+    "summary": "Thuật toán gradient descent, tốc độ hội tụ theo số điều kiện, cách chọn tốc độ học, kiểm tra gradient bằng sai phân và các biến thể SGD, mini-batch.",
+    "part": "Mô hình tuyến tính"
   },
   {
     "num": "6",
     "file": "nentang-ch06.html",
-    "label": "Phân loại tuyến tính: perceptron, logistic, softmax",
-    "summary": "Ba thuật toán dùng chung một mô hình và chỉ khác hàm mất mát; hồi quy logistic đúng bằng softmax với K=2; và vì sao dữ liệu tách được lại làm hợp lý cực đại vô nghiệm.",
-    "part": "Mô hình tuyến tính và tối ưu"
+    "label": "Phân loại tuyến tính",
+    "summary": "Perceptron, hồi quy logistic và hồi quy softmax: cùng một mô hình tuyến tính, khác nhau ở hàm mất mát.",
+    "part": "Mô hình tuyến tính"
   },
   {
     "num": "7",
     "file": "nentang-ch07.html",
-    "label": "K láng giềng gần nhất và Naive Bayes",
-    "summary": "Lời nguyền số chiều làm hỏng KNN; và Naive Bayes, LDA, QDA hoá ra chỉ khác nhau đúng ở ràng buộc đặt lên ma trận hiệp phương sai.",
-    "part": "Phân loại, đánh giá, phạt chuẩn"
+    "label": "k láng giềng gần nhất và Naive Bayes",
+    "summary": "Mô hình phân biệt và mô hình sinh, thuật toán k-NN và lời nguyền số chiều, Naive Bayes, và quan hệ giữa Naive Bayes, LDA, QDA.",
+    "part": "Phân loại và đánh giá"
   },
   {
     "num": "8",
     "file": "nentang-ch08.html",
     "label": "Đánh giá mô hình phân loại",
-    "summary": "Bộ phân loại vô dụng đạt độ chính xác cao hơn bộ dùng được; ROC-AUC 0,97 đi cùng PR-AUC 0,49 trên chính bộ dữ liệu ấy, và cơ chế nằm ở mẫu số của FPR.",
-    "part": "Phân loại, đánh giá, phạt chuẩn"
+    "summary": "Ma trận nhầm lẫn, precision, recall, F1, đường cong ROC và precision–recall, đánh giá nhiều lớp và rò rỉ dữ liệu.",
+    "part": "Phân loại và đánh giá"
   },
   {
     "num": "9",
     "file": "nentang-ch09.html",
-    "label": "Quá khớp, phạt chuẩn và kiểm định chéo",
-    "summary": "Ridge co ngót không đều — nó co mạnh nhất đúng những hướng dữ liệu nói ít nhất; lasso cho hệ số bằng đúng 0 còn ridge thì không bao giờ.",
-    "part": "Phân loại, đánh giá, phạt chuẩn"
+    "label": "Overfitting và regularization",
+    "summary": "Overfitting và underfitting, hồi quy ridge, ridge nhìn qua SVD, lasso và nghiệm thưa, cross-validation.",
+    "part": "Regularization và ước lượng"
   },
   {
     "num": "10",
     "file": "nentang-ch10.html",
-    "label": "Hợp lý cực đại và hậu nghiệm cực đại",
-    "summary": "Bình phương sai lệch, entropy chéo, ridge, lasso và làm trơn Laplace đều suy ra từ một nguyên lý. Ridge đúng bằng MAP với tiên nghiệm Gauss, kiểm chứng bằng số.",
-    "part": "Phân loại, đánh giá, phạt chuẩn"
+    "label": "Ước lượng hợp lý cực đại và hậu nghiệm cực đại",
+    "summary": "MLE cho ra bình phương sai số và cross-entropy; MAP cho ra regularization, với ridge trùng MAP khi tiên nghiệm là Gauss.",
+    "part": "Regularization và ước lượng"
   },
   {
     "num": "11",
     "file": "nentang-ch11.html",
     "label": "Tập lồi và hàm lồi",
-    "summary": "Ranh giới giữa hai thế giới: lồi thì mọi cực tiểu địa phương là toàn cục. Kiểm tính lồi bằng số, và đo hậu quả khi mất nó.",
+    "summary": "Định nghĩa tập lồi và hàm lồi, điều kiện bậc nhất và bậc hai, các phép toán bảo toàn tính lồi, và ảnh hưởng của tính lồi tới gradient descent.",
     "part": "Tối ưu lồi và SVM"
   },
   {
     "num": "12",
     "file": "nentang-ch12.html",
     "label": "Tối ưu lồi và đối ngẫu Lagrange",
-    "summary": "Hàm Lagrange, đối ngẫu yếu và mạnh, điều kiện Slater và KKT. Điều kiện bù trừ là thứ sinh ra khái niệm vector hỗ trợ ở chương sau.",
+    "summary": "Hàm Lagrange, hàm đối ngẫu, đối ngẫu yếu và mạnh, điều kiện Slater và KKT, minh hoạ bằng một ví dụ tính tay xuyên suốt.",
     "part": "Tối ưu lồi và SVM"
   },
   {
     "num": "13",
     "file": "nentang-ch13.html",
-    "label": "Support Vector Machine",
-    "summary": "Lề cứng, lề mềm, thủ thuật nhân — và bốn khẳng định lý thuyết được kiểm chứng bằng số, trong đó 3 trên 120 điểm quyết định toàn bộ nghiệm.",
+    "label": "Máy vector hỗ trợ",
+    "summary": "SVM lề cứng và lề mềm, bài toán đối ngẫu và vector hỗ trợ, mối liên hệ với mất mát hinge, kernel và chi phí tính toán.",
     "part": "Tối ưu lồi và SVM"
   },
   {
     "num": "14",
     "file": "nentang-ch14.html",
-    "label": "Giảm chiều: PCA, SVD và LDA",
-    "summary": "Định lý Eckart–Young kiểm chứng tới 10⁻¹³; và một trường hợp PCA giữ 96,1% phương sai nhưng cho AUC 0,502 — vô dụng hoàn toàn cho phân loại.",
+    "label": "Giảm chiều dữ liệu",
+    "summary": "Phân tích thành phần chính, định lý Eckart–Young, hạn chế của PCA khi có nhãn, và phân tích biệt thức tuyến tính (LDA).",
     "part": "Học không giám sát"
   },
   {
     "num": "15",
     "file": "nentang-ch15.html",
-    "label": "Phân cụm: K-means",
-    "summary": "Khởi tạo ngẫu nhiên kẹt ở nghiệm tồi 71,5% số lần; ba giả định ngầm về hình dạng cụm, và chuyện gì xảy ra khi chúng sai.",
+    "label": "Phân cụm K-means",
+    "summary": "Thuật toán Lloyd, khởi tạo k-means++, các giả định ngầm về hình dạng cụm, và cách chọn số cụm.",
     "part": "Học không giám sát"
   },
   {
     "num": "16",
     "file": "nentang-ch16.html",
-    "label": "Hệ gợi ý",
-    "summary": "Phân rã ma trận có một ngưỡng dữ liệu sắc nét ở khoảng 5 lần số yếu tố ẩn; dưới ngưỡng ấy nó còn tệ hơn đoán bừa. Và vì sao khởi đầu lạnh không có đường lùi.",
+    "label": "Hệ thống gợi ý",
+    "summary": "Lọc cộng tác bằng phân rã ma trận và ALS, lượng dữ liệu cần thiết, chọn hạng, và vấn đề khởi đầu lạnh.",
     "part": "Học không giám sát"
   },
   {
@@ -123,24 +123,24 @@
     "file": "nentang-bai-tap.html",
     "label": "Bài tập",
     "kind": "exercises",
-    "summary": "Mười bài tập kèm lời giải chi tiết, và ngân hàng trắc nghiệm theo từng chương."
+    "summary": "Mười bài tập có lời giải chi tiết và ngân hàng câu hỏi trắc nghiệm theo từng chương."
   },
   {
     "num": "18",
     "file": "nentang-ch18.html",
-    "label": "Ôn phỏng vấn",
-    "summary": "Khung trả lời ba bước, các câu hỏi theo sáu nhóm kèm con số để dẫn ra, và mười bốn câu trả lời tự tố cáo người nói chỉ học thuộc."
+    "label": "Câu hỏi phỏng vấn",
+    "summary": "Cách trình bày câu trả lời, các câu hỏi thường gặp theo sáu nhóm chủ đề kèm câu trả lời mẫu, và những câu trả lời chưa đạt."
   },
   {
     "num": "19",
     "file": "nentang-ch19.html",
     "label": "Tài liệu tham khảo",
-    "summary": "Ba mươi hai nguồn, mỗi nguồn ghi rõ nó là nguồn của kết quả nào được dùng trong tài liệu."
+    "summary": "Sách, bài báo gốc và tài liệu tiếng Việt, mỗi nguồn ghi rõ được dùng cho phần nào của giáo trình."
   },
   {
     "num": "PL",
     "file": "nentang-phu-luc.html",
     "label": "Phụ lục: chạy lại thí nghiệm",
-    "summary": "Cây thư mục mã nguồn, các lệnh tái lập, và bảng mười đẳng thức được kiểm chứng kèm sai số thật của từng cái."
+    "summary": "Cấu trúc mã nguồn, lệnh chạy lại toàn bộ thí nghiệm, và hai loại số liệu: kiểm chứng đẳng thức và mô phỏng."
   }
 ]

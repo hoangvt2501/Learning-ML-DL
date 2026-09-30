@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createMarkdownIt, sectionId, figureId, slugify } from './markdown.mjs';
+import { buildSprite, icon } from './icons.mjs';
 import { page, escapeHtml } from './layout.mjs';
 import { buildExercisePage } from './pages/exercises.mjs';
 import { buildCurriculumPage } from './pages/curriculum.mjs';
@@ -65,15 +66,18 @@ function extractToc(html) {
   const items = [];
   let m;
   while ((m = re.exec(html)) !== null) {
-    const text = m[3].replace(/<[^>]+>/g, '').trim();
-    if (text) items.push({ level: +m[1], id: m[2], text });
+    const so = (m[3].match(/<span class="hnum">([^<]+)<\/span>/) || [])[1] || '';
+    const text = m[3].replace(/<span class="hnum">[^<]*<\/span>/, '').replace(/<[^>]+>/g, '').trim();
+    if (text) items.push({ level: +m[1], id: m[2], text, so });
   }
   if (items.length < 2) return '';
   return (
     '<ul class="toc-list">' +
     items
       .map((i) =>
-        '<li class="toc-l' + i.level + '"><a href="#' + i.id + '">' + escapeHtml(i.text) + '</a></li>')
+        '<li class="toc-l' + i.level + '"><a href="#' + i.id + '">' +
+        (i.so ? '<span class="toc-num">' + i.so + '</span>' : '') +
+        '<span>' + escapeHtml(i.text) + '</span></a></li>')
       .join('') +
     '</ul>'
   );
@@ -136,14 +140,14 @@ function buildBook(spec, books) {
 
   // ---------------------------------------------------------- điều hướng
   const extras = [];
-  if (spec.lab) extras.push({ file: f('thuc-hanh.html'), icon: '⚙', label: 'Phòng thí nghiệm' });
+  if (spec.lab) extras.push({ file: f('thuc-hanh.html'), icon: 'thi-nghiem', label: 'Phòng thí nghiệm' });
   if (spec.figures && registry.figures.size) {
-    extras.push({ file: f('hinh-anh.html'), icon: '◳', label: `Thư viện ${registry.figures.size} hình` });
+    extras.push({ file: f('hinh-anh.html'), icon: 'hinh', label: `Thư viện ${registry.figures.size} hình` });
   }
-  extras.push({ file: f('thuat-ngu.html'), icon: '¶', label: 'Từ điển thuật ngữ' });
-  if (spec.notes) extras.push({ file: f('ghi-chu.html'), icon: '!', label: 'Ghi chú biên tập' });
-  if (spec.code) extras.push({ file: f('ma-nguon.html'), icon: '{}', label: 'Mã nguồn thí nghiệm' });
-  extras.push({ file: f('toan-van.html'), icon: '≡', label: 'Toàn văn một trang' });
+  extras.push({ file: f('thuat-ngu.html'), icon: 'thuat-ngu', label: 'Từ điển thuật ngữ' });
+  if (spec.notes) extras.push({ file: f('ghi-chu.html'), icon: 'ghi-chu', label: 'Ghi chú biên tập' });
+  if (spec.code) extras.push({ file: f('ma-nguon.html'), icon: 'ma-nguon', label: 'Mã nguồn thí nghiệm' });
+  extras.push({ file: f('toan-van.html'), icon: 'toan-van', label: 'Toàn văn một trang' });
 
   const nav = {
     book: spec,
@@ -226,7 +230,7 @@ function buildBook(spec, books) {
       body:
         '<article class="prose">' +
         '<div class="chapter-kicker"><span class="kicker-badge">' + kicker + '</span>' +
-        '<span class="kicker-time">' + minutes[ch.num] + ' phút đọc</span>' +
+        '<span class="kicker-time">' + icon('dong-ho') + minutes[ch.num] + ' phút đọc</span>' +
         (ch.part ? '<span class="kicker-part">' + escapeHtml(ch.part) + '</span>' : '') +
         '</div>' +
         withLede + quiz + '</article>',
@@ -300,6 +304,7 @@ function buildBook(spec, books) {
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
 
+buildSprite(ROOT);
 const allBooks = JSON.parse(read('content/books.json'));
 // Bỏ qua giáo trình chưa có tệp nguồn, để repo vẫn dựng được khi đang viết dở.
 const books = allBooks.filter((spec) => {

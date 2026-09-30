@@ -9,7 +9,7 @@ const NGOAI_MACH = new Set(['PL']);
 /** Chương nào là phần tra cứu chứ không phải bài học. */
 function laPhuLuc(ch) {
   return NGOAI_MACH.has(ch.num) ||
-    /^(Bài tập|Ôn phỏng vấn|Tài liệu tham khảo)$/i.test(ch.label.trim());
+    /^(Bài tập|Ôn phỏng vấn|Câu hỏi phỏng vấn|Tài liệu tham khảo)$/i.test(ch.label.trim());
 }
 
 const SO_CHU_LT = ['Không', 'Một', 'Hai', 'Ba', 'Bốn', 'Năm', 'Sáu', 'Bảy'];

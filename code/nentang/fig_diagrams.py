@@ -1,4 +1,4 @@
-"""Các sơ đồ khái niệm cho giáo trình "Nền tảng Machine Learning".
+"""Các sơ đồ khái niệm cho giáo trình "Nền tảng học máy".
 
 Đây là hình vẽ tay bằng matplotlib chứ không phải kết quả thí nghiệm, để trong mã
 nguồn cho sửa được và cho khớp với chữ trong bài.
@@ -37,19 +37,19 @@ def mui_ten(ax, p0, p1, color=C_DIM, lw=1.1, style="-|>"):
 fig, ax = plt.subplots(figsize=(8.6, 4.5))
 ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
 
-ax.text(.5, .955, "Mọi thuật toán học có giám sát đều gồm đúng ba thứ",
+ax.text(.5, .955, "Ba thành phần của một thuật toán học có giám sát",
         ha="center", fontsize=11.5, weight="bold", color="#1a1a1a")
 
 hop(ax, .04, .70, .27, .16,
-    "1. MÔ HÌNH\n$f_\\theta(x)$\ndạng hàm được phép dùng", fs=8.5, weight="bold")
+    "1. MÔ HÌNH\n$f_\\theta(x)$\nhọ hàm được phép chọn", fs=8.5, weight="bold")
 hop(ax, .365, .70, .27, .16,
-    "2. HÀM MẤT MÁT\n$L(f_\\theta(x),\\, y)$\nthế nào là đoán sai", fs=8.5, weight="bold")
+    "2. HÀM MẤT MÁT\n$L(f_\\theta(x),\\, y)$\nđo mức sai của dự đoán", fs=8.5, weight="bold")
 hop(ax, .69, .70, .27, .16,
-    "3. THUẬT TOÁN TỐI ƯU\n$\\min_\\theta \\sum_i L$\ntìm $\\theta$ thế nào", fs=8.5, weight="bold")
+    "3. THUẬT TOÁN TỐI ƯU\n$\\min_\\theta \\sum_i L$\ncách tìm $\\theta$", fs=8.5, weight="bold")
 
-vd = [("Hồi quy tuyến tính", "$w^\\top x + b$", "bình phương sai lệch",
-       "nghiệm giải tích\nhoặc GD"),
-      ("Hồi quy logistic", "$\\sigma(w^\\top x + b)$", "entropy chéo", "GD (hàm lồi)"),
+vd = [("Hồi quy tuyến tính", "$w^\\top x + b$", "bình phương sai số",
+       "phương trình chuẩn\nhoặc gradient descent"),
+      ("Hồi quy logistic", "$\\sigma(w^\\top x + b)$", "cross-entropy", "gradient descent"),
       ("SVM lề mềm", "$w^\\top x + b$", "hinge $+\\;\\lambda\\|w\\|^2$",
        "quy hoạch toàn phương\n(bài toán đối ngẫu)"),
       ("Cây quyết định", "hàm hằng từng khúc", "Gini / entropy",
@@ -58,7 +58,7 @@ vd = [("Hồi quy tuyến tính", "$w^\\top x + b$", "bình phương sai lệch"
        "SGD + lan truyền ngược")]
 
 y0, dy = .575, .102
-ax.text(.04, y0 + .055, "Năm ví dụ đọc theo đúng ba cột ấy:", fontsize=9,
+ax.text(.04, y0 + .055, "Năm thuật toán, mô tả theo ba thành phần:", fontsize=9,
         color=C_DIM, style="italic")
 for i, (ten, mh, mm, tu) in enumerate(vd):
     y = y0 - i * dy
@@ -75,8 +75,7 @@ for x in (.175, .50, .825):
     mui_ten(ax, (x, .695), (x, .645), color=C_LINE, lw=1.0)
 
 ax.text(.5, .022,
-        "Đổi một trong ba cột là ra một thuật toán khác. Phần lớn \"thuật toán mới\"\n"
-        "chỉ là một tổ hợp mới của ba lựa chọn này.",
+        "Thay một thành phần là được một thuật toán khác.",
         ha="center", fontsize=8.6, color=C_DIM, style="italic", linespacing=1.5)
 fig.tight_layout(); fig.savefig(OUT + "nt01_bando.png"); plt.close(fig)
 
@@ -87,27 +86,27 @@ fig.tight_layout(); fig.savefig(OUT + "nt01_bando.png"); plt.close(fig)
 fig, ax = plt.subplots(1, 2, figsize=(8.8, 3.3))
 m = np.linspace(-3, 3, 600)
 
-loss = [("mất mát 0–1 (thứ ta THỰC SỰ muốn)", np.where(m <= 0, 1.0, 0.0), "k", 2.0, "-"),
+loss = [("mất mát 0–1", np.where(m <= 0, 1.0, 0.0), "k", 2.0, "-"),
         ("perceptron: $\\max(0, -m)$", np.maximum(0, -m), C_WARN, 1.6, "-"),
         ("hinge (SVM): $\\max(0, 1-m)$", np.maximum(0, 1 - m), C_BAD, 1.6, "-"),
         ("logistic: $\\log_2(1+e^{-m})$", np.log2(1 + np.exp(-m)), C_MAIN, 1.6, "-")]
 for lab, v, c, lw, ls in loss:
     ax[0].plot(m, v, label=lab, color=c, lw=lw, ls=ls)
-ax[0].set_xlabel("biên $m = y\\,(w^\\top x + b)$")
+ax[0].set_xlabel("lề $m = y\\,(w^\\top x + b)$")
 ax[0].set_ylabel("mất mát")
 ax[0].set_ylim(-.1, 3.1); ax[0].axvline(0, color=C_LINE, lw=.9)
 ax[0].grid(alpha=.25)
 ax[0].legend(frameon=False, fontsize=7.6, loc="upper right")
-ax[0].set_title("Ba hàm mất mát là ba cách làm trơn cùng một thứ", fontsize=9)
+ax[0].set_title("Các hàm mất mát theo lề", fontsize=9)
 ax[0].spines[["top", "right"]].set_visible(False)
 
 ax[1].axis("off")
 ax[1].set_xlim(0, 1); ax[1].set_ylim(0, 1)
-rows = [("mất mát 0–1", "không lồi, đạo hàm 0 khắp nơi", "không tối ưu trực tiếp được"),
-        ("perceptron", "lồi, nhưng phẳng ở $m>0$", "dừng ngay khi vừa đúng"),
-        ("hinge", "lồi, phẳng ở $m>1$", "ép có lề, cho nghiệm thưa"),
-        ("logistic", "lồi, trơn, không bao giờ phẳng hẳn", "cho ra xác suất")]
-ax[1].text(.5, .93, "Vì sao lại cần thay?", ha="center", fontsize=10, weight="bold")
+rows = [("mất mát 0–1", "không lồi, đạo hàm bằng 0", "không dùng gradient được"),
+        ("perceptron", "lồi, bằng 0 khi $m \\geq 0$", "dừng khi vừa phân loại đúng"),
+        ("hinge", "lồi, bằng 0 khi $m \\geq 1$", "đòi hỏi lề, nghiệm thưa"),
+        ("logistic", "lồi, trơn, luôn dương", "cho ra xác suất")]
+ax[1].text(.5, .93, "Tính chất và hệ quả", ha="center", fontsize=10, weight="bold")
 for i, (a, b, c) in enumerate(rows):
     y = .78 - i * .168
     ax[1].add_patch(FancyBboxPatch((.02, y - .065), .96, .13,
@@ -118,82 +117,69 @@ for i, (a, b, c) in enumerate(rows):
     ax[1].text(.06, y - .03, b, fontsize=7.9, color="#333", va="center")
     ax[1].text(.96, y, c, fontsize=7.9, color=C_DIM, va="center", ha="right", style="italic")
 ax[1].text(.5, .075,
-           "Cả ba đều là chặn trên của mất mát 0–1, nên giảm chúng là\n"
-           "gián tiếp giảm tỉ lệ đoán sai.",
+           "Hinge và logistic (log cơ số 2) là chặn trên của mất mát 0–1;\n"
+           "mất mát perceptron thì không, vì bằng 0 tại $m = 0$.",
            ha="center", fontsize=8.2, color=C_DIM, style="italic", linespacing=1.5)
 fig.tight_layout(); fig.savefig(OUT + "nt05_matmat.png"); plt.close(fig)
 
 
 # ---------------------------------------------------------------------
-# Hình 13 — Bản đồ toàn bộ năm giáo trình: cái gì dẫn tới cái gì
+# Hình 13 — Sáu giáo trình của lộ trình kỹ sư AI và thứ tự đọc
 # ---------------------------------------------------------------------
-fig, ax = plt.subplots(figsize=(10.6, 5.4))
+fig, ax = plt.subplots(figsize=(11.2, 5.6))
 ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-ax.text(.5, .962, "Năm giáo trình đọc như một mạch",
-        ha="center", fontsize=12, weight="bold")
+ax.text(.5, .965, "Lộ trình sáu giáo trình", ha="center", fontsize=12.5, weight="bold")
 
 phan = [
-    (.012, "I · Nền tảng", C_MAIN,
-     ["Đại số tuyến tính, xác suất",
-      "Hồi quy tuyến tính & logistic",
-      "Gradient descent",
-      "Đánh giá, phạt chuẩn, MAP",
-      "Tối ưu lồi → SVM",
-      "PCA, K-means, hệ gợi ý"]),
-    (.211, "II · Mô hình & Kiến trúc", "#2f6f9f",
-     ["Thiên lệch – phương sai",
-      "Cây và học tập hợp",
-      "MLP, lan truyền ngược",
-      "Khởi tạo, chuẩn hoá, tắt",
-      "CNN, RNN, Attention",
-      "Transformer hiện đại"]),
-    (.410, "III · Biểu diễn & Căn chỉnh", "#b5651d",
-     ["Word2Vec, embedding",
-      "Học chuyển giao, LoRA",
-      "VAE, GAN, khuếch tán",
-      "Học tăng cường",
-      "RLHF",
-      "DPO"]),
-    (.609, "IV · Quantization", "#8a5fa8",
-     ["Biểu diễn số thực",
-      "Uniform affine, S và Z",
-      "Suy luận số nguyên",
-      "Calibration, PTQ, QAT",
-      "GPTQ, AWQ, NF4",
-      "KV cache"]),
-    (.808, "V · MLOps", C_WARN,
-     ["Nợ kỹ thuật, CACE",
-      "Dữ liệu và kiểm thử",
-      "Phục vụ và ra mắt",
-      "Giám sát, dịch chuyển",
-      "Thí nghiệm A/B",
-      "Huấn luyện lại"]),
+    ("1 · Nền tảng", C_MAIN,
+     ["Đại số tuyến tính, xác suất", "Hồi quy, phân loại", "Gradient descent",
+      "Đánh giá, regularization", "Tối ưu lồi, SVM", "PCA, K-means, gợi ý"]),
+    ("2 · Học sâu", "#2f6f9f",
+     ["Độ chệch – phương sai", "Cây, học tập hợp", "MLP, lan truyền ngược",
+      "Khởi tạo, chuẩn hoá", "CNN, RNN", "Transformer, giải mã"]),
+    ("3 · Biểu diễn & Căn chỉnh", "#b5651d",
+     ["Embedding", "Học chuyển giao, LoRA", "VAE, GAN, khuếch tán",
+      "Học tăng cường", "RLHF", "DPO"]),
+    ("4 · Ứng dụng LLM", "#b0413e",
+     ["Prompt, ngữ cảnh", "Chọn, triển khai mô hình", "Tìm kiếm vector",
+      "RAG", "Agent, MCP", "Đánh giá, an toàn"]),
+    ("5 · Quantization", "#8a5fa8",
+     ["Biểu diễn số", "Affine quantization", "Suy luận số nguyên",
+      "PTQ, QAT", "GPTQ, AWQ", "KV cache"]),
+    ("6 · MLOps", C_WARN,
+     ["Nợ kỹ thuật", "Dữ liệu, kiểm thử", "Phục vụ, ra mắt",
+      "Giám sát, dịch chuyển", "Huấn luyện lại", "LLMOps"]),
 ]
-
-for x, ten, col, muc in phan:
-    ax.add_patch(FancyBboxPatch((x, .335), .18, .545,
+W, G = .148, .0184
+x0 = (1 - (6 * W + 5 * G)) / 2
+for k, (ten, col, muc) in enumerate(phan):
+    x = x0 + k * (W + G)
+    ax.add_patch(FancyBboxPatch((x, .33), W, .55,
                                 boxstyle="round,pad=0.006,rounding_size=0.018",
                                 facecolor="#fcfcfb", edgecolor=col, linewidth=1.4))
-    ax.add_patch(FancyBboxPatch((x, .785), .18, .095,
+    ax.add_patch(FancyBboxPatch((x, .785), W, .095,
                                 boxstyle="round,pad=0.006,rounding_size=0.018",
                                 facecolor=col, edgecolor=col, linewidth=1.4))
-    ax.text(x + .09, .832, ten, ha="center", va="center", fontsize=8.3,
+    ax.text(x + W / 2, .832, ten, ha="center", va="center", fontsize=7.9,
             weight="bold", color="white")
     for i, m_ in enumerate(muc):
-        ax.text(x + .012, .705 - i * .066, "· " + m_, fontsize=6.8,
-                va="center", color="#2a2a2a")
+        ax.text(x + .01, .705 - i * .066, "· " + m_, fontsize=6.9, va="center", color="#2a2a2a")
+    if k < 5:
+        mui_ten(ax, (x + W + .001, .56), (x + W + G - .001, .56), color="#6b7a78", lw=1.6)
 
-for x in (.196, .395, .594, .793):
-    mui_ten(ax, (x, .56), (x + .013, .56), color="#6b7a78", lw=1.8)
+# ba chặng lớn bên dưới
+chang = [(0, 1, "Kiến thức nền", C_MAIN), (2, 3, "Mô hình ngôn ngữ và ứng dụng", "#b0413e"),
+         (4, 5, "Tối ưu và vận hành", C_WARN)]
+for a_, b_, ten, col in chang:
+    xa = x0 + a_ * (W + G); xb = x0 + b_ * (W + G) + W
+    ax.plot([xa + .004, xb - .004], [.285, .285], color=col, lw=2.2, solid_capstyle="round")
+    ax.text((xa + xb) / 2, .245, ten, ha="center", va="center", fontsize=8.6, color=col, weight="bold")
 
-ax.text(.5, .195,
-        "Phần I trả lời \"học là gì và tối ưu thế nào\"; phần II thay mô hình tuyến tính bằng mạng sâu;\n"
-        "phần III kể một trợ lý ngôn ngữ ra đời thế nào; phần IV làm mô hình chạy được trên phần cứng thật;\n"
-        "phần V giữ cho nó sống trong sản xuất.",
-        ha="center", fontsize=8.2, color="#333", linespacing=1.6)
-ax.text(.5, .055,
-        "Đọc ngang cũng được: mỗi phần tự đứng vững. Nhưng mũi tên là thứ tự ít phải quay lại nhất.",
-        ha="center", fontsize=8.2, color=C_DIM, style="italic")
+ax.text(.5, .12,
+        "Giáo trình 1 và 2 là kiến thức nền mà roadmap AI Engineer giả định người học đã có; giáo trình 3 và 4 đi theo\n"
+        "các chặng của roadmap từ cách mô hình ngôn ngữ được huấn luyện tới cách xây ứng dụng trên nó; giáo trình 5 và 6\n"
+        "trình bày cách làm mô hình chạy hiệu quả và vận hành ổn định trong sản xuất.",
+        ha="center", fontsize=7.9, color="#333", linespacing=1.6)
 fig.tight_layout(); fig.savefig(OUT + "nt13_mach.png"); plt.close(fig)
 
 print("Da luu 3 hinh: nt01_bando, nt05_matmat, nt13_mach")

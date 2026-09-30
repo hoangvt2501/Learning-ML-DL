@@ -37,25 +37,73 @@ export const figureId = (num) => 'hinh-' + num;
  * cho nó một lớp theo NỘI DUNG mở đầu, để nó hiện ra như một hộp có kiểu thay vì
  * một khối chữ nghiêng lẫn vào bài — đây là cách các trang tài liệu kỹ thuật làm.
  */
-const LOAI_CHU_THICH = [
-  [/^(cảnh báo|cẩn thận|chú ý|lưu ý|đừng|không nên|sai lầm|một lưu ý|một cảnh báo)/i, 'canh-bao'],
-  [/^(mẹo|quy tắc|cách chữa|thủ thuật|hệ quả thực tế|hệ quả|dùng được ngay|nên làm)/i, 'meo'],
-  [/^(câu này|cách nói|cách trả lời|khi phỏng vấn|ghi điểm|đáng nhớ|điểm cần nhớ|nói được)/i, 'phong-van'],
+const LOAI_HOP = [
+  // [biểu thức nhận dạng chữ mở đầu, loại, nhãn hiện ra, icon]
+  [/^(định nghĩa)/i, 'dinh-nghia', 'Định nghĩa', 'dinh-nghia'],
+  [/^(định lý|mệnh đề|bổ đề|hệ quả toán)/i, 'dinh-ly', 'Định lý', 'dinh-ly'],
+  [/^(chứng minh)/i, 'chung-minh', 'Chứng minh', 'chung-minh'],
+  [/^(ví dụ)/i, 'vi-du', 'Ví dụ', 'vi-du'],
+  [/^(lưu ý|cảnh báo|cẩn thận|chú ý|đừng|không nên|sai lầm)/i, 'luu-y', 'Lưu ý', 'luu-y'],
+  [/^(câu hỏi phỏng vấn|khi phỏng vấn|trả lời phỏng vấn)/i, 'phong-van', 'Phỏng vấn', 'phong-van'],
+  [/^(trả lời|gợi ý trả lời|đáp án)/i, 'tra-loi', 'Trả lời', 'tra-loi'],
 ];
+const HOP_MAC_DINH = ['nhan-xet', 'Nhận xét', 'nhan-xet'];
 
-function loaiChuThich(tokens, idx) {
-  // Tìm đoạn chữ đầu tiên bên trong khối trích dẫn.
+/**
+ * Khối trích dẫn trong bài được dựng thành hộp kiểu giáo trình — Định nghĩa,
+ * Định lý, Chứng minh, Ví dụ, Nhận xét, Lưu ý — nhận dạng theo chữ in đậm mở đầu.
+ * Khối không có nhãn thì là Nhận xét.
+ */
+/**
+ * Chữ in đậm mở đầu hộp kiểu tiêu đề chạy ("**Định nghĩa 2.1 (Tích vô hướng).**")
+ * được nhấc lên làm dòng tiêu đề của hộp và bỏ khỏi đoạn văn, để không lặp
+ * "Định nghĩa" hai lần. Chỉ nhấc khi chữ đậm kết thúc bằng dấu chấm hoặc hai
+ * chấm, tức đúng là một tiêu đề chạy chứ không phải một cụm được nhấn mạnh.
+ */
+function nhacTieuDe(tokens, idx, md, options, env) {
+  const inline = tokens[idx + 2];
+  if (!inline || inline.type !== 'inline' || !inline.children) return null;
+  const ch = inline.children;
+  // bỏ qua các mẩu chữ rỗng mà các luật inline khác để lại ở đầu
+  let a = 0;
+  while (a < ch.length && ch[a].type === 'text' && !ch[a].content.trim()) a++;
+  if (a >= ch.length || ch[a].type !== 'strong_open') return null;
+  let k = a + 1;
+  while (k < ch.length && ch[k].type !== 'strong_close') k++;
+  if (k >= ch.length) return null;
+  const trong = ch.slice(a + 1, k).map((t) => t.content).join('');
+  const sau = ch[k + 1] && ch[k + 1].type === 'text' ? ch[k + 1].content : '';
+  if (!/[.:]\s*$/.test(trong) && !/^\s*[.:]/.test(sau)) return null;
+  const html = md.renderer.renderInline(ch.slice(a + 1, k), options, env)
+    .replace(/[.:]\s*$/, '').trim();
+  ch.splice(0, k + 1);
+  if (ch.length && ch[0].type === 'text') {
+    ch[0].content = ch[0].content.replace(/^\s*[.:]?\s*/, '');
+    if (!ch[0].content) ch.shift();
+  }
+  if (ch.length && ch[0].type === 'softbreak') ch.shift();
+  // Đoạn chỉ có mỗi tiêu đề (theo sau là danh sách, công thức...) thì bỏ luôn thẻ <p> rỗng.
+  if (!ch.length && tokens[idx + 1].type === 'paragraph_open') {
+    tokens[idx + 1].hidden = true;
+    if (tokens[idx + 3] && tokens[idx + 3].type === 'paragraph_close') tokens[idx + 3].hidden = true;
+  }
+  return html;
+}
+
+function loaiHop(tokens, idx) {
   for (let i = idx + 1; i < tokens.length; i++) {
     const tk = tokens[i];
     if (tk.type === 'blockquote_close') break;
     if (tk.type === 'inline') {
       const txt = tk.content.replace(/^[*_\s]+/, '').trim();
-      for (const [re, ten] of LOAI_CHU_THICH) if (re.test(txt)) return ten;
-      return 'ghi-chu';
+      for (const [re, loai, nhan, ic] of LOAI_HOP) if (re.test(txt)) return [loai, nhan, ic];
+      return HOP_MAC_DINH;
     }
   }
-  return 'ghi-chu';
+  return HOP_MAC_DINH;
 }
+
+import { icon } from './icons.mjs';
 
 export function createMarkdownIt(registry) {
   const md = new MarkdownIt({ html: false, linkify: false, typographer: false });
@@ -74,11 +122,21 @@ export function createMarkdownIt(registry) {
     const token = tokens[idx];
     const inline = tokens[idx + 1];
     const text = inline ? inline.content : '';
-    const num = text.match(/^(\d+(?:\.\d+)*)\./);
+    const num = text.match(/^(\d+(?:\.\d+)*)\.\s*/);
     const id = num ? sectionId(num[1]) : slugify(text) || 'phan-' + idx;
     token.attrSet('id', id);
     token.attrJoin('class', 'heading');
-    return self.renderToken(tokens, idx, options);
+    // Số mục tách ra một ô riêng, bỏ dấu chấm cuối: "4.1. Tiêu đề" -> "4.1  Tiêu đề",
+    // đúng lối đánh số của giáo trình in.
+    if (num && inline && inline.children && inline.children.length) {
+      const dau = inline.children[0];
+      if (dau.type === 'text' && dau.content.startsWith(num[0])) {
+        dau.content = dau.content.slice(num[0].length);
+      }
+      return self.renderToken(tokens, idx, options) +
+        '<span class="hnum">' + num[1] + '</span><span class="htext">';
+    }
+    return self.renderToken(tokens, idx, options) + '<span class="htext">';
   };
 
   md.renderer.rules.heading_close = (tokens, idx) => {
@@ -87,13 +145,16 @@ export function createMarkdownIt(registry) {
     const anchor = id
       ? '<a class="anchor" href="#' + id + '" aria-label="Liên kết tới mục này">#</a>'
       : '';
-    return anchor + '</' + tokens[idx].tag + '>\n';
+    return anchor + '</span></' + tokens[idx].tag + '>\n';
   };
 
   // Khối trích dẫn -> hộp chú thích có kiểu, nhận dạng theo chữ mở đầu.
   md.renderer.rules.blockquote_open = (tokens, idx, options, env, self) => {
-    tokens[idx].attrJoin('class', 'callout callout--' + loaiChuThich(tokens, idx));
-    return self.renderToken(tokens, idx, options);
+    const [loai, nhan, ic] = loaiHop(tokens, idx);
+    const tieuDe = nhacTieuDe(tokens, idx, md, options, env);
+    tokens[idx].attrJoin('class', 'callout callout--' + loai);
+    return self.renderToken(tokens, idx, options) +
+      '<p class="callout-label">' + icon(ic) + '<span>' + (tieuDe || nhan) + '</span></p>';
   };
 
   // ---------------------------------------------------------------- bảng
