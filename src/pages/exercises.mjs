@@ -110,6 +110,7 @@ export function buildExercisePage(ctx, exChapter) {
     .join('');
 
   // --------------------------------------------------------- luyện tính tay
+  const hasDrills = book.drills !== false;
   const drillOptions = DRILLS.map(
     (d, i) =>
       '<button class="drill-tab' + (i === 0 ? ' is-active' : '') +
@@ -160,19 +161,22 @@ export function buildExercisePage(ctx, exChapter) {
     '<div class="chapter-kicker"><span class="kicker-badge">Chương ' + exChapter.num + '</span>' +
     '<span class="kicker-time">' + exercises.length + ' bài · ' + totalQuestions + ' câu trắc nghiệm</span></div>' +
     '<h2 class="heading" id="sec-' + exChapter.num + '">' + escapeHtml(exChapter.title) + '<a class="anchor" href="#sec-' + exChapter.num + '">#</a></h2>' +
-    '<p class="chapter-lede">Chín bài tập của giáo trình, mỗi bài kèm lời giải chi tiết ẩn sẵn. Hãy tự làm trước khi mở. Bên dưới là phần luyện tính tay tự chấm và ngân hàng trắc nghiệm theo từng chương.</p>' +
+    '<p class="chapter-lede">' + escapeHtml(exChapter.summary) + '</p>' +
     '<nav class="ex-jump">' +
     exercises
       .map((e) => '<a href="#bai-' + e.num + '">Bài ' + e.num + '</a>')
       .join('') +
-    '<a href="#luyen-tinh-tay">Luyện tính tay</a><a href="#trac-nghiem">Trắc nghiệm</a>' +
+    (hasDrills ? '<a href="#luyen-tinh-tay">Luyện tính tay</a>' : '') +
+    '<a href="#trac-nghiem">Trắc nghiệm</a>' +
     '</nav>' +
     '<div class="ex-list">' + cards + '</div>' +
 
-    '<h3 class="heading" id="luyen-tinh-tay-h">Luyện tính tay' +
-    '<a class="anchor" href="#luyen-tinh-tay-h">#</a></h3>' +
-    '<p>Mỗi lần bấm <b>Câu khác</b> sẽ sinh một đề mới với số liệu ngẫu nhiên. Mọi phép làm tròn đều theo quy tắc <i>nửa về số chẵn</i> giống NumPy, đúng như Bài 1.</p>' +
-    drill +
+    (hasDrills
+      ? '<h3 class="heading" id="luyen-tinh-tay-h">Luyện tính tay' +
+        '<a class="anchor" href="#luyen-tinh-tay-h">#</a></h3>' +
+        '<p>Mỗi lần bấm <b>Câu khác</b> sẽ sinh một đề mới với số liệu ngẫu nhiên. Mọi phép làm tròn đều theo quy tắc <i>nửa về số chẵn</i> giống NumPy.</p>' +
+        drill
+      : '') +
 
     '<h3 class="heading" id="trac-nghiem">Trắc nghiệm theo chương' +
     '<a class="anchor" href="#trac-nghiem">#</a></h3>' +
@@ -186,8 +190,8 @@ export function buildExercisePage(ctx, exChapter) {
     page({
       title: 'Bài tập — ' + ctx.docTitle,
       description:
-        'Chín bài tập có lời giải chi tiết, bài luyện tính tay tự chấm và ' +
-        totalQuestions + ' câu trắc nghiệm theo chương.',
+        exercises.length + ' bài tập có lời giải chi tiết và ' + totalQuestions +
+        ' câu trắc nghiệm theo chương.',
       body,
       nav,
       file: f('bai-tap.html'),
