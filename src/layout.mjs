@@ -49,15 +49,21 @@ function renderSidebar(nav, currentFile) {
     '<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình">' +
     '<div class="sidebar-inner">' +
     switcher +
-    '<p class="nav-group">' + escapeHtml(nav.groupLabel || 'Giáo trình') + '</p><ul class="nav-list">' +
-    nav.chapters.map(item).join('') +
-    '</ul>' +
-    '<p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list">' +
-    nav.extras.map(item).join('') +
-    '</ul>' +
+    // Bỏ hẳn nhóm rỗng: trang Lộ trình không thuộc giáo trình nào nên không có
+    // danh sách chương, và một tiêu đề nhóm trống thì chỉ gây rối.
+    (nav.chapters.length
+      ? '<p class="nav-group">' + escapeHtml(nav.groupLabel || 'Giáo trình') + '</p><ul class="nav-list">' +
+        nav.chapters.map(item).join('') + '</ul>'
+      : '') +
+    (nav.extras.length
+      ? '<p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list">' +
+        nav.extras.map(item).join('') + '</ul>'
+      : '') +
     '<p class="nav-group">Toàn site</p><ul class="nav-list">' +
     '<li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span>' +
     '<span class="nav-label">Trang chủ</span></a></li>' +
+    '<li><a href="lo-trinh.html"><span class="nav-num nav-num--icon">↗</span>' +
+    '<span class="nav-label">Lộ trình cả bộ</span></a></li>' +
     '</ul>' +
     '</div></nav>'
   );

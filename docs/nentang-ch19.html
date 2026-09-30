@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>19. Tài liệu tham khảo — Nền tảng Machine Learning: từ đại số tuyến tính tới SVM</title>
+<meta name="description" content="Ba mươi hai nguồn, mỗi nguồn ghi rõ nó là nguồn của kết quả nào được dùng trong tài liệu.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">N</span>
+    <span class="brand-text"><b>Nền tảng</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><span class="book-tab is-active" aria-current="true">Nền tảng</span><a class="book-tab" href="models-ch01.html">Mô hình &amp; Kiến trúc</a><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a></div><p class="nav-group">Giáo trình 1 · Nền tảng</p><ul class="nav-list"><li><a href="nentang-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="nentang-ch01.html"><span class="nav-num">1</span><span class="nav-label">Bài toán học máy là gì</span></a></li><li><a href="nentang-ch02.html"><span class="nav-num">2</span><span class="nav-label">Đại số tuyến tính cho học máy</span></a></li><li><a href="nentang-ch03.html"><span class="nav-num">3</span><span class="nav-label">Xác suất và thống kê cho học máy</span></a></li><li><a href="nentang-ch04.html"><span class="nav-num">4</span><span class="nav-label">Hồi quy tuyến tính</span></a></li><li><a href="nentang-ch05.html"><span class="nav-num">5</span><span class="nav-label">Gradient descent</span></a></li><li><a href="nentang-ch06.html"><span class="nav-num">6</span><span class="nav-label">Phân loại tuyến tính: perceptron, logistic, softmax</span></a></li><li><a href="nentang-ch07.html"><span class="nav-num">7</span><span class="nav-label">K láng giềng gần nhất và Naive Bayes</span></a></li><li><a href="nentang-ch08.html"><span class="nav-num">8</span><span class="nav-label">Đánh giá mô hình phân loại</span></a></li><li><a href="nentang-ch09.html"><span class="nav-num">9</span><span class="nav-label">Quá khớp, phạt chuẩn và kiểm định chéo</span></a></li><li><a href="nentang-ch10.html"><span class="nav-num">10</span><span class="nav-label">Hợp lý cực đại và hậu nghiệm cực đại</span></a></li><li><a href="nentang-ch11.html"><span class="nav-num">11</span><span class="nav-label">Tập lồi và hàm lồi</span></a></li><li><a href="nentang-ch12.html"><span class="nav-num">12</span><span class="nav-label">Tối ưu lồi và đối ngẫu Lagrange</span></a></li><li><a href="nentang-ch13.html"><span class="nav-num">13</span><span class="nav-label">Support Vector Machine</span></a></li><li><a href="nentang-ch14.html"><span class="nav-num">14</span><span class="nav-label">Giảm chiều: PCA, SVD và LDA</span></a></li><li><a href="nentang-ch15.html"><span class="nav-num">15</span><span class="nav-label">Phân cụm: K-means</span></a></li><li><a href="nentang-ch16.html"><span class="nav-num">16</span><span class="nav-label">Hệ gợi ý</span></a></li><li><a href="nentang-bai-tap.html"><span class="nav-num">17</span><span class="nav-label">Bài tập</span></a></li><li><a href="nentang-ch18.html"><span class="nav-num">18</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="nentang-ch19.html" class="is-active" aria-current="page"><span class="nav-num">19</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="nentang-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="nentang-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 13 hình</span></a></li><li><a href="nentang-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="nentang-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="nentang-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon">↗</span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 19</span><span class="kicker-time">5 phút đọc</span></div><h2 id="sec-19" class="heading">19. Tài liệu tham khảo<a class="anchor" href="#sec-19" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Ba mươi hai nguồn, mỗi nguồn ghi rõ nó là nguồn của kết quả nào được dùng trong tài liệu.</p>
+<p><strong>Sách nền tảng</strong></p>
+<ol>
+<li>T. Hastie, R. Tibshirani, J. Friedman. <em>The Elements of Statistical Learning.</em> Springer, 2009. — nguồn chuẩn cho ridge, lasso, LDA/QDA, và công thức co ngót <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>d</mi><mi>i</mi><mn>2</mn></msubsup><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><msubsup><mi>d</mi><mi>i</mi><mn>2</mn></msubsup><mo>+</mo><mi>λ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d_i^2/(d_i^2+\lambda)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0728em;vertical-align:-0.2587em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-2.4413em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2587em;"><span></span></span></span></span></span></span><span class="mord">/</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-2.4413em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2587em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">λ</span><span class="mclose">)</span></span></span></span> ở <a href="nentang-ch09.html#sec-9-3" class="xref">Mục 9.3</a>.</li>
+<li>C. Bishop. <em>Pattern Recognition and Machine Learning.</em> Springer, 2006. — nguồn cho cách đọc MAP như phạt chuẩn, và cho phần phân lớp sinh Gauss.</li>
+<li>K. Murphy. <em>Machine Learning: A Probabilistic Perspective.</em> MIT Press, 2012. — trình bày thống nhất theo góc nhìn xác suất, đúng lối <a href="nentang-ch10.html#sec-10" class="xref">Chương 10</a> dùng.</li>
+<li>S. Boyd, L. Vandenberghe. <em>Convex Optimization.</em> Cambridge University Press, 2004. — nguồn chuẩn cho <a href="nentang-ch11.html#sec-11" class="xref">Chương 11</a> và <a href="nentang-ch12.html#sec-12" class="xref">12</a>: tập lồi, hàm lồi, đối ngẫu Lagrange, điều kiện Slater và KKT. Sách và bài giảng đều đọc miễn phí.</li>
+<li>G. Strang. <em>Introduction to Linear Algebra.</em> Wellesley–Cambridge Press. — nền cho <a href="nentang-ch02.html#sec-2" class="xref">Chương 2</a>.</li>
+<li>T. Hastie, R. Tibshirani, M. Wainwright. <em>Statistical Learning with Sparsity.</em> CRC Press, 2015. — chuyên sâu về lasso và vì sao <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">ℓ</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\ell_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord">ℓ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> cho nghiệm thưa.</li>
+</ol>
+<p><strong>Bài báo gốc của từng thuật toán</strong></p>
+<ol start="7">
+<li>A. Hoerl, R. Kennard. <em>Ridge Regression: Biased Estimation for Nonorthogonal Problems.</em> Technometrics, 1970. — bài báo giới thiệu ridge, và chính tiêu đề của nó đã nói rõ ridge là ước lượng <strong>có thiên lệch</strong>.</li>
+<li>R. Tibshirani. <em>Regression Shrinkage and Selection via the Lasso.</em> JRSS-B, 1996.</li>
+<li>H. Zou, T. Hastie. <em>Regularization and Variable Selection via the Elastic Net.</em> JRSS-B, 2005.</li>
+<li>F. Rosenblatt. <em>The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain.</em> Psychological Review, 1958.</li>
+<li>A. Novikoff. <em>On Convergence Proofs for Perceptrons.</em> Symposium on the Mathematical Theory of Automata, 1962. — nguồn của chặn <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>R</mi><mi mathvariant="normal">/</mi><mi>γ</mi><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">(R/\gamma)^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.0556em;">γ</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span> dùng ở <a href="nentang-ch06.html#sec-6-2" class="xref">Mục 6.2</a>.</li>
+<li>M. Minsky, S. Papert. <em>Perceptrons.</em> MIT Press, 1969. — phân tích giới hạn của perceptron trên dữ liệu không tách được.</li>
+<li>B. Boser, I. Guyon, V. Vapnik. <em>A Training Algorithm for Optimal Margin Classifiers.</em> COLT 1992. — nguồn của thủ thuật nhân.</li>
+<li>C. Cortes, V. Vapnik. <em>Support-Vector Networks.</em> Machine Learning, 1995. — nguồn của lề mềm và tham số <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi></mrow><annotation encoding="application/x-tex">C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span></span></span></span>.</li>
+<li>V. Vapnik. <em>The Nature of Statistical Learning Theory.</em> Springer, 1995.</li>
+<li>J. Platt. <em>Sequential Minimal Optimization.</em> Microsoft Research TR, 1998. — thuật toán mà libsvm dùng để giải bài toán đối ngẫu.</li>
+<li>R. Fisher. <em>The Use of Multiple Measurements in Taxonomic Problems.</em> Annals of Eugenics, 1936. — nguồn của LDA.</li>
+<li>K. Pearson. <em>On Lines and Planes of Closest Fit to Systems of Points in Space.</em> Philosophical Magazine, 1901. — nguồn của PCA.</li>
+<li>C. Eckart, G. Young. <em>The Approximation of One Matrix by Another of Lower Rank.</em> Psychometrika, 1936. — định lý kiểm chứng ở <a href="nentang-ch14.html#sec-14-3" class="xref">Mục 14.3</a>.</li>
+<li>S. Lloyd. <em>Least Squares Quantization in PCM.</em> IEEE Trans. Information Theory, 1982 (bản thảo 1957). — thuật toán K-means.</li>
+<li>D. Arthur, S. Vassilvitskii. <em>k-means++: The Advantages of Careful Seeding.</em> SODA 2007. — nguồn của cách khởi tạo đo ở <a href="nentang-ch15.html#sec-15-2" class="xref">Mục 15.2</a>.</li>
+<li>Y. Koren, R. Bell, C. Volinsky. <em>Matrix Factorization Techniques for Recommender Systems.</em> IEEE Computer, 2009. — nguồn chuẩn cho <a href="nentang-ch16.html#sec-16" class="xref">Chương 16</a>.</li>
+<li>Y. Hu, Y. Koren, C. Volinsky. <em>Collaborative Filtering for Implicit Feedback Datasets.</em> ICDM 2008. — ALS cho phản hồi ngầm.</li>
+</ol>
+<p><strong>Tối ưu hoá</strong></p>
+<ol start="24">
+<li>B. Polyak. <em>Some Methods of Speeding up the Convergence of Iteration Methods.</em> USSR Computational Mathematics, 1964. — heavy ball, tức phương pháp quán tính đo ở <a href="nentang-ch05.html#sec-5-3" class="xref">Mục 5.3</a>.</li>
+<li>Y. Nesterov. <em>A Method of Solving a Convex Programming Problem with Convergence Rate <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mi mathvariant="normal">/</mi><msup><mi>k</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1/k^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord">1/</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>.</em> Soviet Mathematics Doklady, 1983.</li>
+<li>L. Bottou, F. Curtis, J. Nocedal. <em>Optimization Methods for Large-Scale Machine Learning.</em> SIAM Review, 2018. — khảo sát tốt về SGD và các biến thể.</li>
+</ol>
+<p><strong>Đánh giá mô hình</strong></p>
+<ol start="27">
+<li>T. Fawcett. <em>An Introduction to ROC Analysis.</em> Pattern Recognition Letters, 2006.</li>
+<li>J. Davis, M. Goadrich. <em>The Relationship Between Precision-Recall and ROC Curves.</em> ICML 2006. — nguồn chính cho lập luận ở <a href="nentang-ch08.html#sec-8-3" class="xref">Mục 8.3</a> về vì sao PR hợp hơn khi mất cân bằng.</li>
+<li>T. Saito, M. Rehmsmeier. <em>The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets.</em> PLOS ONE, 2015.</li>
+</ol>
+<p><strong>Số học dấu phẩy động</strong></p>
+<ol start="30">
+<li>N. Higham. <em>Accuracy and Stability of Numerical Algorithms.</em> SIAM, 2002. — nguồn cho phân tích <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>ε</mi><mo>∗</mo></msup><mo>∼</mo><msup><mi>u</mi><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mn>3</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\varepsilon^* \sim u^{1/3}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6887em;"></span><span class="mord"><span class="mord mathnormal">ε</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6887em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.888em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.888em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1/3</span></span></span></span></span></span></span></span></span></span></span></span> ở <a href="nentang-ch05.html#sec-5-5" class="xref">Mục 5.5</a> và cho cảnh báo về <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>κ</mi><mo stretchy="false">(</mo><msup><mi>X</mi><mi mathvariant="normal">⊤</mi></msup><mi>X</mi><mo stretchy="false">)</mo><mo>=</mo><mi>κ</mi><mo stretchy="false">(</mo><mi>X</mi><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\kappa(X^\top X) = \kappa(X)^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0991em;vertical-align:-0.25em;"></span><span class="mord mathnormal">κ</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">⊤</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal">κ</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>.</li>
+</ol>
+<p><strong>Tài liệu tiếng Việt</strong></p>
+<ol start="31">
+<li>Vũ Hữu Tiệp. <em>Machine Learning cơ bản.</em> machinelearningcoban.com — bộ bài giảng tiếng Việt đầy đủ nhất về mảng này, với ảnh động minh hoạ và mã Python cho từng thuật toán. Cấu trúc của giáo trình hiện tại có tham khảo cách tổ chức theo phần của bản ebook ấy.</li>
+<li>Phạm Đình Khánh. <em>Deep AI KhanhBlog.</em> phamdinhkhanh.github.io — thiên về mảng ứng dụng thị giác máy tính và xử lý ngôn ngữ.</li>
+</ol>
+<blockquote>
+<p><strong>Về hai nguồn tiếng Việt trên.</strong> Chúng được nêu ở đây như tài liệu đọc thêm. Repo này <strong>không</strong> sao chép nội dung của chúng: mọi phần chữ đều tự viết, và mọi con số đều sinh từ mã trong <code>code/nentang/</code>. Riêng ebook <em>Machine Learning cơ bản</em> có ghi rõ yêu cầu xin phép tác giả trước khi sao chép hay in ấn, nên ai muốn dùng lại nội dung của tài liệu ấy cần liên hệ trực tiếp.</p>
+</blockquote>
+<hr>
+</article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="nentang-ch18.html"><span class="pager-dir">← Trước</span><span class="pager-title">Ôn phỏng vấn</span></a><a class="pager-link pager-next" href="nentang-phu-luc.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Phụ lục: chạy lại thí nghiệm</span></a></nav>
+</main>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+
+</body>
+</html>

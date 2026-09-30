@@ -126,6 +126,7 @@ export function buildHomePage(ctx) {
     '<h1>' + escapeHtml(siteTitle(books)) + '</h1>' +
     '<p class="hero-lede">' + demSach(books.length) + ' giáo trình viết theo cùng một lối: <b>động cơ → định nghĩa → suy luận → ví dụ số → thí nghiệm kiểm chứng</b>. Mỗi chương có phần tự kiểm tra, mỗi bài tập có lời giải đầy đủ, và mọi khẳng định đều truy được về bài báo gốc hoặc về mã chạy lại được.</p>' +
     jump +
+    '<p class="home-spine">Bốn giáo trình viết để đọc nối nhau — <a href="lo-trinh.html">xem lộ trình cả bộ</a>, nơi toàn bộ các bài được xếp thành một dãy đánh số liên tục.</p>' +
     '</header>' +
     books.map((b) => bookSection(b, escapeHtml)).join('') +
     '</article>';

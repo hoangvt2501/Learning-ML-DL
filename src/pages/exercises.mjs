@@ -77,9 +77,18 @@ export function buildExercisePage(ctx, exChapter) {
       const sol = solutions.get(ex.num);
       if (!sol) throw new Error('Thiếu lời giải cho Bài ' + ex.num);
       const meta = sol.meta || {};
-      const chapterRef = meta.chuong
-        ? '<a class="ex-chip ex-chip-link" href="ch' + String(meta.chuong).padStart(2, '0') +
-          '.html">Chương ' + meta.chuong + '</a>'
+      // Tra tệp thật từ sổ tra cứu của CHÍNH giáo trình này. Trước đây chỗ này
+      // ghép tên tệp bằng tay ('ch' + số) nên mọi chip của giáo trình 2 trở đi
+      // đều trỏ sang chương cùng số của giáo trình đầu tiên — sai sách, mà không
+      // bị bộ dò liên kết bắt vì tệp kia vẫn tồn tại.
+      const chapterEntry = meta.chuong ? registry.sections.get(String(meta.chuong)) : null;
+      if (meta.chuong && !chapterEntry) {
+        throw new Error('Bài ' + ex.num + ': @meta chuong=' + meta.chuong +
+          ' không khớp chương nào của giáo trình ' + book.id);
+      }
+      const chapterRef = chapterEntry
+        ? '<a class="ex-chip ex-chip-link" href="' + chapterEntry.href +
+          '">Chương ' + meta.chuong + '</a>'
         : '';
       const kind = ex.tag || meta.dang || '';
       const hint = ex.hint

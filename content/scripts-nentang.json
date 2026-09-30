@@ -1,0 +1,6 @@
+[
+  { "file": "experiments.py", "added": true,
+    "note": "Sinh Hình 2, 3, 4, 6, 7, 8, 9, 10, 11, 12 cùng mọi số liệu đo được: nghiệm bình phương tối thiểu và cái giá của cộng tuyến, tốc độ hội tụ theo số điều kiện, điểm tối ưu của epsilon khi kiểm tra đạo hàm, chặn Novikoff, đẳng thức logistic ≡ softmax, quan hệ Naive Bayes / LDA / QDA, các chỉ số trên dữ liệu mất cân bằng, ridge ≡ MAP Gauss, kiểm tính lồi, đối ngẫu và KKT của SVM, định lý Eckart–Young, K-means, và ngưỡng dữ liệu của phân rã ma trận." },
+  { "file": "fig_diagrams.py", "added": true,
+    "note": "Sinh Hình 1, 5 và 13: ba thành phần của một thuật toán học có giám sát, bốn hàm mất mát phân loại vẽ chung một trục để thấy chúng đều là chặn trên của mất mát 0–1, và bản đồ nối bốn giáo trình thành một mạch." }
+]

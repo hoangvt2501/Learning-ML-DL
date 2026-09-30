@@ -1,0 +1,317 @@
+
+==========================================================================
+(A) Hoi quy tuyen tinh: nghiem giai tich va dieu kien so
+==========================================================================
+cách giải                                w0       w1       w2       w3
+phương trình chuẩn tắc               1.9906  -1.4985   0.7992   2.9749
+giả nghịch đảo Moore-Penrose         1.9906  -1.4985   0.7992   2.9749
+lstsq (phân rã QR)                   1.9906  -1.4985   0.7992   2.9749
+lech giua 3 cach giai: 1.22e-15 / 2.66e-15  -> cung mot nghiem
+
+Khi lap lai mot cot: hang cua X = 4 nhung X co 5 cot -> X^T X suy bien
+  solve: BAO LOI 'Singular matrix'
+  pinv: van cho mot nghiem, chuan ||w|| = 3.8176
+  mot nghiem khac cung du bao y het: ||w|| = 4.0711 (sai so du bao lech 0.00e+00)
+  -> pinv chon nghiem CHUAN NHO NHAT trong vo so nghiem
+
+  tuong quan 2 cot   cond(X^T X)   do lech chuan w1  do lech chuan du bao
+             0.000           1.3             0.0324                0.0586
+             0.900          20.0             0.0772                0.0588
+             0.990         180.3             0.2373                0.0590
+             0.999        1958.9             0.8196                0.0585
+Doc bang: cong tuyen lam HE SO dao manh (cot 3) nhung DU BAO gan nhu khong doi
+(cot 4). Vi vay cong tuyen la van de cua DIEN GIAI, khong phai cua du bao.
+
+==========================================================================
+(B) Gradient descent tren ham bac hai: ly thuyet doi chieu voi do duoc
+==========================================================================
+   kappa   GD (số vòng)   heavy ball    tỉ lệ   căn kappa
+       1              1            1     1.00        1.00
+      10             92           34     2.71        3.16
+     100            922          117     7.88       10.00
+    1000           9211          391    23.56       31.62
+   10000          92104         1297    71.01      100.00
+Ly thuyet: GD can O(kappa) vong, heavy ball can O(sqrt(kappa)) vong.
+Cot 'ti le' bam sat cot 'can kappa' -> dung nhu ly thuyet du doan.
+
+==========================================================================
+(C) Kiem tra dao ham bang sai phan: diem toi uu cua epsilon
+==========================================================================
+     epsilon    sai phân trung tâm     sai phân tiến
+     1.0e-01             2.224e-03         6.075e-02
+     3.2e-03             2.225e-06         1.854e-03
+     1.0e-04             2.226e-09         5.855e-05
+     3.2e-06             1.717e-11         1.851e-06
+     1.0e-07             6.633e-10         5.878e-08
+     3.2e-09             2.415e-08         4.052e-08
+     1.0e-10             4.246e-07         8.008e-07
+     3.2e-12             1.975e-05         3.731e-05
+     1.0e-13             6.267e-04         9.376e-04
+
+Sai so nho nhat cua sai phan trung tam tai epsilon = 5.62e-06 (sai so 1.16e-11)
+Ly thuyet: epsilon* ~ u^(1/3) = 6.06e-06   (u = 2.22e-16)
+Voi sai phan tien thi epsilon* ~ u^(1/2) = 1.49e-08, do duoc 1.78e-08
+Epsilon NHO QUA thi sai so LON LEN: tru hai so gan bang nhau lam mat chu so co nghia.
+
+==========================================================================
+(D) Perceptron: chan Novikoff va truong hop khong tach duoc tuyen tinh
+==========================================================================
+  lề gamma  R = max||x||   chặn (R/gamma)^2   số lần sai đo được   hội tụ
+     0.300        1.3273               19.5                    4     True
+     0.201        1.2631               39.5                    4     True
+     0.100        1.1703              136.8                   10     True
+     0.050        1.1519              526.9                   14     True
+Dinh ly Novikoff: so lan sai <= (R/gamma)^2, khong phu thuoc so diem hay so chieu.
+Bang tren: cot 4 luon nho hon cot 3 -> chan dung, va no khong chat.
+
+Du lieu KHONG tach duoc tuyen tinh: hoi tu = False, so lan sai sau 2000 luot = 17,977
+Perceptron khong dung lai va khong co bao dam gi: no chi duoc chung minh cho
+truong hop tach duoc. Day la ly do can ham mat mat tron nhu hoi quy logistic.
+
+==========================================================================
+(E) Hoi quy logistic va softmax: hai ten goi cua cung mot thu khi K = 2
+==========================================================================
+Sai khac lon nhat giua xac suat cua logistic va cua softmax(K=2): 3.331e-16
+Hieu hai cot trong so cua softmax:  [ 0.10864027  1.53215349 -1.83422929]
+Trong so cua hoi quy logistic:      [ 0.10864027  1.53215349 -1.83422929]
+  -> lech 1.554e-15
+Tong hai cot trong so cua softmax (phai bang 0): 6.661e-16
+Softmax co K vector trong so nhung chi HIEU cua chung la xac dinh duoc:
+cong cung mot vector vao moi cot thi xac suat khong doi. Voi K = 2, hieu
+ay chinh la vector trong so cua hoi quy logistic -> hai mo hinh la MOT.
+
+   số vòng lặp     ||w|| khi lam = 0    ||w|| khi lam = 0,01
+           500                10.164                   3.993
+          2000                15.930                   3.993
+         10000                24.703                   3.993
+         50000                34.784                   3.993
+Du lieu tach duoc thi hop ly cuc dai KHONG co nghiem huu han: cang tang ||w||
+thi likelihood cang tang. Phat chuan chan dieu do lai -> day la ly do BAT BUOC.
+
+==========================================================================
+(F) Naive Bayes / LDA / QDA: khac nhau o gia thiet ve ma tran hiep phuong sai
+==========================================================================
+mô hình                           giả thiết Sigma             độ chính xác
+Naive Bayes Gauss (riêng, chéo)   riêng từng lớp, chéo              0.8550
+LDA (dùng chung, đầy đủ)          dùng chung, đầy đủ                0.8550
+QDA (riêng, đầy đủ)               riêng từng lớp, đầy đủ            0.8600
+NB dùng chung Sigma chéo          dùng chung, chéo                  0.8550
+
+Kiem chung dang thuc: tich cac Gauss MOT CHIEU == Gauss NHIEU CHIEU, Sigma cheo
+  hai cach tinh duoc cai dat hoan toan doc lap nhau trong ma nguon.
+  sai khac lon nhat cua hieu diem phan biet: 1.222e-08
+  hai mo hinh du bao giong nhau o 100.0% so mau
+  ham quyet dinh cua LDA co TUYEN TINH khong? sai so khop tuyen tinh = 4.441e-15  -> co
+  con QDA thi sao? sai so khop tuyen tinh = 1.780e+01 -> khong, no bac hai
+
+Day la ca cau chuyen: ba mo hinh chi khac nhau o RANG BUOC dat len Sigma.
+Gia thiet 'naive' cua Naive Bayes chinh la ep Sigma thanh ma tran cheo.
+
+==========================================================================
+(G) Do chinh xac noi doi tren du lieu mat can bang
+==========================================================================
+Ty le lop duong: 0.98%  (196 tren 20000 mau)
+
+bộ phân loại                    độ chính xác  precision   recall      F1
+đoán TẤT CẢ là âm                     0.9902          —   0.0000  0.0000
+ngưỡng 2,6                            0.9900     0.4928   0.5204  0.5062
+ngưỡng 1,0                            0.8408     0.0559   0.9592  0.1056
+ngưỡng -1,0                           0.1699     0.0117   1.0000  0.0231
+
+ROC-AUC = 0.9715   nhung   PR-AUC = 0.4931
+PR-AUC cua bo doan ngau nhien chinh bang ty le lop duong = 0.0100
+ROC-AUC trong dep vi mau so cua FPR la so luong lop AM, ma lop am thi rat nhieu;
+them vai bao dong gia khong lam FPR nhuc nhich. PR-AUC khong bi the.
+
+==========================================================================
+(H) Phat chuan la tien nghiem: ridge == MAP Gauss, lasso == MAP Laplace
+==========================================================================
+lambda ly thuyet = sigma^2/tau^2 = 1.0/0.49 = 2.040816
+Sai khac giua ridge dang dong va MAP toi uu bang so: 1.973e-08
+Hai duong tinh hoan toan khac nhau (mot giai he tuyen tinh, mot chay BFGS tren
+hau nghiem) nhung ra CUNG MOT nghiem -> phat chuan L2 chinh la tien nghiem Gauss.
+
+    lambda     ||w||    số hệ số = 0 (ridge)    số hệ số = 0 (lasso)
+      0.01    4.0106                       0                       0
+      0.10    4.0056                       0                       1
+      1.00    3.9559                       0                       1
+     10.00    3.5234                       0                       7
+    100.00    1.7090                       0                       9
+Ridge KHONG BAO GIO cho he so bang dung 0; lasso thi co. Ly do nam o dao ham
+tai goc: |w| co diem gay nen nghiem bi 'dinh' vao 0, con w^2 thi tron.
+(su that: mo hinh sinh du lieu co 9 he so bang 0)
+
+Ridge qua SVD so voi dang dong: lech 2.304e-15
+   trị kỳ dị d_i     hệ số co ngót d^2/(d^2+lam)
+         12.2680                          0.9377
+         12.0678                          0.9357
+          8.3651                          0.8750
+          6.4450                          0.8060
+          6.1730                          0.7921
+Huong co tri ky di LON gan nhu khong bi dong toi; huong YEU bi co manh.
+Ridge khong co deu moi huong -> no co dung nhung huong du lieu noi it nhat.
+
+==========================================================================
+(I) Tinh loi: kiem tra bang dinh nghia, va hau qua len toi uu hoa
+==========================================================================
+hàm                                     vi phạm lớn nhất   tỉ lệ vi phạm  kết luận
+$x^2$                                         -1.497e-09          0.0000       lồi
+$|x|$                                          0.000e+00          0.0000       lồi
+$e^x$                                         -3.987e-09          0.0000       lồi
+$\log(1+e^x)$ (mất mát logistic)              -2.535e-11          0.0000       lồi
+$x^4 - 3x^2$                                   2.237e+00          0.2075     KHÔNG
+$\sin x$                                       1.972e+00          0.5051     KHÔNG
+$x^3$                                          1.317e+01          0.4985     KHÔNG
+Phep thu nay khong CHUNG MINH tinh loi, nhung mot phan vi du thi du de BAC BO.
+
+Xuat phat tu 21 diem khac nhau roi chay gradient descent:
+  ham LOI     x^2          : so diem dung khac nhau = 1, gia tri = 0.0000
+  ham KHONG LOI x^4-3x^2+x/2: so diem dung khac nhau = 2, cac gia tri = [-1.2645  1.1807]
+  gia tri ham tai hai diem do: [-2.8725, -1.6484]
+Voi ham loi, MOI cuc tieu dia phuong deu la cuc tieu toan cuc, nen diem khoi tao
+khong quan trong. Day la ly do ta quan tam toi tinh loi den vay.
+
+==========================================================================
+(J) SVM: kiem chung doi ngau manh va dieu kien KKT bang so
+==========================================================================
+Dung lai w tu nghiem doi ngau: lech so voi coef_ cua sklearn = 0.000e+00
+Vector ho tro co thoa y_i(w.x_i + b) = 1 khong? lech lon nhat = 2.523e-08
+So vector ho tro: 3 tren 120 diem (2.5%)
+
+Doi ngau manh:
+  gia tri bai toan goc  0.5*||w||^2          = 1.1037868651
+  gia tri bai toan doi ngau                  = 1.1037868254
+  khe doi ngau                               = 3.961e-08
+Le = 2/||w|| = 1.346085; khoang cach nho nhat tu diem toi sieu phang x 2 = 1.346085
+
+Hai lop chong lan nhau (le mem la bat buoc), quet C:
+         C   lề 2/||w||   số VTHT   đúng trên lề   vi phạm lề   sai số h.luyện   sai số kiểm tra
+     0.003       5.6121       114              0          114           0.1500            0.1795
+     0.030       2.6409        66              3           63           0.1750            0.1727
+     0.300       1.8286        48              3           45           0.1583            0.1790
+     3.000       1.7312        45              3           42           0.1667            0.1795
+    30.000       1.7312        45              3           42           0.1667            0.1795
+   300.000       1.7311        45              3           42           0.1667            0.1795
+C tot nhat tren tap kiem tra: C = 0.03 (sai so 0.1727); C lon nhat cho 0.1795
+C nho -> le RONG, nhieu diem duoc phep vi pham, mo hinh don gian hon.
+C lon -> le HEP, co ep tung diem cho dung, bat dau bam vao nhieu.
+Dieu kien KKT chia cac diem lam ba nhom, va bang tren dem dung ba nhom ay:
+  alpha = 0      -> nam NGOAI le, khong anh huong gi toi nghiem
+  0 < alpha < C  -> nam DUNG TREN le
+  alpha = C      -> VI PHAM le (lot vao trong, hoac sang han phia sai)
+
+Du lieu hai vong tron dong tam:
+  nhân tuyến tính          do chinh xac = 0.6150
+  nhân đa thức bậc 2       do chinh xac = 1.0000
+  nhân RBF                 do chinh xac = 1.0000
+Thu thuat nhan: thay vi anh xa x -> phi(x) roi tinh tich vo huong, ta tinh thang
+K(x, x') = phi(x).phi(x'). Voi RBF thi phi(x) o khong gian VO HAN chieu.
+
+==========================================================================
+(K) PCA: sai so tai dung DUNG BANG tong cac tri rieng bi bo
+==========================================================================
+Hai duong tinh PCA:
+  tri rieng cua ma tran hiep phuong sai : [11.52671   4.855133  2.064187  0.142466]
+  d_i^2/(n-1) tu SVD                    : [11.52671   4.855133  2.064187  0.142466]
+  lech lon nhat tren ca 8 tri: 7.105e-15
+  goc giua cac truc chinh (tri tuyet doi tich vo huong phai bang 1):
+    [1. 1. 1. 1.]
+
+   k     ||X - X_k||_F^2     (n-1) * tổng trị riêng bỏ        lệch   % phương sai giữ
+   1         2242.010603                   2242.010603    9.09e-13              60.59
+   2          790.325815                    790.325815    4.55e-13              86.11
+   3          173.133807                    173.133807    6.25e-13              96.96
+   4          130.536554                    130.536554    4.26e-13              97.71
+   5           92.184562                     92.184562    3.84e-13              98.38
+   6           58.835740                     58.835740    2.13e-13              98.97
+   7           26.645634                     26.645634    6.04e-14              99.53
+   8            0.000000                      0.000000    3.56e-27             100.00
+Day la dinh ly Eckart-Young: phep chieu PCA la xap xi hang k TOT NHAT theo
+chuan Frobenius, va sai so cua no dung bang tong cac tri rieng bi bo di.
+
+Du lieu co mot huong nhieu bien do lon va mot huong tin hieu bien do nho:
+  truc chinh thu nhat cua PCA: [-1.      0.0067]  (giu 96.1% phuong sai)
+  huong cua LDA              : [0.0025 1.    ]
+  AUC khi chieu len truc PCA : 0.5020
+  AUC khi chieu len huong LDA: 0.9987
+PCA giu gan het phuong sai nhung vut di toan bo kha nang phan loai. Ly do:
+PCA KHONG NHIN NHAN. Phuong sai lon khong dong nghia co ich.
+
+==========================================================================
+(L) K-means: khoi tao quyet dinh ket qua, va gia thiet ngam ve hinh dang cum
+==========================================================================
+Chay 200 lan voi 8 cum, moi lan mot hat giong khac nhau:
+cách khởi tạo        quán tính nhỏ nhất   trung bình    % lần kẹt ở nghiệm tồi
+ngau nhien                      407.992      517.838                      71.5
+k-means++                       407.992      476.529                      46.5
+K-means chi bao dam hoi tu toi cuc tieu DIA PHUONG. k-means++ rai cac tam ban
+dau cho xa nhau theo xac suat ti le d^2, nen it roi vao nghiem toi hon han.
+
+Do chinh xac gom cum (da thu moi cach ghep nhan, lay cach tot nhat):
+  ba cum TRON, tach roi              : 1.0000
+  hai hinh LUOI LIEM long nhau       : 0.7517
+  hai DAI DET nam ngang, cach nhau   : 0.5317
+K-means gan moi diem cho tam GAN NHAT theo khoang cach Euclid, nen bien giua hai
+cum luon la mot sieu phang. Cum khong loi hoac bi keo det thi gia thiet do sai.
+
+   k     quán tính     giảm so với k-1   (dữ liệu có đúng 8 cụm)
+   1       7119.53                   —
+   2       3174.48               55.4%
+   3       1992.98               37.2%
+   4       1150.93               42.3%
+   5        902.24               21.6%
+   6        727.79               19.3%
+   7        563.93               22.5%
+   8        407.99               27.7%  <-- khuỷu tay
+   9        385.82                5.4%
+  10        364.76                5.5%
+  11        342.56                6.1%
+  12        323.40                5.6%
+Quan tinh LUON giam khi k tang (k = n thi bang 0), nen KHONG the chon k bang
+cach toi thieu no. 'Khuyu tay' la cho muc giam dot ngot cham han lai.
+
+==========================================================================
+(M) He goi y: nguong du lieu de phan ra ma tran hoat dong, va khoi dau lanh
+==========================================================================
+Ma tran danh gia: 300 nguoi x 200 muc, hang that = 4, nhieu quan sat sd = 0.4
+  mo hinh hang 4 co 2,000 tham so tu do, so voi 60,000 o -> 3.3%
+  do lech chuan cua tin hieu that: 2.0772
+
+  % ô thấy được   đánh giá / người    RMSE ô chưa thấy   so với đoán bừa
+              2                4.1              2.4759              1.19
+              3                5.9              3.0167              1.45
+              5               10.1              3.5444              1.71
+             10               19.8              0.3048              0.15
+             20               39.6              0.1834              0.09
+             40               80.5              0.1237              0.06
+Nguong rat sac net: duoi ~20 danh gia moi nguoi thi phan ra ma tran HONG HAN
+(sai so con te hon doan bua bang 0); tu khoang 5 lan so hang tro len thi no
+khoi phuc gan nhu chinh xac. Ly do: moi nguoi dung co 4 an so can uoc luong,
+nen ho phai co du rang buoc thi he moi giai duoc.
+
+Chon hang k (do o mat do 30%, noi viec khop la dang tin):
+    hạng k    RMSE ô chưa thấy    RMSE trên ô đã thấy
+         1              1.8073                 1.7769
+         2              1.4764                 1.4206
+         3              1.0569                 1.0128
+         4              0.1448                 0.3762  <- hang dung
+         6              0.2217                 0.3535
+        10              0.3501                 0.3076
+        20              0.6291                 0.1903
+Sai so tren o DA THAY giam don dieu theo k (mo hinh manh hon thi khop chat hon),
+nhung sai so tren o CHUA THAY cham day o dung hang that roi tang len. Day chinh
+la danh doi thien lech - phuong sai, lan nay o dang chon hang.
+
+Khoi dau lanh: 10 nguoi dung MOI, khong co lay mot danh gia nao
+  RMSE cho nguoi dung cu   : 0.1459
+  RMSE cho nguoi dung moi  : 2.2364
+  RMSE neu doan bua bang 0 : 2.0772
+  ||P|| trung binh, nguoi cu : 2.0841
+  ||P|| trung binh, nguoi moi: 1.54e-01
+Vector cua nguoi dung moi bi keo thang ve 0 vi khong co rang buoc nao ngoai phat
+chuan, nen mo hinh du bao 0 cho tat ca. Do la ly do he thuc te luon can mot duong
+du phong dua tren NOI DUNG: dac trung cua muc va ho so khai bao cua nguoi dung.
+
+==========================================================================
+Da luu 10 hinh vao thu muc figs/: nt02, nt03, nt04, nt06, nt07, nt08, nt09, nt10, nt11, nt12
+==========================================================================

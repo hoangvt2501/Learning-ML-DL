@@ -374,5 +374,135 @@ check('Bài 6: mạng sâu k=7 dùng 6k=42 tham số so với 3·2^7+2=386',
 check('bagging: phương sai trung bình dừng ở ρσ² khi B→∞',
   0.3 * 1 + (1 - 0.3) / 1e9, 0.3, 1e-8);
 
+// ---------------------------------------------------------------------------
+// Giáo trình 1 — Nền tảng. Các con số tính tay ở Chương 17 và các hằng số
+// mà phần chữ dựa vào. Mỗi phép kiểm ở đây tương ứng một khẳng định trong bài.
+// ---------------------------------------------------------------------------
+
+// Giải hệ 2x2 bằng công thức Cramer, đủ cho mọi bài tính tay của giáo trình.
+function giai2x2(A, b) {
+  const det = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+  return [(b[0] * A[1][1] - A[0][1] * b[1]) / det,
+          (A[0][0] * b[1] - b[0] * A[1][0]) / det];
+}
+
+group('Nền tảng Bài 1 — phương trình chuẩn tắc tính tay');
+const Xb1 = [[1, 1], [1, 2], [1, 3], [1, 4]];
+const yb1 = [2, 3, 5, 6];
+const XtX = [[0, 0], [0, 0]];
+const Xty = [0, 0];
+for (let i = 0; i < 4; i++) {
+  for (let r = 0; r < 2; r++) {
+    Xty[r] += Xb1[i][r] * yb1[i];
+    for (let c = 0; c < 2; c++) XtX[r][c] += Xb1[i][r] * Xb1[i][c];
+  }
+}
+check('X^T X = [[4,10],[10,30]]', JSON.stringify(XtX), JSON.stringify([[4, 10], [10, 30]]));
+check('X^T y = [16, 47]', JSON.stringify(Xty), JSON.stringify([16, 47]));
+const wb1 = giai2x2(XtX, Xty);
+check('w0 = 0,5', wb1[0], 0.5, 1e-12);
+check('w1 = 1,4', wb1[1], 1.4, 1e-12);
+const du = yb1.map((y, i) => y - (wb1[0] + wb1[1] * Xb1[i][1]));
+check('tổng phần dư bằng 0 vì có cột hằng số',
+  Math.abs(du.reduce((a, b) => a + b, 0)) < 1e-12, true);
+check('RSS = 0,20', du.reduce((a, b) => a + b * b, 0), 0.20, 1e-12);
+const wRidge = giai2x2([[XtX[0][0] + 1, XtX[0][1]], [XtX[1][0], XtX[1][1] + 1]], Xty);
+check('ridge lam=1 cho w0 = 0,4727', wRidge[0], 0.4727, 5e-5);
+check('ridge lam=1 cho w1 = 1,3636', wRidge[1], 1.3636, 5e-5);
+check('ridge co cả hai hệ số về phía 0',
+  Math.abs(wRidge[0]) < Math.abs(wb1[0]) && Math.abs(wRidge[1]) < Math.abs(wb1[1]), true);
+
+group('Nền tảng Mục 5.5 — điểm tối ưu của epsilon khi kiểm tra đạo hàm');
+const uMay = Number.EPSILON;
+check('epsilon máy = 2,22e-16', uMay, 2.220446049250313e-16, 1e-30);
+check('sai phân trung tâm: u^(1/3) = 6,06e-6', Math.cbrt(uMay), 6.06e-6, 1e-8);
+check('sai phân tiến: u^(1/2) = 1,49e-8', Math.sqrt(uMay), 1.49e-8, 1e-10);
+check('giá trị đo được 5,62e-6 nằm trong một bước lưới của lý thuyết',
+  Math.abs(Math.log10(5.62e-6 / Math.cbrt(uMay))) < Math.log10(1.8), true);
+check('giá trị đo được 1,78e-8 nằm trong một bước lưới của lý thuyết',
+  Math.abs(Math.log10(1.78e-8 / Math.sqrt(uMay))) < Math.log10(1.8), true);
+check('sai số tốt nhất của sai phân trung tâm cỡ u^(2/3)',
+  Math.pow(uMay, 2 / 3), 3.7e-11, 5e-12);
+
+group('Nền tảng Mục 5.3 — số vòng lặp theo số điều kiện');
+// Số liệu đo được: GD tuyến tính theo kappa, heavy ball theo căn kappa.
+const gdDo = { 10: 92, 100: 922, 1000: 9211, 10000: 92104 };
+const hbDo = { 10: 34, 100: 117, 1000: 391, 10000: 1297 };
+check('GD: 10 lần kappa thì 10 lần số vòng (100 so với 10)', gdDo[100] / gdDo[10], 10, 0.05);
+check('GD: 10 lần kappa thì 10 lần số vòng (10000 so với 1000)',
+  gdDo[10000] / gdDo[1000], 10, 0.05);
+check('heavy ball: 10 lần kappa thì ~3,16 lần số vòng', hbDo[10000] / hbDo[1000], 3.16, 0.2);
+check('tỉ lệ GD/HB ở kappa=10000 là 71', gdDo[10000] / hbDo[10000], 71, 1);
+check('Bài 3: ước lượng GD ở kappa=40000 là ~368.000', gdDo[10000] * 4, 368416, 1);
+check('Bài 3: ước lượng HB ở kappa=40000 là ~2.600', hbDo[10000] * 2, 2594, 1);
+
+group('Nền tảng Bài 5 — chặn Novikoff');
+const novikoff = (R, g) => (R / g) ** 2;
+check('R=2, gamma=0,1 cho chặn 400', novikoff(2, 0.1), 400, 1e-9);
+check('chặn không phụ thuộc số điểm hay số chiều', novikoff(2, 0.1), novikoff(2, 0.1));
+check('nhân mọi x với 10 thì chặn không đổi', novikoff(20, 1), novikoff(2, 0.1), 1e-9);
+check('lề co một nửa thì chặn gấp bốn', novikoff(2, 0.05) / novikoff(2, 0.1), 4, 1e-9);
+
+group('Nền tảng Bài 6 — các chỉ số trên dữ liệu mất cân bằng');
+const TP = 102, FP = 105, FN = 94, TN = 19699;
+const nTot = TP + FP + FN + TN;
+const prec = TP / (TP + FP), rec = TP / (TP + FN);
+check('tổng số giao dịch = 20.000', nTot, 20000);
+check('độ chính xác = 0,9900', (TP + TN) / nTot, 0.9900, 5e-5);
+check('precision = 0,4928', prec, 0.4928, 5e-5);
+check('recall = 0,5204', rec, 0.5204, 5e-5);
+check('F1 = 0,5062', 2 * prec * rec / (prec + rec), 0.5062, 5e-5);
+check('đoán TẤT CẢ là âm cho độ chính xác 0,9902', (TN + FP) / nTot, 0.9902, 5e-5);
+check('bộ phân loại vô dụng có độ chính xác CAO HƠN bộ dùng được',
+  (TN + FP) / nTot > (TP + TN) / nTot, true);
+check('PR-AUC của bộ đoán ngẫu nhiên bằng tỉ lệ lớp dương',
+  (TP + FN) / nTot, 0.0098, 5e-5);
+
+group('Nền tảng Bài 7 — SVM lề cứng trên hai điểm');
+// x1 = (1,1) nhãn +1; x2 = (-1,-1) nhãn -1. Theo đối xứng thì b = 0, w = (a,a).
+const aSVM = 0.5;
+const wSVM = [aSVM, aSVM];
+const normW = Math.hypot(wSVM[0], wSVM[1]);
+check('w = (0,5; 0,5)', wSVM[0], 0.5, 1e-12);
+check('ràng buộc y_i(w.x_i) = 1 tại cả hai điểm', wSVM[0] * 1 + wSVM[1] * 1, 1, 1e-12);
+check('lề 2/||w|| = 2,8284', 2 / normW, 2.8284271247461903, 1e-12);
+check('lề bằng đúng khoảng cách giữa hai điểm', 2 / normW, Math.hypot(2, 2), 1e-12);
+const alpha = 0.25;
+// Dung lai w tu nghiem doi ngau: w = a1*(+1)*(1,1) + a2*(-1)*(-1,-1) = (a1+a2)*(1,1)
+const wTuAlpha = [alpha * 1 * 1 + alpha * (-1) * (-1), alpha * 1 * 1 + alpha * (-1) * (-1)];
+check('dựng lại w từ alpha khớp w của bài toán gốc', wTuAlpha[0], wSVM[0], 1e-12);
+check('ràng buộc tổng alpha_i y_i = 0 thoả', alpha * 1 + alpha * (-1), 0, 1e-15);
+const primalSVM = 0.5 * (wSVM[0] ** 2 + wSVM[1] ** 2);
+// dual = sum alpha - 0.5 * sum_ij a_i a_j y_i y_j x_i.x_j, voi x1.x1=2, x2.x2=2, x1.x2=-2
+const dualSVM = 2 * alpha - 0.5 * (alpha * alpha * 2 + alpha * alpha * 2
+  + 2 * alpha * alpha * (-1) * (-2));
+check('giá trị bài toán gốc = 0,25', primalSVM, 0.25, 1e-12);
+check('giá trị bài toán đối ngẫu = 0,25', dualSVM, 0.25, 1e-12);
+check('khe đối ngẫu bằng 0', Math.abs(primalSVM - dualSVM) < 1e-15, true);
+check('thêm điểm (5,5) nhãn +1 thì ràng buộc lỏng nên alpha = 0',
+  1 * (wSVM[0] * 5 + wSVM[1] * 5) > 1, true);
+
+group('Nền tảng Bài 8 — PCA và định lý Eckart–Young');
+const lamPCA = [10, 5, 3, 1.5, 0.5];
+const tongLam = lamPCA.reduce((a, b) => a + b, 0);
+check('tổng trị riêng = 20', tongLam, 20, 1e-12);
+const giuDuoc = (k) => lamPCA.slice(0, k).reduce((a, b) => a + b, 0) / tongLam;
+check('k=2 giữ 75% phương sai', giuDuoc(2), 0.75, 1e-12);
+check('k=3 giữ 90% phương sai', giuDuoc(3), 0.90, 1e-12);
+check('cần k=3 để đạt ít nhất 85%', giuDuoc(2) < 0.85 && giuDuoc(3) >= 0.85, true);
+const boDi = (k) => lamPCA.slice(k).reduce((a, b) => a + b, 0);
+check('Eckart–Young: k=2, n=101 cho sai số 500', 100 * boDi(2), 500, 1e-12);
+check('k = 5 thì sai số tái dựng bằng 0', boDi(5), 0, 1e-12);
+check('đổi đơn vị mét sang milimét nhân phương sai với 10^6', 1000 ** 2, 1e6, 1);
+
+group('Nền tảng Bài 10 — quy mô của phân rã ma trận');
+const nU = 1e6, nI = 1e5, kMF = 50;
+check('số tham số = 55 triệu', (nU + nI) * kMF, 55e6, 1);
+check('bằng 0,055% số ô', (nU + nI) * kMF / (nU * nI) * 100, 0.055, 1e-6);
+check('quy tắc 5k cho 250 đánh giá mỗi người', 5 * kMF, 250);
+check('tổng 250 triệu đánh giá, tức 0,25% số ô', nU * 5 * kMF / (nU * nI) * 100, 0.25, 1e-9);
+check('thực tế 30 đánh giá là thiếu hơn 8 lần', (5 * kMF) / 30, 8.33, 0.01);
+check('với 30 đánh giá thì hạng dùng được chỉ khoảng 6', Math.floor(30 / 5), 6);
+
 console.log('\n' + (fail === 0 ? 'Tất cả ' + pass + ' phép kiểm tra đều đạt.' : pass + ' đạt, ' + fail + ' HỎNG.'));
 process.exit(fail === 0 ? 0 : 1);

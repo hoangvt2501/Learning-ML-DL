@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { createMarkdownIt, sectionId, figureId, slugify } from './markdown.mjs';
 import { page, escapeHtml } from './layout.mjs';
 import { buildExercisePage } from './pages/exercises.mjs';
+import { buildCurriculumPage } from './pages/curriculum.mjs';
 import { buildPlaygroundPage } from './pages/playground.mjs';
 import { buildMlopsLabPage } from './pages/lab-mlops.mjs';
 import { buildGlossaryPage } from './pages/glossary.mjs';
@@ -298,6 +299,7 @@ const books = allBooks.filter((spec) => {
 });
 const built = books.map((spec) => buildBook(spec, books));
 
+buildCurriculumPage({ books: built, page, escapeHtml, write, searchIndex });
 buildHomePage({ books: built, page, escapeHtml, write, read, ROOT, searchIndex });
 
 // ---------------------------------------------------------------- tài nguyên
