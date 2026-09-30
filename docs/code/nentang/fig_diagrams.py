@@ -125,36 +125,43 @@ fig.tight_layout(); fig.savefig(OUT + "nt05_matmat.png"); plt.close(fig)
 
 
 # ---------------------------------------------------------------------
-# Hình 13 — Bản đồ toàn bộ bốn giáo trình: cái gì dẫn tới cái gì
+# Hình 13 — Bản đồ toàn bộ năm giáo trình: cái gì dẫn tới cái gì
 # ---------------------------------------------------------------------
-fig, ax = plt.subplots(figsize=(9.0, 5.4))
+fig, ax = plt.subplots(figsize=(10.6, 5.4))
 ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-ax.text(.5, .962, "Bốn giáo trình đọc như một mạch",
+ax.text(.5, .962, "Năm giáo trình đọc như một mạch",
         ha="center", fontsize=12, weight="bold")
 
 phan = [
-    (.035, "I · Nền tảng", C_MAIN,
+    (.012, "I · Nền tảng", C_MAIN,
      ["Đại số tuyến tính, xác suất",
       "Hồi quy tuyến tính & logistic",
       "Gradient descent",
       "Đánh giá, phạt chuẩn, MAP",
       "Tối ưu lồi → SVM",
       "PCA, K-means, hệ gợi ý"]),
-    (.275, "II · Mô hình & Kiến trúc", "#2f6f9f",
+    (.211, "II · Mô hình & Kiến trúc", "#2f6f9f",
      ["Thiên lệch – phương sai",
       "Cây và học tập hợp",
       "MLP, lan truyền ngược",
-      "Khởi tạo, chuẩn hoá, kết nối tắt",
+      "Khởi tạo, chuẩn hoá, tắt",
       "CNN, RNN, Attention",
       "Transformer hiện đại"]),
-    (.515, "III · Quantization", "#8a5fa8",
+    (.410, "III · Biểu diễn & Căn chỉnh", "#b5651d",
+     ["Word2Vec, embedding",
+      "Học chuyển giao, LoRA",
+      "VAE, GAN, khuếch tán",
+      "Học tăng cường",
+      "RLHF",
+      "DPO"]),
+    (.609, "IV · Quantization", "#8a5fa8",
      ["Biểu diễn số thực",
       "Uniform affine, S và Z",
       "Suy luận số nguyên",
       "Calibration, PTQ, QAT",
       "GPTQ, AWQ, NF4",
       "KV cache"]),
-    (.755, "IV · MLOps", "#b8860b",
+    (.808, "V · MLOps", C_WARN,
      ["Nợ kỹ thuật, CACE",
       "Dữ liệu và kiểm thử",
       "Phục vụ và ra mắt",
@@ -164,26 +171,27 @@ phan = [
 ]
 
 for x, ten, col, muc in phan:
-    ax.add_patch(FancyBboxPatch((x, .28), .21, .60,
-                                boxstyle="round,pad=0.008,rounding_size=0.02",
+    ax.add_patch(FancyBboxPatch((x, .335), .18, .545,
+                                boxstyle="round,pad=0.006,rounding_size=0.018",
                                 facecolor="#fcfcfb", edgecolor=col, linewidth=1.4))
-    ax.add_patch(FancyBboxPatch((x, .785), .21, .095,
-                                boxstyle="round,pad=0.008,rounding_size=0.02",
+    ax.add_patch(FancyBboxPatch((x, .785), .18, .095,
+                                boxstyle="round,pad=0.006,rounding_size=0.018",
                                 facecolor=col, edgecolor=col, linewidth=1.4))
-    ax.text(x + .105, .832, ten, ha="center", va="center", fontsize=9.2,
+    ax.text(x + .09, .832, ten, ha="center", va="center", fontsize=8.3,
             weight="bold", color="white")
     for i, m_ in enumerate(muc):
-        ax.text(x + .014, .715 - i * .073, "· " + m_, fontsize=7.3,
+        ax.text(x + .012, .705 - i * .066, "· " + m_, fontsize=6.8,
                 va="center", color="#2a2a2a")
 
-for x in (.248, .488, .728):
-    mui_ten(ax, (x, .56), (x + .027, .56), color="#6b7a78", lw=2.0)
+for x in (.196, .395, .594, .793):
+    mui_ten(ax, (x, .56), (x + .013, .56), color="#6b7a78", lw=1.8)
 
-ax.text(.5, .175,
+ax.text(.5, .195,
         "Phần I trả lời \"học là gì và tối ưu thế nào\"; phần II thay mô hình tuyến tính bằng mạng sâu;\n"
-        "phần III làm mô hình chạy được trên phần cứng thật; phần IV giữ cho nó sống trong sản xuất.",
-        ha="center", fontsize=8.4, color="#333", linespacing=1.6)
-ax.text(.5, .065,
+        "phần III kể một trợ lý ngôn ngữ ra đời thế nào; phần IV làm mô hình chạy được trên phần cứng thật;\n"
+        "phần V giữ cho nó sống trong sản xuất.",
+        ha="center", fontsize=8.2, color="#333", linespacing=1.6)
+ax.text(.5, .055,
         "Đọc ngang cũng được: mỗi phần tự đứng vững. Nhưng mũi tên là thứ tự ít phải quay lại nhất.",
         ha="center", fontsize=8.2, color=C_DIM, style="italic")
 fig.tight_layout(); fig.savefig(OUT + "nt13_mach.png"); plt.close(fig)

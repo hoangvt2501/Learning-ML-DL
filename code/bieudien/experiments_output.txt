@@ -1,0 +1,297 @@
+
+==========================================================================
+(A) Tu dong hien den PMI den embedding: quan he deu dan noi len the nao
+==========================================================================
+Kho ngu lieu: 40,000 cau, tu vung 20 tu (5 chu de x 4 vai tro)
+So cap dong hien: 240,000
+
+PMI(w,c) = log[ p(w,c) / (p(w)p(c)) ] — do 'dong hien nhieu hon ngau nhien'
+  PMI giua hai tu cung chu de, khac vai tro : +1.1876
+  PMI giua hai tu cung vai tro, khac chu de : +0.9367
+  PMI giua hai tu khac ca hai               : +0.0000
+Ba con so nay la toan bo tin hieu ma mo hinh co. Khong co gi khac.
+
+Phan ra PPMI bang SVD, giu 8 chieu:
+  vua_nam : vua_nu :: mua_nho : ?  ->  mua_nu
+  Do chinh xac tren 240 phep loai suy: 1.0000   (doan ngau nhien: 0.0588)
+
+  số chiều giữ lại    độ chính xác loại suy
+                 2                   0.4792
+                 4                   0.7875
+                 6                   0.8750
+                 8                   1.0000  <- dung o day
+                12                   0.5875
+                16                   0.2500
+                20                   1.0000
+Bang nay KHONG phai mot duong cong dep: giu 20 chieu (hang day du) lai dat 1,0
+tro lai, vi khi do ta tai dung PPMI chinh xac. Voi tu vung chi 20 tu thi khong
+du cho to ra mot danh doi that su; muon thay duong cong that phai chay tren kho
+ngu lieu that. Bang dua vao day dung de noi ro dieu ay chu khong de ket luan.
+
+Levy & Goldberg (2014) chung minh: skip-gram voi lay mau am AM THAM phan ra
+ma tran PMI dich mot luong log k. Cho dao ham bang 0 se ra dung
+    <w_i, c_j> = log[ #(i,j) N / (#(i) #(j)) ] - log k = PMI(i,j) - log k
+
+  số chiều    tương quan với PMI   |lệch| trung bình   |lệch| lớn nhất
+         8                0.3727              0.2862            1.0566  <- hang thap
+        20                0.9995              0.0106            0.0251  <- hang day du
+O HANG DAY DU, xuong doc hoi tu ve dung ma tran PMI — day la kiem chung bang so
+cho ket qua ly thuyet o tren, va hai duong tinh khong lien quan gi toi nhau.
+O HANG THAP thi no khong the khop chinh xac, va phai chon giu lai cai gi. Chinh
+su ep buoc ay tao ra embedding co ich: mo hinh buoc phai gom cac tu giong nhau.
+
+Do chinh xac loai suy cua embedding skip-gram hang 8: 0.2042
+
+==========================================================================
+(B) Softmax day du so voi lay mau am: dem phep tinh
+==========================================================================
+   từ vựng V   chiều d    softmax đầy đủ    lấy mẫu âm (k=5)    rẻ hơn
+       1,000       300           600,000               3,600      167x
+      50,000       300        30,000,000               3,600     8333x
+     400,000       300       240,000,000               3,600    66667x
+   2,000,000       300     1,200,000,000               3,600   333333x
+Chi phi cua softmax day du ti le TUYEN TINH voi co tu vung; cua lay mau am thi
+KHONG PHU THUOC tu vung. Day la ly do word2vec huan luyen duoc tren kho tu ty tu
+nam 2013, khi phan cung con yeu hon bay gio rat nhieu.
+
+==========================================================================
+(C) Bat dang huong cua khong gian embedding
+==========================================================================
+phân bố embedding                    cosine TB   sau khi trừ TB   độ lệch tâm
+đều trên mặt cầu (lý tưởng)            -0.0001          -0.0011        0.0318
+lệch tâm nhẹ                            0.3899          -0.0011        0.6267
+lệch tâm mạnh (hay gặp thật)            0.8724          -0.0011        0.9342
+Khi dam may embedding LECH khoi goc, moi cap deu co cosine duong lon, va con so
+ay khong con noi len su giong nhau nua — no chi phan anh huong chung. Tru trung
+binh (hoac chuan hoa theo lop) tra lai y nghia cho cosine.
+
+==========================================================================
+(D) LoRA: dem tham so va bo nho
+==========================================================================
+lớp                             d   toàn phần d^2    LoRA r=8   LoRA r=64   % (r=8)
+GPT-2 small                   768         589,824      12,288      98,304    2.083%
+GPT-2 large                  1280       1,638,400      20,480     163,840    1.250%
+Llama-2 7B                   4096      16,777,216      65,536     524,288    0.391%
+Llama-2 70B                  8192      67,108,864     131,072   1,048,576    0.195%
+
+Llama-2 7B, LoRA hang 4 tren W_Q va W_V:
+  tham so huan luyen : 2,097,152
+  so voi 6,476,005,376 tham so cua ca mo hinh: 0.0324%
+
+Llama-2 7B, LoRA hang 8 tren W_Q va W_V:
+  tham so huan luyen : 4,194,304
+  so voi 6,476,005,376 tham so cua ca mo hinh: 0.0648%
+  trang thai Adam (fp32, 2 trang thai): 32.0 MiB so voi 48.2 GiB neu tinh chinh toan phan
+
+Llama-2 7B, LoRA hang 16 tren W_Q va W_V:
+  tham so huan luyen : 8,388,608
+  so voi 6,476,005,376 tham so cua ca mo hinh: 0.1295%
+
+Llama-2 7B, LoRA hang 64 tren W_Q va W_V:
+  tham so huan luyen : 33,554,432
+  so voi 6,476,005,376 tham so cua ca mo hinh: 0.5181%
+
+LoRA khong lam mo hinh chay nhanh hon khi SUY LUAN (co the gop B@A vao W).
+Cai no doi la BO NHO LUC HUAN LUYEN, va do la thu chan nguoi ta lai.
+
+==========================================================================
+(E) Dong bang dac trung so voi tinh chinh toan phan theo co du lieu
+==========================================================================
+   số mẫu có nhãn    đóng băng + đầu tuyến tính    tinh chỉnh toàn phần    huấn luyện từ đầu
+               20                        0.4027                  0.3875               0.4118
+               50                        0.4800                  0.4955               0.4820
+              150                        0.5330                  0.5713               0.5520
+              500                        0.6220                  0.6713               0.6350
+            2,000                        0.6375                  0.7515               0.6773
+            8,000                        0.6452                  0.8183               0.7545
+Ca ba cot dung CUNG mot cai dat mang, chi khac trong so ban dau cua lop an va
+viec co cap nhat no hay khong — nen so sanh moi co nghia.
+Voi RAT IT nhan, dac trung dong bang thang: no chi phai uoc luong mot lop tuyen
+tinh. Khi du lieu nhieu len, tinh chinh bat kip roi vuot len, vi luc do mo hinh
+du rang buoc de sua lai phan dac trung cho khop nhiem vu. Huan luyen tu dau luon
+di sau tinh chinh cho toi khi du lieu rat nhieu.
+
+==========================================================================
+(F) VAE: beta dieu khien so chieu an con mang thong tin
+==========================================================================
+Du lieu: 600 diem trong R^4, sinh tu DUNG 2 yeu to an cong nhieu nho.
+Ta co tinh cho VAE 6 chieu an — nhieu hon can — de xem no lam gi voi phan thua.
+
+   beta   sai số tái dựng   tổng KL   số chiều còn sống   KL của từng chiều
+   0.00            0.1219   34.7857                   6   [14.66  15.027  0.272  2.695  0.414  1.717]
+   0.05            0.1296    5.6551                   6   [2.571 2.602 0.094 0.162 0.097 0.128]
+   0.20            0.1476    3.5038                   4   [1.725 1.738 0.006 0.017 0.006 0.011]
+   1.00            0.3861    2.0222                   2   [1.015 1.006 0.    0.    0.    0.   ]
+   4.00            4.7817    0.6070                   2   [0.356 0.007 0.    0.243 0.    0.   ]
+  16.00           15.2818    0.0000                   0   [0. 0. 0. 0. 0. 0.]
+
+Mot chieu goi la CON SONG khi KL cua no lon hon 0 dang ke — tuc hau nghiem
+q(z_i|x) con khac tien nghiem N(0,1), nghia la chieu ay con mang thong tin ve x.
+beta = 0   : khong suc ep nao, ca 6 chieu deu song. Do la bo tu ma hoa thuong;
+             tai dung rat tot nhung khong gian an khong co cau truc de lay mau.
+beta = 1   : dung 2 chieu song lai — DUNG BANG so yeu to that sinh ra du lieu.
+             VAE tu tim ra so chieu can thiet, khong ai bao no.
+beta = 16  : KHONG chieu nao song. Day la SUP HAU NGHIEM: z khong con lien quan
+             gi toi x, va bo giai ma chi con biet doan gia tri trung binh.
+
+==========================================================================
+(G) GAN: ham mat mat bao hoa so voi khong bao hoa
+==========================================================================
+Du lieu that: 8 cum dat deu tren mot vong tron.
+
+hàm mất mát của bộ sinh              chế độ phủ được (4 hạt giống)    % điểm rơi vào cụm
+tối thiểu log(1 − D(G(z))) — gốc                      [0, 0, 0, 0]                  0.0%
+tối đa log D(G(z)) — không bão hoà                    [8, 8, 8, 8]                 15.3%
+
+Dang bai toan MINIMAX goc that bai hoan toan: bo sinh khong hoc duoc gi, 0/8 che
+do. Ly do nam o dao ham: d/ds log(1 - sigma(s)) = -sigma(s). Luc dau bo phan biet
+de dang nhan ra hang gia nen sigma(s) ~ 0, va gradient cua bo sinh cung ~ 0 theo.
+Bo sinh bi ket ngay tu dau — chinh la dieu bai bao GAN goc canh bao, va la ly do
+ho de xuat doi sang toi da log D(G(z)), thu cho gradient LON khi bo sinh dang te.
+
+Mot luu y trung thuc: o thiet lap hai chieu nay, ban khong bao hoa phu DU CA 8
+che do o moi hat giong, tuc KHONG quan sat duoc sup che do. Sup che do la hien
+tuong that va rat hay gap, nhung no can thiet lap kho hon (nhieu chieu, du lieu
+that) moi lo ra; khang dinh no tu thi nghiem nay thi se la noi qua.
+
+==========================================================================
+(H) Mo hinh khuech tan: dang dong cua qua trinh thuan
+==========================================================================
+Quy tac tung buoc:  q(x_t | x_{t-1}) = N(sqrt(1-beta_t) x_{t-1}, beta_t I)
+Gop T buoc lai cho dang dong:
+    q(x_t | x_0) = N(sqrt(alpha_ngang_t) x_0, (1 - alpha_ngang_t) I)
+Day la ly do khong can chay 1000 buoc de lay mau x_t — nhay thang mot phat.
+
+Mo phong 200,000 quy dao roi so voi dang dong:
+     t     TB mô phỏng    TB dạng đóng     PS mô phỏng    PS dạng đóng
+     1         1.99984         1.99978         0.00022         0.00022
+    10         1.99763         1.99781         0.00219         0.00219
+   100         1.89199         1.89224         0.10485         0.10486
+   400         0.88021         0.87994         0.80511         0.80643
+   999         0.00936         0.01271         1.00484         0.99996
+Bon cot khop nhau trong sai so lay mau — dang dong dung.
+
+     t    alpha_ngang           SNR    còn lại bao nhiêu tín hiệu
+     0       0.999900     9999.0000                        99.99%
+    50       0.969951       32.2795                        98.49%
+   200       0.656347        1.9099                        81.02%
+   500       0.077797        0.0844                        27.89%
+   800       0.001508        0.0015                         3.88%
+   999       0.000040        0.0000                         0.64%
+Tai t = 999, alpha_ngang = 4.04e-05 nen x_T gan nhu la nhieu Gauss
+thuan tuy — do dung la dieu ta can de bat dau lay mau tu N(0, I).
+
+==========================================================================
+(I) Q-learning: kham pha den tu epsilon VA tu cach khoi tao Q
+==========================================================================
+Luoi 7x7: xuat phat goc duoi trai, dich (0, 6) (+10), 4 bay (-10).
+Ba cau hinh chi khac nhau o PHAT MOI BUOC va GIA TRI KHOI TAO cua Q.
+
+phạt −0,1 · $Q_0 = 0$
+   epsilon    thưởng của chính sách đã học    % tới đích
+      0.00                           8.900        100.0%
+      0.05                           8.900        100.0%
+      0.10                           8.900        100.0%
+      0.30                           8.900        100.0%
+      1.00                           8.900        100.0%
+
+phạt 0 · $Q_0 = 0$
+   epsilon    thưởng của chính sách đã học    % tới đích
+      0.00                           0.000          0.0%
+      0.05                          10.000        100.0%
+      0.10                          10.000        100.0%
+      0.30                          10.000        100.0%
+      1.00                          10.000        100.0%
+
+phạt −0,1 · $Q_0 = -20$
+   epsilon    thưởng của chính sách đã học    % tới đích
+      0.00                          -8.000          0.0%
+      0.05                          -8.000          0.0%
+      0.10                          -8.000          0.0%
+      0.30                          -8.000          0.0%
+      1.00                           8.900        100.0%
+
+Ba bang nay noi mot dieu ma cau 'phai co epsilon de kham pha' bo mat:
+  Cau hinh 1 — MOI epsilon deu thanh cong, ke ca eps = 0. Vi khoi tao Q = 0 trong
+    khi moi phan thuong deu am chinh la KHOI TAO LAC QUAN: hanh dong chua thu bao
+    gio cung trong hap dan hon hanh dong da thu, nen tham lam tu no da di kham pha.
+  Cau hinh 2 — bo phat buoc di thi mat luon tinh lac quan ay, va eps = 0 THAT BAI
+    hoan toan (0% toi dich): moi Q deu bang 0 nen argmax luon chon cung mot huong.
+  Cau hinh 3 — khoi tao BI QUAN (Q0 = -20) con doc hon: tham lam bam chat lay hanh
+    dong dau tien tinh co thu, va eps toi 0,3 van khong du de thoat trong ngan sach
+    nay. Phai eps = 1 moi tim ra dich.
+
+Ket luan: kham pha khong chi den tu epsilon. Cach khoi tao ham gia tri cung la mot
+co che kham pha, va doi khi la co che manh hon.
+
+==========================================================================
+(J) Gradient chinh sach: duong nen cat phuong sai bao nhieu
+==========================================================================
+Bai toan mot buoc voi 6 hanh dong, thuong that = [1.   1.2  0.9  1.1  3.   1.05]
+Chinh sach hien tai deu: pi = [0.1667 0.1667 0.1667 0.1667 0.1667 0.1667]
+
+   số mẫu   độ lệch chuẩn — không nền        có nền    giảm được
+       16                     0.13674       0.05776        2.37x
+       64                     0.06745       0.02944        2.29x
+      256                     0.03376       0.01449        2.33x
+     1024                     0.01632       0.00718        2.27x
+
+Duong nen KHONG lam lech uoc luong — no chi cat phuong sai:
+  gradient TB khong nen : [-0.06274 -0.03002 -0.08005 -0.04598  0.27275 -0.05396]
+  gradient TB co nen    : [-0.06272 -0.02927 -0.07917 -0.04593  0.2716  -0.05451]
+  lech lon nhat: 1.15e-03
+Ly do toan hoc: E[b * grad log pi] = b * grad E[1] = 0 voi moi hang so b, nen tru
+di mot duong nen bat ky khong doi ky vong. Chon b = thuong trung binh thi phuong
+sai nho nhat trong so cac hang so.
+
+==========================================================================
+(K) RLHF: nghiem toi uu cua muc tieu co rang buoc KL
+==========================================================================
+Muc tieu cua RLHF:   max_pi  E_pi[r(y)]  -  beta * KL(pi || pi_ref)
+Cho dao ham bang 0 tren don hinh xac suat se ra DANG DONG:
+    pi*(y) = pi_ref(y) * exp(r(y)/beta) / Z
+
+    beta     lệch so với tối ưu số    KL(pi*||pi_ref)    E[r] đạt được
+    0.05                 1.601e-07             4.7409           2.4378
+    0.20                 3.681e-07             4.6579           2.4235
+    1.00                 3.923e-09             0.4166           0.3031
+    5.00                 4.590e-09             0.0171          -0.3496
+Hai duong hoan toan khac nhau — mot ben thay vao cong thuc, mot ben chay BFGS tren
+don hinh — cho cung mot chinh sach toi sai so cua bo toi uu.
+
+Doc y nghia cua beta:
+  beta -> 0   : bo qua pi_ref, don het xac suat vao cau tra loi co thuong cao nhat.
+  beta -> vo cuc: giu nguyen pi_ref, khong hoc duoc gi tu thuong.
+Day la ly do RLHF luon co so hang KL: khong co no, mo hinh se pha nat phan phoi
+ngon ngu da hoc duoc de chay theo diem thuong — tuc 'lach diem thuong'.
+
+==========================================================================
+(L) DPO cho cung chinh sach voi RLHF hai buoc — kiem chung bang so
+==========================================================================
+Du lieu so sanh: 52,588 cap (y_thang, y_thua), sinh tu Bradley-Terry.
+
+  câu trả lời    pi_ref   RLHF 2 bước   DPO 1 bước        lệch
+            0    0.0669        0.0015       0.0015    1.99e-11
+            1    0.0246        0.0000       0.0000    2.96e-11
+            2    0.6201        0.4329       0.4329    4.16e-08
+            3    0.0087        0.0080       0.0080    4.65e-10
+            4    0.0845        0.0060       0.0060    2.81e-10
+            5    0.0378        0.0143       0.0143    2.19e-09
+            6    0.0306        0.2868       0.2868    2.09e-08
+            7    0.1267        0.2504       0.2504    1.83e-08
+
+Lech lon nhat giua hai chinh sach: 4.158e-08
+Tuong quan thuong hoc duoc voi thuong that: 0.999951
+
+Duong 1 chay HAI buoc: khop mo hinh thuong Bradley-Terry, roi giai bai toan RL
+co rang buoc KL. Duong 2 chay MOT buoc, khong he co mo hinh thuong nao.
+Chung ra cung mot chinh sach, va do la toan bo y cua DPO: neu nghiem toi uu von
+da co dang pi* = pi_ref exp(r/beta)/Z thi dao nguoc lai duoc
+    r(y) = beta * log[ pi(y) / pi_ref(y) ] + beta * log Z,
+nen co the thay thang bieu thuc ay vao hop ly Bradley-Terry. Hang log Z triet tieu
+khi lay HIEU giua hai cau tra loi, nen no khong can tinh — do la chi tiet lam cho
+ca cach lam nay chay duoc.
+
+==========================================================================
+Da luu 9 hinh vao thu muc figs/: bd02, bd03, bd04, bd06, bd08, bd09, bd10, bd12, bd13
+==========================================================================

@@ -51,10 +51,7 @@ function renderSidebar(nav, currentFile) {
     switcher +
     // Bỏ hẳn nhóm rỗng: trang Lộ trình không thuộc giáo trình nào nên không có
     // danh sách chương, và một tiêu đề nhóm trống thì chỉ gây rối.
-    (nav.chapters.length
-      ? '<p class="nav-group">' + escapeHtml(nav.groupLabel || 'Giáo trình') + '</p><ul class="nav-list">' +
-        nav.chapters.map(item).join('') + '</ul>'
-      : '') +
+    (nav.chapters.length ? renderChapterNav(nav, item) : '') +
     (nav.extras.length
       ? '<p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list">' +
         nav.extras.map(item).join('') + '</ul>'
@@ -67,6 +64,36 @@ function renderSidebar(nav, currentFile) {
     '</ul>' +
     '</div></nav>'
   );
+}
+
+/**
+ * Danh sách chương, chia theo phần. Mỗi giáo trình gồm nhiều phần nhỏ thay vì
+ * một danh sách dài phẳng lì; các chương tra cứu (bài tập, phụ lục) không thuộc
+ * phần nào nên được gom xuống cuối dưới một nhãn riêng.
+ */
+function renderChapterNav(nav, item) {
+  const khoi = [];
+  let phanHienTai = null;
+  for (const ch of nav.chapters) {
+    const p = ch.part || '';
+    if (!khoi.length || p !== phanHienTai) {
+      khoi.push({ part: p, items: [] });
+      phanHienTai = p;
+    }
+    khoi[khoi.length - 1].items.push(ch);
+  }
+  const coPhan = khoi.some((k) => k.part);
+  return khoi
+    .map((k, i) => {
+      const nhan = k.part
+        ? '<p class="nav-group nav-group--part">' +
+          '<span class="nav-part-no">' + (i + 1) + '</span>' + escapeHtml(k.part) + '</p>'
+        : '<p class="nav-group">' +
+          escapeHtml(coPhan ? 'Tra cứu trong giáo trình' : (nav.groupLabel || 'Giáo trình')) +
+          '</p>';
+      return nhan + '<ul class="nav-list">' + k.items.map(item).join('') + '</ul>';
+    })
+    .join('');
 }
 
 function renderPager(prev, next) {
@@ -184,6 +211,7 @@ ${tocAside}
 </div>
 
 <script src="assets/app.js" defer></script>
+<script src="assets/router.js" defer></script>
 ${scripts}
 </body>
 </html>

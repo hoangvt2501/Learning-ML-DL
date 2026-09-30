@@ -504,5 +504,165 @@ check('tổng 250 triệu đánh giá, tức 0,25% số ô', nU * 5 * kMF / (nU 
 check('thực tế 30 đánh giá là thiếu hơn 8 lần', (5 * kMF) / 30, 8.33, 0.01);
 check('với 30 đánh giá thì hạng dùng được chỉ khoảng 6', Math.floor(30 / 5), 6);
 
+// ---------------------------------------------------------------------------
+// Giáo trình 3 — Biểu diễn, Sinh và Căn chỉnh.
+// ---------------------------------------------------------------------------
+
+group('Biểu diễn Mục 2.5 — chi phí softmax đầy đủ so với lấy mẫu âm');
+const chiPhiFull = (V, d) => 2 * V * d;
+const chiPhiNeg = (k, d) => 2 * (k + 1) * d;
+check('V=2 triệu, d=300: softmax đầy đủ 1,2 tỉ phép tính',
+  chiPhiFull(2e6, 300), 1.2e9, 1);
+check('lấy mẫu âm k=5, d=300: 3.600 phép tính', chiPhiNeg(5, 300), 3600);
+check('rẻ hơn 333.333 lần', chiPhiFull(2e6, 300) / chiPhiNeg(5, 300), 333333, 1);
+check('chi phí lấy mẫu âm KHÔNG phụ thuộc từ vựng',
+  chiPhiNeg(5, 300), chiPhiNeg(5, 300));
+check('V=50.000 cho 30 triệu phép tính', chiPhiFull(50000, 300), 30e6, 1);
+
+group('Biểu diễn Mục 7.3 — đếm tham số LoRA');
+const loraLop = (d, r) => 2 * d * r;
+check('GPT-2 small d=768, r=8: 12.288 tham số', loraLop(768, 8), 12288);
+check('Llama-2 7B d=4096, r=8: 65.536 tham số', loraLop(4096, 8), 65536);
+check('Llama-2 70B d=8192, r=8: 131.072 tham số', loraLop(8192, 8), 131072);
+check('tỉ lệ là 2r/d, không phải r/d', loraLop(4096, 8) / (4096 * 4096), 2 * 8 / 4096, 1e-15);
+check('d=768 cho 2,083%', loraLop(768, 8) / (768 * 768) * 100, 2.083, 5e-4);
+check('d=8192 cho 0,195%', loraLop(8192, 8) / (8192 * 8192) * 100, 0.195, 5e-4);
+check('tỉ lệ GIẢM khi d tăng — mô hình càng lớn LoRA càng lợi',
+  loraLop(8192, 8) / (8192 ** 2) < loraLop(768, 8) / (768 ** 2), true);
+
+// LoRA gắn vào W_Q và W_V của mọi lớp: 2 ma trận x L lớp.
+const loraCaMoHinh = (L, d, r) => L * 2 * loraLop(d, r);
+const N_7B = 6476005376;
+check('Llama-2 7B, r=8 trên Q và V: 4.194.304 tham số',
+  loraCaMoHinh(32, 4096, 8), 4194304);
+check('bằng 0,0648% mô hình', loraCaMoHinh(32, 4096, 8) / N_7B * 100, 0.0648, 5e-5);
+check('r=4 cho 2.097.152', loraCaMoHinh(32, 4096, 4), 2097152);
+check('r=64 cho 33.554.432', loraCaMoHinh(32, 4096, 64), 33554432);
+check('số tham số tuyến tính theo r',
+  loraCaMoHinh(32, 4096, 64) / loraCaMoHinh(32, 4096, 4), 16, 1e-12);
+
+group('Biểu diễn Mục 7.1 và 7.3 — bộ nhớ huấn luyện');
+const adamState = (n) => n * 2 * 4;                   // hai trạng thái, FP32
+check('trạng thái Adam cho LoRA r=8 là 32 MiB',
+  adamState(loraCaMoHinh(32, 4096, 8)) / 2 ** 20, 32, 1e-9);
+check('trạng thái Adam khi tinh chỉnh toàn phần là 48,2 GiB',
+  adamState(N_7B) / 2 ** 30, 48.2, 0.05);
+check('chênh nhau khoảng 1.540 lần',
+  adamState(N_7B) / adamState(loraCaMoHinh(32, 4096, 8)), 1544, 5);
+check('trọng số 7B ở FP32 là 24,1 GiB', N_7B * 4 / 2 ** 30, 24.1, 0.05);
+check('tổng trọng số + gradient + Adam vượt 80 GiB',
+  (N_7B * 4 * 2 + adamState(N_7B)) / 2 ** 30 > 80, true);
+check('Bài 3: 50 khách với LoRA cần 13,8 GB', 13 + 50 * 0.016, 13.8, 1e-9);
+check('Bài 3: 50 khách tinh chỉnh toàn phần cần 650 GB', 50 * 13, 650);
+check('tiết kiệm 47 lần', (50 * 13) / (13 + 50 * 0.016), 47.1, 0.1);
+
+group('Biểu diễn Mục 4.3 — dung lượng kho vector');
+check('10 triệu vector 768 chiều FP32 là 30,7 GB',
+  1e7 * 768 * 4 / 1e9, 30.7, 0.05);
+check('hạ xuống FP16 còn một nửa', 1e7 * 768 * 2 / 1e9, 15.36, 0.05);
+
+group('Biểu diễn Mục 11.2 — lịch nhiễu của mô hình khuếch tán');
+const T_DIFF = 1000;
+const betaLich = [];
+for (let i = 0; i < T_DIFF; i++) betaLich.push(1e-4 + (0.02 - 1e-4) * i / (T_DIFF - 1));
+const alphaNgang = [];
+let acc = 1;
+for (let i = 0; i < T_DIFF; i++) { acc *= (1 - betaLich[i]); alphaNgang.push(acc); }
+check('beta chạy từ 1e-4 tới 0,02', betaLich[T_DIFF - 1], 0.02, 1e-12);
+check('alpha_ngang tại t=0 là 0,9999', alphaNgang[0], 0.9999, 1e-9);
+check('alpha_ngang tại t=999 là 4,0e-5', alphaNgang[999], 4.0e-5, 2e-6);
+check('biên độ tín hiệu còn lại là căn của alpha_ngang, tức 0,63%',
+  Math.sqrt(alphaNgang[999]) * 100, 0.63, 0.02);
+check('alpha_ngang giảm đơn điệu', alphaNgang[500] < alphaNgang[200], true);
+const snr = (t) => alphaNgang[t] / (1 - alphaNgang[t]);
+check('SNR tại t=0 là 9.999', snr(0), 9999, 1);
+check('SNR tại t=200 là 1,91', snr(200), 1.91, 0.02);
+check('SNR giảm đơn điệu theo t', snr(800) < snr(500) && snr(500) < snr(200), true);
+// Dang dong: phuong sai cua q(x_t|x_0) la 1 - alpha_ngang, cong voi (can alpha_ngang * x0)^2
+check('phương sai dạng đóng tại t=999 gần bằng 1', 1 - alphaNgang[999], 1.0, 1e-4);
+
+group('Biểu diễn Mục 14.4 — nghiệm RLHF có ràng buộc KL');
+function softmaxJS(z) {
+  const m = Math.max(...z);
+  const e = z.map((v) => Math.exp(v - m));
+  const s = e.reduce((a, b) => a + b, 0);
+  return e.map((v) => v / s);
+}
+const piRef = softmaxJS([0.4, -1.1, 0.9, 0.2, -0.3, 1.4, -0.8, 0.1]);
+const rThuong = [0.6, -1.3, 1.9, 0.1, -0.7, 0.4, 1.2, -0.2];
+
+function piSao(beta) {
+  return softmaxJS(piRef.map((p, i) => Math.log(p) + rThuong[i] / beta));
+}
+function mucTieu(pi, beta) {
+  let er = 0, kl = 0;
+  for (let i = 0; i < pi.length; i++) {
+    er += pi[i] * rThuong[i];
+    if (pi[i] > 0) kl += pi[i] * (Math.log(pi[i]) - Math.log(piRef[i]));
+  }
+  return er - beta * kl;
+}
+check('pi* là một phân phối hợp lệ',
+  piSao(1.0).reduce((a, b) => a + b, 0), 1, 1e-12);
+// Kiem tra toi uu: nhieu loan pi* mot chut thi muc tieu phai GIAM.
+for (const beta of [0.2, 1.0, 5.0]) {
+  const p = piSao(beta);
+  const base = mucTieu(p, beta);
+  let toiHon = 0;
+  for (let k = 0; k < 40; k++) {
+    const q = p.map((v, i) => v + 0.004 * Math.sin(3 * k + 7 * i));
+    const s = q.reduce((a, b) => a + Math.max(b, 1e-12), 0);
+    const qn = q.map((v) => Math.max(v, 1e-12) / s);
+    if (mucTieu(qn, beta) > base + 1e-12) toiHon++;
+  }
+  check('beta=' + beta + ': không nhiễu loạn nào vượt được pi*', toiHon, 0);
+}
+check('beta nhỏ cho KL lớn hơn beta lớn', (() => {
+  const kl = (pi) => pi.reduce((a, p, i) => a + (p > 0 ? p * (Math.log(p) - Math.log(piRef[i])) : 0), 0);
+  return kl(piSao(0.2)) > kl(piSao(5.0));
+})(), true);
+check('beta nhỏ cho E[r] cao hơn beta lớn', (() => {
+  const er = (pi) => pi.reduce((a, p, i) => a + p * rThuong[i], 0);
+  return er(piSao(0.2)) > er(piSao(5.0));
+})(), true);
+check('pi_ref = 0 thì pi* = 0 bất kể thưởng lớn tới đâu', (() => {
+  const ref = [0.5, 0.5, 0];
+  const rr = [0, 0, 1000];
+  const lg = ref.map((p, i) => (p === 0 ? -Infinity : Math.log(p) + rr[i] / 0.5));
+  return softmaxJS(lg)[2];
+})(), 0, 1e-300);
+
+group('Biểu diễn Mục 15.2 — phép triệt tiêu log Z của DPO');
+// r(y) = beta*log(pi(y)/pi_ref(y)) + beta*log Z. Khi lay HIEU hai cau tra loi
+// cho CUNG mot cau hoi, so hang beta*log Z bi tru cho chinh no.
+const BETA_DPO = 0.5;
+const piTheta = softmaxJS([1.2, -0.4, 0.7, 2.1, -1.0, 0.3, 0.9, -0.6]);
+const logZ = 3.7182818;                                 // gia tri tuy y
+const rTu = (i) => BETA_DPO * (Math.log(piTheta[i]) - Math.log(piRef[i])) + BETA_DPO * logZ;
+const rTuKhongZ = (i) => BETA_DPO * (Math.log(piTheta[i]) - Math.log(piRef[i]));
+check('hiệu hai phần thưởng không phụ thuộc log Z',
+  rTu(2) - rTu(5), rTuKhongZ(2) - rTuKhongZ(5), 1e-12);
+check('đổi log Z sang giá trị khác cũng không đổi hiệu', (() => {
+  const z2 = -42.5;
+  const r2 = (i) => BETA_DPO * (Math.log(piTheta[i]) - Math.log(piRef[i])) + BETA_DPO * z2;
+  return Math.abs((r2(2) - r2(5)) - (rTu(2) - rTu(5)));
+})(), 0, 1e-12);
+check('nhưng từng phần thưởng riêng lẻ THÌ phụ thuộc log Z',
+  Math.abs(rTu(2) - rTuKhongZ(2)) > 1, true);
+
+group('Biểu diễn Mục 13.3 — đường nền của gradient chính sách');
+check('E[b * grad log pi] = 0 vì tổng xác suất luôn bằng 1', (() => {
+  const pi = softmaxJS([0.3, -0.8, 1.1, 0.0, 0.5, -0.2]);
+  // grad log pi(a) theo logit j la  1[a=j] - pi(j); ky vong theo a cho ra 0.
+  let maxAbs = 0;
+  for (let j = 0; j < pi.length; j++) {
+    let s = 0;
+    for (let a = 0; a < pi.length; a++) s += pi[a] * ((a === j ? 1 : 0) - pi[j]);
+    maxAbs = Math.max(maxAbs, Math.abs(s));
+  }
+  return maxAbs;
+})(), 0, 1e-15);
+check('giảm độ lệch chuẩn 2,3 lần tiết kiệm 5,3 lần số mẫu', 2.3 ** 2, 5.29, 0.01);
+
 console.log('\n' + (fail === 0 ? 'Tất cả ' + pass + ' phép kiểm tra đều đạt.' : pass + ' đạt, ' + fail + ' HỎNG.'));
 process.exit(fail === 0 ? 0 : 1);

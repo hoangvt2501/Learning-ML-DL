@@ -146,7 +146,9 @@ function buildBook(spec, books) {
     book: spec,
     books,
     groupLabel: spec.kicker + ' · ' + spec.short,
-    chapters: chapters.map((c) => ({ file: fileOf(c), num: c.num, label: c.label })),
+    chapters: chapters.map((c) => ({
+      file: fileOf(c), num: c.num, label: c.label, part: c.part || '',
+    })),
     extras,
   };
 

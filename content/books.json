@@ -131,9 +131,70 @@
     "drills": false
   },
   {
+    "id": "bieudien",
+    "slug": "bieudien-",
+    "kicker": "Giáo trình 3",
+    "short": "Biểu diễn & Căn chỉnh",
+    "source": "content/bieudien.md",
+    "chapters": "content/bieudien-chapters.json",
+    "quiz": "content/bieudien-trac-nghiem.md",
+    "glossary": "content/bieudien-thuat-ngu.md",
+    "solutions": "content/bieudien-loi-giai.md",
+    "code": "bieudien",
+    "figures": true,
+    "blurb": "Cách một trợ lý ngôn ngữ ra đời: từ embedding và học chuyển giao, qua VAE, GAN và khuếch tán, tới RLHF và DPO. Hai đẳng thức được kiểm chứng tới sai số máy, và ba chỗ số liệu nói ngược lại điều tác giả định viết.",
+    "paths": [
+      {
+        "tag": "Chỉ quan tâm LLM hiện đại",
+        "title": "Từ tiền huấn luyện tới trợ lý",
+        "note": "Bốn chương nối thẳng: vì sao tiền huấn luyện hiệu quả, tinh chỉnh thế nào, rồi căn chỉnh bằng RLHF và DPO.",
+        "steps": [
+          "5",
+          "6",
+          "14",
+          "15"
+        ]
+      },
+      {
+        "tag": "Làm hệ tìm kiếm ngữ nghĩa",
+        "title": "Embedding cho ra hồn",
+        "note": "Ba chương về embedding, kèm cái bẫy bất đẳng hướng làm hỏng rất nhiều hệ thống thật.",
+        "steps": [
+          "2",
+          "3",
+          "4"
+        ]
+      },
+      {
+        "tag": "Muốn hiểu mô hình sinh",
+        "title": "VAE, GAN, khuếch tán trên cùng một khung",
+        "note": "Bốn chương cho thấy cả ba đều biến nhiễu Gauss thành mẫu, chỉ khác nhau ở huấn luyện bằng gì.",
+        "steps": [
+          "8",
+          "9",
+          "10",
+          "11"
+        ]
+      },
+      {
+        "tag": "Tiết kiệm bộ nhớ huấn luyện",
+        "title": "LoRA và họ hàng",
+        "note": "Vì sao tinh chỉnh toàn phần mô hình 7B cần 96 GiB, và LoRA hạ nó xuống 32 MiB thế nào.",
+        "steps": [
+          "6",
+          "7"
+        ]
+      }
+    ],
+    "codeDir": "code/bieudien",
+    "scripts": "content/scripts-bieudien.json",
+    "figuresNote": "Mười bốn hình đều do mã nguồn trong code/bieudien/ sinh ra. Hai kết quả là kiểm chứng một đẳng thức chứ không phải mô phỏng, và ba chỗ số liệu mâu thuẫn với điều tác giả định viết — Phụ lục nói rõ cả ba.",
+    "drills": false
+  },
+  {
     "id": "quantization",
     "slug": "",
-    "kicker": "Giáo trình 3",
+    "kicker": "Giáo trình 4",
     "short": "Quantization",
     "source": "content/quantization.md",
     "chapters": "content/chapters.json",
@@ -191,7 +252,7 @@
   {
     "id": "mlops",
     "slug": "mlops-",
-    "kicker": "Giáo trình 4",
+    "kicker": "Giáo trình 5",
     "short": "MLOps",
     "source": "content/mlops.md",
     "chapters": "content/mlops-chapters.json",

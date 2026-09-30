@@ -1,6 +1,7 @@
 /* Bốn công cụ của Phòng thí nghiệm MLOps.
    Mọi công thức lấy đúng từ giáo trình; hàm thống kê tự cài để không cần thư viện ngoài. */
-(function () {
+window.QZ_INIT = window.QZ_INIT || {};
+window.QZ_INIT['labMlops'] = function () {
   'use strict';
 
   var $ = function (id) { return document.getElementById(id); };
@@ -432,4 +433,5 @@
     },
     mtsScore: function (sections) { return Math.min.apply(null, sections); },
   };
-})();
+};
+window.QZ_INIT['labMlops']();

@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>8. Bài toán sinh, và ba cách trả lời — Biểu diễn, Sinh và Căn chỉnh: cách một trợ lý ngôn ngữ ra đời</title>
+<meta name="description" content="Hằng số chuẩn hoá là thứ chặn đường dùng thẳng hợp lý cực đại, và ba họ mô hình sinh là ba cách né nó.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">B</span>
+    <span class="brand-text"><b>Biểu diễn &amp; Căn chỉnh</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><a class="book-tab" href="models-ch01.html">Mô hình &amp; Kiến trúc</a><span class="book-tab is-active" aria-current="true">Biểu diễn &amp; Căn chỉnh</span><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Nhập môn</p><ul class="nav-list"><li><a href="bieudien-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="bieudien-ch01.html"><span class="nav-num">1</span><span class="nav-label">Bản đồ: bốn câu hỏi</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Biểu diễn và embedding</p><ul class="nav-list"><li><a href="bieudien-ch02.html"><span class="nav-num">2</span><span class="nav-label">Word2Vec và thứ nó thực sự phân rã</span></a></li><li><a href="bieudien-ch03.html"><span class="nav-num">3</span><span class="nav-label">Hình học của không gian embedding</span></a></li><li><a href="bieudien-ch04.html"><span class="nav-num">4</span><span class="nav-label">Embedding hiện đại và tìm kiếm vector</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Học chuyển giao</p><ul class="nav-list"><li><a href="bieudien-ch05.html"><span class="nav-num">5</span><span class="nav-label">Vì sao tiền huấn luyện lại hiệu quả</span></a></li><li><a href="bieudien-ch06.html"><span class="nav-num">6</span><span class="nav-label">Tinh chỉnh: đóng băng tới đâu</span></a></li><li><a href="bieudien-ch07.html"><span class="nav-num">7</span><span class="nav-label">LoRA và tinh chỉnh tiết kiệm tham số</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Mô hình sinh</p><ul class="nav-list"><li><a href="bieudien-ch08.html" class="is-active" aria-current="page"><span class="nav-num">8</span><span class="nav-label">Bài toán sinh, và ba cách trả lời</span></a></li><li><a href="bieudien-ch09.html"><span class="nav-num">9</span><span class="nav-label">Tự mã hoá biến phân</span></a></li><li><a href="bieudien-ch10.html"><span class="nav-num">10</span><span class="nav-label">Mạng đối sinh</span></a></li><li><a href="bieudien-ch11.html"><span class="nav-num">11</span><span class="nav-label">Mô hình khuếch tán</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>Học tăng cường và căn chỉnh</p><ul class="nav-list"><li><a href="bieudien-ch12.html"><span class="nav-num">12</span><span class="nav-label">Nhập môn học tăng cường</span></a></li><li><a href="bieudien-ch13.html"><span class="nav-num">13</span><span class="nav-label">Gradient chính sách</span></a></li><li><a href="bieudien-ch14.html"><span class="nav-num">14</span><span class="nav-label">RLHF: học từ so sánh của con người</span></a></li><li><a href="bieudien-ch15.html"><span class="nav-num">15</span><span class="nav-label">DPO: bỏ hẳn mô hình thưởng</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="bieudien-bai-tap.html"><span class="nav-num">16</span><span class="nav-label">Bài tập</span></a></li><li><a href="bieudien-ch17.html"><span class="nav-num">17</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="bieudien-ch18.html"><span class="nav-num">18</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="bieudien-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="bieudien-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="bieudien-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="bieudien-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="bieudien-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon">↗</span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 8</span><span class="kicker-time">3 phút đọc</span></div><h2 id="sec-8" class="heading">8. Bài toán sinh, và ba cách trả lời<a class="anchor" href="#sec-8" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Hằng số chuẩn hoá là thứ chặn đường dùng thẳng hợp lý cực đại, và ba họ mô hình sinh là ba cách né nó.</p>
+<h3 id="sec-8-1" class="heading">8.1. Bài toán khó ở đâu<a class="anchor" href="#sec-8-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Phân loại hỏi: cho <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>, đoán <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span>. Sinh hỏi ngược lại và khó hơn nhiều: <strong>học phân phối <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span> rồi lấy mẫu từ nó.</strong></p>
+<p>Vì sao khó hơn? Hãy nghĩ về không gian. Một ảnh màu <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>256</mn><mo>×</mo><mn>256</mn></mrow><annotation encoding="application/x-tex">256\times256</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">256</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">256</span></span></span></span> có <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>256</mn><mo>×</mo><mn>256</mn><mo>×</mo><mn>3</mn><mo>=</mo><mn>196</mn><mtext> </mtext><mn>608</mn></mrow><annotation encoding="application/x-tex">256\times256\times3 = 196\,608</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">256</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">256</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">196</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">608</span></span></span></span> số, mỗi số 256 giá trị. Số ảnh khả dĩ là <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>256</mn><mn>196608</mn></msup></mrow><annotation encoding="application/x-tex">256^{196608}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">25</span><span class="mord"><span class="mord">6</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">196608</span></span></span></span></span></span></span></span></span></span></span></span> — lớn hơn số nguyên tử trong vũ trụ nhiều bậc không tưởng tượng nổi.</p>
+<p>Trong cái không gian khổng lồ ấy, <strong>ảnh trông như thật chiếm một phần cực kỳ nhỏ</strong>. Lấy ngẫu nhiên một điểm thì gần như chắc chắn được nhiễu. Thứ ta muốn học là hình dạng của cái tập con bé tí ấy — thường gọi là <strong>đa tạp dữ liệu</strong> — và học nó đủ tốt để lấy mẫu ra những điểm mới trên đó.</p>
+<h3 id="sec-8-2" class="heading">8.2. Vì sao không dùng thẳng hợp lý cực đại<a class="anchor" href="#sec-8-2" aria-label="Liên kết tới mục này">#</a></h3>
+<p><a href="nentang-ch10.html">Chương 10 của <em>Nền tảng</em></a> đã dạy công cụ chuẩn: hợp lý cực đại. Sao không áp thẳng vào đây?</p>
+<p>Vướng ở <strong>hằng số chuẩn hoá</strong>. Nếu mô hình hoá <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mi>Z</mi><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow></mfrac><mi>exp</mi><mo>⁡</mo><mo stretchy="false">(</mo><msub><mi>f</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p_\theta(x) = \frac{1}{Z(\theta)}\exp(f_\theta(x))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.3651em;vertical-align:-0.52em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0715em;">Z</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.52em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">exp</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">))</span></span></span></span> thì</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>Z</mi><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo><mo>=</mo><mo>∫</mo><mi>exp</mi><mo>⁡</mo><mo stretchy="false">(</mo><msub><mi>f</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mtext> </mtext><mi>d</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">Z(\theta) = \int \exp(f_\theta(x))\,dx
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">Z</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.2222em;vertical-align:-0.8622em;"></span><span class="mop op-symbol large-op" style="margin-right:0.4445em;position:relative;top:-0.0011em;">∫</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">exp</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">))</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">x</span></span></span></span></span></p>
+<p>là tích phân trên toàn bộ không gian <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>196</mn><mtext> </mtext><mn>608</mn></mrow><annotation encoding="application/x-tex">196\,608</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">196</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">608</span></span></span></span> chiều. Không tính được, không xấp xỉ nổi, và nó phụ thuộc <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span></span></span> nên không bỏ qua được khi lấy đạo hàm.</p>
+<p>Ba họ mô hình trong các chương sau là <strong>ba cách né hằng số ấy</strong>, và đó là cách đọc gọn nhất để phân biệt chúng:</p>
+<ul>
+<li><strong>VAE</strong> tối đa một <strong>chặn dưới</strong> của log hợp lý — chặn dưới ấy tính được.</li>
+<li><strong>GAN</strong> bỏ hẳn hợp lý, thay bằng một <strong>trò chơi</strong> giữa hai mạng.</li>
+<li><strong>Khuếch tán</strong> biến bài toán thành một chuỗi bài <strong>hồi quy nhỏ</strong>, mỗi bài đều có mất mát tính được.</li>
+</ul>
+<h3 id="sec-8-3" class="heading">8.3. Ba họ, cùng một khung<a class="anchor" href="#sec-8-3" aria-label="Liên kết tới mục này">#</a></h3>
+<figure class="figure" id="hinh-11">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 11"><img src="figs/bd11_mohinhsinh.png" alt="Hình 11" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 11.</strong> Ba cách trả lời cùng một câu hỏi. Cả ba đều biến nhiễu Gauss thành mẫu.</figcaption>
+</figure>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>VAE</th>
+<th>GAN</th>
+<th>Khuếch tán</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Huấn luyện bằng</td>
+<td>chặn dưới ELBO</td>
+<td>trò chơi hai bên</td>
+<td>hồi quy đoán nhiễu</td>
+</tr>
+<tr>
+<td>Ổn định</td>
+<td>cao</td>
+<td><strong>thấp</strong></td>
+<td>cao</td>
+</tr>
+<tr>
+<td>Chất lượng mẫu</td>
+<td>thường <strong>mờ</strong></td>
+<td>sắc nét</td>
+<td>sắc nét</td>
+</tr>
+<tr>
+<td>Phủ hết các chế độ</td>
+<td>có</td>
+<td><strong>hay thiếu</strong></td>
+<td>có</td>
+</tr>
+<tr>
+<td>Tốc độ lấy mẫu</td>
+<td>một lần chạy</td>
+<td>một lần chạy</td>
+<td><strong>nhiều bước</strong></td>
+</tr>
+<tr>
+<td>Có không gian ẩn dùng được</td>
+<td><strong>có</strong></td>
+<td>có phần</td>
+<td>không trực tiếp</td>
+</tr>
+<tr>
+<td>Đánh giá được bằng hợp lý</td>
+<td>có (chặn dưới)</td>
+<td><strong>không</strong></td>
+<td>có (chặn dưới)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Bảng này giải thích luôn diễn biến lịch sử. GAN thống trị tạo ảnh khoảng 2015–2020 vì nó cho mẫu sắc nét nhất. Khuếch tán thay thế nó từ khoảng 2021 vì nó giữ được độ sắc nét <strong>mà không phải trả giá bằng sự bất ổn</strong> — đổi lại là lấy mẫu chậm, và chậm thì còn tối ưu được chứ bất ổn thì không.</p>
+<hr>
+<section class="quiz" data-quiz data-chapter="8"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">2 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Vì sao không dùng thẳng hợp lý cực đại cho bài toán sinh?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì hằng số chuẩn hoá <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">Z(\theta)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">Z</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span><span class="mclose">)</span></span></span></span> là tích phân trên toàn bộ không gian, không tính được và <strong>phụ thuộc <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span></span></span></strong></span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì hợp lý cực đại chỉ dùng cho phân loại</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì dữ liệu sinh không có nhãn</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì hợp lý cực đại luôn bị quá khớp</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Ba họ mô hình sinh là ba cách né nó: VAE tối đa một chặn dưới, GAN thay bằng trò chơi, khuếch tán biến thành chuỗi bài hồi quy.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Vì sao khuếch tán thay thế được GAN từ khoảng 2021?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó lấy mẫu nhanh hơn</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó giữ được độ sắc nét <strong>mà không phải trả giá bằng sự bất ổn</strong> — và chậm thì còn tối ưu được chứ bất ổn thì không</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó cần ít dữ liệu hơn</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì nó có ít tham số hơn</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Khuếch tán lấy mẫu <strong>chậm hơn</strong> GAN hàng trăm lần. Nhưng huấn luyện nó là một bài hồi quy bình thường với mất mát đọc được.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/2</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="bieudien-ch07.html"><span class="pager-dir">← Trước</span><span class="pager-title">LoRA và tinh chỉnh tiết kiệm tham số</span></a><a class="pager-link pager-next" href="bieudien-ch09.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Tự mã hoá biến phân</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-8-1">8.1. Bài toán khó ở đâu</a></li><li class="toc-l3"><a href="#sec-8-2">8.2. Vì sao không dùng thẳng hợp lý cực đại</a></li><li class="toc-l3"><a href="#sec-8-3">8.3. Ba họ, cùng một khung</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+<script src="assets/router.js" defer></script>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
 /* Lọc trắc nghiệm theo chương, dùng cho trang bài tập không có phần luyện tính tay. */
-(function () {
+window.QZ_INIT = window.QZ_INIT || {};
+window.QZ_INIT['quizFilter'] = function () {
   'use strict';
   var filter = document.querySelector('[data-quiz-filter]');
   if (!filter) return;
@@ -15,4 +16,5 @@
       w.hidden = want !== 'all' && w.dataset.quizChapter !== want;
     });
   });
-})();
+};
+window.QZ_INIT['quizFilter']();

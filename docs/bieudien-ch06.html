@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6. Tinh chỉnh: đóng băng tới đâu — Biểu diễn, Sinh và Căn chỉnh: cách một trợ lý ngôn ngữ ra đời</title>
+<meta name="description" content="Ngưỡng đo được giữa đóng băng và tinh chỉnh, và hiện tượng trần chặn — cột đóng băng phẳng ra từ 500 mẫu dù thêm bao nhiêu dữ liệu nữa.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">B</span>
+    <span class="brand-text"><b>Biểu diễn &amp; Căn chỉnh</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><a class="book-tab" href="models-ch01.html">Mô hình &amp; Kiến trúc</a><span class="book-tab is-active" aria-current="true">Biểu diễn &amp; Căn chỉnh</span><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Nhập môn</p><ul class="nav-list"><li><a href="bieudien-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="bieudien-ch01.html"><span class="nav-num">1</span><span class="nav-label">Bản đồ: bốn câu hỏi</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Biểu diễn và embedding</p><ul class="nav-list"><li><a href="bieudien-ch02.html"><span class="nav-num">2</span><span class="nav-label">Word2Vec và thứ nó thực sự phân rã</span></a></li><li><a href="bieudien-ch03.html"><span class="nav-num">3</span><span class="nav-label">Hình học của không gian embedding</span></a></li><li><a href="bieudien-ch04.html"><span class="nav-num">4</span><span class="nav-label">Embedding hiện đại và tìm kiếm vector</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Học chuyển giao</p><ul class="nav-list"><li><a href="bieudien-ch05.html"><span class="nav-num">5</span><span class="nav-label">Vì sao tiền huấn luyện lại hiệu quả</span></a></li><li><a href="bieudien-ch06.html" class="is-active" aria-current="page"><span class="nav-num">6</span><span class="nav-label">Tinh chỉnh: đóng băng tới đâu</span></a></li><li><a href="bieudien-ch07.html"><span class="nav-num">7</span><span class="nav-label">LoRA và tinh chỉnh tiết kiệm tham số</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Mô hình sinh</p><ul class="nav-list"><li><a href="bieudien-ch08.html"><span class="nav-num">8</span><span class="nav-label">Bài toán sinh, và ba cách trả lời</span></a></li><li><a href="bieudien-ch09.html"><span class="nav-num">9</span><span class="nav-label">Tự mã hoá biến phân</span></a></li><li><a href="bieudien-ch10.html"><span class="nav-num">10</span><span class="nav-label">Mạng đối sinh</span></a></li><li><a href="bieudien-ch11.html"><span class="nav-num">11</span><span class="nav-label">Mô hình khuếch tán</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>Học tăng cường và căn chỉnh</p><ul class="nav-list"><li><a href="bieudien-ch12.html"><span class="nav-num">12</span><span class="nav-label">Nhập môn học tăng cường</span></a></li><li><a href="bieudien-ch13.html"><span class="nav-num">13</span><span class="nav-label">Gradient chính sách</span></a></li><li><a href="bieudien-ch14.html"><span class="nav-num">14</span><span class="nav-label">RLHF: học từ so sánh của con người</span></a></li><li><a href="bieudien-ch15.html"><span class="nav-num">15</span><span class="nav-label">DPO: bỏ hẳn mô hình thưởng</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="bieudien-bai-tap.html"><span class="nav-num">16</span><span class="nav-label">Bài tập</span></a></li><li><a href="bieudien-ch17.html"><span class="nav-num">17</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="bieudien-ch18.html"><span class="nav-num">18</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="bieudien-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="bieudien-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="bieudien-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="bieudien-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="bieudien-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon">↗</span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 6</span><span class="kicker-time">5 phút đọc</span></div><h2 id="sec-6" class="heading">6. Tinh chỉnh: đóng băng tới đâu<a class="anchor" href="#sec-6" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Ngưỡng đo được giữa đóng băng và tinh chỉnh, và hiện tượng trần chặn — cột đóng băng phẳng ra từ 500 mẫu dù thêm bao nhiêu dữ liệu nữa.</p>
+<h3 id="sec-6-1" class="heading">6.1. Câu hỏi cụ thể<a class="anchor" href="#sec-6-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Có mô hình tiền huấn luyện, có <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> mẫu có nhãn cho việc của mình. Nên đóng băng phần đặc trưng và chỉ học lớp cuối, hay nên cho cả mô hình học lại?</p>
+<p>Trực giác nói: ít dữ liệu thì đóng băng, nhiều dữ liệu thì tinh chỉnh. Trực giác ấy <strong>đúng</strong>, nhưng nó không nói ngưỡng ở đâu, và ngưỡng mới là thứ ta cần.</p>
+<h3 id="sec-6-2" class="heading">6.2. Thiết kế thí nghiệm cho đàng hoàng<a class="anchor" href="#sec-6-2" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Đây là chỗ tôi phải cẩn thận, và lần đầu tôi làm sai nên nói luôn để người đọc tránh.</p>
+<p>Lần đầu tôi dùng <code>MLPClassifier</code> của scikit-learn cho cột &quot;tinh chỉnh toàn phần&quot;. Nhưng scikit-learn <strong>không cho nạp trọng số ban đầu</strong>. Nên cái gọi là &quot;tinh chỉnh&quot; ấy thực ra là <strong>huấn luyện từ đầu</strong>, và quả nhiên hai cột cho số gần như y hệt nhau (0,6975 so với 0,6987). So sánh ấy vô nghĩa.</p>
+<p>Cách làm đúng là tự cài một mạng nhỏ bằng NumPy để kiểm soát được trọng số khởi tạo. Khi đó ba cấu hình dùng <strong>cùng một cài đặt mạng</strong>, chỉ khác hai điều:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Cấu hình</th>
+<th>Trọng số ban đầu của lớp ẩn</th>
+<th>Lớp ẩn có được cập nhật không</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Đóng băng + đầu tuyến tính</td>
+<td>tiền huấn luyện</td>
+<td><strong>không</strong></td>
+</tr>
+<tr>
+<td>Tinh chỉnh toàn phần</td>
+<td>tiền huấn luyện</td>
+<td>có</td>
+</tr>
+<tr>
+<td>Huấn luyện từ đầu</td>
+<td>ngẫu nhiên</td>
+<td>có</td>
+</tr>
+</tbody>
+</table></div>
+<p>Dữ liệu mô phỏng đúng tình huống thật: có một phép chiếu &quot;thật&quot; sinh ra dữ liệu, và mô hình &quot;tiền huấn luyện&quot; là phép chiếu ấy <strong>cộng nhiễu</strong> — tức gần đúng nhưng không trùng khớp. Đó chính là quan hệ giữa một mô hình tiền huấn luyện và nhiệm vụ đích trong thực tế.</p>
+<h3 id="sec-6-3" class="heading">6.3. Kết quả<a class="anchor" href="#sec-6-3" aria-label="Liên kết tới mục này">#</a></h3>
+<figure class="figure" id="hinh-6">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 6"><img src="figs/bd06_transfer.png" alt="Hình 6" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 6.</strong> Độ chính xác theo số nhãn, trục hoành log.</figcaption>
+</figure>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Số mẫu có nhãn</th>
+<th>Đóng băng + đầu tuyến tính</th>
+<th>Tinh chỉnh toàn phần</th>
+<th>Huấn luyện từ đầu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>20</td>
+<td>0,4027</td>
+<td>0,3875</td>
+<td>0,4118</td>
+</tr>
+<tr>
+<td>50</td>
+<td>0,4800</td>
+<td>0,4955</td>
+<td>0,4820</td>
+</tr>
+<tr>
+<td>150</td>
+<td>0,5330</td>
+<td><strong>0,5713</strong></td>
+<td>0,5520</td>
+</tr>
+<tr>
+<td>500</td>
+<td>0,6220</td>
+<td><strong>0,6713</strong></td>
+<td>0,6350</td>
+</tr>
+<tr>
+<td>2 000</td>
+<td>0,6375</td>
+<td><strong>0,7515</strong></td>
+<td>0,6773</td>
+</tr>
+<tr>
+<td>8 000</td>
+<td>0,6452</td>
+<td><strong>0,8183</strong></td>
+<td>0,7545</td>
+</tr>
+</tbody>
+</table></div>
+<p>Đọc bảng này theo ba tầng.</p>
+<p><strong>Tầng một — ở <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">n = 20</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">20</span></span></span></span> và <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>50</mn></mrow><annotation encoding="application/x-tex">n = 50</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">50</span></span></span></span>, ba cột nằm trong khoảng nhiễu của nhau.</strong> Tôi không kết luận gì ở hai hàng ấy. Với 20 mẫu và 4 lớp, mỗi lớp chỉ có 5 mẫu; chênh lệch 0,02 giữa các cột không nói lên điều gì. Nếu ai đó đưa cho bạn một bảng như vậy và kết luận từ hàng đầu tiên, hãy nghi ngờ.</p>
+<p><strong>Tầng hai — từ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>150</mn></mrow><annotation encoding="application/x-tex">n = 150</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">150</span></span></span></span> trở đi, tinh chỉnh toàn phần tách hẳn lên và không bao giờ bị đuổi kịp.</strong> Khoảng cách giãn dần: 0,04 ở <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>150</mn></mrow><annotation encoding="application/x-tex">n=150</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">150</span></span></span></span>, 0,11 ở <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>2000</mn></mrow><annotation encoding="application/x-tex">n=2000</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2000</span></span></span></span>, <strong>0,17 ở <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>8000</mn></mrow><annotation encoding="application/x-tex">n=8000</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">8000</span></span></span></span></strong>. Cơ chế rất rõ: đặc trưng tiền huấn luyện chỉ <em>gần đúng</em> cho nhiệm vụ này, và khi có đủ dữ liệu thì việc sửa lại chúng đáng giá hơn nhiều so với việc chỉ khớp một lớp tuyến tính lên trên.</p>
+<p><strong>Tầng ba — cột đóng băng gần như đứng yên từ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>500</mn></mrow><annotation encoding="application/x-tex">n = 500</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">500</span></span></span></span> trở đi</strong> (0,6220 → 0,6375 → 0,6452). Đây là hiện tượng đáng chú ý nhất trong bảng và nó có tên: <strong>trần chặn</strong>. Khi đặc trưng bị cố định, mô hình chỉ còn là hồi quy softmax trên những đặc trưng ấy. Thêm dữ liệu giúp ước lượng lớp tuyến tính chính xác hơn, nhưng không phá được giới hạn do bản thân đặc trưng đặt ra.</p>
+<p>Nhận ra trần chặn này có giá trị thực tế ngay: nếu đang đóng băng và thấy độ chính xác không nhích lên dù thêm dữ liệu, thì <strong>thêm dữ liệu nữa cũng vô ích</strong>. Phải mở đóng băng ra. Đây chính là chẩn đoán thiên lệch cao ở <a href="models-ch02.html">Mục 2.4 của <em>Mô hình &amp; Kiến trúc</em></a>, xuất hiện lại ở một dạng khác.</p>
+<p><strong>Và một điều nữa đáng để ý:</strong> tinh chỉnh <strong>luôn</strong> tốt hơn huấn luyện từ đầu, ở mọi cỡ dữ liệu từ 150 trở lên. Trọng số tiền huấn luyện không chỉ giúp khi thiếu dữ liệu — nó là một điểm khởi đầu tốt hơn về mọi mặt.</p>
+<h3 id="sec-6-4" class="heading">6.4. Vài quy tắc thực hành<a class="anchor" href="#sec-6-4" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Những điều dưới đây là kinh nghiệm chung của ngành chứ không phải kết quả đo trong tài liệu này, nên tôi ghi rõ như vậy:</p>
+<ul>
+<li><strong>Tốc độ học khi tinh chỉnh phải nhỏ hơn nhiều so với khi huấn luyện từ đầu</strong>, thường nhỏ hơn 10 đến 100 lần. Lý do: trọng số hiện tại đã tốt, và bước đi lớn sẽ phá mất thứ đã học được trước khi kịp học cái mới.</li>
+<li><strong>Mở đóng băng dần từ trên xuống</strong> thường ổn định hơn mở hết một lúc. Các lớp gần đầu vào học những đặc trưng chung nhất (cạnh, kết cấu, cú pháp cơ bản) và ít cần sửa nhất.</li>
+<li><strong>Tinh chỉnh trên ít dữ liệu có thể gây quên tai hại</strong> — mô hình mất khả năng ở những việc nó từng làm được. Nếu điều đó quan trọng, hãy trộn một ít dữ liệu của miền gốc vào, hoặc dùng LoRA ở <a href="bieudien-ch07.html#sec-7" class="xref">Chương 7</a>, vốn giữ nguyên trọng số gốc theo đúng nghĩa đen.</li>
+</ul>
+<hr>
+<section class="quiz" data-quiz data-chapter="6"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">3 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Ở bao nhiêu mẫu có nhãn thì tinh chỉnh toàn phần tách hẳn lên so với đóng băng?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Ngay từ 20 mẫu</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Từ khoảng <strong>150 mẫu</strong>, và khoảng cách giãn dần tới 0,17 ở 8 000 mẫu</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Chỉ khi có trên 100 000 mẫu</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Không bao giờ — đóng băng luôn thắng</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Ở 20 và 50 mẫu, ba cách nằm trong khoảng nhiễu của nhau và <strong>không kết luận được gì</strong>. Kết luận từ hàng đầu tiên của một bảng như vậy là một lỗi thường gặp.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Hiện tượng gì xảy ra với cột đóng băng khi dữ liệu tăng từ 500 lên 8 000 mẫu?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó tiếp tục tăng đều</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó <strong>phẳng ra</strong> (0,6220 → 0,6375 → 0,6452) — đây là trần chặn do đặc trưng cố định đặt ra</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó giảm vì quá khớp</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Nó vượt cột tinh chỉnh</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Khi đặc trưng bị cố định, mô hình chỉ còn là hồi quy softmax trên chúng. Nhận ra trần này có giá trị ngay: nếu thêm dữ liệu không giúp gì thì thêm nữa cũng vô ích — phải mở đóng băng ra.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">Vì sao thí nghiệm ở <a href="bieudien-ch06.html#sec-6-2" class="xref">Mục 6.2</a> phải tự cài mạng bằng NumPy thay vì dùng scikit-learn?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì scikit-learn <strong>không cho nạp trọng số ban đầu</strong>, nên &quot;tinh chỉnh&quot; hoá ra lại là huấn luyện từ đầu — so sánh vô nghĩa</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì scikit-learn chạy chậm</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì cần GPU</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì scikit-learn không hỗ trợ nhiều lớp</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Lần đầu làm sai đúng chỗ này, và hai cột cho số gần như y hệt (0,6975 so với 0,6987) — dấu hiệu rõ ràng rằng phép so sánh hỏng.</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/3</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="bieudien-ch05.html"><span class="pager-dir">← Trước</span><span class="pager-title">Vì sao tiền huấn luyện lại hiệu quả</span></a><a class="pager-link pager-next" href="bieudien-ch07.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">LoRA và tinh chỉnh tiết kiệm tham số</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-6-1">6.1. Câu hỏi cụ thể</a></li><li class="toc-l3"><a href="#sec-6-2">6.2. Thiết kế thí nghiệm cho đàng hoàng</a></li><li class="toc-l3"><a href="#sec-6-3">6.3. Kết quả</a></li><li class="toc-l3"><a href="#sec-6-4">6.4. Vài quy tắc thực hành</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+<script src="assets/router.js" defer></script>
+
+</body>
+</html>

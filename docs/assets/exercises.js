@@ -1,5 +1,6 @@
 /* Trang Bài tập: bộ luyện tính tay tự chấm và bộ lọc trắc nghiệm theo chương. */
-(function () {
+window.QZ_INIT = window.QZ_INIT || {};
+window.QZ_INIT['exercises'] = function () {
   'use strict';
 
   var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -288,4 +289,5 @@
       });
     });
   }
-})();
+};
+window.QZ_INIT['exercises']();

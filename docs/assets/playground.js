@@ -1,7 +1,8 @@
 /* Năm công cụ của Phòng thí nghiệm.
    Mọi công thức cài đặt đúng theo giáo trình; phép làm tròn dùng quy tắc
    "nửa về số chẵn" giống NumPy và IEEE 754. */
-(function () {
+window.QZ_INIT = window.QZ_INIT || {};
+window.QZ_INIT['playground'] = function () {
   'use strict';
 
   var $ = function (id) { return document.getElementById(id); };
@@ -700,4 +701,5 @@
     samples: samples, mseAt: mseAt, clipCompute: clipCompute,
     WEIGHT_FORMATS: WEIGHT_FORMATS,
   };
-})();
+};
+window.QZ_INIT['playground']();

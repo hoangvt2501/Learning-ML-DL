@@ -1055,3 +1055,26 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
   font-size: .92rem; color: var(--text-2); max-width: 62ch;
 }
 .home-spine a { color: var(--accent); font-weight: 600; }
+
+/* phần nhỏ trong thanh bên */
+.nav-group--part {
+  display: flex; align-items: baseline; gap: .45rem;
+  margin-top: 1.15rem; text-transform: none; letter-spacing: 0;
+  font-size: .78rem; color: var(--text-2); font-weight: 600;
+}
+.nav-group--part:first-of-type { margin-top: .35rem; }
+.nav-part-no {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.05rem; height: 1.05rem; border-radius: 3px;
+  background: var(--accent); color: #fff;
+  font-size: .62rem; font-weight: 700; flex: 0 0 auto;
+}
+.lt-phan--aux { margin: 0 0 2.5rem; padding-left: .2rem; }
+.lt-aux-head {
+  margin: 0 0 .5rem; font-family: var(--font-ui); font-size: .74rem;
+  font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3);
+}
+
+/* nhịp chuyển trang của router: chỉ mờ đi một chút, không nhấp nháy */
+.is-navigating .content { opacity: .55; transition: opacity .12s ease; }
+.content { transition: opacity .12s ease; }

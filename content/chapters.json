@@ -3,85 +3,99 @@
     "num": "0",
     "file": "ch00.html",
     "label": "Ký hiệu và quy ước",
-    "summary": "Bảng ký hiệu dùng xuyên suốt tài liệu và phần kiến thức nền cần có trước khi bắt đầu."
+    "summary": "Bảng ký hiệu dùng xuyên suốt tài liệu và phần kiến thức nền cần có trước khi bắt đầu.",
+    "part": "Biểu diễn số và lượng tử hoá"
   },
   {
     "num": "1",
     "file": "ch01.html",
     "label": "Vì sao cần quantization",
-    "summary": "Bốn động cơ: bộ nhớ, năng lượng, tốc độ và cái giá phải trả. Vì sao di chuyển dữ liệu đắt hơn tính toán hàng trăm lần."
+    "summary": "Bốn động cơ: bộ nhớ, năng lượng, tốc độ và cái giá phải trả. Vì sao di chuyển dữ liệu đắt hơn tính toán hàng trăm lần.",
+    "part": "Biểu diễn số và lượng tử hoá"
   },
   {
     "num": "2",
     "file": "ch02.html",
     "label": "Máy tính biểu diễn số",
-    "summary": "Số nguyên bù hai, IEEE 754, FP16/BF16/FP8. Khác biệt cốt lõi: độ chính xác tương đối so với tuyệt đối."
+    "summary": "Số nguyên bù hai, IEEE 754, FP16/BF16/FP8. Khác biệt cốt lõi: độ chính xác tương đối so với tuyệt đối.",
+    "part": "Biểu diễn số và lượng tử hoá"
   },
   {
     "num": "3",
     "file": "ch03.html",
     "label": "Uniform affine quantization",
-    "summary": "Suy ra công thức S và Z từ đầu, ví dụ tính tay đầy đủ, lượng tử đối xứng so với bất đối xứng."
+    "summary": "Suy ra công thức S và Z từ đầu, ví dụ tính tay đầy đủ, lượng tử đối xứng so với bất đối xứng.",
+    "part": "Biểu diễn số và lượng tử hoá"
   },
   {
     "num": "4",
     "file": "ch04.html",
     "label": "Phân tích sai số",
-    "summary": "Mô hình nhiễu đều, quy tắc mỗi bit đáng giá 6 dB, và đánh đổi giữa sai số làm tròn với sai số cắt."
+    "summary": "Mô hình nhiễu đều, quy tắc mỗi bit đáng giá 6 dB, và đánh đổi giữa sai số làm tròn với sai số cắt.",
+    "part": "Biểu diễn số và lượng tử hoá"
   },
   {
     "num": "5",
     "file": "ch05.html",
     "label": "Độ mịn (granularity)",
-    "summary": "Per-tensor, per-channel, per-group. Vì sao scale chỉ được đặt trên trục không bị lấy tổng."
+    "summary": "Per-tensor, per-channel, per-group. Vì sao scale chỉ được đặt trên trục không bị lấy tổng.",
+    "part": "Suy luận số nguyên"
   },
   {
     "num": "6",
     "file": "ch06.html",
     "label": "Suy luận bằng số nguyên",
-    "summary": "Khai triển phép nhân ma trận đã lượng tử, bias int32, requantization bằng số học dấu chấm tĩnh."
+    "summary": "Khai triển phép nhân ma trận đã lượng tử, bias int32, requantization bằng số học dấu chấm tĩnh.",
+    "part": "Suy luận số nguyên"
   },
   {
     "num": "7",
     "file": "ch07.html",
     "label": "Lượng tử cả một mạng",
-    "summary": "Lượng tử cái gì, nút fake-quant, gộp BatchNorm vào tích chập và gộp chuỗi lớp."
+    "summary": "Lượng tử cái gì, nút fake-quant, gộp BatchNorm vào tích chập và gộp chuỗi lớp.",
+    "part": "Suy luận số nguyên"
   },
   {
     "num": "8",
     "file": "ch08.html",
     "label": "Calibration",
-    "summary": "Năm cách chọn dải cho activation — min–max, EMA, percentile, MSE, KL — và một thí nghiệm so sánh trung thực."
+    "summary": "Năm cách chọn dải cho activation — min–max, EMA, percentile, MSE, KL — và một thí nghiệm so sánh trung thực.",
+    "part": "Quy trình lượng tử hoá"
   },
   {
     "num": "9",
     "file": "ch09.html",
     "label": "PTQ và QAT",
-    "summary": "Straight-Through Estimator, LSQ, so sánh theo độ rộng bit, và nhóm kỹ thuật PTQ nâng cao: CLE, bias correction, AdaRound."
+    "summary": "Straight-Through Estimator, LSQ, so sánh theo độ rộng bit, và nhóm kỹ thuật PTQ nâng cao: CLE, bias correction, AdaRound.",
+    "part": "Quy trình lượng tử hoá"
   },
   {
     "num": "10",
     "file": "ch10.html",
     "label": "PyTorch và TFLite",
-    "summary": "Mã đã chạy thật: eager mode, QAT, PT2E/torchao, LiteRT, và cách đo kích thước – độ trễ – độ chính xác cho đáng tin."
+    "summary": "Mã đã chạy thật: eager mode, QAT, PT2E/torchao, LiteRT, và cách đo kích thước – độ trễ – độ chính xác cho đáng tin.",
+    "part": "Quy trình lượng tử hoá"
   },
   {
     "num": "11",
     "file": "ch11.html",
     "label": "Quantization cho LLM",
-    "summary": "Outlier có hệ thống, LLM.int8(), SmoothQuant, GPTQ, AWQ, NF4/QLoRA, FP8 và microscaling, lượng tử KV cache."
+    "summary": "Outlier có hệ thống, LLM.int8(), SmoothQuant, GPTQ, AWQ, NF4/QLoRA, FP8 và microscaling, lượng tử KV cache.",
+    "part": "Lượng tử hoá cho LLM và quy trình"
   },
   {
     "num": "12",
     "file": "ch12.html",
     "label": "Quy trình làm việc",
-    "summary": "Sơ đồ chọn phương pháp, phân tích độ nhạy theo lớp, và danh sách kiểm tra tám mục trước khi triển khai."
+    "summary": "Sơ đồ chọn phương pháp, phân tích độ nhạy theo lớp, và danh sách kiểm tra tám mục trước khi triển khai.",
+    "part": "Lượng tử hoá cho LLM và quy trình"
   },
   {
     "num": "13",
     "file": "ch13.html",
     "label": "Những hiểu lầm thường gặp",
-    "summary": "Chín phát biểu nghe rất hợp lý nhưng sai, kèm đính chính có dẫn chứng từ chính các thí nghiệm trong tài liệu."
+    "summary": "Chín phát biểu nghe rất hợp lý nhưng sai, kèm đính chính có dẫn chứng từ chính các thí nghiệm trong tài liệu.",
+    "part": "Lượng tử hoá cho LLM và quy trình"
   },
   {
     "num": "14",

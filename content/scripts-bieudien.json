@@ -1,0 +1,6 @@
+[
+  { "file": "experiments.py", "added": true,
+    "note": "Sinh Hình 2, 3, 4, 6, 8, 9, 10, 12, 13 cùng mọi số liệu đo được: phân rã PMI và kiểm chứng kết quả Levy–Goldberg, chi phí lấy mẫu âm, bất đẳng hướng của embedding, đếm tham số LoRA, đóng băng so với tinh chỉnh theo cỡ dữ liệu, số chiều ẩn còn sống của VAE theo β, hàm mất mát bão hoà so với không bão hoà của GAN, dạng đóng của quá trình khuếch tán, khám phá trong Q-learning, phương sai của gradient chính sách, nghiệm RLHF có ràng buộc KL, và đẳng thức DPO ≡ RLHF." },
+  { "file": "fig_diagrams.py", "added": true,
+    "note": "Sinh Hình 1, 5, 7, 11, 14: bản đồ bốn câu hỏi, bốn cách tái dùng một mô hình đã huấn luyện, cách LoRA hoạt động, so sánh ba họ mô hình sinh trên cùng một khung, và ba giai đoạn huấn luyện một trợ lý kèm chỗ DPO cắt bớt." }
+]

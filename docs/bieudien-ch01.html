@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1. Bản đồ: bốn câu hỏi — Biểu diễn, Sinh và Căn chỉnh: cách một trợ lý ngôn ngữ ra đời</title>
+<meta name="description" content="Bốn nhóm kỹ thuật tưởng rời rạc, xếp thành một hàng khi nhìn theo đường đi của một trợ lý ngôn ngữ từ lúc chưa có gì tới lúc biết nghe lời.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">B</span>
+    <span class="brand-text"><b>Biểu diễn &amp; Căn chỉnh</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><a class="book-tab" href="models-ch01.html">Mô hình &amp; Kiến trúc</a><span class="book-tab is-active" aria-current="true">Biểu diễn &amp; Căn chỉnh</span><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Nhập môn</p><ul class="nav-list"><li><a href="bieudien-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="bieudien-ch01.html" class="is-active" aria-current="page"><span class="nav-num">1</span><span class="nav-label">Bản đồ: bốn câu hỏi</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Biểu diễn và embedding</p><ul class="nav-list"><li><a href="bieudien-ch02.html"><span class="nav-num">2</span><span class="nav-label">Word2Vec và thứ nó thực sự phân rã</span></a></li><li><a href="bieudien-ch03.html"><span class="nav-num">3</span><span class="nav-label">Hình học của không gian embedding</span></a></li><li><a href="bieudien-ch04.html"><span class="nav-num">4</span><span class="nav-label">Embedding hiện đại và tìm kiếm vector</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Học chuyển giao</p><ul class="nav-list"><li><a href="bieudien-ch05.html"><span class="nav-num">5</span><span class="nav-label">Vì sao tiền huấn luyện lại hiệu quả</span></a></li><li><a href="bieudien-ch06.html"><span class="nav-num">6</span><span class="nav-label">Tinh chỉnh: đóng băng tới đâu</span></a></li><li><a href="bieudien-ch07.html"><span class="nav-num">7</span><span class="nav-label">LoRA và tinh chỉnh tiết kiệm tham số</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Mô hình sinh</p><ul class="nav-list"><li><a href="bieudien-ch08.html"><span class="nav-num">8</span><span class="nav-label">Bài toán sinh, và ba cách trả lời</span></a></li><li><a href="bieudien-ch09.html"><span class="nav-num">9</span><span class="nav-label">Tự mã hoá biến phân</span></a></li><li><a href="bieudien-ch10.html"><span class="nav-num">10</span><span class="nav-label">Mạng đối sinh</span></a></li><li><a href="bieudien-ch11.html"><span class="nav-num">11</span><span class="nav-label">Mô hình khuếch tán</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>Học tăng cường và căn chỉnh</p><ul class="nav-list"><li><a href="bieudien-ch12.html"><span class="nav-num">12</span><span class="nav-label">Nhập môn học tăng cường</span></a></li><li><a href="bieudien-ch13.html"><span class="nav-num">13</span><span class="nav-label">Gradient chính sách</span></a></li><li><a href="bieudien-ch14.html"><span class="nav-num">14</span><span class="nav-label">RLHF: học từ so sánh của con người</span></a></li><li><a href="bieudien-ch15.html"><span class="nav-num">15</span><span class="nav-label">DPO: bỏ hẳn mô hình thưởng</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="bieudien-bai-tap.html"><span class="nav-num">16</span><span class="nav-label">Bài tập</span></a></li><li><a href="bieudien-ch17.html"><span class="nav-num">17</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="bieudien-ch18.html"><span class="nav-num">18</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="bieudien-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="bieudien-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="bieudien-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="bieudien-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="bieudien-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon">↗</span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 1</span><span class="kicker-time">6 phút đọc</span></div><h2 id="sec-1" class="heading">1. Bản đồ: bốn câu hỏi<a class="anchor" href="#sec-1" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Bốn nhóm kỹ thuật tưởng rời rạc, xếp thành một hàng khi nhìn theo đường đi của một trợ lý ngôn ngữ từ lúc chưa có gì tới lúc biết nghe lời.</p>
+<h3 id="sec-1-1" class="heading">1.1. Vì sao chương này tồn tại<a class="anchor" href="#sec-1-1" aria-label="Liên kết tới mục này">#</a></h3>
+<p>Bốn nhóm kỹ thuật trong tài liệu này — embedding, học chuyển giao, mô hình sinh, căn chỉnh — thoạt nhìn không liên quan gì tới nhau. Word2Vec ra đời năm 2013 để làm vector cho từ; mô hình khuếch tán ra đời để vẽ tranh; RLHF ra đời để dạy chatbot lễ phép. Ba mục đích, ba cộng đồng, ba dòng bài báo.</p>
+<p>Nhưng nếu nhìn theo <strong>đường đi của một mô hình ngôn ngữ hiện đại từ lúc chưa có gì tới lúc thành trợ lý</strong>, chúng xếp thành một hàng rất gọn, và mỗi cái giải quyết đúng vấn đề mà cái trước để lại.</p>
+<figure class="figure" id="hinh-1">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 1"><img src="figs/bd01_bando.png" alt="Hình 1" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 1.</strong> Bốn câu hỏi, và bốn nhóm kỹ thuật trả lời chúng. Đọc từ trái sang phải là đọc theo thứ tự một trợ lý ra đời.</figcaption>
+</figure>
+<h3 id="sec-1-2" class="heading">1.2. Bốn câu hỏi, và vì sao chúng phải theo thứ tự đó<a class="anchor" href="#sec-1-2" aria-label="Liên kết tới mục này">#</a></h3>
+<p><strong>Câu hỏi thứ nhất: làm sao biến dữ liệu thô thành số?</strong></p>
+<p>Đây là câu hỏi đứng trước mọi thứ khác, và nó khó hơn vẻ ngoài. Máy tính chỉ làm việc với số, nên chữ &quot;mèo&quot; phải thành một vector nào đó. Cách ngây thơ nhất là gán cho mỗi từ một chỉ số: mèo = 7, chó = 8, tủ lạnh = 9. Nhưng làm thế là ngầm khẳng định rằng mèo gần chó hơn là gần tủ lạnh <strong>về mặt số học</strong>, mà thật ra ta chỉ tình cờ đánh số như vậy. Nếu đánh số theo thứ tự chữ cái thì &quot;mèo&quot; và &quot;mền&quot; lại cạnh nhau.</p>
+<p>Cách thứ hai là one-hot: mỗi từ là một vector toàn số 0 với đúng một số 1. Cách này không bịa ra quan hệ giả nào cả — nhưng nó cũng không có quan hệ <strong>thật</strong> nào. Mọi cặp từ đều cách nhau đúng <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msqrt><mn>2</mn></msqrt></mrow><annotation encoding="application/x-tex">\sqrt2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.04em;vertical-align:-0.1328em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9072em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord" style="padding-left:0.833em;">2</span></span><span style="top:-2.8672em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail" style="min-width:0.853em;height:1.08em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="1.08em" viewBox="0 0 400000 1080" preserveAspectRatio="xMinYMin slice"><path d="M95,702
+c-2.7,0,-7.17,-2.7,-13.5,-8c-5.8,-5.3,-9.5,-10,-9.5,-14
+c0,-2,0.3,-3.3,1,-4c1.3,-2.7,23.83,-20.7,67.5,-54
+c44.2,-33.3,65.8,-50.3,66.5,-51c1.3,-1.3,3,-2,5,-2c4.7,0,8.7,3.3,12,10
+s173,378,173,378c0.7,0,35.3,-71,104,-213c68.7,-142,137.5,-285,206.5,-429
+c69,-144,104.5,-217.7,106.5,-221
+l0 -0
+c5.3,-9.3,12,-14,20,-14
+H400000v40H845.2724
+s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
+c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
+M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1328em;"><span></span></span></span></span></span></span></span></span>, nên mèo cách chó đúng bằng mèo cách tủ lạnh. Ta đã đi từ &quot;bịa quan hệ&quot; sang &quot;không có quan hệ gì&quot;, và cả hai đều vô dụng.</p>
+<p>Điều ta thực sự muốn là một không gian mà <strong>khoảng cách có nghĩa</strong>. <a href="bieudien-ch02.html#sec-2" class="xref">Chương 2</a> và <a href="bieudien-ch03.html#sec-3" class="xref">3</a> nói về cách làm ra không gian ấy, và điều bất ngờ là nó nổi lên chỉ từ thống kê đồng hiện, không cần ai dạy.</p>
+<p><strong>Câu hỏi thứ hai: đã có mô hình lớn rồi, làm sao dùng lại?</strong></p>
+<p>Huấn luyện một mô hình ngôn ngữ từ đầu tốn hàng triệu đô la và hàng nghìn tỉ token. Gần như không ai làm việc đó. Cái mọi người làm là lấy một mô hình đã có rồi sửa nó cho việc của mình — và câu hỏi là sửa tới đâu, sửa thế nào, với bao nhiêu dữ liệu.</p>
+<p><a href="bieudien-ch05.html#sec-5" class="xref">Chương 5</a>, <a href="bieudien-ch06.html#sec-6" class="xref">6</a>, <a href="bieudien-ch07.html#sec-7" class="xref">7</a> trả lời. Có một kết quả đo được ở <a href="bieudien-ch06.html#sec-6-3" class="xref">Mục 6.3</a> mà tôi thấy đáng nhớ: với <strong>rất ít nhãn</strong>, đóng băng toàn bộ mô hình và chỉ học một lớp tuyến tính lại <strong>thắng</strong> việc tinh chỉnh toàn phần. Nhưng khi dữ liệu nhiều lên thì thứ tự đảo ngược hẳn. Biết ngưỡng đảo ngược ấy ở đâu là biết chọn đúng cách làm.</p>
+<p><strong>Câu hỏi thứ ba: làm sao sinh ra cái mới?</strong></p>
+<p>Phân loại thì dễ hiểu: cho ảnh, đoán nhãn. Sinh thì ngược lại và khó hơn nhiều: <strong>cho nhiễu ngẫu nhiên, sinh ra một bức ảnh chưa từng tồn tại nhưng trông như thật</strong>. <a href="bieudien-ch08.html#sec-8" class="xref">Chương 8</a> tới 11 trình bày ba cách trả lời — VAE, GAN, khuếch tán — và điều đáng nói là cả ba đều biến nhiễu Gauss thành mẫu, chỉ khác nhau ở <strong>huấn luyện bằng gì</strong>.</p>
+<p><strong>Câu hỏi thứ tư: làm sao bắt nó nói thứ ta muốn?</strong></p>
+<p>Một mô hình đã tiền huấn luyện biết ngôn ngữ nhưng không biết <strong>nghe lời</strong>. Hỏi nó &quot;thủ đô Pháp là gì?&quot; thì nó có thể trả lời đúng, mà cũng có thể viết tiếp thành một bài kiểm tra địa lý gồm mười câu hỏi tương tự — vì trong dữ liệu huấn luyện, một câu hỏi thường đi kèm các câu hỏi khác chứ không phải câu trả lời.</p>
+<p><a href="bieudien-ch12.html#sec-12" class="xref">Chương 12</a> tới 15 nói về cách sửa điều đó. Và ở đây có một ý sâu đáng dừng lại: giai đoạn căn chỉnh là chỗ duy nhất mô hình học từ <strong>so sánh</strong> thay vì từ ví dụ mẫu. Vì sao điều đó quan trọng? Vì <strong>nhận ra câu nào hay hơn thì dễ hơn nhiều so với tự viết ra câu hay nhất</strong>. Một người bình thường không viết nổi một bài thơ hay, nhưng vẫn chỉ ra được bài nào hay hơn bài nào. Học từ so sánh cho phép mô hình vượt qua chất lượng của chính người dán nhãn — điều mà học bắt chước không bao giờ làm được.</p>
+<h3 id="sec-1-3" class="heading">1.3. Mối nối với các giáo trình khác<a class="anchor" href="#sec-1-3" aria-label="Liên kết tới mục này">#</a></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Chỗ này cần</th>
+<th>Xem ở đâu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Softmax, entropy chéo, hợp lý cực đại</td>
+<td><a href="nentang-ch06.html">Chương 6</a> và <a href="nentang-ch10.html">Chương 10 của <em>Nền tảng</em></a></td>
+</tr>
+<tr>
+<td>Phân rã SVD và xấp xỉ hạng thấp</td>
+<td><a href="nentang-ch14.html">Chương 14 của <em>Nền tảng</em></a></td>
+</tr>
+<tr>
+<td>Tối ưu có ràng buộc, nhân tử Lagrange</td>
+<td><a href="nentang-ch12.html">Chương 12 của <em>Nền tảng</em></a></td>
+</tr>
+<tr>
+<td>Kiến trúc Transformer, attention</td>
+<td><a href="models-ch09.html">Chương 9 của <em>Mô hình &amp; Kiến trúc</em></a></td>
+</tr>
+<tr>
+<td>Đếm tham số, bộ nhớ huấn luyện</td>
+<td><a href="models-ch12.html">Chương 12 của <em>Mô hình &amp; Kiến trúc</em></a></td>
+</tr>
+<tr>
+<td>Vận hành mô hình ngôn ngữ trong sản xuất</td>
+<td><a href="mlops-ch13.html">Chương 13 của <em>MLOps</em></a></td>
+</tr>
+</tbody>
+</table></div>
+<p>Đặc biệt, <a href="bieudien-ch07.html#sec-7" class="xref">Chương 7</a> về LoRA dùng thẳng kết quả đếm tham số ở <a href="models-ch12.html">Chương 12 của <em>Mô hình &amp; Kiến trúc</em></a>, và <a href="bieudien-ch15.html#sec-15" class="xref">Chương 15</a> về DPO dùng lại cách suy luận về tối ưu có ràng buộc ở <a href="nentang-ch12.html">Chương 12 của <em>Nền tảng</em></a>. Nếu hai chỗ đó còn mờ thì nên quay lại trước.</p>
+<hr>
+</article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="bieudien-ch00.html"><span class="pager-dir">← Trước</span><span class="pager-title">Kiến thức nền và quy ước</span></a><a class="pager-link pager-next" href="bieudien-ch02.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Word2Vec và thứ nó thực sự phân rã</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-1-1">1.1. Vì sao chương này tồn tại</a></li><li class="toc-l3"><a href="#sec-1-2">1.2. Bốn câu hỏi, và vì sao chúng phải theo thứ tự đó</a></li><li class="toc-l3"><a href="#sec-1-3">1.3. Mối nối với các giáo trình khác</a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+<script src="assets/router.js" defer></script>
+
+</body>
+</html>

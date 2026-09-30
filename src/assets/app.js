@@ -36,14 +36,15 @@
   if (scrim) scrim.addEventListener('click', closeSidebar);
 
   // Giữ mục đang đọc trong tầm nhìn của thanh bên.
-  var activeNav = $('.nav-list a.is-active');
-  if (activeNav && sidebar) {
-    var r = activeNav.getBoundingClientRect();
-    var sr = sidebar.getBoundingClientRect();
-    if (r.top < sr.top || r.bottom > sr.bottom) {
-      activeNav.scrollIntoView({ block: 'center' });
-    }
+  function cuonToiMucDangDoc() {
+    var cur = $('.nav-list a.is-active');
+    var sb = $('#sidebar');
+    if (!cur || !sb) return;
+    var r = cur.getBoundingClientRect();
+    var sr = sb.getBoundingClientRect();
+    if (r.top < sr.top || r.bottom > sr.bottom) cur.scrollIntoView({ block: 'center' });
   }
+  cuonToiMucDangDoc();
 
   /* ------------------------------------------------------ sao chép mã */
   document.addEventListener('click', function (e) {
@@ -104,10 +105,16 @@
 
   /* ------------------------------------------ thanh tiến độ + mục lục */
   var progress = $('#readProgress');
-  var tocLinks = $$('.toc-list a');
-  var headings = tocLinks
-    .map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); })
-    .filter(Boolean);
+  var tocLinks = [];
+  var headings = [];
+
+  function docLaiMucLuc() {
+    tocLinks = $$('.toc-list a');
+    headings = tocLinks
+      .map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); })
+      .filter(Boolean);
+  }
+  docLaiMucLuc();
 
   var ticking = false;
   function onScroll() {
@@ -338,5 +345,16 @@
   });
 
   /* Đóng thanh bên khi bấm vào một mục điều hướng trên màn hình hẹp. */
-  $$('.nav-list a').forEach(function (a) { a.addEventListener('click', closeSidebar); });
+  // Uỷ quyền cho document thay vì gắn vào từng thẻ: sau khi router thay thanh
+  // bên thì các thẻ cũ biến mất, mà handler uỷ quyền thì vẫn sống.
+  document.addEventListener('click', function (e) {
+    if (e.target.closest && e.target.closest('.nav-list a')) closeSidebar();
+  });
+
+  /* Router gọi lại hàm này mỗi khi thay nội dung trang. */
+  window.QZ_BIND = function () {
+    docLaiMucLuc();
+    cuonToiMucDangDoc();
+    onScroll();
+  };
 })();

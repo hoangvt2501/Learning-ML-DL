@@ -1,0 +1,47 @@
+[
+  { "num": "0", "file": "bieudien-ch00.html", "label": "Kiến thức nền và quy ước", "part": "Nhập môn",
+    "summary": "Bảng ký hiệu, và một lưu ý về chữ β — nó xuất hiện ở hai chương với hai nghĩa hoàn toàn khác nhau." },
+  { "num": "1", "file": "bieudien-ch01.html", "label": "Bản đồ: bốn câu hỏi", "part": "Nhập môn",
+    "summary": "Bốn nhóm kỹ thuật tưởng rời rạc, xếp thành một hàng khi nhìn theo đường đi của một trợ lý ngôn ngữ từ lúc chưa có gì tới lúc biết nghe lời." },
+
+  { "num": "2", "file": "bieudien-ch02.html", "label": "Word2Vec và thứ nó thực sự phân rã", "part": "Biểu diễn và embedding",
+    "summary": "Từ đếm đồng hiện sang PMI sang embedding. Và kết quả của Levy–Goldberg: skip-gram ngầm phân rã ma trận PMI, kiểm chứng được với tương quan 0,9995." },
+  { "num": "3", "file": "bieudien-ch03.html", "label": "Hình học của không gian embedding", "part": "Biểu diễn và embedding",
+    "summary": "Vì sao cosine hay đánh lừa: 900 vector ngẫu nhiên độc lập vẫn cho cosine trung bình 0,87. Và vì sao chiều thứ 37 thường không mang nghĩa gì." },
+  { "num": "4", "file": "bieudien-ch04.html", "label": "Embedding hiện đại và tìm kiếm vector", "part": "Biểu diễn và embedding",
+    "summary": "Embedding theo ngữ cảnh, mục tiêu tương phản, và ba họ chỉ mục xấp xỉ — kèm con số dung lượng quyết định phần lớn kiến trúc hệ thống." },
+
+  { "num": "5", "file": "bieudien-ch05.html", "label": "Vì sao tiền huấn luyện lại hiệu quả", "part": "Học chuyển giao",
+    "summary": "Đoán từ tiếp theo là một nhiệm vụ đại diện cực rộng: để làm đúng nó, mô hình buộc phải học sự thật về thế giới, ngữ pháp, số học và cấu trúc mã." },
+  { "num": "6", "file": "bieudien-ch06.html", "label": "Tinh chỉnh: đóng băng tới đâu", "part": "Học chuyển giao",
+    "summary": "Ngưỡng đo được giữa đóng băng và tinh chỉnh, và hiện tượng trần chặn — cột đóng băng phẳng ra từ 500 mẫu dù thêm bao nhiêu dữ liệu nữa." },
+  { "num": "7", "file": "bieudien-ch07.html", "label": "LoRA và tinh chỉnh tiết kiệm tham số", "part": "Học chuyển giao",
+    "summary": "Trạng thái Adam 32 MiB so với 48,2 GiB — chênh 1 540 lần. Và món lợi vận hành hay bị quên: 50 khách hàng cần 13,8 GB thay vì 650 GB." },
+
+  { "num": "8", "file": "bieudien-ch08.html", "label": "Bài toán sinh, và ba cách trả lời", "part": "Mô hình sinh",
+    "summary": "Hằng số chuẩn hoá là thứ chặn đường dùng thẳng hợp lý cực đại, và ba họ mô hình sinh là ba cách né nó." },
+  { "num": "9", "file": "bieudien-ch09.html", "label": "Tự mã hoá biến phân", "part": "Mô hình sinh",
+    "summary": "β không chỉ cân hai số hạng — nó quyết định bao nhiêu chiều ẩn còn mang thông tin. Ở β = 1, mô hình tự tìm ra đúng số yếu tố thật." },
+  { "num": "10", "file": "bieudien-ch10.html", "label": "Mạng đối sinh", "part": "Mô hình sinh",
+    "summary": "Bài toán minimax gốc phủ 0/8 chế độ, bản không bão hoà phủ 8/8 — hai hàm cùng điểm tối ưu nhưng gradient khác hẳn. Và một chỗ số liệu bác bỏ điều tôi định viết." },
+  { "num": "11", "file": "bieudien-ch11.html", "label": "Mô hình khuếch tán", "part": "Mô hình sinh",
+    "summary": "Dạng đóng của quá trình thuận cho phép nhảy thẳng tới bước bất kỳ; huấn luyện chỉ là bình phương sai lệch, và đó mới là lý do nó thắng GAN." },
+
+  { "num": "12", "file": "bieudien-ch12.html", "label": "Nhập môn học tăng cường", "part": "Học tăng cường và căn chỉnh",
+    "summary": "Ba cấu hình lưới cho thấy khám phá không chỉ đến từ ε: cách khởi tạo hàm giá trị cũng là một cơ chế khám phá, đôi khi mạnh hơn." },
+  { "num": "13", "file": "bieudien-ch13.html", "label": "Gradient chính sách", "part": "Học tăng cường và căn chỉnh",
+    "summary": "Thủ thuật log, và vì sao trừ một đường nền cắt độ lệch chuẩn 2,3 lần mà không làm lệch ước lượng chút nào." },
+  { "num": "14", "file": "bieudien-ch14.html", "label": "RLHF: học từ so sánh của con người", "part": "Học tăng cường và căn chỉnh",
+    "summary": "Vì sao học từ so sánh phá được trần của học bắt chước, và dạng đóng của bài toán có ràng buộc KL — kiểm chứng tới 10⁻⁹." },
+  { "num": "15", "file": "bieudien-ch15.html", "label": "DPO: bỏ hẳn mô hình thưởng", "part": "Học tăng cường và căn chỉnh",
+    "summary": "Mọi chính sách đều ngầm định nghĩa một hàm thưởng. Chính sách DPO trùng chính sách RLHF hai bước tới 4,2×10⁻⁸ — không phải xấp xỉ." },
+
+  { "num": "16", "file": "bieudien-bai-tap.html", "label": "Bài tập", "kind": "exercises",
+    "summary": "Mười bài tập kèm lời giải chi tiết, và ngân hàng trắc nghiệm theo từng chương." },
+  { "num": "17", "file": "bieudien-ch17.html", "label": "Ôn phỏng vấn",
+    "summary": "Câu hỏi theo bốn nhóm kèm con số để dẫn ra, và mười hai câu trả lời tự tố cáo người nói chỉ học thuộc." },
+  { "num": "18", "file": "bieudien-ch18.html", "label": "Tài liệu tham khảo",
+    "summary": "Ba mươi sáu nguồn, mỗi nguồn ghi rõ nó là nguồn của kết quả nào được dùng trong tài liệu." },
+  { "num": "PL", "file": "bieudien-phu-luc.html", "label": "Phụ lục: chạy lại thí nghiệm",
+    "summary": "Lệnh tái lập, bảng các đẳng thức được kiểm chứng, và ba chỗ số liệu nói ngược lại điều tôi định viết." }
+]

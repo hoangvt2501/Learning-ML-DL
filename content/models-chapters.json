@@ -3,79 +3,92 @@
     "num": "0",
     "file": "models-ch00.html",
     "label": "Kiến thức nền và quy ước",
-    "summary": "Bảng ký hiệu dùng xuyên suốt và quy ước dịch thuật — trong đó chỗ dễ nhầm nhất là hai nghĩa khác nhau của chữ bias."
+    "summary": "Bảng ký hiệu dùng xuyên suốt và quy ước dịch thuật — trong đó chỗ dễ nhầm nhất là hai nghĩa khác nhau của chữ bias.",
+    "part": "Từ tuyến tính tới mạng sâu"
   },
   {
     "num": "1",
     "file": "models-ch01.html",
     "label": "Bản đồ các họ mô hình",
-    "summary": "Bốn câu hỏi thiết kế mà mọi kiến trúc đều phải trả lời, và bốn họ mô hình đọc như bốn bộ câu trả lời khác nhau cho cùng bốn câu hỏi ấy."
+    "summary": "Bốn câu hỏi thiết kế mà mọi kiến trúc đều phải trả lời, và bốn họ mô hình đọc như bốn bộ câu trả lời khác nhau cho cùng bốn câu hỏi ấy.",
+    "part": "Từ tuyến tính tới mạng sâu"
   },
   {
     "num": "2",
     "file": "models-ch02.html",
     "label": "Đánh đổi thiên lệch – phương sai",
-    "summary": "Phân rã sai số thành thiên lệch², phương sai và nhiễu — đo thật trên 400 tập huấn luyện — rồi dùng nó để phân biệt \"cần mô hình mạnh hơn\" với \"cần nhiều dữ liệu hơn\"."
+    "summary": "Phân rã sai số thành thiên lệch², phương sai và nhiễu — đo thật trên 400 tập huấn luyện — rồi dùng nó để phân biệt \"cần mô hình mạnh hơn\" với \"cần nhiều dữ liệu hơn\".",
+    "part": "Từ tuyến tính tới mạng sâu"
   },
   {
     "num": "3",
     "file": "models-ch03.html",
     "label": "Cây quyết định và học tập hợp",
-    "summary": "Cây chia không gian bằng các nhát cắt trực giao; bagging cắt phương sai, boosting cắt thiên lệch. Có số đo cho thấy đúng mỗi cách cắt vào đâu."
+    "summary": "Cây chia không gian bằng các nhát cắt trực giao; bagging cắt phương sai, boosting cắt thiên lệch. Có số đo cho thấy đúng mỗi cách cắt vào đâu.",
+    "part": "Từ tuyến tính tới mạng sâu"
   },
   {
     "num": "4",
     "file": "models-ch04.html",
     "label": "Mạng nơ-ron nhiều lớp",
-    "summary": "Vì sao hợp các phép biến đổi tuyến tính không được gì, các hàm kích hoạt thay nhau vì lý do gì, và một chứng minh kiến tạo cho câu \"độ sâu mua được sự gọn gàng\"."
+    "summary": "Vì sao hợp các phép biến đổi tuyến tính không được gì, các hàm kích hoạt thay nhau vì lý do gì, và một chứng minh kiến tạo cho câu \"độ sâu mua được sự gọn gàng\".",
+    "part": "Từ tuyến tính tới mạng sâu"
   },
   {
     "num": "5",
     "file": "models-ch05.html",
     "label": "Lan truyền ngược và tối ưu hoá",
-    "summary": "Lan truyền ngược là quy tắc chuỗi nhân từ phải sang trái, và lý do của thứ tự ấy là chi phí. Kèm SGD, momentum, Adam, AdamW và lý do có bước hiệu chỉnh thiên lệch."
+    "summary": "Lan truyền ngược là quy tắc chuỗi nhân từ phải sang trái, và lý do của thứ tự ấy là chi phí. Kèm SGD, momentum, Adam, AdamW và lý do có bước hiệu chỉnh thiên lệch.",
+    "part": "Huấn luyện mạng sâu"
   },
   {
     "num": "6",
     "file": "models-ch06.html",
     "label": "Khởi tạo, chuẩn hoá và kết nối tắt",
-    "summary": "Ba cơ chế cùng chữa một bệnh: tín hiệu co lại hoặc phình ra qua nhiều lớp. Đo trên mạng 40 lớp cho thấy chúng cộng dồn, và kết nối tắt một mình thì làm bùng nổ."
+    "summary": "Ba cơ chế cùng chữa một bệnh: tín hiệu co lại hoặc phình ra qua nhiều lớp. Đo trên mạng 40 lớp cho thấy chúng cộng dồn, và kết nối tắt một mình thì làm bùng nổ.",
+    "part": "Huấn luyện mạng sâu"
   },
   {
     "num": "7",
     "file": "models-ch07.html",
     "label": "Mạng tích chập",
-    "summary": "Ba giả thiết quy nạp của tích chập và ba món lợi tương ứng; cách tính trường tiếp nhận; vì sao tích chập tách được theo chiều sâu lại rẻ tới vậy."
+    "summary": "Ba giả thiết quy nạp của tích chập và ba món lợi tương ứng; cách tính trường tiếp nhận; vì sao tích chập tách được theo chiều sâu lại rẻ tới vậy.",
+    "part": "Thị giác và chuỗi"
   },
   {
     "num": "8",
     "file": "models-ch08.html",
     "label": "Mạng hồi quy và giới hạn của nó",
-    "summary": "Gradient của RNN là một tích các Jacobi, nên nó tiêu biến hoặc bùng nổ. LSTM chữa được phần nào, nhưng giới hạn thật sự là tính tuần tự — và đó là điều Transformer phá bỏ."
+    "summary": "Gradient của RNN là một tích các Jacobi, nên nó tiêu biến hoặc bùng nổ. LSTM chữa được phần nào, nhưng giới hạn thật sự là tính tuần tự — và đó là điều Transformer phá bỏ.",
+    "part": "Thị giác và chuỗi"
   },
   {
     "num": "9",
     "file": "models-ch09.html",
     "label": "Attention và Transformer",
-    "summary": "Attention như một phép tra cứu từ điển lấy đạo hàm được, phép chia √dₖ được suy ra và đo bằng entropy, nhiều đầu mua được gì, và bên trong một khối có những gì."
+    "summary": "Attention như một phép tra cứu từ điển lấy đạo hàm được, phép chia √dₖ được suy ra và đo bằng entropy, nhiều đầu mua được gì, và bên trong một khối có những gì.",
+    "part": "Transformer và mô hình ngôn ngữ"
   },
   {
     "num": "10",
     "file": "models-ch10.html",
     "label": "Transformer hiện đại",
-    "summary": "Năm chi tiết đã đổi từ 2017 tới nay: pre-LN, RMSNorm, RoPE, GQA và SwiGLU — mỗi cái kèm vấn đề nó sinh ra để chữa và cái giá phải trả."
+    "summary": "Năm chi tiết đã đổi từ 2017 tới nay: pre-LN, RMSNorm, RoPE, GQA và SwiGLU — mỗi cái kèm vấn đề nó sinh ra để chữa và cái giá phải trả.",
+    "part": "Transformer và mô hình ngôn ngữ"
   },
   {
     "num": "11",
     "file": "models-ch11.html",
     "label": "Sinh văn bản: các chiến lược giải mã",
-    "summary": "Greedy, beam, nhiệt độ, top-k và top-p nhào nặn cùng một phân phối theo những cách khác nhau — đo bằng entropy và bằng số token còn sống sót."
+    "summary": "Greedy, beam, nhiệt độ, top-k và top-p nhào nặn cùng một phân phối theo những cách khác nhau — đo bằng entropy và bằng số token còn sống sót.",
+    "part": "Transformer và mô hình ngôn ngữ"
   },
   {
     "num": "12",
     "file": "models-ch12.html",
     "label": "Đếm tham số, FLOP và bộ nhớ",
-    "summary": "Các công thức 12Ld², C ≈ 6ND và ngưỡng T > 6d, kiểm chứng khớp chính xác với số tham số công bố của GPT-2 và Llama-2 cùng ngân sách giờ-GPU của Llama-2 7B."
+    "summary": "Các công thức 12Ld², C ≈ 6ND và ngưỡng T > 6d, kiểm chứng khớp chính xác với số tham số công bố của GPT-2 và Llama-2 cùng ngân sách giờ-GPU của Llama-2 7B.",
+    "part": "Transformer và mô hình ngôn ngữ"
   },
   {
     "num": "13",

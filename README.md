@@ -1,6 +1,6 @@
-# Bốn giáo trình tự học, đọc như một mạch
+# Năm giáo trình tự học, đọc như một mạch
 
-Một site tĩnh chứa bốn giáo trình viết theo cùng một lối — *động cơ → định nghĩa → suy luận →
+Một site tĩnh chứa năm giáo trình viết theo cùng một lối — *động cơ → định nghĩa → suy luận →
 ví dụ số → thí nghiệm kiểm chứng* — kèm bài tập có lời giải, ngân hàng trắc nghiệm và công cụ
 tương tác.
 
@@ -14,21 +14,48 @@ npm install     # chỉ cần cho việc dựng lại site
 npm run dev     # dựng lại rồi phục vụ tại http://localhost:4173
 ```
 
-## Bốn giáo trình, một mạch
+## Năm giáo trình, hai mươi ba phần, một mạch
 
-Bốn giáo trình được viết để **đọc nối nhau**, và trang `lo-trinh.html` xếp toàn bộ **58 bài**
-của chúng thành một dãy đánh số liên tục:
+Trang `lo-trinh.html` xếp toàn bộ các bài thành một dãy đánh số liên tục, chia thành **23 phần
+nhỏ** thay vì vài khối lớn:
 
-| Phần | Giáo trình | Trả lời câu hỏi |
+| Giáo trình | Trả lời câu hỏi | Các phần |
 | --- | --- | --- |
-| I | **Nền tảng** | học là gì, và tối ưu thế nào |
-| II | **Mô hình & Kiến trúc** | thay mô hình tuyến tính bằng mạng sâu thì được gì |
-| III | **Quantization** | làm mô hình chạy được trên phần cứng thật |
-| IV | **MLOps** | giữ cho nó sống trong sản xuất |
+| **Nền tảng** | học là gì, và tối ưu thế nào | nhập môn và toán nền · mô hình tuyến tính · phân loại và phạt chuẩn · tối ưu lồi và SVM · học không giám sát |
+| **Mô hình & Kiến trúc** | thay mô hình tuyến tính bằng mạng sâu thì được gì | từ tuyến tính tới mạng sâu · huấn luyện mạng sâu · thị giác và chuỗi · Transformer |
+| **Biểu diễn & Căn chỉnh** | một trợ lý ngôn ngữ ra đời thế nào | embedding · học chuyển giao · mô hình sinh · học tăng cường và căn chỉnh |
+| **Quantization** | làm mô hình chạy được trên phần cứng thật | biểu diễn số · suy luận số nguyên · quy trình · cho LLM |
+| **MLOps** | giữ cho nó sống trong sản xuất | vì sao khó · dữ liệu và kiểm thử · phục vụ và ra mắt · giám sát · LLMOps |
 
-Mỗi phần tự đứng vững được; thứ tự trên là thứ tự **ít phải quay lại nhất**. Tên tệp của từng
-giáo trình giữ nguyên tiền tố riêng, nên thêm phần mới không làm hỏng liên kết cũ.
+Mỗi phần tự đứng vững được; thứ tự trên là thứ tự **ít phải quay lại nhất**. Thanh bên của mỗi
+giáo trình cũng chia theo phần, nên không còn một danh sách chương dài phẳng lì.
 
+**Điều hướng không tải lại trang.** Bấm sang chương khác chỉ thay phần nội dung chứ không tải
+lại cả trang, và trang đích được nạp trước ngay khi rê chuột. Site vẫn là HTML tĩnh thuần —
+mỗi trang vẫn tồn tại đầy đủ và mở trực tiếp được; đây chỉ là một lớp tăng tốc đặt lên trên,
+và nó tự tắt khi mở bằng `file://` hoặc khi trình duyệt chặn.
+
+
+### 3 · Biểu diễn, Sinh và Căn chỉnh: cách một trợ lý ngôn ngữ ra đời
+
+Mảng mà bốn giáo trình kia bỏ trống. 20 chương, **14 hình sinh bằng mã**, 10 bài tập có lời
+giải, 48 câu trắc nghiệm, và một chương ôn phỏng vấn. Nội dung: embedding và Word2Vec, học
+chuyển giao và LoRA, VAE/GAN/khuếch tán, học tăng cường và RLHF/DPO.
+
+Hai kết quả là **kiểm chứng đẳng thức** chứ không phải mô phỏng:
+
+| Đẳng thức | Sai số đo được |
+| --- | --- |
+| Nghiệm RLHF có ràng buộc KL khớp dạng đóng $\pi^{*}\propto\pi_{\mathrm{ref}}e^{r/\beta}$ | $4\times10^{-9}$ |
+| Chính sách DPO trùng chính sách RLHF hai bước | $4{,}16\times10^{-8}$ |
+| Skip-gram hạng đầy đủ hội tụ về ma trận PMI (Levy–Goldberg) | tương quan 0,9995 |
+| Dạng đóng của quá trình khuếch tán | khớp mô men trên 200 000 quỹ đạo |
+
+Và **ba chỗ số liệu nói ngược lại điều tôi định viết.** Tôi giữ nguyên số và viết lại phần chữ:
+thí nghiệm GAN không cho thấy sụp chế độ (nó cho thấy bài toán minimax gốc thất bại hoàn toàn
+vì gradient triệt tiêu — phủ 0/8 chế độ); thí nghiệm Q-learning cho thấy $\varepsilon = 0$ vẫn
+đạt 100% nhờ khởi tạo lạc quan; và bảng quét số chiều embedding không phải một đường cong đánh
+đổi đẹp. Ba chỗ ấy được nói thẳng trong bài, vì đó là chỗ học được nhiều nhất.
 
 ### 1 · Nền tảng Machine Learning: từ đại số tuyến tính tới SVM
 
@@ -53,7 +80,7 @@ thức**, phải khớp tới sai số máy:
 Bốn dòng cuối không đạt sai số máy vì bị giới hạn bởi dung sai của bộ giải (libsvm, BFGS),
 và tài liệu in ra con số thật thay vì làm tròn cho đẹp.
 
-### 2 · Quantization trong Deep Learning
+### 4 · Quantization trong Deep Learning
 
 Từ công thức $S$ và $Z$ cho tới GPTQ, NF4 và KV cache. 17 chương, **17 hình sinh bằng mã**,
 9 bài tập có lời giải, 48 câu trắc nghiệm, 5 công cụ tương tác.
@@ -62,7 +89,7 @@ Nguyên văn giáo trình do tác giả cung cấp và **được giữ nguyên*
 mức chứng minh được đã được bổ sung **ghi chú biên tập** có nhãn rõ ràng, chèn ngay cuối mục
 tương ứng và gom ở trang `ghi-chu.html` — xem mục [Ghi chú biên tập](#ghi-chú-biên-tập).
 
-### 3 · MLOps: đưa mô hình ra sản xuất và giữ cho nó sống
+### 5 · MLOps: đưa mô hình ra sản xuất và giữ cho nó sống
 
 Vì sao mô hình tốt vẫn chết trong sản xuất, và phải dựng những gì quanh nó để nó sống.
 18 chương, **14 hình sinh bằng mã**, 10 bài tập có lời giải, 48 câu trắc nghiệm, 4 công cụ
@@ -81,7 +108,7 @@ Nội dung dựa trên nguồn gốc, và mỗi khẳng định đều ghi rõ n
 
 Phần còn lại là **số liệu đo được trong chính repo này**, sinh bởi `code/mlops/`.
 
-### 4 · Mô hình và kiến trúc: từ cây quyết định tới Transformer hiện đại
+### 2 · Mô hình và kiến trúc: từ cây quyết định tới Transformer hiện đại
 
 Từ đánh đổi thiên lệch–phương sai tới RoPE, GQA và SwiGLU. 17 chương, **14 hình sinh bằng mã**,
 10 bài tập có lời giải, 43 câu trắc nghiệm, và một chương riêng để **ôn phỏng vấn**.
@@ -117,6 +144,11 @@ Phần còn lại là **số liệu đo được trong chính repo này**, sinh 
 | Phân rã ma trận dưới ~20 đánh giá mỗi người còn **tệ hơn đoán bừa**; trên ngưỡng thì RMSE giảm 11 lần | `nentang/experiments.py` (M) |
 | K-means khởi tạo ngẫu nhiên kẹt ở nghiệm tồi **71,5%** số lần; k-means++ hạ xuống 46,5% | `nentang/experiments.py` (L) |
 | Kiểm tra đạo hàm: $\varepsilon$ tối ưu là $u^{1/3}$, và $\varepsilon=10^{-13}$ tệ hơn $10^{-6}$ bảy bậc | `nentang/experiments.py` (C) |
+| LoRA $r=8$ cần **32 MiB** trạng thái Adam so với **48,2 GiB** khi tinh chỉnh toàn phần | `bieudien/experiments.py` (D) |
+| Bài toán GAN minimax gốc phủ **0/8** chế độ; bản không bão hoà phủ **8/8** | `bieudien/experiments.py` (G) |
+| VAE với 6 chiều ẩn: ở $\beta=1$ còn **đúng 2** chiều sống, bằng số yếu tố thật | `bieudien/experiments.py` (F) |
+| 900 vector **ngẫu nhiên độc lập** cho cosine trung bình **0,8724** nếu lệch tâm | `bieudien/experiments.py` (C) |
+| Đóng băng đặc trưng phẳng ra ở 0,645 trong khi tinh chỉnh đạt 0,818 ở 8 000 mẫu | `bieudien/experiments.py` (E) |
 | Cùng mạng 40 lớp, đổi hệ số khởi tạo từ 0,5 sang 2,0 làm gradient đi từ $10^{-18}$ tới $10^{6}$ | `models/experiments.py` (D) |
 | **Kết nối tắt một mình làm bùng nổ** ($2{,}4 	imes 10^{8}$); phải kèm chuẩn hoá mới ổn định (2,22) | `models/experiments.py` (D) |
 | Không chia $\sqrt{d_k}$ thì entropy attention rơi còn **0,118 nat** trên tối đa 4,159 | `models/experiments.py` (E) |
@@ -132,12 +164,13 @@ Phần còn lại là **số liệu đo được trong chính repo này**, sinh 
 | **Phòng thí nghiệm** | Sách 1: máy lượng tử affine, đánh đổi làm tròn – cắt, soi bit số thực, requantization, tính dung lượng. Sách 2: cỡ mẫu A/B có CUPED, hiệu chuẩn ngưỡng PSI, đuôi độ trễ khi toả nhánh, tự chấm ML Test Score. Sách 3 không có công cụ tương tác — phần tính toán của nó nằm ở Chương 12 và các bài tập. |
 | **Thư viện hình** | Toàn bộ hình ở một chỗ, bấm để phóng to, có liên kết về đúng mục đã dùng. |
 | **Từ điển thuật ngữ** | Hơn 60 thuật ngữ mỗi sách, đối chiếu Việt – Anh, lọc tại chỗ. |
-| **Ôn phỏng vấn** | Sách 1, 3 và 4 có chương riêng: khung trả lời, câu hỏi theo nhóm kèm con số để dẫn ra, và bảng những câu trả lời tự tố cáo. |
-| **Lộ trình** | `lo-trinh.html` gom toàn bộ 58 bài của bốn giáo trình thành một dãy đánh số liên tục, kèm sơ đồ mối nối giữa các phần. |
+| **Ôn phỏng vấn** | Bốn trong năm giáo trình có chương riêng: khung trả lời, câu hỏi theo nhóm kèm con số để dẫn ra, và bảng những câu trả lời tự tố cáo. |
+| **Lộ trình** | `lo-trinh.html` gom toàn bộ các bài của năm giáo trình thành một dãy đánh số liên tục, chia 23 phần, kèm sơ đồ mối nối. |
+| **Điều hướng nhanh** | Bấm sang chương khác không tải lại trang; trang đích được nạp trước khi rê chuột. Tự tắt khi mở bằng `file://`. |
 | **Mã nguồn** | Mọi script sinh hình và số liệu, kèm kết quả in ra. Tải về là chạy được. |
 | **Toàn văn** | Cả giáo trình trên một trang, tiện Ctrl+F và in ra giấy. |
 
-Ngoài ra: tìm kiếm toàn văn qua cả bốn giáo trình (bấm `/` hoặc `Ctrl`+`K`, **bỏ dấu vẫn tìm
+Ngoài ra: tìm kiếm toàn văn qua cả năm giáo trình (bấm `/` hoặc `Ctrl`+`K`, **bỏ dấu vẫn tìm
 được**), giao diện sáng/tối, mục lục hai bên bám theo vị trí đọc, và bố cục dùng được trên
 điện thoại.
 

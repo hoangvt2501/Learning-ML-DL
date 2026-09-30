@@ -3,85 +3,99 @@
     "num": "0",
     "file": "mlops-ch00.html",
     "label": "Kiến thức nền và quy ước",
-    "summary": "Bảng ký hiệu và quy ước dịch thuật dùng xuyên suốt tài liệu, cùng phần kiến thức cần có trước khi bắt đầu."
+    "summary": "Bảng ký hiệu và quy ước dịch thuật dùng xuyên suốt tài liệu, cùng phần kiến thức cần có trước khi bắt đầu.",
+    "part": "Vì sao hệ ML khó"
   },
   {
     "num": "1",
     "file": "mlops-ch01.html",
     "label": "Vì sao mô hình tốt vẫn chết",
-    "summary": "Nợ kỹ thuật ẩn của hệ thống ML: nguyên lý CACE, mười ba dạng nợ có tên, và cách đọc cho đúng con số 5% mã học máy."
+    "summary": "Nợ kỹ thuật ẩn của hệ thống ML: nguyên lý CACE, mười ba dạng nợ có tên, và cách đọc cho đúng con số 5% mã học máy.",
+    "part": "Vì sao hệ ML khó"
   },
   {
     "num": "2",
     "file": "mlops-ch02.html",
     "label": "Vòng đời và ba chữ V",
-    "summary": "Vòng đời ML là vòng lặp; ba biến quyết định thành bại Velocity – Validation – Versioning; ba mức tự động hoá và vì sao ML cần thêm chữ CT."
+    "summary": "Vòng đời ML là vòng lặp; ba biến quyết định thành bại Velocity – Validation – Versioning; ba mức tự động hoá và vì sao ML cần thêm chữ CT.",
+    "part": "Vì sao hệ ML khó"
   },
   {
     "num": "3",
     "file": "mlops-ch03.html",
     "label": "Dữ liệu: hợp đồng và phổ lỗi",
-    "summary": "Phổ lỗi cứng → mềm → dịch chuyển và ba cách phản ứng khác nhau; hợp đồng dữ liệu bốn tầng; độ trễ nhãn và phiên bản hoá dữ liệu."
+    "summary": "Phổ lỗi cứng → mềm → dịch chuyển và ba cách phản ứng khác nhau; hợp đồng dữ liệu bốn tầng; độ trễ nhãn và phiên bản hoá dữ liệu.",
+    "part": "Vì sao hệ ML khó"
   },
   {
     "num": "4",
     "file": "mlops-ch04.html",
     "label": "Đặc trưng và tính đúng theo thời điểm",
-    "summary": "Hai nỗi đau sinh ra kho đặc trưng: lệch giữa huấn luyện và phục vụ, và rò rỉ nhãn. Point-in-time correctness giải thích bằng SQL và bằng hình."
+    "summary": "Hai nỗi đau sinh ra kho đặc trưng: lệch giữa huấn luyện và phục vụ, và rò rỉ nhãn. Point-in-time correctness giải thích bằng SQL và bằng hình.",
+    "part": "Dữ liệu và kiểm thử"
   },
   {
     "num": "5",
     "file": "mlops-ch05.html",
     "label": "Thí nghiệm lặp lại được",
-    "summary": "Ba mức lặp lại, sáu thứ phải ghim, ba chỗ hay bị bỏ sót, và sổ đăng ký mô hình tồn tại để làm gì."
+    "summary": "Ba mức lặp lại, sáu thứ phải ghim, ba chỗ hay bị bỏ sót, và sổ đăng ký mô hình tồn tại để làm gì.",
+    "part": "Dữ liệu và kiểm thử"
   },
   {
     "num": "6",
     "file": "mlops-ch06.html",
     "label": "Đánh giá cho sản xuất",
-    "summary": "Vì sao một con số là không đủ: đánh giá theo lát cắt với thí nghiệm đo được, kiểm thử hành vi, và toàn bộ 28 mục của ML Test Score."
+    "summary": "Vì sao một con số là không đủ: đánh giá theo lát cắt với thí nghiệm đo được, kiểm thử hành vi, và toàn bộ 28 mục của ML Test Score.",
+    "part": "Dữ liệu và kiểm thử"
   },
   {
     "num": "7",
     "file": "mlops-ch07.html",
     "label": "Đóng gói và phục vụ",
-    "summary": "Ba chế độ phục vụ, ngân sách độ trễ, và vì sao p99 của một hệ toả nhánh tệ hơn nhiều so với p99 của từng nhánh."
+    "summary": "Ba chế độ phục vụ, ngân sách độ trễ, và vì sao p99 của một hệ toả nhánh tệ hơn nhiều so với p99 của từng nhánh.",
+    "part": "Phục vụ và ra mắt"
   },
   {
     "num": "8",
     "file": "mlops-ch08.html",
     "label": "Chiến lược ra mắt",
-    "summary": "Shadow, canary, blue–green và A/B trả lời bốn câu hỏi khác nhau. Cỡ mẫu A/B tỉ lệ nghịch với bình phương mức cải thiện, và ba cái bẫy thống kê."
+    "summary": "Shadow, canary, blue–green và A/B trả lời bốn câu hỏi khác nhau. Cỡ mẫu A/B tỉ lệ nghịch với bình phương mức cải thiện, và ba cái bẫy thống kê.",
+    "part": "Phục vụ và ra mắt"
   },
   {
     "num": "9",
     "file": "mlops-ch09.html",
     "label": "Dịch chuyển phân phối",
-    "summary": "Ba loại dịch chuyển, loại nào dò được mà không cần nhãn, PSI thực chất là phân kỳ Jeffreys, và vì sao ngưỡng 0,25 không dùng thẳng được."
+    "summary": "Ba loại dịch chuyển, loại nào dò được mà không cần nhãn, PSI thực chất là phân kỳ Jeffreys, và vì sao ngưỡng 0,25 không dùng thẳng được.",
+    "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "10",
     "file": "mlops-ch10.html",
     "label": "Giám sát và cảnh báo",
-    "summary": "Bốn lớp giám sát, độ lệch dự đoán, giới hạn hành động, và cách thiết kế cảnh báo để nó không bị mất niềm tin."
+    "summary": "Bốn lớp giám sát, độ lệch dự đoán, giới hạn hành động, và cách thiết kế cảnh báo để nó không bị mất niềm tin.",
+    "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "11",
     "file": "mlops-ch11.html",
     "label": "Huấn luyện lại",
-    "summary": "Đo giá của việc mô hình cũ đi, bốn loại kích hoạt, huấn luyện lại từ đầu so với học liên tục, và những cửa mà pipeline tự động không được đi tắt."
+    "summary": "Đo giá của việc mô hình cũ đi, bốn loại kích hoạt, huấn luyện lại từ đầu so với học liên tục, và những cửa mà pipeline tự động không được đi tắt.",
+    "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "12",
     "file": "mlops-ch12.html",
     "label": "Vòng phản hồi",
-    "summary": "Khi mô hình tự tạo ra dữ liệu huấn luyện của mình: vòng phản hồi thoái hoá, thí nghiệm đo mức thiệt hại, và bốn cách chữa."
+    "summary": "Khi mô hình tự tạo ra dữ liệu huấn luyện của mình: vòng phản hồi thoái hoá, thí nghiệm đo mức thiệt hại, và bốn cách chữa.",
+    "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "13",
     "file": "mlops-ch13.html",
     "label": "LLMOps",
-    "summary": "Năm ràng buộc đổi so với MLOps cổ điển: đánh giá ba tầng, thiên lệch của giám khảo LLM, quy lỗi RAG, chi phí theo token và rào chắn."
+    "summary": "Năm ràng buộc đổi so với MLOps cổ điển: đánh giá ba tầng, thiên lệch của giám khảo LLM, quy lỗi RAG, chi phí theo token và rào chắn.",
+    "part": "LLMOps"
   },
   {
     "num": "14",

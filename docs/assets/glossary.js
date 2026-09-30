@@ -1,5 +1,6 @@
 /* Lọc tại chỗ cho trang từ điển thuật ngữ. Bỏ dấu tiếng Việt khi so khớp. */
-(function () {
+window.QZ_INIT = window.QZ_INIT || {};
+window.QZ_INIT['glossary'] = function () {
   'use strict';
 
   var input = document.getElementById('termFilter');
@@ -46,4 +47,5 @@
 
   input.addEventListener('input', apply);
   apply();
-})();
+};
+window.QZ_INIT['glossary']();

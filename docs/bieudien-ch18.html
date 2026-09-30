@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>18. Tài liệu tham khảo — Biểu diễn, Sinh và Căn chỉnh: cách một trợ lý ngôn ngữ ra đời</title>
+<meta name="description" content="Ba mươi sáu nguồn, mỗi nguồn ghi rõ nó là nguồn của kết quả nào được dùng trong tài liệu.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">B</span>
+    <span class="brand-text"><b>Biểu diễn &amp; Căn chỉnh</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><a class="book-tab" href="models-ch01.html">Mô hình &amp; Kiến trúc</a><span class="book-tab is-active" aria-current="true">Biểu diễn &amp; Căn chỉnh</span><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Nhập môn</p><ul class="nav-list"><li><a href="bieudien-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="bieudien-ch01.html"><span class="nav-num">1</span><span class="nav-label">Bản đồ: bốn câu hỏi</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Biểu diễn và embedding</p><ul class="nav-list"><li><a href="bieudien-ch02.html"><span class="nav-num">2</span><span class="nav-label">Word2Vec và thứ nó thực sự phân rã</span></a></li><li><a href="bieudien-ch03.html"><span class="nav-num">3</span><span class="nav-label">Hình học của không gian embedding</span></a></li><li><a href="bieudien-ch04.html"><span class="nav-num">4</span><span class="nav-label">Embedding hiện đại và tìm kiếm vector</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Học chuyển giao</p><ul class="nav-list"><li><a href="bieudien-ch05.html"><span class="nav-num">5</span><span class="nav-label">Vì sao tiền huấn luyện lại hiệu quả</span></a></li><li><a href="bieudien-ch06.html"><span class="nav-num">6</span><span class="nav-label">Tinh chỉnh: đóng băng tới đâu</span></a></li><li><a href="bieudien-ch07.html"><span class="nav-num">7</span><span class="nav-label">LoRA và tinh chỉnh tiết kiệm tham số</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Mô hình sinh</p><ul class="nav-list"><li><a href="bieudien-ch08.html"><span class="nav-num">8</span><span class="nav-label">Bài toán sinh, và ba cách trả lời</span></a></li><li><a href="bieudien-ch09.html"><span class="nav-num">9</span><span class="nav-label">Tự mã hoá biến phân</span></a></li><li><a href="bieudien-ch10.html"><span class="nav-num">10</span><span class="nav-label">Mạng đối sinh</span></a></li><li><a href="bieudien-ch11.html"><span class="nav-num">11</span><span class="nav-label">Mô hình khuếch tán</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>Học tăng cường và căn chỉnh</p><ul class="nav-list"><li><a href="bieudien-ch12.html"><span class="nav-num">12</span><span class="nav-label">Nhập môn học tăng cường</span></a></li><li><a href="bieudien-ch13.html"><span class="nav-num">13</span><span class="nav-label">Gradient chính sách</span></a></li><li><a href="bieudien-ch14.html"><span class="nav-num">14</span><span class="nav-label">RLHF: học từ so sánh của con người</span></a></li><li><a href="bieudien-ch15.html"><span class="nav-num">15</span><span class="nav-label">DPO: bỏ hẳn mô hình thưởng</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="bieudien-bai-tap.html"><span class="nav-num">16</span><span class="nav-label">Bài tập</span></a></li><li><a href="bieudien-ch17.html"><span class="nav-num">17</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="bieudien-ch18.html" class="is-active" aria-current="page"><span class="nav-num">18</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="bieudien-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="bieudien-hinh-anh.html"><span class="nav-num nav-num--icon">◳</span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="bieudien-thuat-ngu.html"><span class="nav-num nav-num--icon">¶</span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="bieudien-ma-nguon.html"><span class="nav-num nav-num--icon">{}</span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="bieudien-toan-van.html"><span class="nav-num nav-num--icon">≡</span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon">⌂</span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon">↗</span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 18</span><span class="kicker-time">4 phút đọc</span></div><h2 id="sec-18" class="heading">18. Tài liệu tham khảo<a class="anchor" href="#sec-18" aria-label="Liên kết tới mục này">#</a></h2><p class="chapter-lede">Ba mươi sáu nguồn, mỗi nguồn ghi rõ nó là nguồn của kết quả nào được dùng trong tài liệu.</p>
+<p><strong>Biểu diễn và embedding</strong></p>
+<ol>
+<li>T. Mikolov và cộng sự. <em>Efficient Estimation of Word Representations in Vector Space.</em> ICLR Workshop 2013. — bài báo word2vec gốc.</li>
+<li>T. Mikolov và cộng sự. <em>Distributed Representations of Words and Phrases and their Compositionality.</em> NeurIPS 2013. — nguồn của lấy mẫu âm và mũ 3/4; bài báo nói rõ mũ ấy chọn bằng thực nghiệm.</li>
+<li>O. Levy, Y. Goldberg. <em>Neural Word Embedding as Implicit Matrix Factorization.</em> NeurIPS 2014. — chứng minh dùng ở <a href="bieudien-ch02.html#sec-2-6" class="xref">Mục 2.6</a>: SGNS ngầm phân rã PMI dịch <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">\log k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span>.</li>
+<li>J. Pennington, R. Socher, C. Manning. <em>GloVe: Global Vectors for Word Representation.</em> EMNLP 2014.</li>
+<li>J. Devlin và cộng sự. <em>BERT: Pre-training of Deep Bidirectional Transformers.</em> NAACL 2019. — embedding theo ngữ cảnh.</li>
+<li>N. Reimers, I. Gurevych. <em>Sentence-BERT.</em> EMNLP 2019. — nguồn của nhận định rằng trạng thái ẩn thô không phải embedding câu tốt.</li>
+<li>J. Gao, D. He và cộng sự. <em>Representation Degeneration Problem in Training Neural Language Models.</em> ICLR 2019. — bất đẳng hướng.</li>
+<li>T. Chen và cộng sự. <em>A Simple Framework for Contrastive Learning of Visual Representations (SimCLR).</em> ICML 2020. — mục tiêu tương phản ở <a href="bieudien-ch04.html#sec-4-2" class="xref">Mục 4.2</a>.</li>
+<li>Y. Malkov, D. Yashunin. <em>Efficient and Robust Approximate Nearest Neighbor Search Using HNSW Graphs.</em> TPAMI 2018.</li>
+<li>H. Jégou, M. Douze, C. Schmid. <em>Product Quantization for Nearest Neighbor Search.</em> TPAMI 2011.</li>
+</ol>
+<p><strong>Học chuyển giao</strong></p>
+<ol start="11">
+<li>J. Howard, S. Ruder. <em>Universal Language Model Fine-tuning for Text Classification.</em> ACL 2018. — mở đóng băng dần.</li>
+<li>N. Houlsby và cộng sự. <em>Parameter-Efficient Transfer Learning for NLP.</em> ICML 2019. — adapter.</li>
+<li>E. Hu và cộng sự. <em>LoRA: Low-Rank Adaptation of Large Language Models.</em> ICLR 2022. — nguồn của <a href="bieudien-ch07.html#sec-7" class="xref">Chương 7</a>, kể cả việc chỉ gắn vào <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>Q</mi></msub></mrow><annotation encoding="application/x-tex">W_Q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">Q</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> và <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>V</mi></msub></mrow><annotation encoding="application/x-tex">W_V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.2222em;">V</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>.</li>
+<li>T. Dettmers và cộng sự. <em>QLoRA: Efficient Finetuning of Quantized LLMs.</em> NeurIPS 2023.</li>
+<li>X. Lisa Li, P. Liang. <em>Prefix-Tuning.</em> ACL 2021.</li>
+<li>E. Ben Zaken, S. Ravfogel, Y. Goldberg. <em>BitFit.</em> ACL 2022.</li>
+</ol>
+<p><strong>Mô hình sinh</strong></p>
+<ol start="17">
+<li>D. Kingma, M. Welling. <em>Auto-Encoding Variational Bayes.</em> ICLR 2014. — VAE và mẹo tái tham số hoá.</li>
+<li>I. Higgins và cộng sự. <em>beta-VAE.</em> ICLR 2017. — nguồn của <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span></span></span></span> ở <a href="bieudien-ch09.html#sec-9" class="xref">Chương 9</a>.</li>
+<li>I. Goodfellow và cộng sự. <em>Generative Adversarial Nets.</em> NeurIPS 2014. — nguồn của cả bài toán minimax lẫn mẹo không bão hoà ở <a href="bieudien-ch10.html#sec-10-2" class="xref">Mục 10.2</a>.</li>
+<li>M. Arjovsky, S. Chintala, L. Bottou. <em>Wasserstein GAN.</em> ICML 2017. — phân tích vì sao GAN khó huấn luyện.</li>
+<li>J. Ho, A. Jain, P. Abbeel. <em>Denoising Diffusion Probabilistic Models.</em> NeurIPS 2020. — nguồn của dạng đóng và của lựa chọn đoán <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>.</li>
+<li>J. Song, C. Meng, S. Ermon. <em>Denoising Diffusion Implicit Models.</em> ICLR 2021. — DDIM.</li>
+<li>R. Rombach và cộng sự. <em>High-Resolution Image Synthesis with Latent Diffusion Models.</em> CVPR 2022. — khuếch tán trong không gian ẩn.</li>
+<li>A. Nichol, P. Dhariwal. <em>Improved Denoising Diffusion Probabilistic Models.</em> ICML 2021. — lịch nhiễu.</li>
+</ol>
+<p><strong>Học tăng cường và căn chỉnh</strong></p>
+<ol start="25">
+<li>R. Sutton, A. Barto. <em>Reinforcement Learning: An Introduction.</em> MIT Press, 2018. — sách chuẩn; <a href="bieudien-ch02.html#sec-2" class="xref">Chương 2</a> bàn về khởi tạo lạc quan, cơ chế đo được ở <a href="bieudien-ch12.html#sec-12-4" class="xref">Mục 12.4</a>.</li>
+<li>C. Watkins, P. Dayan. <em>Q-learning.</em> Machine Learning, 1992.</li>
+<li>R. Williams. <em>Simple Statistical Gradient-Following Algorithms.</em> Machine Learning, 1992. — REINFORCE và đường nền.</li>
+<li>J. Schulman và cộng sự. <em>Proximal Policy Optimization Algorithms.</em> arXiv:1707.06347, 2017.</li>
+<li>J. Schulman và cộng sự. <em>High-Dimensional Continuous Control Using Generalized Advantage Estimation.</em> ICLR 2016. — hàm lợi thế.</li>
+<li>P. Christiano và cộng sự. <em>Deep Reinforcement Learning from Human Preferences.</em> NeurIPS 2017. — bài báo đầu tiên của dòng RLHF.</li>
+<li>L. Ouyang và cộng sự. <em>Training Language Models to Follow Instructions with Human Feedback.</em> NeurIPS 2022. — InstructGPT; nguồn của quy trình ba giai đoạn ở <a href="bieudien-ch14.html#hinh-14" class="xref">Hình 14</a>.</li>
+<li>Y. Bai và cộng sự. <em>Training a Helpful and Harmless Assistant with RLHF.</em> arXiv:2204.05862, 2022.</li>
+<li>R. Rafailov và cộng sự. <em>Direct Preference Optimization.</em> NeurIPS 2023. — nguồn của toàn bộ <a href="bieudien-ch15.html#sec-15" class="xref">Chương 15</a>, kể cả phép suy ra ở <a href="bieudien-ch15.html#sec-15-2" class="xref">Mục 15.2</a>.</li>
+<li>M. Azar và cộng sự. <em>A General Theoretical Paradigm to Understand Learning from Human Preferences.</em> AISTATS 2024. — IPO.</li>
+<li>K. Ethayarajh và cộng sự. <em>KTO: Model Alignment as Prospect Theoretic Optimization.</em> ICML 2024.</li>
+<li>R. Bradley, M. Terry. <em>Rank Analysis of Incomplete Block Designs.</em> Biometrika, 1952. — mô hình so sánh cặp dùng ở <a href="bieudien-ch14.html#sec-14-3" class="xref">Mục 14.3</a>.</li>
+</ol>
+<hr>
+</article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="bieudien-ch17.html"><span class="pager-dir">← Trước</span><span class="pager-title">Ôn phỏng vấn</span></a><a class="pager-link pager-next" href="bieudien-phu-luc.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Phụ lục: chạy lại thí nghiệm</span></a></nav>
+</main>
+
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+<script src="assets/router.js" defer></script>
+
+</body>
+</html>
