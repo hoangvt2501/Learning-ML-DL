@@ -1,0 +1,118 @@
+{
+  "chang": [
+    {
+      "ten": "Toán cho học máy",
+      "icon": "nen-tang",
+      "mo_ta": "Đại số tuyến tính và xác suất ở đúng mức cần để đọc mọi chặng sau.",
+      "roadmap": ["kiến thức tiên quyết"],
+      "bai": [["nentang", "1", "3"]]
+    },
+    {
+      "ten": "Học máy cổ điển",
+      "icon": "hoc-may",
+      "mo_ta": "Hồi quy, phân loại, đánh giá mô hình, regularization, tối ưu lồi, SVM, học không giám sát, rồi so sánh các họ mô hình, phân rã độ chệch – phương sai, cây quyết định và phương pháp tập hợp.",
+      "roadmap": ["kiến thức tiên quyết"],
+      "bai": [["nentang", "4", "16"], ["models", "1", "3"]]
+    },
+    {
+      "ten": "Học sâu",
+      "icon": "mang-no-ron",
+      "mo_ta": "Mạng nơ-ron nhiều lớp, lan truyền ngược và các thuật toán tối ưu, khởi tạo, chuẩn hoá, kết nối tắt, mạng tích chập và mạng hồi quy.",
+      "roadmap": ["kiến thức tiên quyết"],
+      "bai": [["models", "4", "8"]]
+    },
+    {
+      "ten": "Transformer và mô hình ngôn ngữ",
+      "icon": "llm",
+      "mo_ta": "Attention, ba kiểu kiến trúc Transformer, các cải tiến hiện nay như RoPE, GQA và FlashAttention, các chiến lược giải mã, và cách ước lượng tham số, FLOP, bộ nhớ.",
+      "roadmap": ["How LLMs Work"],
+      "bai": [["models", "9", "12"]]
+    },
+    {
+      "ten": "Biểu diễn, học chuyển giao và mô hình sinh",
+      "icon": "mo-hinh-sinh",
+      "mo_ta": "Embedding, vì sao tiền huấn luyện hiệu quả, tinh chỉnh và LoRA, VAE, GAN và mô hình khuếch tán.",
+      "roadmap": ["What are Embeddings", "Fine-tuning", "Training"],
+      "bai": [["bieudien", "1", "11"]]
+    },
+    {
+      "ten": "Căn chỉnh mô hình",
+      "icon": "tinh-chinh",
+      "mo_ta": "Học tăng cường, gradient chính sách, RLHF và DPO: cách một mô hình ngôn ngữ học làm theo ý người dùng.",
+      "roadmap": ["Training"],
+      "bai": [["bieudien", "12", "15"]]
+    },
+    {
+      "ten": "Làm việc với mô hình ngôn ngữ",
+      "icon": "prompt",
+      "mo_ta": "Kỹ sư AI làm gì, token và chi phí, chọn và triển khai mô hình, prompt engineering, context engineering.",
+      "roadmap": ["Introduction", "How LLMs Work", "Prompt Engineering", "Context Engineering", "Type of Models", "Hugging Face", "Choosing the Right Model", "Ollama", "LM Studio", "OpenRouter"],
+      "bai": [["ungdung", "1", "5"]]
+    },
+    {
+      "ten": "Truy xuất và RAG",
+      "icon": "rag",
+      "mo_ta": "Embedding trong thực tế, cơ sở dữ liệu vector và retrieval-augmented generation, đo trên văn bản tiếng Việt.",
+      "roadmap": ["What are Embeddings", "Embedding Models", "Vector Databases", "What are RAGs?"],
+      "bai": [["ungdung", "6", "8"]]
+    },
+    {
+      "ten": "Agent và MCP",
+      "icon": "agent",
+      "mo_ta": "Function calling, ReAct, hệ nhiều agent, độ tin cậy của agent, và Model Context Protocol.",
+      "roadmap": ["AI Agents", "Model Context Protocol (MCP)"],
+      "bai": [["ungdung", "9", "10"]]
+    },
+    {
+      "ten": "An toàn, đánh giá và quan sát",
+      "icon": "an-toan",
+      "mo_ta": "Prompt injection và các rủi ro trong danh sách OWASP, đánh giá có cơ sở thống kê, kiểm thử hồi quy, trace và giám sát.",
+      "roadmap": ["AI Safety and Ethics", "LLM Evaluations", "Regression Testing", "LLM Observability"],
+      "bai": [["ungdung", "11", "13"]]
+    },
+    {
+      "ten": "Đa phương thức và công cụ phát triển",
+      "icon": "da-phuong-thuc",
+      "mo_ta": "Ảnh, video, tiếng nói trong ứng dụng LLM, và các công cụ lập trình có hỗ trợ AI.",
+      "roadmap": ["Multimodal AI", "Development Tools"],
+      "bai": [["ungdung", "14", "15"]]
+    },
+    {
+      "ten": "Tối ưu suy luận",
+      "icon": "luong-tu",
+      "mo_ta": "Lượng tử hoá: biểu diễn số, suy luận bằng số nguyên, PTQ, QAT, và các phương pháp riêng cho LLM.",
+      "roadmap": ["Self-Hosted Models"],
+      "bai": [["quantization", "1", "13"]]
+    },
+    {
+      "ten": "Vận hành hệ thống học máy",
+      "icon": "van-hanh",
+      "mo_ta": "Dữ liệu, kiểm thử, phục vụ, ra mắt, giám sát, dịch chuyển phân phối, huấn luyện lại và LLMOps.",
+      "roadmap": ["LLM Observability", "Regression Testing"],
+      "bai": [["mlops", "1", "13"]]
+    }
+  ],
+  "doi_chieu": [
+    {"node": "Introduction", "vi": "Kỹ sư AI là gì, vai trò, AI Engineer và ML Engineer, thuật ngữ chung", "ref": [["ungdung", "1"]]},
+    {"node": "How LLMs Work", "vi": "Token, cửa sổ ngữ cảnh, tham số lấy mẫu, huấn luyện và suy luận", "ref": [["ungdung", "2"], ["models", "9"], ["models", "11"], ["models", "12"]]},
+    {"node": "Prompt Engineering", "vi": "Cấu trúc prompt, zero-shot, few-shot, chain-of-thought, đầu ra có cấu trúc, prompt caching", "ref": [["ungdung", "4"]]},
+    {"node": "Context Engineering", "vi": "Nguồn ngữ cảnh, ngân sách token, bộ nhớ, cô lập ngữ cảnh, các kiểu hỏng", "ref": [["ungdung", "5"]]},
+    {"node": "Type of Models", "vi": "Mô hình gốc, chỉ dẫn, suy luận; đóng và mở trọng số; tự triển khai", "ref": [["ungdung", "3.1"], ["ungdung", "3.2"], ["ungdung", "3.3"]]},
+    {"node": "Hugging Face", "vi": "Hub, model card, Tasks, Transformers, Transformers.js", "ref": [["ungdung", "3.4"]]},
+    {"node": "Choosing the Right Model", "vi": "Ràng buộc, chất lượng trên dữ liệu của mình, độ trễ, chi phí, định tuyến", "ref": [["ungdung", "3.6"]]},
+    {"node": "Ollama, LM Studio, OpenRouter", "vi": "Chạy mô hình cục bộ, API tương thích OpenAI, dịch vụ trung gian", "ref": [["ungdung", "3.3"], ["ungdung", "3.5"]]},
+    {"node": "Fine-tuning", "vi": "Đóng băng hay tinh chỉnh, LoRA và các phương pháp tiết kiệm tham số", "ref": [["bieudien", "6"], ["bieudien", "7"]]},
+    {"node": "What are Embeddings", "vi": "Embedding từ, embedding theo ngữ cảnh, embedding văn bản cho tìm kiếm", "ref": [["bieudien", "2"], ["bieudien", "4"], ["ungdung", "6"]]},
+    {"node": "Embedding Models", "vi": "Chọn mô hình embedding, số chiều, độ dài tối đa, tiền tố, MTEB", "ref": [["ungdung", "6.2"]]},
+    {"node": "Vector Databases", "vi": "IVF, product quantization, HNSW, lọc theo metadata, chọn công cụ", "ref": [["ungdung", "7"]]},
+    {"node": "What are RAGs?", "vi": "Quy trình RAG, chia đoạn, tìm kiếm kết hợp, xếp lại, đánh giá RAG", "ref": [["ungdung", "8"]]},
+    {"node": "AI Agents", "vi": "Workflow và agent, function calling, ReAct, hệ nhiều agent, độ tin cậy", "ref": [["ungdung", "9"]]},
+    {"node": "Model Context Protocol (MCP)", "vi": "Host, client, server; tools, resources, prompts; truyền tải; an toàn", "ref": [["ungdung", "10"]]},
+    {"node": "AI Safety and Ethics", "vi": "Prompt injection, dữ liệu nhạy cảm, thiên kiến và công bằng, rào chắn", "ref": [["ungdung", "11"]]},
+    {"node": "LLM Observability", "vi": "Trace, span, chi phí và độ trễ, giám sát trong sản xuất", "ref": [["ungdung", "13"], ["mlops", "13"]]},
+    {"node": "LLM Evaluations", "vi": "Đánh giá tất định, dựa trên mô hình, bởi con người; cỡ mẫu và so sánh ghép cặp", "ref": [["ungdung", "12"], ["mlops", "13"]]},
+    {"node": "Regression Testing", "vi": "Bộ vàng, cửa kiểm tra trong CI, đổi phiên bản mô hình", "ref": [["ungdung", "12.5"]]},
+    {"node": "Multimodal AI", "vi": "Hiểu ảnh, sinh ảnh, video, nhận dạng và tổng hợp tiếng nói", "ref": [["ungdung", "14"], ["bieudien", "11"]]},
+    {"node": "Development Tools", "vi": "Công cụ lập trình có hỗ trợ AI và cách dùng an toàn", "ref": [["ungdung", "15"]]}
+  ]
+}

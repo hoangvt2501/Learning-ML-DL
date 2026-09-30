@@ -1,0 +1,146 @@
+Doc kho van ban da chup: code\ungdung\kho_van_ban.json
+
+==========================================================================
+(A) So token cua cung mot noi dung tieng Viet va tieng Anh
+==========================================================================
+Van ban song song: Tuyen ngon Nhan quyen (NLTK udhr), tu Loi noi dau toi het Dieu 20
+  tieng Anh :  1075 tu,   6593 ky tu,   6593 byte UTF-8
+  tieng Viet:  1507 tu,   6703 ky tu,   9095 byte UTF-8
+
+tokenizer     kích thước từ vựng  token (Anh)  token (Việt)  Việt / Anh  token/từ (Việt)
+GPT-2                     50,257        1,342         6,437        4.80             4.27
+Qwen2.5                  151,665        1,298         1,814        1.40             1.20
+XLM-RoBERTa              250,002        1,370         1,652        1.21             1.10
+
+Cau vi du: 'Mô hình ngôn ngữ lớn dự đoán token tiếp theo.' (10 tu)
+  GPT-2         36 token: M | ô | ·h | � | � | n | h | ·ng | ô | n | ·ng | � | � | � | ·l | � | � | � | n | ·d | � | � | � | ·� | � | o | án | ·token | ·ti | � | � | � | p | ·the | o | .
+  Qwen2.5       13 token: M | ô | ·hình | ·ngôn | ·ngữ | ·lớn | ·dự | ·đoán | ·token | ·tiếp | ·the | o | .
+  XLM-RoBERTa   12 token: Mô | hình | ngôn | ngữ | lớn | dự | đoán | to | ken | tiếp | theo | .
+
+Tokenizer BPE tu huan luyen (8 000 token), kho: Viet 86,931 tu / Anh 418,105 tu
+dữ liệu huấn luyện        token (Anh)  token (Việt)  Việt / Anh
+chỉ tiếng Anh                   1,750         7,230        4.13
+chỉ tiếng Việt                  2,969         1,893        0.64
+trộn Anh + Việt                 1,797         2,057        1.14
+
+Ca kho van ban tieng Viet (332 muc cua 5 giao trinh, 86,931 tu):
+  GPT-2          345,745 token  (3.98 token/tu)
+  Qwen2.5        146,050 token  (1.68 token/tu)
+  XLM-RoBERTa    145,941 token  (1.68 token/tu)
+
+==========================================================================
+(B) Bo nho KV cache va chi phi mot yeu cau
+==========================================================================
+Llama 3 8B: 2 (K va V) x 32 lop x 8 dau KV x 128 chieu x 2 byte = 131,072 byte = 128 KiB moi token
+  ngu canh   2,048 token: KV cache   0.25 GiB cho mot chuoi
+  ngu canh   8,192 token: KV cache   1.00 GiB cho mot chuoi
+  ngu canh  32,768 token: KV cache   4.00 GiB cho mot chuoi
+  ngu canh 131,072 token: KV cache  16.00 GiB cho mot chuoi
+Neu khong dung GQA (32 dau KV): 512 KiB moi token, gap 4 lan
+
+Yeu cau RAG: dau vao 3,210 token, dau ra 350 token
+  chỉ dẫn hệ thống                   600 token (18.7%)
+  5 đoạn truy xuất × 350 token      1750 token (54.5%)
+  lịch sử hội thoại                  800 token (24.9%)
+  câu hỏi                             60 token ( 1.9%)
+Voi don gia gia dinh 1 (vao) va 4 (ra) moi trieu token: 4.610 phan nghin don vi / yeu cau
+Neu 600 token chi dan duoc doc tu cache voi gia 10%: 4.070 (giam 11.7%)
+Dau ra chiem 30.4% chi phi du chi bang 9.8% so token
+
+==========================================================================
+(C) Truy xuat tren van ban tieng Viet: BM25, TF-IDF, LSA va ket hop RRF
+==========================================================================
+Kho van ban: 332 muc tu 5 giao trinh, 86,931 tu
+Bo truy van 1: 254 cau hoi trac nghiem (nhan: chuong; 30 cau co nhan muc)
+Bo truy van 2: 50 cau hoi dien dat lai theo cach nguoi hoc hoi (nhan: muc)
+Tu vung TF-IDF (am tiet + cap am tiet): 44,181; LSA giu 256 chieu, 82.3% phuong sai
+
+                        bộ 1: trắc nghiệm → chương  |bộ 2: diễn đạt lại → mục
+phương pháp                  R@1     R@5     MRR  |     R@1     R@5     MRR
+BM25, âm tiết              0.870   0.953   0.912  |   0.340   0.580   0.452
+BM25, âm tiết + cặp        0.886   0.965   0.924  |   0.320   0.600   0.461
+TF-IDF cosine              0.874   0.969   0.920  |   0.300   0.600   0.436
+LSA 256 chiều              0.866   0.976   0.918  |   0.300   0.600   0.442
+RRF: BM25 + LSA            0.890   0.972   0.927  |   0.300   0.560   0.441
+
+==========================================================================
+(D) Kich thuoc doan (chunk) va chat luong truy xuat
+==========================================================================
+Truy van: 30 cau trac nghiem co nhan muc + 50 cau dien dat lai; do: tim dung muc trong 5 ket qua
+kích thước đoạn     số đoạn   mục R@5 BM25   mục R@5 LSA   mục R@5 RRF
+50 từ                  2245          0.637         0.625         0.650
+100 từ                 1161          0.675         0.650         0.675
+200 từ                  616          0.688         0.688         0.662
+400 từ                  391          0.738         0.675         0.700
+cả mục                  332          0.725         0.725         0.700
+
+==========================================================================
+(E) Tim kiem gan dung tren vector: IVF, PQ va do thi lang gieng
+==========================================================================
+4,419 vector 128 chieu (LSA cua cac cau trong kho), 300 truy van, tim 10 lang gieng gan nhat
+
+IVF voi 128 cum (k-means); kich thuoc cum: nho nhat 6, lon nhat 85
+  nprobe   recall@10    tỉ lệ vector phải so
+       1       0.627                    0.9%
+       2       0.743                    1.7%
+       4       0.834                    3.3%
+       8       0.888                    6.1%
+      16       0.933                   11.7%
+      32       0.968                   23.8%
+      64       0.993                   50.9%
+
+Product quantization: chia 128 chieu thanh m doan, moi doan 256 tam (1 byte)
+   m  byte/vector     nén   recall@10   recall@10 sau xếp lại 100
+   8            8     64x       0.596                       0.987
+  16           16     32x       0.696                       0.999
+  32           32     16x       0.825                       1.000
+  64           64      8x       0.915                       1.000
+
+Tim kiem tren do thi k-NN (16 canh moi dinh), best-first voi hang doi ef:
+    ef   recall@10   số phép tính khoảng cách   so với vét cạn
+    10       0.731                        128             2.9%
+    20       0.845                        185             4.2%
+    40       0.927                        295             6.7%
+    80       0.960                        523            11.8%
+   160       0.992                        987            22.3%
+
+==========================================================================
+(F) Do tin cay cua agent nhieu buoc
+==========================================================================
+ số bước    p = 0.99    p = 0.95     p = 0.9
+       1       0.990       0.950       0.900
+       5       0.951       0.774       0.590
+      10       0.904       0.599       0.349
+      20       0.818       0.358       0.122
+      50       0.605       0.077       0.005
+
+Agent 20 buoc, p = 0,95 moi buoc; kiem tra phat hien loi voi xac suat c, thu lai toi da r lan:
+     c   r   công thức   mô phỏng   lời gọi / bước
+  0.00   0       0.358      0.357            1.000
+  0.50   1       0.587      0.586            1.025
+  0.80   1       0.785      0.784            1.040
+  0.80   3       0.811      0.810            1.042
+  0.95   3       0.949      0.949            1.050
+
+==========================================================================
+(G) Can bao nhieu mau de danh gia mot ung dung LLM
+==========================================================================
+Khoang tin cay 95% cua do chinh xac uoc luong (p = 0,80):
+     n   nửa độ rộng (công thức)   nửa độ rộng (mô phỏng)
+    50                     11.1%                    11.0%
+   100                      7.8%                     8.0%
+   200                      5.5%                     5.5%
+   500                      3.5%                     3.5%
+  1000                      2.5%                     2.5%
+  2000                      1.8%                     1.7%
+
+Phat hien cai thien tu 80% len khoang 83% (muc y nghia 5%), 2 000 lan mo phong moi n:
+     n   ghép cặp (McNemar)   hai bộ độc lập
+   100                0.086            0.076
+   300                0.392            0.154
+  1000                0.919            0.410
+  3000                1.000            0.857
+
+==========================================================================
+Da luu 5 hinh vao figs/: ud02, ud05, ud07, ud11, ud12
+==========================================================================

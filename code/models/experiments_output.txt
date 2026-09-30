@@ -1,8 +1,8 @@
 
 ==========================================================================
-(A) Phan ra thien lech - phuong sai cua da thuc
+(A) Phan ra do chech - phuong sai cua da thuc
 ==========================================================================
- bậc   thiên lệch²   phương sai    nhiễu²    tổng MSE
+ bậc     độ chệch²   phương sai    nhiễu²    tổng MSE
    1        0.4221       0.0231    0.1225      0.5677
    2        0.4223       0.0418    0.1225      0.5866
    3        0.4098       0.0857    0.1225      0.6180
@@ -18,19 +18,20 @@
   13        6.2261     871.8100    0.1225    878.1586
   14       35.1402    7392.2751    0.1225   7427.5379
 
-Bac toi uu = 5; tai do thien lech^2=0.0836, phuong sai=0.0767
-Bac 1  : thien lech^2 = 0.422 (chiem 74% MSE) -> THIEU KHOP
-Bac 14: phuong sai  = 7392.275 (chiem 100% MSE) -> QUA KHOP
+Bac toi uu = 5; tai do do chech^2=0.0836, phuong sai=0.0767
+Bac 1  : do chech^2 = 0.422 (chiem 74% MSE) -> UNDERFITTING
+Bac 14: phuong sai  = 7392.275 (chiem 100% MSE) -> OVERFITTING
+Sai so Monte Carlo cua uoc luong do chech^2 (~ phuong sai / 250): bac 12 ~ 0.21, bac 13 ~ 3.49, bac 14 ~ 29.57
 
 ==========================================================================
 (B) Bagging va boosting cat vao thanh phan nao
 ==========================================================================
-Một cây (sâu 8)      thiên lệch²=0.0031  phương sai=0.1089  tổng=0.1120
-Bagging 100 cây      thiên lệch²=0.0016  phương sai=0.0534  tổng=0.0550
-Boosting 100 gốc     thiên lệch²=0.0032  phương sai=0.0371  tổng=0.0403
+Một cây (sâu 8)      độ chệch²=0.0031  phương sai=0.1089  tổng=0.1120
+Bagging 100 cây      độ chệch²=0.0016  phương sai=0.0534  tổng=0.0550
+Boosting 100 gốc     độ chệch²=0.0032  phương sai=0.0371  tổng=0.0403
 
-Bagging giam phuong sai 2.0 lan, thien lech doi 0.52 lan
-Boosting giam thien lech 1.0 lan, phuong sai doi 0.34 lan
+Bagging giam phuong sai 2.0 lan, do chech doi 0.52 lan
+Boosting giam do chech 1.0 lan, phuong sai doi 0.34 lan
 
 ==========================================================================
 (C) Sau mua duoc su gon gang (chung minh kien tao, khong phu thuoc toi uu)

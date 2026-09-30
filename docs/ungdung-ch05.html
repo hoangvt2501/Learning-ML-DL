@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5. Context engineering — Xây dựng ứng dụng với mô hình ngôn ngữ lớn</title>
+<meta name="description" content="Quản lý toàn bộ ngữ cảnh ở mỗi lần gọi: nguồn ngữ cảnh, ngân sách token, thí nghiệm tìm dữ kiện theo vị trí trong ngữ cảnh dài, bộ nhớ, cô lập ngữ cảnh và các kiểu hỏng.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><defs><symbol id="i-nha" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /> <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></symbol><symbol id="i-lo-trinh" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3" /> <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" /> <circle cx="18" cy="5" r="3" /></symbol><symbol id="i-tim" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34" /> <circle cx="11" cy="11" r="8" /></symbol><symbol id="i-sang" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /> <path d="M12 2v2" /> <path d="M12 20v2" /> <path d="m4.93 4.93 1.41 1.41" /> <path d="m17.66 17.66 1.41 1.41" /> <path d="M2 12h2" /> <path d="M20 12h2" /> <path d="m6.34 17.66-1.41 1.41" /> <path d="m19.07 4.93-1.41 1.41" /></symbol><symbol id="i-toi" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 5h16" /> <path d="M4 12h16" /> <path d="M4 19h16" /></symbol><symbol id="i-truoc" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7" /> <path d="M19 12H5" /></symbol><symbol id="i-sau" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></symbol><symbol id="i-dong-ho" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 6v6h4" /></symbol><symbol id="i-chep" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></symbol><symbol id="i-xong" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol><symbol id="i-ngoai" viewBox="0 0 24 24"><path d="M7 7h10v10" /> <path d="M7 17 17 7" /></symbol><symbol id="i-mo-rong" viewBox="0 0 24 24"><path d="M15 3h6v6" /> <path d="m21 3-7 7" /> <path d="m3 21 7-7" /> <path d="M9 21H3v-6" /></symbol><symbol id="i-chuong" viewBox="0 0 24 24"><path d="M12 5v16" /> <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></symbol><symbol id="i-thi-nghiem" viewBox="0 0 24 24"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2" /> <path d="M6.453 15h11.094" /> <path d="M8.5 2h7" /></symbol><symbol id="i-hinh" viewBox="0 0 24 24"><path d="m22 11-1.296-1.296a2.4 2.4 0 0 0-3.408 0L11 16" /> <path d="M4 8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2" /> <circle cx="13" cy="7" r="1" fill="currentColor" /> <rect x="8" y="2" width="14" height="14" rx="2" /></symbol><symbol id="i-thuat-ngu" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" /> <path d="m8 13 4-7 4 7" /> <path d="M9.1 11h5.7" /></symbol><symbol id="i-ghi-chu" viewBox="0 0 24 24"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" /> <path d="M2 6h4" /> <path d="M2 10h4" /> <path d="M2 14h4" /> <path d="M2 18h4" /> <path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" /></symbol><symbol id="i-ma-nguon" viewBox="0 0 24 24"><path d="M4 12.15V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3.35" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <path d="m5 16-3 3 3 3" /> <path d="m9 22 3-3-3-3" /></symbol><symbol id="i-toan-van" viewBox="0 0 24 24"><path d="M15 12h-5" /> <path d="M15 8h-5" /> <path d="M19 17V5a2 2 0 0 0-2-2H4" /> <path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3" /></symbol><symbol id="i-bai-tap" viewBox="0 0 24 24"><path d="M13 21h8" /> <path d="m15 5 4 4" /> <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /></symbol><symbol id="i-trac-nghiem" viewBox="0 0 24 24"><path d="M13 5h8" /> <path d="M13 12h8" /> <path d="M13 19h8" /> <path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /></symbol><symbol id="i-phong-van" viewBox="0 0 24 24"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /> <path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1" /></symbol><symbol id="i-tai-lieu" viewBox="0 0 24 24"><path d="m16 6 4 14" /> <path d="M12 6v14" /> <path d="M8 8v12" /> <path d="M4 4v16" /></symbol><symbol id="i-phu-luc" viewBox="0 0 24 24"><path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" /></symbol><symbol id="i-dinh-nghia" viewBox="0 0 24 24"><path d="M10 2v7.751a.25.25 0 00.407.195l2.28-1.834a.5.5 0 01.627 0l2.28 1.834A.25.25 0 0016 9.751V2" /> <path d="M4 19.5v-15A2.5 2.5 0 016.5 2H19a1 1 0 011 1v18a1 1 0 01-1 1H6.5a1 1 0 010-5H20" /></symbol><symbol id="i-dinh-ly" viewBox="0 0 24 24"><path d="M18 7V5a1 1 0 0 0-1-1H6.5a.5.5 0 0 0-.4.8l4.5 6a2 2 0 0 1 0 2.4l-4.5 6a.5.5 0 0 0 .4.8H17a1 1 0 0 0 1-1v-2" /></symbol><symbol id="i-vi-du" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /> <path d="M9 18h6" /> <path d="M10 22h4" /></symbol><symbol id="i-nhan-xet" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 16v-4" /> <path d="M12 8h.01" /></symbol><symbol id="i-luu-y" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /> <path d="M12 9v4" /> <path d="M12 17h.01" /></symbol><symbol id="i-chung-minh" viewBox="0 0 24 24"><path d="M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344" /> <path d="m9 11 3 3L22 4" /></symbol><symbol id="i-tra-loi" viewBox="0 0 24 24"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" /> <path d="m10 15-3-3 3-3" /> <path d="M7 12h8a2 2 0 0 1 2 2v1" /></symbol><symbol id="i-nen-tang" viewBox="0 0 24 24"><path d="M18 7V5a1 1 0 0 0-1-1H6.5a.5.5 0 0 0-.4.8l4.5 6a2 2 0 0 1 0 2.4l-4.5 6a.5.5 0 0 0 .4.8H17a1 1 0 0 0 1-1v-2" /></symbol><symbol id="i-hoc-may" viewBox="0 0 24 24"><circle cx="7.5" cy="7.5" r=".5" fill="currentColor" /> <circle cx="18.5" cy="5.5" r=".5" fill="currentColor" /> <circle cx="11.5" cy="11.5" r=".5" fill="currentColor" /> <circle cx="7.5" cy="16.5" r=".5" fill="currentColor" /> <circle cx="17.5" cy="14.5" r=".5" fill="currentColor" /> <path d="M3 3v16a2 2 0 0 0 2 2h16" /></symbol><symbol id="i-mang-no-ron" viewBox="0 0 24 24"><rect x="16" y="16" width="6" height="6" rx="1" /> <rect x="2" y="16" width="6" height="6" rx="1" /> <rect x="9" y="2" width="6" height="6" rx="1" /> <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" /> <path d="M12 12V8" /></symbol><symbol id="i-llm" viewBox="0 0 24 24"><path d="M12 20v2" /> <path d="M12 2v2" /> <path d="M17 20v2" /> <path d="M17 2v2" /> <path d="M2 12h2" /> <path d="M2 17h2" /> <path d="M2 7h2" /> <path d="M20 12h2" /> <path d="M20 17h2" /> <path d="M20 7h2" /> <path d="M7 20v2" /> <path d="M7 2v2" /> <rect x="4" y="4" width="16" height="16" rx="2" /> <rect x="8" y="8" width="8" height="8" rx="1" /></symbol><symbol id="i-prompt" viewBox="0 0 24 24"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" /> <path d="M7 11h10" /> <path d="M7 15h6" /> <path d="M7 7h8" /></symbol><symbol id="i-ngu-canh" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /> <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /> <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></symbol><symbol id="i-mo-hinh" viewBox="0 0 24 24"><path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z" /> <path d="m7 16.5-4.74-2.85" /> <path d="m7 16.5 5-3" /> <path d="M7 16.5v5.17" /> <path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z" /> <path d="m17 16.5-5-3" /> <path d="m17 16.5 4.74-2.85" /> <path d="M17 16.5v5.17" /> <path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z" /> <path d="M12 8 7.26 5.15" /> <path d="m12 8 4.74-2.85" /> <path d="M12 13.5V8" /></symbol><symbol id="i-embedding" viewBox="0 0 24 24"><path d="m10.586 5.414-5.172 5.172" /> <path d="m18.586 13.414-5.172 5.172" /> <path d="M6 12h12" /> <circle cx="12" cy="20" r="2" /> <circle cx="12" cy="4" r="2" /> <circle cx="20" cy="12" r="2" /> <circle cx="4" cy="12" r="2" /></symbol><symbol id="i-vector-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3" /> <path d="M3 5V19A9 3 0 0 0 21 19V5" /> <path d="M3 12A9 3 0 0 0 21 12" /></symbol><symbol id="i-rag" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <circle cx="11.5" cy="14.5" r="2.5" /> <path d="M13.3 16.3 15 18" /></symbol><symbol id="i-agent" viewBox="0 0 24 24"><path d="M12 8V4H8" /> <rect width="16" height="12" x="4" y="8" rx="2" /> <path d="M2 14h2" /> <path d="M20 14h2" /> <path d="M15 13v2" /> <path d="M9 13v2" /></symbol><symbol id="i-mcp" viewBox="0 0 24 24"><path d="M12 22v-5" /> <path d="M15 8V2" /> <path d="M17 8a1 1 0 0 1 1 1v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1z" /> <path d="M9 8V2" /></symbol><symbol id="i-an-toan" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /> <path d="m9 12 2 2 4-4" /></symbol><symbol id="i-danh-gia" viewBox="0 0 24 24"><path d="m12 14 4-4" /> <path d="M3.34 19a10 10 0 1 1 17.32 0" /></symbol><symbol id="i-da-phuong-thuc" viewBox="0 0 24 24"><path d="M15 15.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997a1 1 0 0 1-1.517-.86z" /> <path d="M21 12.17V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6" /> <path d="m6 21 5-5" /> <circle cx="9" cy="9" r="2" /></symbol><symbol id="i-tinh-chinh" viewBox="0 0 24 24"><path d="M10 5H3" /> <path d="M12 19H3" /> <path d="M14 3v4" /> <path d="M16 17v4" /> <path d="M21 12h-9" /> <path d="M21 19h-5" /> <path d="M21 5h-7" /> <path d="M8 10v4" /> <path d="M8 12H3" /></symbol><symbol id="i-mo-hinh-sinh" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" /> <path d="M20 2v4" /> <path d="M22 4h-4" /> <circle cx="4" cy="20" r="2" /></symbol><symbol id="i-luong-tu" viewBox="0 0 24 24"><rect x="14" y="14" width="4" height="6" rx="2" /> <rect x="6" y="4" width="4" height="6" rx="2" /> <path d="M6 20h4" /> <path d="M14 10h4" /> <path d="M6 14h2v6" /> <path d="M14 4h2v6" /></symbol><symbol id="i-van-hanh" viewBox="0 0 24 24"><path d="m10.852 14.772-.383.923" /> <path d="M13.148 14.772a3 3 0 1 0-2.296-5.544l-.383-.923" /> <path d="m13.148 9.228.383-.923" /> <path d="m13.53 15.696-.382-.924a3 3 0 1 1-2.296-5.544" /> <path d="m14.772 10.852.923-.383" /> <path d="m14.772 13.148.923.383" /> <path d="M4.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5" /> <path d="M4.5 14H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-.5" /> <path d="M6 18h.01" /> <path d="M6 6h.01" /> <path d="m9.228 10.852-.923-.383" /> <path d="m9.228 13.148-.923.383" /></symbol><symbol id="i-gioi-thieu" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z" /></symbol></defs></svg>
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-menu"></use></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">Ứ</span>
+    <span class="brand-text"><b>Ứng dụng LLM</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-tim"></use></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic ic-sun" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sang"></use></svg>
+    <svg class="ic ic-moon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-toi"></use></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><a class="book-tab" href="models-ch01.html">Học sâu</a><a class="book-tab" href="bieudien-ch01.html">Biểu diễn &amp; Căn chỉnh</a><span class="book-tab is-active" aria-current="true">Ứng dụng LLM</span><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Mở đầu</p><ul class="nav-list"><li><a href="ungdung-ch00.html"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li><li><a href="ungdung-ch01.html"><span class="nav-num">1</span><span class="nav-label">Kỹ sư AI</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Làm việc với mô hình ngôn ngữ</p><ul class="nav-list"><li><a href="ungdung-ch02.html"><span class="nav-num">2</span><span class="nav-label">Mô hình ngôn ngữ lớn nhìn từ phía ứng dụng</span></a></li><li><a href="ungdung-ch03.html"><span class="nav-num">3</span><span class="nav-label">Chọn và triển khai mô hình</span></a></li><li><a href="ungdung-ch04.html"><span class="nav-num">4</span><span class="nav-label">Prompt engineering</span></a></li><li><a href="ungdung-ch05.html" class="is-active" aria-current="page"><span class="nav-num">5</span><span class="nav-label">Context engineering</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Truy xuất và RAG</p><ul class="nav-list"><li><a href="ungdung-ch06.html"><span class="nav-num">6</span><span class="nav-label">Embedding và tìm kiếm ngữ nghĩa</span></a></li><li><a href="ungdung-ch07.html"><span class="nav-num">7</span><span class="nav-label">Cơ sở dữ liệu vector</span></a></li><li><a href="ungdung-ch08.html"><span class="nav-num">8</span><span class="nav-label">Retrieval-Augmented Generation</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Agent và MCP</p><ul class="nav-list"><li><a href="ungdung-ch09.html"><span class="nav-num">9</span><span class="nav-label">Agent</span></a></li><li><a href="ungdung-ch10.html"><span class="nav-num">10</span><span class="nav-label">Model Context Protocol</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>An toàn, đánh giá và vận hành</p><ul class="nav-list"><li><a href="ungdung-ch11.html"><span class="nav-num">11</span><span class="nav-label">An toàn và đạo đức</span></a></li><li><a href="ungdung-ch12.html"><span class="nav-num">12</span><span class="nav-label">Đánh giá ứng dụng LLM</span></a></li><li><a href="ungdung-ch13.html"><span class="nav-num">13</span><span class="nav-label">Quan sát và vận hành</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">6</span>Mở rộng</p><ul class="nav-list"><li><a href="ungdung-ch14.html"><span class="nav-num">14</span><span class="nav-label">AI đa phương thức</span></a></li><li><a href="ungdung-ch15.html"><span class="nav-num">15</span><span class="nav-label">Công cụ lập trình có hỗ trợ AI</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="ungdung-bai-tap.html"><span class="nav-num">16</span><span class="nav-label">Bài tập</span></a></li><li><a href="ungdung-ch17.html"><span class="nav-num">17</span><span class="nav-label">Câu hỏi phỏng vấn</span></a></li><li><a href="ungdung-ch18.html"><span class="nav-num">18</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="ungdung-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="ungdung-hinh-anh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-hinh"></use></svg></span><span class="nav-label">Thư viện 15 hình</span></a></li><li><a href="ungdung-thuat-ngu.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thuat-ngu"></use></svg></span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="ungdung-ma-nguon.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-ma-nguon"></use></svg></span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="ungdung-toan-van.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-toan-van"></use></svg></span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-nha"></use></svg></span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lo-trinh"></use></svg></span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 5</span><span class="kicker-time"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-dong-ho"></use></svg>16 phút đọc</span><span class="kicker-part">Làm việc với mô hình ngôn ngữ</span></div><h2 id="sec-5" class="heading"><span class="hnum">5</span><span class="htext">Context engineering<a class="anchor" href="#sec-5" aria-label="Liên kết tới mục này">#</a></span></h2><p class="chapter-lede">Quản lý toàn bộ ngữ cảnh ở mỗi lần gọi: nguồn ngữ cảnh, ngân sách token, thí nghiệm tìm dữ kiện theo vị trí trong ngữ cảnh dài, bộ nhớ, cô lập ngữ cảnh và các kiểu hỏng.</p>
+<p><a href="ungdung-ch04.html#sec-4" class="xref">Chương 4</a> bàn cách viết chỉ dẫn. Nhưng trong một ứng dụng thật, chỉ dẫn chỉ là một phần nhỏ của những gì mô hình nhận được ở mỗi lần gọi; phần còn lại là tài liệu, kết quả tool, lịch sử hội thoại và bộ nhớ. Chương này trình bày cách quản lý toàn bộ ngữ cảnh đó: nguồn ngữ cảnh, ngân sách token, ảnh hưởng của độ dài và vị trí thông tin (kèm một thí nghiệm đo được), bộ nhớ, cô lập ngữ cảnh giữa các agent, và các kiểu hỏng thường gặp.</p>
+<h3 id="sec-5-1" class="heading"><span class="hnum">5.1</span><span class="htext">Từ prompt engineering tới context engineering<a class="anchor" href="#sec-5-1" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Anthropic (2025) định nghĩa <strong>context engineering</strong> là tập hợp các chiến lược để chọn lọc và duy trì tập token tối ưu trong ngữ cảnh ở mỗi lần suy luận, bao gồm mọi thông tin đi vào ngữ cảnh ngoài bản thân prompt. Prompt engineering tập trung vào việc viết chỉ dẫn, nhất là chỉ dẫn hệ thống; context engineering quản lý toàn bộ trạng thái của ngữ cảnh: chỉ dẫn, tool, dữ liệu bên ngoài, lịch sử, và cách tất cả những thứ đó thay đổi qua các bước.</p>
+<p>Sự khác biệt rõ nhất ở agent. Với một lời gọi đơn lẻ, ngữ cảnh được dựng một lần. Với agent chạy 30 bước, mỗi bước thêm vào ngữ cảnh một lời gọi tool và một kết quả, có thể là vài nghìn token. Sau vài chục bước, ngữ cảnh chứa phần lớn là kết quả tool cũ, phần lớn không còn liên quan, và câu hỏi thiết kế chính trở thành: ở bước này, mô hình cần thấy những gì, và những gì nên được bỏ ra, tóm tắt lại, hoặc để ở ngoài cho tới khi cần.</p>
+<p>Nguyên tắc chung được nêu trong cùng tài liệu: tìm <strong>tập token nhỏ nhất có nhiều thông tin liên quan nhất</strong> cho nhiệm vụ. Mỗi token thêm vào tốn chi phí, tăng độ trễ, và như <a href="ungdung-ch05.html#sec-5-3" class="xref">Mục 5.3</a> cho thấy, có thể làm mô hình dùng thông tin kém đi.</p>
+<h3 id="sec-5-2" class="heading"><span class="hnum">5.2</span><span class="htext">Lớp ngữ cảnh và các nguồn ngữ cảnh<a class="anchor" href="#sec-5-2" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Ứng dụng tốt thường có một thành phần riêng, có thể gọi là <strong>lớp ngữ cảnh</strong> (context layer), chịu trách nhiệm dựng ngữ cảnh trước mỗi lần gọi mô hình. Các nguồn mà lớp này lấy thông tin:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Nguồn</th>
+<th>Nội dung</th>
+<th>Ghi chú</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chỉ dẫn hệ thống</td>
+<td>vai trò, quy tắc, định dạng</td>
+<td>ổn định, đặt đầu để dùng prompt caching</td>
+</tr>
+<tr>
+<td>Định nghĩa tool</td>
+<td>tên, mô tả, lược đồ tham số</td>
+<td>nhiều tool tốn nhiều token và làm mô hình khó chọn</td>
+</tr>
+<tr>
+<td>Tài liệu truy xuất</td>
+<td>đoạn văn liên quan tới yêu cầu</td>
+<td>chọn bằng truy xuất và bộ lọc metadata (<a href="ungdung-ch08.html#sec-8" class="xref">Chương 8</a>)</td>
+</tr>
+<tr>
+<td>Kết quả tool</td>
+<td>dữ liệu trả về từ API, cơ sở dữ liệu, công cụ</td>
+<td>có thể rất dài; cần cắt gọn</td>
+</tr>
+<tr>
+<td>Lịch sử hội thoại</td>
+<td>các lượt trước</td>
+<td>tăng dần theo thời gian</td>
+</tr>
+<tr>
+<td>Bộ nhớ dài hạn</td>
+<td>sở thích của người dùng, dữ kiện đã học</td>
+<td>lấy chọn lọc theo mức liên quan (<a href="ungdung-ch05.html#sec-5-4" class="xref">Mục 5.4</a>)</td>
+</tr>
+<tr>
+<td>Resource qua MCP</td>
+<td>tệp, bản ghi do server cung cấp</td>
+<td><a href="ungdung-ch10.html#sec-10" class="xref">Chương 10</a></td>
+</tr>
+</tbody>
+</table></div>
+<figure class="figure" id="hinh-3">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 3"><img src="figs/ud03_ngucanh.png" alt="Hình 3" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 3.</strong> Ngân sách cửa sổ ngữ cảnh của một yêu cầu điển hình có tool và truy xuất. Câu hỏi của người dùng chỉ chiếm khoảng 1% số token.</figcaption>
+</figure>
+<p>Có hai chiến lược đưa thông tin vào ngữ cảnh. <strong>Truy xuất trước</strong> (pre-retrieval): trước khi gọi mô hình, ứng dụng truy xuất các tài liệu có vẻ liên quan và đặt vào ngữ cảnh, như trong RAG. <strong>Truy xuất đúng lúc</strong> (just-in-time): ngữ cảnh chỉ chứa các định danh nhẹ, như đường dẫn tệp, tên bảng, địa chỉ web, và agent tự dùng tool để tải nội dung khi thấy cần. Cách thứ hai giống cách con người làm việc: không ai đọc thuộc cả thư viện trước khi bắt đầu, mà nhớ chỗ để tìm. Nó tiết kiệm ngữ cảnh và cho agent tự khám phá, đổi lại chậm hơn vì cần thêm lời gọi tool. Nhiều hệ thống kết hợp cả hai: truy xuất trước một ít thông tin nền cốt lõi, rồi để agent tự tìm phần chi tiết.</p>
+<h3 id="sec-5-3" class="heading"><span class="hnum">5.3</span><span class="htext">Ngữ cảnh dài và vị trí của thông tin<a class="anchor" href="#sec-5-3" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Mô hình nhận được một triệu token không có nghĩa là nó dùng tốt mọi token trong đó. Liu và cộng sự (2024) đưa một câu hỏi kèm nhiều tài liệu, trong đó chỉ một tài liệu chứa câu trả lời, và thay đổi vị trí của tài liệu đó. Độ chính xác cao nhất khi tài liệu đúng nằm ở đầu hoặc cuối ngữ cảnh, và giảm rõ khi nó nằm ở giữa, hiện tượng được gọi là <strong>lost in the middle</strong>. Bộ đánh giá RULER (Hsieh và cộng sự, 2024) cho thấy với các nhiệm vụ khó hơn việc tìm một câu, độ dài ngữ cảnh mà mô hình dùng hiệu quả thường ngắn hơn nhiều so với độ dài được công bố. Báo cáo của Chroma (Hong, Troynikov và Huber, 2025) ghi nhận hiện tượng tương tự trên nhiều mô hình hiện đại và gọi nó là <strong>context rot</strong>: khi số token đầu vào tăng, khả năng nhớ lại và dùng thông tin trong ngữ cảnh giảm, kể cả với nhiệm vụ đơn giản. Một cách giải thích trực quan: với <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> token, cơ chế attention phải phân bổ trên <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>n</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">n^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span> cặp quan hệ, nên ngữ cảnh càng dài thì &quot;ngân sách chú ý&quot; dành cho mỗi thông tin càng mỏng.</p>
+<p>Thí nghiệm trong <code>code/ungdung/experiments_llm.py</code> đo hiện tượng này trên một mô hình nhỏ. Mỗi lần thử, một &quot;đống cỏ&quot; được ghép từ các đoạn văn ngẫu nhiên của các giáo trình tới độ dài khoảng 1 000, 2 000 hoặc 4 000 token, rồi một dữ kiện (kim) được chèn vào ở vị trí 0%, 25%, 50%, 75% hoặc 100% của ngữ cảnh: &quot;Mật mã của kho lưu trữ số 37 là 5821.&quot; Mô hình Qwen2.5-0.5B-Instruct được hỏi mật mã của đúng kho đó, và câu trả lời được tính là đúng nếu có chứa đúng bốn chữ số của mật mã (mô hình được sinh tối đa 40 token, vì nó thường nhắc lại cả câu trước khi nêu con số). Mỗi ô của bảng là tỉ lệ trả lời đúng trên 10 lần thử với đống cỏ và dữ kiện khác nhau.</p>
+<figure class="figure" id="hinh-4">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 4"><img src="figs/ud14_kim.png" alt="Hình 4" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 4.</strong> Tỉ lệ trả lời đúng mật mã theo độ dài ngữ cảnh và vị trí của dữ kiện, với Qwen2.5-0.5B-Instruct. Mỗi ô là 10 lần thử.</figcaption>
+</figure>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Độ dài ngữ cảnh</th>
+<th>Vị trí 0%</th>
+<th>25%</th>
+<th>50%</th>
+<th>75%</th>
+<th>100%</th>
+<th>Trung bình</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>khoảng 1 000 token</td>
+<td>0,7</td>
+<td>1,0</td>
+<td>0,9</td>
+<td>0,9</td>
+<td>1,0</td>
+<td>0,90</td>
+</tr>
+<tr>
+<td>khoảng 2 000 token</td>
+<td>0,7</td>
+<td>1,0</td>
+<td>0,9</td>
+<td>1,0</td>
+<td>0,4</td>
+<td>0,80</td>
+</tr>
+<tr>
+<td>khoảng 4 000 token</td>
+<td>0,7</td>
+<td>0,6</td>
+<td>0,6</td>
+<td>0,8</td>
+<td>0,6</td>
+<td>0,66</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Độ chính xác giảm khi ngữ cảnh dài ra.</strong> Tính trên cả năm vị trí, tỉ lệ đúng giảm từ 0,90 ở khoảng 1 000 token xuống 0,80 ở 2 000 token và 0,66 ở 4 000 token, dù nhiệm vụ không đổi. Mỗi độ dài có 50 lần thử; mức giảm từ 45/50 xuống 33/50 lớn hơn nhiều so với dao động ngẫu nhiên (kiểm định chính xác Fisher, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0,007</mn></mrow><annotation encoding="application/x-tex">p = 0{,}007</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">007</span></span></span></span>). Trong khi đó, 4 000 token mới chỉ bằng khoảng một phần tám cửa sổ ngữ cảnh 32 768 token của mô hình. Đây là một ví dụ nhỏ của hiện tượng context rot: mô hình nhận được ngữ cảnh dài không có nghĩa là dùng tốt thông tin trong đó.</p>
+<p><strong>Không thấy rõ dạng chữ U theo vị trí.</strong> Với mô hình và nhiệm vụ này, vị trí giữa không kém hơn đầu và cuối một cách nhất quán: ở 1 000 và 2 000 token, vị trí 50% đúng 9 trên 10 lần. Các ô thấp nhất nằm ở những vị trí khác nhau: vị trí đầu cho 0,7 ở cả ba độ dài, và vị trí cuối ở 2 000 token chỉ đúng 4 trên 10 lần. Với 10 lần thử mỗi ô, khoảng tin cậy 95% của tỉ lệ 7/10 là từ khoảng 0,40 tới 0,89, nên phần lớn chênh lệch giữa các ô đơn lẻ nằm trong dao động ngẫu nhiên; một ô bất thường như 4/10 cần thêm lần thử trước khi kết luận. Liu và cộng sự đo trên các mô hình lớn hơn, với nhiệm vụ trả lời câu hỏi từ nhiều tài liệu. Hình dạng của đường cong theo vị trí phụ thuộc vào mô hình và nhiệm vụ, nên cần được đo trên chính mô hình và loại nhiệm vụ của ứng dụng.</p>
+<p>Những kết quả này đến từ một mô hình 0,5 tỉ tham số; các mô hình lớn hiện nay tìm một câu đơn lẻ như thế tốt hơn nhiều, gần như hoàn hảo ở độ dài này. Nhưng các nghiên cứu nêu trên cho thấy hiện tượng suy giảm vẫn xuất hiện với mô hình lớn khi nhiệm vụ khó hơn: thông tin cần tìm không được diễn đạt giống câu hỏi, cần kết hợp nhiều mẩu thông tin, hoặc ngữ cảnh chứa các đoạn gây nhiễu gần giống đáp án.</p>
+<blockquote class="callout callout--nhan-xet">
+<p class="callout-label"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-nhan-xet"></use></svg><span>Nhận xét (Hệ quả thiết kế)</span></p><p>Không nên coi cửa sổ ngữ cảnh lớn là lý do để đưa mọi thứ vào. Những thông tin quan trọng nhất, như chỉ dẫn cốt lõi và câu hỏi, nên đặt ở đầu hoặc ở cuối ngữ cảnh; nhiều hệ thống lặp lại nhiệm vụ ngay trước câu hỏi. Khi cần xử lý tài liệu rất dài, các chiến lược chia nhỏ thường cho kết quả đáng tin hơn một lần gọi với toàn bộ tài liệu: xử lý từng phần rồi tổng hợp (map-reduce), hoặc truy xuất các phần liên quan rồi mới đọc kỹ. Và chất lượng ở độ dài ngữ cảnh mà ứng dụng thật sự dùng cần được đo trên bộ đánh giá, không suy ra từ con số độ dài tối đa của mô hình.</p>
+</blockquote>
+<h3 id="sec-5-4" class="heading"><span class="hnum">5.4</span><span class="htext">Bộ nhớ và trạng thái<a class="anchor" href="#sec-5-4" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Mô hình không nhớ gì giữa các lần gọi; mọi &quot;trí nhớ&quot; là do ứng dụng quản lý. Các loại bộ nhớ thường dùng:</p>
+<ul>
+<li><strong>Bộ nhớ ngắn hạn</strong>: lịch sử hội thoại gần đây, gửi lại nguyên văn trong mỗi lần gọi. Khi lịch sử dài quá ngân sách, cần cắt bớt hoặc nén.</li>
+<li><strong>Nén ngữ cảnh</strong> (compaction): khi ngữ cảnh gần đầy, tóm tắt phần cũ thành một bản ngắn giữ lại các quyết định, dữ kiện và việc còn dang dở, rồi tiếp tục với bản tóm tắt thay cho nguyên văn. Cái khó là chọn giữ gì: tóm tắt quá mạnh làm mất chi tiết mà về sau mới thấy là quan trọng.</li>
+<li><strong>Ghi chú có cấu trúc</strong> (structured note-taking): agent tự ghi các ghi chú ra ngoài ngữ cảnh, ví dụ một tệp danh sách việc cần làm hoặc nhật ký tiến độ, và đọc lại khi cần. Cách này giúp agent làm việc liên tục qua nhiều cửa sổ ngữ cảnh.</li>
+<li><strong>Bộ nhớ dài hạn</strong>: sở thích, thông tin về người dùng, các dữ kiện đã xác nhận, lưu trong cơ sở dữ liệu (thường có embedding để truy xuất theo mức liên quan) và được lấy ra chọn lọc khi phù hợp với yêu cầu hiện tại.</li>
+</ul>
+<p>Thiết kế bộ nhớ cần trả lời bốn câu hỏi: ghi nhớ điều gì, lấy ra khi nào, cập nhật hoặc quên thế nào khi thông tin cũ không còn đúng, và người dùng có biết, xem, xoá được những gì hệ thống nhớ về họ không. Câu hỏi cuối vừa là vấn đề trải nghiệm vừa là vấn đề quyền riêng tư (<a href="ungdung-ch11.html#sec-11-3" class="xref">Mục 11.3</a>).</p>
+<h3 id="sec-5-5" class="heading"><span class="hnum">5.5</span><span class="htext">Nhiều agent và cô lập ngữ cảnh<a class="anchor" href="#sec-5-5" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Khi nhiệm vụ lớn hơn một cửa sổ ngữ cảnh, một cách tổ chức là chia việc cho các <strong>agent con</strong>, mỗi agent có cửa sổ ngữ cảnh riêng. Agent con có thể đọc hàng chục nghìn token tài liệu, thử nhiều hướng, và chỉ trả về cho agent chính một bản tóm tắt ngắn, thường cỡ một tới hai nghìn token. Agent chính vì vậy giữ được ngữ cảnh gọn, chứa kế hoạch và kết luận thay vì mọi chi tiết. Đây gọi là <strong>cô lập ngữ cảnh</strong> (context isolation).</p>
+<p>Chia sẻ ngữ cảnh giữa các agent là một quyết định thiết kế: chia sẻ quá ít thì các agent làm trùng việc hoặc đưa ra quyết định mâu thuẫn; chia sẻ quá nhiều thì mất lợi ích của việc cô lập. Mẫu thường dùng là agent chính giao cho mỗi agent con một mô tả nhiệm vụ đầy đủ (mục tiêu, phạm vi, định dạng kết quả, những gì không cần làm), và agent con trả về kết quả theo đúng định dạng đó. <a href="ungdung-ch09.html#sec-9-6" class="xref">Mục 9.6</a> trình bày số liệu về chi phí và lợi ích của hệ nhiều agent.</p>
+<h3 id="sec-5-6" class="heading"><span class="hnum">5.6</span><span class="htext">Các kiểu hỏng của ngữ cảnh<a class="anchor" href="#sec-5-6" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Breunig (2025) mô tả bốn kiểu hỏng thường gặp khi ngữ cảnh dài và được tích luỹ qua nhiều bước:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Kiểu hỏng</th>
+<th>Mô tả</th>
+<th>Cách xử lý</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nhiễm độc ngữ cảnh (context poisoning)</td>
+<td>một thông tin sai, ví dụ do ảo giác, lọt vào ngữ cảnh và được các bước sau dựa vào lặp đi lặp lại</td>
+<td>kiểm tra dữ kiện trước khi ghi vào bộ nhớ; cho phép xoá hoặc sửa</td>
+</tr>
+<tr>
+<td>Phân tán (context distraction)</td>
+<td>lịch sử quá dài làm mô hình lặp lại hành động cũ thay vì suy nghĩ về bước tiếp theo</td>
+<td>nén ngữ cảnh; giữ lịch sử gọn</td>
+</tr>
+<tr>
+<td>Nhầm lẫn (context confusion)</td>
+<td>thông tin hoặc tool không liên quan làm mô hình chọn sai</td>
+<td>chọn tool và tài liệu theo từng nhiệm vụ thay vì đưa tất cả vào</td>
+</tr>
+<tr>
+<td>Mâu thuẫn (context clash)</td>
+<td>các phần của ngữ cảnh mâu thuẫn nhau, ví dụ thông tin cũ và thông tin cập nhật</td>
+<td>ghi thời điểm và nguồn; loại bỏ phiên bản cũ</td>
+</tr>
+</tbody>
+</table></div>
+<p>Điểm chung của cả bốn: chúng khó phát hiện nếu chỉ nhìn câu trả lời cuối, và dễ thấy nếu xem được ngữ cảnh thật mà mô hình đã nhận ở từng bước. Đó là lý do <a href="ungdung-ch13.html#sec-13" class="xref">Chương 13</a> nhấn mạnh việc ghi lại đầu vào đầy đủ của mỗi lần gọi.</p>
+<h3 id="sec-5-7" class="heading"><span class="hnum">5.7</span><span class="htext">Bảo mật và đánh giá ngữ cảnh<a class="anchor" href="#sec-5-7" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p><strong>Bảo mật.</strong> Mọi thứ đưa vào ngữ cảnh đều có thể ảnh hưởng tới hành vi của mô hình, và có thể bị mô hình nhắc lại trong câu trả lời. Hai hệ quả: nội dung không đáng tin (email, trang web, tài liệu do người ngoài tạo, kết quả của MCP server lạ) là kênh cho prompt injection (<a href="ungdung-ch11.html#sec-11" class="xref">Chương 11</a>); và thông tin người dùng không được phép xem không được lọt vào ngữ cảnh ngay từ đầu, vì một chỉ dẫn &quot;đừng tiết lộ&quot; không phải là hàng rào đáng tin. Bí mật như khoá API và mật khẩu không bao giờ nên nằm trong ngữ cảnh.</p>
+<p><strong>Đánh giá.</strong> Nhiều lỗi của ứng dụng LLM thực chất là lỗi ngữ cảnh: thông tin cần thiết không có mặt, có mặt nhưng bị chôn giữa nhiều thông tin khác, hoặc bị cắt khi ngữ cảnh quá dài. Các câu hỏi đánh giá riêng cho ngữ cảnh: với mỗi yêu cầu trong bộ đánh giá, thông tin cần để trả lời có nằm trong ngữ cảnh không (đo được bằng recall của truy xuất); ngữ cảnh trung bình dài bao nhiêu token và thành phần nào chiếm nhiều nhất; và bỏ một thành phần đi (ví dụ lịch sử cũ, hoặc một nửa số tool) thì chất lượng thay đổi thế nào. Thí nghiệm loại bỏ từng thành phần (ablation) như vậy thường cho thấy một phần đáng kể của ngữ cảnh không đóng góp gì, và có thể bỏ để giảm chi phí mà không mất chất lượng.</p>
+<hr>
+<section class="quiz" data-quiz data-chapter="5"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">3 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Context engineering khác prompt engineering ở chỗ nào?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Không khác, hai tên gọi của một việc</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Context engineering quản lý toàn bộ những gì nằm trong cửa sổ ngữ cảnh ở mỗi lần gọi, không chỉ chỉ dẫn</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Context engineering chỉ dùng cho mô hình ảnh</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Context engineering là huấn luyện lại mô hình</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Ngữ cảnh gồm chỉ dẫn, định nghĩa tool, tài liệu truy xuất, kết quả tool, lịch sử và bộ nhớ; với agent, nó thay đổi sau mỗi bước (<a href="ungdung-ch05.html#sec-5-1" class="xref">Mục 5.1</a>).</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Hiện tượng &quot;lost in the middle&quot; nói gì?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Mô hình luôn bỏ qua phần đầu ngữ cảnh</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Khả năng dùng một thông tin phụ thuộc vào vị trí của nó trong ngữ cảnh, thường kém hơn khi thông tin nằm ở giữa ngữ cảnh dài</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Mô hình bị lạc khi có quá nhiều tool</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Mô hình mất kết nối với máy chủ giữa chừng</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Liu và cộng sự (2024) ghi nhận hiện tượng này; <a href="ungdung-ch05.html#sec-5-3" class="xref">Mục 5.3</a> đo trên một mô hình nhỏ với các vị trí và độ dài khác nhau.</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">Vì sao agent con trong hệ nhiều agent giúp quản lý ngữ cảnh?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì agent con dùng mô hình lớn hơn</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì mỗi agent con có cửa sổ ngữ cảnh sạch cho phần việc của nó và chỉ trả về bản tóm tắt</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì agent con không cần chỉ dẫn</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Vì agent con không tốn token</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Cô lập ngữ cảnh giữ cho ngữ cảnh của agent chính gọn, đổi lại tổng số token tăng nhiều (<a href="ungdung-ch05.html#sec-5-5" class="xref">Mục 5.5</a>, <a href="ungdung-ch09.html#sec-9-6" class="xref">9.6</a>).</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/3</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="ungdung-ch04.html"><span class="pager-dir">← Trước</span><span class="pager-title">Prompt engineering</span></a><a class="pager-link pager-next" href="ungdung-ch06.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Embedding và tìm kiếm ngữ nghĩa</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-5-1"><span class="toc-num">5.1</span><span>Từ prompt engineering tới context engineering</span></a></li><li class="toc-l3"><a href="#sec-5-2"><span class="toc-num">5.2</span><span>Lớp ngữ cảnh và các nguồn ngữ cảnh</span></a></li><li class="toc-l3"><a href="#sec-5-3"><span class="toc-num">5.3</span><span>Ngữ cảnh dài và vị trí của thông tin</span></a></li><li class="toc-l3"><a href="#sec-5-4"><span class="toc-num">5.4</span><span>Bộ nhớ và trạng thái</span></a></li><li class="toc-l3"><a href="#sec-5-5"><span class="toc-num">5.5</span><span>Nhiều agent và cô lập ngữ cảnh</span></a></li><li class="toc-l3"><a href="#sec-5-6"><span class="toc-num">5.6</span><span>Các kiểu hỏng của ngữ cảnh</span></a></li><li class="toc-l3"><a href="#sec-5-7"><span class="toc-num">5.7</span><span>Bảo mật và đánh giá ngữ cảnh</span></a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-tim"></use></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+<script src="assets/router.js" defer></script>
+<script src="assets/preview.js" defer></script>
+
+</body>
+</html>

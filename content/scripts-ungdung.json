@@ -1,0 +1,17 @@
+[
+ {
+  "file": "experiments.py",
+  "added": true,
+  "note": "Sinh Hình 2, 5, 7, 10, 13 và các số liệu không cần mô hình lớn: số token của cùng một văn bản tiếng Việt và tiếng Anh với ba tokenizer thật và với BPE tự huấn luyện, KV cache và chi phí một yêu cầu, truy xuất bằng BM25, TF-IDF, LSA và RRF trên văn bản của lộ trình, kích thước đoạn, IVF, product quantization và tìm kiếm trên đồ thị, độ tin cậy của agent nhiều bước, và cỡ mẫu cần cho đánh giá."
+ },
+ {
+  "file": "experiments_llm.py",
+  "added": true,
+  "note": "Sinh Hình 4, 6, 12 và các số liệu có dùng mô hình học sâu thật: truy xuất bằng multilingual-e5-small, RAG trả lời câu hỏi trắc nghiệm với Qwen2.5-0.5B-Instruct, tìm một dữ kiện theo vị trí trong ngữ cảnh dài, và prompt injection gián tiếp với bốn cách viết prompt. Chạy 1 tới 2 giờ trên CPU."
+ },
+ {
+  "file": "fig_diagrams.py",
+  "added": true,
+  "note": "Sinh Hình 1, 3, 8, 9, 11, 14, 15: các thành phần của một ứng dụng dùng LLM, ngân sách cửa sổ ngữ cảnh, quy trình RAG, vòng lặp của agent, kiến trúc MCP, một trace minh hoạ, và số token của ảnh theo độ phân giải. Đây là hình vẽ bằng matplotlib, không phải kết quả thí nghiệm."
+ }
+]

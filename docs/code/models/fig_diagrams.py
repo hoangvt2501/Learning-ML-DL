@@ -1,4 +1,4 @@
-"""Sinh Hình 1, 3, 6, 8, 11 và 14 của giáo trình "Mô hình và kiến trúc": các sơ đồ.
+"""Sinh Hình 1, 3, 6, 8, 11 và 12 của giáo trình "Học sâu": các sơ đồ.
 
 Đây là hình vẽ tay bằng matplotlib chứ không phải kết quả thí nghiệm, nhưng vẫn để
 trong mã nguồn để sửa được và để mọi chi tiết khớp với chữ trong bài.
@@ -240,8 +240,8 @@ ax.text(6, 7.7, "Cùng một bộ khung, năm chi tiết đã đổi", ha="cente
         fontsize=9.5, weight="bold", color=INK)
 rows = [
     ("Vị trí trong khối", "Post-LN: $x + \\mathrm{Sublayer}(x)$ rồi mới LN",
-     "Pre-LN: LN trước, tắt đi thẳng", "huấn luyện ổn định, bỏ được warmup dài"),
-    ("Chuẩn hoá", "LayerNorm (trừ trung bình, chia độ lệch)",
+     "Pre-LN: LN trước, tắt đi thẳng", "huấn luyện ổn định hơn, ít cần warmup"),
+    ("Chuẩn hoá", "LayerNorm (trừ trung bình, chia độ lệch chuẩn)",
      "RMSNorm (chỉ chia chuẩn bậc hai)", "rẻ hơn, gần như không mất chất lượng"),
     ("Vị trí token", "Sin/cos cộng vào embedding",
      "RoPE: xoay $Q$, $K$ theo vị trí", "ngoại suy độ dài tốt hơn, quan hệ tương đối"),
@@ -262,4 +262,4 @@ for i, (comp, old, new, why) in enumerate(rows):
     box(ax, 9.9, y, 1.9, 1.0, why, fc="white", ec=DIM, fs=7.0)
 fig.tight_layout(); fig.savefig(OUT + "models14_modern.png"); plt.close(fig)
 
-print("Đã lưu Hình 1, 3, 6, 8, 11 và 14 vào " + OUT)
+print("Đã lưu Hình 1, 3, 6, 8, 11 và 12 vào " + OUT)

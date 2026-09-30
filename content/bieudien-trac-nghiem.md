@@ -1,368 +1,375 @@
-# Ngân hàng câu hỏi tự kiểm tra — Biểu diễn, Sinh và Căn chỉnh
+# Ngân hàng câu hỏi tự kiểm tra — Biểu diễn, mô hình sinh và căn chỉnh
 
 Cú pháp: `## Chương N` mở một nhóm, `### …` là câu hỏi, `- [x]` đánh dấu đáp án đúng,
 dòng `>` là phần giải thích hiện ra sau khi trả lời.
 
 ## Chương 2
 
-### Skip-gram với lấy mẫu âm thực chất đang phân rã cái gì?
-- [ ] Ma trận đồng hiện thô
+### Skip-gram với lấy mẫu âm thực chất phân rã ma trận nào?
+- [ ] Ma trận số lần đồng hiện thô
 - [x] Ma trận PMI dịch đi một lượng $\log k$
 - [ ] Ma trận hiệp phương sai của các từ
-- [ ] Không phân rã gì cả, nó là mạng nơ-ron sâu
-> Kết quả của Levy và Goldberg (2014). Cho đạo hàm của hàm mục tiêu kỳ vọng bằng 0 sẽ ra $\langle w_i, c_j\rangle = \mathrm{PMI}(i,j) - \log k$. Kiểm chứng ở Mục 2.6: ở hạng đầy đủ, xuống dốc hội tụ về đúng PMI với tương quan **0,9995**.
+- [ ] Không phân rã ma trận nào, vì nó là mạng nơ-ron sâu
+> Kết quả của Levy và Goldberg (2014): cho đạo hàm của hàm mục tiêu kỳ vọng bằng 0 được $\langle w_i, c_j\rangle = \mathrm{PMI}(i,j) - \log k$. Ở Mục 2.6, với hạng đầy đủ, tích vô hướng học được có tương quan 0,9995 với PMI.
 
-### Vì sao dùng PMI thay vì đếm đồng hiện thô?
+### Vì sao dùng PMI thay cho số lần đồng hiện thô?
 - [ ] Vì PMI dễ tính hơn
-- [x] Vì đếm thô bị chi phối bởi từ **phổ biến**; PMI hỏi đúng câu "đồng hiện nhiều hơn mức ngẫu nhiên bao nhiêu"
+- [x] Vì số đếm thô bị các từ phổ biến chi phối; PMI đo hai từ cùng xuất hiện nhiều hơn mức ngẫu nhiên bao nhiêu
 - [ ] Vì PMI luôn dương nên dễ phân rã
 - [ ] Vì PMI không cần chuẩn hoá
-> Từ "của" đồng hiện với mọi thứ không phải vì nó liên quan tới mọi thứ. Mẫu số $p(w)p(c)$ của PMI chính là xác suất nếu hai từ độc lập, nên tỉ số đo đúng phần vượt trội.
+> Một từ như "của" đồng hiện với hầu hết các từ vì nó phổ biến, không vì nó liên quan. Mẫu số $p(w)p(c)$ của PMI là xác suất đồng hiện nếu hai từ độc lập, nên tỉ số đo phần vượt mức ngẫu nhiên.
 
 ### Lấy mẫu âm giải quyết vấn đề gì?
-- [x] Mẫu số của softmax cộng trên toàn bộ từ vựng cho **mỗi** cặp huấn luyện
+- [x] Mẫu số của softmax là tổng trên toàn bộ từ vựng, tính lại cho mỗi cặp huấn luyện
 - [ ] Dữ liệu huấn luyện có quá nhiều nhiễu
-- [ ] Embedding bị quá khớp
+- [ ] Embedding bị overfitting
 - [ ] Gradient bị tiêu biến
-> Với $V = 2$ triệu và $d = 300$, softmax đầy đủ tốn 1,2 tỉ phép tính mỗi cặp còn lấy mẫu âm $k=5$ tốn 3 600 — rẻ hơn **333 000 lần**. Điểm mấu chốt: chi phí không còn phụ thuộc $V$.
+> Với từ vựng 2 triệu từ và vector 300 chiều, softmax đầy đủ tốn khoảng 1,2 tỉ phép tính mỗi cặp, lấy mẫu âm với $k = 5$ tốn 3 600. Chi phí của lấy mẫu âm không phụ thuộc kích thước từ vựng.
 
-### Vì sao ở hạng thấp skip-gram lại cho embedding có ích hơn ở hạng đầy đủ?
-- [ ] Vì hạng thấp tính nhanh hơn
-- [x] Vì nó **không thể** khớp chính xác nên buộc phải chọn giữ lại cái gì — chính sự ép buộc ấy tạo ra khái quát hoá
-- [ ] Vì hạng đầy đủ luôn bị quá khớp
-- [ ] Vì PMI chỉ có hạng thấp
-> Nếu khớp được hoàn hảo thì ta chỉ có một cách viết lại ma trận PMI chứ không có sự khái quát hoá nào. Đây là cùng ý với xấp xỉ hạng thấp ở Chương 14 của *Nền tảng*.
+### Trong thí nghiệm ở Mục 2.6, embedding skip-gram hạng 8 giải đúng bao nhiêu phép loại suy, so với SVD trên PPMI cùng số chiều?
+- [ ] Cả hai đều đạt 100%
+- [x] Khoảng 20%, so với 100% của SVD
+- [ ] Khoảng 90%, gần bằng SVD
+- [ ] Cao hơn SVD vì skip-gram tối ưu trực tiếp
+> Hai phương pháp nhắm tới cùng một ma trận đích nhưng xấp xỉ khác nhau khi bị giới hạn số chiều: SVD cho xấp xỉ tốt nhất với trọng số như nhau cho mọi phần tử, skip-gram cho xấp xỉ có trọng số theo tần suất và dùng hai bộ vector. Trên dữ liệu thật, khác biệt giữa các phương pháp phụ thuộc nhiều vào siêu tham số (Levy, Goldberg và Dagan, 2015).
 
-### Mũ 3/4 trong phân phối lấy mẫu âm có cơ sở gì?
-- [ ] Suy ra từ lý thuyết thông tin
-- [x] **Chọn bằng thực nghiệm** — bài báo gốc nói rõ như vậy
+### Vì sao độ chính xác loại suy của SVD giảm khi giữ 12 hoặc 16 chiều, rồi lại đạt 100% ở 20 chiều?
+- [ ] Vì giữ nhiều chiều hơn luôn gây overfitting
+- [x] Vì ma trận PPMI chỉ có 8 trị riêng dương; các hướng tiếp theo ứng với trị riêng âm, và SVD không phân biệt dấu
+- [ ] Vì thuật toán SVD không hội tụ ở số chiều cao
+- [ ] Vì phép loại suy chỉ dùng 8 từ
+> Tám trị riêng dương ứng với cấu trúc hai trục của dữ liệu ($1 + 4 + 3 = 8$); mười hai trị riêng âm sinh ra vì đường chéo của ma trận bằng 0. Giữ đủ 20 chiều thì ma trận được tái tạo chính xác (Mục 2.4).
+
+### Số mũ 3/4 trong phân phối lấy mẫu âm có cơ sở gì?
+- [ ] Được suy ra từ lý thuyết thông tin
+- [x] Được chọn bằng thực nghiệm, như bài báo gốc ghi rõ
 - [ ] Là hệ quả của định lý giới hạn trung tâm
-- [ ] Để phân phối trở thành phân phối chuẩn
-> Nó chạy tốt hơn mũ 1 và mũ 0; vì sao thì không ai chứng minh. Bịa một lý thuyết cho nó khi phỏng vấn là tự tố cáo.
+- [ ] Để phân phối lấy mẫu trở thành phân phối chuẩn
+> Số mũ 3/4 cho kết quả tốt hơn số mũ 1 (phân phối unigram) và số mũ 0 (phân phối đều) trong thí nghiệm của Mikolov và cộng sự (2013); không có lý thuyết nào dẫn tới con số này.
 
 ## Chương 3
 
-### Vì sao hai vector embedding ngẫu nhiên vẫn có thể cho cosine rất cao?
-- [x] Vì đám mây embedding **lệch khỏi gốc toạ độ** — hiện tượng bất đẳng hướng
+### Vì sao hai embedding không liên quan vẫn có thể có cosine rất cao?
+- [x] Vì đám mây embedding lệch khỏi gốc toạ độ (tính bất đẳng hướng), nên mọi vector có chung một thành phần lớn
 - [ ] Vì số chiều quá cao
-- [ ] Vì chúng chưa được chuẩn hoá độ dài
+- [ ] Vì các vector chưa được chuẩn hoá độ dài
 - [ ] Vì cosine luôn dương
-> Đo được ở Mục 3.2: 900 vector ngẫu nhiên độc lập cộng một hằng số cho cosine trung bình **0,8724**. Không có quan hệ ngữ nghĩa nào ở đó, chỉ là mọi vector cùng lệch về một hướng.
+> Ở Mục 3.2, 900 vector ngẫu nhiên độc lập cộng một vector hằng có cosine trung bình 0,8724, dù không có quan hệ gì với nhau.
 
-### Cách chữa rẻ nhất cho bất đẳng hướng là gì?
-- [x] Trừ vector trung bình của cả tập trước khi so sánh
-- [ ] Nâng ngưỡng điểm cosine lên
+### Cách rẻ nhất để giảm tác động của tính bất đẳng hướng là gì?
+- [x] Trừ vector trung bình của cả tập trước khi tính cosine
+- [ ] Nâng ngưỡng cosine lên
 - [ ] Giảm số chiều bằng PCA
-- [ ] Dùng khoảng cách Euclid thay cosine
-> Đo được: cosine trung bình về $-0{,}0011$ ở cả ba mức lệch tâm. Nâng ngưỡng là chữa triệu chứng chứ không chữa nguyên nhân, và sẽ hỏng ngay khi phân bố đổi.
+- [ ] Dùng khoảng cách Euclid thay cho cosine
+> Trừ trung bình đưa cosine trung bình về $-0{,}0011$ ở cả ba mức lệch tâm trong thí nghiệm. Nâng ngưỡng chỉ xử lý triệu chứng, và thứ hạng giữa các kết quả vẫn bị thành phần chung chi phối.
 
 ### Chiều thứ 37 của một embedding mang nghĩa gì?
 - [ ] Một đặc trưng ngữ nghĩa cụ thể mà mô hình học được
-- [x] Thường **không gì cả**, vì bài toán chỉ xác định embedding tới một phép xoay
-- [ ] Tần suất của từ
-- [ ] Độ dài của từ
-> Nếu $EE^\top \approx M$ thì $(EQ)(EQ)^\top = EE^\top$ với mọi ma trận trực giao $Q$. Thứ có nghĩa là **quan hệ** giữa các vector, không phải toạ độ — và đó cũng là lý do phép loại suy hoạt động, vì nó chỉ dùng hiệu vector.
+- [x] Thường không mang nghĩa riêng, vì xoay toàn bộ không gian không thay đổi mọi tích vô hướng
+- [ ] Tần suất của từ trong kho ngữ liệu
+- [ ] Vị trí của từ trong câu
+> Nếu $EE^\top \approx M$ thì $(EQ)(EQ)^\top = EE^\top$ với mọi ma trận trực giao $Q$, nên hệ trục toạ độ là tuỳ ý. Thứ có nghĩa là quan hệ giữa các vector (Mục 3.4).
 
 ## Chương 4
 
-### Vì sao trạng thái ẩn thô của một mô hình ngôn ngữ không phải embedding câu tốt?
-- [x] Vì mô hình được huấn luyện để **đoán token tiếp theo**, không có sức ép nào buộc hai câu cùng nghĩa phải gần nhau
-- [ ] Vì số chiều quá nhỏ
-- [ ] Vì nó chưa được lượng tử hoá
-- [ ] Vì nó chỉ chứa thông tin ngữ pháp
-> Cộng thêm việc các biểu diễn ấy bất đẳng hướng nặng. Cách chữa là huấn luyện thêm một bước với mục tiêu tương phản.
+### Vì sao trung bình các trạng thái ẩn của BERT chưa phải embedding câu tốt?
+- [ ] Vì BERT quá nhỏ
+- [x] Vì mô hình được huấn luyện để đoán token bị che, không được huấn luyện để các câu cùng nghĩa có biểu diễn gần nhau
+- [ ] Vì trạng thái ẩn có quá nhiều chiều
+- [ ] Vì BERT không dùng attention
+> Reimers và Gurevych (2019) cho thấy trung bình các vector đầu ra của BERT kém cả trung bình vector GloVe trên các bộ đánh giá độ tương đồng câu. Cần huấn luyện thêm với mục tiêu tương phản (Mục 4.2).
 
-### Trong học tương phản, mẫu âm lấy từ đâu?
-- [x] Từ **các câu khác trong cùng lô** — nên lô càng lớn càng nhiều mẫu âm
-- [ ] Từ một kho mẫu âm chuẩn bị sẵn
-- [ ] Sinh ngẫu nhiên
+### Trong học tương phản với hàm mất mát InfoNCE, mẫu âm thường lấy từ đâu?
+- [ ] Phải thu thập riêng một tập mẫu âm có gán nhãn
+- [x] Từ các câu khác trong cùng một lô huấn luyện
+- [ ] Từ các từ ngẫu nhiên trong từ vựng
 - [ ] Không cần mẫu âm
-> Đây cũng là một dạng lấy mẫu âm, đúng tinh thần Chương 2. Đó là lý do các mô hình embedding tốt thường huấn luyện với lô rất lớn.
+> Mỗi câu còn lại trong lô là một "lớp sai" trong hàm cross-entropy, nên lô càng lớn thì càng nhiều mẫu âm. Đây là cùng ý tưởng với lấy mẫu âm của word2vec.
 
-### Một kho 10 triệu vector 768 chiều ở FP32 chiếm bao nhiêu?
-- [ ] 3,1 GB
-- [x] **30,7 GB**
-- [ ] 307 GB
-- [ ] 7,7 GB
-> $10^7 \times 768 \times 4 = 30{,}7$ GB. Con số này quyết định phần lớn kiến trúc: nó không vừa RAM máy thường, nên hoặc phải nén hoặc phải chia máy. Tính nó **trước** khi chọn thư viện.
+### Một kho 10 triệu vector 768 chiều lưu ở FP32 chiếm bao nhiêu bộ nhớ?
+- [ ] Khoảng 3 GB
+- [x] Khoảng 30,7 GB
+- [ ] Khoảng 7,7 GB
+- [ ] Khoảng 307 GB
+> $10^7 \times 768 \times 4$ byte $= 30{,}7$ GB. Con số này quyết định nhiều lựa chọn kiến trúc: giảm độ chính xác số, nén bằng product quantization, hay chia kho cho nhiều máy (Mục 4.3).
 
 ## Chương 5
 
-### Vì sao đoán từ tiếp theo lại dạy được nhiều thứ đến vậy?
-- [ ] Vì mô hình thấy rất nhiều dữ liệu
-- [x] Vì để đoán đúng trong **mọi** ngữ cảnh, mô hình buộc phải học sự thật về thế giới, ngữ pháp, số học, cấu trúc mã — không cái nào được dạy riêng
-- [ ] Vì kiến trúc Transformer rất mạnh
-- [ ] Vì dữ liệu web đã được lọc kỹ
-> Đây là nhiệm vụ **đại diện**: không phải mục tiêu cuối mà là cái cớ để mô hình phải xây dựng biểu diễn hữu ích về thế giới.
+### Vì sao dự đoán token tiếp theo dạy được nhiều kỹ năng như vậy?
+- [ ] Vì mô hình được dạy riêng từng kỹ năng
+- [x] Vì muốn dự đoán đúng trong mọi ngữ cảnh, mô hình buộc phải nắm sự kiện, ngữ pháp, phép tính và cấu trúc mã nguồn
+- [ ] Vì dữ liệu tiền huấn luyện đã được gán nhãn theo kỹ năng
+- [ ] Vì mô hình rất nhiều tham số
+> Các kỹ năng là hệ quả của việc giảm mất mát trên một kho văn bản đủ lớn và đa dạng, không được dạy riêng (Mục 5.2).
 
-### Tiền huấn luyện hỏng khi nào?
-- [x] Khi miền đích quá xa miền tiền huấn luyện, hoặc nhiệm vụ đích cần thứ mà nhiệm vụ đại diện không đụng tới
-- [ ] Khi có quá nhiều dữ liệu có nhãn
-- [ ] Khi dùng tốc độ học nhỏ
-- [ ] Khi mô hình quá lớn
-> Mô hình học trên văn bản web không giúp được mấy cho tín hiệu cảm biến công nghiệp. Và nó giỏi ngữ pháp nhưng không giỏi số học nhiều chữ số, vì đoán từ tiếp theo hiếm khi đòi tính toán chính xác.
+### Trường hợp nào tiền huấn luyện giúp được ít nhất?
+- [ ] Nhiệm vụ phân loại văn bản tiếng Việt
+- [x] Miền dữ liệu đích rất xa miền tiền huấn luyện, như tín hiệu cảm biến công nghiệp với một mô hình học trên văn bản web
+- [ ] Nhiệm vụ trả lời câu hỏi
+- [ ] Nhiệm vụ có ít nhãn
+> Khi miền quá xa, các đặc trưng đã học không dùng lại được. Ngược lại, ít nhãn chính là tình huống tiền huấn luyện có ích nhất (Mục 5.4).
 
 ## Chương 6
 
-### Ở bao nhiêu mẫu có nhãn thì tinh chỉnh toàn phần tách hẳn lên so với đóng băng?
-- [ ] Ngay từ 20 mẫu
-- [x] Từ khoảng **150 mẫu**, và khoảng cách giãn dần tới 0,17 ở 8 000 mẫu
-- [ ] Chỉ khi có trên 100 000 mẫu
-- [ ] Không bao giờ — đóng băng luôn thắng
-> Ở 20 và 50 mẫu, ba cách nằm trong khoảng nhiễu của nhau và **không kết luận được gì**. Kết luận từ hàng đầu tiên của một bảng như vậy là một lỗi thường gặp.
+### Trong thí nghiệm ở Mục 6.3, từ khoảng bao nhiêu mẫu có nhãn thì tinh chỉnh toàn phần vượt rõ các cách khác?
+- [ ] 20 mẫu
+- [x] Khoảng 150 mẫu trở lên
+- [ ] 8 000 mẫu
+- [ ] Không bao giờ
+> Với 20 và 50 mẫu, ba cách không phân biệt được. Từ 150 mẫu, tinh chỉnh toàn phần vượt lên và khoảng cách tăng dần, tới 0,17 so với đóng băng ở 8 000 mẫu.
 
-### Hiện tượng gì xảy ra với cột đóng băng khi dữ liệu tăng từ 500 lên 8 000 mẫu?
-- [ ] Nó tiếp tục tăng đều
-- [x] Nó **phẳng ra** (0,6220 → 0,6375 → 0,6452) — đây là trần chặn do đặc trưng cố định đặt ra
-- [ ] Nó giảm vì quá khớp
-- [ ] Nó vượt cột tinh chỉnh
-> Khi đặc trưng bị cố định, mô hình chỉ còn là hồi quy softmax trên chúng. Nhận ra trần này có giá trị ngay: nếu thêm dữ liệu không giúp gì thì thêm nữa cũng vô ích — phải mở đóng băng ra.
+### Điều gì xảy ra với cách đóng băng khi dữ liệu tăng từ 500 lên 8 000 mẫu?
+- [ ] Độ chính xác tăng đều
+- [x] Độ chính xác gần như không tăng (0,622; 0,638; 0,645), vì đặc trưng cố định đặt một giới hạn trên
+- [ ] Độ chính xác giảm vì overfitting
+- [ ] Độ chính xác vượt tinh chỉnh toàn phần
+> Khi đặc trưng bị cố định, mô hình chỉ còn là hồi quy softmax trên các đặc trưng đó. Thêm dữ liệu không vượt được giới hạn của đặc trưng; đây là tình trạng độ chệch cao.
 
-### Vì sao thí nghiệm ở Mục 6.2 phải tự cài mạng bằng NumPy thay vì dùng scikit-learn?
-- [x] Vì scikit-learn **không cho nạp trọng số ban đầu**, nên "tinh chỉnh" hoá ra lại là huấn luyện từ đầu — so sánh vô nghĩa
-- [ ] Vì scikit-learn chạy chậm
-- [ ] Vì cần GPU
-- [ ] Vì scikit-learn không hỗ trợ nhiều lớp
-> Lần đầu làm sai đúng chỗ này, và hai cột cho số gần như y hệt (0,6975 so với 0,6987) — dấu hiệu rõ ràng rằng phép so sánh hỏng.
+### Vì sao thí nghiệm ở Mục 6.2 tự cài mạng bằng NumPy thay cho `MLPClassifier` của scikit-learn?
+- [ ] Vì NumPy chạy nhanh hơn
+- [x] Vì `MLPClassifier` không cho nạp trọng số ban đầu, nên "tinh chỉnh" bằng nó thực chất là huấn luyện từ đầu
+- [ ] Vì scikit-learn không hỗ trợ hàm tanh
+- [ ] Vì cần chạy trên GPU
+> Tên cấu hình phải khớp với việc mã thực sự làm; nếu không, so sánh giữa hai cột trở nên vô nghĩa.
 
 ## Chương 7
 
-### LoRA tiết kiệm cái gì?
+### LoRA tiết kiệm điều gì?
 - [ ] Thời gian suy luận
-- [x] **Bộ nhớ lúc huấn luyện** — trạng thái Adam 32 MiB so với 48,2 GiB
-- [ ] Dung lượng dữ liệu huấn luyện
-- [ ] Số lớp của mô hình
-> Khi suy luận thì gộp $BA$ vào $W_0$ nên tốc độ **bằng** bản gốc. Chênh lệch bộ nhớ là 1 540 lần — đó là khác biệt giữa "chạy được trên một GPU tiêu dùng" và "cần một cụm máy chủ".
+- [x] Bộ nhớ khi huấn luyện, chủ yếu là gradient và trạng thái bộ tối ưu, và dung lượng lưu các phiên bản tinh chỉnh
+- [ ] Số phép tính khi suy luận
+- [ ] Dung lượng của mô hình gốc
+> Khi suy luận, $BA$ được gộp vào $W_0$ nên tốc độ bằng mô hình gốc. Với Llama 2 7B, trạng thái Adam giảm từ 48,2 GiB xuống 32 MiB với $r = 8$.
 
-### Giả thiết cốt lõi của LoRA là gì?
-- [x] Phần **cần sửa** khi chuyển sang nhiệm vụ mới có hạng thấp
-- [ ] Ma trận trọng số gốc có hạng thấp
-- [ ] Dữ liệu đích có ít chiều
-- [ ] Gradient luôn thưa
-> Chú ý phân biệt: LoRA **không** giả định $W_0$ hạng thấp — nó giả định $\Delta W$ hạng thấp. Nhiệm vụ đích thường chỉ đòi nhấn mạnh lại thứ mô hình đã biết, và loại chỉnh sửa ấy đúng là ít chiều.
+### Giả định cốt lõi của LoRA là gì?
+- [ ] Mô hình gốc có hạng thấp
+- [x] Phần thay đổi cần thiết khi chuyển sang nhiệm vụ mới có hạng thấp
+- [ ] Dữ liệu huấn luyện có hạng thấp
+- [ ] Mọi ma trận trọng số đều thưa
+> Mô hình gốc đã đúng gần hết; phần cần điều chỉnh nằm trong một không gian con ít chiều. Giả định này yếu đi khi nhiệm vụ đòi học kiến thức thật sự mới.
 
-### Vì sao khởi tạo $B = 0$?
-- [x] Để $BA = 0$ lúc bắt đầu, nên mô hình **khởi đầu đúng bằng bản gốc** rồi đi dần ra
+### Vì sao LoRA khởi tạo $B = 0$?
 - [ ] Để tiết kiệm bộ nhớ
-- [ ] Để gradient lớn hơn
-- [ ] Để tránh quá khớp
-> Nếu khởi tạo cả $A$ và $B$ ngẫu nhiên thì ngay bước đầu đã phá mô hình bằng một phần thêm vào ngẫu nhiên.
+- [x] Để $BA = 0$ lúc đầu, tức mô hình bắt đầu đúng bằng mô hình gốc
+- [ ] Để gradient của $A$ bằng 0
+- [ ] Để $A$ và $B$ trực giao
+> Nếu khởi tạo cả $A$ và $B$ ngẫu nhiên, ngay từ bước đầu mô hình đã bị cộng một nhiễu ngẫu nhiên vào trọng số.
 
-### Tỉ lệ tham số LoRA trên tham số toàn phần của một lớp là bao nhiêu?
-- [x] $2r/d$ — nên mô hình càng lớn thì LoRA càng lợi
-- [ ] $r/d^2$
-- [ ] $r^2/d$
+### Với một ma trận $d \times d$, tỉ lệ số tham số của LoRA hạng $r$ so với tinh chỉnh toàn phần là bao nhiêu?
+- [ ] $r/d$
+- [x] $2r/d$
+- [ ] $r^2/d^2$
 - [ ] $2r/d^2$
-> Với $d = 768$ và $r = 8$ là 2,08%; với $d = 8192$ cùng $r$ là 0,195%. Đây là lý do LoRA đặc biệt hợp với mô hình rất lớn.
+> LoRA có $2dr$ tham số so với $d^2$. Tỉ lệ giảm khi $d$ tăng: 2,08% với GPT-2 small, 0,39% với một lớp của Llama 2 7B khi $r = 8$.
 
 ## Chương 8
 
-### Vì sao không dùng thẳng hợp lý cực đại cho bài toán sinh?
-- [x] Vì hằng số chuẩn hoá $Z(\theta)$ là tích phân trên toàn bộ không gian, không tính được và **phụ thuộc $\theta$**
-- [ ] Vì hợp lý cực đại chỉ dùng cho phân loại
-- [ ] Vì dữ liệu sinh không có nhãn
-- [ ] Vì hợp lý cực đại luôn bị quá khớp
-> Ba họ mô hình sinh là ba cách né nó: VAE tối đa một chặn dưới, GAN thay bằng trò chơi, khuếch tán biến thành chuỗi bài hồi quy.
+### Vì sao không áp dụng trực tiếp ước lượng hợp lý cực đại cho một mô hình mật độ tổng quát trên ảnh?
+- [ ] Vì ảnh không có phân phối
+- [x] Vì hằng số chuẩn hoá $Z(\theta)$ là tích phân trên không gian rất nhiều chiều, không tính được và phụ thuộc $\theta$
+- [ ] Vì hàm mất mát không khả vi
+- [ ] Vì cần quá nhiều nhãn
+> Các họ mô hình sinh khác nhau ở cách tránh $Z$: mô hình tự hồi quy chuẩn hoá từng bước trên tập nhỏ, VAE dùng chặn dưới, GAN dùng trò chơi, mô hình khuếch tán dùng chuỗi bài hồi quy (Mục 8.2).
 
-### Vì sao khuếch tán thay thế được GAN từ khoảng 2021?
-- [ ] Vì nó lấy mẫu nhanh hơn
-- [x] Vì nó giữ được độ sắc nét **mà không phải trả giá bằng sự bất ổn** — và chậm thì còn tối ưu được chứ bất ổn thì không
-- [ ] Vì nó cần ít dữ liệu hơn
-- [ ] Vì nó có ít tham số hơn
-> Khuếch tán lấy mẫu **chậm hơn** GAN hàng trăm lần. Nhưng huấn luyện nó là một bài hồi quy bình thường với mất mát đọc được.
+### Vì sao mô hình khuếch tán thay thế GAN trong phần lớn ứng dụng sinh ảnh?
+- [ ] Vì lấy mẫu nhanh hơn
+- [x] Vì đạt độ sắc nét tương đương mà huấn luyện ổn định và phủ phân phối tốt hơn
+- [ ] Vì có ít tham số hơn
+- [ ] Vì không cần dữ liệu
+> Nhược điểm của mô hình khuếch tán là lấy mẫu nhiều bước, và nhược điểm đó cải thiện được bằng DDIM, chưng cất và khuếch tán trong không gian ẩn.
 
 ## Chương 9
 
-### $\beta$ trong VAE thực sự điều khiển cái gì?
-- [ ] Chỉ là hệ số cân giữa hai số hạng, không có ý nghĩa cụ thể hơn
-- [x] **Số chiều ẩn còn mang thông tin** — ở $\beta=1$ mô hình tự tìm ra đúng số yếu tố thật
-- [ ] Tốc độ hội tụ
-- [ ] Kích thước không gian ẩn
-> Đo được với dữ liệu sinh từ đúng 2 yếu tố, VAE cho 6 chiều ẩn: $\beta=0$ giữ cả 6, $\beta=1$ giữ **đúng 2**, $\beta=16$ giữ 0. Số hạng KL hoạt động như một phép chọn số chiều tự động.
+### Trong thí nghiệm ở Mục 9.3, hệ số $\beta$ của VAE quyết định điều gì?
+- [ ] Tốc độ học của bộ mã hoá
+- [x] Số chiều ẩn còn mang thông tin: 6 chiều với $\beta = 0$, đúng 2 chiều với $\beta = 1$, không chiều nào với $\beta = 16$
+- [ ] Số lớp của bộ giải mã
+- [ ] Kích thước lô
+> Dữ liệu sinh từ đúng 2 yếu tố, và với $\beta = 1$ VAE giữ đúng 2 chiều mang thông tin; mỗi chiều phải "trả" một chi phí KL, và chỉ những chiều giảm sai số tái dựng đủ nhiều mới được giữ.
 
 ### Sụp hậu nghiệm là gì?
-- [x] $q(z\mid x)$ trùng với tiên nghiệm, tức $z$ **không còn mang thông tin gì** về $x$
-- [ ] Bộ giải mã không hội tụ
-- [ ] Không gian ẩn bị quá khớp
-- [ ] KL trở nên vô hạn
-> Đo được ở $\beta=16$: cả 6 chiều đều chết, sai số tái dựng nhảy lên 15,28 — tệ hơn 125 lần so với $\beta=0$. Mô hình đã "thắng" số hạng KL bằng cách vứt bỏ toàn bộ thông tin.
+- [ ] Bộ giải mã sinh ra mẫu giống hệt nhau
+- [x] Hậu nghiệm xấp xỉ trùng với tiên nghiệm ở mọi chiều, nên $z$ không còn mang thông tin về $x$
+- [ ] Mô hình quên dữ liệu cũ khi học dữ liệu mới
+- [ ] Gradient của bộ mã hoá bằng 0
+> Ở $\beta = 16$, mọi chiều có KL bằng 0 và sai số tái dựng tăng lên 15,28, gấp khoảng 125 lần so với $\beta = 0$. Hiện tượng này cũng gặp khi bộ giải mã quá mạnh.
 
 ### Vì sao mẫu của VAE thường mờ?
-- [x] Vì bình phương sai lệch tối ưu ở **kỳ vọng có điều kiện**, mà trung bình của nhiều ảnh sắc nét lệch nhau thì nhoè
 - [ ] Vì mô hình chưa đủ lớn
-- [ ] Vì không gian ẩn quá nhỏ
-- [ ] Vì huấn luyện chưa đủ lâu
-> Độ mờ là **hệ quả trực tiếp của việc chọn hàm mất mát**, tức của giả định nhiễu Gauss. Không phải lỗi huấn luyện. Đổi giả định thì đổi hiện tượng — và đó chính là điều GAN làm.
+- [x] Vì hàm mất mát bình phương có nghiệm tối ưu là kỳ vọng có điều kiện, tức trung bình của nhiều ảnh khả dĩ
+- [ ] Vì lấy mẫu từ phân phối Gauss
+- [ ] Vì số chiều ẩn quá nhỏ
+> Trung bình của nhiều ảnh sắc nét lệch nhau vài điểm ảnh là một ảnh nhoè ở các đường viền. Độ mờ là hệ quả của lựa chọn hàm mất mát.
 
 ### Mẹo tái tham số hoá dùng để làm gì?
-- [x] Để gradient chảy được qua phép lấy mẫu: viết $z = \mu + \sigma\odot\varepsilon$ nên phần ngẫu nhiên nằm ở $\varepsilon$ vốn không phụ thuộc tham số
-- [ ] Để giảm phương sai của ELBO
-- [ ] Để bảo đảm hậu nghiệm là Gauss
-- [ ] Để tăng tốc huấn luyện
-> Đây là một **mẹo cài đặt**, không phải ý tưởng của VAE. Không nên nhầm hai thứ khi trả lời phỏng vấn.
+- [x] Cho gradient truyền qua phép lấy mẫu, bằng cách viết $z = \mu + \sigma \odot \varepsilon$ với $\varepsilon$ không phụ thuộc tham số
+- [ ] Giảm số tham số của bộ mã hoá
+- [ ] Chuẩn hoá không gian ẩn
+- [ ] Tăng tốc lấy mẫu khi suy luận
+> Đây là kỹ thuật cài đặt để huấn luyện VAE bằng gradient descent, không phải ý tưởng chính của VAE.
 
 ## Chương 10
 
-### Đạo hàm của $\log(1-\sigma(s))$ theo $s$ bằng bao nhiêu, và hậu quả là gì?
-- [x] $-\sigma(s)$ — nên khi bộ sinh còn tệ ($\sigma(s)\approx 0$) thì gradient cũng gần 0
-- [ ] $1-\sigma(s)$ — gradient lớn khi bộ sinh tệ
-- [ ] $\sigma(s)(1-\sigma(s))$ — luôn nhỏ
-- [ ] $-1/\sigma(s)$ — gradient bùng nổ
-> Đây là vòng luẩn quẩn: bộ sinh càng tệ càng ít tín hiệu để sửa. Đo được ở Mục 10.2: dạng minimax gốc phủ **0/8** chế độ ở cả bốn hạt giống.
+### Đạo hàm của $\log(1 - \sigma(s))$ theo $s$ là gì, và hệ quả với dạng gốc của hàm mất mát cho bộ sinh?
+- [ ] $1 - \sigma(s)$; bộ sinh học nhanh lúc đầu
+- [x] $-\sigma(s)$; lúc đầu $\sigma(s) \approx 0$ với mẫu giả nên gradient gần 0 và bộ sinh không học được
+- [ ] $\sigma(s)$; gradient bùng nổ
+- [ ] Bằng 0; hàm mất mát là hằng số
+> Ở Mục 10.2, dạng gốc phủ 0 trong 8 cụm ở cả bốn lần khởi tạo. Bộ sinh càng kém càng nhận ít tín hiệu để sửa.
 
-### Bản "không bão hoà" khác ở đâu?
-- [x] Bộ sinh **tối đa** $\log D(G(z))$, đạo hàm là $1-\sigma(s)$ — lớn nhất đúng khi bộ sinh đang tệ nhất
-- [ ] Nó thêm một số hạng phạt chuẩn
-- [ ] Nó dùng bộ phân biệt mạnh hơn
-- [ ] Nó đổi kiến trúc bộ sinh
-> Hai hàm có **cùng điểm tối ưu** nhưng hành vi huấn luyện khác một trời một vực. Bài học tổng quát: cái quyết định việc học là **gradient**, không phải vị trí điểm tối ưu.
+### Dạng không bão hoà của hàm mất mát cho bộ sinh khác gì?
+- [x] Cực đại $\log D(G(z))$, có đạo hàm $1 - \sigma(s)$, lớn nhất khi bộ sinh kém nhất
+- [ ] Dùng khoảng cách Wasserstein
+- [ ] Bỏ bộ phân biệt
+- [ ] Huấn luyện bộ sinh nhiều bước hơn bộ phân biệt
+> Hai dạng có cùng điểm cố định nhưng gradient khác hẳn; với dạng không bão hoà, cả bốn lần khởi tạo đều phủ đủ 8 cụm.
 
-### Thí nghiệm GAN trong tài liệu này cho thấy gì về sụp chế độ?
-- [ ] Nó xác nhận sụp chế độ xảy ra ở mọi hạt giống
-- [x] Nó **không** quan sát được sụp chế độ — bản không bão hoà phủ đủ 8/8 ở mọi hạt giống, và tài liệu nói rõ điều đó
-- [ ] Nó cho thấy sụp chế độ chỉ xảy ra với lô nhỏ
-- [ ] Nó không đo được gì về sụp chế độ
-> Sụp chế độ là hiện tượng có thật và hay gặp, nhưng khẳng định nó từ một thí nghiệm hai chiều mà chính thí nghiệm ấy bác bỏ thì là nói quá. Điều thí nghiệm **có** cho thấy: chỉ 15,3% điểm sinh ra rơi vào phạm vi một cụm.
+### Thí nghiệm GAN ở Mục 10.3 cho thấy gì về sụp chế độ?
+- [ ] Sụp chế độ xảy ra ở mọi lần khởi tạo
+- [x] Không tái hiện được sụp chế độ: dạng không bão hoà phủ đủ 8 cụm, nhưng chỉ 15,3% điểm sinh ra nằm trong phạm vi một cụm
+- [ ] GAN luôn học đúng phân phối trong không gian hai chiều
+- [ ] Sụp chế độ chỉ xảy ra với dạng không bão hoà
+> Phủ đủ các chế độ chưa có nghĩa là học đúng phân phối: phần lớn điểm sinh ra nằm rải rác giữa các cụm. Sụp chế độ là hiện tượng có thật, nhưng một ví dụ hai chiều đơn giản không đủ để nó xuất hiện.
 
-### Vì sao không đọc được đường cong mất mát của GAN?
-- [x] Mất mát của bộ sinh tăng có thể vì nó tệ đi, **mà cũng có thể** vì bộ phân biệt vừa giỏi lên
+### Vì sao đường cong mất mát của GAN khó dùng để theo dõi chất lượng?
 - [ ] Vì mất mát luôn bằng 0
-- [ ] Vì thư viện không ghi lại
-- [ ] Vì mất mát dao động quá nhanh
-> Cộng thêm hai lý do cấu trúc: đây là bài toán **điểm yên ngựa** chứ không phải cực tiểu, và không có cách đánh giá khách quan như chặn dưới hợp lý.
+- [x] Vì mất mát của bộ sinh tăng có thể do bộ sinh kém đi hoặc do bộ phân biệt vừa tốt lên; bài toán tìm điểm cân bằng chứ không tìm cực tiểu
+- [ ] Vì mất mát chỉ tính được trên tập kiểm tra
+- [ ] Vì GAN không có hàm mất mát
+> Đây là một trong ba nguyên nhân cấu trúc khiến GAN khó huấn luyện, cùng với việc không có bảo đảm hội tụ tới điểm yên ngựa và không có đánh giá dựa trên hợp lý.
 
 ## Chương 11
 
-### Dạng đóng của quá trình thuận nói gì, và vì sao nó quan trọng?
-- [x] $q(x_t\mid x_0) = \mathcal{N}(\sqrt{\bar\alpha_t}x_0, (1-\bar\alpha_t)I)$ — cho phép **nhảy thẳng** tới bước $t$ bất kỳ thay vì mô phỏng $t$ bước
-- [ ] Nó cho biết cách đi ngược lại
-- [ ] Nó bảo đảm quá trình hội tụ
-- [ ] Nó chỉ dùng để phân tích, không dùng khi huấn luyện
-> Không có nó thì huấn luyện chậm gấp hàng trăm lần. Kiểm chứng trên 200 000 quỹ đạo mô phỏng thật, khớp mô men tới 4–5 chữ số.
+### Dạng đóng của quá trình thuận cho biết gì, và vì sao nó quan trọng?
+- [x] $q(x_t \mid x_0) = \mathcal{N}(\sqrt{\bar\alpha_t}\,x_0, (1 - \bar\alpha_t)I)$, nên lấy được $x_t$ ở bước bất kỳ trong một phép tính khi huấn luyện
+- [ ] $x_t$ luôn là nhiễu thuần tuý
+- [ ] Quá trình ngược cũng có dạng đóng
+- [ ] Mô hình không cần huấn luyện
+> Không có dạng đóng thì mỗi mẫu huấn luyện phải mô phỏng $t$ bước. Ở Mục 11.2, dạng đóng khớp với mô phỏng 200 000 quỹ đạo.
 
-### Ở $t$ lớn (SNR thấp) mô hình học gì?
+### Ở các bước $t$ lớn (SNR rất thấp), việc khử nhiễu liên quan tới điều gì?
 - [ ] Chi tiết nhỏ và kết cấu
-- [x] **Bố cục thô và màu tổng thể**
-- [ ] Không học gì vì chỉ còn nhiễu
-- [ ] Học cách phân loại ảnh
-> Nên khi lấy mẫu và đi ngược từ $t=T$ về $t=0$, mô hình quyết định bố cục trước rồi mới điền chi tiết — giống cách người ta vẽ tranh. Điều đó không được lập trình vào; nó là hệ quả của lịch nhiễu.
+- [x] Bố cục và màu sắc tổng thể
+- [ ] Không liên quan gì, vì chỉ còn nhiễu
+- [ ] Chỉ tới độ sáng trung bình
+> Ở $t$ lớn gần như chỉ còn nhiễu, nên việc khử nhiễu quyết định các thành phần biên độ lớn. Khi sinh mẫu đi từ $t = T$ về 0, mô hình quyết định bố cục trước rồi mới thêm chi tiết.
 
 ### Huấn luyện mô hình khuếch tán thực chất là bài toán gì?
-- [x] **Hồi quy bình phương sai lệch**: đoán lại $\varepsilon$ đã thêm vào
-- [ ] Một trò chơi hai bên như GAN
-- [ ] Tối đa một chặn dưới như VAE
+- [ ] Trò chơi giữa hai mạng
+- [x] Hồi quy: dự đoán nhiễu $\varepsilon$ từ $x_t$ và $t$ với mất mát bình phương sai số
+- [ ] Phân loại nhiều lớp
 - [ ] Học tăng cường
-> Đó là lý do nó ổn định: không có điểm yên ngựa, mất mát giảm nghĩa là mô hình tốt lên, và đọc được đường cong mất mát.
+> Mất mát giảm nghĩa là mô hình tốt lên, không có điểm yên ngựa hay hai mạng cạnh tranh. Đây là lý do chính mô hình khuếch tán dễ huấn luyện hơn GAN.
 
-### Vì sao đoán $\varepsilon$ thay vì đoán thẳng $x_0$?
-- [x] Hai cách tương đương về toán, nhưng đoán $\varepsilon$ cho mục tiêu có **phương sai đồng đều hơn giữa các $t$** nên ổn định hơn
-- [ ] Vì $x_0$ không biết khi huấn luyện
-- [ ] Vì đoán $\varepsilon$ chính xác hơn về mặt lý thuyết
+### Vì sao mô hình khuếch tán thường dự đoán nhiễu $\varepsilon$ thay vì dự đoán $x_0$?
+- [ ] Vì dự đoán $x_0$ là không thể
+- [x] Hai cách tương đương về toán học; dự đoán $\varepsilon$ là lựa chọn thực nghiệm cho chất lượng mẫu tốt hơn
 - [ ] Vì $\varepsilon$ có ít chiều hơn
-> Biết một cái thì suy ra cái kia từ dạng đóng. Đây là lựa chọn **thực nghiệm**, và bài báo DDPM nói rõ như vậy.
+- [ ] Vì dự đoán $\varepsilon$ không cần mạng nơ-ron
+> Biết $\varepsilon$ thì suy ra được $x_0$ từ dạng đóng và ngược lại. Ho, Jain và Abbeel (2020) thấy dạng đơn giản hoá với dự đoán nhiễu cho kết quả tốt nhất.
 
 ## Chương 12
 
-### Khác biệt nặng nhất giữa học tăng cường và học có giám sát là gì?
-- [ ] Phần thưởng là số thay vì nhãn
-- [x] **Dữ liệu do chính chính sách sinh ra** — chính sách tồi chỉ thu được dữ liệu tồi, rồi lại học ra chính sách tồi
-- [ ] Phần thưởng có thể đến trễ
-- [ ] Không có tập kiểm tra
-> Đây là một vòng phản hồi, cùng bản chất với vòng phản hồi thoái hoá ở Chương 12 của *MLOps*. Nó là gốc của mọi khó khăn về sau.
+### Khác biệt có hệ quả lớn nhất giữa học tăng cường và học có giám sát là gì?
+- [ ] Học tăng cường dùng mạng nơ-ron sâu hơn
+- [x] Dữ liệu do chính chính sách đang học sinh ra, tạo thành vòng phản hồi
+- [ ] Học tăng cường không có hàm mất mát
+- [ ] Học tăng cường chỉ dùng được trong trò chơi
+> Chính sách kém chỉ thu thập được dữ liệu kém, rồi học từ dữ liệu đó lại ra chính sách kém. Ngoài ra, phần thưởng không cho biết hành động đúng là gì và có thể đến rất muộn.
 
-### Thí nghiệm ở Mục 12.4 cho thấy điều gì mà câu "phải có ε để khám phá" bỏ sót?
-- [x] **Khởi tạo hàm giá trị cũng là một cơ chế khám phá** — với khởi tạo lạc quan, $\varepsilon = 0$ vẫn đạt 100%
-- [ ] ε lớn luôn tốt hơn ε nhỏ
+### Thí nghiệm ở Mục 12.4 cho thấy điều gì mà câu "cần $\varepsilon > 0$ để khám phá" bỏ sót?
+- [ ] $\varepsilon$ càng lớn càng tốt
+- [x] Khởi tạo lạc quan cũng là cơ chế khám phá: với phạt $-0{,}1$ mỗi bước và $Q_0 = 0$, $\varepsilon = 0$ vẫn tới đích 100%
 - [ ] Q-learning không cần khám phá
-- [ ] Chỉ cần chạy đủ lâu là được
-> Khởi tạo $Q = 0$ trong khi mọi phần thưởng đều âm nghĩa là hành động chưa thử luôn trông hấp dẫn hơn hành động đã thử, nên tham lam tự đi khám phá. Bỏ phạt bước đi thì mất tính lạc quan ấy và $\varepsilon = 0$ thất bại 0%.
+- [ ] Chỉ cần tăng số lượt huấn luyện
+> Khi mọi phần thưởng của bước đi đều âm mà $Q$ khởi tạo bằng 0, hành động chưa thử luôn có vẻ tốt hơn hành động đã thử, nên chính sách tham lam tự khám phá.
 
-### Khởi tạo bi quan ($Q_0 = -20$) gây ra chuyện gì?
-- [x] Tác tử **bám chặt** lấy hành động đầu tiên tình cờ thử; ngay cả $\varepsilon = 0{,}3$ cũng không đủ để thoát
+### Khởi tạo bi quan $Q_0 = -20$ gây ra điều gì trong thí nghiệm?
 - [ ] Tác tử khám phá nhiều hơn
-- [ ] Không ảnh hưởng gì
-- [ ] Thuật toán không hội tụ
-> Hành động đầu tiên được thử sẽ được kéo **lên** gần 0 trong khi các hành động khác vẫn ở $-20$. Bi quan tạo ra sự cố chấp.
+- [x] Tác tử bám lấy hành động đầu tiên được thử; ngay cả $\varepsilon = 0{,}3$ cũng không đủ để tới đích trong 6 000 lượt
+- [ ] Không khác khởi tạo bằng 0
+- [ ] Tác tử luôn rơi vào bẫy
+> Hành động đã thử có $Q$ tăng lên gần giá trị thật, còn các hành động khác vẫn ở $-20$, nên chính sách tham lam gần như không thử hành động mới. Chỉ $\varepsilon = 1$ mới học được chính sách tối ưu.
 
 ## Chương 13
 
-### Vì sao trừ một đường nền không làm lệch ước lượng gradient?
-- [x] Vì $\mathbb{E}[b\nabla\log\pi] = b\nabla\big(\sum_a\pi(a)\big) = b\nabla 1 = 0$ với **mọi** hằng số $b$
-- [ ] Vì đường nền được chọn bằng cách tối thiểu phương sai
-- [ ] Vì nó nhỏ so với phần thưởng
-- [ ] Nó **có** làm lệch, nhưng lệch ít
-> Tổng xác suất luôn bằng 1 nên đạo hàm của nó bằng 0. Ta được đổi phương sai mà không mất gì — đo được: giảm độ lệch chuẩn 2,3 lần, gradient trung bình lệch chỉ $1{,}2\times10^{-3}$.
+### Vì sao trừ một đường nền không làm lệch ước lượng gradient chính sách?
+- [ ] Vì đường nền luôn bằng 0
+- [x] Vì $\mathbb{E}[b\,\nabla_\theta\log\pi_\theta(a)] = b\,\nabla_\theta\sum_a\pi_\theta(a) = b\,\nabla_\theta 1 = 0$
+- [ ] Vì đường nền được học cùng chính sách
+- [ ] Vì gradient được chuẩn hoá sau khi trừ
+> Tổng xác suất luôn bằng 1, nên số hạng thêm vào có kỳ vọng 0 với mọi hằng số $b$. Phép trừ chỉ làm giảm phương sai.
 
-### Giảm độ lệch chuẩn 2,3 lần tương đương tiết kiệm bao nhiêu mẫu?
+### Giảm độ lệch chuẩn của ước lượng gradient 2,3 lần tương đương cần ít mẫu hơn bao nhiêu lần?
 - [ ] 2,3 lần
-- [x] Khoảng **5,3 lần**, vì số mẫu cần tỉ lệ với **bình phương** độ lệch chuẩn
+- [x] Khoảng 5,3 lần
 - [ ] 1,5 lần
-- [ ] Không tiết kiệm mẫu, chỉ ổn định hơn
-> $2{,}3^2 = 5{,}3$. Đây là lý do đường nền gần như luôn được dùng trong mọi cài đặt gradient chính sách thực tế.
+- [ ] 23 lần
+> Số mẫu cần để đạt một độ chính xác tỉ lệ với phương sai, tức bình phương độ lệch chuẩn: $2{,}3^2 \approx 5{,}3$.
 
-### Vì sao phần thưởng toàn dương làm ước lượng gradient nhiễu?
-- [x] Vì ta **đẩy log xác suất của mọi hành động lên**, kể cả hành động tệ; việc học chỉ diễn ra nhờ chênh lệch tương đối vốn chìm trong nhiễu
-- [ ] Vì gradient bị tràn số
-- [ ] Vì softmax bão hoà
-- [ ] Vì phần thưởng dương không hợp lệ
-> Trừ đường nền biến phần thưởng thành "tốt hơn hay tệ hơn mức trung bình", đúng thứ ta cần.
+### Vì sao phần thưởng luôn dương làm ước lượng REINFORCE nhiễu?
+- [ ] Vì gradient bằng 0
+- [x] Vì mỗi mẫu đều đẩy log xác suất của hành động được chọn lên, kể cả hành động tệ; việc học chỉ dựa vào chênh lệch nhỏ về độ mạnh
+- [ ] Vì phần thưởng dương làm chính sách hội tụ quá nhanh
+- [ ] Vì hàm softmax không nhận giá trị dương
+> Trừ đường nền gần phần thưởng trung bình làm hành động kém hơn trung bình bị đẩy xuống thay vì được đẩy lên ít hơn.
 
 ## Chương 14
 
-### Nghiệm tối ưu của $\max_\pi \mathbb{E}_\pi[r] - \beta\mathrm{KL}(\pi\|\pi_{\text{ref}})$ là gì?
-- [x] $\pi^*(y) \propto \pi_{\text{ref}}(y)\exp(r(y)/\beta)$ — chính sách tham chiếu **đánh trọng số lại theo hàm mũ của thưởng**
-- [ ] $\pi^*(y) \propto \exp(r(y)/\beta)$, không phụ thuộc $\pi_{\text{ref}}$
-- [ ] $\pi^*(y) \propto \pi_{\text{ref}}(y) + r(y)/\beta$
-- [ ] Không có dạng đóng
-> Suy ra bằng nhân tử Lagrange trên ràng buộc $\sum_y\pi(y)=1$. Kiểm chứng bằng số: giải theo hai đường độc lập cho kết quả lệch $10^{-9}$ tới $10^{-7}$.
+### Nghiệm của bài toán $\max_\pi \mathbb{E}_\pi[r] - \beta\,\mathrm{KL}(\pi \,\|\, \pi_{\text{ref}})$ là gì?
+- [ ] $\pi^* = \pi_{\text{ref}}$
+- [x] $\pi^*(y) \propto \pi_{\text{ref}}(y)\exp(r(y)/\beta)$
+- [ ] $\pi^*(y) \propto \exp(r(y))$
+- [ ] $\pi^*$ dồn toàn bộ xác suất vào câu trả lời có phần thưởng cao nhất
+> Suy ra bằng nhân tử Lagrange với ràng buộc tổng xác suất bằng 1. Ở Mục 14.4, công thức khớp với nghiệm tìm bằng BFGS tới cỡ $10^{-7}$.
 
 ### Nếu $\pi_{\text{ref}}(y_0) = 0$ thì $\pi^*(y_0)$ bằng bao nhiêu?
-- [x] **0**, bất kể $r(y_0)$ lớn tới đâu — vì nhân với 0 vẫn là 0
-- [ ] Bằng $\exp(r(y_0)/\beta)/Z$
+- [ ] Tỉ lệ với $r(y_0)$
+- [x] Bằng 0, bất kể $r(y_0)$ lớn tới đâu
+- [ ] Bằng $1/N$
 - [ ] Không xác định
-- [ ] Bằng $\beta$
-> Đây chính là cơ chế giữ cho mô hình không nói năng lung tung: những gì chính sách tham chiếu coi là không thể thì vẫn không thể.
+> Nhân với 0 vẫn bằng 0. Điều này giữ mô hình trong phạm vi hành vi của mô hình tham chiếu, nhưng không ngăn được những hành vi mà mô hình tham chiếu đã có xác suất dương.
 
-### Vì sao học từ so sánh vượt được trần của học bắt chước?
-- [x] Vì **đánh giá dễ hơn sáng tạo** — người ta chỉ ra được bài nào hay hơn dù không viết nổi bài hay nhất
+### Vì sao học từ so sánh có thể vượt chất lượng của học bắt chước?
 - [ ] Vì dữ liệu so sánh nhiều hơn
-- [ ] Vì mô hình thưởng mạnh hơn mô hình ngôn ngữ
-- [ ] Vì RLHF dùng nhiều tính toán hơn
-> Cộng thêm một lý do thực tế: so sánh **nhất quán giữa những người dán nhãn** hơn là chấm điểm tuyệt đối. Hỏi mười người "mấy điểm trên 10" thì được mười câu trả lời khác nhau.
+- [x] Vì đánh giá câu trả lời nào tốt hơn dễ hơn tự viết câu trả lời tốt nhất
+- [ ] Vì học tăng cường luôn tốt hơn học có giám sát
+- [ ] Vì mô hình thưởng lớn hơn mô hình ngôn ngữ
+> Học bắt chước chỉ đưa mô hình tới chất lượng của câu trả lời mẫu; so sánh cho tín hiệu về chất lượng cao hơn mức người gán nhãn tự viết ra.
 
-### Nên hiểu $\beta$ của RLHF thế nào?
-- [ ] Một siêu tham số cần chỉnh cho đúng
-- [x] **Vị trí ta chọn trên một đường đánh đổi** giữa thưởng đạt được và độ lệch khỏi $\pi_{\text{ref}}$
+### Nên hiểu hệ số $\beta$ trong RLHF thế nào?
+- [ ] Một siêu tham số có giá trị đúng duy nhất cần tìm
+- [x] Một vị trí trên đường đánh đổi giữa phần thưởng đạt được và độ lệch khỏi $\pi_{\text{ref}}$
 - [ ] Tốc độ học của PPO
-- [ ] Trọng số của mô hình thưởng
-> Muốn thưởng cao hơn thì phải chấp nhận lệch xa $\pi_{\text{ref}}$ hơn, mà lệch xa hơn nghĩa là rủi ro lách điểm thưởng cao hơn. Không có giá trị nào "đúng".
+- [ ] Nhiệt độ khi lấy mẫu
+> $\beta$ nhỏ cho phần thưởng theo mô hình thưởng cao hơn nhưng đi xa $\pi_{\text{ref}}$ hơn, tăng nguy cơ lách phần thưởng.
 
 ## Chương 15
 
 ### Quan sát then chốt của DPO là gì?
-- [x] Dạng đóng **đảo ngược được**: mọi chính sách đều ngầm định nghĩa một hàm thưởng $r = \beta\log\frac{\pi}{\pi_{\text{ref}}} + \beta\log Z$
-- [ ] Mô hình thưởng không cần thiết vì nó không chính xác
-- [ ] PPO có thể thay bằng xuống dốc thường
-- [ ] Dữ liệu so sánh có thể chuyển thành dữ liệu có nhãn
-> Không cần huấn luyện mô hình thưởng riêng — chính sách **đã là** một mô hình thưởng, viết ở dạng khác.
+- [ ] Mô hình thưởng không cần thiết vì phần thưởng luôn bằng nhau
+- [x] Nghiệm dạng đóng của RLHF đảo ngược được, nên mọi chính sách ngầm xác định một hàm thưởng $r = \beta\log(\pi/\pi_{\text{ref}}) + \beta\log Z(x)$
+- [ ] Học tăng cường luôn cho kết quả kém
+- [ ] Có thể bỏ ràng buộc KL
+> Từ đó thay trực tiếp biểu thức của $r$ vào mô hình Bradley–Terry và tối ưu theo chính sách.
 
 ### Vì sao $\log Z(x)$ triệt tiêu trong hàm mất mát DPO?
-- [x] Vì hợp lý Bradley–Terry chỉ dùng **hiệu** hai phần thưởng, mà $\log Z(x)$ phụ thuộc $x$ chứ không phụ thuộc $y$
-- [ ] Vì nó nhỏ nên bỏ qua được
-- [ ] Vì nó được xấp xỉ bằng lấy mẫu
-- [ ] Vì nó bằng 1 khi chuẩn hoá
-> Chi tiết nhỏ ấy là thứ làm cả phương pháp chạy được. Và nó đòi hỏi hai câu trả lời phải cho **cùng một** câu hỏi $x$ — nếu khác $x$ thì không triệt tiêu.
+- [ ] Vì $Z(x) = 1$
+- [x] Vì mô hình Bradley–Terry chỉ dùng hiệu phần thưởng của hai câu trả lời cho cùng một câu hỏi, và $Z(x)$ không phụ thuộc câu trả lời
+- [ ] Vì $Z(x)$ được xấp xỉ bằng lấy mẫu
+- [ ] Vì hàm sigmoid bỏ qua hằng số
+> Phép triệt tiêu đòi hỏi hai câu trả lời phải cho cùng một câu hỏi $x$; đó là cấu trúc của dữ liệu so sánh.
 
-### DPO có phải một xấp xỉ của RLHF không?
-- [ ] Có, nó đơn giản hoá nên kém chính xác hơn
-- [x] **Không** — nó tối ưu cùng mục tiêu và cho cùng nghiệm, kiểm chứng được tới $4{,}2\times10^{-8}$
-- [ ] Không, nó tối ưu một mục tiêu hoàn toàn khác
-- [ ] Có, nó chỉ đúng khi $\beta$ nhỏ
-> Thí nghiệm ở Mục 15.3 giải cả hai đường trên không gian 8 câu trả lời với 52 588 cặp so sánh. Lệch lớn nhất giữa hai chính sách là $4{,}16\times10^{-8}$.
+### DPO có phải một phép xấp xỉ của RLHF không?
+- [ ] Có, DPO đơn giản hoá mục tiêu nên cho nghiệm gần đúng
+- [x] Không, DPO tối ưu cùng mục tiêu và có cùng nghiệm; ở Mục 15.3 hai chính sách khác nhau không quá $4{,}2 \times 10^{-8}$
+- [ ] Có, vì DPO bỏ ràng buộc KL
+- [ ] Không so sánh được vì hai phương pháp khác mục tiêu
+> Khác biệt thực tế nằm ở dữ liệu dùng khi huấn luyện: DPO học trên tập so sánh cố định, RLHF lấy mẫu từ chính sách hiện tại.
 
-### RLHF vẫn hơn DPO ở điểm nào?
-- [x] Nó **lấy mẫu từ chính sách hiện tại** nên học trên đúng phân phối mô hình đang sinh ra; và mô hình thưởng là tài sản dùng lại được
-- [ ] Nó luôn cho chất lượng cao hơn
-- [ ] Nó cần ít bộ nhớ hơn
-- [ ] Nó ổn định hơn
-> DPO chỉ học trên tập so sánh **cố định**, nên khi chính sách đi xa khỏi phân phối của tập ấy thì tín hiệu học yếu đi. Và mô hình thưởng còn dùng để chấm dữ liệu mới, đánh giá mô hình khác, dò suy giảm chất lượng.
+### RLHF với PPO có lợi thế nào so với DPO?
+- [ ] Cần ít bộ nhớ hơn
+- [x] Học được trên các câu trả lời mà chính sách hiện tại sinh ra, và tạo ra một mô hình thưởng dùng lại được
+- [ ] Ổn định hơn khi huấn luyện
+- [ ] Không cần dữ liệu so sánh
+> DPO đơn giản và ổn định hơn nên là mặc định hợp lý; RLHF có lợi khi chính sách đi xa khỏi phân phối của tập so sánh, hoặc khi cần mô hình thưởng cho đánh giá và giám sát.

@@ -1,1246 +1,1298 @@
-# MLOps: đưa mô hình ra sản xuất và giữ cho nó sống
+# MLOps: vận hành hệ thống học máy
 
-> **Giáo trình tự học, viết theo lối bài giảng.** Mỗi khái niệm đi theo trình tự *động cơ → định nghĩa → suy luận → ví dụ số → thí nghiệm kiểm chứng*, giống giáo trình Quantization trong cùng repo này.
+> **Giáo trình 6 của lộ trình.** Tài liệu trình bày những gì xảy ra sau khi đã có một mô hình tốt: quản lý dữ liệu và đặc trưng, thí nghiệm lặp lại được, đánh giá cho sản xuất, phục vụ và ra mắt mô hình, phát hiện dịch chuyển phân phối, giám sát, huấn luyện lại, vòng phản hồi, và những thay đổi khi hệ thống dùng mô hình ngôn ngữ lớn (LLMOps).
 >
-> **Về độ tin cậy của số liệu.** Tài liệu này có hai loại con số, và chúng được phân biệt rạch ròi. Loại thứ nhất là **số liệu trích từ bài báo gốc** — mỗi lần dùng đều nói rõ nguồn, và nguồn nằm ở Chương 16. Loại thứ hai là **số liệu đo được trong chính repo này**, sinh ra bởi hai script trong `code/mlops/`, hạt giống cố định, chạy lại cho kết quả y hệt. Không có con số nào ở đây là ước chừng theo cảm tính; chỗ nào là quy tắc kinh nghiệm của ngành thì được gọi đúng tên là quy tắc kinh nghiệm.
+> **Kiến thức cần có.** Quy trình huấn luyện và đánh giá một mô hình có giám sát ([*Nền tảng*](nentang-ch01.html)), kiểm định giả thuyết ở mức cơ bản, và Python ở mức đọc hiểu. Không cần biết trước công cụ MLOps nào: tên công cụ thay đổi nhanh, còn các vấn đề mà công cụ giải quyết thì không.
 >
-> **Điều tài liệu này không làm.** Nó không dạy dùng một công cụ cụ thể. Tên công cụ đổi mỗi năm; câu hỏi mà công cụ trả lời thì không. Chương 15 dành riêng cho việc trả lời phỏng vấn, và cách trả lời tốt luôn là nói được *ràng buộc nào sinh ra nhu cầu ấy* trước khi nói tên công cụ.
+> **Về số liệu.** Tài liệu có hai loại con số. Loại thứ nhất trích từ tài liệu gốc, mỗi lần dùng đều ghi nguồn, danh sách nguồn ở Chương 16. Loại thứ hai là số liệu đo trong chính repo này, sinh bởi `code/mlops/experiments.py` (số liệu trong bài) và `code/mlops/bai_tap.py` (số liệu trong lời giải bài tập) với hạt giống cố định. Những chỗ là quy tắc kinh nghiệm của ngành được ghi rõ là quy tắc kinh nghiệm.
 
 ---
 
 ## Mục lục
 
-0. [Kiến thức nền và quy ước](#0-kiến-thức-nền-và-quy-ước)
-1. [Vì sao mô hình tốt vẫn chết trong sản xuất](#1-vì-sao-mô-hình-tốt-vẫn-chết-trong-sản-xuất)
-2. [Vòng đời, ba chữ V và ba mức tự động hoá](#2-vòng-đời-ba-chữ-v-và-ba-mức-tự-động-hoá)
-3. [Dữ liệu: hợp đồng, kiểm định và phổ lỗi](#3-dữ-liệu-hợp-đồng-kiểm-định-và-phổ-lỗi)
-4. [Đặc trưng: kho đặc trưng và tính đúng theo thời điểm](#4-đặc-trưng-kho-đặc-trưng-và-tính-đúng-theo-thời-điểm)
-5. [Thí nghiệm lặp lại được](#5-thí-nghiệm-lặp-lại-được)
-6. [Đánh giá cho sản xuất](#6-đánh-giá-cho-sản-xuất)
-7. [Đóng gói và phục vụ mô hình](#7-đóng-gói-và-phục-vụ-mô-hình)
-8. [Chiến lược ra mắt](#8-chiến-lược-ra-mắt)
-9. [Dịch chuyển phân phối](#9-dịch-chuyển-phân-phối)
-10. [Giám sát và cảnh báo](#10-giám-sát-và-cảnh-báo)
-11. [Huấn luyện lại và tự động hoá](#11-huấn-luyện-lại-và-tự-động-hoá)
-12. [Vòng phản hồi: khi mô hình tự tạo ra dữ liệu của mình](#12-vòng-phản-hồi-khi-mô-hình-tự-tạo-ra-dữ-liệu-của-mình)
-13. [LLMOps](#13-llmops)
-14. [Bài tập](#14-bài-tập)
-15. [Ôn phỏng vấn](#15-ôn-phỏng-vấn)
-16. [Tài liệu tham khảo](#16-tài-liệu-tham-khảo)
+0. Ký hiệu và quy ước
+1. Nợ kỹ thuật của hệ thống học máy
+2. Vòng đời và mức độ tự động hoá
+3. Dữ liệu: hợp đồng, kiểm định và các loại lỗi
+4. Đặc trưng và tính đúng theo thời điểm
+5. Thí nghiệm lặp lại được
+6. Đánh giá mô hình cho sản xuất
+7. Đóng gói và phục vụ mô hình
+8. Chiến lược ra mắt
+9. Dịch chuyển phân phối
+10. Giám sát và cảnh báo
+11. Huấn luyện lại
+12. Vòng phản hồi
+13. LLMOps
+14. Bài tập
+15. Câu hỏi phỏng vấn
+16. Tài liệu tham khảo
 
 ---
 
-## 0. Kiến thức nền và quy ước
+## 0. Ký hiệu và quy ước
 
-Người đọc cần biết: quy trình huấn luyện một mô hình có giám sát, khái niệm tập huấn luyện / kiểm định / kiểm tra, Python ở mức đọc hiểu, và một chút kiến thức về hệ thống phân tán (dịch vụ, API, hàng đợi). Không cần biết trước công cụ MLOps nào.
+### 0.1. Bảng ký hiệu
 
 | Ký hiệu | Ý nghĩa |
 |---|---|
-| $X$ | đặc trưng đầu vào (features) |
-| $Y$ | nhãn hoặc biến mục tiêu |
+| $X$ | đặc trưng đầu vào |
+| $Y$ | nhãn, biến mục tiêu |
 | $P(X)$ | phân phối của đầu vào |
-| $P(Y \mid X)$ | quy luật gán nhãn — thứ mà mô hình học |
-| $\hat{y}$ | dự đoán của mô hình |
-| $t$ | thời điểm; $t_{\text{pred}}$ là thời điểm phải đưa ra dự đoán |
-| SLI / SLO | chỉ số mức dịch vụ / mục tiêu mức dịch vụ (service level indicator / objective) |
+| $P(Y \mid X)$ | quan hệ giữa đầu vào và nhãn, điều mô hình học |
+| $\hat y$ | dự đoán của mô hình |
+| $t$, $t_{\text{pred}}$ | thời điểm; thời điểm phải đưa ra dự đoán |
+| $n$ | cỡ mẫu |
+| $k$ | số bin (Chương 9) hoặc số dịch vụ gọi song song (Chương 7), tuỳ ngữ cảnh |
 | p50, p95, p99 | phân vị 50, 95, 99 của độ trễ |
-| CI / CD / CT | tích hợp liên tục / bàn giao liên tục / **huấn luyện liên tục** |
-| PSI | Population Stability Index, một đại lượng đo dịch chuyển phân phối |
-| TTL | thời gian sống của một giá trị được lưu đệm (time to live) |
+| SLI, SLO | chỉ số mức dịch vụ, mục tiêu mức dịch vụ |
+| CI, CD, CT | tích hợp liên tục, bàn giao liên tục, huấn luyện liên tục |
+| PSI | population stability index, một đại lượng đo dịch chuyển phân phối |
 
-**Một quy ước về chữ.** Tài liệu dùng *sản xuất* cho "production", *ra mắt* cho "rollout/release", *dịch chuyển phân phối* cho "distribution shift", *độ trễ* cho "latency", *thông lượng* cho "throughput". Khi một thuật ngữ tiếng Anh đã thành tên riêng trong ngành (canary, shadow, feature store, drift) thì giữ nguyên và giải thích ở lần xuất hiện đầu. Toàn bộ đối chiếu Việt – Anh nằm ở trang **Từ điển thuật ngữ**.
+### 0.2. Quy ước thuật ngữ
+
+| Tiếng Anh | Dùng trong giáo trình |
+|---|---|
+| production | sản xuất (môi trường vận hành thật) |
+| deployment, rollout | triển khai, ra mắt |
+| serving | phục vụ (mô hình) |
+| latency, throughput | độ trễ, thông lượng |
+| distribution shift, drift | dịch chuyển phân phối |
+| covariate shift, label shift, concept drift | giữ nguyên tiếng Anh |
+| training–serving skew | lệch giữa huấn luyện và phục vụ |
+| data leakage | rò rỉ dữ liệu |
+| point-in-time correctness | tính đúng theo thời điểm |
+| feature store | kho đặc trưng |
+| model registry | sổ đăng ký mô hình |
+| shadow, canary, A/B test, blue–green | giữ nguyên tiếng Anh |
+| monitoring, alerting | giám sát, cảnh báo |
+| feedback loop | vòng phản hồi |
+| technical debt | nợ kỹ thuật |
+| guardrail | rào chắn |
+
+Bảng đối chiếu đầy đủ nằm ở trang Từ điển thuật ngữ.
 
 ---
 
-## 1. Vì sao mô hình tốt vẫn chết trong sản xuất
+## 1. Nợ kỹ thuật của hệ thống học máy
 
-### 1.1. Câu hỏi mở đầu
+Một mô hình đạt kết quả tốt trên tập kiểm tra vẫn có thể suy giảm dần trong sản xuất mà không gây ra lỗi nào. Chương này giải thích vì sao, dựa trên khung nợ kỹ thuật của Sculley và cộng sự (2015): nguyên lý CACE, các dạng nợ có tên, và cách đọc đúng con số "5% mã học máy" hay được trích dẫn. Chương kết thúc bằng danh sách những nguyên nhân thường gặp làm mô hình suy giảm, và mỗi nguyên nhân được trình bày ở một chương sau.
 
-Một mô hình đạt AUC 0,94 trên tập kiểm tra. Sáu tháng sau nó vẫn chạy, không ai báo lỗi, không có ngoại lệ nào trong log — nhưng doanh thu từ tính năng ấy giảm 20% và không ai biết vì sao. Chuyện này phổ biến đến mức nó là lý do tồn tại của cả một nghề.
+### 1.1. Hệ thống học máy hỏng một cách im lặng
 
-Điều cần hiểu trước tiên: **phần mềm thường hỏng theo cách ồn ào, hệ thống ML hỏng theo cách im lặng.** Một API gọi sai kiểu dữ liệu thì ném ngoại lệ và có người bị đánh thức lúc 3 giờ sáng. Một mô hình nhận đầu vào đã lệch phân phối thì vẫn trả về một con số trong khoảng $[0, 1]$, đúng kiểu, đúng định dạng, đúng thời hạn — và sai.
+Một mô hình đạt AUC 0,94 trên tập kiểm tra. Sáu tháng sau nó vẫn chạy, không có ngoại lệ nào trong log, không ai báo lỗi, nhưng doanh thu từ tính năng dùng mô hình đã giảm 20%. Tình huống này phổ biến, và là một trong những lý do chính khiến MLOps trở thành một lĩnh vực riêng.
 
-### 1.2. Nợ kỹ thuật của hệ thống ML
+Phần mềm thông thường thường hỏng một cách dễ thấy: một lời gọi API sai kiểu dữ liệu ném ra ngoại lệ, và hệ thống giám sát báo động. Hệ thống học máy thường hỏng một cách im lặng: một mô hình nhận đầu vào có phân phối đã thay đổi vẫn trả về một con số trong khoảng $[0, 1]$, đúng kiểu, đúng định dạng, đúng thời hạn, nhưng sai. Không cơ chế kiểm tra nào của phần mềm thông thường phát hiện được loại lỗi này.
 
-Khung khái niệm chuẩn cho chuyện này là bài báo *Hidden Technical Debt in Machine Learning Systems* (Sculley và cộng sự, Google, NeurIPS 2015). Ý chính của nó:
+### 1.2. Nợ kỹ thuật
 
-> Xây và triển khai hệ thống ML thì tương đối nhanh và rẻ, nhưng **duy trì chúng theo thời gian thì khó và đắt.**
+Khung khái niệm chuẩn cho vấn đề này là bài báo *Hidden Technical Debt in Machine Learning Systems* (Sculley và cộng sự, 2015). Ý chính: xây dựng và triển khai hệ thống học máy tương đối nhanh và rẻ, nhưng duy trì chúng theo thời gian thì khó và tốn kém.
 
-Bài báo mượn ẩn dụ *nợ kỹ thuật* của Ward Cunningham: vay nợ không phải lúc nào cũng sai, nhưng **mọi khoản nợ đều phải trả lãi**. Điểm nguy hiểm riêng của ML là khoản nợ này **ẩn** — nó nằm ở mức hệ thống chứ không ở mức mã nguồn, nên đọc code không thấy, và lãi thì cộng dồn im lặng.
+Bài báo dùng ẩn dụ **nợ kỹ thuật** (technical debt) của Ward Cunningham: vay nợ không phải lúc nào cũng sai, nhưng mọi khoản nợ đều phải trả lãi. Điểm riêng của học máy là phần lớn khoản nợ nằm ở mức hệ thống chứ không ở mức mã nguồn, nên đọc mã không thấy được, và lãi tích luỹ mà không ai nhận ra.
 
 ![Hình 1](figs/mlops01_debt.png)
 
-**Hình 1.** Vẽ lại ý của Hình 1 trong Sculley và cộng sự (2015). Ô đen ở giữa là mã học máy. Mọi thứ bao quanh mới là phần phải xây, phải vận hành và phải trả nợ.
+**Hình 1.** Vẽ lại ý của Hình 1 trong Sculley và cộng sự (2015): phần mã học máy ở giữa chỉ là một phần nhỏ; các thành phần xung quanh (thu thập dữ liệu, kiểm định, trích đặc trưng, quản lý tài nguyên, phục vụ, giám sát) mới là phần phải xây dựng và vận hành.
 
 ### 1.3. Nguyên lý CACE
 
-Khái niệm quan trọng nhất trong bài báo, và cũng là thứ hay bị hỏi nhất:
+> **Định nghĩa 1.1 (CACE).** **CACE** (Changing Anything Changes Everything): trong một hệ thống học máy, thay đổi bất kỳ thành phần nào cũng có thể thay đổi hành vi của toàn bộ hệ thống.
 
-> **CACE — Changing Anything Changes Everything.** Đổi bất cứ thứ gì là đổi tất cả.
+Lý do: một mô hình học một hàm từ toàn bộ các đầu vào cùng lúc. Thêm một đặc trưng, bỏ một đặc trưng hay chỉ đổi cách lấy mẫu dữ liệu đều làm trọng số của mọi đặc trưng còn lại thay đổi theo. Bài báo nói rõ nguyên lý này áp dụng cho cả siêu tham số, thiết lập huấn luyện, cách lấy mẫu, ngưỡng hội tụ, tức mọi thứ có thể điều chỉnh.
 
-Lập luận rất gọn. Một mô hình học được một hàm từ *toàn bộ* các đầu vào cùng lúc. Thêm một đặc trưng $x_{n+1}$, bỏ một đặc trưng $x_j$, hay chỉ đổi cách lấy mẫu — trọng số của **mọi** đặc trưng còn lại đều đổi theo. Không có đầu vào nào thực sự độc lập với đầu vào nào.
+Hệ quả thực tế:
 
-Bài báo nói rõ CACE không chỉ áp cho tín hiệu đầu vào mà còn cho **siêu tham số, thiết lập học, cách lấy mẫu, ngưỡng hội tụ, và về cơ bản là mọi thứ có thể tinh chỉnh được**.
+- **Không có thay đổi nào là nhỏ và cô lập trong một mô hình.** Mọi thay đổi đều cần đánh giá lại toàn bộ; không thể lập luận cục bộ như khi sửa một hàm trong phần mềm thông thường. Mục 6.3 cho một ví dụ đo được: thêm một đặc trưng làm độ chính xác tổng thể tăng gần 20 điểm phần trăm nhưng làm một nhóm người dùng giảm gần 12 điểm.
+- Bài báo đề xuất một cách giảm nhẹ: tách bài toán thành các bài toán con độc lập và dùng các mô hình riêng. Cách này chỉ hợp khi các bài toán con thật sự tách rời nhau.
 
-Hệ quả thực hành, và đây là chỗ phân biệt người đã làm thật với người mới đọc:
+### 1.4. Các dạng nợ kỹ thuật
 
-- **Không tồn tại "thay đổi nhỏ và cô lập" trong một mô hình.** Mọi thay đổi đều phải đánh giá lại toàn bộ, không thể lý luận cục bộ như sửa một hàm trong phần mềm thường.
-- Cách giảm nhẹ mà bài báo nêu là **cô lập mô hình và phục vụ theo tổ hợp (ensemble)**, khi bài toán tách được thành các bài toán con độc lập một cách tự nhiên. Nhưng bài báo cũng thành thật: cách này chỉ hợp khi bài toán con thực sự rời nhau.
+Bài báo đặt tên cho nhiều dạng nợ. Dưới đây chúng được nhóm theo nơi phát sinh; riêng vòng phản hồi (feedback loop), một dạng nợ khác trong bài báo, được trình bày ở Chương 12.
 
-### 1.4. Các dạng nợ có tên
+**a) Mô hình làm mờ ranh giới trừu tượng**
 
-Nhớ được danh sách này là nhớ được phần lớn ngữ pháp của nghề. Chúng được nhóm theo nơi nợ phát sinh.
-
-**a) Mô hình phức tạp làm xói mòn ranh giới trừu tượng**
-
-| Tên | Nội dung |
+| Dạng nợ | Nội dung |
 |---|---|
-| **Entanglement** (rối) | Chính là CACE ở trên. |
-| **Correction cascade** (thác hiệu chỉnh) | Có mô hình $m_a$ cho bài toán A; cần giải bài toán A' hơi khác, ta học một mô hình nhỏ *nhận đầu ra của $m_a$ làm đầu vào* rồi học phần hiệu chỉnh. Nhanh, nhưng vừa tạo ra một phụ thuộc hệ thống mới vào $m_a$, và cải thiện $m_a$ từ nay trở đi trở nên rất đắt. |
-| **Undeclared consumer** (người dùng không khai báo) | Đầu ra mô hình được ghi ra đâu đó mà không có kiểm soát truy cập, rồi một hệ thống khác lặng lẽ dùng nó làm đầu vào. Trong công nghệ phần mềm cổ điển gọi là **visibility debt**. Nguy hiểm vì nó tạo ra ràng buộc chặt mà **không ai nhìn thấy**. |
+| Entanglement (rối) | chính là CACE ở Mục 1.3 |
+| Correction cascade (thác hiệu chỉnh) | có mô hình $m_a$ cho bài toán A; để giải bài toán A' gần giống, học thêm một mô hình nhận đầu ra của $m_a$ làm đầu vào. Nhanh, nhưng tạo ra phụ thuộc mới vào $m_a$, và từ đó cải thiện $m_a$ trở nên rất tốn kém vì có thể làm hỏng mô hình phía sau |
+| Undeclared consumer (bên sử dụng không khai báo) | đầu ra của mô hình được ghi ra ở đâu đó không có kiểm soát truy cập, rồi một hệ thống khác dùng nó làm đầu vào mà không ai biết. Thay đổi mô hình khi đó làm hỏng hệ thống kia, và có thể tạo ra vòng phản hồi ẩn (Chương 12) |
 
-**b) Phụ thuộc dữ liệu đắt hơn phụ thuộc mã**
+**b) Phụ thuộc dữ liệu tốn kém hơn phụ thuộc mã**
 
-Bài báo nói thẳng: phụ thuộc mã thì trình biên dịch và trình liên kết phát hiện được bằng phân tích tĩnh; **phụ thuộc dữ liệu thì không có công cụ tương đương**, nên rất dễ tích tụ những chuỗi phụ thuộc khổng lồ mà không ai gỡ nổi.
+Phụ thuộc giữa các đoạn mã có thể phát hiện bằng trình biên dịch và công cụ phân tích tĩnh; phụ thuộc vào dữ liệu thì không có công cụ tương đương, nên rất dễ tích tụ những chuỗi phụ thuộc không ai kiểm soát được.
 
-- **Unstable data dependency** (phụ thuộc dữ liệu không ổn định): tín hiệu đầu vào lấy từ hệ thống khác, mà hệ thống ấy lại thay đổi hành vi theo thời gian — ví dụ nó cũng là một mô hình ML tự cập nhật, hoặc là một bảng tra phụ thuộc dữ liệu. Cách chữa là **đóng băng phiên bản** tín hiệu, nhưng đóng băng cũng có giá của nó: giá trị cũ dần và phải nuôi nhiều phiên bản song song.
-- **Underutilized data dependency** (phụ thuộc dữ liệu ít dùng): đặc trưng gần như không đóng góp gì nhưng vẫn nằm trong mô hình, khiến hệ thống dễ vỡ một cách không cần thiết. Bài báo liệt kê bốn đường vào:
-  - **Legacy feature** — đặc trưng đưa vào từ sớm, sau này bị các đặc trưng mới làm cho thừa mà không ai nhận ra.
-  - **Bundled feature** — một nhóm đặc trưng được đánh giá chung rồi đưa vào cả gói vì áp lực thời hạn, trong đó có cái vô dụng.
-  - **ε-feature** — đặc trưng làm độ chính xác tăng một chút xíu nhưng chi phí phức tạp thì lớn.
-  - **Correlated feature** — hai đặc trưng tương quan mạnh, một cái mới là nhân quả; mô hình chia đều công cho cả hai hoặc chọn nhầm cái không nhân quả, và hệ thống thành giòn khi thế giới đổi.
+- **Phụ thuộc dữ liệu không ổn định** (unstable data dependency): đặc trưng lấy từ một hệ thống khác, và hệ thống đó thay đổi hành vi theo thời gian, ví dụ vì bản thân nó cũng là một mô hình được huấn luyện lại. Cách xử lý là cố định phiên bản của tín hiệu đầu vào, với cái giá là phải duy trì nhiều phiên bản song song.
+- **Phụ thuộc dữ liệu ít giá trị** (underutilized data dependency): đặc trưng đóng góp rất ít nhưng vẫn nằm trong mô hình, làm hệ thống dễ hỏng một cách không cần thiết. Bài báo nêu bốn nguồn: đặc trưng cũ đã bị các đặc trưng mới thay thế nhưng không ai gỡ; một nhóm đặc trưng được thêm cả gói vì áp lực thời hạn; đặc trưng cải thiện độ chính xác rất ít nhưng làm hệ thống phức tạp hơn nhiều; và đặc trưng tương quan mạnh với một đặc trưng khác có quan hệ nhân quả thật. Cách phát hiện được đề xuất là định kỳ đánh giá lại mô hình khi bỏ từng đặc trưng (leave-one-feature-out).
 
-  Cách phát hiện mà bài báo đề xuất rất thực dụng: **đánh giá bỏ-từng-đặc-trưng (leave-one-feature-out) định kỳ**.
+**c) Nợ trong kiến trúc, cấu hình và quy trình**
 
-**c) Nợ ở mức hệ thống**
-
-| Tên | Nội dung |
+| Dạng nợ | Nội dung |
 |---|---|
-| **Glue code** | Mã keo để nối các gói đa dụng lại với nhau. Đây là chỗ có con số nổi tiếng nhất của bài báo: *"một hệ thống trưởng thành rốt cuộc có thể chỉ gồm **nhiều nhất 5% mã học máy** và **ít nhất 95% mã keo**"*. |
-| **Pipeline jungle** (rừng rậm pipeline) | Trường hợp riêng của glue code, mọc lên ở khâu chuẩn bị dữ liệu: cào, ghép, lấy mẫu chồng chất theo năm tháng, đầy tệp trung gian. |
-| **Dead experimental codepath** | Nhánh điều kiện để thử nghiệm nằm lẫn trong mã sản xuất. Mỗi nhánh riêng lẻ thì rẻ; cộng dồn thì thành nợ lớn. |
-| **Abstraction debt** | Ngành ML chưa có một trừu tượng nào đạt tới mức thành công của **cơ sở dữ liệu quan hệ**. Câu hỏi "giao diện đúng để mô tả một luồng dữ liệu, một mô hình, một dự đoán là gì?" vẫn chưa có câu trả lời chuẩn. |
-| **Configuration debt** | Hệ thống lớn nào cũng có rất nhiều tuỳ chọn cấu hình, và cả nhà nghiên cứu lẫn kỹ sư đều coi cấu hình là chuyện phụ. Trong khi một dòng cấu hình sai có sức phá hoại ngang một dòng mã sai. |
-| **Reproducibility debt** | Chạy lại thí nghiệm và ra kết quả tương tự là yêu cầu khoa học cơ bản, nhưng thuật toán ngẫu nhiên, tính bất định của huấn luyện song song, phụ thuộc điều kiện khởi tạo và tương tác với thế giới bên ngoài làm việc đó rất khó. |
-| **Cultural debt** | Ranh giới cứng giữa "nghiên cứu" và "kỹ thuật" là có hại. Đội cần **thưởng cho việc xoá bớt đặc trưng, giảm độ phức tạp, cải thiện tính lặp lại và giám sát ngang với thưởng cho việc tăng độ chính xác**. |
+| Glue code (mã keo) | mã nối các thư viện đa dụng lại với nhau; đây là nơi xuất hiện con số 5% ở Mục 1.5 |
+| Pipeline jungle | trường hợp riêng của mã keo ở khâu chuẩn bị dữ liệu: các bước lấy, ghép, lấy mẫu dữ liệu chồng chất qua thời gian, với nhiều tệp trung gian |
+| Dead experimental codepaths | các nhánh điều kiện để thử nghiệm còn nằm lại trong mã sản xuất |
+| Abstraction debt | thiếu những trừu tượng chuẩn cho dữ liệu, mô hình và dự đoán, tương tự vai trò của cơ sở dữ liệu quan hệ trong phần mềm thông thường |
+| Configuration debt | hệ thống lớn có rất nhiều tuỳ chọn cấu hình, thường ít được kiểm tra kỹ như mã, dù một dòng cấu hình sai có thể gây hại như một dòng mã sai |
+| Reproducibility debt | khó chạy lại một thí nghiệm và nhận được cùng kết quả (Chương 5) |
+| Cultural debt | ranh giới cứng giữa nhóm nghiên cứu và nhóm kỹ thuật; cần ghi nhận việc gỡ bớt đặc trưng, giảm độ phức tạp, cải thiện giám sát ngang với việc tăng độ chính xác |
 
-> **Ba "mùi" đáng ngờ** mà bài báo đặt tên, rất hay được hỏi: **plain-old-data type smell** (thông tin giàu ngữ nghĩa của ML bị nhét vào float và int trần, nên một tham số không tự biết mình là log-odds hay là ngưỡng quyết định), **multiple-language smell** (mỗi mảnh viết một ngôn ngữ vì tiện thư viện, làm kiểm thử và bàn giao đắt lên), và **prototype smell** (phải dựa vào môi trường prototype thường xuyên là dấu hiệu hệ thống thật đang giòn).
+Bài báo còn nêu ba dấu hiệu đáng ngờ (smell) trong mã: dùng kiểu dữ liệu nguyên thuỷ (float, int) cho những đại lượng giàu ngữ nghĩa, nên một tham số không cho biết nó là log-odds hay là ngưỡng quyết định; dùng nhiều ngôn ngữ lập trình trong một hệ thống, làm việc kiểm thử và bàn giao khó hơn; và thường xuyên phải thử ý tưởng trên một bản nguyên mẫu (prototype) thay vì trên hệ thống thật, dấu hiệu cho thấy hệ thống thật khó thay đổi hoặc thiếu những giao diện tốt.
 
-### 1.5. Đọc con số 5% cho đúng
+### 1.5. Con số 5% mã học máy
 
-Con số "5% mã ML, 95% mã keo" bị trích sai rất nhiều. Ba điểm cần nói đúng:
+Con số "5% mã học máy, 95% mã keo" thường bị trích dẫn sai. Ba điểm cần nói đúng:
 
-1. Nó là phát biểu về **mã keo khi tái sử dụng các gói đa dụng**, nằm trong mục *Glue Code* — **không phải** chú thích của Hình 1.
-2. Bài báo diễn đạt có biên: *nhiều nhất* 5% và *ít nhất* 95%. Đó là một nhận định định tính có kèm độ lớn, không phải một phép đo trên một mẫu hệ thống.
-3. Kết luận bài báo rút ra từ đó cũng thường bị bỏ mất: vì tỉ lệ ấy, **viết một lời giải gọn và thuần nội bộ đôi khi rẻ hơn là tái sử dụng một gói đa dụng**, và chiến lược chống glue code là *bọc các gói hộp đen sau một API chung*.
+1. Đây là nhận định trong mục *Glue Code* của bài báo, về hệ thống tái sử dụng các thư viện đa dụng, không phải chú thích của Hình 1.
+2. Bài báo diễn đạt có giới hạn: một hệ thống trưởng thành có thể chỉ gồm **nhiều nhất** 5% mã học máy và **ít nhất** 95% mã keo. Đây là một nhận định định tính kèm độ lớn, không phải kết quả đo trên một mẫu hệ thống.
+3. Kết luận bài báo rút ra thường bị bỏ qua: vì tỉ lệ này, đôi khi tự viết một giải pháp gọn còn rẻ hơn tái sử dụng một thư viện đa dụng, và cách chống mã keo là bọc các thư viện sau một giao diện chung.
 
-Nói được cả ba ý này là dấu hiệu rõ nhất của người đã đọc bài báo chứ không chỉ nghe kể lại.
+### 1.6. Những nguyên nhân thường gặp làm mô hình suy giảm
 
-### 1.6. Cái giá phải trả cho việc không có MLOps
+Trở lại mô hình AUC 0,94 ở Mục 1.1. Nó có thể suy giảm vì một trong các nguyên nhân sau, mỗi nguyên nhân đã có tên ở trên và được trình bày ở một chương sau:
 
-Đến đây có thể trả lời câu hỏi mở đầu. Mô hình AUC 0,94 ấy chết vì một trong các lý do sau, tất cả đều đã có tên ở trên:
-
-- một nhà cung cấp dữ liệu thượng nguồn đổi đơn vị từ đồng sang nghìn đồng (**unstable data dependency**, không ai giám sát **up-stream producer**);
-- một đặc trưng được tính khác nhau giữa lúc huấn luyện và lúc phục vụ (**training–serving skew**, Chương 4);
-- thế giới đã đổi và không ai đo (**dịch chuyển phân phối**, Chương 9);
-- một ngưỡng quyết định đặt tay từ năm ngoái vẫn còn đó sau khi mô hình đã huấn luyện lại (**fixed threshold in dynamic system**, Mục 10.6);
-- chính mô hình làm hỏng dữ liệu huấn luyện của lần sau (**feedback loop**, Chương 12).
-
-Toàn bộ phần còn lại của tài liệu là cách phát hiện và chặn từng nguyên nhân ấy.
+- một nguồn dữ liệu phía trước đổi đơn vị tính từ đồng sang nghìn đồng mà không báo (phụ thuộc dữ liệu không ổn định; Chương 3 và Mục 10.4);
+- một đặc trưng được tính khác nhau lúc huấn luyện và lúc phục vụ (lệch giữa huấn luyện và phục vụ; Chương 4);
+- phân phối dữ liệu đã thay đổi mà không ai đo (dịch chuyển phân phối; Chương 9);
+- một ngưỡng quyết định đặt tay từ năm trước vẫn được dùng sau khi mô hình đã huấn luyện lại (ngưỡng cố định trong hệ thống thay đổi; Mục 10.6);
+- chính mô hình làm sai lệch dữ liệu huấn luyện của những lần sau (vòng phản hồi; Chương 12).
 
 ---
 
-## 2. Vòng đời, ba chữ V và ba mức tự động hoá
+## 2. Vòng đời và mức độ tự động hoá
 
-### 2.1. Vòng đời là vòng lặp
+Chương này mô tả vòng đời của một hệ thống học máy như một vòng lặp, trình bày ba yếu tố quyết định thành công theo nghiên cứu phỏng vấn của Shankar và cộng sự (2022), ba mức tự động hoá theo kiến trúc tham chiếu của Google Cloud, và phân biệt huấn luyện liên tục với CI/CD.
 
-Cách vẽ quen thuộc "thu thập dữ liệu → huấn luyện → triển khai" là một đường thẳng, và chính vì thế nó sai. Vòng đời thật có ít nhất ba đường quay lại.
+### 2.1. Vòng đời là một vòng lặp
+
+Cách mô tả quen thuộc "thu thập dữ liệu, huấn luyện, triển khai" là một đường thẳng và vì thế thiếu phần quan trọng nhất. Vòng đời thật có nhiều đường quay lại: kết quả đánh giá dẫn tới thu thập thêm dữ liệu, giám sát trong sản xuất dẫn tới huấn luyện lại, sự cố dẫn tới sửa đặc trưng.
 
 ![Hình 2](figs/mlops02_lifecycle.png)
 
-**Hình 2.** Ba đường quay lại mới là nơi phần lớn công sức thực sự đổ vào. Một hệ thống ML sống được là hệ thống đi vòng này nhanh và rẻ, không phải hệ thống đi một lượt thật giỏi.
+**Hình 2.** Vòng đời của một hệ thống học máy với các đường quay lại. Hệ thống tốt là hệ thống đi vòng này nhanh và ít tốn kém.
 
-Nghiên cứu phỏng vấn *Operationalizing Machine Learning: An Interview Study* (Shankar và cộng sự, 2022) phỏng vấn 18 kỹ sư ML đang làm sản xuất và gom công việc của họ thành **bốn nhiệm vụ**:
+Shankar và cộng sự (2022) phỏng vấn 18 kỹ sư học máy đang vận hành hệ thống thật và gom công việc của họ thành bốn nhiệm vụ:
 
-1. **Thu thập và gán nhãn dữ liệu** — tìm nguồn, kéo về kho tập trung, làm sạch, gán nhãn (thuê ngoài hoặc đội nội bộ).
-2. **Tạo đặc trưng và thí nghiệm mô hình** — cải thiện chỉ số ML; thí nghiệm có thể hướng dữ liệu hoặc hướng mô hình.
-3. **Đánh giá và triển khai mô hình**.
-4. **Giám sát và phản ứng khi chất lượng tụt trong sản xuất**.
+1. **Thu thập và gán nhãn dữ liệu**: tìm nguồn, đưa về kho tập trung, làm sạch, gán nhãn.
+2. **Tạo đặc trưng và thí nghiệm mô hình**: cải thiện chỉ số, thay đổi dữ liệu hoặc thay đổi mô hình.
+3. **Đánh giá và triển khai mô hình.**
+4. **Giám sát và xử lý khi chất lượng suy giảm trong sản xuất.**
 
-### 2.2. Ba chữ V
+### 2.2. Ba yếu tố: tốc độ, kiểm định, phiên bản
 
-Cùng nghiên cứu ấy rút ra **ba biến quyết định thành bại** của một lần triển khai. Đây là khung tóm tắt gọn nhất mà tài liệu này biết, và rất đáng thuộc:
+Cùng nghiên cứu đó rút ra ba yếu tố quyết định thành công của việc đưa mô hình vào sản xuất, gọi tắt là ba chữ V:
 
-| Chữ V | Nội dung | Vì sao nó quyết định |
+| Yếu tố | Nội dung | Lý do quan trọng |
 |---|---|---|
-| **Velocity** (tốc độ vòng lặp) | Đi từ một ý tưởng mới tới một mô hình đã huấn luyện trong vòng một ngày. | ML mang bản chất thí nghiệm, nên số ý tưởng thử được trên một đơn vị thời gian chính là năng suất. |
-| **Validation** (kiểm định sớm) | Thử, loại ý tưởng tồi và giám sát pipeline **càng sớm càng tốt**. | Lỗi càng để người dùng nhìn thấy thì càng đắt. |
-| **Versioning** (quản phiên bản) | Lưu và quản nhiều phiên bản mô hình và dữ liệu cùng lúc. | Không thể lường trước mọi lỗi, nên phải **quay lui được**. |
+| Velocity (tốc độ) | đi nhanh từ một ý tưởng tới một mô hình đã huấn luyện, lý tưởng trong vòng một ngày | học máy mang tính thực nghiệm, nên số ý tưởng thử được trong một khoảng thời gian quyết định năng suất |
+| Validation (kiểm định) | kiểm tra, loại bỏ ý tưởng kém và phát hiện lỗi càng sớm càng tốt | lỗi được phát hiện càng muộn thì càng tốn kém |
+| Versioning (phiên bản) | lưu và quản lý nhiều phiên bản mô hình và dữ liệu | không lường trước được mọi lỗi, nên phải quay lại được phiên bản trước |
 
-Một câu trích trong bài báo tóm đúng cả ba: *"Chủ đề chung khi chúng tôi trưởng thành lên là: làm sao kiểm định được nhiều hơn ở giai đoạn sớm hơn, để vòng lặp nhanh hơn?"*
-
-Chú ý điểm tinh tế: **Velocity và Validation kéo nhau về hai phía**. Kiểm định thêm thì chậm lại. Nhưng bài báo chỉ ra chúng cũng *cộng hưởng*: nếu ý tưởng tồi bị loại ở giai đoạn sớm thì tổng tốc độ lại tăng. Nghệ thuật nằm ở chỗ đặt cửa kiểm định ở đâu, chứ không phải đặt nhiều hay ít.
+Tốc độ và kiểm định có vẻ mâu thuẫn: thêm bước kiểm định thì chậm hơn. Nhưng chúng cũng hỗ trợ nhau: loại được ý tưởng kém ở giai đoạn sớm thì tổng thời gian giảm. Vấn đề là đặt bước kiểm định ở đâu, không phải nhiều hay ít.
 
 ### 2.3. Ba mức tự động hoá
 
-Kiến trúc tham chiếu được trích dẫn nhiều nhất là tài liệu *MLOps: Continuous delivery and automation pipelines in machine learning* của Google Cloud. Nó chia độ trưởng thành thành ba mức.
+Kiến trúc tham chiếu được trích dẫn nhiều nhất là tài liệu *MLOps: Continuous delivery and automation pipelines in machine learning* của Google Cloud, chia mức trưởng thành thành ba mức.
 
 ![Hình 3](figs/mlops03_levels.png)
 
-**Hình 3.** Thứ được bàn giao lớn dần theo mức: mức 0 bàn giao một mô hình, mức 1 bàn giao một pipeline, mức 2 bàn giao một hệ thống tự cập nhật.
+**Hình 3.** Ba mức tự động hoá. Thứ được bàn giao lớn dần theo mức: một mô hình, một pipeline, rồi một hệ thống tự cập nhật.
 
-**Mức 0 — quy trình thủ công.** Mọi bước làm tay: phân tích dữ liệu, chuẩn bị dữ liệu, huấn luyện, kiểm định. Nhà khoa học dữ liệu bàn giao *mô hình đã huấn luyện* cho kỹ sư đem triển khai. Hai bên làm việc tách rời nhau. Phát hành thưa thớt và **không giám sát hiệu năng**.
+**Mức 0, quy trình thủ công.** Mọi bước, từ phân tích và chuẩn bị dữ liệu tới huấn luyện và kiểm định, đều làm tay. Nhóm khoa học dữ liệu bàn giao mô hình đã huấn luyện cho nhóm kỹ thuật triển khai; hai bên làm việc tách rời. Mô hình ít khi được cập nhật và không được giám sát hiệu năng.
 
-**Mức 1 — tự động hoá pipeline ML.** Trọng tâm là **huấn luyện liên tục (CT)**: tự động hoá cả pipeline huấn luyện. Thành phần được đóng gói, tái sử dụng được, có bước **kiểm định dữ liệu và kiểm định mô hình tự động**. Thứ được triển khai không còn là mô hình mà là **toàn bộ pipeline huấn luyện**.
+**Mức 1, tự động hoá pipeline huấn luyện.** Toàn bộ pipeline huấn luyện được tự động hoá, nên mô hình có thể được **huấn luyện liên tục** (continuous training, CT) trên dữ liệu mới. Pipeline có bước kiểm định dữ liệu và kiểm định mô hình tự động. Thứ được triển khai không còn là một mô hình mà là cả pipeline huấn luyện.
 
-**Mức 2 — tự động hoá CI/CD.** Có hệ thống CI/CD mạnh cho chính pipeline, để thử ý tưởng mới và đưa ra sản xuất nhanh. Tài liệu Google đặt tên sáu giai đoạn:
+**Mức 2, tự động hoá CI/CD cho pipeline.** Có hệ thống CI/CD cho chính pipeline, để thử nghiệm ý tưởng mới và đưa vào sản xuất nhanh chóng. Tài liệu của Google chia thành sáu giai đoạn: phát triển và thí nghiệm, tích hợp liên tục pipeline, bàn giao liên tục pipeline, kích hoạt tự động, bàn giao liên tục mô hình, và giám sát.
 
-1. Phát triển và thí nghiệm
-2. Tích hợp liên tục cho pipeline
-3. Bàn giao liên tục cho pipeline
-4. Kích hoạt tự động
-5. Bàn giao liên tục cho mô hình
-6. Giám sát
+Tài liệu cũng liệt kê tám bước của một pipeline học máy: trích xuất dữ liệu, phân tích dữ liệu, chuẩn bị dữ liệu, huấn luyện, đánh giá, **kiểm định mô hình**, phục vụ, giám sát. Bước kiểm định mô hình được tách riêng khỏi bước đánh giá, vì một lý do Mục 11.4 trình bày.
 
-**Tám bước của pipeline ML** mà tài liệu ấy liệt kê — đáng thuộc vì rất hay được hỏi dưới dạng "hãy mô tả pipeline của bạn": trích xuất dữ liệu → phân tích dữ liệu → chuẩn bị dữ liệu → huấn luyện → đánh giá → **kiểm định mô hình** → phục vụ → giám sát.
+### 2.4. Huấn luyện liên tục và CI/CD
 
-### 2.4. CT khác gì CI/CD
+CI/CD xử lý thay đổi của **mã**; CT xử lý thay đổi của **dữ liệu**. Trong phần mềm thông thường, hệ thống chỉ thay đổi khi có người sửa mã. Trong học máy có thêm một nguồn thay đổi không đi qua kho mã: thế giới thay đổi, dữ liệu thay đổi theo, và mô hình cũ dần. Vì vậy học máy cần thêm huấn luyện liên tục: tự động huấn luyện lại và triển khai lại, kích hoạt bởi dữ liệu mới, bởi chất lượng suy giảm hoặc bởi dịch chuyển phân phối (Chương 11).
 
-Đây là câu hỏi phỏng vấn kinh điển, và câu trả lời ngắn là:
+Trong CI/CD thông thường, tạo tác (artifact) là mã đã biên dịch. Trong học máy, tạo tác gồm mã, dữ liệu và mô hình, ba thứ thay đổi theo nhịp khác nhau. Quản lý đồng thời ba nhịp đó là lý do MLOps là một lĩnh vực riêng.
 
-> CI/CD lo việc **mã thay đổi**. CT lo việc **dữ liệu thay đổi**.
+### 2.5. Các thói quen xấu thường gặp
 
-Trong phần mềm thường, hệ thống chỉ đổi khi có người sửa mã. Trong ML có thêm một nguồn thay đổi mà không ai chạm vào repo cả: thế giới. Vì vậy ML có thêm một chữ C thứ ba — **Continuous Training** — tức tự động huấn luyện lại và phục vụ lại, kích hoạt bởi dữ liệu mới, bởi chất lượng tụt, hoặc bởi dịch chuyển phân phối (Chương 11).
+Shankar và cộng sự quan sát được bốn thói quen xấu (anti-pattern):
 
-Một cách nói khác giúp nhớ: trong CI/CD của phần mềm thường, **tạo tác (artifact) là mã đã biên dịch**. Trong ML, tạo tác gồm **mã + dữ liệu + mô hình**, và ba thứ này có nhịp thay đổi khác nhau. Đó là toàn bộ lý do MLOps tồn tại như một nghề riêng.
-
-### 2.5. Bốn thói xấu có tên
-
-Shankar và cộng sự quan sát được bốn **anti-pattern**, đều đáng nhận mặt:
-
-| Thói xấu | Mô tả | Vì sao nó hại |
+| Thói quen | Mô tả | Tác hại |
 |---|---|---|
-| **Industry–Classroom Mismatch** | Kiến thức học ở trường không khớp với lỗi gặp ở chỗ làm; người mới phải học lại bằng cách vấp. | Có thể chữa bằng tài liệu và quy trình, không nhất thiết phải trả giá bằng sự cố. |
-| **Keeping GPUs Warm** | "Giữ cho GPU luôn ấm": chạy càng nhiều thí nghiệm càng tốt để không phí tài nguyên. | Nhiều thí nghiệm không có giả thuyết thì chỉ sinh ra nhiễu và nhiều phiên bản phải quản. |
-| **Retrofitting an Explanation** | Thấy kết quả tốt, đưa ra sản xuất, rồi mới đi tìm lý do vì sao nó tốt. | Lời giải thích gắn sau thường sai, và nó dẫn hướng sai cho các quyết định tiếp theo. |
-| **Undocumented Tribal Knowledge** | Tri thức về pipeline chỉ nằm trong đầu vài người. | Tốc độ cao sinh ra rất nhiều phiên bản, tài liệu không theo kịp; người đó nghỉ việc là mất. |
+| Industry–classroom mismatch | kiến thức học ở trường không khớp với những vấn đề gặp khi vận hành; người mới phải học lại qua sự cố | có thể giảm bằng tài liệu và quy trình |
+| Keeping GPUs warm | chạy càng nhiều thí nghiệm càng tốt để không lãng phí tài nguyên | thí nghiệm không có giả thuyết tạo ra nhiều kết quả khó diễn giải và nhiều phiên bản phải quản lý |
+| Retrofitting an explanation | thấy kết quả tốt, đưa vào sản xuất, rồi mới tìm lý do vì sao thay đổi có tác dụng | lời giải thích gắn vào sau có thể sai, và dễ làm các quyết định tiếp theo đi sai hướng |
+| Undocumented tribal knowledge | hiểu biết về pipeline chỉ nằm trong đầu vài người | khi người đó rời đi, hiểu biết mất theo |
 
-Anti-pattern thứ hai đáng nói thêm. Nó nghe như một đức tính (tận dụng tài nguyên) nhưng thực ra là một sự nhầm lẫn về thứ cần tối ưu: **cái khan hiếm không phải GPU, mà là số giả thuyết tốt và thời gian của con người để đọc kết quả.**
+Thói quen thứ hai nghe như một ưu điểm, tận dụng tài nguyên, nhưng nhầm lẫn về thứ cần tối ưu: tài nguyên khan hiếm thường không phải GPU mà là số giả thuyết tốt và thời gian của con người để đọc và diễn giải kết quả.
 
 ---
 
-## 3. Dữ liệu: hợp đồng, kiểm định và phổ lỗi
+## 3. Dữ liệu: hợp đồng, kiểm định và các loại lỗi
 
-### 3.1. Vì sao chương này đứng trước chương mô hình
+Lỗi dữ liệu là nguồn sự cố phổ biến và khó phát hiện nhất trong hệ thống học máy. Chương này phân loại lỗi dữ liệu thành ba loại với ba cách xử lý khác nhau, trình bày hợp đồng dữ liệu như một cách biến các giả định ngầm thành các kiểm tra tự động, rồi bàn về nhãn và phiên bản hoá dữ liệu.
 
-Một quan sát nhất quán trong nghiên cứu phỏng vấn: kỹ sư ML giỏi **lặp trên dữ liệu chứ không nhất thiết lặp trên mô hình**. Lý do đơn giản: với cùng một lượng công sức, sửa dữ liệu thường cho mức cải thiện lớn hơn đổi kiến trúc, và quan trọng hơn — **lỗi dữ liệu là loại lỗi im lặng**, còn lỗi mô hình thì hiện ra trên chỉ số.
+### 3.1. Vai trò của dữ liệu
 
-### 3.2. Phổ lỗi dữ liệu: cứng → mềm → dịch chuyển
+Một nhận xét lặp lại trong các nghiên cứu về thực hành: kỹ sư học máy giỏi thường cải thiện hệ thống bằng cách thay đổi dữ liệu nhiều hơn thay đổi mô hình. Theo một quy tắc kinh nghiệm được nhắc ở [Mục 1.3 của *Học sâu*](models-ch01.html), với cùng công sức, sửa dữ liệu và nhãn thường cho cải thiện lớn hơn đổi kiến trúc. Quan trọng hơn, lỗi dữ liệu thường không gây lỗi chương trình nào, nên chỉ được phát hiện nếu được kiểm tra có chủ đích.
 
-Đây là khung phân loại hữu dụng nhất mà tài liệu này biết, lấy từ Shankar và cộng sự. Nó giải thích vì sao "kiểm tra dữ liệu" không phải một việc mà là **ba việc khác nhau**.
+### 3.2. Ba loại lỗi dữ liệu
+
+Shankar và cộng sự (2022) phân biệt ba loại lỗi, mỗi loại cần một cách phản ứng khác nhau:
 
 ![Hình 4](figs/mlops04_errors.png)
 
-**Hình 4.** Ba loại lỗi dữ liệu đòi hỏi ba cách phản ứng khác nhau. Sai lầm phổ biến là dùng cùng một cơ chế cảnh báo cho cả ba.
+**Hình 4.** Ba loại lỗi dữ liệu, từ dễ phát hiện và gây hại ngay tới khó phát hiện và gây hại chậm.
 
-| Loại | Ví dụ | Đặc điểm | Phản ứng đúng |
+| Loại | Ví dụ | Đặc điểm | Cách xử lý |
 |---|---|---|---|
-| **Lỗi cứng** (hard) | đảo hai cột, tuổi âm, kiểu sai, tệp rỗng | Cho dự đoán sai rõ ràng. Vi phạm ràng buộc kiểm tra được. | **Chặn pipeline.** Thà không có dự đoán còn hơn có dự đoán rác. |
-| **Lỗi mềm** (soft) | vài trường null, đơn vị đổi, xuất hiện mã danh mục lạ | Vẫn ra dự đoán trông hợp lý, nên **trôi qua mọi kiểm tra**. Khó bắt và khó định lượng. | Cảnh báo và theo dõi **tỉ lệ**, không chặn. |
-| **Dịch chuyển** (drift) | phân phối đổi dần theo tuần, theo mùa | Không có gì "sai"; thế giới đã khác. Diễn ra chậm. | Điều tra, có thể huấn luyện lại (Chương 9, 11). |
+| Lỗi cứng | hai cột bị đảo, tuổi âm, sai kiểu dữ liệu, tệp rỗng | vi phạm một ràng buộc kiểm tra được; dự đoán sai rõ ràng | dừng pipeline: không có dự đoán tốt hơn có dự đoán sai |
+| Lỗi mềm | một số trường bị thiếu, đơn vị tính thay đổi, xuất hiện giá trị danh mục lạ | dự đoán vẫn trông hợp lý nên vượt qua các kiểm tra đơn giản; khó định lượng | cảnh báo và theo dõi tỉ lệ, không dừng pipeline |
+| Dịch chuyển | phân phối thay đổi dần theo tuần, theo mùa | không có gì sai về kỹ thuật; thế giới đã khác | điều tra, có thể huấn luyện lại (Chương 9, 11) |
 
-Bài báo ghi nhận hai nỗi đau cụ thể quanh khung này, và cả hai đều nên nói ra khi phỏng vấn vì chúng chứng tỏ bạn hiểu vấn đề vận hành chứ không chỉ vấn đề kỹ thuật:
-
-1. **Bắt người ta tự tay đặt ràng buộc chất lượng dữ liệu là không bền.** Người biết vì sao ngưỡng ấy là 0,3 sẽ nghỉ việc, và ngưỡng ấy ở lại.
-2. **Nỗi đau được nhắc nhiều nhất là báo động giả** — cảnh báo nổ trong khi chất lượng ML vẫn ổn. Hậu quả của báo động giả không phải là phiền, mà là **đội ngừng tin vào cảnh báo**, và lúc có sự cố thật thì không ai buồn nhìn.
+Nghiên cứu ghi nhận hai khó khăn quanh việc kiểm tra dữ liệu. Thứ nhất, để người tự đặt các ràng buộc chất lượng dữ liệu bằng tay không bền vững: người biết vì sao một ngưỡng là 0,3 có thể rời đi, còn ngưỡng thì ở lại. Thứ hai, khó khăn được nhắc nhiều nhất là **báo động giả**: cảnh báo kích hoạt trong khi chất lượng của mô hình vẫn ổn. Hậu quả không chỉ là phiền toái mà là nhóm vận hành mất niềm tin vào cảnh báo, và bỏ qua cả khi có sự cố thật (Mục 10.5). Dùng cùng một cơ chế cảnh báo cho cả ba loại lỗi là một nguyên nhân chính của báo động giả.
 
 ### 3.3. Hợp đồng dữ liệu
 
-Cách chữa gốc cho lỗi cứng là biến giả định ngầm thành **hợp đồng dữ liệu (data contract)** có thể kiểm tra bằng máy. Một hợp đồng tối thiểu gồm bốn tầng:
+Cách xử lý gốc cho lỗi cứng là biến các giả định ngầm về dữ liệu thành một **hợp đồng dữ liệu** (data contract) kiểm tra được bằng máy. Một hợp đồng tối thiểu gồm bốn tầng:
 
 ```python
-# Tầng 1 — schema: tên cột, kiểu, cột nào được phép null
+# Tầng 1: lược đồ (schema) - tên cột, kiểu, cột nào được phép thiếu
 schema = {
-    "user_id":      {"type": "int64",   "nullable": False},
-    "amount_vnd":   {"type": "float64", "nullable": False},
-    "country":      {"type": "category","nullable": False},
-    "event_time":   {"type": "datetime","nullable": False},
+    "user_id":    {"type": "int64",    "nullable": False},
+    "amount_vnd": {"type": "float64",  "nullable": False},
+    "country":    {"type": "category", "nullable": False},
+    "event_time": {"type": "datetime", "nullable": False},
 }
 
-# Tầng 2 — miền giá trị: ràng buộc trên từng giá trị
+# Tầng 2: miền giá trị - ràng buộc trên từng giá trị
 domain = {
     "amount_vnd": {"min": 0, "max": 5e9},
     "country":    {"allowed": {"VN", "SG", "TH", "ID"}},
 }
 
-# Tầng 3 — thống kê: ràng buộc trên phân phối của cả lô
+# Tầng 3: thống kê - ràng buộc trên phân phối của cả lô
 batch_stats = {
     "amount_vnd": {"null_rate_max": 0.001, "mean_shift_max_sigma": 3},
     "country":    {"new_category_rate_max": 0.005},
 }
 
-# Tầng 4 — quan hệ giữa các cột và giữa các bảng
+# Tầng 4: quan hệ giữa các cột và giữa các bảng
 invariants = [
-    "event_time <= ingest_time",                  # không có sự kiện từ tương lai
+    "event_time <= ingest_time",       # không có sự kiện từ tương lai
     "refund_amount <= amount_vnd",
-    "count(rows) between 0.7*d7_median and 1.4*d7_median",   # lô không hụt, không phình
+    "count(rows) between 0.7*d7_median and 1.4*d7_median",   # số dòng không hụt, không phình bất thường
 ]
 ```
 
-Ba điều đáng nói về thiết kế này:
+Ba nhận xét về thiết kế này:
 
-- **Tầng 1 và 2 bắt lỗi cứng, tầng 3 và 4 bắt lỗi mềm.** Trộn chúng vào một cơ chế là nguồn gốc của báo động giả.
-- **Hợp đồng phải được sinh ra từ dữ liệu chứ không chỉ viết tay.** Cách làm chuẩn là suy ra schema và khoảng giá trị từ một tập tham chiếu đã được duyệt, rồi cho người xem lại — như vậy hợp đồng không chết theo người viết ra nó.
-- **Ràng buộc "không có sự kiện từ tương lai"** ở tầng 4 nhìn thì tầm thường, nhưng nó chính là tuyến phòng thủ đầu tiên chống rò rỉ nhãn — chủ đề của Chương 4.
+- **Tầng 1 và 2 phát hiện lỗi cứng, tầng 3 và 4 phát hiện lỗi mềm.** Hai nhóm cần hai cách phản ứng khác nhau (Mục 3.2): vi phạm tầng 1, 2 thì dừng pipeline; vi phạm tầng 3, 4 thì cảnh báo.
+- **Hợp đồng nên được suy ra từ dữ liệu rồi người duyệt lại,** thay vì chỉ viết tay: suy ra lược đồ và khoảng giá trị từ một tập dữ liệu tham chiếu đã được kiểm tra, rồi để người xem lại. Hợp đồng khi đó không phụ thuộc vào trí nhớ của một người cụ thể. Các thư viện như TensorFlow Data Validation (Breck và cộng sự, 2019) và Great Expectations cung cấp chức năng này.
+- **Ràng buộc "không có sự kiện từ tương lai"** ở tầng 4 là tuyến phòng thủ đầu tiên chống rò rỉ dữ liệu theo thời gian (Chương 4).
 
-### 3.4. Kiểm định ở cả đầu vào lẫn đầu ra
+### 3.4. Kiểm định ở đầu vào và đầu ra của pipeline
 
-Một thực hành được nhắc đi nhắc lại trong nghiên cứu phỏng vấn: **kiểm định dữ liệu đi vào *và* đi ra khỏi mỗi pipeline**. Lý do là một pipeline nhiều bước có tính chất khó chịu: bước thứ ba hỏng thì bước thứ năm vẫn chạy, và chỉ đến đầu ra cuối cùng mới thấy con số lạ — lúc đó đã mất hàng giờ để lần ngược.
+Một thực hành được nhắc lại nhiều lần trong nghiên cứu phỏng vấn: kiểm định dữ liệu cả khi đi vào và khi đi ra khỏi mỗi pipeline. Lý do: trong một pipeline nhiều bước, bước thứ ba hỏng thì bước thứ năm vẫn chạy, và chỉ tới đầu ra cuối cùng mới thấy con số bất thường; khi đó phải mất nhiều thời gian lần ngược để tìm bước hỏng. Nguyên tắc chung, mượn từ hệ thống phân tán, là phát hiện lỗi sớm, báo lỗi rõ ràng, và kiểm tra tại ranh giới giữa các thành phần, nơi trách nhiệm chuyển từ nhóm này sang nhóm khác.
 
-Nguyên tắc chung mượn từ hệ phân tán: **fail fast, fail loud, fail at the boundary** — hỏng sớm, hỏng ồn ào, và hỏng ở đúng ranh giới nơi trách nhiệm đổi chủ.
-
-### 3.5. Nhãn: nguồn lỗi bị đánh giá thấp nhất
+### 3.5. Nhãn
 
 Ba loại vấn đề về nhãn, xếp theo mức độ hay bị bỏ qua:
 
-1. **Độ trễ nhãn (label lag).** Khoảng cách giữa lúc dự đoán và lúc biết đáp án thật. Với dự đoán click là vài phút; với dự đoán vỡ nợ tín dụng là **hàng tháng tới hàng năm**. Độ trễ nhãn quyết định gần như mọi thứ khác: nó quyết định bạn giám sát được gì (Chương 10) và huấn luyện lại được nhanh đến đâu (Chương 11).
-2. **Nhãn nhiễu và nhãn bất đồng.** Cần đo **mức đồng thuận giữa người gán nhãn** và coi nó là **trần trên của độ chính xác khả dĩ**. Một mô hình đạt 95% trong khi hai người gán nhãn chỉ đồng ý với nhau 90% là một mô hình đáng nghi, không phải đáng mừng.
-3. **Nhãn bị chính hệ thống làm lệch.** Nếu nhãn lấy từ hành vi người dùng trên kết quả do mô hình đưa ra, thì nhãn ấy không phải quan sát khách quan về thế giới — đó là Chương 12.
+1. **Độ trễ nhãn** (label lag): khoảng thời gian từ lúc dự đoán tới lúc biết đáp án thật. Với dự đoán lượt nhấp là vài phút; với dự đoán vỡ nợ tín dụng là hàng tháng tới hàng năm. Độ trễ nhãn quyết định những gì giám sát được (Chương 10) và huấn luyện lại được nhanh tới đâu (Chương 11), và Mục 9.2 cho thấy nó quyết định cả khả năng phát hiện loại dịch chuyển nguy hiểm nhất.
+2. **Nhãn nhiễu và bất đồng giữa người gán nhãn.** Mức đồng thuận giữa những người gán nhãn là giới hạn trên thực tế của độ chính xác đo được. Một mô hình đạt 95% trong khi hai người gán nhãn chỉ đồng ý với nhau 90% là một kết quả đáng nghi, có thể do rò rỉ hoặc do cách đo.
+3. **Nhãn bị chính hệ thống làm sai lệch.** Nếu nhãn lấy từ hành vi của người dùng trên những kết quả do mô hình chọn hiển thị, nhãn đó không phải quan sát khách quan về thế giới (Chương 12).
 
 ### 3.6. Phiên bản hoá dữ liệu
 
-Chữ V thứ ba ở Mục 2.2 áp cho dữ liệu chứ không chỉ cho mô hình. Câu hỏi cần trả lời được bất cứ lúc nào là: *mô hình đang chạy trong sản xuất được huấn luyện từ chính xác tập dữ liệu nào?*
+Yếu tố phiên bản ở Mục 2.2 áp dụng cho cả dữ liệu, không chỉ mô hình. Câu hỏi cần trả lời được bất cứ lúc nào: mô hình đang chạy trong sản xuất được huấn luyện từ chính xác tập dữ liệu nào? Có ba mức trả lời, chi phí tăng dần:
 
-Có ba mức trả lời, chi phí tăng dần:
-
-| Mức | Cách làm | Trả lời được câu hỏi gì |
+| Mức | Cách làm | Trả lời được |
 |---|---|---|
-| Yếu | Ghi lại đường dẫn và dấu thời gian | "Nó ở thư mục đó, ngày đó" — không dựng lại được nếu thư mục bị ghi đè |
-| Vừa | Lưu **hash nội dung** của tập dữ liệu cùng với mô hình | "Đúng tập này hay không" — phát hiện được thay đổi, nhưng chưa dựng lại được |
-| Mạnh | Lưu trữ **bất biến, chỉ thêm** (immutable, append-only) + truy vết dòng dõi (lineage) | Dựng lại được đúng tập huấn luyện của bất kỳ mô hình nào trong quá khứ |
+| Yếu | ghi đường dẫn và thời điểm | "dữ liệu ở thư mục đó, ngày đó"; không dựng lại được nếu thư mục bị ghi đè |
+| Trung bình | lưu mã băm (hash) nội dung của tập dữ liệu cùng với mô hình | biết chắc có phải đúng tập đó không; chưa dựng lại được |
+| Mạnh | lưu trữ bất biến, chỉ thêm (append-only), kèm truy vết nguồn gốc (lineage) | dựng lại được đúng tập huấn luyện của bất kỳ mô hình nào trong quá khứ |
 
-Mức mạnh nghe đắt, nhưng nó là điều kiện cần để điều tra sự cố. Khi mô hình hành xử lạ, câu hỏi đầu tiên luôn là "dữ liệu huấn luyện có gì bất thường không" — và nếu không dựng lại được tập ấy thì cuộc điều tra dừng ngay ở câu hỏi đầu tiên.
+Mức mạnh tốn kém, nhưng là điều kiện để điều tra sự cố. Khi mô hình hoạt động bất thường, câu hỏi đầu tiên thường là dữ liệu huấn luyện có gì bất thường không; nếu không dựng lại được tập dữ liệu đó, việc điều tra dừng ngay ở câu hỏi đầu tiên.
 
 ---
 
-## 4. Đặc trưng: kho đặc trưng và tính đúng theo thời điểm
+## 4. Đặc trưng và tính đúng theo thời điểm
 
-### 4.1. Hai nỗi đau sinh ra kho đặc trưng
+Kho đặc trưng thường được giới thiệu như một loại cơ sở dữ liệu. Chương này giải thích hai vấn đề mà nó được tạo ra để giải quyết: lệch giữa huấn luyện và phục vụ, và rò rỉ thông tin tương lai khi dựng tập huấn luyện. Khái niệm trung tâm của chương là tính đúng theo thời điểm, kèm ví dụ SQL cho cách ghép dữ liệu sai và đúng. Phần cuối nêu khi nào không cần kho đặc trưng.
 
-Kho đặc trưng (feature store) thường được giới thiệu như một loại cơ sở dữ liệu. Cách hiểu ấy làm người ta trả lời phỏng vấn rất nông. Nó ra đời để chữa **hai nỗi đau cụ thể**, và nếu bạn không có hai nỗi đau ấy thì bạn không cần nó.
+### 4.1. Hai vấn đề: lệch huấn luyện–phục vụ và rò rỉ
 
-**Nỗi đau 1 — lệch giữa huấn luyện và phục vụ (training–serving skew).** Lúc huấn luyện, đặc trưng "tổng chi tiêu 30 ngày qua" được tính bằng một truy vấn SQL trên kho dữ liệu. Lúc phục vụ, nó được tính lại bằng Python trong một dịch vụ, vì truy vấn kho dữ liệu quá chậm. Hai đoạn mã ấy do hai người viết, ở hai thời điểm, và chúng **không bao giờ khớp nhau hoàn toàn**: một bên tính 30 ngày theo lịch, bên kia theo 720 giờ; một bên loại giao dịch hoàn tiền, bên kia không.
+**Lệch giữa huấn luyện và phục vụ** (training–serving skew). Khi huấn luyện, đặc trưng "tổng chi tiêu 30 ngày qua" được tính bằng một truy vấn SQL trên kho dữ liệu. Khi phục vụ, truy vấn đó quá chậm, nên đặc trưng được tính lại bằng Python trong dịch vụ phục vụ. Hai đoạn mã do hai người viết ở hai thời điểm, và hiếm khi khớp nhau hoàn toàn: một bên tính 30 ngày theo lịch, bên kia theo 720 giờ; một bên loại giao dịch hoàn tiền, bên kia không. Tài liệu của Google Cloud định nghĩa lệch huấn luyện–phục vụ là khi đặc trưng dùng để phục vụ khác với đặc trưng dùng lúc huấn luyện, làm chất lượng mô hình giảm sau khi triển khai.
 
-Tài liệu Google Cloud định nghĩa thẳng: training–serving skew xảy ra khi **đặc trưng cần cho việc phục vụ độ trễ thấp trong sản xuất khác với đặc trưng dùng lúc huấn luyện**, khiến chất lượng mô hình tụt sau khi triển khai.
+Loại lỗi này không gây ra lỗi chương trình nào. Mô hình vẫn chạy, chỉ là nhận đầu vào hơi khác những gì nó đã học, và mất vài điểm phần trăm mà không ai biết vì sao.
 
-Điểm khó chịu nhất của loại lỗi này: **nó không tạo ra lỗi nào**. Mô hình vẫn chạy. Chỉ là nó nhận đầu vào hơi khác thứ nó đã học, và mất vài điểm phần trăm mà không ai biết vì sao.
-
-**Nỗi đau 2 — rò rỉ nhãn khi dựng tập huấn luyện.** Đây là nội dung mục tiếp theo, và là khái niệm quan trọng nhất của cả chương.
+**Rò rỉ thông tin tương lai khi dựng tập huấn luyện.** Đây là nội dung của Mục 4.2 và 4.3.
 
 ### 4.2. Tính đúng theo thời điểm
 
-> **Tính đúng theo thời điểm (point-in-time correctness).** Với mỗi dòng huấn luyện có thời điểm cần dự đoán $t_{\text{pred}}$, giá trị đặc trưng dùng cho dòng ấy phải là **giá trị quan sát được tại đúng $t_{\text{pred}}$**, chứ không phải giá trị của hôm nay.
+> **Định nghĩa 4.1 (Tính đúng theo thời điểm).** Một tập huấn luyện có **tính đúng theo thời điểm** (point-in-time correctness) nếu với mỗi dòng có thời điểm dự đoán $t_{\text{pred}}$, giá trị của mọi đặc trưng là giá trị quan sát được tại $t_{\text{pred}}$, không phải giá trị tại thời điểm dựng tập dữ liệu.
 
-Nghe hiển nhiên. Vi phạm nó thì cực kỳ dễ, và đây là cách nó xảy ra.
+Định nghĩa nghe hiển nhiên nhưng rất dễ vi phạm.
 
 ![Hình 5](figs/mlops05_pit.png)
 
-**Hình 5.** Đặc trưng "tổng số đơn hàng của khách" thay đổi theo thời gian: 12 vào 1/3, 31 vào 15/3, 480 vào hôm nay. Một dòng huấn luyện cần dự đoán cho ngày 1/4 phải dùng giá trị **31**. Dùng 480 là đưa thông tin của tương lai vào quá khứ.
+**Hình 5.** Đặc trưng "tổng số đơn hàng của khách" thay đổi theo thời gian: 12 vào ngày 1/3, 31 vào ngày 15/3, 480 vào hôm nay. Một dòng huấn luyện cần dự đoán cho ngày 1/4 phải dùng giá trị 31; dùng 480 là đưa thông tin của tương lai vào quá khứ.
 
-Viết bằng SQL thì vi phạm trông như thế này — và nó là một trong những câu SQL vô hại nhất mà bạn từng thấy:
+Trong SQL, cách ghép sai trông hoàn toàn bình thường:
 
 ```sql
 -- SAI: lấy giá trị đặc trưng HIỆN TẠI cho mọi dòng lịch sử
 SELECT  l.user_id, l.event_time, l.label,
-        f.total_orders                      -- giá trị của hôm nay!
+        f.total_orders                  -- giá trị của hôm nay
 FROM    labels l
-JOIN    user_features f  ON f.user_id = l.user_id;
+JOIN    user_features f ON f.user_id = l.user_id;
 ```
 
-Bản đúng phải ghép thêm theo trục thời gian — mỗi dòng lấy bản ghi đặc trưng **mới nhất nhưng không muộn hơn** thời điểm dự đoán:
+Cách ghép đúng phải ghép thêm theo trục thời gian: mỗi dòng lấy bản ghi đặc trưng mới nhất nhưng không muộn hơn thời điểm dự đoán.
 
 ```sql
--- ĐÚNG: point-in-time join (as-of join)
+-- ĐÚNG: ghép theo thời điểm (point-in-time join, as-of join)
 SELECT  l.user_id, l.event_time, l.label, f.total_orders
 FROM    labels l
 LEFT JOIN LATERAL (
     SELECT total_orders
     FROM   user_features_history h
     WHERE  h.user_id    = l.user_id
-      AND  h.valid_from <= l.event_time          -- chỉ nhìn về quá khứ
+      AND  h.valid_from <= l.event_time      -- chỉ nhìn về quá khứ
     ORDER BY h.valid_from DESC
     LIMIT 1
 ) f ON TRUE;
 ```
 
-**Vì sao vi phạm này nguy hiểm hơn mọi lỗi khác trong tài liệu.** Nó không làm chỉ số xấu đi — nó làm chỉ số **đẹp lên**. Mô hình học được rằng "khách có 480 đơn hàng thì không rời bỏ", trong khi con số 480 chỉ tồn tại *vì* khách ấy đã ở lại. Offline bạn thấy AUC 0,94; online bạn thấy một mô hình vô dụng. Và vì offline đẹp nên không ai nghi ngờ gì cho tới khi đã triển khai.
+Vi phạm tính đúng theo thời điểm nguy hiểm hơn phần lớn các lỗi khác vì nó không làm kết quả đánh giá xấu đi mà làm chúng **tốt lên**. Mô hình học được rằng "khách có 480 đơn hàng thì không rời bỏ dịch vụ", trong khi con số 480 chỉ tồn tại vì khách đã ở lại. Kết quả ngoại tuyến tốt nên không ai nghi ngờ, cho tới khi mô hình được triển khai và hoạt động kém. Nghiên cứu của Shankar và cộng sự ghi nhận đúng điều này: rò rỉ dữ liệu, tức giả định lúc huấn luyện rằng có những dữ liệu mà lúc phục vụ không có, thường chỉ bị phát hiện sau khi mô hình đã được triển khai. [Mục 8.5 của *Nền tảng*](nentang-ch08.html) trình bày các dạng rò rỉ khi chia dữ liệu.
 
-Nghiên cứu phỏng vấn xếp **rò rỉ dữ liệu** là ví dụ đầu tiên của nỗi đau "lệch giữa môi trường phát triển và môi trường sản xuất", với đúng định nghĩa: *giả định lúc huấn luyện rằng có quyền truy cập thứ dữ liệu mà lúc phục vụ không hề có* — và ghi nhận rằng lỗi này **thường chỉ bị phát hiện sau khi mô hình đã triển khai và đã ra vài dự đoán sai**.
+### 4.3. Ba đường rò rỉ thông tin tương lai
 
-### 4.3. Ba cách một đặc trưng rò rỉ tương lai
+Xếp theo mức độ khó phát hiện:
 
-Rò rỉ không chỉ đến từ phép ghép sai. Ba đường vào, xếp theo mức độ khó phát hiện:
+1. **Rò rỉ theo thời gian**: như Mục 4.2. Phòng bằng ghép theo thời điểm và ràng buộc "không có sự kiện từ tương lai" trong hợp đồng dữ liệu (Mục 3.3).
+2. **Rò rỉ theo thực thể**: cùng một người dùng có dữ liệu ở cả tập huấn luyện lẫn tập kiểm tra khi chia ngẫu nhiên, nên mô hình được kiểm tra trên chính những người nó đã thấy. Phòng bằng chia theo nhóm thực thể, và với dữ liệu có yếu tố thời gian thì chia theo thời gian.
+3. **Rò rỉ qua đặc trưng là hệ quả của nhãn** (proxy leakage): ví dụ đặc trưng "số lần gọi tổng đài sau sự cố" để dự đoán "khách có gặp sự cố không". Về thời gian có thể hợp lệ, nhưng đặc trưng này là hậu quả của nhãn chứ không phải nguyên nhân. Không có kiểm tra tự động nào phát hiện được loại này; chỉ có cách hỏi với từng đặc trưng: tại thời điểm cần dự đoán, giá trị này đã tồn tại chưa, và nó có tồn tại vì nhãn hay không?
 
-1. **Rò rỉ theo thời gian** — như trên. Chữa bằng point-in-time join và bằng ràng buộc `event_time <= feature_valid_from` ở Mục 3.3.
-2. **Rò rỉ theo thực thể** — cùng một người dùng xuất hiện ở cả tập huấn luyện lẫn tập kiểm tra khi chia ngẫu nhiên. Chữa bằng **chia theo nhóm (group split) theo thực thể**, và với dữ liệu có thời gian thì luôn **chia theo thời gian** chứ không chia ngẫu nhiên.
-3. **Rò rỉ qua đặc trưng thay mặt cho nhãn (proxy leakage)** — đặc trưng "số lần gọi tổng đài chăm sóc sau sự cố" để dự đoán "khách có gặp sự cố không". Về thời gian thì hợp lệ, nhưng nó là hệ quả của nhãn chứ không phải nguyên nhân. Đây là loại khó nhất vì không có kiểm tra máy nào bắt được; chỉ có cách hỏi với từng đặc trưng: **"tại thời điểm cần dự đoán, giá trị này đã tồn tại chưa, và nó có tồn tại *vì* nhãn hay không?"**
+### 4.4. Kho đặc trưng
 
-### 4.4. Kho đặc trưng giải quyết chuyện gì
+Kho đặc trưng (feature store) là một lớp hạ tầng gồm ba thành phần:
 
-Bây giờ mới nên nói tới công cụ. Kho đặc trưng là một lớp hạ tầng gồm hai kho và một sổ đăng ký:
-
-| Thành phần | Nội dung | Đặc tính cần |
+| Thành phần | Nội dung | Yêu cầu |
 |---|---|---|
-| **Kho ngoại tuyến** (offline store) | toàn bộ lịch sử giá trị đặc trưng, có `valid_from` | thông lượng cao, chịu được truy vấn lớn, hỗ trợ point-in-time join |
-| **Kho trực tuyến** (online store) | chỉ giá trị **mới nhất** của mỗi thực thể | độ trễ thấp (thường dưới 10 ms), tra theo khoá |
-| **Sổ đăng ký** (registry) | **một định nghĩa duy nhất** cho mỗi đặc trưng | là nguồn sự thật cho cả hai kho |
+| Kho ngoại tuyến (offline store) | toàn bộ lịch sử giá trị đặc trưng, kèm thời điểm có hiệu lực | thông lượng cao, hỗ trợ ghép theo thời điểm trên dữ liệu lớn |
+| Kho trực tuyến (online store) | giá trị mới nhất của mỗi thực thể | độ trễ thấp, thường dưới 10 ms, tra cứu theo khoá |
+| Sổ đăng ký (registry) | một định nghĩa duy nhất cho mỗi đặc trưng | nguồn chuẩn cho cả hai kho |
 
-Sổ đăng ký mới là phần quan trọng. Nó chữa nỗi đau 1 bằng cách buộc hai đường huấn luyện và phục vụ **dùng chung một định nghĩa** thay vì hai bản cài đặt song song. Kho ngoại tuyến chữa nỗi đau 2 bằng cách giữ lịch sử để ghép được theo thời điểm.
+Sổ đăng ký là thành phần quan trọng nhất: nó giải quyết lệch huấn luyện–phục vụ bằng cách buộc hai đường huấn luyện và phục vụ dùng chung một định nghĩa thay vì hai bản cài đặt. Kho ngoại tuyến giải quyết rò rỉ bằng cách giữ lịch sử để ghép được theo thời điểm.
 
-**Điều cần nói rõ:** kho đặc trưng **không tự động** xoá bỏ skew. Nó chỉ tạo điều kiện. Nếu đội vẫn viết một đường tính riêng cho phục vụ vì lý do độ trễ, skew vẫn quay lại. Đây là chỗ các công cụ khác nhau: có công cụ chỉ cung cấp hạ tầng và để bạn tự giữ kỷ luật, có công cụ ép một định nghĩa duy nhất bằng thiết kế.
+> **Lưu ý.** Kho đặc trưng không tự động loại bỏ lệch huấn luyện–phục vụ, mà chỉ tạo điều kiện. Nếu nhóm vẫn viết một đường tính riêng cho phục vụ vì lý do độ trễ, sự lệch quay lại. Các công cụ khác nhau ở điểm này: có công cụ chỉ cung cấp hạ tầng và để nhóm tự giữ kỷ luật, có công cụ buộc dùng một định nghĩa duy nhất.
 
-### 4.5. Khi nào **không** cần kho đặc trưng
+### 4.5. Khi nào không cần kho đặc trưng
 
-Một câu trả lời phỏng vấn tốt luôn có phần này. Kho đặc trưng là hạ tầng nặng; nó xứng đáng khi:
+Kho đặc trưng là hạ tầng phức tạp. Nó đáng đầu tư khi có đồng thời:
 
-- có **nhiều mô hình dùng chung đặc trưng** (nếu chỉ một mô hình, lợi ích tái sử dụng bằng 0);
-- có **phục vụ trực tuyến độ trễ thấp** (nếu chỉ chấm điểm theo lô hằng đêm, dùng thẳng kho dữ liệu là đủ và đúng hơn);
-- đặc trưng **phụ thuộc thời gian và cập nhật thường xuyên** (nếu đặc trưng tĩnh, point-in-time là chuyện không tồn tại).
+- nhiều mô hình dùng chung đặc trưng (với một mô hình, lợi ích tái sử dụng gần như bằng 0);
+- phục vụ trực tuyến với độ trễ thấp (nếu chỉ chấm điểm theo lô mỗi đêm, dùng trực tiếp kho dữ liệu là đủ);
+- đặc trưng phụ thuộc thời gian và cập nhật thường xuyên (nếu đặc trưng tĩnh, vấn đề ghép theo thời điểm không tồn tại).
 
-Thiếu cả ba điều kiện ấy thì một bảng trong kho dữ liệu cộng với kỷ luật viết một hàm biến đổi dùng chung sẽ rẻ hơn nhiều và đạt cùng mục tiêu.
+Thiếu các điều kiện trên, một bảng trong kho dữ liệu cộng với kỷ luật dùng chung một hàm biến đổi đặc trưng cho cả huấn luyện lẫn phục vụ rẻ hơn nhiều và đạt cùng mục tiêu.
 
 ---
 
 ## 5. Thí nghiệm lặp lại được
 
-### 5.1. Lặp lại được nghĩa là gì
+Khi một mô hình hoạt động bất thường, việc đầu tiên là dựng lại được đúng mô hình đó: cùng mã, cùng dữ liệu, cùng cấu hình. Chương này phân biệt ba mức "lặp lại được", liệt kê những thứ phải cố định để huấn luyện cho cùng kết quả, rồi trình bày hai công cụ lưu vết: theo dõi thí nghiệm và sổ đăng ký mô hình.
 
-Ba mức, hay bị gọi lẫn lộn:
+### 5.1. Ba mức: tái lập, tái tạo, tính bền
 
-| Mức | Định nghĩa | Ai cần |
+| Mức | Định nghĩa | Khi nào cần |
 |---|---|---|
-| **Tái lập (reproducibility)** | chạy lại **cùng mã, cùng dữ liệu, cùng môi trường** cho **cùng kết quả** | bắt buộc, cho điều tra sự cố |
-| **Tái tạo (replicability)** | người khác, môi trường khác, làm lại được kết quả *tương tự* | cần cho hợp tác và kiểm toán |
-| **Tính bền (robustness)** | đổi hạt giống, đổi phân chia dữ liệu mà kết luận không đổi | cần trước khi tin vào một cải thiện |
+| Tái lập (reproducibility) | chạy lại với cùng mã, cùng dữ liệu, cùng môi trường thì được cùng kết quả | bắt buộc, để điều tra sự cố |
+| Tái tạo (replicability) | người khác, trong môi trường khác, làm lại được kết quả tương tự | cần cho hợp tác và kiểm toán |
+| Tính bền (robustness) | đổi hạt giống ngẫu nhiên, đổi cách chia dữ liệu mà kết luận không đổi | cần trước khi tin vào một cải thiện |
 
-Sculley và cộng sự gọi thiếu hụt ở mức 1 là **reproducibility debt**, và nêu đúng bốn nguyên nhân: thuật toán ngẫu nhiên, tính bất định vốn có của huấn luyện song song, phụ thuộc điều kiện khởi tạo, và tương tác với thế giới bên ngoài.
+Các tài liệu dùng hai từ reproducibility và replicability không thống nhất, có nơi dùng theo nghĩa ngược lại; giáo trình dùng theo nghĩa ở bảng trên.
 
-### 5.2. Sáu thứ phải ghim lại
+Sculley và cộng sự (2015) gọi sự thiếu hụt ở mức thứ nhất là **reproducibility debt** và nêu bốn nguyên nhân: thuật toán có yếu tố ngẫu nhiên, tính bất định vốn có của huấn luyện song song, sự phụ thuộc vào điều kiện khởi tạo, và tương tác với thế giới bên ngoài.
 
-Để đạt mức 1, phải ghim đủ sáu thứ. Thiếu một là đủ hỏng:
+Mức thứ ba thường bị bỏ qua nhất. Một cải thiện 0,3 điểm phần trăm có thể nhỏ hơn độ dao động giữa hai lần chạy chỉ khác hạt giống. Trước khi kết luận mô hình mới tốt hơn, cần chạy vài hạt giống cho cả hai mô hình và so sánh chênh lệch với độ dao động đó ([Mục 12.4 của *Ứng dụng LLM*](ungdung-ch12.html) trình bày cách so sánh ghép cặp hai hệ thống trên cùng tập kiểm tra bằng kiểm định McNemar).
+
+### 5.2. Những thứ phải cố định
+
+Để đạt mức tái lập, phải cố định đủ sáu nhóm yếu tố. Thiếu một nhóm là đủ để hai lần chạy cho kết quả khác nhau:
 
 ```python
-# 1. Hạt giống — cho MỌI nguồn ngẫu nhiên, không chỉ một
+import os, random
+import numpy as np
+import torch
+
+S = 1207
+
+# 1. Hạt giống cho mọi nguồn ngẫu nhiên, không chỉ một
 random.seed(S); np.random.seed(S); torch.manual_seed(S)
 torch.cuda.manual_seed_all(S)
 
-# 2. Tính tất định của phép toán (đổi lại thì chậm hơn)
-torch.use_deterministic_algorithms(True)
-torch.backends.cudnn.benchmark = False        # tắt chọn thuật toán theo thời gian chạy
+# 2. Phép toán tất định (chậm hơn)
+os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"   # cần cho một số phép cuBLAS
+torch.use_deterministic_algorithms(True)            # báo lỗi nếu phép toán không có bản tất định
+torch.backends.cudnn.benchmark = False              # không chọn thuật toán theo đo thời gian
 
-# 3. Thứ tự dữ liệu — worker cũng phải có hạt giống
-DataLoader(ds, shuffle=True, num_workers=4,
-           worker_init_fn=lambda w: np.random.seed(S + w),
-           generator=torch.Generator().manual_seed(S))
+# 3. Thứ tự dữ liệu và các tiến trình con của DataLoader
+def seed_worker(worker_id):
+    s = torch.initial_seed() % 2**32
+    np.random.seed(s); random.seed(s)
+
+g = torch.Generator(); g.manual_seed(S)
+loader = torch.utils.data.DataLoader(ds, shuffle=True, num_workers=4,
+                                     worker_init_fn=seed_worker, generator=g)
 
 # 4. Phiên bản: mã (commit), dữ liệu (hash), thư viện (lockfile), ảnh container (digest)
-# 5. Cấu hình: một tệp duy nhất, được ghi lại cùng kết quả
-# 6. Phần cứng: số GPU và kiểu GPU (đổi số GPU là đổi kích thước lô hiệu dụng)
+# 5. Cấu hình: một tệp duy nhất, lưu cùng kết quả
+# 6. Phần cứng: loại GPU và số GPU
 ```
 
-Ba điểm hay bị bỏ sót, và đều là câu hỏi phỏng vấn tốt:
+Ba điểm hay bị bỏ sót:
 
-- **Hạt giống của worker.** `num_workers > 0` mà không đặt `worker_init_fn` thì thứ tự tăng cường dữ liệu khác nhau giữa các lần chạy dù đã `manual_seed`.
-- **Số GPU là một siêu tham số.** Đổi từ 4 sang 8 GPU mà giữ nguyên `batch_size` mỗi GPU là đã nhân đôi kích thước lô hiệu dụng, tức đổi cả bài toán tối ưu.
-- **`cudnn.benchmark = True` là không tất định** vì nó chọn thuật toán tích chập theo đo thời gian lúc chạy, và kết quả đo phụ thuộc tải máy.
+- **Các tiến trình con của DataLoader.** Với `num_workers > 0`, mỗi worker là một tiến trình riêng. PyTorch tự đặt hạt giống cho bộ sinh số của torch trong mỗi worker, nhưng các thư viện khác mà hàm tăng cường dữ liệu dùng tới thì không chắc. Tài liệu PyTorch khuyến nghị đặt hạt giống cho chúng trong `worker_init_fn`, như hàm `seed_worker` ở trên.
+- **Số GPU là một siêu tham số.** Đổi từ 4 sang 8 GPU mà giữ nguyên kích thước lô trên mỗi GPU là nhân đôi kích thước lô hiệu dụng, tức đổi bài toán tối ưu. Ngay cả khi giữ kích thước lô hiệu dụng, thứ tự cộng gradient giữa các GPU thay đổi, và vì phép cộng số thực dấu phẩy động không có tính kết hợp, kết quả khác đi ở những chữ số cuối.
+- **`cudnn.benchmark = True` không tất định**: nó chọn thuật toán tích chập bằng cách đo thời gian lúc chạy, và kết quả đo phụ thuộc tải của máy.
 
-### 5.3. Theo dõi thí nghiệm: ghi cái gì
+Tính tất định hoàn toàn trên GPU có giá: nhiều phép toán tất định chậm hơn bản thường. Cách làm phổ biến là bật chế độ tất định khi điều tra sự cố hoặc khi chạy kiểm thử hồi quy, còn khi huấn luyện thường thì chấp nhận dao động nhỏ và đo tính bền bằng nhiều hạt giống (Mục 5.1).
 
-Nguyên tắc: ghi đủ để **dựng lại** thí nghiệm, không chỉ đủ để **so sánh** thí nghiệm. Tối thiểu bốn nhóm:
+### 5.3. Theo dõi thí nghiệm
+
+Nguyên tắc: ghi đủ để dựng lại một thí nghiệm, không chỉ đủ để so sánh các thí nghiệm. Tối thiểu bốn nhóm thông tin:
 
 1. **Đầu vào**: commit mã, hash dữ liệu, tệp cấu hình đầy đủ, ảnh container.
-2. **Quá trình**: đường cong mất mát, learning rate theo bước, tài nguyên tiêu thụ, thời gian chạy.
-3. **Đầu ra**: chỉ số **theo lát cắt** (Mục 6.3), ma trận nhầm lẫn, tạo tác mô hình kèm hash.
-4. **Ngữ cảnh**: ai chạy, khi nào, vì sao — giả thuyết đang kiểm chứng là gì.
+2. **Quá trình**: đường cong hàm mất mát, learning rate theo bước, tài nguyên sử dụng, thời gian chạy.
+3. **Đầu ra**: chỉ số theo lát cắt (Mục 6.3), ma trận nhầm lẫn, tạo tác mô hình kèm hash.
+4. **Ngữ cảnh**: ai chạy, khi nào, để kiểm tra giả thuyết gì.
 
-Nhóm 4 là nhóm hay bị bỏ nhất và cũng là thuốc giải cho anti-pattern **Retrofitting an Explanation** ở Mục 2.5: nếu giả thuyết được ghi lại *trước* khi chạy, thì không thể gắn lời giải thích vào sau.
+Các công cụ như MLflow hay Weights & Biases lưu được cả bốn nhóm, nhưng nhóm thứ tư thường bị bỏ trống vì không công cụ nào điền thay được. Nhóm này lại là cách phòng thói quen *retrofitting an explanation* ở Mục 2.5: nếu giả thuyết được ghi lại trước khi chạy, lời giải thích không thể được gắn vào sau.
 
 ### 5.4. Sổ đăng ký mô hình
 
-Sổ đăng ký (model registry) là nơi một tạo tác mô hình có **danh tính và vòng đời**. Tối thiểu nó phải trả lời được:
+Sổ đăng ký mô hình (model registry) là nơi mỗi mô hình có một định danh và một vòng đời. Tối thiểu, nó phải trả lời được:
 
-- mô hình này huấn luyện từ commit nào, dữ liệu nào, cấu hình nào;
-- nó đã qua những cửa kiểm định nào, kết quả ra sao;
-- nó đang ở trạng thái nào (`staging` / `production` / `archived`), ai duyệt;
-- **phiên bản nào đang thực sự chạy**, và quay lui về phiên bản nào.
+- mô hình này được huấn luyện từ commit nào, dữ liệu nào, cấu hình nào;
+- nó đã qua những bước kiểm định nào, với kết quả ra sao;
+- nó đang ở trạng thái nào (`staging`, `production`, `archived`) và ai duyệt;
+- phiên bản nào đang thực sự chạy trong sản xuất, và nếu cần quay lui thì quay về phiên bản nào.
 
-Câu cuối là lý do tồn tại của sổ đăng ký. Chữ V thứ ba — Versioning — tồn tại để **quay lui được**, và nghiên cứu phỏng vấn ghi nhận một thực hành đi kèm rất đáng nhớ: **giữ các phiên bản cũ làm mô hình dự phòng**, và **duy trì các tầng heuristic** bên dưới để khi mô hình hỏng thì hệ thống rơi về một hành vi tuy đơn giản nhưng đoán trước được, thay vì rơi về hư vô.
+Câu hỏi cuối là lý do chính để có sổ đăng ký: yếu tố phiên bản ở Mục 2.2 tồn tại để quay lui được. Nghiên cứu của Shankar và cộng sự ghi nhận hai thực hành liên quan: giữ các phiên bản cũ làm mô hình dự phòng, và duy trì một lớp quy tắc đơn giản (heuristic) phía sau mô hình, để khi mô hình hỏng thì hệ thống chuyển sang một hành vi đơn giản nhưng đoán trước được.
+
+Mỗi mô hình trong sổ đăng ký nên kèm một **thẻ mô hình** (model card; Mitchell và cộng sự, 2019): mục đích sử dụng, những trường hợp không nên dùng, dữ liệu huấn luyện, và kết quả đánh giá tách theo các nhóm liên quan. Thẻ mô hình biến những hiểu biết vốn chỉ nằm trong đầu người huấn luyện thành tài liệu đi cùng mô hình.
 
 ---
 
-## 6. Đánh giá cho sản xuất
+## 6. Đánh giá mô hình cho sản xuất
 
-### 6.1. Vì sao một con số là không đủ
+Một mô hình được tóm tắt bằng một con số, chẳng hạn "độ chính xác 92%", là một mô hình chưa được đánh giá đủ cho sản xuất. Chương này trình bày ba lý do và cách xử lý tương ứng: chỉ số ngoại tuyến phải gắn với chỉ số sản phẩm, chỉ số gộp che mất các nhóm nhỏ, và chỉ số trung bình không cho biết hành vi trên những trường hợp cụ thể. Phần cuối là bộ tiêu chí ML Test Score để đánh giá mức sẵn sàng của cả hệ thống.
 
-Một mô hình được tóm bằng một con số duy nhất — "độ chính xác 92%" — là một mô hình chưa được đánh giá. Ba lý do, đi từ dễ tới khó.
+### 6.1. Ba giới hạn của một con số
 
-### 6.2. Chỉ số ngoại tuyến phải gắn với chỉ số sản phẩm
+1. **Con số đo trên tập kiểm tra, không đo trên sản phẩm.** Mô hình tốt hơn theo AUC chưa chắc làm doanh thu hay mức hài lòng tăng (Mục 6.2).
+2. **Con số gộp là trung bình theo lưu lượng,** nên nhóm chiếm đa số quyết định kết quả. Một nhóm nhỏ có thể tệ đi mà con số gộp vẫn tăng (Mục 6.3).
+3. **Con số trung bình không nói gì về từng trường hợp.** Mô hình có thể tăng một điểm độ chính xác nhưng sai ở một trường hợp hiển nhiên mà phiên bản trước làm đúng (Mục 6.4).
 
-Thực hành được nghiên cứu phỏng vấn nhấn mạnh: **chỉ số đánh giá ML phải gắn với chỉ số sản phẩm**. Cùng ý đó, tiêu chí **Model 2** của ML Test Score (Mục 6.5) viết thẳng: *chỉ số đại diện ngoại tuyến phải tương quan với tác động thật*.
+### 6.2. Gắn chỉ số ngoại tuyến với chỉ số sản phẩm
 
-Mối quan hệ giữa hai loại chỉ số hầu như không bao giờ tuyến tính:
+Shankar và cộng sự (2022) ghi nhận thực hành gắn chỉ số đánh giá mô hình với chỉ số của sản phẩm. Tiêu chí Model 2 của ML Test Score (Mục 6.5) phát biểu cùng ý: chỉ số ngoại tuyến phải tương quan với chỉ số trực tuyến.
 
-| Chỉ số ML | Chỉ số sản phẩm tương ứng | Quan hệ điển hình |
+Quan hệ giữa hai loại chỉ số hiếm khi tuyến tính. Bảng dưới là các ví dụ minh hoạ cho những dạng quan hệ thường gặp, không phải số đo:
+
+| Chỉ số của mô hình | Chỉ số sản phẩm tương ứng | Dạng quan hệ thường gặp |
 |---|---|---|
-| AUC của mô hình gian lận | tiền thiệt hại chặn được | bão hoà — sau một mức, AUC tăng mà tiền không đổi vì đội điều tra đã hết công suất |
-| NDCG của xếp hạng | thời gian người dùng ở lại | có thể **nghịch** — xếp hạng "đúng" quá có thể giảm khám phá |
-| Perplexity của mô hình ngôn ngữ | tỉ lệ người dùng chấp nhận câu trả lời | tương quan yếu, và yếu dần khi mô hình mạnh lên |
+| AUC của mô hình phát hiện gian lận | số tiền thiệt hại chặn được | bão hoà: quá một mức nào đó, AUC tăng nhưng số tiền không đổi vì nhóm điều tra đã hết năng lực xử lý |
+| NDCG của hệ thống xếp hạng | thời gian người dùng ở lại | có thể ngược chiều: xếp hạng quá sát sở thích cũ làm giảm khám phá (Chương 12) |
+| Perplexity của mô hình ngôn ngữ | tỉ lệ người dùng chấp nhận câu trả lời | tương quan yếu, và yếu dần khi mô hình đã đủ tốt |
 
-Vì vậy quy tắc là: **chọn một chỉ số ngoại tuyến rẻ để lặp nhanh, nhưng phải kiểm chứng định kỳ rằng nó còn tương quan với chỉ số sản phẩm.** Khi tương quan ấy đứt — và nó sẽ đứt — thì chỉ số ngoại tuyến trở thành một trò chơi tự sướng.
+Quy tắc thực hành: dùng một chỉ số ngoại tuyến rẻ để lặp nhanh, nhưng định kỳ kiểm tra rằng nó vẫn tương quan với chỉ số sản phẩm. Khi tương quan đó không còn, cải thiện chỉ số ngoại tuyến không còn mang lại giá trị cho sản phẩm.
 
 ### 6.3. Đánh giá theo lát cắt
 
-Đây là kỹ thuật có tỉ lệ *lợi ích trên công sức* cao nhất trong cả chương. Một chỉ số gộp là trung bình có trọng số theo lưu lượng, nên nó **bị nhóm đa số chi phối hoàn toàn**.
+Đánh giá theo lát cắt (slice-based evaluation) là tính chỉ số riêng cho từng nhóm con của dữ liệu thay vì chỉ tính một con số trên toàn bộ tập kiểm tra. Đây là một trong những kỹ thuật cho lợi ích lớn nhất so với công sức bỏ ra.
 
-Thí nghiệm sau nằm trong `code/mlops/experiments.py`. Tình huống rất thật: mô hình v2 được thêm một đặc trưng mạnh — "hành vi mua hàng trong quá khứ" — nhưng đặc trưng ấy **chỉ có tín hiệu với khách hàng cũ**. Với 15% người dùng mới, nó là nhiễu thuần tuý.
+**Thí nghiệm.** Thí nghiệm trong `code/mlops/experiments.py` mô phỏng một tình huống thường gặp. Có 8 000 mẫu huấn luyện và 8 000 mẫu kiểm tra, trong đó 15% là khách hàng mới (nhóm B) và 85% là khách hàng cũ (nhóm A). Nhãn phụ thuộc vào đặc trưng $x_1$ mà mọi khách hàng đều có. Mô hình v2 thêm đặc trưng $x_2$, "lịch sử mua hàng": với khách hàng cũ, $x_2$ mang nhiều thông tin về nhãn; với khách hàng mới, chưa có lịch sử nên $x_2$ chỉ là nhiễu. Cả v1 (chỉ dùng $x_1$) và v2 (dùng $x_1$, $x_2$) đều là hồi quy logistic, không biết khách hàng thuộc nhóm nào.
 
 ![Hình 6](figs/mlops06_slice.png)
 
-**Hình 6.** Cùng một thay đổi, ba cách nhìn khác nhau. Chỉ số gộp nói "tốt hơn rất nhiều"; nhóm người dùng mới nói ngược lại.
+**Hình 6.** Độ chính xác của v1 và v2 trên toàn bộ tập kiểm tra và trên từng nhóm. Chỉ số gộp tăng mạnh trong khi nhóm khách hàng mới giảm.
 
 | Lát cắt | v1 | v2 | Thay đổi |
 |---|---|---|---|
-| Tổng thể | 69,14% | 88,96% | **+19,83 điểm** |
-| Nhóm A — khách cũ, 85% lưu lượng | 68,99% | 94,48% | +25,49 điểm |
-| Nhóm B — khách mới, 15% lưu lượng | 69,97% | 58,35% | **−11,62 điểm** |
+| Tổng thể | 69,14% | 88,96% | +19,83 điểm |
+| Nhóm A: khách hàng cũ, 85% lưu lượng | 68,99% | 94,48% | +25,49 điểm |
+| Nhóm B: khách hàng mới, 15% lưu lượng | 69,97% | 58,35% | −11,62 điểm |
 
-Cơ chế thì đơn giản và đáng nói ra khi phỏng vấn: mô hình học được trọng số lớn cho đặc trưng mới (trọng số đo được là 2,28 so với 1,07 của đặc trưng cũ) vì với 85% dữ liệu đặc trưng ấy rất tốt. Với 15% còn lại, chính trọng số lớn ấy **bơm nhiễu thẳng vào dự đoán**. Nhóm B không chỉ *không được lợi* — nó **bị hại**, và tụt xuống dưới cả mức của mô hình cũ.
+Cơ chế: vì $x_2$ rất tốt với 85% dữ liệu, mô hình học cho nó trọng số lớn (2,28, so với 1,07 của $x_1$). Với 15% còn lại, chính trọng số lớn đó đưa nhiễu vào dự đoán. Nhóm B không chỉ không được lợi mà còn bị hại, xuống dưới cả mức của mô hình cũ. Đây là một minh hoạ của nguyên lý CACE (Mục 1.3): thêm một đặc trưng không cộng thêm một thứ vào mô hình mà thay đổi toàn bộ hàm dự đoán.
 
-Đây cũng là minh hoạ sống của nguyên lý CACE ở Mục 1.3: thêm một đặc trưng không phải là cộng thêm một thứ, mà là đổi toàn bộ hàm số.
+Các cách sửa, vốn chỉ nghĩ tới được sau khi đã thấy vấn đề qua lát cắt, gồm: mã hoá "chưa có lịch sử" thành một giá trị thiếu tường minh kèm một đặc trưng chỉ báo, thay vì để nó thành một số ngẫu nhiên; thêm tương tác giữa $x_2$ và nhóm khách hàng; hoặc dùng mô hình riêng cho khách hàng mới.
 
-**Lát cắt nào cần theo dõi?** Tối thiểu bốn nhóm:
+**Nên theo dõi những lát cắt nào.** Tối thiểu bốn loại:
 
-1. **Lát cắt nghiệp vụ**: khách mới / cũ, thị trường, hạng khách hàng, kênh.
-2. **Lát cắt kỹ thuật**: thiết bị, phiên bản ứng dụng, có / không có đặc trưng nào đó.
-3. **Lát cắt công bằng**: các nhóm được pháp luật bảo vệ, nếu bài toán có liên quan.
-4. **Lát cắt thời gian**: theo giờ trong ngày, theo ngày trong tuần, ngày lễ.
+1. **Nghiệp vụ**: khách hàng mới hay cũ, thị trường, hạng khách hàng, kênh bán.
+2. **Kỹ thuật**: thiết bị, phiên bản ứng dụng, có hay không có một đặc trưng nào đó.
+3. **Công bằng**: các nhóm được pháp luật bảo vệ, nếu bài toán liên quan.
+4. **Thời gian**: giờ trong ngày, ngày trong tuần, ngày lễ.
 
-Tiêu chí **Model 6** của ML Test Score phát biểu đúng yêu cầu này: *chất lượng mô hình phải đủ tốt trên mọi lát cắt dữ liệu quan trọng*.
+Tiêu chí Model 6 của ML Test Score phát biểu đúng yêu cầu này: chất lượng mô hình phải đủ tốt trên mọi lát cắt dữ liệu quan trọng.
 
 ### 6.4. Kiểm thử hành vi
 
-Ngoài chỉ số trên tập kiểm tra, mô hình cần loại kiểm thử mà phần mềm thường vẫn dùng: khẳng định về **hành vi**, không về **độ chính xác trung bình**. Ba họ:
+Ngoài chỉ số trên tập kiểm tra, mô hình cần loại kiểm thử mà phần mềm thông thường vẫn dùng: khẳng định về hành vi trên những đầu vào cụ thể. Ribeiro và cộng sự (2020), với bộ công cụ CheckList, phân biệt ba loại kiểm thử:
 
 ```python
-# 1. Bất biến — đổi thứ không nên ảnh hưởng, dự đoán phải giữ nguyên
-assert model("Chuyến bay tới Hà Nội bị huỷ") == model("Chuyến bay tới Đà Nẵng bị huỷ")
-
-# 2. Kỳ vọng có hướng — đổi thứ có hướng rõ ràng, dự đoán phải đổi đúng hướng
-assert risk(income=50_000_000) < risk(income=5_000_000)
-
-# 3. Chức năng tối thiểu — các ca đơn giản mà hệ thống KHÔNG ĐƯỢC PHÉP sai
+# 1. Chức năng tối thiểu (minimum functionality): những trường hợp đơn giản không được phép sai
 assert sentiment("Sản phẩm này tuyệt vời") == "tích cực"
+
+# 2. Bất biến (invariance): thay đổi không liên quan thì dự đoán phải giữ nguyên
+assert sentiment("Chuyến bay tới Hà Nội bị huỷ") == sentiment("Chuyến bay tới Đà Nẵng bị huỷ")
+
+# 3. Kỳ vọng có hướng (directional expectation): thay đổi có hướng rõ thì dự đoán phải đổi đúng hướng
+assert risk(income=50_000_000) <= risk(income=5_000_000)   # các đặc trưng khác giữ nguyên
 ```
 
-Giá trị của chúng: một mô hình có thể tăng 1 điểm độ chính xác trung bình mà lại mất khả năng xử lý đúng một ca hiển nhiên. Chỉ số trung bình không bao giờ báo chuyện đó; kiểm thử hành vi thì báo ngay.
+Giá trị của các kiểm thử này: một mô hình có thể tăng một điểm độ chính xác trung bình mà mất khả năng xử lý đúng một trường hợp hiển nhiên; chỉ số trung bình không phát hiện được điều đó, còn kiểm thử hành vi thì có. Các kiểm thử hành vi nên được chạy tự động mỗi khi có mô hình mới, như kiểm thử đơn vị trong CI.
 
 ### 6.5. ML Test Score
 
-Bộ tiêu chí đầy đủ nhất để trả lời câu "hệ thống của bạn đã sẵn sàng cho sản xuất chưa" là *The ML Test Score: A Rubric for ML Production Readiness and Technical Debt Reduction* (Breck và cộng sự, Google, 2017). Nó gồm **28 mục, chia đều thành 4 nhóm 7 mục**.
+Bộ tiêu chí đầy đủ nhất để trả lời câu hỏi "hệ thống đã sẵn sàng cho sản xuất chưa" là *The ML Test Score: A Rubric for ML Production Readiness and Technical Debt Reduction* (Breck và cộng sự, 2017). Bộ tiêu chí gồm 28 mục, chia thành bốn nhóm, mỗi nhóm 7 mục.
 
-**Nhóm 1 — Dữ liệu và đặc trưng**
+**Nhóm 1: Dữ liệu và đặc trưng**
 
-| # | Nội dung |
+| Mục | Nội dung |
 |---|---|
-| Data 1 | Kỳ vọng về đặc trưng được ghi lại thành một schema |
-| Data 2 | Mọi đặc trưng đều có ích — không có kiểu "vơ hết vào" |
-| Data 3 | Không đặc trưng nào có chi phí quá đắt so với lợi ích |
+| Data 1 | Kỳ vọng về đặc trưng được ghi lại thành một lược đồ |
+| Data 2 | Mọi đặc trưng đều có ích |
+| Data 3 | Không đặc trưng nào có chi phí quá lớn so với lợi ích |
 | Data 4 | Đặc trưng tuân thủ các yêu cầu ở mức chính sách (quyền riêng tư, pháp lý) |
 | Data 5 | Pipeline dữ liệu có kiểm soát quyền riêng tư phù hợp |
-| Data 6 | Thêm đặc trưng mới được nhanh |
+| Data 6 | Có thể thêm đặc trưng mới nhanh chóng |
 | Data 7 | Toàn bộ mã tính đặc trưng đều được kiểm thử |
 
-**Nhóm 2 — Phát triển mô hình**
+**Nhóm 2: Phát triển mô hình**
 
-| # | Nội dung |
+| Mục | Nội dung |
 |---|---|
-| Model 1 | Mọi đặc tả mô hình đều qua rà soát mã và được đưa vào quản lý phiên bản |
-| Model 2 | Chỉ số đại diện ngoại tuyến tương quan với tác động thật |
+| Model 1 | Mọi đặc tả mô hình đều được rà soát và đưa vào kho mã |
+| Model 2 | Chỉ số ngoại tuyến tương quan với chỉ số trực tuyến |
 | Model 3 | Mọi siêu tham số đã được tinh chỉnh |
 | Model 4 | Đã biết ảnh hưởng của việc mô hình cũ đi (staleness) |
-| Model 5 | Một mô hình đơn giản hơn không tốt hơn — kiểm tra định kỳ |
-| Model 6 | Chất lượng đủ tốt trên **mọi lát cắt quan trọng** |
-| Model 7 | Đã kiểm tra các khía cạnh về tính bao hàm / công bằng |
+| Model 5 | Một mô hình đơn giản hơn không tốt hơn (kiểm tra định kỳ) |
+| Model 6 | Chất lượng đủ tốt trên mọi lát cắt dữ liệu quan trọng |
+| Model 7 | Mô hình đã được kiểm tra về tính bao hàm (inclusion) giữa các nhóm người dùng |
 
-**Nhóm 3 — Hạ tầng ML**
+**Nhóm 3: Hạ tầng học máy**
 
-| # | Nội dung |
+| Mục | Nội dung |
 |---|---|
-| Infra 1 | **Huấn luyện lặp lại được** |
+| Infra 1 | Huấn luyện tái lập được |
 | Infra 2 | Mã đặc tả mô hình có kiểm thử đơn vị |
-| Infra 3 | **Toàn bộ pipeline** có kiểm thử tích hợp |
-| Infra 4 | Chất lượng mô hình được kiểm định **trước khi** phục vụ |
-| Infra 5 | Mô hình cho phép gỡ lỗi bằng cách quan sát từng bước |
-| Infra 6 | Mô hình được thử qua quy trình **canary** trước khi ra toàn bộ |
-| Infra 7 | **Quay lui được nhanh và an toàn** |
+| Infra 3 | Toàn bộ pipeline có kiểm thử tích hợp |
+| Infra 4 | Chất lượng mô hình được kiểm định trước khi đưa vào phục vụ |
+| Infra 5 | Mô hình gỡ lỗi được bằng cách quan sát từng bước tính |
+| Infra 6 | Mô hình được thử qua quy trình canary trước khi phục vụ toàn bộ |
+| Infra 7 | Có thể quay lui mô hình đang phục vụ nhanh và an toàn |
 
-**Nhóm 4 — Giám sát**
+**Nhóm 4: Giám sát**
 
-| # | Nội dung |
+| Mục | Nội dung |
 |---|---|
-| Monitor 1 | Thay đổi ở phụ thuộc thượng nguồn sinh ra thông báo |
-| Monitor 2 | Bất biến dữ liệu giữ đúng ở cả huấn luyện lẫn phục vụ |
-| Monitor 3 | **Đặc trưng lúc huấn luyện và lúc phục vụ tính ra cùng giá trị** |
+| Monitor 1 | Thay đổi ở các hệ thống phụ thuộc phía trước sinh ra thông báo |
+| Monitor 2 | Các bất biến của dữ liệu đúng ở cả đầu vào huấn luyện lẫn đầu vào phục vụ |
+| Monitor 3 | Đặc trưng lúc huấn luyện và lúc phục vụ tính ra cùng giá trị |
 | Monitor 4 | Mô hình không quá cũ |
-| Monitor 5 | Mô hình ổn định về mặt số học |
-| Monitor 6 | Mô hình không bị tụt chất lượng đột ngột |
-| Monitor 7 | Mô hình không bị tụt chất lượng do hồi quy (regression) |
+| Monitor 5 | Mô hình ổn định về mặt số học (không có NaN, không có giá trị vô cùng) |
+| Monitor 6 | Không có suy giảm, đột ngột hay từ từ, về tốc độ huấn luyện, độ trễ phục vụ, thông lượng hay bộ nhớ |
+| Monitor 7 | Chất lượng dự đoán trên dữ liệu thật không suy giảm |
 
-**Cách tính điểm** — và đây là phần tinh tế nhất, rất đáng nhớ:
+**Cách tính điểm:**
 
-- **0,5 điểm** nếu mục đó được thực hiện **thủ công**, có ghi lại kết quả và có phân phát cho người liên quan;
-- **1 điểm** nếu có **hệ thống chạy mục đó tự động, lặp lại theo định kỳ**;
-- cộng điểm **riêng cho từng nhóm trong bốn nhóm**;
-- **điểm cuối cùng là GIÁ TRỊ NHỎ NHẤT trong bốn điểm nhóm.**
+- 0,5 điểm cho một mục nếu mục đó được thực hiện thủ công, có ghi lại kết quả và gửi cho những người liên quan;
+- 1 điểm nếu có hệ thống chạy mục đó tự động và định kỳ;
+- cộng điểm riêng cho từng nhóm trong bốn nhóm;
+- **điểm cuối cùng là giá trị nhỏ nhất trong bốn điểm nhóm.**
 
-Lý do lấy nhỏ nhất được bài báo nói rõ: cả bốn nhóm đều quan trọng, nên muốn nâng điểm thì **phải quan tâm cả bốn**. Hệ quả sắc bén: một đội có hạ tầng huấn luyện hoàn hảo nhưng **không giám sát gì** thì điểm bằng 0 — dù ba nhóm kia đạt tối đa.
+Bài báo giải thích việc lấy giá trị nhỏ nhất: cả bốn nhóm đều quan trọng, nên muốn tăng điểm phải cải thiện cả bốn. Hệ quả: một hệ thống có hạ tầng huấn luyện hoàn hảo nhưng không giám sát gì có điểm 0, dù ba nhóm kia đạt tối đa.
 
 **Cách đọc điểm** (Bảng V của bài báo):
 
 | Điểm | Ý nghĩa |
 |---|---|
-| 0 | Giống một dự án nghiên cứu hơn là một hệ thống sản xuất |
-| (0, 1] | Không phải hoàn toàn chưa kiểm thử, nhưng đáng lo về những lỗ hổng nghiêm trọng |
-| (1, 2] | Đã có bước đầu đưa vào sản xuất, cần đầu tư thêm |
-| (2, 3] | Kiểm thử tương đối đủ, nhưng nhiều mục còn có thể tự động hoá |
-| (3, 5] | Mức kiểm thử và giám sát tự động mạnh, hợp cho hệ thống trọng yếu |
-| > 5 | Mức tự động hoá xuất sắc |
+| 0 | giống một dự án nghiên cứu hơn là một hệ thống sản xuất |
+| (0, 1] | đã có kiểm thử, nhưng có thể còn những lỗ hổng nghiêm trọng về độ tin cậy |
+| (1, 2] | đã có bước đầu đưa vào sản xuất, cần đầu tư thêm |
+| (2, 3] | kiểm thử tương đối đủ, nhiều mục còn có thể tự động hoá |
+| (3, 5] | kiểm thử và giám sát tự động ở mức cao, phù hợp với hệ thống trọng yếu |
+| > 5 | kiểm thử và giám sát tự động ở mức rất cao |
 
-Bài báo cũng ghi chú rằng **hệ thống ở giai đoạn khác nhau thì hợp lý khi nhắm tới điểm khác nhau** — một prototype không cần đạt 4.
+Bài báo cũng lưu ý rằng hệ thống ở các giai đoạn khác nhau nên nhắm tới các mức điểm khác nhau; một nguyên mẫu không cần đạt mức của một hệ thống trọng yếu.
 
 ---
 
 ## 7. Đóng gói và phục vụ mô hình
 
+Chương này trình bày ba chế độ phục vụ mô hình, cách lập ngân sách độ trễ, lý do phải theo dõi phân vị cao của độ trễ thay vì trung bình, và cách đóng gói mô hình để môi trường huấn luyện và môi trường phục vụ khớp nhau.
+
 ### 7.1. Ba chế độ phục vụ
 
-| Chế độ | Cách chạy | Hợp với | Độ trễ nhãn | Cái khó chính |
-|---|---|---|---|---|
-| **Theo lô** (batch) | chấm điểm định kỳ, ghi kết quả vào bảng | gợi ý hằng ngày, chấm điểm rủi ro | dài | dự đoán cũ khi người dùng vừa đổi hành vi |
-| **Trực tuyến** (online / request-response) | gọi đồng bộ, trả trong vài chục ms | xếp hạng tìm kiếm, chống gian lận | ngắn | ngân sách độ trễ, đuôi phân phối |
-| **Luồng** (streaming) | phản ứng theo sự kiện, trạng thái cập nhật liên tục | phát hiện bất thường, cá nhân hoá tại chỗ | ngắn | tính đúng của trạng thái, xử lý sự kiện đến muộn |
+| Chế độ | Cách chạy | Phù hợp với | Khó khăn chính |
+|---|---|---|---|
+| Theo lô (batch) | chấm điểm định kỳ, ghi kết quả vào bảng | gợi ý hằng ngày, chấm điểm rủi ro | dự đoán cũ khi người dùng vừa thay đổi hành vi |
+| Trực tuyến (online, request–response) | gọi đồng bộ, trả kết quả trong vài chục mili giây | xếp hạng tìm kiếm, chống gian lận khi thanh toán | ngân sách độ trễ, phần đuôi của phân phối độ trễ |
+| Luồng (streaming) | xử lý theo sự kiện, trạng thái cập nhật liên tục | phát hiện bất thường, cá nhân hoá theo phiên | tính đúng của trạng thái, xử lý sự kiện đến muộn |
 
-Sai lầm hay gặp là chọn trực tuyến vì nghe hiện đại hơn. Nguyên tắc đúng: **chọn chế độ rẻ nhất mà vẫn đáp ứng yêu cầu nghiệp vụ**, vì chi phí vận hành tăng rất nhanh từ trái sang phải.
+Một sai lầm hay gặp là chọn phục vụ trực tuyến khi yêu cầu nghiệp vụ không cần. Nguyên tắc: chọn chế độ rẻ nhất vẫn đáp ứng yêu cầu, vì chi phí vận hành tăng nhanh theo thứ tự trong bảng. Chế độ phục vụ cũng quyết định cách giám sát: với chấm điểm theo lô, có thể kiểm tra toàn bộ kết quả trước khi dùng; với phục vụ trực tuyến, dự đoán đã tới người dùng trước khi ai kịp kiểm tra.
 
 ### 7.2. Ngân sách độ trễ
 
-Phục vụ trực tuyến bắt đầu bằng một phép tính, không phải bằng một lựa chọn công nghệ. Ví dụ ngân sách 150 ms cho một lượt xếp hạng tìm kiếm:
+Thiết kế phục vụ trực tuyến bắt đầu bằng một phép tính. Ví dụ giả định: ngân sách 150 ms cho một lượt xếp hạng kết quả tìm kiếm.
 
 | Thành phần | Ngân sách |
 |---|---|
-| Mạng vào + ra | 20 ms |
-| Tra đặc trưng ở kho trực tuyến | 25 ms |
+| Mạng, chiều đi và chiều về | 20 ms |
+| Tra cứu đặc trưng ở kho trực tuyến | 25 ms |
 | Tiền xử lý đặc trưng | 10 ms |
-| **Suy luận mô hình** | **60 ms** |
+| Suy luận mô hình | 60 ms |
 | Hậu xử lý, ghi log | 15 ms |
 | Dự phòng | 20 ms |
 
-Điểm cần rút ra: **phần suy luận thường chỉ chiếm chưa tới một nửa ngân sách.** Tối ưu mô hình từ 60 ms xuống 30 ms chỉ cải thiện tổng thể 20%, trong khi giảm một lần tra đặc trưng thừa có thể cho nhiều hơn thế. Đây là phiên bản độ trễ của cùng bài học Hình 1.
+Trong ví dụ này, suy luận mô hình chiếm chưa tới một nửa ngân sách. Tối ưu mô hình từ 60 ms xuống 30 ms chỉ giảm tổng thời gian 20%, trong khi bỏ một lần tra cứu đặc trưng thừa có thể giảm nhiều hơn. Đây là phiên bản về độ trễ của Hình 1: phần mô hình chỉ là một phần của hệ thống. Các kỹ thuật giảm thời gian suy luận như lượng tử hoá được trình bày ở giáo trình [*Quantization*](ch01.html).
 
-### 7.3. Vì sao phải nói p99 chứ không nói trung bình
+### 7.3. Phân vị cao của độ trễ và hiệu ứng toả nhánh
 
-Độ trễ trung bình gần như vô dụng, vì phân phối độ trễ lệch phải rất mạnh: đa số yêu cầu nhanh, một ít rất chậm. Người dùng cảm nhận cái chậm.
+Độ trễ trung bình ít có giá trị để giám sát, vì phân phối độ trễ thường lệch phải mạnh: đa số yêu cầu nhanh, một số ít rất chậm, và người dùng cảm nhận những yêu cầu chậm. Vì vậy các mục tiêu mức dịch vụ (SLO) thường đặt trên phân vị cao: p95, p99.
 
-Nhưng lý do sâu hơn, và là thứ đáng nói khi phỏng vấn, là **hiệu ứng đuôi khi toả nhánh**. Nếu một yêu cầu phải gọi $k$ dịch vụ song song và chỉ trả lời khi cả $k$ đã xong, thì thời gian trả lời là **giá trị lớn nhất** của $k$ biến ngẫu nhiên. Với $k$ lần gọi độc lập có hàm phân phối $F$:
+Lý do quan trọng hơn là **hiệu ứng toả nhánh** (fan-out), được Dean và Barroso (2013) phân tích trong bài *The Tail at Scale*. Nếu một yêu cầu phải gọi $k$ dịch vụ song song và chỉ trả lời khi cả $k$ lời gọi đã xong, thời gian trả lời là **giá trị lớn nhất** của $k$ biến ngẫu nhiên. Với $k$ lời gọi độc lập có cùng hàm phân phối $F$:
 
 $$P(\max \le t) = F(t)^k \quad\Longrightarrow\quad \text{phân vị } q \text{ của max} = F^{-1}\!\left(q^{1/k}\right).$$
 
-Nói cách khác, muốn đạt p99 ở mức tổng thể thì **mỗi nhánh phải đạt tới phân vị $q^{1/k}$** — với $k = 100$ thì đó là phân vị 99,99.
+Nói cách khác, để toàn bộ yêu cầu đạt p99 thì mỗi nhánh phải đạt phân vị $0{,}99^{1/k}$; với $k = 100$, đó là phân vị 99,99.
 
-Thí nghiệm trong `code/mlops/experiments.py` dùng phân phối log-chuẩn với trung vị 20 ms và p99 = 100 ms cho **một** dịch vụ:
+Thí nghiệm trong `code/mlops/experiments.py` dùng phân phối log-chuẩn với trung vị 20 ms và p99 bằng 100 ms cho một dịch vụ:
 
 ![Hình 7](figs/mlops07_tail.png)
 
-**Hình 7.** Trái: p99 của thời gian trả lời theo số nhánh gọi song song. Phải: tỉ lệ yêu cầu chạm ít nhất một nhánh vượt p99, bằng $1-0{,}99^k$.
+**Hình 7.** Trái: p99 của thời gian trả lời theo số nhánh gọi song song. Phải: tỉ lệ yêu cầu gặp ít nhất một nhánh chậm hơn p99 của một nhánh, bằng $1-0{,}99^k$.
 
-| Số nhánh $k$ | p99 của tổng thể | % yêu cầu chạm ít nhất một nhánh chậm |
+| Số nhánh $k$ | p99 của thời gian trả lời | Tỉ lệ yêu cầu gặp ít nhất một nhánh chậm |
 |---|---|---|
 | 1 | 100,0 ms | 1,0% |
 | 10 | 169,5 ms | 9,6% |
 | 50 | 231,4 ms | 39,5% |
-| 100 | 261,9 ms | **63,4%** |
+| 100 | 261,9 ms | 63,4% |
 
-Con số cuối là con số đáng nhớ nhất chương: **nếu mỗi trong 100 dịch vụ đều "nhanh ở mức p99", thì 63% số yêu cầu vẫn chạm phải ít nhất một dịch vụ chậm.** Cải thiện trung bình không giúp gì cho chuyện này; chỉ có ba cách chữa — giảm $k$, cắt đuôi bằng thời hạn chờ (timeout) và trả lời một phần, hoặc gửi yêu cầu dự phòng (hedged request).
+Với 100 nhánh, dù mỗi dịch vụ chỉ chậm hơn 100 ms ở 1% số lần gọi, 63% số yêu cầu gặp ít nhất một lời gọi chậm như vậy. Giảm độ trễ trung bình của từng dịch vụ không giải quyết được vấn đề này. Dean và Barroso nêu các cách xử lý: giảm số nhánh; đặt thời hạn chờ (timeout) và trả lời với kết quả một phần; và gửi yêu cầu dự phòng (hedged request), tức gửi lại yêu cầu tới một bản sao khác nếu bản đầu chưa trả lời sau một khoảng thời gian, rồi dùng kết quả về trước.
 
 ### 7.4. Đóng gói và ranh giới môi trường
 
-Nỗi đau số một trong nghiên cứu phỏng vấn là **lệch giữa môi trường phát triển và môi trường sản xuất**. Nó sinh ra một căng thẳng thật sự: môi trường phát triển cần nhanh và thoải mái, môi trường sản xuất cần chặt — nhưng càng khác nhau thì càng khó kiểm định sớm.
+Nghiên cứu của Shankar và cộng sự ghi nhận khó khăn thường gặp là sự khác biệt giữa môi trường phát triển và môi trường sản xuất. Hai yêu cầu kéo về hai phía: môi trường phát triển cần linh hoạt để thử nghiệm nhanh, môi trường sản xuất cần chặt chẽ; nhưng hai môi trường càng khác nhau thì càng khó phát hiện lỗi sớm.
 
-Ba thực hành giảm khoảng cách ấy:
+Ba thực hành thu hẹp khoảng cách:
 
-1. **Cùng một ảnh container** cho huấn luyện và phục vụ, chỉ khác điểm vào (entrypoint).
-2. **Cùng một hàm biến đổi đặc trưng**, đóng gói cùng mô hình thay vì cài đặt lại ở dịch vụ phục vụ (xem Mục 4.4).
-3. **Kiểm thử tích hợp toàn pipeline** chạy trong CI trên một tập dữ liệu nhỏ nhưng thật — đây đúng là mục **Infra 3** của ML Test Score.
+1. **Dùng cùng một ảnh container** cho huấn luyện và phục vụ, chỉ khác điểm vào (entrypoint).
+2. **Dùng cùng một hàm biến đổi đặc trưng**, đóng gói cùng mô hình thay vì cài đặt lại ở dịch vụ phục vụ (Mục 4.4).
+3. **Kiểm thử tích hợp toàn pipeline** trong CI trên một tập dữ liệu nhỏ nhưng thật, đúng như mục Infra 3 của ML Test Score.
 
-Về bản thân tạo tác mô hình, có một đánh đổi đáng biết:
+Về định dạng lưu mô hình, có một đánh đổi:
 
-| Cách đóng gói | Ưu | Nhược |
+| Cách lưu | Ưu điểm | Nhược điểm |
 |---|---|---|
-| Pickle / `state_dict` | đơn giản, giữ nguyên hệ sinh thái | phụ thuộc chặt phiên bản thư viện; pickle còn là **rủi ro an ninh** khi nạp tệp không tin cậy |
-| Đồ thị đã xuất (ONNX, TorchScript, SavedModel) | độc lập ngôn ngữ, tối ưu được, ranh giới rõ | mất linh hoạt, phải kiểm chứng đồ thị xuất ra khớp với bản gốc |
+| Pickle, `state_dict` | đơn giản, giữ nguyên hệ sinh thái | phụ thuộc chặt vào phiên bản thư viện; nạp tệp pickle không tin cậy có thể chạy mã tuỳ ý |
+| Đồ thị đã xuất (ONNX, TorchScript, SavedModel) | không phụ thuộc ngôn ngữ, tối ưu được, ranh giới rõ | kém linh hoạt; phải kiểm tra đồ thị xuất ra cho cùng kết quả với bản gốc |
 
-Với cách thứ hai, luôn phải thêm một kiểm thử: chạy cả hai bản trên cùng một lô đầu vào và so đầu ra. Đây chính là tinh thần của thí nghiệm "trùng khớp từng bit" ở giáo trình Quantization — cùng một kỷ luật, khác đối tượng.
+Với cách thứ hai, luôn cần một kiểm thử so sánh: chạy bản gốc và bản đã xuất trên cùng một lô đầu vào và so sánh đầu ra. Vì hai bản có thể dùng các kernel khác nhau, phép so sánh thường dùng một dung sai (ví dụ sai số tương đối $10^{-3}$) thay vì đòi trùng khớp từng bit. Mục 6.5 của giáo trình [*Quantization*](ch06.html) là một ví dụ của cùng kỷ luật này: kiểm tra bằng mã rằng phép tính số nguyên cho cùng kết quả với phép mô phỏng.
 
 ---
 
 ## 8. Chiến lược ra mắt
 
-### 8.1. Bốn cách, khác nhau ở chỗ ai chịu rủi ro
+Một mô hình đã qua đánh giá ngoại tuyến vẫn chưa được đưa ngay tới mọi người dùng. Chương này trình bày bốn chiến lược ra mắt, mỗi chiến lược trả lời một câu hỏi khác nhau, rồi đi vào chi tiết của shadow, canary và A/B test, gồm cách tính cỡ mẫu và những lỗi thống kê thường gặp.
+
+### 8.1. Bốn chiến lược và câu hỏi mỗi chiến lược trả lời
 
 ![Hình 8](figs/mlops08_rollout.png)
 
-**Hình 8.** Bốn chiến lược ra mắt. Câu hỏi để chọn không phải "cái nào tốt nhất" mà "ở bước này, tôi đang cần trả lời câu hỏi gì".
+**Hình 8.** Bốn chiến lược ra mắt. Chọn chiến lược theo câu hỏi cần trả lời ở từng bước.
 
-| Chiến lược | Trả lời được câu hỏi | Không trả lời được |
+| Chiến lược | Trả lời được | Không trả lời được |
 |---|---|---|
-| **Shadow** (song song ngầm) | Mô hình mới có sập không, có chậm không, dự đoán có khác nhiều không? | Người dùng có phản ứng tốt hơn không — vì họ không hề thấy nó |
-| **Canary** (ra mắt dần) | Có chỉ số vận hành nào xấu đi ở quy mô nhỏ không? | Hiệu ứng dài hạn, hiệu ứng mạng |
-| **Blue–green** | (chủ yếu là cơ chế triển khai, không phải cơ chế học) | Không trả lời câu hỏi nào về chất lượng |
-| **A/B test** | Mô hình mới có làm chỉ số sản phẩm tốt lên một cách **nhân quả** không? | Câu trả lời nhanh — nó tốn thời gian và lưu lượng |
+| Shadow (chạy song song ngầm) | mô hình mới có lỗi, có chậm không; dự đoán khác mô hình cũ nhiều không | người dùng có phản ứng tốt hơn không, vì họ không thấy kết quả của mô hình mới |
+| Canary (ra mắt dần) | có chỉ số vận hành nào xấu đi ở quy mô nhỏ không | hiệu ứng dài hạn, hiệu ứng mạng lưới |
+| Blue–green | chủ yếu là cơ chế triển khai: chuyển toàn bộ lưu lượng giữa hai môi trường và quay lui tức thì | không trả lời câu hỏi nào về chất lượng |
+| A/B test | mô hình mới có làm chỉ số sản phẩm tốt lên hay không, theo nghĩa nhân quả | câu trả lời nhanh: A/B test tốn thời gian và lưu lượng |
 
-Nghiên cứu phỏng vấn ghi nhận một thực hành chuẩn: **trải một lần ra mắt qua nhiều giai đoạn và đánh giá ở từng giai đoạn**. Trình tự điển hình: ngoại tuyến → shadow → canary 1% → A/B 50% → toàn bộ. Mỗi cửa loại được một lớp rủi ro, và loại càng sớm thì càng rẻ.
+Shankar và cộng sự (2022) ghi nhận thực hành chia một lần ra mắt thành nhiều giai đoạn và đánh giá ở từng giai đoạn. Trình tự điển hình: đánh giá ngoại tuyến, shadow, canary 1%, A/B test, rồi toàn bộ. Mỗi giai đoạn loại được một loại rủi ro, và loại càng sớm càng rẻ. Nghiên cứu cũng ghi nhận cái giá: nhiều người được phỏng vấn cho rằng quá trình từ lúc có ý tưởng tới lúc kiểm chứng xong kéo dài quá lâu. Một người cho biết ở công ty của họ, thử một ý tưởng đặc trưng mới mất hơn ba tháng; khoảng 40 tới 50% ý tưởng đi tới được lần ra mắt ban đầu, và khoảng một nửa trong số đó sau đó bị loại vì lý do pháp lý, quyền riêng tư hoặc độ phức tạp. Loại được ý tưởng kém ở giai đoạn sớm vì thế làm tăng tốc độ chung (Mục 2.2).
 
-Nhưng bài báo cũng ghi nhận cái giá: **"triển khai nhiều giai đoạn tưởng như kéo dài vô tận"**. Một người được phỏng vấn cho biết ở công ty họ, thời gian thử một ý tưởng đặc trưng mới mất **hơn ba tháng**, và chỉ khoảng 40–50% số ý tưởng đi được tới lần ra mắt đầu tiên; trong số đã ra mắt lại rơi tiếp khoảng một nửa vì lý do pháp lý, quyền riêng tư hay độ phức tạp.
+### 8.2. Shadow
 
-### 8.2. Shadow: mạnh hơn người ta tưởng
+Ở chế độ shadow, mô hình mới nhận cùng lưu lượng thật với mô hình cũ, dự đoán của nó được ghi lại nhưng không được dùng. Shadow trả lời được ba câu hỏi mà người dùng không phải chịu rủi ro nào:
 
-Shadow thường bị coi là bước cho có. Thực ra nó trả lời được ba câu hỏi rất đắt, **với rủi ro bằng 0 cho người dùng**:
+1. **Mô hình mới có chịu được tải thật không**: độ trễ, bộ nhớ, tỉ lệ lỗi.
+2. **Đặc trưng lúc phục vụ có khớp với lúc huấn luyện không**: đây là mục Monitor 3 của ML Test Score, và shadow là cách rẻ nhất để đo nó trên lưu lượng thật.
+3. **Phân phối dự đoán có khác bất thường không**: so sánh phân phối của $\hat y$ giữa mô hình mới và mô hình cũ.
 
-1. **Mô hình mới có chịu nổi tải thật không** — về độ trễ, bộ nhớ, tỉ lệ lỗi.
-2. **Đặc trưng lúc phục vụ có khớp lúc huấn luyện không** — đây chính là mục **Monitor 3** của ML Test Score, và shadow là cách rẻ nhất để đo nó trên lưu lượng thật.
-3. **Phân phối dự đoán có lệch bất thường không** — so sánh phân phối $\hat{y}$ của bản mới và bản cũ.
+Điểm thứ hai đáng chú ý: nhiều lỗi lệch huấn luyện–phục vụ chỉ xuất hiện trên phân phối đầu vào thật, không xuất hiện trên tập kiểm tra. Shadow phát hiện được chúng trước khi có người dùng nào bị ảnh hưởng. Giới hạn của shadow: với các hệ thống mà dự đoán ảnh hưởng tới hành vi người dùng, như gợi ý hay xếp hạng, shadow không đo được phản ứng của người dùng với mô hình mới.
 
-Điểm thứ hai đáng nhấn. Nhiều lỗi skew chỉ lộ ra trên phân phối đầu vào thật, không lộ trên tập kiểm tra. Shadow bắt được chúng trước khi có bất kỳ người dùng nào bị ảnh hưởng.
+### 8.3. Canary
 
-### 8.3. Canary: phải đủ nhạy ở 1%
+Canary đưa mô hình mới tới một phần nhỏ lưu lượng, ví dụ 1%, rồi tăng dần. Canary chỉ có ý nghĩa nếu ở mức lưu lượng nhỏ vẫn đo được điều gì đó; với 1% lưu lượng, chỉ số sản phẩm gần như chắc chắn không đủ mẫu để có ý nghĩa thống kê (Mục 8.4). Vì vậy cần phân chia chỉ số theo độ nhạy:
 
-Canary chỉ có ý nghĩa nếu ở mức lưu lượng nhỏ bạn vẫn **đo được** điều gì đó. Và đây là chỗ nhiều đội tự lừa mình: ở 1% lưu lượng, chỉ số sản phẩm gần như chắc chắn **không đủ mẫu để có ý nghĩa thống kê**.
-
-Cách làm đúng là phân tầng chỉ số theo độ nhạy:
-
-| Ở canary 1%, đo được | Phải đợi A/B mới đo được |
+| Đo được ở canary 1% | Phải đợi A/B test |
 |---|---|
-| tỉ lệ lỗi, độ trễ p50/p95/p99 | tỉ lệ chuyển đổi, doanh thu mỗi phiên |
-| phân phối dự đoán $\hat{y}$ | giữ chân người dùng |
-| tỉ lệ đặc trưng thiếu / null | chỉ số dài hạn |
+| tỉ lệ lỗi, độ trễ p50, p95, p99 | tỉ lệ chuyển đổi, doanh thu mỗi phiên |
+| phân phối của dự đoán $\hat y$ | tỉ lệ giữ chân người dùng |
+| tỉ lệ đặc trưng bị thiếu | các chỉ số dài hạn |
 
-Nói ngắn: **canary bảo vệ khỏi thảm hoạ, A/B trả lời câu hỏi về giá trị.** Lẫn hai vai trò này là lỗi thiết kế quy trình hay gặp nhất.
+Canary bảo vệ khỏi sự cố lớn; A/B test trả lời câu hỏi về giá trị. Dùng canary để kết luận về giá trị sản phẩm là một lỗi thiết kế quy trình thường gặp.
 
-### 8.4. A/B test: cỡ mẫu quyết định mọi thứ
+### 8.4. A/B test và cỡ mẫu
 
-Với chỉ số là một tỉ lệ (tỉ lệ click, tỉ lệ chuyển đổi), cỡ mẫu mỗi nhánh cần để phát hiện chênh lệch $\Delta = p_2 - p_1$ ở mức ý nghĩa $\alpha$ và lực kiểm định $1-\beta$ là
+Với chỉ số là một tỉ lệ (tỉ lệ nhấp, tỉ lệ chuyển đổi), cỡ mẫu mỗi nhánh cần để phát hiện chênh lệch $\Delta = p_2 - p_1$ với mức ý nghĩa $\alpha$ (hai phía) và lực kiểm định $1-\beta$ là
 
 $$n \;=\; \frac{\left(z_{1-\alpha/2} + z_{1-\beta}\right)^2 \left[p_1(1-p_1) + p_2(1-p_2)\right]}{\Delta^2}.$$
 
-Điều cần nhớ nằm ở mẫu số: **$n$ tỉ lệ nghịch với bình phương mức cải thiện.** Muốn bắt cải thiện nhỏ đi một nửa thì cần gấp bốn lần lưu lượng.
+$n$ tỉ lệ nghịch với bình phương mức chênh lệch: muốn phát hiện một mức cải thiện nhỏ bằng một nửa thì cần gấp bốn lần số mẫu.
 
 ![Hình 9](figs/mlops09_abtest.png)
 
-**Hình 9.** Cỡ mẫu mỗi nhánh theo mức cải thiện tương đối cần phát hiện, với ba mức tỉ lệ nền. Trục dọc là thang log.
+**Hình 9.** Cỡ mẫu mỗi nhánh theo mức cải thiện tương đối cần phát hiện, với ba mức tỉ lệ nền. Trục tung dùng thang logarit.
 
-Bảng dưới lấy tỉ lệ nền 5%, $\alpha = 0{,}05$ hai phía, lực kiểm định 80% — tính trong `code/mlops/experiments.py`:
+Bảng dưới lấy tỉ lệ nền 5%, $\alpha = 0{,}05$ hai phía và lực kiểm định 80%, tính trong `code/mlops/experiments.py`:
 
-| Cải thiện tương đối cần bắt | Cỡ mẫu mỗi nhánh | Số ngày nếu mỗi nhánh có 100 000 lượt/ngày |
+| Cải thiện tương đối cần phát hiện | Cỡ mẫu mỗi nhánh | Số ngày nếu mỗi nhánh có 100 000 lượt mỗi ngày |
 |---|---|---|
-| 1% | 2 996 694 | **30,0 ngày** |
+| 1% (từ 5% lên 5,05%) | 2 996 694 | 30,0 ngày |
 | 2% | 752 700 | 7,5 ngày |
 | 5% | 122 121 | 1,2 ngày |
 | 10% | 31 231 | 0,3 ngày |
 | 20% | 8 155 | 0,1 ngày |
 
-Hàng đầu tiên là câu trả lời cho một câu hỏi phỏng vấn rất hay: *"vì sao không A/B test mọi thay đổi?"* Vì để chứng minh một cải thiện 1% trên tỉ lệ nền 5%, bạn cần **ba triệu mẫu mỗi nhánh** — một tháng lưu lượng cho **một** ý tưởng. Lưu lượng là tài nguyên khan hiếm, và mọi quy trình ra mắt tốt đều được thiết kế để **không phí nó vào những ý tưởng có thể loại sớm hơn bằng cách rẻ hơn**.
+Hàng đầu tiên giải thích vì sao không thể A/B test mọi thay đổi: để phát hiện cải thiện tương đối 1% trên tỉ lệ nền 5% cần khoảng ba triệu mẫu mỗi nhánh, tức một tháng lưu lượng cho một ý tưởng. Lưu lượng là tài nguyên khan hiếm, và quy trình ra mắt tốt được thiết kế để không dùng nó cho những ý tưởng có thể loại sớm hơn bằng cách rẻ hơn (đánh giá ngoại tuyến, shadow).
 
-### 8.5. Ba cái bẫy thống kê
+**Giảm phương sai.** Công thức cho thấy ba cách giảm cỡ mẫu: chấp nhận chỉ phát hiện mức cải thiện lớn hơn, nới $\alpha$ hoặc lực kiểm định, và giảm phương sai của chỉ số. Cách thứ ba không làm giảm độ tin cậy của kết luận. Kỹ thuật phổ biến là CUPED (Deng và cộng sự, 2013): dùng giá trị của chính chỉ số đó ở mỗi người dùng trong giai đoạn trước thí nghiệm làm biến hiệp phương sai, và trừ phần biến động giải thích được bởi nó. Nếu hệ số tương quan giữa giá trị trước và trong thí nghiệm là $\rho$, phương sai giảm theo hệ số $1 - \rho^2$, và cỡ mẫu cần thiết giảm cùng tỉ lệ. Công cụ cỡ mẫu ở trang Phòng thí nghiệm cho phép nhập mức giảm phương sai này.
 
-1. **Peeking (nhìn lén).** Kiểm tra p-value liên tục và dừng ngay khi thấy $p < 0{,}05$ làm tỉ lệ dương tính giả cao hơn 5% rất nhiều. Chữa bằng cách cố định cỡ mẫu trước, hoặc dùng phương pháp thiết kế cho việc theo dõi liên tục (kiểm định tuần tự, ranh giới alpha-spending).
-2. **So nhiều chỉ số cùng lúc.** Theo dõi 20 chỉ số ở mức $\alpha = 0{,}05$ thì kỳ vọng có 1 chỉ số "có ý nghĩa" **hoàn toàn do ngẫu nhiên**. Chữa bằng cách khai báo trước **một** chỉ số chính, còn lại là chỉ số bảo vệ (guardrail).
-3. **Ô nhiễm giữa hai nhánh.** Trong mạng xã hội hoặc thị trường hai chiều, người ở nhánh A ảnh hưởng tới người ở nhánh B, nên giả thiết độc lập vỡ. Chữa bằng chia ngẫu nhiên theo cụm (theo vùng, theo nhóm bạn bè) thay vì theo cá nhân.
+### 8.5. Những lỗi thống kê thường gặp
+
+Tài liệu tham khảo chính cho mục này là Kohavi, Tang và Xu (2020), *Trustworthy Online Controlled Experiments*.
+
+1. **Xem kết quả giữa chừng (peeking).** Kiểm tra p-value liên tục và dừng ngay khi thấy $p < 0{,}05$ làm tỉ lệ dương tính giả cao hơn 5% nhiều. Cách xử lý: cố định cỡ mẫu trước khi chạy, hoặc dùng các phương pháp thiết kế cho việc theo dõi liên tục (kiểm định tuần tự).
+2. **So sánh nhiều chỉ số cùng lúc.** Với 20 chỉ số không thật sự thay đổi, kiểm định ở mức $\alpha = 0{,}05$ cho trung bình 1 chỉ số "có ý nghĩa" do ngẫu nhiên, và xác suất có ít nhất một chỉ số như vậy là $1 - 0{,}95^{20} \approx 64\%$ nếu các chỉ số độc lập. Cách xử lý: khai báo trước một chỉ số chính; các chỉ số còn lại là chỉ số bảo vệ (guardrail metric), chỉ dùng để phát hiện tác hại.
+3. **Hai nhánh ảnh hưởng lẫn nhau.** Trong mạng xã hội hoặc sàn giao dịch hai phía, người dùng ở nhánh A ảnh hưởng tới người dùng ở nhánh B, nên giả định độc lập không còn đúng. Cách xử lý: chia ngẫu nhiên theo cụm (theo vùng, theo nhóm bạn bè) thay vì theo cá nhân.
+4. **Tỉ lệ mẫu lệch (sample ratio mismatch).** Thiết kế chia 50/50 nhưng số người dùng thực tế ở hai nhánh chênh lệch nhiều hơn mức ngẫu nhiên cho phép, ví dụ vì một nhánh gây lỗi làm mất log. Khi đó kết quả không đáng tin, dù p-value trông thế nào. Kiểm tra bằng kiểm định khi bình phương trên số người dùng của hai nhánh trước khi đọc kết quả.
+5. **Hiệu ứng mới lạ.** Người dùng có thể phản ứng mạnh với một thay đổi chỉ vì nó mới, và hiệu ứng giảm dần sau vài tuần. Cách xử lý: chạy đủ lâu và xem hiệu ứng theo thời gian, đặc biệt ở những người dùng đã gặp thay đổi nhiều lần.
 
 ---
 
 ## 9. Dịch chuyển phân phối
 
-### 9.1. Ba loại, định nghĩa cho chặt
+Dữ liệu trong sản xuất khác dần với dữ liệu huấn luyện. Chương này định nghĩa ba loại dịch chuyển phân phối, dùng một thí nghiệm để chỉ ra loại nào phát hiện được mà không cần nhãn, trình bày các phép kiểm tra thống kê thường dùng, rồi phân tích chỉ số PSI: vì sao bộ ngưỡng quen thuộc của nó cho kết quả sai khi cỡ mẫu thay đổi, và nên dùng gì thay thế.
 
-Mô hình học quan hệ giữa $X$ và $Y$ từ phân phối chung $P(X, Y)$. Phân phối chung ấy tách được theo hai cách, và mỗi cách cho một họ dịch chuyển:
+### 9.1. Ba loại dịch chuyển
 
-$$P(X, Y) \;=\; \underbrace{P(Y \mid X)\,P(X)}_{\text{cách 1}} \;=\; \underbrace{P(X \mid Y)\,P(Y)}_{\text{cách 2}}$$
+Mô hình học quan hệ giữa $X$ và $Y$ từ phân phối chung $P(X, Y)$. Phân phối chung có thể tách theo hai cách:
 
-| Tên | Cái gì đổi | Cái gì giữ nguyên | Ví dụ |
+$$P(X, Y) \;=\; P(Y \mid X)\,P(X) \;=\; P(X \mid Y)\,P(Y).$$
+
+Mỗi cách tách cho một cách mô tả sự thay đổi (Quiñonero-Candela và cộng sự, 2009):
+
+| Loại | Thành phần thay đổi | Thành phần giữ nguyên | Ví dụ |
 |---|---|---|---|
-| **Covariate shift** | $P(X)$ | $P(Y \mid X)$ | Chiến dịch marketing kéo về nhóm khách trẻ hơn. Quan hệ "trẻ → hành vi" không đổi, chỉ là có nhiều người trẻ hơn. |
-| **Label shift** (prior probability shift) | $P(Y)$ | $P(X \mid Y)$ | Tỉ lệ gian lận tăng gấp đôi trong dịp lễ, nhưng giao dịch gian lận vẫn "trông" như cũ. |
-| **Concept drift** | $P(Y \mid X)$ | $P(X)$ | Cùng một hồ sơ khách hàng, nhưng định nghĩa "rủi ro" đã đổi vì chính sách tín dụng mới. |
+| Covariate shift | $P(X)$ | $P(Y \mid X)$ | một chiến dịch quảng cáo thu hút nhiều khách hàng trẻ hơn; quan hệ giữa tuổi và hành vi không đổi, chỉ có tỉ lệ người trẻ tăng |
+| Label shift (prior probability shift) | $P(Y)$ | $P(X \mid Y)$ | tỉ lệ giao dịch gian lận tăng gấp đôi dịp lễ, nhưng một giao dịch gian lận vẫn có đặc điểm như trước |
+| Concept drift | $P(Y \mid X)$ | $P(X)$ | cùng một hồ sơ khách hàng, nhưng định nghĩa "rủi ro" thay đổi vì chính sách tín dụng mới |
 
-Điểm cần nắm: covariate shift và concept drift là hai vế của **cùng một cách tách**; label shift thuộc cách tách kia. Vì vậy hỏi "đây là covariate shift hay label shift" đôi khi không có câu trả lời duy nhất — nó phụ thuộc bạn coi hướng nhân quả đi từ đâu tới đâu.
+Covariate shift và concept drift là hai thành phần của cùng một cách tách; label shift thuộc cách tách còn lại. Vì vậy câu hỏi "đây là covariate shift hay label shift" không phải lúc nào cũng có câu trả lời duy nhất: nó phụ thuộc vào việc coi $X$ gây ra $Y$ (ví dụ đặc điểm khách hàng quyết định hành vi) hay $Y$ gây ra $X$ (ví dụ bệnh gây ra triệu chứng). Trong thực tế, các loại dịch chuyển thường xảy ra cùng lúc.
 
-### 9.2. Thí nghiệm: loại nào dò được mà không cần nhãn
+### 9.2. Thí nghiệm: loại dịch chuyển nào phát hiện được mà không cần nhãn
 
-Đây là kết quả quan trọng nhất của chương, và là câu trả lời phỏng vấn phân biệt người đã vận hành thật.
+**Thiết lập.** Thí nghiệm trong `code/mlops/experiments.py` dùng dữ liệu hai chiều: $X \sim \mathcal N(0, I)$, nhãn sinh theo mô hình logistic với trọng số $w = (1{,}5;\ -1{,}0)$. Một hồi quy logistic được huấn luyện trên 4 000 mẫu, rồi được đánh giá trên ba tập dữ liệu mới, mỗi tập 4 000 mẫu:
 
-Thí nghiệm trong `code/mlops/experiments.py`: huấn luyện một bộ phân loại tuyến tính trên dữ liệu nguồn, rồi thả nó vào ba thế giới đã dịch chuyển. Với mỗi thế giới, đo hai thứ — **độ chính xác thật** (cần nhãn) và **kiểm định KS hai mẫu trên từng đặc trưng** (không cần nhãn).
+- **Covariate shift**: $X \sim \mathcal N(1{,}2;\ 1)$ trên mỗi trục, nhãn sinh theo cùng quy tắc.
+- **Label shift**: lấy mẫu lại sao cho 80% mẫu có nhãn dương (dữ liệu gốc khoảng 50%), giữ nguyên $P(X \mid Y)$.
+- **Concept drift**: $X$ có cùng phân phối như lúc huấn luyện, nhưng nhãn sinh theo trọng số mới $w = (-1{,}0;\ 1{,}5)$.
+
+Với mỗi tập, đo hai đại lượng: độ chính xác (cần nhãn) và p-value của kiểm định Kolmogorov–Smirnov (KS) hai mẫu trên từng đặc trưng, so với dữ liệu huấn luyện (không cần nhãn). Một dịch chuyển được coi là phát hiện được nếu p-value nhỏ nhất trong hai đặc trưng dưới $10^{-3}$.
 
 ![Hình 10](figs/mlops10_shifts.png)
 
-**Hình 10.** Cùng một biên quyết định, ba kiểu dịch chuyển. Hai hình đầu: đám mây dữ liệu dịch đi và nhìn thấy được. Hình cuối: đám mây **không hề đổi**, chỉ có nhãn đổi — và độ chính xác sụp.
+**Hình 10.** Dữ liệu nguồn (xám), dữ liệu mới (màu) và biên quyết định của mô hình trong ba kịch bản. Ở hai kịch bản đầu, đám mây dữ liệu dịch chuyển và nhìn thấy được. Ở kịch bản concept drift, đám mây không đổi, chỉ có nhãn thay đổi, và độ chính xác giảm mạnh.
 
-| Kịch bản | Độ chính xác | KS trên $x_1$ | KS trên $x_2$ | Dò được chỉ bằng $X$? |
+| Kịch bản | Độ chính xác | p-value KS trên $x_1$ | p-value KS trên $x_2$ | Phát hiện được chỉ từ $X$? |
 |---|---|---|---|---|
-| Không dịch chuyển | 75,6% | — | — | — |
-| Covariate shift | 76,4% | $p \approx 0$ | $p \approx 0$ | **CÓ** |
-| Label shift | 75,1% | $1{,}2\times10^{-29}$ | $2{,}2\times10^{-7}$ | **CÓ** |
-| **Concept drift** | **26,9%** | $p = 0{,}48$ | $p = 0{,}043$ | **KHÔNG** |
+| Không dịch chuyển | 75,6% | | | |
+| Covariate shift | 76,4% | $\approx 0$ | $\approx 0$ | có |
+| Label shift | 75,1% | $1{,}2\times10^{-29}$ | $2{,}2\times10^{-7}$ | có |
+| Concept drift | 26,9% | $0{,}48$ | $0{,}043$ | không |
 
-Đọc bảng này cho kỹ, vì nó chứa hai bài học ngược chiều nhau:
+Bảng cho hai kết luận ngược chiều nhau:
 
-1. **Hai hàng giữa: dò được nhưng gần như vô hại.** Kiểm định KS hét toáng lên ($p$ nhỏ tới mức máy làm tròn về 0), trong khi độ chính xác gần như không đổi. Nếu bạn cảnh báo dựa trên dịch chuyển của $X$, đây chính là **báo động giả** — nỗi đau được nhắc nhiều nhất ở Mục 3.2.
-2. **Hàng cuối: không dò được nhưng tàn phá.** Độ chính xác rơi từ 75,6% xuống **26,9%** — tệ hơn cả đoán bừa — trong khi mọi thống kê trên $X$ đều bình thường.
+1. **Hai kịch bản giữa phát hiện được nhưng gần như vô hại.** Kiểm định KS cho p-value rất nhỏ, trong khi độ chính xác gần như không đổi. Trong thí nghiệm này, mô hình logistic có dạng đúng với quy tắc sinh nhãn, nên việc dữ liệu dịch sang vùng khác không làm hỏng nó; covariate shift gây hại khi mô hình phải ngoại suy ra vùng ít dữ liệu huấn luyện mà nó mô tả sai. Label shift phát hiện được từ $X$ vì $X$ mang thông tin về $Y$: đổi tỉ lệ nhãn thì phân phối của $X$ cũng đổi theo. Nếu cảnh báo chỉ dựa trên thay đổi của $X$, cả hai trường hợp đều thành báo động giả, loại khó khăn được nhắc nhiều nhất ở Mục 3.2.
+2. **Kịch bản cuối không phát hiện được nhưng gây hại nặng.** Độ chính xác giảm từ 75,6% xuống 26,9%, thấp hơn cả đoán ngẫu nhiên, trong khi các kiểm định trên $X$ không thấy gì bất thường. Giá trị $p = 0{,}043$ trên $x_2$ chỉ là dao động ngẫu nhiên, vì phân phối của $X$ không đổi; với ngưỡng thông thường 0,05, nó sẽ bị tính là "phát hiện", một ví dụ của vấn đề kiểm định nhiều lần ở Mục 9.3.
 
-> **Kết luận phải thuộc:** giám sát $P(X)$ **không bao giờ** phát hiện được concept drift, vì theo đúng định nghĩa concept drift giữ nguyên $P(X)$. Muốn bắt nó thì phải có tín hiệu về nhãn — nhãn thật, nhãn trễ, nhãn đại diện, hoặc phản hồi gián tiếp của người dùng.
+> **Nhận xét.** Giám sát $P(X)$ không thể phát hiện concept drift, vì theo định nghĩa concept drift giữ nguyên $P(X)$. Muốn phát hiện concept drift phải có tín hiệu về nhãn: nhãn thật, nhãn đến trễ, nhãn thay thế, hoặc phản hồi gián tiếp của người dùng.
 
-Đây cũng là lý do Mục 3.5 nói độ trễ nhãn quyết định gần như mọi thứ khác: **nó quyết định bạn có khả năng nhìn thấy loại dịch chuyển nguy hiểm nhất hay không.**
+Đây là lý do Mục 3.5 nói độ trễ nhãn quyết định khả năng giám sát: nó quyết định hệ thống có phát hiện được loại dịch chuyển gây hại nhiều nhất hay không.
 
-### 9.3. Các phép dò và phạm vi dùng được
+### 9.3. Các phép kiểm tra dịch chuyển
 
-| Phép | Dùng cho | Ưu | Nhược |
+| Phép kiểm tra | Dùng cho | Ưu điểm | Nhược điểm |
 |---|---|---|---|
-| **Kolmogorov–Smirnov hai mẫu** | biến liên tục, một chiều | không giả định phân phối, có p-value thật | chỉ một chiều; với $n$ lớn thì nhạy tới mức vô nghĩa |
-| **Chi-square** | biến rời rạc / đã chia bin | có p-value, lý thuyết rõ | phải chọn bin; kém khi ô thưa |
-| **PSI** | cả hai, đã chia bin | một con số dễ báo cáo | **không có p-value**, ngưỡng là quy ước (Mục 9.5) |
-| **MMD** (maximum mean discrepancy) | nhiều chiều | xử lý được vector, có kiểm định hoán vị | tốn tính toán, phải chọn hạt nhân |
-| **Bộ phân loại phân biệt** (domain classifier) | nhiều chiều | trực giác rõ: nếu phân biệt được nguồn/đích thì đã dịch chuyển; AUC là thước đo độ lớn | cần huấn luyện thêm một mô hình |
+| Kolmogorov–Smirnov hai mẫu | biến liên tục, một chiều | không giả định dạng phân phối, có p-value | chỉ một chiều; với $n$ rất lớn, những khác biệt không đáng kể cũng có ý nghĩa thống kê |
+| Khi bình phương | biến rời rạc hoặc đã chia bin | có p-value, lý thuyết rõ ràng | phải chọn cách chia bin; kém chính xác khi có bin ít mẫu |
+| PSI | biến đã chia bin | một con số dễ báo cáo | không có p-value; ngưỡng là quy ước (Mục 9.5) |
+| MMD (maximum mean discrepancy) | dữ liệu nhiều chiều | xử lý được vector, kiểm định bằng hoán vị | tốn tính toán, phải chọn hàm kernel |
+| Bộ phân loại miền (domain classifier) | dữ liệu nhiều chiều | trực quan: nếu phân biệt được dữ liệu cũ và mới thì đã có dịch chuyển; AUC đo mức độ | phải huấn luyện thêm một mô hình |
+
+Rabanser và cộng sự (2019) so sánh có hệ thống các phương pháp này và thấy một cách đơn giản cho kết quả tốt: áp dụng kiểm định KS lên **đầu ra của mô hình** (xác suất dự đoán cho từng lớp) thay vì lên từng đặc trưng đầu vào, kèm hiệu chỉnh Bonferroni. Đầu ra có ít chiều hơn đầu vào nhiều và tập trung đúng vào những thay đổi ảnh hưởng tới dự đoán. Mục 10.3 dùng cùng ý này.
 
 Hai lưu ý thực hành:
 
-- **Đơn biến trên trăm đặc trưng thì phải hiệu chỉnh đa kiểm định.** Chạy KS trên 200 đặc trưng ở $\alpha = 0{,}01$ thì kỳ vọng **2 đặc trưng báo động mỗi lần chạy** dù không có gì xảy ra. Hoặc hiệu chỉnh (Bonferroni, Benjamini–Hochberg), hoặc chuyển sang một phép đa biến.
-- **Dịch chuyển đáng lo nhất thường nằm ở tương quan, không ở biên.** Từng đặc trưng vẫn đúng phân phối cũ nhưng quan hệ giữa chúng đổi — chỉ phép đa biến hoặc domain classifier mới thấy.
+- **Kiểm định trên nhiều đặc trưng phải hiệu chỉnh cho kiểm định nhiều lần.** Chạy KS trên 200 đặc trưng ở mức $\alpha = 0{,}01$ thì trung bình có 2 đặc trưng báo động ở mỗi lần kiểm tra dù không có gì thay đổi. Cần hiệu chỉnh (Bonferroni, Benjamini–Hochberg) hoặc dùng một phép kiểm tra nhiều chiều.
+- **Nhiều dịch chuyển nằm ở quan hệ giữa các đặc trưng, không ở từng đặc trưng.** Mỗi đặc trưng vẫn giữ phân phối cũ nhưng tương quan giữa chúng thay đổi; chỉ phép kiểm tra nhiều chiều hoặc bộ phân loại miền phát hiện được.
 
-### 9.4. PSI thực chất là gì
+### 9.4. PSI
 
-PSI được định nghĩa trên hai phân phối đã chia bin, với $B_j$ là tỉ lệ ở bin $j$ của tập nền và $T_j$ của tập hiện tại:
+PSI (population stability index) được định nghĩa trên hai phân phối đã chia thành $k$ bin. Gọi $B_j$ là tỉ lệ mẫu rơi vào bin $j$ trong tập tham chiếu và $T_j$ là tỉ lệ đó trong tập hiện tại:
 
-$$\mathrm{PSI} \;=\; \sum_{j=1}^{k} (T_j - B_j)\,\ln\!\frac{T_j}{B_j}.$$
+$$\mathrm{PSI} \;=\; \sum_{j=1}^{k} (T_j - B_j)\,\ln\frac{T_j}{B_j}.$$
 
-Khai triển ra thì thấy ngay nó là cái gì:
+Tách tổng thành hai phần:
 
-$$\mathrm{PSI} \;=\; \sum_j T_j \ln\frac{T_j}{B_j} \;+\; \sum_j B_j \ln\frac{B_j}{T_j} \;=\; D_{KL}(T \,\|\, B) + D_{KL}(B \,\|\, T).$$
+$$\mathrm{PSI} \;=\; \sum_j T_j \ln\frac{T_j}{B_j} \;+\; \sum_j B_j \ln\frac{B_j}{T_j} \;=\; D_{\mathrm{KL}}(T \,\|\, B) + D_{\mathrm{KL}}(B \,\|\, T).$$
 
-> **PSI chính là phân kỳ Jeffreys — tổng hai chiều của KL divergence.** Nó đối xứng, khác với KL. Nói được điều này trong phỏng vấn là dấu hiệu hiểu bản chất chứ không thuộc công thức.
+Vậy PSI là tổng hai chiều của phân kỳ KL, còn gọi là phân kỳ Jeffreys. Khác với phân kỳ KL, PSI đối xứng giữa hai phân phối. Vì có $\ln(T_j/B_j)$, PSI không xác định khi một bin không có mẫu nào; các cài đặt thường thay tỉ lệ 0 bằng một số dương rất nhỏ.
 
-PSI ra đời trong chấm điểm tín dụng và trở thành chuẩn công nghiệp ở đó. Kèm theo nó là bộ ngưỡng quy ước, được trích dẫn khắp nơi:
+PSI xuất phát từ lĩnh vực chấm điểm tín dụng và được dùng rộng rãi ở đó, kèm bộ ngưỡng quy ước sau:
 
-| PSI | Diễn giải quy ước |
+| PSI | Diễn giải theo quy ước |
 |---|---|
 | < 0,10 | phân phối ổn định |
-| 0,10 – 0,25 | có dịch chuyển nhỏ, nên xem xét |
+| 0,10 tới 0,25 | có dịch chuyển nhỏ, nên xem xét |
 | > 0,25 | dịch chuyển đáng kể, cần hành động |
 
-### 9.5. Vì sao bộ ngưỡng ấy không dùng thẳng được
+### 9.5. Ngưỡng PSI phụ thuộc cỡ mẫu và số bin
 
-Ba ngưỡng trên là **quy tắc kinh nghiệm**, không phải kết quả thống kê. Vấn đề của chúng đã được chỉ ra trong tài liệu học thuật về chấm điểm tín dụng: Yurdakul và Naranjo chứng minh rằng một phiên bản **PSI được co giãn lại tuân theo phân phối $\chi^2$ tiệm cận**, và lập luận rằng nên dùng **giá trị tới hạn tiệm cận** thay cho quy tắc kinh nghiệm — bởi các giá trị tới hạn ấy **phụ thuộc cả cỡ mẫu lẫn số bin**.
+Ba ngưỡng trên là quy tắc kinh nghiệm, không phải kết quả thống kê. Yurdakul và Naranjo (2020) chỉ ra rằng khi hai mẫu cùng phân phối, PSI nhân với một hệ số phụ thuộc cỡ mẫu có phân phối tiệm cận khi bình phương, và đề xuất dùng giá trị tới hạn tính từ phân phối đó thay cho quy tắc kinh nghiệm, vì giá trị tới hạn phụ thuộc cả cỡ mẫu lẫn số bin.
 
-Tài liệu này kiểm chứng lại điều đó bằng mô phỏng. Lấy **hai mẫu từ đúng cùng một phân phối chuẩn** — tức **không hề có dịch chuyển nào** — rồi tính PSI:
+Có thể thấy điều này bằng mô phỏng. Lấy hai mẫu từ **cùng một** phân phối chuẩn, tức không có dịch chuyển nào, chia bin theo phân vị của mẫu tham chiếu, rồi tính PSI; lặp lại 300 lần và lấy trung bình:
 
 ![Hình 11](figs/mlops11_psi_null.png)
 
-**Hình 11.** PSI trung bình khi hai mẫu cùng phân phối. Đường chấm là dự đoán lý thuyết $2(k-1)/n$; các điểm đo nằm đúng trên đó.
+**Hình 11.** PSI trung bình khi hai mẫu cùng phân phối, theo cỡ mẫu, với 5, 10 và 20 bin. Đường chấm là giá trị lý thuyết $2(k-1)/n$; hai đường ngang là các ngưỡng 0,10 và 0,25.
 
-| $n$ mỗi mẫu | $k = 5$ bin | $k = 10$ bin | $k = 20$ bin | Lý thuyết $2(k-1)/n$, $k=10$ |
+| $n$ mỗi mẫu | $k = 5$ | $k = 10$ | $k = 20$ | Lý thuyết $2(k-1)/n$, $k = 10$ |
 |---|---|---|---|---|
-| 200 | 0,0399 | **0,0943** | **0,2050** | 0,0900 |
+| 200 | 0,0399 | 0,0943 | 0,2050 | 0,0900 |
 | 500 | 0,0164 | 0,0353 | 0,0795 | 0,0360 |
 | 1 000 | 0,0080 | 0,0179 | 0,0381 | 0,0180 |
 | 5 000 | 0,0015 | 0,0037 | 0,0076 | 0,0036 |
 | 20 000 | 0,0004 | 0,0009 | 0,0019 | 0,0009 |
 
-**Suy luận đằng sau con số $2(k-1)/n$.** Khi hai mẫu cùng phân phối, $T_j \approx B_j \approx p_j$ và chênh lệch chỉ cỡ $1/\sqrt{n}$. Khai triển $\ln(T_j/B_j) \approx (T_j - B_j)/p_j$ cho
+**Vì sao PSI trung bình xấp xỉ $2(k-1)/n$.** Khi hai mẫu cùng phân phối, $T_j$ và $B_j$ đều gần xác suất thật $p_j$ của bin $j$, và chênh lệch giữa chúng có độ lớn cỡ $1/\sqrt n$. Dùng xấp xỉ $\ln(T_j/B_j) \approx (T_j - B_j)/p_j$:
 
-$$\mathrm{PSI} \approx \sum_j \frac{(T_j - B_j)^2}{p_j},$$
+$$\mathrm{PSI} \approx \sum_j \frac{(T_j - B_j)^2}{p_j}.$$
 
-mà $\operatorname{Var}(T_j - B_j) = 2p_j(1-p_j)/n$ với hai mẫu độc lập, nên $\tfrac{n}{2}\mathrm{PSI}$ xấp xỉ một biến $\chi^2$ với $k-1$ bậc tự do — đúng kết quả tiệm cận nói trên. Lấy kỳ vọng:
+Với hai mẫu độc lập cùng cỡ $n$, $\operatorname{Var}(T_j - B_j) = 2p_j(1-p_j)/n$, nên $\tfrac{n}{2}\,\mathrm{PSI}$ có phân phối xấp xỉ khi bình phương với $k-1$ bậc tự do, đúng với kết quả tiệm cận nêu trên. Lấy kỳ vọng:
 
-$$\mathbb{E}[\mathrm{PSI} \mid \text{không dịch chuyển}] \;\approx\; \frac{2(k-1)}{n}.$$
+$$\mathbb{E}[\mathrm{PSI} \mid \text{không có dịch chuyển}] \;\approx\; \frac{2(k-1)}{n}.$$
 
-Hệ quả sắc bén, và là câu trả lời hay cho câu hỏi "bạn dùng ngưỡng PSI nào":
+Hai hệ quả:
 
-- Với $n = 200$ và $k = 20$ bin, PSI trung bình là **0,205 khi không có bất kỳ dịch chuyển nào** — sát ngay ngưỡng 0,25 "dịch chuyển mạnh".
-- Với $n = 20\,000$, PSI chỉ là 0,0009. Ngưỡng 0,25 lúc này **không bao giờ chạm tới**, kể cả khi có dịch chuyển thật.
+- Với $n = 200$ và 20 bin, PSI trung bình là 0,205 **khi không có dịch chuyển nào**, rất gần ngưỡng 0,25.
+- Với $n = 20\,000$, PSI trung bình chỉ là 0,0009; ngưỡng 0,25 khó đạt tới ngay cả khi có dịch chuyển thật.
 
-Nói cách khác: **cùng một ngưỡng PSI vừa tạo ra báo động giả ở mẫu nhỏ, vừa mù hoàn toàn ở mẫu lớn.** Thí nghiệm tiếp theo đo trực tiếp điều đó.
+Cùng một ngưỡng PSI vì thế vừa gây báo động giả ở mẫu nhỏ, vừa bỏ sót dịch chuyển ở mẫu lớn. Thí nghiệm tiếp theo đo trực tiếp điều này: với mỗi cỡ mẫu $n$ và mỗi độ dịch chuyển $\delta$ (mẫu mới có trung bình dịch đi $\delta$ lần độ lệch chuẩn), lặp lại 400 lần và đếm tỉ lệ số lần mỗi quy tắc báo động. Quy tắc thứ nhất là PSI lớn hơn 0,25 với 10 bin; quy tắc thứ hai là kiểm định KS với $p < 0{,}01$.
 
 ![Hình 12](figs/mlops12_detect.png)
 
-**Hình 12.** Tỉ lệ báo động của hai cách dò theo độ dịch chuyển thật $\delta$ (tính bằng đơn vị độ lệch chuẩn). Trái: quy tắc PSI > 0,25. Phải: kiểm định KS ở $p < 0{,}01$.
+**Hình 12.** Tỉ lệ báo động theo độ dịch chuyển thật $\delta$. Trái: quy tắc PSI > 0,25. Phải: kiểm định KS với $p < 0{,}01$.
 
-| $n$ | $\delta$ thật | PSI > 0,25 báo | KS $p<0{,}01$ báo |
+Mỗi ô ghi tỉ lệ báo động của quy tắc PSI, rồi của kiểm định KS:
+
+| $n$ | $\delta = 0$ (không dịch chuyển) | $\delta = 0{,}1$ | $\delta = 0{,}3$ |
 |---|---|---|---|
-| 50 | **0** (không dịch chuyển) | **73%** | 0% |
-| 100 | **0** | **24%** | 1% |
-| 200 | 0 | 0% | 0% |
-| 1 000 | 0 | 0% | 2% |
-| 1 000 | 0,3 | **0%** | **100%** |
-| 10 000 | 0,1 | **0%** | **100%** |
+| 50 | 73% / 0% | 78% / 1% | 82% / 5% |
+| 100 | 24% / 1% | 24% / 2% | 54% / 24% |
+| 200 | 0% / 0% | 0% / 5% | 17% / 49% |
+| 1 000 | 0% / 2% | 0% / 22% | 0% / 100% |
+| 10 000 | 0% / 0% | 0% / 100% | 0% / 100% |
 
-Hai hàng đầu và hai hàng cuối là toàn bộ câu chuyện: ở $n = 50$ thì PSI báo động **73% số lần dù không có gì xảy ra**; ở $n = 1000$ với dịch chuyển thật $0{,}3\sigma$ thì PSI **không báo lần nào** trong khi KS báo 100%.
+Cột $\delta = 0$ là tỉ lệ báo động giả. Với $n = 50$, quy tắc PSI báo động 73% số lần dù không có gì thay đổi; kiểm định KS giữ tỉ lệ báo động giả quanh mức danh nghĩa 1% ở mọi cỡ mẫu. Hai cột còn lại là độ nhạy. Với $n = 1\,000$ và dịch chuyển thật $0{,}3$ độ lệch chuẩn, PSI không báo động lần nào, trong khi KS báo động ở cả 400 lần. Ở cỡ mẫu nhỏ, tỉ lệ báo động của PSI hầu như không phụ thuộc vào việc có dịch chuyển hay không: 73% khi không có dịch chuyển, 78% với $\delta = 0{,}1$.
 
-**Nên làm gì thay thế.** Ba cách, theo thứ tự đáng ưu tiên:
+**Nên làm gì thay thế.** Theo thứ tự ưu tiên:
 
-1. **Dùng kiểm định có p-value** (KS, chi-square, hoán vị MMD) và hiệu chỉnh đa kiểm định. Ngưỡng khi ấy tự thích ứng với $n$.
-2. **Nếu bắt buộc dùng PSI** (vì quy định ngành, vì báo cáo quen thuộc), hãy **hiệu chuẩn ngưỡng bằng mô phỏng** trên chính $n$ và $k$ của mình: chạy lại hai mẫu cùng phân phối vài trăm lần, lấy phân vị 99% của PSI làm ngưỡng.
-3. **Luôn cố định $n$ và $k$ giữa các kỳ đo.** Nếu cỡ lô thay đổi theo ngày thì PSI của hai ngày khác nhau không so được với nhau, dù chẳng có dịch chuyển nào.
+1. **Dùng kiểm định có p-value** (KS, khi bình phương, MMD với kiểm định hoán vị) và hiệu chỉnh cho kiểm định nhiều lần. Ngưỡng khi đó tự điều chỉnh theo $n$.
+2. **Nếu buộc phải dùng PSI** (vì quy định của ngành hoặc vì báo cáo đã quen dùng), tính ngưỡng theo đúng $n$ và $k$ của mình. Với hai mẫu cùng cỡ $n$, dùng kết quả ở trên: ngưỡng ở mức ý nghĩa $\alpha$ là $\tfrac{2}{n}\,\chi^2_{k-1,\,1-\alpha}$. Ví dụ với $k = 10$ và $\alpha = 0{,}01$, $\chi^2_{9;\,0{,}99} = 21{,}67$, nên ngưỡng là 0,217 khi $n = 200$, 0,043 khi $n = 1\,000$ và 0,0043 khi $n = 10\,000$. Cũng có thể xác định ngưỡng bằng mô phỏng: lấy nhiều cặp mẫu từ dữ liệu tham chiếu, tính PSI, và dùng phân vị 99% làm ngưỡng.
+3. **Giữ cố định $n$ và $k$ giữa các lần đo.** Nếu cỡ lô thay đổi theo ngày, PSI của hai ngày không so sánh được với nhau, dù không có dịch chuyển nào.
 
 ### 9.6. Chọn cửa sổ thời gian
 
-Mọi phép dò đều so "hiện tại" với "tham chiếu", và cả hai đều cần định nghĩa:
+Mọi phép kiểm tra dịch chuyển đều so sánh một cửa sổ **hiện tại** với một tập **tham chiếu**, và cả hai đều phải được chọn:
 
 | Lựa chọn | Đánh đổi |
 |---|---|
-| **Cửa sổ hiện tại ngắn** (một giờ) | Phát hiện nhanh, nhưng nhiễu lớn và báo động giả nhiều |
-| **Cửa sổ hiện tại dài** (một tuần) | Ổn định, nhưng một cú sốc đột ngột bị pha loãng và phát hiện muộn |
-| **Tham chiếu cố định** (tập huấn luyện) | Trả lời đúng câu "đã xa mô hình tới đâu"; nhưng sẽ báo động mãi sau khi dịch chuyển đã ổn định thành bình thường mới |
-| **Tham chiếu trượt** (30 ngày gần nhất) | Thích ứng với bình thường mới; nhưng **không bao giờ thấy dịch chuyển chậm**, vì tham chiếu trôi theo |
+| Cửa sổ hiện tại ngắn (một giờ) | phát hiện nhanh, nhưng nhiễu lớn và nhiều báo động giả |
+| Cửa sổ hiện tại dài (một tuần) | ổn định, nhưng thay đổi đột ngột bị pha loãng và phát hiện muộn |
+| Tham chiếu cố định (tập huấn luyện) | trả lời đúng câu hỏi "dữ liệu đã khác dữ liệu huấn luyện tới đâu", nhưng tiếp tục báo động cả khi dịch chuyển đã ổn định thành trạng thái bình thường mới |
+| Tham chiếu trượt (30 ngày gần nhất) | thích ứng với trạng thái bình thường mới, nhưng không phát hiện được dịch chuyển chậm, vì tham chiếu trôi theo dữ liệu |
 
-Cái bẫy nằm ở hàng cuối: tham chiếu trượt làm dịch chuyển chậm trở nên vô hình, đúng loại dịch chuyển mà Chương 11 cho thấy là tốn kém nhất. Cách dùng đúng là **giữ cả hai** — tham chiếu cố định để biết khoảng cách so với mô hình, tham chiếu trượt để biết có cú sốc mới không.
+Hàng cuối là cái bẫy: tham chiếu trượt làm dịch chuyển chậm trở nên không thấy được, trong khi Chương 11 cho thấy dịch chuyển chậm có thể gây thiệt hại lớn. Cách làm hợp lý là dùng cả hai: tham chiếu cố định để biết dữ liệu đã cách xa dữ liệu huấn luyện bao nhiêu, tham chiếu trượt để phát hiện thay đổi đột ngột.
 
-Cuối cùng, một cạm bẫy riêng: **tính mùa vụ**. Lưu lượng thứ Bảy khác thứ Ba, tháng Chạp khác tháng Ba. So thứ Bảy với tham chiếu tính trên ngày thường sẽ báo dịch chuyển mỗi tuần một lần, rất đều đặn và hoàn toàn vô nghĩa. Cách chữa tối thiểu là so cùng kỳ (thứ Bảy với thứ Bảy).
+Một cái bẫy khác là **tính mùa vụ**. Lưu lượng thứ Bảy khác thứ Ba, tháng Chạp khác tháng Ba. So dữ liệu thứ Bảy với tham chiếu tính trên các ngày thường sẽ báo động đều đặn mỗi tuần mà không có ý nghĩa gì. Cách xử lý tối thiểu là so sánh cùng kỳ: thứ Bảy với các thứ Bảy trước.
 
 ---
 
 ## 10. Giám sát và cảnh báo
 
-### 10.1. Hai loại chỉ số, đừng trộn
+Chương 9 trình bày cách phát hiện dịch chuyển. Chương này đặt các phép kiểm tra đó vào một hệ thống giám sát hoàn chỉnh: phân biệt hai loại chỉ số, bốn lớp giám sát xếp theo khoảng cách tới nhãn, ba cơ chế giám sát do Sculley và cộng sự đề xuất, và cách thiết kế cảnh báo để tránh báo động giả.
 
-| Loại | Ví dụ | Ai lo | Khi hỏng thì biết ngay? |
+### 10.1. Chỉ số vận hành và chỉ số riêng của học máy
+
+| Loại | Ví dụ | Khi có sự cố, có biết ngay không |
+|---|---|---|
+| Chỉ số vận hành | độ trễ, lưu lượng, tỉ lệ lỗi, mức sử dụng CPU, GPU, bộ nhớ | có |
+| Chỉ số riêng của học máy | độ chính xác, phân phối dự đoán, phân phối đặc trưng, chất lượng dữ liệu đầu vào | thường là không |
+
+Chỉ số vận hành giống với mọi dịch vụ phần mềm khác. Sách *Site Reliability Engineering* của Google (Beyer và cộng sự, 2016) gọi độ trễ, lưu lượng, tỉ lệ lỗi và mức bão hoà tài nguyên là bốn tín hiệu cơ bản (four golden signals), và định nghĩa hai khái niệm dùng trong chương này: **chỉ số mức dịch vụ** (SLI), một đại lượng đo được như p99 độ trễ, và **mục tiêu mức dịch vụ** (SLO), giá trị mục tiêu cho SLI đó, như "p99 dưới 200 ms trong 99,9% số phút". Phần còn lại của chương tập trung vào loại chỉ số thứ hai, loại chỉ có ở hệ thống học máy.
+
+### 10.2. Bốn lớp giám sát
+
+Xếp theo khoảng cách tới nhãn: càng gần nhãn thì càng có ý nghĩa, nhưng càng khó có được.
+
+| Lớp | Giám sát gì | Có ngay không | Mức ý nghĩa |
 |---|---|---|---|
-| **Chỉ số vận hành** | độ trễ, thông lượng, tỉ lệ lỗi, mức dùng CPU/GPU/bộ nhớ, thời gian hoạt động | giống hệt mọi dịch vụ khác | **Có** |
-| **Chỉ số riêng của ML** | độ chính xác, phân phối dự đoán, phân phối đặc trưng, chất lượng dữ liệu vào | chỉ ML mới có | **Không** |
+| 1. Đầu vào thô | dữ liệu tới có đủ số lượng, đúng giờ, đúng lược đồ không | có | thấp: chỉ phát hiện lỗi cứng |
+| 2. Đặc trưng | phân phối từng đặc trưng, tỉ lệ thiếu, giá trị danh mục lạ | có | trung bình: phát hiện covariate shift và lệch huấn luyện–phục vụ |
+| 3. Dự đoán | phân phối của $\hat y$, tỉ lệ từng lớp, độ tự tin trung bình | có | khá: phát hiện nhiều sự cố mà không cần nhãn |
+| 4. Chất lượng | độ chính xác, AUC, chỉ số sản phẩm | chỉ khi có nhãn | cao nhất, nhưng thường đến muộn |
 
-Hệ thống ML sập vì lý do vận hành thì cũng giống mọi hệ thống khác, và ngành phần mềm đã biết cách xử lý từ lâu. Phần đáng viết ra trong tài liệu này là loại thứ hai.
-
-### 10.2. Bốn lớp để giám sát
-
-Xếp theo thứ tự **càng gần nhãn thì càng có ý nghĩa, nhưng càng khó lấy**:
-
-| Lớp | Giám sát cái gì | Có ngay không | Ý nghĩa |
-|---|---|---|---|
-| 1. **Đầu vào thô** | tệp/luồng tới có đúng số lượng, đúng giờ, đúng schema không | ngay | thấp — chỉ bắt lỗi cứng |
-| 2. **Đặc trưng** | phân phối từng đặc trưng, tỉ lệ null, danh mục lạ | ngay | vừa — bắt được covariate shift và skew |
-| 3. **Dự đoán** | phân phối $\hat{y}$, tỉ lệ theo lớp, độ tin cậy trung bình | ngay | khá — bắt được nhiều sự cố mà không cần nhãn |
-| 4. **Chỉ số chất lượng** | độ chính xác, AUC, chỉ số sản phẩm | **chỉ khi có nhãn** | cao nhất — nhưng thường tới trễ |
-
-Nguyên tắc dùng: **báo động ở lớp 4 khi có thể, điều tra ở lớp 1–3 khi lớp 4 chưa tới.** Đội không có nhãn nhanh thì lớp 3 là tuyến phòng thủ chính.
+Nguyên tắc: cảnh báo dựa trên lớp 4 khi có thể; dùng lớp 1 tới 3 để điều tra, và để cảnh báo khi lớp 4 chưa có. Với hệ thống có nhãn đến chậm, lớp 3 là lớp giám sát chính.
 
 ### 10.3. Độ lệch dự đoán
 
-Sculley và cộng sự đề xuất một phép kiểm tra đơn giản đến bất ngờ mà lại hữu dụng:
+Sculley và cộng sự (2015) đề xuất một phép kiểm tra đơn giản nhưng hữu ích:
 
-> **Prediction bias.** Trong một hệ thống chạy đúng, phân phối **nhãn được dự đoán** thường phải bằng phân phối **nhãn quan sát được**.
+> **Định nghĩa 10.1 (Độ lệch dự đoán).** Trong một hệ thống hoạt động đúng, phân phối của các nhãn được dự đoán thường phải bằng phân phối của các nhãn quan sát được. **Độ lệch dự đoán** (prediction bias) là chênh lệch giữa hai phân phối đó.
 
-Bài báo cũng tự nêu giới hạn của nó rất thành thật: đây không phải phép kiểm tra đầy đủ, vì một mô hình rỗng chỉ đoán tỉ lệ trung bình cũng thoả mãn. **Nhưng thay đổi của chỉ số này thường là dấu hiệu của sự cố cần chú ý.**
+Bài báo nêu rõ giới hạn: đây không phải một phép kiểm tra đầy đủ, vì một mô hình chỉ luôn dự đoán tỉ lệ trung bình cũng có độ lệch dự đoán bằng 0. Nhưng một thay đổi đột ngột của đại lượng này thường là dấu hiệu của sự cố.
 
-Sức mạnh của nó nằm ở chỗ: nó không cần nhãn *tức thời* cho từng dự đoán, chỉ cần biết **tỉ lệ nền theo thời gian**. Nếu tỉ lệ gian lận lịch sử là 1,2% mà mô hình đột nhiên gắn cờ 4,5% giao dịch, thì có chuyện — dù chưa có nhãn nào cho ngày hôm nay.
+Ưu điểm của nó là không cần nhãn cho từng dự đoán, chỉ cần biết tỉ lệ nền theo thời gian. Nếu tỉ lệ gian lận trong lịch sử là 1,2% mà mô hình đột nhiên đánh dấu 4,5% số giao dịch, có vấn đề cần điều tra, dù chưa có nhãn nào cho ngày hôm nay.
 
-Cách dùng thực hành là chia theo lát cắt: độ lệch dự đoán theo từng thị trường, từng kênh, từng phiên bản ứng dụng. Độ lệch tổng thể bằng 0 vẫn có thể che giấu hai lát cắt lệch ngược chiều nhau.
+Nên tính độ lệch dự đoán theo lát cắt: theo thị trường, theo kênh, theo phiên bản ứng dụng. Độ lệch tổng thể bằng 0 vẫn có thể che giấu hai lát cắt lệch theo hai chiều ngược nhau.
 
-### 10.4. Hai cơ chế nữa từ cùng bài báo
+### 10.4. Giới hạn hành động và giám sát hệ thống phía trước
 
-**Giới hạn hành động (action limits).** Với hệ thống đưa ra hành động thật — đặt giá thầu, chặn tin nhắn, khoá tài khoản — cần đặt và **cưỡng chế** giới hạn hành động như một phép kiểm tra tỉnh táo. Giới hạn phải đủ rộng để không nổ vu vơ; khi chạm giới hạn thì báo động tự động và có người vào xem.
+Bài báo của Sculley và cộng sự đề xuất thêm hai cơ chế.
 
-Đây là loại biện pháp rẻ và cứu được nhiều thảm hoạ: nó không cần biết mô hình đúng hay sai, chỉ cần biết **"khoá 50 000 tài khoản trong một giờ" là điều chưa từng xảy ra và không nên xảy ra**.
+**Giới hạn hành động** (action limits). Với hệ thống thực hiện hành động thật, như đặt giá thầu quảng cáo, chặn tin nhắn hay khoá tài khoản, cần đặt và thực thi giới hạn cho các hành động như một phép kiểm tra hợp lý. Giới hạn phải đủ rộng để không kích hoạt khi hệ thống hoạt động bình thường; khi chạm giới hạn thì tự động cảnh báo và cần người xem xét. Cơ chế này không cần biết mô hình đúng hay sai, chỉ cần biết rằng, chẳng hạn, việc khoá 50 000 tài khoản trong một giờ là điều chưa từng xảy ra và không nên xảy ra.
 
-**Nhà cung cấp thượng nguồn (up-stream producers).** Dữ liệu chảy vào hệ thống học từ nhiều nguồn thượng nguồn. Các nguồn ấy phải được **giám sát, kiểm thử và đạt một SLO có tính đến nhu cầu của hệ thống ML ở hạ nguồn**. Quan trọng hơn: mọi cảnh báo ở thượng nguồn **phải được truyền tới mặt phẳng điều khiển của hệ thống ML**, và ngược lại, nếu hệ ML không đạt SLO thì phải báo xuống mọi bên tiêu thụ.
+**Hệ thống phía trước** (up-stream producers). Dữ liệu đi vào hệ thống học máy từ nhiều hệ thống phía trước. Các hệ thống này cần được giám sát, kiểm thử và có SLO phù hợp với nhu cầu của hệ thống học máy phía sau. Cảnh báo ở phía trước phải được chuyển tới hệ thống học máy; ngược lại, khi hệ thống học máy không đạt SLO, mọi bên sử dụng kết quả của nó phải được thông báo. Cơ chế này cũng là cách xử lý dạng nợ *undeclared consumer* ở Mục 1.4: biến các phụ thuộc ngầm thành phụ thuộc có tên, có cảnh báo theo cả hai chiều.
 
-Đây chính là cách chặn dạng nợ **undeclared consumer** ở Mục 1.4 — biến quan hệ ngầm thành hợp đồng có tên và có cảnh báo hai chiều.
+### 10.5. Thiết kế cảnh báo
 
-### 10.5. Cảnh báo: kẻ thù là báo động giả
+Mục 3.2 đã nhắc tới khó khăn được nêu nhiều nhất trong nghiên cứu của Shankar và cộng sự: báo động giả. Hậu quả của báo động giả không chỉ là phiền toái mà là mất niềm tin: khi đa số cảnh báo là giả, người nhận bỏ qua cả những cảnh báo thật, và hệ thống cảnh báo khi đó tạo ra cảm giác an toàn không có cơ sở.
 
-Nhắc lại nỗi đau được nêu nhiều nhất trong nghiên cứu phỏng vấn: **báo động giả**. Hậu quả không phải là phiền toái mà là **mất niềm tin**, và một hệ cảnh báo không được tin thì tệ hơn không có hệ cảnh báo, vì nó tạo cảm giác an toàn giả.
+Bốn nguyên tắc thiết kế, phần lớn lấy từ kinh nghiệm vận hành phần mềm (Beyer và cộng sự, 2016):
 
-Bốn nguyên tắc thiết kế:
+1. **Mỗi cảnh báo phải gắn với một hành động.** Nếu người nhận không biết phải làm gì, đó là một biểu đồ, không phải một cảnh báo; đưa nó vào bảng theo dõi (dashboard) thay vì gửi thông báo.
+2. **Phân mức độ.** Gọi người trực ngay (page) cho lỗi cứng và dịch vụ ngừng hoạt động; tạo phiếu xử lý (ticket) cho dịch chuyển và suy giảm chậm; phần còn lại đưa vào bảng theo dõi.
+3. **Cảnh báo theo triệu chứng, không theo nguyên nhân.** "Tỉ lệ chuyển đổi giảm 15%" là triệu chứng đáng gọi người trực. "PSI của đặc trưng thứ 37 vượt 0,2" là một manh mối để điều tra, không phải một sự cố.
+4. **Yêu cầu tín hiệu kéo dài.** Một điểm dữ liệu vượt ngưỡng có thể là nhiễu; vượt ngưỡng trong ba cửa sổ liên tiếp mới là tín hiệu.
 
-1. **Mỗi cảnh báo phải gắn với một hành động.** Nếu người nhận không biết phải làm gì, đó không phải cảnh báo — đó là một biểu đồ. Cho nó vào bảng điều khiển, đừng cho nó đánh thức ai.
-2. **Phân tầng theo mức độ.** *Trang* (đánh thức người) cho lỗi cứng và sập dịch vụ; *vé* (ticket) cho dịch chuyển và suy giảm chậm; *bảng điều khiển* cho phần còn lại.
-3. **Cảnh báo trên triệu chứng, không trên nguyên nhân.** "Tỉ lệ chuyển đổi giảm 15%" đáng đánh thức người. "PSI của đặc trưng số 37 vượt 0,2" thì không — đó là một manh mối cho cuộc điều tra, không phải một sự cố.
-4. **Đòi hỏi độ dai (persistence).** Một điểm dữ liệu vượt ngưỡng là nhiễu; vượt ngưỡng trong ba cửa sổ liên tiếp mới là tín hiệu.
+### 10.6. Ngưỡng cố định trong hệ thống thay đổi
 
-### 10.6. Ngưỡng cố định trong hệ thống động
+Sculley và cộng sự đặt tên cho một dạng nợ rất hay gặp: **ngưỡng cố định trong hệ thống thay đổi** (fixed thresholds in dynamic systems). Nhiều mô hình cần một ngưỡng quyết định, ví dụ để xếp một email là thư rác hay không. Ngưỡng thường được đặt bằng tay để cân bằng precision và recall. Khi mô hình được huấn luyện lại trên dữ liệu mới, phân phối điểm số của nó thay đổi, và ngưỡng cũ có thể không còn phù hợp.
 
-Một dạng nợ riêng mà Sculley và cộng sự đặt tên, và rất hay gặp trong thực tế:
+Cập nhật ngưỡng bằng tay cho nhiều mô hình vừa tốn công vừa dễ quên. Cách xử lý mà bài báo đề xuất là xác định ngưỡng tự động trên một tập kiểm định riêng mỗi lần huấn luyện, và coi ngưỡng là một phần của mô hình (lưu cùng mô hình trong sổ đăng ký) thay vì một hằng số trong cấu hình của dịch vụ.
 
-> **Fixed thresholds in dynamic systems.** Mô hình nào cũng cần một ngưỡng quyết định — báo đúng hay sai, đánh dấu thư rác hay không. Ngưỡng ấy thường được **đặt bằng tay** để cân bằng precision và recall. Nhưng khi mô hình được huấn luyện lại trên dữ liệu mới, **ngưỡng cũ có thể không còn hợp lệ.**
-
-Cập nhật tay ngưỡng cho nhiều mô hình vừa tốn công vừa dễ quên. Cách chữa đúng là **học ngưỡng cùng mô hình** trên một tập kiểm định giữ riêng, và coi ngưỡng là **một phần của tạo tác mô hình** chứ không phải một hằng số trong cấu hình dịch vụ.
-
-Đây là một ví dụ rất gọn của CACE: huấn luyện lại đã đổi phân phối điểm số đầu ra, nên mọi thứ phụ thuộc vào thang điểm ấy đều đã đổi theo — kể cả một con số nằm trong tệp YAML mà không ai nghĩ là một phần của mô hình.
+Đây cũng là một ví dụ của CACE: huấn luyện lại làm thay đổi phân phối điểm số, nên mọi thứ phụ thuộc vào điểm số đó cũng thay đổi theo, kể cả một con số trong tệp cấu hình mà không ai coi là một phần của mô hình.
 
 ---
 
-## 11. Huấn luyện lại và tự động hoá
+## 11. Huấn luyện lại
 
-### 11.1. Mô hình cũ đi nhanh đến mức nào
+Chương này trả lời ba câu hỏi: mô hình cũ đi nhanh tới mức nào, khi nào nên huấn luyện lại, và huấn luyện lại từ đầu hay cập nhật tiếp mô hình cũ. Phần cuối trình bày nguyên tắc quan trọng nhất khi tự động hoá: pipeline huấn luyện lại phải qua đủ các bước kiểm định như một lần phát hành thủ công.
 
-Trước khi hỏi "bao lâu huấn luyện lại một lần", phải trả lời được **cái giá của việc không huấn luyện lại**. ML Test Score có riêng hai mục cho việc này: **Model 4** — *đã biết ảnh hưởng của độ cũ* — và **Monitor 4** — *mô hình không quá cũ*.
+### 11.1. Mô hình cũ đi nhanh tới mức nào
 
-Thí nghiệm trong `code/mlops/experiments.py`: mô phỏng một thế giới có concept drift chậm (biên quyết định xoay dần 0,035 radian mỗi tuần, tức khoảng $2^\circ$), chạy 52 tuần với bốn nhịp huấn luyện lại.
+Trước khi quyết định bao lâu huấn luyện lại một lần, cần biết cái giá của việc không huấn luyện lại. ML Test Score có hai mục cho vấn đề này: Model 4 (đã biết ảnh hưởng của việc mô hình cũ đi) và Monitor 4 (mô hình không quá cũ).
+
+**Thí nghiệm.** Thí nghiệm trong `code/mlops/experiments.py` mô phỏng một thế giới có concept drift chậm: dữ liệu hai chiều, biên quyết định thật xoay 0,035 radian (khoảng $2^\circ$) mỗi tuần, trong 52 tuần. Mỗi tuần có 4 000 mẫu mới. Mô hình ban đầu là hồi quy logistic huấn luyện trên dữ liệu tuần 0; khi tới lịch huấn luyện lại, mô hình mới được huấn luyện trên dữ liệu của tuần vừa qua. So sánh bốn nhịp huấn luyện lại:
 
 ![Hình 13](figs/mlops13_staleness.png)
 
-**Hình 13.** Cùng một mô hình, cùng một thế giới, chỉ khác nhịp huấn luyện lại.
+**Hình 13.** Độ chính xác theo tuần của cùng một mô hình trong cùng một thế giới, chỉ khác nhịp huấn luyện lại.
 
-| Nhịp huấn luyện lại | Độ chính xác trung bình | Thấp nhất | Tuần 52 |
-|---|---|---|---|
-| Không bao giờ | 64,61% | 45,42% | **45,48%** |
-| Mỗi quý | 76,89% | 74,50% | 78,25% |
-| Mỗi tháng | 77,68% | 75,80% | 78,25% |
-| Mỗi tuần | 77,80% | 75,72% | 78,72% |
+| Nhịp huấn luyện lại | Số lần huấn luyện lại trong năm | Độ chính xác trung bình | Thấp nhất | Tuần 52 |
+|---|---|---|---|---|
+| Không bao giờ | 0 | 64,61% | 45,42% | 45,48% |
+| Mỗi quý (12 tuần) | 4 | 76,89% | 74,50% | 78,25% |
+| Mỗi tháng (4 tuần) | 13 | 77,68% | 75,80% | 78,25% |
+| Mỗi tuần | 52 | 77,80% | 75,72% | 78,72% |
 
-Ba điều rút ra, và cả ba đều là câu trả lời phỏng vấn tốt:
+Ba nhận xét:
 
-1. **Không huấn luyện lại thì mất 13,19 điểm phần trăm độ chính xác trung bình** trong một năm, và tới tuần 52 thì mô hình chỉ còn 45,5% — **tệ hơn đoán bừa** trên bài toán hai lớp cân bằng. Đáng chú ý là nó tụt *dần*, nên không có ngày nào báo động nổ.
-2. **Lợi ích giảm dần rất nhanh.** Từ "không bao giờ" lên "mỗi quý" được thêm 12,3 điểm. Từ "mỗi quý" lên "mỗi tuần" chỉ được thêm **0,91 điểm**. Nhịp hằng tuần đắt hơn hằng quý khoảng 13 lần về chi phí vận hành, để đổi lấy chưa tới một điểm.
-3. **Vì vậy nhịp đúng là một quyết định kinh tế, không phải kỹ thuật.** Nó được xác định bằng cách đo đường cong này trên chính bài toán của mình, rồi so giá trị của một điểm phần trăm với chi phí một chu kỳ huấn luyện.
+1. **Không huấn luyện lại thì mất 13,19 điểm phần trăm độ chính xác trung bình** trong một năm. Tới tuần 52, biên quyết định đã xoay hơn $90^\circ$, và mô hình chỉ còn đúng 45,5%, thấp hơn đoán ngẫu nhiên trên bài toán hai lớp cân bằng này. Độ chính xác giảm dần từng chút, nên không có tuần nào có một thay đổi đột ngột đủ để kích hoạt cảnh báo theo ngưỡng.
+2. **Lợi ích giảm dần nhanh.** Từ không huấn luyện lại lên mỗi quý tăng 12,3 điểm; từ mỗi quý lên mỗi tuần chỉ tăng thêm 0,91 điểm, trong khi số lần huấn luyện tăng 13 lần.
+3. **Nhịp huấn luyện lại là một quyết định kinh tế.** Nó được xác định bằng cách đo đường cong như Hình 13 trên chính bài toán của mình, rồi so sánh giá trị của một điểm phần trăm độ chính xác với chi phí của một lần huấn luyện, kiểm định và triển khai.
+
+Các con số trên thuộc về mô phỏng này: dịch chuyển đều và chậm. Với những thay đổi đột ngột, như một sự kiện làm hành vi người dùng thay đổi trong vài ngày, huấn luyện lại theo lịch cố định phản ứng chậm, và cần thêm các loại kích hoạt ở Mục 11.2.
 
 ### 11.2. Bốn loại kích hoạt
 
-| Kích hoạt | Cơ chế | Ưu | Nhược |
+| Kích hoạt | Cơ chế | Ưu điểm | Nhược điểm |
 |---|---|---|---|
-| **Theo lịch** | cron: mỗi tuần / mỗi tháng | đơn giản, dễ dự đoán tài nguyên | huấn luyện lại vô ích khi yên ổn; quá muộn khi có cú sốc |
-| **Theo chất lượng** | chỉ số tụt quá ngưỡng | phản ứng đúng lúc cần | **cần nhãn**, nên bị chặn bởi độ trễ nhãn |
-| **Theo dịch chuyển** | phép dò ở Chương 9 báo | không cần nhãn | bắt được covariate shift, **mù với concept drift** |
-| **Theo lượng dữ liệu** | đủ $N$ mẫu mới | hợp khi dữ liệu tới không đều | không liên quan gì tới việc mô hình có còn tốt không |
+| Theo lịch | định kỳ: mỗi tuần, mỗi tháng | đơn giản, dễ dự trù tài nguyên | huấn luyện lại không cần thiết khi mọi thứ ổn định; quá muộn khi có thay đổi đột ngột |
+| Theo chất lượng | chỉ số chất lượng giảm quá ngưỡng | phản ứng đúng lúc cần | cần nhãn, nên bị giới hạn bởi độ trễ nhãn |
+| Theo dịch chuyển | phép kiểm tra ở Chương 9 báo động | không cần nhãn | phát hiện được covariate shift, không phát hiện được concept drift (Mục 9.2) |
+| Theo lượng dữ liệu | có đủ $N$ mẫu mới | phù hợp khi dữ liệu tới không đều | không liên quan tới việc mô hình còn tốt hay không |
 
-Cấu hình thực tế thường là **theo lịch làm nền, cộng thêm kích hoạt theo chất lượng hoặc theo dịch chuyển để cắt ngang khi cần**. Nghiên cứu phỏng vấn ghi nhận một thực hành đơn giản hơn nhiều so với những gì người ta hay nghĩ: **huấn luyện lại thường xuyên trên dữ liệu và nhãn trực tiếp**, coi đó là cách tạo phiên bản mới — thay vì xây một cơ chế kích hoạt thông minh.
+Cấu hình thường gặp là huấn luyện lại theo lịch làm nền, cộng thêm kích hoạt theo chất lượng hoặc theo dịch chuyển để huấn luyện lại sớm khi cần. Shankar và cộng sự ghi nhận rằng nhiều nhóm chọn cách đơn giản: huấn luyện lại thường xuyên trên dữ liệu mới nhất, thay vì xây dựng một cơ chế kích hoạt phức tạp.
 
-### 11.3. Huấn luyện lại từ đầu hay học liên tục
+### 11.3. Huấn luyện lại từ đầu hay cập nhật mô hình cũ
 
-| | Huấn luyện lại từ đầu | Học liên tục (continual / online) |
+Huyen (2022) phân biệt hai cách: **huấn luyện lại từ đầu** (stateless retraining), mỗi lần huấn luyện một mô hình mới trên một cửa sổ dữ liệu; và **huấn luyện có trạng thái** (stateful training), tiếp tục cập nhật mô hình hiện có chỉ bằng dữ liệu mới.
+
+| | Huấn luyện lại từ đầu | Cập nhật mô hình cũ |
 |---|---|---|
-| Dữ liệu dùng | toàn bộ cửa sổ lịch sử | chỉ dữ liệu mới |
+| Dữ liệu dùng | toàn bộ cửa sổ dữ liệu lịch sử | chỉ dữ liệu mới |
 | Chi phí mỗi lần | cao | thấp |
-| Khả năng lặp lại | **tốt** — dựng lại được từ dữ liệu + hạt giống | **kém** — trạng thái phụ thuộc toàn bộ chuỗi cập nhật đã qua |
-| Quay lui | dễ: nạp lại tạo tác cũ | khó: phải phát lại lịch sử |
-| Rủi ro riêng | không có | **quên thảm hoạ** (catastrophic forgetting); một lô dữ liệu bẩn làm hỏng vĩnh viễn |
+| Khả năng tái lập | tốt: dựng lại được từ dữ liệu, mã và hạt giống | kém: trạng thái mô hình phụ thuộc toàn bộ chuỗi cập nhật trước đó |
+| Quay lui | dễ: nạp lại mô hình cũ | khó: phải phát lại lịch sử cập nhật |
+| Rủi ro riêng | | quên thảm khốc (catastrophic forgetting); một lô dữ liệu lỗi ảnh hưởng tới mọi phiên bản sau |
 
-Lời khuyên: **mặc định là huấn luyện lại từ đầu**, và chỉ chuyển sang học liên tục khi có ràng buộc thật sự buộc phải làm thế (dữ liệu quá lớn để giữ, hoặc yêu cầu thích ứng trong vài phút). Lý do nằm ở hai hàng giữa bảng — khả năng lặp lại và khả năng quay lui là hai thứ bạn chỉ thấy quý vào đúng ngày xảy ra sự cố.
+Nên mặc định huấn luyện lại từ đầu, và chỉ chuyển sang cập nhật mô hình cũ khi có ràng buộc thật: dữ liệu quá lớn để huấn luyện lại toàn bộ, hoặc cần thích ứng trong vài phút. Lý do nằm ở hai hàng giữa của bảng: khả năng tái lập và khả năng quay lui chỉ thể hiện giá trị khi có sự cố, nhưng khi đó thì rất cần.
 
-### 11.4. Nguyên tắc: huấn luyện lại phải đi qua đúng những cửa đó
+### 11.4. Pipeline huấn luyện lại phải qua đủ các bước kiểm định
 
-Sai lầm nguy hiểm nhất trong tự động hoá huấn luyện lại là để nó **đi tắt**. Một pipeline huấn luyện lại tự động phải đi qua **chính những cửa kiểm định** mà một lần phát hành thủ công phải đi qua:
+Sai lầm nguy hiểm nhất khi tự động hoá huấn luyện lại là để pipeline bỏ qua các bước kiểm định. Một pipeline huấn luyện lại tự động phải qua đúng những bước mà một lần phát hành thủ công phải qua:
 
 ```
 dữ liệu mới
-  → kiểm định dữ liệu            (Chương 3; hỏng thì DỪNG, không huấn luyện)
+  → kiểm định dữ liệu              (Chương 3; nếu lỗi thì dừng, không huấn luyện)
   → huấn luyện
-  → đánh giá trên tập cố định    (Chương 6, có chia lát cắt)
-  → SO VỚI MÔ HÌNH ĐANG CHẠY     ← cửa hay bị quên nhất
-  → kiểm thử hành vi             (Mục 6.4)
-  → đăng ký vào sổ (staging)
-  → shadow → canary → toàn bộ    (Chương 8)
+  → đánh giá trên tập kiểm tra cố định, theo lát cắt   (Chương 6)
+  → so sánh với mô hình đang chạy  ← bước hay bị bỏ qua nhất
+  → kiểm thử hành vi               (Mục 6.4)
+  → đăng ký vào sổ đăng ký, trạng thái staging
+  → shadow → canary → toàn bộ      (Chương 8)
 ```
 
-Cửa "so với mô hình đang chạy" đáng nói riêng. Tài liệu Google Cloud đặt bước **kiểm định mô hình** (model validation) tách hẳn khỏi bước **đánh giá mô hình** (model evaluation) trong tám bước ở Mục 2.3, đúng vì lý do này: đánh giá trả lời "mô hình này tốt đến đâu", còn kiểm định trả lời "**có nên thay thế cái đang chạy bằng nó không**". Một mô hình huấn luyện lại tự động mà kém hơn bản cũ thì phải bị chặn tự động, không cần ai nhìn thấy.
+Bước so sánh với mô hình đang chạy cần được nói riêng. Tài liệu của Google Cloud tách bước **kiểm định mô hình** (model validation) khỏi bước **đánh giá mô hình** (model evaluation) trong tám bước ở Mục 2.3 vì lý do này: đánh giá trả lời câu hỏi "mô hình này tốt tới đâu", còn kiểm định trả lời câu hỏi "có nên thay mô hình đang chạy bằng mô hình này không". Một mô hình huấn luyện lại tự động mà kém hơn mô hình đang chạy, trên tổng thể hoặc trên một lát cắt quan trọng, phải bị chặn tự động.
 
-Và vì mọi thứ đều tự động, **cơ chế quay lui cũng phải tự động** — đó là **Infra 7** của ML Test Score: *mô hình phải quay lui được nhanh và an toàn*.
+Vì mọi bước đều tự động, cơ chế quay lui cũng phải tự động: đó là mục Infra 7 của ML Test Score, có thể quay lui mô hình đang phục vụ nhanh và an toàn.
 
 ---
 
-## 12. Vòng phản hồi: khi mô hình tự tạo ra dữ liệu của mình
+## 12. Vòng phản hồi
+
+Trong nhiều hệ thống, dự đoán của mô hình ảnh hưởng tới dữ liệu mà mô hình sẽ được huấn luyện trong tương lai. Chương này phân loại các vòng phản hồi, trình bày cơ chế của vòng phản hồi thoái hoá trong hệ thống gợi ý, đo thiệt hại bằng mô phỏng, và nêu các cách phát hiện và khắc phục.
 
 ### 12.1. Hai loại vòng phản hồi
 
-Sculley và cộng sự phân biệt:
+Sculley và cộng sự (2015) phân biệt:
 
-- **Vòng phản hồi trực tiếp (direct feedback loop):** mô hình ảnh hưởng trực tiếp tới việc chọn dữ liệu huấn luyện tương lai của chính nó. Bài báo ghi chú rằng lời giải đúng về mặt lý thuyết là **thuật toán bandit** (ví dụ contextual bandit), nhưng bandit không co giãn tốt lên kích thước không gian hành động của bài toán thật; cách giảm nhẹ khả thi là **thêm một lượng ngẫu nhiên hoá**, hoặc **cô lập một phần dữ liệu khỏi ảnh hưởng của mô hình**.
-- **Vòng phản hồi ẩn (hidden feedback loop):** hai hệ thống ảnh hưởng lẫn nhau **gián tiếp qua thế giới**. Khó hơn hẳn, vì không có đường dữ liệu nào trong sơ đồ hệ thống cho thấy mối liên hệ ấy.
+- **Vòng phản hồi trực tiếp** (direct feedback loop): mô hình ảnh hưởng trực tiếp tới việc chọn dữ liệu huấn luyện tương lai của chính nó. Bài báo ghi nhận rằng về lý thuyết, cách giải đúng là dùng thuật toán bandit (ví dụ contextual bandit), nhưng các thuật toán này không phải lúc nào cũng mở rộng được tới kích thước không gian hành động của bài toán thực tế. Các cách giảm nhẹ khả thi là thêm một mức ngẫu nhiên hoá, hoặc tách riêng một phần dữ liệu không chịu ảnh hưởng của mô hình.
+- **Vòng phản hồi ẩn** (hidden feedback loop): hai hệ thống ảnh hưởng lẫn nhau một cách gián tiếp, thông qua thế giới bên ngoài. Ví dụ trong bài báo: hai hệ thống cùng quyết định nội dung của một trang web, một hệ thống chọn sản phẩm để hiển thị, một hệ thống chọn đánh giá liên quan. Cải thiện hệ thống này làm người dùng nhấp nhiều hơn hoặc ít hơn vào phần của hệ thống kia, và thay đổi dữ liệu huấn luyện của nó. Loại này khó phát hiện hơn nhiều, vì không có đường dữ liệu nào trong sơ đồ hệ thống cho thấy mối liên hệ.
 
 ### 12.2. Vòng phản hồi thoái hoá
 
-Trường hợp riêng quan trọng nhất trong sản xuất là cái mà Chip Huyen gọi là **degenerate feedback loop**: dự đoán ảnh hưởng tới phản hồi, phản hồi được dùng làm nhãn để huấn luyện vòng sau, nên hệ thống **tự xác nhận chính mình**.
+Trường hợp quan trọng nhất trong thực tế là **vòng phản hồi thoái hoá** (degenerate feedback loop; Huyen, 2022): dự đoán ảnh hưởng tới phản hồi của người dùng, phản hồi được dùng làm nhãn để huấn luyện lần sau, nên hệ thống tự củng cố những gì nó đã tin.
 
-Cơ chế rất dễ hiểu qua một hệ gợi ý:
+Cơ chế trong một hệ thống gợi ý:
 
 1. Món A tình cờ được xếp cao hơn món B ở vòng đầu, dù chất lượng thật tương đương.
-2. A được hiển thị nhiều hơn → nhận nhiều click hơn (chỉ vì được nhìn thấy nhiều hơn).
-3. Vòng huấn luyện sau thấy "A có nhiều click" → xếp A còn cao hơn.
-4. B không bao giờ được hiển thị nữa, nên không bao giờ có cơ hội chứng minh mình.
+2. A được hiển thị nhiều hơn nên nhận nhiều lượt nhấp hơn, chỉ vì được nhìn thấy nhiều hơn.
+3. Lần huấn luyện sau thấy A có nhiều lượt nhấp, nên xếp A cao hơn nữa.
+4. B không được hiển thị nữa, nên không có dữ liệu nào cho thấy B cũng tốt.
 
-Điểm chết người: **dữ liệu trông rất đẹp**. Tỉ lệ click trên những gì được hiển thị vẫn cao, vì hệ thống chỉ hiển thị thứ nó tin là tốt. Mọi chỉ số ngoại tuyến đều xanh.
+Vấn đề là dữ liệu vẫn trông tốt: tỉ lệ nhấp trên những gì được hiển thị vẫn cao, vì hệ thống chỉ hiển thị những gì nó tin là tốt, và các chỉ số ngoại tuyến tính trên dữ liệu log không cho thấy vấn đề.
 
-### 12.3. Thí nghiệm: đo mức thiệt hại
+### 12.3. Thí nghiệm: đo thiệt hại của vòng phản hồi
 
-Mô phỏng trong `code/mlops/experiments.py`: danh mục 2000 món với chất lượng thật khác nhau, hệ thống khởi động bằng một vòng hiển thị ngẫu nhiên nhỏ rồi cứ thế huấn luyện lại trên log click của chính nó, 30 vòng, trung bình 20 lần chạy.
+**Thiết lập.** Mô phỏng trong `code/mlops/experiments.py` dùng một danh mục 2 000 món. Chất lượng thật của mỗi món, tức xác suất người dùng nhấp khi thấy nó, lấy từ phân phối Beta(1,6; 9): phần lớn món bình thường, ít món thật sự tốt; hệ thống không biết các giá trị này. Hệ thống khởi động bằng 200 lượt hiển thị ngẫu nhiên. Sau đó, ở mỗi vòng trong 30 vòng, hệ thống xếp các món theo tỉ lệ nhấp đã quan sát, chọn 10 món đầu, hiển thị cho 3 000 người dùng, rồi cập nhật số liệu từ log nhấp của chính nó. Chiến lược ε thay $\varepsilon \times 10$ vị trí trong danh sách bằng các món chọn ngẫu nhiên từ toàn bộ danh mục. Kết quả là trung bình của 20 lần chạy.
 
 ![Hình 14](figs/mlops14_feedback.png)
 
-**Hình 14.** Không ngẫu nhiên hoá thì hệ thống khoá cứng vào phần danh mục mà nó tình cờ thấy ở vòng đầu và không bao giờ thoát ra.
+**Hình 14.** Qua 30 vòng huấn luyện lại: tỉ lệ danh mục từng được hiển thị (trái), chất lượng thật của 10 món xếp đầu (giữa), và tỉ lệ của nhóm 1% món tốt nhất đã từng được hiển thị (phải). Không ngẫu nhiên hoá, hệ thống chỉ hiển thị những món đã gặp ở vòng khởi động.
 
-| Chiến lược | Phủ danh mục | Chất lượng thật của top-10 | Đã thấy nhóm 1% tốt nhất |
+| Chiến lược | Tỉ lệ danh mục từng được hiển thị | Chất lượng thật của 10 món xếp đầu | Tỉ lệ nhóm 1% tốt nhất từng được hiển thị |
 |---|---|---|---|
-| Không ngẫu nhiên hoá | **9,5%** | 0,351 | 8% |
-| ε = 10% chỗ dành cho ngẫu nhiên | 10,8% | 0,384 | 10% |
-| ε = 30% chỗ dành cho ngẫu nhiên | **13,4%** | **0,402** | 12% |
+| Không ngẫu nhiên hoá | 9,5% | 0,351 | 8% |
+| ε = 10% | 10,8% | 0,384 | 10% |
+| ε = 30% | 13,4% | 0,402 | 12% |
 
-Để so sánh: trần có thể đạt (chất lượng trung bình của 10 món tốt nhất thật sự) là **0,555**, còn trung bình cả danh mục là 0,153.
+Để so sánh: chất lượng trung bình của 10 món tốt nhất thật sự là 0,555, và chất lượng trung bình của toàn danh mục là 0,153.
 
 Đọc bảng:
 
-- Hệ không ngẫu nhiên hoá đạt **0,351, tức 63% của trần**, và **vĩnh viễn chỉ nhìn thấy 9,5% danh mục**. Nó không hỏng — nó chỉ không bao giờ tốt hơn được.
-- Dành 30% số chỗ cho hiển thị ngẫu nhiên nâng chất lượng lên 0,402 (**+15%**) và mở rộng vùng nhìn thấy lên 41%.
-- Cái giá phải trả là hiển thị 30% số chỗ cho món chưa biết gì — tức **hy sinh ngắn hạn để đổi lấy khả năng học dài hạn**. Đây đúng là đánh đổi khai thác – khám phá (exploitation – exploration), và cũng đúng là "thêm một lượng ngẫu nhiên hoá" mà Sculley và cộng sự đề xuất.
+- Không ngẫu nhiên hoá, hệ thống đạt chất lượng 0,351, khoảng 63% mức tối đa, và chỉ bao giờ hiển thị 9,5% danh mục, đúng những món đã xuất hiện trong 200 lượt khởi động. Những món chưa từng được hiển thị có tỉ lệ nhấp quan sát bằng 0 nên không bao giờ vào được danh sách. Hệ thống không hỏng; nó chỉ không thể tốt hơn.
+- Dành 30% vị trí cho các món ngẫu nhiên nâng tỉ lệ danh mục được hiển thị từ 9,5% lên 13,4% (tăng 41% theo tỉ lệ tương đối) và nâng chất lượng của danh sách từ 0,351 lên 0,402 (tăng khoảng 15%).
+- Cái giá là 30% số lượt hiển thị dành cho các món ngẫu nhiên, có chất lượng trung bình chỉ 0,153: hy sinh kết quả ngắn hạn để có thông tin cho dài hạn. Đây là đánh đổi giữa khai thác và khám phá (exploitation–exploration), và chính là "thêm một mức ngẫu nhiên hoá" mà Sculley và cộng sự đề xuất.
+- Mức cải thiện nhỏ so với khoảng cách tới mức tối đa. Với 30 vòng và chỉ 1 tới 3 vị trí ngẫu nhiên mỗi vòng, khám phá ngẫu nhiên đi rất chậm: sau 30 vòng, chiến lược ε = 30% mới gặp 12% nhóm món tốt nhất. Các thuật toán bandit như UCB hay Thompson sampling hướng việc khám phá vào những món chưa chắc chắn thay vì chọn đều, nên hiệu quả hơn nhiều.
 
-### 12.4. Nhận ra và chữa
+### 12.4. Phát hiện và khắc phục
 
-**Dấu hiệu nhận biết** — không dấu hiệu nào nằm trong chỉ số chất lượng thông thường:
+**Dấu hiệu.** Không dấu hiệu nào nằm trong các chỉ số chất lượng thông thường:
 
-- **Độ đa dạng giảm dần** qua các vòng: entropy của phân phối hiển thị, số món phân biệt được hiển thị, tỉ lệ phủ danh mục.
-- **Phân phối hiển thị lệch dần** về một nhóm nhỏ: tỉ trọng của top 1% món tăng đều.
-- **Nhóm mới không bao giờ nổi lên**: món mới thêm vào danh mục không bao giờ vào được top.
+- **Độ đa dạng giảm dần** qua các vòng: entropy của phân phối hiển thị, số món khác nhau được hiển thị, tỉ lệ danh mục được hiển thị.
+- **Phân phối hiển thị lệch dần** về một nhóm nhỏ: tỉ trọng của 1% món được hiển thị nhiều nhất tăng đều.
+- **Món mới không bao giờ nổi lên**: món mới thêm vào danh mục không vào được danh sách đầu.
 
-**Cách chữa**, theo thứ tự chi phí:
+**Cách khắc phục**, theo thứ tự chi phí tăng dần:
 
-1. **Ngẫu nhiên hoá một phần chỗ hiển thị** (ε-greedy). Rẻ nhất, và như thí nghiệm cho thấy là hiệu quả rõ rệt.
-2. **Giữ một nhóm đối chứng không bị mô hình tác động.** Một tỉ lệ nhỏ lưu lượng nhận kết quả ngẫu nhiên hoặc theo heuristic. Đây là nguồn dữ liệu **không thiên lệch** duy nhất bạn có, và là cách duy nhất để đo mô hình thật sự tốt đến đâu.
-3. **Hiệu chỉnh theo xác suất hiển thị** (inverse propensity weighting): khi huấn luyện, đánh trọng số mỗi mẫu bằng nghịch đảo xác suất nó được hiển thị, để bù cho thiên lệch phơi nhiễm. Đòi hỏi phải **ghi lại xác suất hiển thị tại thời điểm hiển thị** — và đây là thứ phải quyết định làm **trước**, vì không thể khôi phục về sau.
-4. **Đưa vị trí vào mô hình rồi đặt cứng lúc suy luận:** thêm đặc trưng "vị trí hiển thị" lúc huấn luyện để mô hình học được phần click do vị trí gây ra, rồi lúc phục vụ thì đặt vị trí là một hằng số cho mọi món. Cách chuẩn để khử thiên lệch vị trí.
+1. **Ngẫu nhiên hoá một phần vị trí hiển thị** (ε-greedy), hoặc dùng thuật toán bandit. Cách rẻ nhất; thí nghiệm ở Mục 12.3 cho thấy tác dụng và giới hạn của nó.
+2. **Giữ một nhóm đối chứng không chịu ảnh hưởng của mô hình.** Một tỉ lệ nhỏ lưu lượng nhận kết quả ngẫu nhiên hoặc theo quy tắc đơn giản. Đây là nguồn dữ liệu không bị mô hình làm sai lệch, và là cách để đo mô hình thật sự tốt tới đâu.
+3. **Hiệu chỉnh theo xác suất hiển thị** (inverse propensity weighting): khi huấn luyện, gán cho mỗi mẫu trọng số bằng nghịch đảo xác suất nó được hiển thị, để bù cho việc một số món được hiển thị nhiều hơn (Joachims và cộng sự, 2017). Cách này đòi hỏi ghi lại xác suất hiển thị tại thời điểm hiển thị; nếu không ghi lại từ đầu thì không thể khôi phục về sau.
+4. **Đưa vị trí hiển thị vào mô hình:** khi huấn luyện, thêm đặc trưng "vị trí hiển thị" để mô hình tách được phần lượt nhấp do vị trí gây ra; khi phục vụ, đặt vị trí bằng cùng một hằng số cho mọi món. Đây là cách thường dùng để giảm thiên lệch vị trí.
 
-Điểm thứ hai đáng nhấn mạnh hơn cả. Một nhóm đối chứng nhỏ, giữ thường trực, là **khoản bảo hiểm rẻ nhất trong toàn bộ tài liệu này**: nó vừa cho bạn dữ liệu sạch để huấn luyện, vừa cho bạn thước đo trung thực về giá trị thật của hệ thống.
+Cách thứ hai đáng được ưu tiên: một nhóm đối chứng nhỏ, duy trì thường xuyên, vừa cung cấp dữ liệu không bị sai lệch để huấn luyện, vừa cho một thước đo đáng tin cậy về giá trị thật của hệ thống.
 
 ---
 
 ## 13. LLMOps
 
-### 13.1. Cái gì đổi, cái gì không
+Khi hệ thống dùng mô hình ngôn ngữ lớn, phần lớn các nguyên tắc ở mười hai chương trước vẫn áp dụng, nhưng một số ràng buộc thay đổi. Chương này nêu những thay đổi đó rồi đi qua các vấn đề vận hành riêng: đánh giá bằng giám khảo LLM và các thiên lệch của nó, đánh giá hệ thống RAG, chi phí và độ trễ, rào chắn, và phiên bản hoá. Giáo trình [*Ứng dụng LLM*](ungdung-ch01.html) trình bày chi tiết về phía xây dựng ứng dụng; chương này tập trung vào phía vận hành.
 
-Phần lớn nội dung mười hai chương trước vẫn đúng nguyên: vẫn cần hợp đồng dữ liệu, vẫn cần quản phiên bản, vẫn cần shadow và canary, vẫn cần giám sát và quay lui. Cái đổi là **năm ràng buộc**:
+### 13.1. Những gì thay đổi
 
-| Ràng buộc | MLOps cổ điển | LLMOps |
+Vẫn cần hợp đồng dữ liệu, quản lý phiên bản, shadow và canary, giám sát và quay lui. Có năm ràng buộc thay đổi:
+
+| Ràng buộc | MLOps cho mô hình tự huấn luyện | LLMOps |
 |---|---|---|
-| **Huấn luyện** | ta tự huấn luyện | thường dùng mô hình của bên thứ ba; "huấn luyện lại" thành **đổi prompt, đổi ngữ cảnh, đổi bản mô hình** |
-| **Đầu ra** | một số hoặc một lớp | **văn bản tự do** — không có hàm đúng/sai hiển nhiên |
-| **Tính tất định** | đặt hạt giống là lặp lại được | có ngẫu nhiên do nhiệt độ, và bản mô hình của nhà cung cấp đổi dưới chân ta |
-| **Chi phí** | chủ yếu là chi phí huấn luyện, cố định | chủ yếu là **chi phí suy luận theo token**, biến thiên theo từng yêu cầu |
-| **Rủi ro** | dự đoán sai | dự đoán sai **cộng thêm** rò rỉ dữ liệu, nội dung độc hại, prompt injection |
+| Huấn luyện | tự huấn luyện mô hình | thường dùng mô hình của bên thứ ba; thay cho huấn luyện lại là thay prompt, ngữ cảnh hoặc phiên bản mô hình |
+| Đầu ra | một số hoặc một lớp | văn bản tự do, không có hàm đúng sai hiển nhiên |
+| Tính tất định | cố định hạt giống thì tái lập được | có yếu tố ngẫu nhiên khi lấy mẫu, và mô hình của nhà cung cấp có thể thay đổi |
+| Chi phí | chủ yếu là chi phí huấn luyện, tương đối cố định | chủ yếu là chi phí suy luận theo token, thay đổi theo từng yêu cầu |
+| Rủi ro | dự đoán sai | dự đoán sai, cộng thêm rò rỉ dữ liệu, nội dung có hại, prompt injection |
 
-Hàng thứ ba đáng nói nhất về mặt vận hành: trong MLOps cổ điển, tạo tác mô hình nằm trong tay bạn và bất biến. Với mô hình gọi qua API, **nhà cung cấp có thể đổi mô hình mà bạn không biết**. Đó là dạng cực đoan nhất của **unstable data dependency** ở Mục 1.4, và cách chữa cũng giống: **ghim phiên bản mô hình**, và coi mỗi lần đổi phiên bản là một lần phát hành đầy đủ, phải qua shadow và canary.
+Hàng thứ ba đáng chú ý nhất về mặt vận hành. Với mô hình tự huấn luyện, mô hình là một tạo tác bất biến nằm trong sổ đăng ký. Với mô hình gọi qua API, hành vi có thể thay đổi khi nhà cung cấp cập nhật mô hình sau cùng một tên gọi; Chen, Zaharia và Zou (2023) đo được những thay đổi đáng kể về hành vi của cùng một tên mô hình GPT-4 giữa hai phiên bản cách nhau ba tháng. Đây là dạng cực đoan của phụ thuộc dữ liệu không ổn định ở Mục 1.4, và cách xử lý cũng tương tự: dùng định danh phiên bản cố định của mô hình (các nhà cung cấp thường có tên kèm ngày phát hành), và coi mỗi lần đổi phiên bản là một lần phát hành đầy đủ, phải qua bộ đánh giá, shadow và canary.
 
-### 13.2. Đánh giá: ba tầng
+### 13.2. Đánh giá theo ba tầng
 
-Vì không có hàm mất mát hiển nhiên, đánh giá trở thành phần đắt nhất của LLMOps. Thực hành hội tụ trong ngành là ba tầng, đánh đổi giữa chi phí và độ tin:
+Vì không có hàm đúng sai hiển nhiên, đánh giá là phần tốn kém nhất của LLMOps. Thực hành phổ biến là chia thành ba tầng, đánh đổi giữa chi phí và độ tin cậy. Tỉ lệ lấy mẫu trong bảng là mức thường gặp, không phải quy chuẩn:
 
-| Tầng | Chạy trên | Chi phí | Bắt được gì |
+| Tầng | Áp dụng cho | Chi phí | Phát hiện được |
 |---|---|---|---|
-| **Kiểm tra quy tắc** (heuristic) | **100%** số lượt | gần như bằng 0 | định dạng sai, JSON hỏng, thiếu trích dẫn, độ dài bất thường, từ khoá cấm |
-| **LLM làm giám khảo** (LLM-as-judge) | **mẫu 10–20%** (hoặc 1–5% khi lưu lượng lớn) | trung bình | chất lượng ngữ nghĩa: bám nguồn, hữu ích, đúng giọng, từ chối đúng lúc |
-| **Người chấm** | mẫu nhỏ, định kỳ | cao | sự thật nền — dùng để **hiệu chuẩn lại giám khảo** |
+| Kiểm tra theo quy tắc | mọi lượt gọi | gần như bằng 0 | sai định dạng, JSON lỗi, thiếu trích dẫn, độ dài bất thường, từ khoá bị cấm |
+| Giám khảo LLM (LLM-as-a-judge) | một mẫu, vài phần trăm tới vài chục phần trăm số lượt | trung bình | chất lượng về nội dung: bám nguồn, hữu ích, đúng giọng văn, từ chối đúng lúc |
+| Người chấm | một mẫu nhỏ, định kỳ | cao | đánh giá chuẩn, dùng để hiệu chỉnh giám khảo LLM |
 
-Cấu trúc này giải một bài toán rất quen: nó là phiên bản LLM của **bốn lớp giám sát** ở Mục 10.2 — càng gần sự thật thì càng đắt, nên phải lấy mẫu.
+Cấu trúc này tương ứng với bốn lớp giám sát ở Mục 10.2: càng gần đánh giá thật thì càng đắt, nên phải lấy mẫu.
 
-Tầng ba là tầng hay bị bỏ nhất và cũng là tầng giữ cho cả hệ thống trung thực. **Giám khảo LLM cũng là một mô hình, nên nó cũng trôi.** Không có người chấm định kỳ để đối chiếu, bạn sẽ có một hệ đánh giá tự tin nói rằng mọi thứ đều ổn.
+Tầng thứ ba hay bị bỏ qua nhất nhưng giữ cho cả hệ thống đánh giá đáng tin. Giám khảo LLM cũng là một mô hình, có sai số và có thể thay đổi theo phiên bản. Không đối chiếu định kỳ với người chấm, hệ thống đánh giá có thể báo mọi thứ đều ổn trong khi chất lượng đã giảm. [Chương 12 của *Ứng dụng LLM*](ungdung-ch12.html) trình bày chi tiết các loại đánh giá và cách tính số mẫu cần thiết.
 
-### 13.3. Những thiên lệch đã biết của giám khảo LLM
+### 13.3. Các thiên lệch của giám khảo LLM
 
-Cần biết để phòng, và đây là câu hỏi phỏng vấn tốt cho vị trí LLMOps:
+Zheng và cộng sự (2023), khi xây dựng bộ đánh giá MT-Bench, phân tích các thiên lệch của mô hình ngôn ngữ khi làm giám khảo:
 
-- **Thiên lệch vị trí** — với hai câu trả lời đặt cạnh nhau, giám khảo hay ưu ái vị trí thứ nhất. Chữa bằng cách **hỏi hai lần với thứ tự đảo**, và chỉ tính là thắng khi cả hai lần đều thắng.
-- **Thiên lệch độ dài** — câu trả lời dài hơn hay được chấm cao hơn, dù không tốt hơn. Chữa bằng cách kiểm soát độ dài trong rubric hoặc chuẩn hoá theo độ dài.
-- **Thiên lệch tự ưu ái** — mô hình chấm cao hơn cho văn bản do chính họ mô hình sinh ra. Chữa bằng cách dùng mô hình giám khảo khác họ với mô hình đang phục vụ.
-- **Rubric mơ hồ** — "câu trả lời này có tốt không" cho kết quả bất ổn định. Chữa bằng rubric **nhiều chiều, mỗi chiều một tiêu chí nhị phân hoặc thang ngắn**, kèm ví dụ mẫu.
+- **Thiên lệch vị trí**: khi so sánh hai câu trả lời, giám khảo có xu hướng ưu tiên một vị trí, thường là câu trả lời đặt trước. Cách xử lý: hỏi hai lần với thứ tự đảo ngược, và chỉ tính là thắng khi thắng ở cả hai lần.
+- **Thiên lệch độ dài**: câu trả lời dài hơn thường được chấm cao hơn dù không tốt hơn. Cách xử lý: đưa yêu cầu về độ dài vào tiêu chí chấm, hoặc so sánh các câu trả lời có độ dài tương đương.
+- **Thiên lệch tự ưu tiên**: có dấu hiệu giám khảo chấm cao hơn cho câu trả lời do chính nó sinh ra, dù các tác giả lưu ý dữ liệu chưa đủ để kết luận chắc chắn. Cách xử lý thận trọng: dùng mô hình giám khảo khác họ với mô hình đang phục vụ.
+- **Tiêu chí chấm mơ hồ**: câu hỏi "câu trả lời này có tốt không" cho kết quả không ổn định. Cách xử lý: tiêu chí nhiều chiều, mỗi chiều là một câu hỏi có hoặc không, hoặc một thang điểm ngắn, kèm ví dụ mẫu.
 
-Và một kỷ luật bao trùm: **đo độ đồng thuận giữa giám khảo và người chấm**, và coi nó là trần trên cho mọi kết luận rút ra từ giám khảo — đúng như lập luận về mức đồng thuận giữa người gán nhãn ở Mục 3.5.
+Shankar và cộng sự (2024) ghi nhận thêm một hiện tượng khi xây dựng tiêu chí chấm: người dùng cần có tiêu chí để chấm đầu ra, nhưng chính việc đọc và chấm đầu ra lại làm họ thay đổi tiêu chí, hiện tượng mà các tác giả gọi là *criteria drift*. Hệ quả thực tế: không thể viết xong tiêu chí chấm một lần từ đầu; cần đọc một lượng đầu ra thật trước, và xem lại tiêu chí định kỳ.
 
-### 13.4. Hai vòng đánh giá
+Nguyên tắc chung: đo mức đồng thuận giữa giám khảo LLM và người chấm trên cùng một tập mẫu, ví dụ bằng hệ số kappa của Cohen, và coi đó là giới hạn trên cho độ tin cậy của mọi kết luận rút ra từ giám khảo, tương tự lập luận về mức đồng thuận giữa những người gán nhãn ở Mục 3.5.
 
-Cách tổ chức đang thành chuẩn:
+### 13.4. Đánh giá ngoại tuyến và trực tuyến
 
-1. **Vòng ngoại tuyến — tập vàng (golden set).** Một tập câu hỏi khó, được tuyển chọn, **phải đạt trước mỗi lần phát hành**. Đây chính là cửa chất lượng trong CI, tương đương "so với mô hình đang chạy" ở Mục 11.4.
-2. **Vòng trực tuyến — chấm mẫu trên lưu lượng thật.** Chấm bất đồng bộ 1–5% số lượt thật và gắn điểm vào bản ghi vết (trace).
+Cách tổ chức phổ biến gồm hai vòng:
 
-Nguyên tắc quan trọng nhất về tập vàng: **nó phải sống**. Nghiên cứu phỏng vấn nêu đúng thực hành này cho ML nói chung — *tập kiểm định phải động*: mỗi sự cố sản xuất phải được biến thành một ca mới trong tập vàng. Một tập vàng đóng băng sẽ dần chỉ đo những thứ bạn đã biết cách làm đúng.
+1. **Vòng ngoại tuyến, trên một tập đánh giá chuẩn** (golden set): một tập câu hỏi được chọn lọc, gồm cả các trường hợp khó, mà hệ thống phải đạt trước mỗi lần phát hành. Đây là bước kiểm định trong CI, tương đương bước "so sánh với mô hình đang chạy" ở Mục 11.4 ([Mục 12.5 của *Ứng dụng LLM*](ungdung-ch12.html) trình bày kiểm thử hồi quy cho prompt).
+2. **Vòng trực tuyến, chấm mẫu trên lưu lượng thật:** chấm bất đồng bộ một tỉ lệ nhỏ số lượt gọi thật và gắn điểm vào bản ghi vết (trace) tương ứng ([Chương 13 của *Ứng dụng LLM*](ungdung-ch13.html)).
 
-### 13.5. RAG: phải quy được lỗi về đâu
+Tập đánh giá chuẩn phải được cập nhật liên tục. Shankar và cộng sự (2022) ghi nhận thực hành này cho học máy nói chung: tập kiểm định nên thay đổi theo thời gian, và mỗi sự cố trong sản xuất nên trở thành một trường hợp mới trong tập kiểm định. Một tập đánh giá không được cập nhật dần dần chỉ còn đo những gì hệ thống đã làm đúng.
 
-Với hệ thống truy hồi tăng cường (RAG), một câu trả lời sai có **hai nguyên nhân khác hẳn nhau**, và chữa hai kiểu khác nhau:
+### 13.5. Đánh giá và vận hành hệ thống RAG
 
-| Nguyên nhân | Biểu hiện | Đo bằng | Chữa bằng |
+Với hệ thống RAG, một câu trả lời sai có hai nguồn gốc khác nhau và cần hai cách sửa khác nhau:
+
+| Nguồn gốc | Biểu hiện | Đo bằng | Cách sửa |
 |---|---|---|---|
-| **Truy hồi hỏng** | tài liệu đúng không nằm trong ngữ cảnh | recall@k, MRR trên tập câu hỏi có nhãn tài liệu | cải thiện chia đoạn, embedding, truy hồi lai, rerank |
-| **Sinh hỏng** | tài liệu đúng **có** trong ngữ cảnh nhưng câu trả lời vẫn sai | **độ bám nguồn (groundedness / faithfulness)** — câu trả lời có được chống đỡ bởi ngữ cảnh không | sửa prompt, đổi mô hình, buộc trích dẫn |
+| Truy xuất | tài liệu cần thiết không có trong ngữ cảnh | recall@$k$, MRR trên tập câu hỏi có nhãn tài liệu đúng | cải thiện cách chia đoạn, mô hình embedding, tìm kiếm kết hợp, xếp hạng lại |
+| Sinh | tài liệu cần thiết có trong ngữ cảnh nhưng câu trả lời vẫn sai | độ trung thành (faithfulness): các khẳng định trong câu trả lời có được ngữ cảnh hỗ trợ không | sửa prompt, đổi mô hình, yêu cầu trích dẫn |
 
-Đây là phép chẩn đoán đầu tiên phải làm với mọi lỗi RAG, và là câu hỏi phỏng vấn rất hay gặp. Trả lời sai thường là do gộp hai loại lỗi vào một chỉ số duy nhất — lúc đó bạn không biết nên đi sửa chỗ nào.
+Phân biệt hai nguồn gốc này là bước chẩn đoán đầu tiên cho mọi lỗi RAG. Gộp chúng vào một chỉ số duy nhất thì không biết cần sửa ở đâu. Es và cộng sự (2023), với thư viện RAGAS, đề xuất ba chỉ số theo dõi: độ trung thành của câu trả lời với ngữ cảnh, mức liên quan của câu trả lời với câu hỏi, và mức liên quan của ngữ cảnh với câu hỏi. Thí nghiệm ở [Mục 8.5 của *Ứng dụng LLM*](ungdung-ch08.html) cho một ví dụ vì sao cần theo dõi riêng bước truy xuất: ở những câu mà truy xuất không đưa về đoạn nào thuộc đúng chương, độ chính xác giảm từ 0,586 (không có ngữ cảnh) xuống 0,276 (có ngữ cảnh sai).
 
-Ba chỉ số nên theo dõi cho RAG: **độ bám nguồn** (câu trả lời có nằm trong ngữ cảnh không), **độ liên quan của ngữ cảnh** (đoạn lấy về có liên quan không), **độ liên quan của câu trả lời** (có trả lời đúng câu hỏi không).
+Ba vấn đề vận hành riêng của RAG:
+
+- **Độ mới của chỉ mục.** Kho tài liệu thay đổi (tài liệu mới, tài liệu bị sửa hoặc xoá), nên chỉ mục phải được cập nhật, và cần giám sát độ trễ giữa lúc tài liệu thay đổi và lúc chỉ mục phản ánh thay đổi đó.
+- **Đổi mô hình embedding phải lập chỉ mục lại toàn bộ.** Vector của hai mô hình embedding khác nhau không so sánh được với nhau, nên không thể trộn vector cũ và mới trong cùng một chỉ mục. Việc đổi mô hình embedding cần được lên kế hoạch như một lần di chuyển dữ liệu: lập chỉ mục mới song song, đánh giá, rồi chuyển.
+- **Quyền truy cập.** Truy xuất phải lọc theo quyền của người hỏi; nếu không, hệ thống có thể trả lời bằng nội dung từ tài liệu mà người hỏi không được phép xem.
 
 ### 13.6. Chi phí và độ trễ
 
-Đây là phần khác MLOps cổ điển nhiều nhất, vì chi phí biến thiên theo **từng** yêu cầu.
-
-Cần ghi lại theo từng bản ghi vết, và tách bạch:
+Đây là phần khác nhiều nhất so với MLOps cho mô hình tự huấn luyện, vì chi phí thay đổi theo từng yêu cầu. Chi phí cần được ghi lại theo từng bản ghi vết và tách thành các thành phần:
 
 ```
-chi phí một lượt = (token vào × đơn giá vào) + (token ra × đơn giá ra)
-                 + chi phí của các lượt gọi giám khảo   ← ghi thành dòng chi phí RIÊNG
-                 + chi phí truy hồi (embedding + tìm kiếm vector)
+chi phí một lượt = (số token vào × đơn giá token vào) + (số token ra × đơn giá token ra)
+                 + chi phí các lượt gọi giám khảo LLM      ← ghi thành một dòng riêng
+                 + chi phí truy xuất (embedding + tìm kiếm vector)
 ```
 
-Tách dòng chi phí giám khảo là chi tiết nhỏ nhưng quan trọng: nếu gộp, bạn sẽ không biết vì sao chi phí tăng khi tăng tỉ lệ lấy mẫu đánh giá, và sẽ cắt nhầm chỗ.
+Ghi riêng chi phí giám khảo giúp biết chi phí tăng vì lưu lượng tăng hay vì tăng tỉ lệ lấy mẫu đánh giá.
 
-Ba đòn bẩy giảm chi phí, theo thứ tự nên thử:
+Ba cách giảm chi phí, theo thứ tự nên thử:
 
-1. **Lưu đệm (cache)** — đệm chính xác cho câu hỏi lặp, đệm ngữ nghĩa cho câu hỏi gần giống; đệm tiền tố cho phần prompt hệ thống cố định.
-2. **Định tuyến (routing)** — câu dễ cho mô hình nhỏ và rẻ, câu khó mới đẩy lên mô hình lớn. Cần một bộ phân loại độ khó, và bản thân nó cũng là một mô hình phải giám sát.
-3. **Nén ngữ cảnh** — bớt số đoạn lấy về, tóm tắt lịch sử hội thoại. Đây là đòn bẩy mạnh nhất vì chi phí tỉ lệ thuận với số token vào.
+1. **Bộ nhớ đệm** (cache): lưu kết quả cho câu hỏi lặp lại chính xác, cho câu hỏi gần giống (semantic cache), và lưu đệm phần đầu cố định của prompt (prompt caching; [Mục 4.6 của *Ứng dụng LLM*](ungdung-ch04.html)).
+2. **Định tuyến** (routing): câu hỏi dễ gửi tới mô hình nhỏ và rẻ, câu hỏi khó mới gửi tới mô hình lớn. Cần một bộ phân loại độ khó, và bộ phân loại này cũng là một mô hình phải được giám sát.
+3. **Giảm ngữ cảnh**: bớt số đoạn truy xuất, tóm tắt lịch sử hội thoại. Chi phí tỉ lệ với số token đầu vào, và ngữ cảnh thường chiếm phần lớn số token đó: trong thí nghiệm RAG ở Mục 8.5 của *Ứng dụng LLM*, hai đoạn ngữ cảnh làm số token đầu vào tăng từ 137 lên 813.
 
-Về độ trễ, hai chỉ số riêng mà MLOps cổ điển không có: **thời gian tới token đầu tiên** (quyết định cảm nhận về độ nhạy) và **thời gian giữa các token** (quyết định cảm nhận về tốc độ). Và toàn bộ phân tích đuôi ở Mục 7.3 vẫn áp dụng nguyên — một hệ tác tử gọi mô hình nhiều lượt nối tiếp là một trường hợp cực đoan của bài toán $k$ nhánh.
+Về độ trễ, có hai chỉ số riêng: **thời gian tới token đầu tiên** (time to first token), quyết định cảm nhận về độ nhanh khi bắt đầu trả lời, và **thời gian giữa các token**, quyết định tốc độ hiển thị câu trả lời ([Mục 2.5 của *Ứng dụng LLM*](ungdung-ch02.html)). Phân tích phần đuôi ở Mục 7.3 vẫn áp dụng: một agent gọi mô hình và công cụ qua $k$ bước nối tiếp có thời gian trả lời bằng tổng thời gian các bước, và xác suất gặp ít nhất một bước chậm vẫn là $1 - 0{,}99^k$ nếu mỗi bước chậm với xác suất 1%.
 
 ### 13.7. Rào chắn
 
-**Rào chắn (guardrails)** là các kiểm tra chạy quanh lượt gọi mô hình, ở cả hai đầu:
+**Rào chắn** (guardrails) là các kiểm tra chạy quanh lượt gọi mô hình, ở cả đầu vào và đầu ra:
 
 | Ở đầu vào | Ở đầu ra |
 |---|---|
-| lọc prompt injection | kiểm tra định dạng (JSON hợp lệ, đúng schema) |
-| phát hiện và che dữ liệu cá nhân | phát hiện nội dung độc hại |
-| chặn chủ đề ngoài phạm vi | kiểm tra bám nguồn cho RAG |
-| giới hạn tần suất theo người dùng | **giới hạn hành động** — đúng cơ chế ở Mục 10.4 |
+| phát hiện prompt injection | kiểm tra định dạng (JSON hợp lệ, đúng lược đồ) |
+| phát hiện và che dữ liệu cá nhân | phát hiện nội dung có hại |
+| chặn yêu cầu ngoài phạm vi | kiểm tra bám nguồn với RAG |
+| giới hạn tần suất theo người dùng | giới hạn hành động (Mục 10.4) |
 
-Hàng cuối đáng nhấn. Với hệ tác tử có quyền gọi công cụ thật — gửi thư, hoàn tiền, sửa dữ liệu — thì **giới hạn hành động** của Sculley và cộng sự trở lại đúng nguyên văn: đặt trần cho số hành động mỗi loại trong mỗi cửa sổ thời gian, và khi chạm trần thì dừng và gọi người. Một mô hình ngôn ngữ nhầm lẫn mà có quyền hoàn tiền thì nguy hiểm hơn hẳn một mô hình chấm điểm nhầm.
+Hàng cuối cần nhấn mạnh. Với agent có quyền gọi các công cụ có tác động thật, như gửi email, hoàn tiền hay sửa dữ liệu, cơ chế giới hạn hành động của Sculley và cộng sự áp dụng nguyên vẹn: đặt giới hạn số hành động mỗi loại trong mỗi khoảng thời gian, và khi chạm giới hạn thì dừng lại và chuyển cho người xử lý. Một mô hình ngôn ngữ trả lời sai mà có quyền hoàn tiền gây hậu quả lớn hơn nhiều so với một mô hình chấm điểm sai. [Chương 11 của *Ứng dụng LLM*](ungdung-ch11.html) trình bày chi tiết về prompt injection, dữ liệu nhạy cảm và rào chắn nội dung.
 
-### 13.8. Phiên bản hoá cái gì
+### 13.8. Phiên bản hoá
 
-Chữ V thứ ba áp cho LLM với một danh sách dài hơn. Một "phiên bản" của hệ thống LLM gồm ít nhất:
+Yếu tố phiên bản ở Mục 2.2 áp dụng cho hệ thống LLM với một danh sách dài hơn. Một phiên bản của hệ thống LLM gồm ít nhất:
 
-- **prompt** (kể cả prompt hệ thống và các ví dụ few-shot);
-- **bản mô hình và tham số sinh** (nhiệt độ, top-p, giới hạn token);
-- **cấu hình truy hồi** (mô hình embedding, cách chia đoạn, $k$, bộ rerank);
-- **ảnh chụp kho tri thức** (corpus đã lập chỉ mục tại thời điểm nào);
-- **định nghĩa công cụ** mà tác tử được phép gọi;
-- **rubric đánh giá** và **tập vàng** đã dùng để duyệt.
+- **prompt**, gồm cả prompt hệ thống và các ví dụ few-shot ([Mục 4.7 của *Ứng dụng LLM*](ungdung-ch04.html));
+- **phiên bản mô hình và tham số sinh**: nhiệt độ, top-p, số token tối đa;
+- **cấu hình truy xuất**: mô hình embedding, cách chia đoạn, $k$, bộ xếp hạng lại;
+- **ảnh chụp của kho tài liệu**: chỉ mục được lập tại thời điểm nào;
+- **định nghĩa các công cụ** mà agent được phép gọi;
+- **tiêu chí chấm và tập đánh giá chuẩn** đã dùng để duyệt phiên bản.
 
-Đổi bất kỳ thứ nào trong sáu thứ trên là một phiên bản mới, và phải đánh giá lại. Đây là CACE của Mục 1.3 phát biểu lại cho thời LLM: **prompt, mô hình, corpus và công cụ rối vào nhau; đổi một là đổi tất cả.**
+Thay đổi bất kỳ thành phần nào trong sáu thành phần trên là một phiên bản mới và cần được đánh giá lại. Đây là nguyên lý CACE (Mục 1.3) áp dụng cho hệ thống LLM: prompt, mô hình, kho tài liệu và công cụ phụ thuộc lẫn nhau, nên thay đổi một thành phần có thể thay đổi hành vi của cả hệ thống.
 
 ---
 
 ## 14. Bài tập
 
-**Bài 1 (tính tay).** Đội bạn giám sát dịch chuyển bằng PSI với $k = 10$ bin, mỗi ngày lấy $n = 500$ mẫu cho cả tập nền lẫn tập hiện tại. Tính PSI kỳ vọng khi **không hề có dịch chuyển**. Với ngưỡng cảnh báo 0,10, bạn có yên tâm không? Cần $n$ bằng bao nhiêu để PSI kỳ vọng dưới 0,01?
-*Gợi ý: dùng $\mathbb{E}[\mathrm{PSI}] \approx 2(k-1)/n$ ở Mục 9.5 và đối chiếu với bảng đo được.*
+Lời giải chi tiết nằm ở trang Lời giải. Các số liệu dùng trong lời giải của Bài 1, 2, 3, 4, 7 và 8 được sinh bởi `code/mlops/bai_tap.py`.
 
-**Bài 2 (tính tay).** Tỉ lệ chuyển đổi nền là 2%. Bạn muốn phát hiện một cải thiện **tương đối** 5% với $\alpha = 0{,}05$ hai phía và lực kiểm định 80%. Tính cỡ mẫu mỗi nhánh. Nếu mỗi nhánh nhận 40 000 lượt mỗi ngày thì thí nghiệm chạy bao lâu? Nếu sếp muốn rút xuống một nửa thời gian mà không giảm lực kiểm định thì có những lựa chọn nào?
-*Gợi ý: $n = (z_{1-\alpha/2}+z_{1-\beta})^2[p_1(1-p_1)+p_2(1-p_2)]/\Delta^2$, với $z_{0{,}975} = 1{,}96$ và $z_{0{,}80} = 0{,}84$.*
+**Bài 1 (tính tay).** Một hệ thống giám sát dịch chuyển bằng PSI với $k = 10$ bin; mỗi ngày lấy $n = 500$ mẫu cho cả tập tham chiếu và tập hiện tại.
+(a) Tính PSI kỳ vọng khi không có dịch chuyển nào.
+(b) Hệ thống cảnh báo khi PSI vượt 0,10 và theo dõi 200 đặc trưng. Khi không có dịch chuyển, trung bình mỗi ngày có bao nhiêu cảnh báo giả?
+(c) Cần $n$ tối thiểu bằng bao nhiêu để PSI kỳ vọng khi không có dịch chuyển nhỏ hơn 0,01?
+*Gợi ý: dùng kết quả $\tfrac{n}{2}\,\mathrm{PSI} \approx \chi^2_{k-1}$ ở Mục 9.5.*
 
-**Bài 3 (tính tay).** Một yêu cầu xếp hạng gọi song song 25 dịch vụ đặc trưng, mỗi dịch vụ có p99 là 80 ms và phải đợi đủ cả 25 mới trả lời. Tính tỉ lệ yêu cầu chạm ít nhất một dịch vụ vượt p99. Nếu muốn p99 **tổng thể** đạt 80 ms thì mỗi dịch vụ phải nhanh tới phân vị nào? Nêu hai cách chữa không đòi hỏi làm mỗi dịch vụ nhanh hơn.
+**Bài 2 (tính tay).** Tỉ lệ chuyển đổi nền là 2%. Cần phát hiện một cải thiện tương đối 5% với $\alpha = 0{,}05$ hai phía và lực kiểm định 80%.
+(a) Tính cỡ mẫu mỗi nhánh.
+(b) Mỗi nhánh nhận 40 000 lượt mỗi ngày. Thí nghiệm phải chạy bao lâu?
+(c) Cần rút thời gian xuống một nửa mà không giảm lực kiểm định. Nêu các cách hợp lệ, và chỉ ra những cách nghe hợp lý nhưng không hợp lệ.
+*Gợi ý: công thức ở Mục 8.4, với $z_{0{,}975} = 1{,}96$ và $z_{0{,}80} = 0{,}84$.*
 
-**Bài 4 (suy luận).** Cho bảng lịch sử đặc trưng và bảng nhãn dưới đây. Hãy viết ra tập huấn luyện **đúng theo thời điểm**, rồi chỉ ra tập huấn luyện sai mà một phép `JOIN` thông thường sẽ tạo ra, và nói rõ mô hình sẽ học nhầm điều gì.
+**Bài 3 (tính tay).** Một yêu cầu xếp hạng gọi song song 25 dịch vụ đặc trưng và phải đợi đủ 25 kết quả mới trả lời. Mỗi dịch vụ có p99 bằng 80 ms, và các dịch vụ độc lập với nhau.
+(a) Tính tỉ lệ yêu cầu gặp ít nhất một dịch vụ chậm hơn 80 ms.
+(b) Để p99 của cả yêu cầu bằng 80 ms, mỗi dịch vụ phải đạt phân vị nào?
+(c) Nêu hai cách giảm phần đuôi mà không cần làm từng dịch vụ nhanh hơn.
+
+**Bài 4 (suy luận).** Cho bảng lịch sử đặc trưng và bảng nhãn dưới đây. Viết tập huấn luyện đúng theo thời điểm; chỉ ra tập huấn luyện sai mà một phép `JOIN` thông thường tạo ra, và cho biết mô hình sẽ học sai điều gì.
 
 | user_id | valid_from | tong_don_hang |
 |---|---|---|
@@ -1253,247 +1305,228 @@ Chữ V thứ ba áp cho LLM với một danh sách dài hơn. Một "phiên b�
 | 7 | 2026-02-10 | 0 |
 | 7 | 2026-04-15 | 1 |
 
-**Bài 5 (phân loại).** Xếp mỗi tình huống vào covariate shift, label shift hay concept drift, và cho biết có **dò được bằng cách chỉ giám sát $X$** hay không:
-(a) Một chiến dịch quảng cáo kéo về lượng lớn người dùng dưới 25 tuổi.
-(b) Ngân hàng đổi định nghĩa "nợ xấu" từ quá hạn 90 ngày xuống 60 ngày.
+**Bài 5 (phân loại).** Xếp mỗi tình huống vào covariate shift, label shift hay concept drift, và cho biết có phát hiện được chỉ bằng cách giám sát $X$ hay không:
+(a) Một chiến dịch quảng cáo thu hút nhiều người dùng dưới 25 tuổi.
+(b) Ngân hàng đổi định nghĩa "nợ xấu" từ quá hạn 90 ngày thành quá hạn 60 ngày.
 (c) Mùa mua sắm cuối năm làm tỉ lệ giao dịch gian lận tăng gấp ba, nhưng cách gian lận không đổi.
-(d) Một đối thủ ra mắt tính năng mới làm thay đổi hẳn kỳ vọng của người dùng về "kết quả tìm kiếm tốt".
-*Gợi ý: hai trong bốn trường hợp không dò được bằng $X$, và đó đúng là hai trường hợp tàn phá nhất — xem bảng ở Mục 9.2.*
+(d) Một đối thủ ra mắt tính năng mới, làm thay đổi kỳ vọng của người dùng về một kết quả tìm kiếm tốt.
+*Gợi ý: xem lại bảng ở Mục 9.2.*
 
-**Bài 6 (ML Test Score).** Một đội có: schema đặc trưng đầy đủ và kiểm thử đơn vị cho mọi mã đặc trưng (tự động), huấn luyện lặp lại được và kiểm thử tích hợp toàn pipeline (tự động), canary và quay lui tự động, **nhưng giám sát thì chỉ có biểu đồ độ trễ và tỉ lệ lỗi, không có mục nào trong bốn nhóm giám sát của ML Test Score**. Tính điểm ML Test Score của đội và giải thích vì sao quy tắc lấy giá trị nhỏ nhất cho ra con số đó. Đội nên làm gì đầu tiên?
+**Bài 6 (ML Test Score).** Một nhóm có: lược đồ đặc trưng đầy đủ và kiểm thử đơn vị cho toàn bộ mã tính đặc trưng, chạy tự động; huấn luyện tái lập được và kiểm thử tích hợp toàn pipeline, chạy tự động; canary và quay lui tự động. Về giám sát, nhóm chỉ có một biểu đồ độ trễ để xem khi cần, không có cảnh báo tự động và không có mục nào khác thuộc nhóm giám sát. Đề bài không nói gì về các mục của nhóm phát triển mô hình.
+(a) Tính điểm ML Test Score của nhóm và giải thích vì sao quy tắc lấy giá trị nhỏ nhất cho ra con số đó.
+(b) Nhóm nên làm gì đầu tiên để tăng điểm?
 
-**Bài 7 (thí nghiệm).** Chạy lại `code/mlops/experiments.py` phần (G) với các tốc độ dịch chuyển khác nhau (`DRIFT` = 0,01 / 0,035 / 0,08 radian mỗi tuần). Với mỗi tốc độ, tìm nhịp huấn luyện lại nhỏ nhất sao cho độ chính xác trung bình nằm trong 1 điểm phần trăm so với nhịp hằng tuần. Rút ra quan hệ giữa tốc độ dịch chuyển và nhịp huấn luyện lại hợp lý.
+**Bài 7 (thí nghiệm).** Sửa phần (G) của `code/mlops/experiments.py` để chạy với ba tốc độ dịch chuyển 0,010, 0,035 và 0,080 radian mỗi tuần, và thêm nhịp huấn luyện lại 2 tuần một lần. Với mỗi tốc độ, tìm nhịp thưa nhất mà độ chính xác trung bình không kém nhịp hằng tuần quá 1 điểm phần trăm. Rút ra quan hệ giữa tốc độ dịch chuyển và nhịp huấn luyện lại hợp lý.
 
-**Bài 8 (thí nghiệm).** Trong phần (H), quét $\varepsilon$ từ 0 đến 0,5 với bước 0,05 và vẽ chất lượng thật của top-10 ở vòng cuối theo $\varepsilon$. Có tồn tại $\varepsilon$ tối ưu không? Giải thích vì sao đường cong có dạng như vậy, và điều gì sẽ đổi nếu số vòng tăng từ 30 lên 300.
+**Bài 8 (thí nghiệm).** Trong phần (H) của `code/mlops/experiments.py`, cho $\varepsilon$ chạy từ 0 tới 0,5 với bước 0,1 (tức từ 0 tới 5 vị trí ngẫu nhiên trong danh sách 10 món). Với mỗi $\varepsilon$, đo hai đại lượng: chất lượng thật của 10 món mà hệ thống xếp đầu ở vòng cuối, và chất lượng thật trung bình của các món đã thực sự hiển thị cho người dùng.
+(a) Theo mỗi đại lượng, có giá trị $\varepsilon$ tốt nhất không? Giải thích hình dạng của các đường cong.
+(b) Điều gì thay đổi khi số vòng tăng từ 30 lên 300?
 
-**Bài 9 (thiết kế).** Thiết kế hệ giám sát cho một mô hình phát hiện gian lận có **độ trễ nhãn 30 ngày** (tranh chấp giao dịch mất một tháng mới được xác nhận). Nêu rõ: bạn giám sát gì ở mỗi lớp trong bốn lớp ở Mục 10.2, chỉ số nào đủ tư cách đánh thức người lúc 3 giờ sáng, và bạn phát hiện concept drift bằng cách nào khi nhãn tới trễ một tháng.
+**Bài 9 (thiết kế).** Thiết kế hệ thống giám sát cho một mô hình phát hiện gian lận có độ trễ nhãn 30 ngày (tranh chấp giao dịch mất một tháng mới được xác nhận). Nêu rõ: giám sát gì ở mỗi lớp trong bốn lớp ở Mục 10.2; chỉ số nào đủ quan trọng để gọi người trực lúc nửa đêm; và phát hiện concept drift bằng cách nào khi nhãn đến trễ một tháng.
 
-**Bài 10 (thiết kế, LLM).** Thiết kế quy trình đánh giá cho một trợ lý hỏi đáp RAG trên tài liệu nội bộ công ty, lưu lượng 50 000 lượt/ngày, ngân sách đánh giá bằng 3% chi phí suy luận. Nêu rõ ba tầng đánh giá và tỉ lệ lấy mẫu từng tầng, cách bạn tách lỗi truy hồi khỏi lỗi sinh, và cách bạn phát hiện khi nào chính mô hình giám khảo đã trôi.
+**Bài 10 (thiết kế, LLM).** Thiết kế quy trình đánh giá cho một trợ lý hỏi đáp dùng RAG trên tài liệu nội bộ của công ty, với 50 000 lượt hỏi mỗi ngày và ngân sách đánh giá bằng 3% chi phí suy luận. Nêu rõ: ba tầng đánh giá và tỉ lệ lấy mẫu của từng tầng; cách tách lỗi truy xuất khỏi lỗi sinh; và cách phát hiện khi chính giám khảo LLM thay đổi hành vi.
 
 ---
 
-## 15. Ôn phỏng vấn
+## 15. Câu hỏi phỏng vấn
 
-Chương này không thêm kiến thức mới. Nó sắp xếp lại những gì đã có thành dạng dùng được trong phòng phỏng vấn.
+Chương này không thêm kiến thức mới mà sắp xếp lại nội dung các chương trước theo dạng câu hỏi và câu trả lời thường gặp trong phỏng vấn cho vị trí kỹ sư học máy hoặc kỹ sư MLOps.
 
-### 15.1. Khung trả lời
+### 15.1. Cách trình bày câu trả lời
 
-Phần lớn câu hỏi MLOps là câu hỏi mở, và người phỏng vấn nghe **cách bạn nghĩ** chứ không nghe danh sách công cụ. Khung bốn bước dưới đây dùng được cho gần như mọi câu:
+Phần lớn câu hỏi về MLOps là câu hỏi mở, và người phỏng vấn đánh giá cách lập luận hơn là danh sách công cụ. Một cách trình bày dùng được cho đa số câu hỏi gồm bốn bước:
 
-1. **Nêu ràng buộc trước.** "Điều này phụ thuộc độ trễ nhãn" hay "phụ thuộc có bao nhiêu mô hình dùng chung đặc trưng" — nêu được ràng buộc là đã chứng minh bạn hiểu bài toán.
-2. **Nêu đánh đổi.** Mọi lựa chọn trong tài liệu này đều là đánh đổi. Câu trả lời không có đánh đổi là câu trả lời thuộc lòng.
-3. **Chọn một phương án và nói vì sao.** Không được dừng ở "còn tuỳ".
-4. **Nói cách đo xem mình có chọn đúng không.** Đây là bước phân biệt rõ nhất người đã vận hành thật.
+1. **Nêu ràng buộc.** Ví dụ: "phụ thuộc vào độ trễ nhãn", "phụ thuộc vào số mô hình dùng chung đặc trưng". Nêu đúng ràng buộc cho thấy đã hiểu bài toán.
+2. **Nêu đánh đổi** giữa các lựa chọn.
+3. **Chọn một phương án và giải thích lý do**, thay vì dừng ở "còn tuỳ trường hợp".
+4. **Nêu cách đo để biết lựa chọn có đúng không.**
 
-Và một mẹo: **nhắc được một con số cụ thể** làm câu trả lời nặng ký hẳn lên. Tài liệu này cố tình cung cấp sẵn những con số đó.
+Một con số cụ thể, như các số liệu đo được trong giáo trình, làm câu trả lời thuyết phục hơn nhiều so với một nhận định chung.
 
-### 15.2. Nhóm câu hỏi nền tảng
+### 15.2. Nền tảng
 
-**"MLOps là gì, khác DevOps chỗ nào?"**
+**Câu hỏi: MLOps là gì, khác DevOps ở điểm nào?**
 
-> *Ý chính:* DevOps quản một tạo tác thay đổi khi có người sửa mã. MLOps quản **ba** tạo tác — mã, dữ liệu, mô hình — với ba nhịp thay đổi khác nhau, trong đó **dữ liệu thay đổi mà không ai chạm vào repo**.
->
-> *Ghi điểm thêm:* vì thế ML có chữ C thứ ba là **CT — huấn luyện liên tục** bên cạnh CI/CD. Và hệ quả vận hành là ML hỏng **im lặng**: một mô hình nhận đầu vào lệch phân phối vẫn trả về đúng kiểu dữ liệu, đúng thời hạn, và sai.
+> **Trả lời.** DevOps quản lý một loại tạo tác, mã nguồn, thay đổi khi có người sửa mã. MLOps quản lý ba loại tạo tác: mã, dữ liệu và mô hình, thay đổi theo ba nhịp khác nhau, trong đó dữ liệu thay đổi mà không ai sửa kho mã. Vì vậy ngoài CI/CD, học máy cần thêm huấn luyện liên tục (CT). Hệ quả về vận hành: hệ thống học máy thường hỏng một cách im lặng; một mô hình nhận đầu vào có phân phối khác vẫn trả về kết quả đúng kiểu, đúng thời hạn, nhưng sai.
 
-**"Vì sao mô hình tốt lại chết trong sản xuất?"**
+**Câu hỏi: Vì sao một mô hình tốt khi đánh giá lại suy giảm trong sản xuất?**
 
-> Trả lời bằng bốn nguyên nhân có tên, mỗi cái một câu: **training–serving skew** (đặc trưng tính khác nhau hai bên), **dịch chuyển phân phối** (thế giới đổi), **phụ thuộc dữ liệu không ổn định** (nguồn thượng nguồn đổi mà không ai báo), **vòng phản hồi** (mô hình làm hỏng dữ liệu huấn luyện của chính nó).
->
-> *Ghi điểm thêm:* nhắc **nguyên lý CACE** — đổi bất cứ thứ gì là đổi tất cả — và giải thích vì sao nó làm mọi trực giác "sửa cục bộ" của kỹ sư phần mềm thành vô hiệu.
+> **Trả lời.** Có bốn nguyên nhân chính, mỗi nguyên nhân có tên: lệch giữa huấn luyện và phục vụ (đặc trưng được tính khác nhau ở hai nơi), dịch chuyển phân phối (dữ liệu thay đổi theo thời gian), phụ thuộc dữ liệu không ổn định (một hệ thống phía trước thay đổi mà không thông báo), và vòng phản hồi (mô hình làm sai lệch dữ liệu huấn luyện của chính nó). Nguyên lý CACE giải thích vì sao khó phòng: trong một mô hình, thay đổi bất kỳ thành phần nào cũng có thể thay đổi toàn bộ hành vi, nên không thể lập luận cục bộ như khi sửa một hàm trong phần mềm thông thường.
 
-**"Con số 5% mã ML nghĩa là gì?"**
+**Câu hỏi: Con số "5% mã học máy" nghĩa là gì?**
 
-Đây là câu bẫy, vì phần lớn người trả lời theo trí nhớ mơ hồ. Trả lời đúng gồm ba ý ở Mục 1.5: nó là phát biểu về **mã keo** chứ không phải chú thích của hình vẽ; nó có biên (*nhiều nhất* 5% / *ít nhất* 95%); và kết luận đi kèm là **đôi khi viết gọn từ đầu còn rẻ hơn tái dùng một gói đa dụng**.
+> **Trả lời.** Nhận định này nằm trong mục về mã keo của Sculley và cộng sự (2015), không phải chú thích của hình vẽ nổi tiếng trong bài báo. Nó được diễn đạt có giới hạn: một hệ thống trưởng thành có thể chỉ gồm nhiều nhất 5% mã học máy và ít nhất 95% mã keo; đây là nhận định định tính, không phải phép đo. Kết luận bài báo rút ra là đôi khi tự viết một giải pháp gọn còn rẻ hơn dùng lại một thư viện đa dụng, và nên bọc các thư viện sau một giao diện chung.
 
-**"Kể tên các mức trưởng thành MLOps."**
+**Câu hỏi: Các mức trưởng thành của MLOps là gì?**
 
-> Mức 0: mọi thứ thủ công, bàn giao **một mô hình**. Mức 1: pipeline huấn luyện tự động, bàn giao **cả pipeline**, có CT. Mức 2: CI/CD cho chính pipeline, bàn giao **một hệ thống tự cập nhật**.
->
-> *Ghi điểm thêm:* nêu được rằng **thứ được bàn giao lớn dần** chính là trục của thang đo này, và đội ở mức 1 mà không có giám sát thì vẫn không an toàn hơn mức 0 bao nhiêu.
+> **Trả lời.** Theo kiến trúc tham chiếu của Google Cloud: mức 0, mọi bước làm thủ công, thứ được bàn giao là một mô hình; mức 1, pipeline huấn luyện được tự động hoá và có huấn luyện liên tục, thứ được bàn giao là cả pipeline; mức 2, có CI/CD cho chính pipeline, thứ được bàn giao là một hệ thống tự cập nhật. Tự động hoá không thay thế giám sát: một hệ thống ở mức 1 mà không có giám sát chỉ triển khai nhanh hơn, kể cả khi triển khai một mô hình đã hỏng.
 
-### 15.3. Nhóm dữ liệu và đặc trưng
+### 15.3. Dữ liệu và đặc trưng
 
-**"Training–serving skew là gì, chống thế nào?"**
+**Câu hỏi: Lệch giữa huấn luyện và phục vụ là gì và phòng tránh thế nào?**
 
-> Là khi đặc trưng lúc phục vụ được tính khác lúc huấn luyện — thường vì hai bên có hai bản cài đặt riêng, một bản SQL trên kho dữ liệu, một bản mã dịch vụ viết lại cho đủ nhanh.
->
-> *Chống:* một định nghĩa đặc trưng duy nhất dùng chung cho cả hai đường; đóng gói hàm biến đổi cùng mô hình; và **đo nó** bằng cách so giá trị đặc trưng ở hai bên trên cùng lưu lượng — đúng mục **Monitor 3** của ML Test Score. Chạy shadow là cách rẻ nhất để đo trên lưu lượng thật.
+> **Trả lời.** Là khi đặc trưng lúc phục vụ được tính khác với lúc huấn luyện, thường vì có hai bản cài đặt riêng: một truy vấn SQL trên kho dữ liệu khi huấn luyện, một đoạn mã viết lại trong dịch vụ phục vụ cho đủ nhanh. Cách phòng: một định nghĩa đặc trưng duy nhất cho cả hai đường, đóng gói hàm biến đổi cùng mô hình, và đo độ lệch bằng cách so giá trị đặc trưng ở hai nơi trên cùng lưu lượng, đúng mục Monitor 3 của ML Test Score. Chạy shadow là cách rẻ nhất để đo điều này trên lưu lượng thật.
 
-**"Point-in-time correctness là gì?"** — Câu này gần như luôn được hỏi.
+**Câu hỏi: Tính đúng theo thời điểm là gì?**
 
-> Với mỗi dòng huấn luyện có thời điểm dự đoán $t$, giá trị đặc trưng phải là giá trị **quan sát được tại $t$**, không phải giá trị hôm nay.
->
-> *Cách kể cho rõ:* dùng ví dụ "tổng số đơn hàng": một dòng của tháng 3 phải dùng con số của tháng 3, không dùng con số của hôm nay. Nếu dùng con số hôm nay thì mô hình học rằng "khách có 480 đơn thì không rời bỏ", trong khi 480 tồn tại **vì** khách đã ở lại.
->
-> *Ghi điểm thêm:* chỉ ra vì sao lỗi này nguy hiểm hơn mọi lỗi khác — **nó làm chỉ số ngoại tuyến đẹp lên**, nên không ai nghi ngờ cho tới khi đã triển khai.
+> **Trả lời.** Với mỗi dòng huấn luyện có thời điểm dự đoán $t$, giá trị mọi đặc trưng phải là giá trị quan sát được tại $t$, không phải giá trị tại lúc dựng tập dữ liệu. Ví dụ: một dòng của tháng 3 phải dùng tổng số đơn hàng của khách tại tháng 3. Nếu dùng con số của hôm nay, mô hình học rằng "khách có 480 đơn hàng thì không rời bỏ", trong khi con số 480 chỉ tồn tại vì khách đã ở lại. Lỗi này nguy hiểm vì nó làm kết quả đánh giá ngoại tuyến tốt lên, nên không ai nghi ngờ cho tới khi mô hình được triển khai. Cách phòng là ghép theo thời điểm (as-of join) và thêm ràng buộc "không có sự kiện từ tương lai" vào hợp đồng dữ liệu.
 
-**"Khi nào cần feature store?"**
+**Câu hỏi: Khi nào cần kho đặc trưng?**
 
-> Khi có **đồng thời** ba điều: nhiều mô hình dùng chung đặc trưng, có phục vụ trực tuyến độ trễ thấp, và đặc trưng phụ thuộc thời gian. Thiếu cả ba thì một bảng trong kho dữ liệu cộng với kỷ luật dùng chung một hàm biến đổi là đủ và rẻ hơn nhiều.
->
-> *Ghi điểm thêm:* feature store **không tự động** xoá skew, nó chỉ tạo điều kiện; nếu đội vẫn viết đường tính riêng cho phục vụ thì skew quay lại ngay.
+> **Trả lời.** Khi có đồng thời ba điều kiện: nhiều mô hình dùng chung đặc trưng, phục vụ trực tuyến với độ trễ thấp, và đặc trưng phụ thuộc thời gian, cập nhật thường xuyên. Thiếu các điều kiện đó, một bảng trong kho dữ liệu cộng với kỷ luật dùng chung một hàm biến đổi rẻ hơn nhiều. Kho đặc trưng không tự động loại bỏ lệch huấn luyện–phục vụ; nếu nhóm vẫn viết một đường tính riêng cho phục vụ thì sự lệch quay lại.
 
-**"Làm sao biết dữ liệu có vấn đề?"**
+**Câu hỏi: Làm sao phát hiện dữ liệu có vấn đề?**
 
-> Dùng khung **cứng → mềm → dịch chuyển**: lỗi cứng thì **chặn pipeline**; lỗi mềm thì **cảnh báo và theo dõi tỉ lệ**; dịch chuyển thì **điều tra, có thể huấn luyện lại**. Ba loại đòi hỏi ba cách phản ứng khác nhau, và trộn chúng vào một cơ chế cảnh báo là nguồn gốc của báo động giả.
+> **Trả lời.** Phân loại lỗi thành ba loại với ba cách phản ứng: lỗi cứng (vi phạm lược đồ, giá trị ngoài miền) thì dừng pipeline; lỗi mềm (thiếu dữ liệu một phần, đổi đơn vị, giá trị danh mục lạ) thì cảnh báo và theo dõi tỉ lệ; dịch chuyển phân phối thì điều tra và có thể huấn luyện lại. Các kiểm tra được viết thành hợp đồng dữ liệu, suy ra từ dữ liệu tham chiếu rồi người duyệt lại, và chạy ở cả đầu vào lẫn đầu ra của mỗi pipeline. Dùng chung một cơ chế cảnh báo cho cả ba loại là nguyên nhân phổ biến của báo động giả.
 
-### 15.4. Nhóm đánh giá và ra mắt
+### 15.4. Đánh giá và ra mắt
 
-**"Vì sao một chỉ số là không đủ?"**
+**Câu hỏi: Vì sao một chỉ số tổng thể không đủ để đánh giá mô hình?**
 
-> Vì chỉ số gộp là trung bình có trọng số theo lưu lượng, nên nhóm đa số chi phối hoàn toàn.
->
-> *Kể một con số:* trong thí nghiệm ở Mục 6.3, thêm một đặc trưng làm độ chính xác tổng thể tăng **19,8 điểm**, nhóm đa số tăng 25,5 điểm, còn nhóm 15% người dùng mới **mất 11,6 điểm** và tụt xuống dưới cả mô hình cũ. Cơ chế: đặc trưng ấy chỉ có tín hiệu với nhóm đa số, nên với nhóm thiểu số trọng số lớn của nó bơm nhiễu thẳng vào dự đoán.
+> **Trả lời.** Chỉ số tổng thể là trung bình theo lưu lượng, nên nhóm đa số quyết định kết quả. Trong thí nghiệm ở Mục 6.3, thêm một đặc trưng làm độ chính xác tổng thể tăng 19,8 điểm phần trăm, nhóm khách hàng cũ tăng 25,5 điểm, nhưng nhóm 15% khách hàng mới giảm 11,6 điểm, xuống dưới cả mô hình cũ. Nguyên nhân: đặc trưng mới chỉ có thông tin với khách hàng cũ, nên với khách hàng mới, trọng số lớn của nó đưa nhiễu vào dự đoán. Vì vậy cần đánh giá theo lát cắt, cùng với kiểm thử hành vi cho những trường hợp cụ thể.
 
-**"Shadow, canary và A/B khác nhau thế nào?"**
+**Câu hỏi: Shadow, canary và A/B test khác nhau thế nào?**
 
-> Mỗi cái trả lời một câu hỏi khác nhau. **Shadow**: mô hình mới có chịu nổi tải không, đặc trưng có khớp không — rủi ro cho người dùng bằng 0, nhưng không biết họ phản ứng ra sao. **Canary**: có chỉ số vận hành nào xấu đi ở quy mô nhỏ không — hạn chế bán kính thiệt hại. **A/B**: mô hình mới có làm chỉ số sản phẩm tốt lên một cách **nhân quả** không.
->
-> *Ghi điểm thêm:* nói rõ **canary không đo được chỉ số sản phẩm**, vì ở 1% lưu lượng không đủ mẫu để có ý nghĩa thống kê. Canary bảo vệ khỏi thảm hoạ; A/B trả lời câu hỏi về giá trị. Lẫn hai vai trò này là lỗi quy trình phổ biến nhất.
+> **Trả lời.** Mỗi cách trả lời một câu hỏi khác nhau. Shadow cho biết mô hình mới có chịu được tải thật không, đặc trưng có khớp với lúc huấn luyện không, mà người dùng không chịu rủi ro nào; nhưng không cho biết người dùng phản ứng ra sao. Canary cho biết có chỉ số vận hành nào xấu đi ở quy mô nhỏ không, và giới hạn phạm vi ảnh hưởng nếu có sự cố. A/B test cho biết mô hình mới có làm chỉ số sản phẩm tốt lên theo nghĩa nhân quả không. Canary không đo được chỉ số sản phẩm, vì ở 1% lưu lượng không đủ mẫu; dùng canary để kết luận về giá trị là một lỗi quy trình thường gặp.
 
-**"Vì sao không A/B test mọi thay đổi?"**
+**Câu hỏi: Vì sao không A/B test mọi thay đổi?**
 
-> Vì lưu lượng là tài nguyên khan hiếm và cỡ mẫu tỉ lệ nghịch với **bình phương** mức cải thiện.
->
-> *Kể một con số:* với tỉ lệ nền 5%, để bắt một cải thiện tương đối 1% ở lực kiểm định 80% cần **khoảng 3 triệu mẫu mỗi nhánh** — tức một tháng lưu lượng cho một ý tưởng. Vì vậy quy trình tốt được thiết kế để loại ý tưởng tồi ở giai đoạn rẻ hơn, trước khi tiêu lưu lượng.
+> **Trả lời.** Vì lưu lượng có hạn, và cỡ mẫu tỉ lệ nghịch với bình phương mức cải thiện cần phát hiện. Với tỉ lệ nền 5%, phát hiện một cải thiện tương đối 1% với lực kiểm định 80% cần khoảng 3 triệu mẫu mỗi nhánh, tức khoảng một tháng lưu lượng nếu mỗi nhánh có 100 000 lượt mỗi ngày. Vì vậy quy trình tốt loại các ý tưởng kém bằng những cách rẻ hơn (đánh giá ngoại tuyến, shadow) trước khi dùng lưu lượng cho A/B test.
 
-**"Nêu ba cái bẫy khi đọc kết quả A/B."** — Peeking, so nhiều chỉ số cùng lúc, và ô nhiễm giữa hai nhánh. Với mỗi cái nêu cách chữa (cố định cỡ mẫu hoặc kiểm định tuần tự; khai báo trước một chỉ số chính; chia ngẫu nhiên theo cụm).
+**Câu hỏi: Những lỗi thường gặp khi đọc kết quả A/B test là gì?**
 
-**"ML Test Score tính thế nào?"**
+> **Trả lời.** Xem kết quả giữa chừng và dừng khi thấy $p < 0{,}05$, làm tăng tỉ lệ dương tính giả (cố định cỡ mẫu trước, hoặc dùng kiểm định tuần tự); so sánh nhiều chỉ số cùng lúc (khai báo trước một chỉ số chính); hai nhánh ảnh hưởng lẫn nhau trong mạng xã hội hoặc sàn giao dịch (chia ngẫu nhiên theo cụm); tỉ lệ mẫu giữa hai nhánh lệch so với thiết kế (kiểm tra bằng kiểm định khi bình phương trước khi đọc kết quả); và hiệu ứng mới lạ (chạy đủ lâu, xem hiệu ứng theo thời gian).
 
-> 28 mục, chia đều bốn nhóm: dữ liệu, mô hình, hạ tầng, giám sát. Mỗi mục được **0,5 điểm nếu làm thủ công có ghi chép**, **1 điểm nếu có hệ thống chạy tự động định kỳ**. Cộng điểm riêng từng nhóm, rồi **điểm cuối là giá trị nhỏ nhất trong bốn nhóm**.
->
-> *Ghi điểm thêm:* giải thích vì sao lấy nhỏ nhất — vì cả bốn đều cần thiết, nên đội có hạ tầng hoàn hảo mà không giám sát gì thì **điểm bằng 0**. Đây thường là nhóm yếu nhất trong thực tế.
+**Câu hỏi: ML Test Score được tính thế nào?**
 
-### 15.5. Nhóm giám sát và dịch chuyển
+> **Trả lời.** Gồm 28 mục chia đều bốn nhóm: dữ liệu, phát triển mô hình, hạ tầng, giám sát. Mỗi mục được 0,5 điểm nếu làm thủ công có ghi lại kết quả, 1 điểm nếu có hệ thống chạy tự động và định kỳ. Cộng điểm riêng từng nhóm; điểm cuối cùng là giá trị nhỏ nhất trong bốn nhóm. Lý do lấy giá trị nhỏ nhất: cả bốn nhóm đều cần thiết, nên một hệ thống có hạ tầng hoàn hảo mà không có giám sát vẫn có điểm 0.
 
-**"Ba loại dịch chuyển phân phối?"**
+### 15.5. Giám sát và dịch chuyển
 
-> Covariate shift: $P(X)$ đổi, $P(Y|X)$ giữ. Label shift: $P(Y)$ đổi, $P(X|Y)$ giữ. Concept drift: $P(Y|X)$ đổi, $P(X)$ giữ.
+**Câu hỏi: Có những loại dịch chuyển phân phối nào?**
 
-**"Cái nào dò được mà không cần nhãn?"** — Đây là câu hỏi quan trọng nhất của cả nhóm.
+> **Trả lời.** Covariate shift: $P(X)$ thay đổi, $P(Y \mid X)$ giữ nguyên. Label shift: $P(Y)$ thay đổi, $P(X \mid Y)$ giữ nguyên. Concept drift: $P(Y \mid X)$ thay đổi. Hai loại đầu thường làm $P(X)$ thay đổi; concept drift thì không nhất thiết.
 
-> Chỉ hai loại đầu. **Concept drift về nguyên tắc không dò được bằng cách giám sát $X$**, vì theo đúng định nghĩa nó giữ nguyên $P(X)$.
->
-> *Kể một con số:* trong thí nghiệm ở Mục 9.2, concept drift làm độ chính xác rơi từ 75,6% xuống **26,9%** — tệ hơn đoán bừa — trong khi kiểm định KS trên các đặc trưng cho $p = 0{,}48$, tức hoàn toàn bình thường. Ngược lại, covariate shift làm KS hét toáng lên trong khi độ chính xác gần như không đổi: đó chính là báo động giả.
->
-> *Kết luận:* vì vậy **độ trễ nhãn quyết định bạn có nhìn thấy loại dịch chuyển nguy hiểm nhất hay không**, và mọi thiết kế giám sát phải bắt đầu từ câu hỏi "bao lâu tôi mới biết đáp án thật".
+**Câu hỏi: Loại dịch chuyển nào phát hiện được mà không cần nhãn?**
 
-**"Bạn dùng ngưỡng PSI nào?"** — Câu bẫy. Trả lời "0,25" là trả lời như người chưa đo bao giờ.
+> **Trả lời.** Covariate shift và label shift, vì cả hai làm phân phối của $X$ thay đổi. Concept drift không phát hiện được bằng cách giám sát $X$, vì theo định nghĩa nó có thể giữ nguyên $P(X)$. Trong thí nghiệm ở Mục 9.2, concept drift làm độ chính xác giảm từ 75,6% xuống 26,9%, trong khi kiểm định KS trên các đặc trưng không thấy gì bất thường ($p = 0{,}48$). Ngược lại, covariate shift cho p-value gần bằng 0 trong khi độ chính xác gần như không đổi, tức cảnh báo dựa trên $X$ sẽ là báo động giả. Vì vậy độ trễ nhãn quyết định khả năng phát hiện loại dịch chuyển gây hại nhiều nhất, và thiết kế giám sát phải bắt đầu bằng câu hỏi: sau bao lâu thì biết nhãn thật?
 
-> PSI thực chất là **phân kỳ Jeffreys**, tức $D_{KL}(T\|B) + D_{KL}(B\|T)$. Ngưỡng 0,1 và 0,25 là **quy tắc kinh nghiệm từ chấm điểm tín dụng**, không phải kết quả thống kê, và chúng **không tính tới cỡ mẫu lẫn số bin**.
->
-> *Kể một con số:* khi hai mẫu **cùng một phân phối**, PSI kỳ vọng xấp xỉ $2(k-1)/n$. Với $n = 200$ và 20 bin, PSI trung bình là **0,205 dù không có dịch chuyển nào** — sát ngay ngưỡng "dịch chuyển mạnh". Đo thực tế: ở $n = 50$, quy tắc PSI > 0,25 báo động **73% số lần khi không có gì xảy ra**; còn ở $n = 1000$ với dịch chuyển thật $0{,}3\sigma$ thì nó **không báo lần nào**, trong khi kiểm định KS báo 100%.
->
-> *Nên làm gì:* dùng kiểm định có p-value và hiệu chỉnh đa kiểm định; nếu buộc phải dùng PSI thì **hiệu chuẩn ngưỡng bằng mô phỏng trên chính $n$ và $k$ của mình**, và giữ $n$, $k$ cố định giữa các kỳ đo.
+**Câu hỏi: Nên dùng ngưỡng PSI nào?**
 
-**"Giám sát gì khi không có nhãn?"**
+> **Trả lời.** PSI là tổng hai chiều của phân kỳ KL (phân kỳ Jeffreys). Các ngưỡng 0,10 và 0,25 là quy tắc kinh nghiệm từ lĩnh vực chấm điểm tín dụng, không tính tới cỡ mẫu và số bin. Khi hai mẫu cùng phân phối, PSI có kỳ vọng xấp xỉ $2(k-1)/n$: với $n = 200$ và 20 bin, PSI trung bình là 0,205 dù không có dịch chuyển nào. Mô phỏng ở Mục 9.5 cho thấy với $n = 50$, quy tắc PSI > 0,25 báo động 73% số lần khi không có dịch chuyển; với $n = 1\,000$ và dịch chuyển thật 0,3 độ lệch chuẩn, quy tắc này không báo động lần nào, trong khi kiểm định KS báo động ở mọi lần. Nên dùng kiểm định có p-value kèm hiệu chỉnh cho kiểm định nhiều lần; nếu buộc phải dùng PSI, tính ngưỡng theo đúng $n$ và $k$, ví dụ $\tfrac{2}{n}\chi^2_{k-1,\,0{,}99}$, và giữ $n$, $k$ cố định giữa các lần đo.
 
-> Bốn lớp, càng gần nhãn càng có ý nghĩa nhưng càng khó lấy: đầu vào thô → đặc trưng → **dự đoán** → chỉ số chất lượng. Không có nhãn thì lớp **dự đoán** là tuyến phòng thủ chính.
->
-> *Ghi điểm thêm:* nhắc **độ lệch dự đoán** — phân phối nhãn dự đoán thường phải bằng phân phối nhãn quan sát — và nêu luôn giới hạn của nó (một mô hình rỗng chỉ đoán tỉ lệ trung bình cũng thoả mãn), nhưng **thay đổi của chỉ số này thường là dấu hiệu sự cố**. Và nhắc **giới hạn hành động**: đặt trần cho số hành động thật mỗi cửa sổ thời gian, chạm trần thì báo người.
+**Câu hỏi: Khi không có nhãn thì giám sát gì?**
 
-**"Vì sao cảnh báo hay bị bỏ qua?"**
+> **Trả lời.** Có bốn lớp giám sát, càng gần nhãn càng có ý nghĩa nhưng càng khó có: đầu vào thô, đặc trưng, dự đoán, chất lượng. Không có nhãn thì lớp dự đoán là lớp chính: phân phối điểm số, tỉ lệ từng lớp, và độ lệch dự đoán (phân phối nhãn dự đoán so với tỉ lệ nền lịch sử), tính theo lát cắt. Độ lệch dự đoán có giới hạn: một mô hình luôn dự đoán tỉ lệ trung bình cũng có độ lệch bằng 0; nhưng thay đổi đột ngột của nó thường là dấu hiệu sự cố. Với hệ thống có hành động thật, thêm giới hạn hành động: đặt trần cho số hành động trong mỗi khoảng thời gian, chạm trần thì cảnh báo.
 
-> Vì báo động giả. Hậu quả không phải là phiền mà là **mất niềm tin**, và một hệ cảnh báo không được tin thì tệ hơn không có, vì nó tạo cảm giác an toàn giả. Chữa bằng bốn nguyên tắc: mỗi cảnh báo phải gắn với một hành động; phân tầng trang / vé / bảng điều khiển; **cảnh báo trên triệu chứng chứ không trên nguyên nhân**; và đòi hỏi độ dai qua nhiều cửa sổ liên tiếp.
+**Câu hỏi: Vì sao cảnh báo hay bị bỏ qua, và thiết kế cảnh báo thế nào?**
 
-### 15.6. Nhóm thiết kế hệ thống
+> **Trả lời.** Vì báo động giả: khi phần lớn cảnh báo là giả, người nhận mất niềm tin và bỏ qua cả cảnh báo thật. Bốn nguyên tắc: mỗi cảnh báo phải gắn với một hành động cụ thể; phân mức (gọi người trực, tạo phiếu xử lý, hoặc chỉ hiển thị trên bảng theo dõi); cảnh báo theo triệu chứng (tỉ lệ chuyển đổi giảm) chứ không theo nguyên nhân (PSI của một đặc trưng); và yêu cầu tín hiệu kéo dài qua nhiều cửa sổ liên tiếp.
 
-Với câu "thiết kế hệ thống ML cho X", đi theo đúng thứ tự này và bạn sẽ không bỏ sót:
+### 15.6. Thiết kế hệ thống
 
-1. **Làm rõ bài toán:** chỉ số sản phẩm là gì, chỉ số ML nào đại diện cho nó, và hai chỉ số ấy tương quan tới đâu.
-2. **Hỏi về nhãn:** lấy từ đâu, **trễ bao lâu**, có thiên lệch do chính hệ thống gây ra không. Câu trả lời quyết định phần lớn thiết kế còn lại.
-3. **Chế độ phục vụ:** lô, trực tuyến hay luồng — chọn cái rẻ nhất đủ dùng; lập **ngân sách độ trễ** nếu trực tuyến.
-4. **Dữ liệu và đặc trưng:** nguồn, hợp đồng dữ liệu, có cần point-in-time không, có cần feature store không.
-5. **Huấn luyện:** nhịp huấn luyện lại và **kích hoạt** nào, ghim gì để lặp lại được.
-6. **Đánh giá:** tập cố định, **các lát cắt**, kiểm thử hành vi, cửa so với mô hình đang chạy.
-7. **Ra mắt:** shadow → canary → A/B, và cơ chế quay lui.
-8. **Giám sát:** bốn lớp, chỉ số nào đánh thức người, phản ứng khi báo động.
-9. **Vòng phản hồi:** hệ thống có ảnh hưởng tới dữ liệu tương lai của mình không, có cần nhóm đối chứng không.
+Với câu hỏi dạng "thiết kế hệ thống học máy cho bài toán X", đi theo thứ tự sau để không bỏ sót:
 
-Bước 2 và bước 9 là hai bước ứng viên hay bỏ nhất, và cũng là hai bước gây ấn tượng nhất khi có.
+1. **Làm rõ bài toán:** chỉ số sản phẩm là gì, chỉ số nào của mô hình đại diện cho nó, và hai chỉ số tương quan tới đâu.
+2. **Hỏi về nhãn:** lấy từ đâu, trễ bao lâu, có bị chính hệ thống làm sai lệch không. Câu trả lời quyết định phần lớn thiết kế còn lại.
+3. **Chế độ phục vụ:** theo lô, trực tuyến hay luồng; chọn chế độ rẻ nhất đáp ứng được yêu cầu; nếu trực tuyến thì lập ngân sách độ trễ.
+4. **Dữ liệu và đặc trưng:** nguồn, hợp đồng dữ liệu, có cần ghép theo thời điểm không, có cần kho đặc trưng không.
+5. **Huấn luyện:** nhịp huấn luyện lại, loại kích hoạt, những gì cần cố định để tái lập được.
+6. **Đánh giá:** tập kiểm tra cố định, các lát cắt, kiểm thử hành vi, bước so sánh với mô hình đang chạy.
+7. **Ra mắt:** shadow, canary, A/B test, và cơ chế quay lui.
+8. **Giám sát:** bốn lớp, chỉ số nào gọi người trực, quy trình xử lý khi có cảnh báo.
+9. **Vòng phản hồi:** hệ thống có ảnh hưởng tới dữ liệu tương lai của nó không, có cần nhóm đối chứng không.
 
-### 15.7. Nhóm LLMOps
+Bước 2 và bước 9 là hai bước hay bị bỏ qua nhất.
 
-**"LLMOps khác MLOps chỗ nào?"**
+### 15.7. LLMOps
 
-> Phần lớn không đổi: vẫn cần hợp đồng dữ liệu, quản phiên bản, shadow/canary, giám sát, quay lui. Cái đổi là năm ràng buộc: không tự huấn luyện; đầu ra là văn bản tự do nên **không có hàm đúng/sai hiển nhiên**; không tất định và nhà cung cấp có thể đổi mô hình dưới chân ta; chi phí là **chi phí suy luận theo token, biến thiên từng yêu cầu**; và có thêm lớp rủi ro về an toàn nội dung và prompt injection.
->
-> *Ghi điểm thêm:* gọi tên việc nhà cung cấp đổi mô hình là **dạng cực đoan của unstable data dependency**, và nêu cách chữa giống hệt: **ghim phiên bản**, coi mỗi lần đổi là một lần phát hành đầy đủ.
+**Câu hỏi: LLMOps khác MLOps ở điểm nào?**
 
-**"Đánh giá một hệ LLM thế nào?"**
+> **Trả lời.** Phần lớn nguyên tắc giữ nguyên: hợp đồng dữ liệu, quản lý phiên bản, shadow và canary, giám sát, quay lui. Có năm ràng buộc thay đổi: thường không tự huấn luyện mô hình; đầu ra là văn bản tự do, không có hàm đúng sai hiển nhiên; kết quả không tất định, và nhà cung cấp có thể cập nhật mô hình sau cùng một tên gọi; chi phí chủ yếu là chi phí suy luận theo token, thay đổi theo từng yêu cầu; và có thêm các rủi ro như nội dung có hại, rò rỉ dữ liệu, prompt injection. Việc nhà cung cấp cập nhật mô hình là dạng cực đoan của phụ thuộc dữ liệu không ổn định; cách xử lý là dùng định danh phiên bản cố định và coi mỗi lần đổi phiên bản là một lần phát hành đầy đủ.
 
-> Ba tầng theo chi phí: **kiểm tra quy tắc trên 100% số lượt** (định dạng, JSON, trích dẫn, độ dài); **LLM làm giám khảo trên mẫu 10–20%** (hoặc 1–5% khi lưu lượng lớn) cho chất lượng ngữ nghĩa; **người chấm trên mẫu nhỏ định kỳ** để hiệu chuẩn lại giám khảo. Cộng thêm hai vòng: **tập vàng** làm cửa CI cho mỗi lần phát hành, và chấm mẫu trực tuyến trên lưu lượng thật.
->
-> *Ghi điểm thêm:* nêu các **thiên lệch của giám khảo** — vị trí, độ dài, tự ưu ái — kèm cách chữa từng cái, và nhấn rằng **giám khảo cũng là một mô hình nên nó cũng trôi**; không có tầng người chấm thì bạn sẽ có một hệ đánh giá tự tin báo rằng mọi thứ đều ổn.
+**Câu hỏi: Đánh giá một hệ thống dùng LLM thế nào?**
 
-**"Câu trả lời RAG sai thì điều tra thế nào?"**
+> **Trả lời.** Ba tầng theo chi phí: kiểm tra theo quy tắc trên mọi lượt gọi (định dạng, JSON, trích dẫn, độ dài); giám khảo LLM trên một mẫu, cho chất lượng nội dung; người chấm trên một mẫu nhỏ, định kỳ, để hiệu chỉnh giám khảo. Cộng thêm hai vòng: tập đánh giá chuẩn làm bước kiểm định trước mỗi lần phát hành, và chấm mẫu trên lưu lượng thật. Cần biết các thiên lệch của giám khảo LLM: thiên lệch vị trí (xử lý bằng cách hỏi hai lần với thứ tự đảo), thiên lệch độ dài, và khả năng tự ưu tiên câu trả lời của chính mình. Giám khảo cũng là một mô hình có thể thay đổi, nên cần đo định kỳ mức đồng thuận giữa giám khảo và người chấm.
 
-> Tách ngay thành hai câu hỏi: tài liệu đúng **có nằm trong ngữ cảnh không**? Nếu không, đó là lỗi **truy hồi** — đo bằng recall@k, chữa bằng chia đoạn, embedding, truy hồi lai, rerank. Nếu có mà vẫn sai, đó là lỗi **sinh** — đo bằng **độ bám nguồn**, chữa bằng prompt, đổi mô hình, buộc trích dẫn.
->
-> *Ghi điểm thêm:* nói rằng gộp hai loại lỗi vào một chỉ số duy nhất là lý do phổ biến nhất khiến đội không biết nên đi sửa chỗ nào.
+**Câu hỏi: Một câu trả lời của hệ thống RAG sai thì điều tra thế nào?**
 
-**"Giảm chi phí LLM thế nào?"** — Ba đòn bẩy theo thứ tự nên thử: **lưu đệm** (chính xác, ngữ nghĩa, tiền tố), **định tuyến** theo độ khó, **nén ngữ cảnh**. Nói thêm rằng chi phí gọi giám khảo phải ghi thành **dòng chi phí riêng**, nếu không sẽ cắt nhầm chỗ khi chi phí tăng.
+> **Trả lời.** Tách thành hai câu hỏi. Tài liệu cần thiết có nằm trong ngữ cảnh không? Nếu không, đó là lỗi truy xuất: đo bằng recall@$k$, sửa bằng cách chia đoạn, mô hình embedding, tìm kiếm kết hợp, xếp hạng lại. Nếu có mà câu trả lời vẫn sai, đó là lỗi sinh: đo bằng độ trung thành với ngữ cảnh, sửa bằng prompt, đổi mô hình, yêu cầu trích dẫn. Để tách được hai loại lỗi, bản ghi vết phải lưu danh sách các đoạn đã truy xuất và điểm của chúng; gộp hai loại lỗi vào một chỉ số thì không biết cần sửa ở đâu.
 
-### 15.8. Những câu trả lời tự tố cáo
+**Câu hỏi: Làm sao giảm chi phí của một ứng dụng LLM?**
 
-Cuối cùng, những câu nghe thì trơn tru nhưng lập tức cho thấy người nói chưa vận hành hệ thống thật:
+> **Trả lời.** Theo thứ tự nên thử: bộ nhớ đệm (cho câu hỏi lặp lại, câu hỏi gần giống, và phần đầu cố định của prompt); định tuyến câu hỏi dễ tới mô hình nhỏ; giảm ngữ cảnh (bớt số đoạn truy xuất, tóm tắt lịch sử hội thoại). Chi phí của giám khảo LLM nên được ghi thành một dòng riêng, để biết chi phí tăng vì lưu lượng hay vì tăng tỉ lệ lấy mẫu đánh giá.
 
-| Câu trả lời | Vì sao nó tố cáo |
+### 15.8. Các câu trả lời chưa đạt
+
+| Câu trả lời | Vì sao chưa đạt |
 |---|---|
-| "Tôi giám sát độ chính xác trong sản xuất." | Chỉ đúng khi có nhãn ngay. Không hỏi lại về **độ trễ nhãn** là bỏ qua ràng buộc quan trọng nhất. |
-| "Ngưỡng PSI là 0,25." | Không phụ thuộc $n$ và số bin — xem Mục 9.5. |
-| "Dùng feature store để hết skew." | Feature store tạo điều kiện, không bảo đảm. |
-| "A/B test mọi thứ." | Không biết cỡ mẫu tỉ lệ $1/\Delta^2$, tức chưa từng phải phân bổ lưu lượng. |
-| "Huấn luyện lại hằng ngày cho chắc." | Không biết lợi ích giảm dần rất nhanh (Mục 11.1) và không nói tới chi phí. |
-| "Mô hình đạt 99% nên rất tốt." | Không hỏi về mất cân bằng lớp, về lát cắt, và về **trần trên là mức đồng thuận giữa người gán nhãn**. |
-| "Chúng tôi dùng công cụ X nên chuyện đó được lo." | Công cụ không lo được các đánh đổi; nêu tên công cụ trước khi nêu ràng buộc là dấu hiệu học thuộc. |
-| "CI/CD là đủ cho ML." | Bỏ mất **CT** và bỏ mất chuyện dữ liệu thay đổi mà không ai sửa mã. |
+| "Tôi giám sát độ chính xác trong sản xuất." | Chỉ làm được khi có nhãn ngay; không hỏi về độ trễ nhãn là bỏ qua ràng buộc quan trọng nhất. |
+| "Ngưỡng PSI là 0,25." | Ngưỡng cố định không tính tới cỡ mẫu và số bin (Mục 9.5). |
+| "Dùng kho đặc trưng là hết lệch huấn luyện–phục vụ." | Kho đặc trưng tạo điều kiện, không bảo đảm. |
+| "A/B test mọi thay đổi." | Cỡ mẫu tỉ lệ với $1/\Delta^2$; lưu lượng không đủ cho mọi ý tưởng. |
+| "Huấn luyện lại hằng ngày cho chắc." | Lợi ích giảm dần nhanh (Mục 11.1), và không tính tới chi phí. |
+| "Mô hình đạt 99% nên rất tốt." | Không hỏi về mất cân bằng lớp, về lát cắt, và về mức đồng thuận giữa người gán nhãn. |
+| "Chúng tôi dùng công cụ X nên vấn đề đó đã được giải quyết." | Công cụ không thay được việc chọn đánh đổi; nêu tên công cụ trước khi nêu ràng buộc là dấu hiệu học thuộc. |
+| "CI/CD là đủ cho học máy." | Thiếu huấn luyện liên tục, và bỏ qua việc dữ liệu thay đổi mà không ai sửa mã. |
+| "Giám khảo LLM chấm 4,5/5 nên chất lượng tốt." | Không đối chiếu với người chấm thì không biết giám khảo có đáng tin không (Mục 13.3). |
 
 ---
 
 ## 16. Tài liệu tham khảo
 
-**Nền tảng về nợ kỹ thuật và kiểm thử**
+**Nợ kỹ thuật và kiểm thử hệ thống học máy**
 
-1. D. Sculley và cộng sự. *Hidden Technical Debt in Machine Learning Systems.* NeurIPS 2015. — nguồn của CACE, của các dạng nợ có tên, của con số 5% / 95% mã keo, và của bộ ba giám sát prediction bias / action limits / up-stream producers.
-2. D. Sculley và cộng sự. *Machine Learning: The High-Interest Credit Card of Technical Debt.* NeurIPS Workshop, 2014. — bản tiền thân, ngắn hơn.
-3. E. Breck, S. Cai, E. Nielsen, M. Salib, D. Sculley. *The ML Test Score: A Rubric for ML Production Readiness and Technical Debt Reduction.* IEEE Big Data 2017. — nguồn của 28 mục kiểm thử, cách tính điểm và bảng diễn giải.
-4. M. Zinkevich. *Rules of Machine Learning: Best Practices for ML Engineering.* Google. — tập quy tắc thực hành, bổ trợ rất tốt cho Chương 2 và 6.
+1. D. Sculley, G. Holt, D. Golovin, E. Davydov, T. Phillips, D. Ebner, V. Chaudhary, M. Young, J.-F. Crespo, D. Dennison. *Hidden Technical Debt in Machine Learning Systems.* NeurIPS 2015. Nguồn của nguyên lý CACE, các dạng nợ kỹ thuật, nhận định về 5% mã học máy, vòng phản hồi, và ba cơ chế giám sát: độ lệch dự đoán, giới hạn hành động, hệ thống phía trước.
+2. D. Sculley và cộng sự. *Machine Learning: The High-Interest Credit Card of Technical Debt.* SE4ML Workshop, NeurIPS 2014. Phiên bản đầu, ngắn hơn, của bài báo trên.
+3. E. Breck, S. Cai, E. Nielsen, M. Salib, D. Sculley. *The ML Test Score: A Rubric for ML Production Readiness and Technical Debt Reduction.* IEEE BigData 2017. Nguồn của 28 mục kiểm tra, cách tính điểm và bảng diễn giải ở Mục 6.5.
+4. E. Breck, N. Polyzotis, S. Roy, S. E. Whang, M. Zinkevich. *Data Validation for Machine Learning.* SysML 2019. Kiểm định dữ liệu bằng lược đồ suy ra từ dữ liệu (Mục 3.3).
+5. M. Zinkevich. *Rules of Machine Learning: Best Practices for ML Engineering.* Google. Tập hợp các quy tắc thực hành, bổ sung cho Chương 2 và Chương 6.
 
-**Quy trình và kiến trúc**
+**Quy trình, kiến trúc và vận hành**
 
-5. Google Cloud. *MLOps: Continuous delivery and automation pipelines in machine learning.* — nguồn của ba mức tự động hoá, tám bước pipeline, sáu giai đoạn CI/CD ở mức 2, và định nghĩa training–serving skew.
-6. D. Sato, A. Wider, C. Windheuser. *Continuous Delivery for Machine Learning.* martinfowler.com, 2019.
-7. D. Kreuzberger, N. Kühl, S. Hirschl. *Machine Learning Operations (MLOps): Overview, Definition, and Architecture.* IEEE Access, 2023.
+6. Google Cloud. *MLOps: Continuous delivery and automation pipelines in machine learning.* Nguồn của ba mức tự động hoá, tám bước của pipeline, sáu giai đoạn CI/CD ở mức 2, và định nghĩa lệch huấn luyện–phục vụ.
+7. D. Sato, A. Wider, C. Windheuser. *Continuous Delivery for Machine Learning.* martinfowler.com, 2019.
+8. D. Kreuzberger, N. Kühl, S. Hirschl. *Machine Learning Operations (MLOps): Overview, Definition, and Architecture.* IEEE Access, 2023.
+9. B. Beyer, C. Jones, J. Petoff, N. R. Murphy (chủ biên). *Site Reliability Engineering: How Google Runs Production Systems.* O'Reilly, 2016. Nguồn của SLI, SLO, bốn tín hiệu cơ bản và các nguyên tắc cảnh báo ở Chương 10.
+10. J. Dean, L. A. Barroso. *The Tail at Scale.* Communications of the ACM, 2013. Phân tích phần đuôi độ trễ khi toả nhánh và yêu cầu dự phòng (Mục 7.3).
 
-**Thực hành từ người trong nghề**
+**Thực hành trong công nghiệp**
 
-8. S. Shankar, R. Garcia, J. M. Hellerstein, A. G. Parameswaran. *Operationalizing Machine Learning: An Interview Study.* arXiv:2209.09125, 2022. — nguồn của ba chữ V, bốn nhiệm vụ vòng đời, phổ lỗi cứng → mềm → dịch chuyển, bốn nỗi đau và bốn anti-pattern.
-9. C. Huyen. *Designing Machine Learning Systems.* O'Reilly, 2022.
-10. C. Huyen. *Data Distribution Shifts and Monitoring.* huyenchip.com, 2022. — nguồn của định nghĩa ba loại dịch chuyển theo $P(X)$, $P(Y)$, $P(Y|X)$, của degenerate feedback loop và của phân tầng chỉ số giám sát.
-11. A. Paleyes, R.-G. Urma, N. D. Lawrence. *Challenges in Deploying Machine Learning: A Survey of Case Studies.* ACM Computing Surveys, 2022.
+11. S. Shankar, R. Garcia, J. M. Hellerstein, A. G. Parameswaran. *Operationalizing Machine Learning: An Interview Study.* arXiv:2209.09125, 2022. Nguồn của ba yếu tố tốc độ, kiểm định, phiên bản; bốn nhiệm vụ trong vòng đời; ba loại lỗi dữ liệu; và bốn thói quen xấu.
+12. C. Huyen. *Designing Machine Learning Systems.* O'Reilly, 2022. Nguồn của khái niệm vòng phản hồi thoái hoá và cách phân biệt huấn luyện lại từ đầu với huấn luyện có trạng thái.
+13. A. Paleyes, R.-G. Urma, N. D. Lawrence. *Challenges in Deploying Machine Learning: A Survey of Case Studies.* ACM Computing Surveys, 2022.
+14. M. Mitchell, S. Wu, A. Zaldivar, P. Barnes, L. Vasserman, B. Hutchinson, E. Spitzer, I. D. Raji, T. Gebru. *Model Cards for Model Reporting.* FAT* 2019. Thẻ mô hình (Mục 5.4).
 
-**Dịch chuyển phân phối và phát hiện**
+**Đánh giá và thí nghiệm có đối chứng**
 
-12. J. Quiñonero-Candela, M. Sugiyama, A. Schwaighofer, N. D. Lawrence (chủ biên). *Dataset Shift in Machine Learning.* MIT Press, 2009. — nguồn học thuật gốc của phân loại covariate / prior probability / concept shift.
-13. J. G. Moreno-Torres và cộng sự. *A unifying view on dataset shift in classification.* Pattern Recognition, 2012.
-14. B. Yurdakul, J. Naranjo. *Statistical properties of the population stability index.* — nguồn cho kết quả PSI co giãn tiệm cận theo $\chi^2$ và cho lập luận rằng giá trị tới hạn phụ thuộc cỡ mẫu và số bin.
-15. A. du Pisanie, J. Visagie và cộng sự. *A critical review of existing and new population stability testing procedures in credit risk scoring.* arXiv:2303.01227, 2023.
-16. J. Dean, L. A. Barroso. *The Tail at Scale.* Communications of the ACM, 2013. — nguồn của phân tích đuôi độ trễ khi toả nhánh ở Mục 7.3.
+15. M. T. Ribeiro, T. Wu, C. Guestrin, S. Singh. *Beyond Accuracy: Behavioral Testing of NLP Models with CheckList.* ACL 2020. Ba loại kiểm thử hành vi ở Mục 6.4.
+16. R. Kohavi, D. Tang, Y. Xu. *Trustworthy Online Controlled Experiments: A Practical Guide to A/B Testing.* Cambridge University Press, 2020. Tài liệu chuẩn về A/B test, gồm các lỗi ở Mục 8.5.
+17. A. Deng, Y. Xu, R. Kohavi, T. Walker. *Improving the Sensitivity of Online Controlled Experiments by Utilizing Pre-Experiment Data.* WSDM 2013. Kỹ thuật CUPED ở Mục 8.4.
 
-**Kiểm thử hành vi và đánh giá**
+**Dịch chuyển phân phối**
 
-17. M. T. Ribeiro, T. Wu, C. Guestrin, S. Singh. *Beyond Accuracy: Behavioral Testing of NLP Models with CheckList.* ACL 2020. — nguồn của ba họ kiểm thử bất biến / kỳ vọng có hướng / chức năng tối thiểu.
-18. R. Kohavi, D. Tang, Y. Xu. *Trustworthy Online Controlled Experiments.* Cambridge University Press, 2020. — chuẩn mực về A/B test, peeking, đa kiểm định và ô nhiễm nhánh.
+18. J. Quiñonero-Candela, M. Sugiyama, A. Schwaighofer, N. D. Lawrence (chủ biên). *Dataset Shift in Machine Learning.* MIT Press, 2009. Nguồn học thuật của cách phân loại covariate shift, prior probability shift và concept shift.
+19. J. G. Moreno-Torres, T. Raeder, R. Alaiz-Rodríguez, N. V. Chawla, F. Herrera. *A unifying view on dataset shift in classification.* Pattern Recognition, 2012.
+20. S. Rabanser, S. Günnemann, Z. C. Lipton. *Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift.* NeurIPS 2019. So sánh các phương pháp phát hiện dịch chuyển (Mục 9.3).
+21. B. Yurdakul, J. Naranjo. *Statistical properties of the population stability index.* Journal of Risk Model Validation, 2020. Phân phối tiệm cận của PSI và giá trị tới hạn phụ thuộc cỡ mẫu và số bin (Mục 9.5).
+22. A. du Pisanie và cộng sự. *A critical review of existing and new population stability testing procedures in credit risk scoring.* arXiv:2303.01227, 2023.
+
+**Vòng phản hồi**
+
+23. T. Joachims, A. Swaminathan, T. Schnabel. *Unbiased Learning-to-Rank with Biased Feedback.* WSDM 2017. Hiệu chỉnh theo xác suất hiển thị (Mục 12.4).
 
 **Kho đặc trưng**
 
-19. Tài liệu Feast (feast.dev) và Tecton về **point-in-time correct join**, offline/online store và sổ đăng ký đặc trưng.
+24. Tài liệu của Feast (feast.dev) về ghép theo thời điểm, kho ngoại tuyến, kho trực tuyến và sổ đăng ký đặc trưng.
 
 **LLMOps**
 
-20. Tài liệu vận hành và đánh giá LLM cập nhật 2025–2026 về LLM-as-judge, tập vàng, rào chắn và theo dõi chi phí theo bản ghi vết. Đây là mảng đổi nhanh nhất trong tài liệu này; hãy đối chiếu lại với nguồn hiện hành trước khi dùng con số cụ thể.
+25. L. Zheng, W.-L. Chiang, Y. Sheng và cộng sự. *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena.* NeurIPS 2023, Datasets and Benchmarks Track. Các thiên lệch của giám khảo LLM (Mục 13.3).
+26. S. Es, J. James, L. Espinosa-Anke, S. Schockaert. *RAGAS: Automated Evaluation of Retrieval Augmented Generation.* arXiv:2309.15217, 2023. Ba chỉ số đánh giá RAG (Mục 13.5).
+27. S. Shankar, J. D. Zamfirescu-Pereira, B. Hartmann, A. G. Parameswaran, I. Arawjo. *Who Validates the Validators? Aligning LLM-Assisted Evaluation of LLM Outputs with Human Preferences.* UIST 2024. Hiện tượng criteria drift (Mục 13.3).
+28. L. Chen, M. Zaharia, J. Zou. *How is ChatGPT's Behavior Changing over Time?* arXiv:2307.09009, 2023. Thay đổi hành vi của cùng một tên mô hình theo thời gian (Mục 13.1).
+29. C. Huyen. *AI Engineering: Building Applications with Foundation Models.* O'Reilly, 2025. Đánh giá, vận hành và kiến trúc của ứng dụng dùng mô hình nền tảng.
 
 ---
 
@@ -1501,15 +1534,18 @@ Cuối cùng, những câu nghe thì trơn tru nhưng lập tức cho thấy ng�
 
 ```
 code/mlops/
-├── experiments.py            # Hình 6, 7, 9–14 và mọi số liệu đo được
-├── experiments_output.txt    # kết quả in ra của script trên
+├── experiments.py            # Hình 6, 7, 9–14 và mọi số liệu đo được trong bài
+├── experiments_output.txt    # kết quả in ra của experiments.py
+├── bai_tap.py                # số liệu cho lời giải bài tập Chương 14
+├── bai_tap_output.txt        # kết quả in ra của bai_tap.py
 └── fig_diagrams.py           # Hình 1–5 và Hình 8 (sơ đồ khái niệm)
 ```
 
 ```bash
 pip install numpy scipy matplotlib scikit-learn
 python code/mlops/experiments.py     # khoảng một phút
+python code/mlops/bai_tap.py         # khoảng một phút rưỡi
 python code/mlops/fig_diagrams.py
 ```
 
-Hai script đặt hạt giống cố định nên mọi con số trong tài liệu lặp lại được y hệt trên cùng phiên bản thư viện.
+Các script đặt hạt giống cố định, nên mọi con số trong tài liệu lặp lại được y hệt với cùng phiên bản thư viện. Số liệu thực nghiệm đến từ dữ liệu mô phỏng, mỗi thí nghiệm được thiết kế để cô lập một cơ chế. Chúng cho thấy cơ chế đó tồn tại và có độ lớn đáng kể, không dùng để suy ra con số cho một hệ thống cụ thể.

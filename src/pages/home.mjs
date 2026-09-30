@@ -10,8 +10,7 @@ function lietKe(ten) {
   return ten.slice(0, -1).join(', ') + ' và ' + ten[ten.length - 1];
 }
 
-const siteTitle = (books) =>
-  demSach(books.length) + ' giáo trình tự học: ' + lietKe(books.map((b) => b.spec.short));
+const SITE_TITLE = 'Tự học học máy và kỹ thuật AI';
 
 function bookSection(b, escapeHtml) {
   const spec = b.spec;
@@ -123,11 +122,18 @@ export function buildHomePage(ctx) {
   const body =
     '<article class="prose home">' +
     '<header class="hero">' +
-    '<p class="hero-kicker">Tự học · tiếng Việt · mọi con số đều chạy lại được</p>' +
-    '<h1>' + escapeHtml(siteTitle(books)) + '</h1>' +
-    '<p class="hero-lede">' + demSach(books.length) + ' giáo trình viết theo cùng một lối: <b>động cơ → định nghĩa → suy luận → ví dụ số → thí nghiệm kiểm chứng</b>. Mỗi chương có phần tự kiểm tra, mỗi bài tập có lời giải đầy đủ, và mọi khẳng định đều truy được về bài báo gốc hoặc về mã chạy lại được.</p>' +
+    '<p class="hero-kicker">Tài liệu tự học bằng tiếng Việt</p>' +
+    '<h1>' + SITE_TITLE + '</h1>' +
+    '<p class="hero-lede">' + demSach(books.length) + ' giáo trình: ' +
+    escapeHtml(lietKe(books.map((b) => b.spec.short))) + '. Nội dung đi từ toán và học máy cổ điển, ' +
+    'qua học sâu và mô hình ngôn ngữ, tới xây dựng ứng dụng LLM, tối ưu suy luận và vận hành hệ thống, ' +
+    'theo các chặng của roadmap <b>AI Engineer</b> trên roadmap.sh.</p>' +
+    '<p class="hero-lede">Mỗi chương trình bày theo thứ tự: vấn đề cần giải quyết, định nghĩa, suy luận, ' +
+    'ví dụ số, rồi thí nghiệm kiểm chứng bằng mã chạy lại được. Mỗi chương có câu hỏi tự kiểm tra, mỗi bài ' +
+    'tập có lời giải đầy đủ, và mỗi kết quả quan trọng đều ghi nguồn.</p>' +
     jump +
-    '<p class="home-spine">Bốn giáo trình viết để đọc nối nhau — <a href="lo-trinh.html">xem lộ trình cả bộ</a>, nơi toàn bộ các bài được xếp thành một dãy đánh số liên tục.</p>' +
+    '<p class="home-spine">Các giáo trình viết để đọc nối tiếp nhau. Trang <a href="lo-trinh.html">Lộ trình</a> ' +
+    'xếp toàn bộ bài học thành các chặng theo roadmap, kèm bảng cho biết mỗi chủ đề của roadmap được trình bày ở chương nào.</p>' +
     '</header>' +
     books.map((b) => bookSection(b, escapeHtml)).join('') +
     '</article>';
@@ -135,9 +141,10 @@ export function buildHomePage(ctx) {
   write(
     'index.html',
     page({
-      title: siteTitle(books),
+      title: SITE_TITLE,
       description:
-        'Giáo trình tự học bằng tiếng Việt về quantization trong deep learning và về MLOps: lý thuyết, hình sinh bằng mã, bài tập có lời giải và công cụ tương tác.',
+        'Sáu giáo trình tự học bằng tiếng Việt theo roadmap AI Engineer: toán, học máy cổ điển, học sâu, ' +
+        'mô hình ngôn ngữ, ứng dụng LLM, lượng tử hoá và MLOps; có hình sinh bằng mã, bài tập có lời giải và công cụ tương tác.',
       body,
       nav,
       file: 'index.html',

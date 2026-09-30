@@ -110,10 +110,10 @@ window.QZ_INIT['labModels'] = function () {
       so('atH', fmt(H, 4));
       so('atMax', fmt(maxW, 4));
       so('atNote', chia
-        ? 'Có chia: phương sai điểm số về 1 với MỌI d_k, nên entropy đứng yên quanh 3,68. Đó chính là điều phép chia được thiết kế để làm.'
+        ? 'Có chia: phương sai điểm số bằng 1 với mọi d_k, nên entropy giữ quanh 3,68.'
         : (dk >= 256
-          ? 'Không chia: một khoá duy nhất chiếm gần hết trọng số. Softmax bão hoà, và đạo hàm p(δ−p) tắt theo — gradient gần như bằng 0.'
-          : 'Không chia: phương sai điểm số bằng đúng d_k. Tăng d_k lên 256 rồi 1024 để thấy softmax bão hoà.'));
+          ? 'Không chia: một khoá chiếm gần hết trọng số. Softmax bão hoà nên đạo hàm p(δ − p) gần bằng 0, gradient gần như không truyền qua.'
+          : 'Không chia: phương sai điểm số bằng d_k. Tăng d_k lên 256 rồi 1024 để thấy softmax bão hoà.'));
     }
     nghe(['atDk', 'atScale'], chay);
   })();
@@ -154,9 +154,9 @@ window.QZ_INIT['labModels'] = function () {
       so('pcTiLe', fmt(tiLe, 3));
       so('pcNguong', nhom(6 * d));
       so('pcNote', tiLe > 1
-        ? 'T > 6d: chi phí bậc hai của attention ĐÃ chi phối. Đây là lúc attention thưa bắt đầu đáng cân nhắc.'
+        ? 'T > 6d: phần tính toán của attention đã lớn hơn phần còn lại. Các cách tính attention hiệu quả hơn bắt đầu đáng cân nhắc.'
         : 'T < 6d: attention chỉ chiếm ' + fmt(tiLe / (1 + tiLe) * 100, 0) +
-          '% chi phí. Phần còn lại của khối mới là chỗ tốn — đó là lý do phần lớn hệ thống chưa cần attention thưa.');
+          '% chi phí tính toán; phần lớn chi phí nằm ở các phép nhân với ma trận trọng số.');
     }
     nghe(['pcL', 'pcD', 'pcV', 'pcT', 'pcB', 'pcKV', 'pcH', 'pcTok'], chay);
     var nut = $('pcPreset');
@@ -217,14 +217,14 @@ window.QZ_INIT['labModels'] = function () {
 
       var tiLe = cur[cur.length - 1];
       so('ggTiLe', tiLe.toExponential(2).replace('.', ','));
-      so('ggKl', tiLe < 1e-6 ? 'TIÊU BIẾN' : tiLe > 1e6 ? 'BÙNG NỔ' : 'ổn định');
+      so('ggKl', tiLe < 1e-6 ? 'tiêu biến' : tiLe > 1e6 ? 'bùng nổ' : 'ổn định');
       so('ggNote', (!norm && res)
-        ? 'Kết nối tắt MỘT MÌNH làm BÙNG NỔ: mỗi lớp cộng thêm vào tín hiệu nên nó tích luỹ. Đây là chỗ hay bị nói sai nhất — bật thêm chuẩn hoá để thấy nó ổn định lại.'
+        ? 'Chỉ có kết nối tắt thì gradient bùng nổ: mỗi lớp cộng thêm vào tín hiệu một lượng cùng cỡ, nên độ lớn tăng theo cấp số nhân. Bật thêm chuẩn hoá để thấy gradient ổn định lại.'
         : (norm && res)
-          ? 'Chuẩn hoá cộng kết nối tắt cho tỉ lệ gần 1 — đúng cấu hình pre-LN của Transformer hiện đại.'
+          ? 'Chuẩn hoá kết hợp kết nối tắt cho tỉ lệ gần 1, giống cấu hình pre-LN của Transformer hiện nay.'
           : Math.abs(gain - he) < 0.06
-            ? 'Khởi tạo He: hệ số 2 bù cho việc ReLU vứt một nửa phương sai. Thử kéo gain sang 0,5 rồi 2,0.'
-            : 'Chỉ đổi hệ số khởi tạo thôi mà tỉ lệ trải qua hàng chục bậc độ lớn — đó là Mục 6.3.');
+            ? 'Khởi tạo He: hệ số 2 bù cho việc ReLU đặt một nửa phân phối bằng 0. Thử kéo gain sang 0,5 rồi 2,0.'
+            : 'Chỉ đổi hệ số khởi tạo, tỉ lệ đã thay đổi hàng chục bậc độ lớn (Mục 6.3).');
     }
     ['ggGain', 'ggDepth'].forEach(function (i) {
       var e = $(i); if (e) e.addEventListener('input', chay);

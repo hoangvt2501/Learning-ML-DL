@@ -59,7 +59,7 @@ ax[0].annotate(f"p99 một dịch vụ = {P99:.0f} ms", (1, P99), xytext=(4, -14
                textcoords="offset points", fontsize=8, color=C_DIM)
 ax[0].set_xscale("log"); ax[0].set_xlabel("số nhánh k gọi song song")
 ax[0].set_ylabel("p99 của thời gian trả lời (ms)")
-ax[0].set_title("Đuôi dài lên rất nhanh theo số nhánh")
+ax[0].set_title("p99 của thời gian trả lời theo số nhánh")
 ax[1].plot(ks, slow_frac * 100, "-o", ms=4, color=C_BAD)
 ax[1].set_xscale("log"); ax[1].set_xlabel("số nhánh k gọi song song")
 ax[1].set_ylabel("% yêu cầu chạm ít nhất một nhánh chậm")
@@ -111,7 +111,7 @@ for i, r in enumerate(rows):
                 color=C_BAD if d < 0 else C_MAIN)
 ax.set_xticks(xs); ax.set_xticklabels(names); ax.set_ylabel("Độ chính xác (%)")
 ax.legend(frameon=False, fontsize=8)
-ax.set_title("Gộp lại thì v2 tốt hơn — nhóm B thì không")
+ax.set_title("Độ chính xác của v1 và v2 theo lát cắt")
 fig.tight_layout(); fig.savefig(OUT + "mlops06_slice.png"); plt.close(fig)
 
 
@@ -143,7 +143,7 @@ for p0, c in [(0.01, C_BAD), (0.05, C_MAIN), (0.20, C_WARN)]:
     ax.plot(fine * 100, [n_per_arm(p0, l) for l in fine], color=c, label=f"CTR nền {p0:.0%}")
 ax.set_yscale("log"); ax.set_xlabel("Mức cải thiện tương đối cần phát hiện (%)")
 ax.set_ylabel("Cỡ mẫu mỗi nhánh (log)")
-ax.set_title("Muốn bắt cải thiện nhỏ thì cỡ mẫu tăng theo $1/\\Delta^2$")
+ax.set_title("Cỡ mẫu mỗi nhánh theo mức cải thiện tương đối cần phát hiện")
 ax.legend(frameon=False, fontsize=8)
 fig.tight_layout(); fig.savefig(OUT + "mlops09_abtest.png"); plt.close(fig)
 
@@ -313,7 +313,7 @@ fig, ax = plt.subplots(figsize=(6.0, 3.1))
 for lab, a in G.items():
     ax.plot(np.arange(WEEKS), a * 100, lw=1.6, label=lab)
 ax.set_xlabel("tuần kể từ lần huấn luyện đầu"); ax.set_ylabel("độ chính xác (%)")
-ax.set_title("Cùng một mô hình, chỉ khác nhịp huấn luyện lại")
+ax.set_title("Độ chính xác theo tuần với bốn nhịp huấn luyện lại")
 ax.legend(frameon=False, fontsize=8)
 fig.tight_layout(); fig.savefig(OUT + "mlops13_staleness.png"); plt.close(fig)
 

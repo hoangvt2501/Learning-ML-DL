@@ -10,7 +10,7 @@ export function buildBieudienLabPage(ctx) {
   // ---------------------------------------------------------- 1. RLHF beta
   const lab1 = K('rlhf-beta', 1,
     'RLHF: $\\beta$ là vị trí trên một đường đánh đổi',
-    'Nghiệm tối ưu có dạng đóng $\\pi^{*} \\propto \\pi_{\\text{ref}}\\,e^{r/\\beta}$ — tức **chính sách tham chiếu đánh trọng số lại theo hàm mũ của phần thưởng**. Trượt $\\beta$ và xem hai việc cùng lúc: bên trái là phân phối bị kéo đi thế nào, bên phải là vị trí hiện tại trên mặt đánh đổi. Lý thuyết ở Mục 14.4.',
+    'Nghiệm tối ưu có dạng đóng $\\pi^{*} \\propto \\pi_{\\text{ref}}\\,e^{r/\\beta}$ , tức chính sách tham chiếu đánh trọng số lại theo hàm mũ của phần thưởng. Thay đổi $\\beta$ để xem phân phối thay đổi thế nào (trái) và vị trí tương ứng trên đường đánh đổi (phải). Lý thuyết ở Mục 14.4.',
     '<div class="lab-grid lab-grid--wide"><div class="lab-controls">' +
     range('rlBeta', 'β', -30, 24, 0, 1, 'rlBetaOut') +
     stat('rlKL', 'KL(π* ‖ π_ref)') +
@@ -23,7 +23,7 @@ export function buildBieudienLabPage(ctx) {
   // --------------------------------------------------- 2. lịch nhiễu khuếch tán
   const lab2 = K('lich-nhieu', 2,
     'Lịch nhiễu: vì sao $t$ nhỏ học chi tiết còn $t$ lớn học bố cục',
-    'Dạng đóng $q(x_t \\mid x_0) = \\mathcal{N}(\\sqrt{\\bar\\alpha_t}\\,x_0,\\ (1-\\bar\\alpha_t)I)$ cho phép nhảy thẳng tới bước $t$ bất kỳ. Trượt $t$ và xem đồng thời hai thứ: tín hiệu còn lại theo lịch (trái) và một "ảnh" một chiều đang tan dần (phải). Số liệu ở Mục 11.3.',
+    'Dạng đóng $q(x_t \\mid x_0) = \\mathcal{N}(\\sqrt{\\bar\\alpha_t}\\,x_0,\\ (1-\\bar\\alpha_t)I)$ cho phép lấy trực tiếp $x_t$ ở bước bất kỳ. Thay đổi $t$ để xem tín hiệu còn lại theo lịch nhiễu (trái) và một tín hiệu một chiều bị nhiễu dần (phải). Số liệu ở Mục 11.3.',
     '<div class="lab-grid lab-grid--wide"><div class="lab-controls">' +
     range('dfT', 'Bước t', 0, 999, 200, 1, 'dfTOut') +
     stat('dfAn', 'ᾱ_t') +
@@ -35,13 +35,13 @@ export function buildBieudienLabPage(ctx) {
 
   // ------------------------------------------------------- 3. bộ nhớ LoRA
   const lab3 = K('lora-bo-nho', 3,
-    'LoRA: cái nó thật sự tiết kiệm',
-    'LoRA **không** làm mô hình chạy nhanh hơn — khi suy luận thì gộp $BA$ vào $W_0$ nên tốc độ bằng bản gốc. Thứ nó đổi là **bộ nhớ lúc huấn luyện**. Gõ cấu hình vào và so hai cột cuối. Lý thuyết và số đo ở Mục 7.3.',
+    'LoRA: bộ nhớ khi huấn luyện',
+    'LoRA không làm mô hình chạy nhanh hơn: khi suy luận, $BA$ được gộp vào $W_0$ nên tốc độ bằng mô hình gốc. Điều LoRA thay đổi là bộ nhớ khi huấn luyện. Nhập cấu hình để so sánh với tinh chỉnh toàn phần. Lý thuyết và số đo ở Mục 7.3.',
     '<div class="lab-grid"><div class="lab-controls">' +
     num('loD', 'Chiều mô hình d', 4096, 'min="8" step="8"') +
     num('loL', 'Số lớp L', 32, 'min="1" step="1"') +
     num('loR', 'Hạng r của LoRA', 8, 'min="1" step="1"') +
-    num('loN', 'Tham số phi-embedding (tỉ)', 6.476, 'min="0.01" step="0.1"') +
+    num('loN', 'Tham số không tính embedding (tỉ)', 6.476, 'min="0.01" step="0.1"') +
     check('loQV', 'Chỉ gắn vào W_Q và W_V', true) +
     '</div><div class="lab-output lab-stats">' +
     stat('loTiLeLop', 'Tỉ lệ 2r/d của một lớp') +
@@ -57,9 +57,8 @@ export function buildBieudienLabPage(ctx) {
   const body =
     '<article class="prose lab-page" data-lab-bieudien>' +
     mo('Biểu diễn &amp; Căn chỉnh · thực hành',
-      'Ba công cụ cho ba chỗ mà công thức nhìn thì hiểu nhưng chưa thấy: ' +
-      'phép đánh trọng số lại của RLHF, lịch nhiễu của mô hình khuếch tán, ' +
-      'và con số bộ nhớ đứng sau LoRA.') +
+      'Ba thí nghiệm tương tác đi kèm giáo trình: phép đánh trọng số lại trong nghiệm của RLHF, ' +
+      'lịch nhiễu của mô hình khuếch tán, và bộ nhớ huấn luyện khi dùng LoRA.') +
     lab1 + lab2 + lab3 +
     '</article>';
 

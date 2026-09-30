@@ -314,7 +314,7 @@ const books = allBooks.filter((spec) => {
 });
 const built = books.map((spec) => buildBook(spec, books));
 
-buildCurriculumPage({ books: built, page, escapeHtml, write, searchIndex });
+buildCurriculumPage({ books: built, page, escapeHtml, write, searchIndex, read });
 buildHomePage({ books: built, page, escapeHtml, write, read, ROOT, searchIndex });
 
 // ---------------------------------------------------------------- tài nguyên

@@ -1,4 +1,4 @@
-"""Sơ đồ khái niệm cho giáo trình "Biểu diễn, Sinh và Căn chỉnh".
+"""Sơ đồ khái niệm cho giáo trình "Biểu diễn & Căn chỉnh".
 
 Hình vẽ tay bằng matplotlib, để trong mã nguồn cho sửa được và cho khớp với chữ.
 
@@ -124,28 +124,28 @@ fig.tight_layout(); fig.savefig(OUT + "bd05_taidung.png"); plt.close(fig)
 # ---------------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(8.8, 3.6))
 ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-ax.text(.5, .95, "LoRA: học phần THÊM VÀO, hạng thấp", ha="center", fontsize=11.5, weight="bold")
+ax.text(.5, .95, "LoRA: học phần cộng thêm có hạng thấp", ha="center", fontsize=11.5, weight="bold")
 
 ax.add_patch(FancyBboxPatch((.06, .35), .2, .38,
                             boxstyle="round,pad=0.008,rounding_size=0.02",
                             facecolor="#e9ecec", edgecolor=C_DIM, linewidth=1.3))
 ax.text(.16, .60, "$W_0$", ha="center", fontsize=15)
 ax.text(.16, .50, "$d \\times d$", ha="center", fontsize=8.5, color="#444")
-ax.text(.16, .42, "ĐÓNG BĂNG", ha="center", fontsize=7.6, color=C_DIM, weight="bold")
+ax.text(.16, .42, "đóng băng", ha="center", fontsize=7.6, color=C_DIM, weight="bold")
 ax.text(.16, .30, "$d^2$ tham số", ha="center", fontsize=8, color=C_DIM)
 
 ax.add_patch(FancyBboxPatch((.42, .55), .085, .18,
                             boxstyle="round,pad=0.006,rounding_size=0.015",
                             facecolor="#f2e6f5", edgecolor="#8a5fa8", linewidth=1.3))
-ax.text(.4625, .64, "$A$", ha="center", fontsize=13, color="#8a5fa8")
+ax.text(.4625, .64, "$B$", ha="center", fontsize=13, color="#8a5fa8")
 ax.text(.4625, .50, "$d\\times r$", ha="center", fontsize=8, color="#8a5fa8")
 
 ax.add_patch(FancyBboxPatch((.55, .55), .085, .18,
                             boxstyle="round,pad=0.006,rounding_size=0.015",
                             facecolor="#f2e6f5", edgecolor="#8a5fa8", linewidth=1.3))
-ax.text(.5925, .64, "$B$", ha="center", fontsize=13, color="#8a5fa8")
+ax.text(.5925, .64, "$A$", ha="center", fontsize=13, color="#8a5fa8")
 ax.text(.5925, .50, "$r\\times d$", ha="center", fontsize=8, color="#8a5fa8")
-ax.text(.5275, .40, "HỌC — chỉ $2dr$ tham số", ha="center", fontsize=8,
+ax.text(.5275, .40, "học, chỉ $2dr$ tham số", ha="center", fontsize=8,
         color="#8a5fa8", weight="bold")
 
 ax.text(.345, .64, "+", ha="center", fontsize=20, color="#333")
@@ -158,11 +158,11 @@ ax.text(.84, .60, "$W_0 + BA$", ha="center", fontsize=13)
 ax.text(.84, .48, "gộp lại khi\nsuy luận", ha="center", fontsize=8,
         color=C_MAIN, linespacing=1.4)
 
-ax.text(.5, .22, "Giả thiết cốt lõi: phần CẦN SỬA khi chuyển sang việc mới có **hạng thấp**.",
+ax.text(.5, .22, "Giả thiết: phần cần sửa khi chuyển sang nhiệm vụ mới có hạng thấp.",
         ha="center", fontsize=8.8, color="#222")
 ax.text(.5, .13, "Với $d = 4096$ và $r = 8$: $2dr / d^2 = 2r/d = 0{,}39\\%$ số tham số của lớp.",
         ha="center", fontsize=8.5, color="#333")
-ax.text(.5, .04, "Khi suy luận thì cộng $BA$ vào $W_0$ một lần là xong — LoRA KHÔNG làm chậm mô hình.",
+ax.text(.5, .04, "Khi suy luận, cộng $BA$ vào $W_0$ một lần, nên LoRA không làm chậm mô hình.",
         ha="center", fontsize=8.2, color=C_DIM, style="italic")
 fig.tight_layout(); fig.savefig(OUT + "bd07_lora.png"); plt.close(fig)
 
@@ -210,7 +210,7 @@ for x, ten_h, col, cong_thuc, muc in ho:
                 "· " + m.replace("**", ""), fontsize=7.7, va="center", color="#2a2a2a")
 
 ax.text(.5, .085,
-        "Cả ba đều biến nhiễu Gauss thành mẫu. Khác nhau ở chỗ HUẤN LUYỆN BẰNG GÌ:\n"
+        "Cả ba đều biến nhiễu Gauss thành mẫu. Khác nhau ở cách huấn luyện:\n"
         "VAE tối đa một chặn dưới của hợp lý, GAN chơi một trò chơi, khuếch tán giải một bài hồi quy.",
         ha="center", fontsize=8.4, color="#333", linespacing=1.6)
 fig.tight_layout(); fig.savefig(OUT + "bd11_mohinhsinh.png"); plt.close(fig)
@@ -258,13 +258,13 @@ for x in (.253, .493, .733):
 ax.add_patch(FancyBboxPatch((.50, .14), .47, .12,
                             boxstyle="round,pad=0.008,rounding_size=0.02",
                             facecolor="#fdf4e6", edgecolor=C_WARN, linewidth=1.4))
-ax.text(.735, .20, "DPO gộp 3a và 3b làm MỘT — bỏ hẳn mô hình thưởng",
+ax.text(.735, .20, "DPO gộp 3a và 3b thành một bước, không cần mô hình thưởng",
         ha="center", va="center", fontsize=9.0, weight="bold", color="#7a5a10")
 ten(ax, (.62, .29), (.62, .265), color=C_WARN, lw=1.5)
 ten(ax, (.86, .29), (.86, .265), color=C_WARN, lw=1.5)
 
 ax.text(.5, .055,
-        "Bước 3 là chỗ duy nhất mô hình học từ SO SÁNH thay vì từ ví dụ mẫu — và đó là lý do nó vượt được\n"
+        "Bước 3 là bước duy nhất mô hình học từ so sánh thay vì từ ví dụ mẫu, và đó là lý do nó vượt được\n"
         "chất lượng của người viết mẫu: nhận ra câu nào hay hơn dễ hơn nhiều so với tự viết ra câu hay nhất.",
         ha="center", fontsize=8.3, color="#333", linespacing=1.6)
 fig.tight_layout(); fig.savefig(OUT + "bd14_rlhf_quytrinh.png"); plt.close(fig)

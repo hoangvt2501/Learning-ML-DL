@@ -1,4 +1,4 @@
-"""Thí nghiệm sinh số liệu và hình cho giáo trình "Mô hình và kiến trúc".
+"""Thí nghiệm sinh số liệu và hình cho giáo trình "Học sâu".
 
 Mọi con số thực nghiệm trong tài liệu đều in ra từ script này. Hạt giống cố định
 nên chạy lại cho kết quả y hệt. Chỉ cần NumPy, SciPy, scikit-learn, matplotlib.
@@ -28,9 +28,9 @@ def head(t):
 
 
 # =====================================================================
-# (A) Hình 2 — Phân rã thiên lệch / phương sai, đo thật
+# (A) Hình 2 — Phân rã độ chệch / phương sai, đo bằng mô phỏng
 # =====================================================================
-head("(A) Phan ra thien lech - phuong sai cua da thuc")
+head("(A) Phan ra do chech - phuong sai cua da thuc")
 
 NOISE, N_TRAIN, N_SETS = 0.35, 40, 250
 f_true = lambda x: np.sin(2.2 * x) + 0.35 * x
@@ -54,29 +54,32 @@ for d in degrees:
     bias2.append(b2); var.append(v); total.append(b2 + v + NOISE ** 2)
 
 best = int(np.argmin(total))
-print(f"{'bậc':>4}{'thiên lệch²':>14}{'phương sai':>13}{'nhiễu²':>10}{'tổng MSE':>12}")
+print(f"{'bậc':>4}{'độ chệch²':>14}{'phương sai':>13}{'nhiễu²':>10}{'tổng MSE':>12}")
 for i, d in enumerate(degrees):
     star = "  <- nhỏ nhất" if i == best else ""
     print(f"{d:4d}{bias2[i]:14.4f}{var[i]:13.4f}{NOISE**2:10.4f}{total[i]:12.4f}{star}")
-print(f"\nBac toi uu = {degrees[best]}; tai do thien lech^2={bias2[best]:.4f}, phuong sai={var[best]:.4f}")
-print(f"Bac 1  : thien lech^2 = {bias2[0]:.3f} (chiem {bias2[0]/total[0]*100:.0f}% MSE) -> THIEU KHOP")
-print(f"Bac {degrees[-1]}: phuong sai  = {var[-1]:.3f} (chiem {var[-1]/total[-1]*100:.0f}% MSE) -> QUA KHOP")
+print(f"\nBac toi uu = {degrees[best]}; tai do do chech^2={bias2[best]:.4f}, phuong sai={var[best]:.4f}")
+print(f"Bac 1  : do chech^2 = {bias2[0]:.3f} (chiem {bias2[0]/total[0]*100:.0f}% MSE) -> UNDERFITTING")
+print(f"Bac {degrees[-1]}: phuong sai  = {var[-1]:.3f} (chiem {var[-1]/total[-1]*100:.0f}% MSE) -> OVERFITTING")
+# Ước lượng độ chệch² từ N_SETS lần khớp bị cộng thêm sai số Monte Carlo cỡ phương sai / N_SETS
+print(f"Sai so Monte Carlo cua uoc luong do chech^2 (~ phuong sai / {N_SETS}): "
+      f"bac 12 ~ {var[11]/N_SETS:.2f}, bac 13 ~ {var[12]/N_SETS:.2f}, bac 14 ~ {var[13]/N_SETS:.2f}")
 
 fig, ax = plt.subplots(figsize=(6.0, 3.2))
-ax.plot(degrees, bias2, "-o", ms=4, color=C_MAIN, label="thiên lệch²")
+ax.plot(degrees, bias2, "-o", ms=4, color=C_MAIN, label="độ chệch²")
 ax.plot(degrees, var, "-o", ms=4, color=C_BAD, label="phương sai")
 ax.plot(degrees, total, "-o", ms=4, color=C_WARN, label="tổng MSE")
 ax.axhline(NOISE ** 2, ls=":", color=C_DIM, lw=1.2)
 ax.annotate("nhiễu không thể giảm", (1.2, NOISE ** 2 * 1.15), fontsize=8, color=C_DIM)
 ax.axvline(degrees[best], ls="--", lw=1.1, color=C_DIM)
 ax.set_yscale("log"); ax.set_xlabel("bậc đa thức"); ax.set_ylabel("sai số bình phương (log)")
-ax.set_title("Phân rã đo được: MSE = thiên lệch² + phương sai + nhiễu²")
+ax.set_title("Phân rã đo được: MSE = độ chệch² + phương sai + nhiễu²")
 ax.legend(frameon=False, fontsize=8)
 fig.tight_layout(); fig.savefig(OUT + "models02_biasvar.png"); plt.close(fig)
 
 
 # =====================================================================
-# (B) Hình 4 — Bagging cắt phương sai, boosting cắt thiên lệch
+# (B) Hình 4 — Bagging giảm phương sai, boosting giảm độ chệch
 # =====================================================================
 head("(B) Bagging va boosting cat vao thanh phan nao")
 
@@ -102,18 +105,18 @@ for name, mk in models.items():
     mp = preds.mean(axis=0)
     b2 = np.mean((mp - y_true) ** 2); v = np.mean(preds.var(axis=0))
     rows.append((name, b2, v, b2 + v))
-    print(f"{name:<20} thiên lệch²={b2:.4f}  phương sai={v:.4f}  tổng={b2+v:.4f}")
+    print(f"{name:<20} độ chệch²={b2:.4f}  phương sai={v:.4f}  tổng={b2+v:.4f}")
 base = rows[0]
-print(f"\nBagging giam phuong sai {base[2]/rows[1][2]:.1f} lan, thien lech doi {rows[1][1]/base[1]:.2f} lan")
-print(f"Boosting giam thien lech {base[1]/rows[2][1]:.1f} lan, phuong sai doi {rows[2][2]/base[2]:.2f} lan")
+print(f"\nBagging giam phuong sai {base[2]/rows[1][2]:.1f} lan, do chech doi {rows[1][1]/base[1]:.2f} lan")
+print(f"Boosting giam do chech {base[1]/rows[2][1]:.1f} lan, phuong sai doi {rows[2][2]/base[2]:.2f} lan")
 
 fig, ax = plt.subplots(figsize=(5.6, 3.1))
 xs = np.arange(len(rows)); w = .38
-ax.bar(xs - w/2, [r[1] for r in rows], w, label="thiên lệch²", color=C_MAIN)
+ax.bar(xs - w/2, [r[1] for r in rows], w, label="độ chệch²", color=C_MAIN)
 ax.bar(xs + w/2, [r[2] for r in rows], w, label="phương sai", color=C_BAD)
 ax.set_xticks(xs); ax.set_xticklabels([r[0] for r in rows], fontsize=8)
 ax.set_ylabel("đóng góp vào MSE"); ax.legend(frameon=False, fontsize=8)
-ax.set_title("Hai họ tập hợp tấn công hai thành phần khác nhau")
+ax.set_title("Độ chệch² và phương sai của ba mô hình")
 fig.tight_layout(); fig.savefig(OUT + "models04_ensemble.png"); plt.close(fig)
 
 
@@ -174,7 +177,7 @@ for k, npieces, _, _, errs in Crows:
     ax[0].plot(widths, np.maximum(errs, 1e-12), "-o", ms=4, label=f"$k={k}$ ({npieces} đoạn)")
 ax[0].set_xscale("log", base=2); ax[0].set_yscale("log")
 ax[0].set_xlabel("bề rộng của mạng MỘT lớp ẩn"); ax[0].set_ylabel("MSE nhỏ nhất đạt được (log)")
-ax[0].set_title("Sai số sụp đúng khi bề rộng chạm số đoạn")
+ax[0].set_title("Sai số của mạng một lớp ẩn theo bề rộng")
 ax[0].legend(frameon=False, fontsize=7.5)
 ks = [c[0] for c in Crows]
 ax[1].plot(ks, [c[2] for c in Crows], "-o", ms=5, color=C_MAIN, label="mạng sâu $k$ lớp")
@@ -285,13 +288,13 @@ ax[0].plot(dks, [e[1] for e in E], "-o", ms=4, color=C_MAIN, label="đo được
 ax[0].plot(dks, dks, ":", color=C_DIM, lw=1.4, label="lý thuyết $d_k$")
 ax[0].set_xscale("log"); ax[0].set_yscale("log")
 ax[0].set_xlabel("$d_k$"); ax[0].set_ylabel("phương sai của $q\\cdot k$")
-ax[0].set_title("Tích vô hướng phình theo $d_k$"); ax[0].legend(frameon=False, fontsize=8)
+ax[0].set_title("Phương sai của tích vô hướng theo $d_k$"); ax[0].legend(frameon=False, fontsize=8)
 ax[1].plot(dks, [e[3] for e in E], "-o", ms=4, color=C_BAD, label="không chia")
 ax[1].plot(dks, [e[4] for e in E], "-o", ms=4, color=C_MAIN, label="chia $\\sqrt{d_k}$")
 ax[1].axhline(np.log(64), ls=":", color=C_DIM, lw=1.2)
 ax[1].annotate("entropy tối đa ln 64", (dks[0], np.log(64) * 0.93), fontsize=7.5, color=C_DIM)
 ax[1].set_xscale("log"); ax[1].set_xlabel("$d_k$"); ax[1].set_ylabel("entropy của softmax (nat)")
-ax[1].set_title("Không chia thì attention hoá cứng"); ax[1].legend(frameon=False, fontsize=8)
+ax[1].set_title("Entropy của phân phối attention"); ax[1].legend(frameon=False, fontsize=8)
 fig.tight_layout(); fig.savefig(OUT + "models10_scaling.png"); plt.close(fig)
 
 
@@ -398,7 +401,7 @@ fig.tight_layout(); fig.savefig(OUT + "models12_rope.png"); plt.close(fig)
 
 
 # =====================================================================
-# (H) Hình 13 — Các chiến lược giải mã nhào nặn phân phối thế nào
+# (H) Hình 14 — Các chiến lược giải mã thay đổi phân phối thế nào
 # =====================================================================
 head("(H) Nhiet do, top-k, top-p")
 
@@ -434,7 +437,7 @@ ax[0].set_yscale("log"); ax[0].set_xlabel("hạng của token"); ax[0].set_ylabe
 ax[0].set_title("Hình dạng phân phối"); ax[0].legend(frameon=False, fontsize=7.5)
 ax[1].barh([h[0] for h in H], [h[2] for h in H], color=C_MAIN)
 ax[1].set_xscale("log"); ax[1].set_xlabel("số token phủ 90% xác suất (log)")
-ax[1].set_title("Không gian lựa chọn còn lại")
+ax[1].set_title("Số token phủ 90% xác suất")
 fig.tight_layout(); fig.savefig(OUT + "models13_decode.png"); plt.close(fig)
 
 

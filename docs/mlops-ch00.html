@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>0. Kiến thức nền và quy ước — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
-<meta name="description" content="Bảng ký hiệu và quy ước dịch thuật dùng xuyên suốt tài liệu, cùng phần kiến thức cần có trước khi bắt đầu.">
+<title>0. Ký hiệu và quy ước — MLOps: vận hành hệ thống học máy</title>
+<meta name="description" content="Bảng ký hiệu và quy ước thuật ngữ dùng trong giáo trình: sản xuất, phục vụ, dịch chuyển phân phối, lệch huấn luyện–phục vụ, rào chắn.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,11 +47,11 @@
 </header>
 
 <div class="shell">
-<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><a class="book-tab" href="models-ch01.html">Học sâu</a><a class="book-tab" href="bieudien-ch01.html">Biểu diễn &amp; Căn chỉnh</a><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Vì sao hệ ML khó</p><ul class="nav-list"><li><a href="mlops-ch00.html" class="is-active" aria-current="page"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Dữ liệu và kiểm thử</p><ul class="nav-list"><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Phục vụ và ra mắt</p><ul class="nav-list"><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Giám sát và huấn luyện lại</p><ul class="nav-list"><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>LLMOps</p><ul class="nav-list"><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thi-nghiem"></use></svg></span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-hinh"></use></svg></span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thuat-ngu"></use></svg></span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-ma-nguon"></use></svg></span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-toan-van"></use></svg></span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-nha"></use></svg></span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lo-trinh"></use></svg></span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><a class="book-tab" href="models-ch01.html">Học sâu</a><a class="book-tab" href="bieudien-ch01.html">Biểu diễn &amp; Căn chỉnh</a><a class="book-tab" href="ungdung-ch01.html">Ứng dụng LLM</a><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Mở đầu</p><ul class="nav-list"><li><a href="mlops-ch00.html" class="is-active" aria-current="page"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Nợ kỹ thuật của hệ thống học máy</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và mức độ tự động hoá</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Dữ liệu và thí nghiệm</p><ul class="nav-list"><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng, kiểm định và các loại lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá mô hình cho sản xuất</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Phục vụ và ra mắt</p><ul class="nav-list"><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ mô hình</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Giám sát và huấn luyện lại</p><ul class="nav-list"><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>LLMOps</p><ul class="nav-list"><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Câu hỏi phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thi-nghiem"></use></svg></span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-hinh"></use></svg></span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thuat-ngu"></use></svg></span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-ma-nguon"></use></svg></span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-toan-van"></use></svg></span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-nha"></use></svg></span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lo-trinh"></use></svg></span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
 <div class="scrim" id="scrim" hidden></div>
 <main class="content" id="main">
-<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 0</span><span class="kicker-time"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-dong-ho"></use></svg>2 phút đọc</span><span class="kicker-part">Vì sao hệ ML khó</span></div><h2 id="sec-0" class="heading"><span class="hnum">0</span><span class="htext">Kiến thức nền và quy ước<a class="anchor" href="#sec-0" aria-label="Liên kết tới mục này">#</a></span></h2><p class="chapter-lede">Bảng ký hiệu và quy ước dịch thuật dùng xuyên suốt tài liệu, cùng phần kiến thức cần có trước khi bắt đầu.</p>
-<p>Người đọc cần biết: quy trình huấn luyện một mô hình có giám sát, khái niệm tập huấn luyện / kiểm định / kiểm tra, Python ở mức đọc hiểu, và một chút kiến thức về hệ thống phân tán (dịch vụ, API, hàng đợi). Không cần biết trước công cụ MLOps nào.</p>
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 0</span><span class="kicker-time"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-dong-ho"></use></svg>2 phút đọc</span><span class="kicker-part">Mở đầu</span></div><h2 id="sec-0" class="heading"><span class="hnum">0</span><span class="htext">Ký hiệu và quy ước<a class="anchor" href="#sec-0" aria-label="Liên kết tới mục này">#</a></span></h2><p class="chapter-lede">Bảng ký hiệu và quy ước thuật ngữ dùng trong giáo trình: sản xuất, phục vụ, dịch chuyển phân phối, lệch huấn luyện–phục vụ, rào chắn.</p>
+<h3 id="sec-0-1" class="heading"><span class="hnum">0.1</span><span class="htext">Bảng ký hiệu<a class="anchor" href="#sec-0-1" aria-label="Liên kết tới mục này">#</a></span></h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -62,11 +62,11 @@
 <tbody>
 <tr>
 <td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi></mrow><annotation encoding="application/x-tex">X</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span></span></span></span></td>
-<td>đặc trưng đầu vào (features)</td>
+<td>đặc trưng đầu vào</td>
 </tr>
 <tr>
 <td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi></mrow><annotation encoding="application/x-tex">Y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span></span></span></span></td>
-<td>nhãn hoặc biến mục tiêu</td>
+<td>nhãn, biến mục tiêu</td>
 </tr>
 <tr>
 <td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span></td>
@@ -74,44 +74,123 @@
 </tr>
 <tr>
 <td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>Y</mi><mo>∣</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(Y \mid X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span></td>
-<td>quy luật gán nhãn — thứ mà mô hình học</td>
+<td>quan hệ giữa đầu vào và nhãn, điều mô hình học</td>
 </tr>
 <tr>
-<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{y}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span></span></span></span></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span></span></span></span></td>
 <td>dự đoán của mô hình</td>
 </tr>
 <tr>
-<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span></td>
-<td>thời điểm; <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mtext>pred</mtext></msub></mrow><annotation encoding="application/x-tex">t_{\text{pred}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9012em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">pred</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> là thời điểm phải đưa ra dự đoán</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mtext>pred</mtext></msub></mrow><annotation encoding="application/x-tex">t_{\text{pred}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9012em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">pred</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></td>
+<td>thời điểm; thời điểm phải đưa ra dự đoán</td>
 </tr>
 <tr>
-<td>SLI / SLO</td>
-<td>chỉ số mức dịch vụ / mục tiêu mức dịch vụ (service level indicator / objective)</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span></td>
+<td>cỡ mẫu</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span></td>
+<td>số bin (<a href="mlops-ch09.html#sec-9" class="xref">Chương 9</a>) hoặc số dịch vụ gọi song song (<a href="mlops-ch07.html#sec-7" class="xref">Chương 7</a>), tuỳ ngữ cảnh</td>
 </tr>
 <tr>
 <td>p50, p95, p99</td>
 <td>phân vị 50, 95, 99 của độ trễ</td>
 </tr>
 <tr>
-<td>CI / CD / CT</td>
-<td>tích hợp liên tục / bàn giao liên tục / <strong>huấn luyện liên tục</strong></td>
+<td>SLI, SLO</td>
+<td>chỉ số mức dịch vụ, mục tiêu mức dịch vụ</td>
+</tr>
+<tr>
+<td>CI, CD, CT</td>
+<td>tích hợp liên tục, bàn giao liên tục, huấn luyện liên tục</td>
 </tr>
 <tr>
 <td>PSI</td>
-<td>Population Stability Index, một đại lượng đo dịch chuyển phân phối</td>
-</tr>
-<tr>
-<td>TTL</td>
-<td>thời gian sống của một giá trị được lưu đệm (time to live)</td>
+<td>population stability index, một đại lượng đo dịch chuyển phân phối</td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>Một quy ước về chữ.</strong> Tài liệu dùng <em>sản xuất</em> cho &quot;production&quot;, <em>ra mắt</em> cho &quot;rollout/release&quot;, <em>dịch chuyển phân phối</em> cho &quot;distribution shift&quot;, <em>độ trễ</em> cho &quot;latency&quot;, <em>thông lượng</em> cho &quot;throughput&quot;. Khi một thuật ngữ tiếng Anh đã thành tên riêng trong ngành (canary, shadow, feature store, drift) thì giữ nguyên và giải thích ở lần xuất hiện đầu. Toàn bộ đối chiếu Việt – Anh nằm ở trang <strong>Từ điển thuật ngữ</strong>.</p>
+<h3 id="sec-0-2" class="heading"><span class="hnum">0.2</span><span class="htext">Quy ước thuật ngữ<a class="anchor" href="#sec-0-2" aria-label="Liên kết tới mục này">#</a></span></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tiếng Anh</th>
+<th>Dùng trong giáo trình</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>production</td>
+<td>sản xuất (môi trường vận hành thật)</td>
+</tr>
+<tr>
+<td>deployment, rollout</td>
+<td>triển khai, ra mắt</td>
+</tr>
+<tr>
+<td>serving</td>
+<td>phục vụ (mô hình)</td>
+</tr>
+<tr>
+<td>latency, throughput</td>
+<td>độ trễ, thông lượng</td>
+</tr>
+<tr>
+<td>distribution shift, drift</td>
+<td>dịch chuyển phân phối</td>
+</tr>
+<tr>
+<td>covariate shift, label shift, concept drift</td>
+<td>giữ nguyên tiếng Anh</td>
+</tr>
+<tr>
+<td>training–serving skew</td>
+<td>lệch giữa huấn luyện và phục vụ</td>
+</tr>
+<tr>
+<td>data leakage</td>
+<td>rò rỉ dữ liệu</td>
+</tr>
+<tr>
+<td>point-in-time correctness</td>
+<td>tính đúng theo thời điểm</td>
+</tr>
+<tr>
+<td>feature store</td>
+<td>kho đặc trưng</td>
+</tr>
+<tr>
+<td>model registry</td>
+<td>sổ đăng ký mô hình</td>
+</tr>
+<tr>
+<td>shadow, canary, A/B test, blue–green</td>
+<td>giữ nguyên tiếng Anh</td>
+</tr>
+<tr>
+<td>monitoring, alerting</td>
+<td>giám sát, cảnh báo</td>
+</tr>
+<tr>
+<td>feedback loop</td>
+<td>vòng phản hồi</td>
+</tr>
+<tr>
+<td>technical debt</td>
+<td>nợ kỹ thuật</td>
+</tr>
+<tr>
+<td>guardrail</td>
+<td>rào chắn</td>
+</tr>
+</tbody>
+</table></div>
+<p>Bảng đối chiếu đầy đủ nằm ở trang Từ điển thuật ngữ.</p>
 <hr>
 </article>
-<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="index.html"><span class="pager-dir">← Trước</span><span class="pager-title">Trang chủ</span></a><a class="pager-link pager-next" href="mlops-ch01.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Vì sao mô hình tốt vẫn chết</span></a></nav>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="index.html"><span class="pager-dir">← Trước</span><span class="pager-title">Trang chủ</span></a><a class="pager-link pager-next" href="mlops-ch01.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Nợ kỹ thuật của hệ thống học máy</span></a></nav>
 </main>
-
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-0-1"><span class="toc-num">0.1</span><span>Bảng ký hiệu</span></a></li><li class="toc-l3"><a href="#sec-0-2"><span class="toc-num">0.2</span><span>Quy ước thuật ngữ</span></a></li></ul></div></aside>
 </div>
 
 <div class="lightbox" id="lightbox" hidden>

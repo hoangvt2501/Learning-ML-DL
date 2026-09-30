@@ -1,1289 +1,1568 @@
-# Mô hình và kiến trúc: từ hồi quy tuyến tính tới Transformer
+# Học sâu và các kiến trúc mô hình
 
-> **Giáo trình tự học, viết theo lối bài giảng.** Mỗi khái niệm đi theo trình tự *động cơ → định nghĩa → suy luận → ví dụ số → thí nghiệm kiểm chứng*, giống hai giáo trình còn lại trong repo này.
+> **Giáo trình 2 của lộ trình.** Tài liệu nối tiếp giáo trình *Nền tảng*: bắt đầu từ các họ mô hình, phân rã độ chệch – phương sai và phương pháp tập hợp, rồi đi qua mạng nơ-ron nhiều lớp, lan truyền ngược, các kỹ thuật giúp huấn luyện mạng sâu, mạng tích chập, mạng hồi quy, tới Transformer và các thành phần của mô hình ngôn ngữ lớn hiện nay.
 >
-> **Về độ tin cậy của số liệu.** Tài liệu có hai loại con số, phân biệt rạch ròi. Loại thứ nhất **trích từ bài báo gốc** — mỗi lần dùng đều nói rõ nguồn, và nguồn nằm ở Chương 15. Loại thứ hai là **số liệu đo được trong chính repo này**, sinh bởi hai script trong `code/models/`, hạt giống cố định, chạy lại cho kết quả y hệt. Chỗ nào là quy ước của ngành thì được gọi đúng tên là quy ước.
+> **Kiến thức cần có.** Đại số tuyến tính, xác suất, gradient descent và hồi quy logistic ở mức của *Nền tảng*. Chỗ nào dùng lại kiến thức cũ đều có liên kết tới đúng mục.
 >
-> **Tài liệu này dạy cái gì.** Nó không dạy dùng framework. Nó trả lời câu hỏi: *mỗi họ mô hình giả định điều gì về thế giới, và giả định ấy bắt nó mạnh ở đâu, yếu ở đâu.* Nắm được điều đó thì đọc một kiến trúc mới chỉ còn là đọc xem nó đổi giả định nào.
+> **Về số liệu.** Tài liệu có hai loại con số. Loại thứ nhất trích từ bài báo gốc, mỗi lần dùng đều ghi nguồn, danh sách nguồn ở Chương 15. Loại thứ hai là số liệu đo trong chính repo này, sinh bởi hai script trong `code/models/` với hạt giống cố định, nên chạy lại cho kết quả giống hệt. Một số kết quả là phép đối chiếu với con số đã công bố, ví dụ số tham số của GPT-2 và Llama 2, và các kết quả đó khớp chính xác.
 
 ---
 
 ## Mục lục
 
-0. [Kiến thức nền và quy ước](#0-kiến-thức-nền-và-quy-ước)
-1. [Bản đồ các họ mô hình](#1-bản-đồ-các-họ-mô-hình)
-2. [Đánh đổi thiên lệch – phương sai](#2-đánh-đổi-thiên-lệch--phương-sai)
-3. [Cây quyết định và học tập hợp](#3-cây-quyết-định-và-học-tập-hợp)
-4. [Mạng nơ-ron nhiều lớp](#4-mạng-nơ-ron-nhiều-lớp)
-5. [Lan truyền ngược và tối ưu hoá](#5-lan-truyền-ngược-và-tối-ưu-hoá)
-6. [Khởi tạo, chuẩn hoá và kết nối tắt](#6-khởi-tạo-chuẩn-hoá-và-kết-nối-tắt)
-7. [Mạng tích chập](#7-mạng-tích-chập)
-8. [Mạng hồi quy và giới hạn của nó](#8-mạng-hồi-quy-và-giới-hạn-của-nó)
-9. [Attention và Transformer](#9-attention-và-transformer)
-10. [Transformer hiện đại](#10-transformer-hiện-đại)
-11. [Sinh văn bản: các chiến lược giải mã](#11-sinh-văn-bản-các-chiến-lược-giải-mã)
-12. [Đếm tham số, FLOP và bộ nhớ](#12-đếm-tham-số-flop-và-bộ-nhớ)
-13. [Bài tập](#13-bài-tập)
-14. [Ôn phỏng vấn](#14-ôn-phỏng-vấn)
-15. [Tài liệu tham khảo](#15-tài-liệu-tham-khảo)
+0. Ký hiệu và quy ước
+1. Các họ mô hình
+2. Độ chệch và phương sai
+3. Cây quyết định và phương pháp tập hợp
+4. Mạng nơ-ron nhiều lớp
+5. Lan truyền ngược và các thuật toán tối ưu
+6. Khởi tạo, chuẩn hoá và kết nối tắt
+7. Mạng nơ-ron tích chập
+8. Mạng nơ-ron hồi quy
+9. Attention và Transformer
+10. Các cải tiến của Transformer
+11. Các chiến lược giải mã
+12. Tham số, FLOP và bộ nhớ của Transformer
+13. Bài tập
+14. Câu hỏi phỏng vấn
+15. Tài liệu tham khảo
 
 ---
 
-## 0. Kiến thức nền và quy ước
+## 0. Ký hiệu và quy ước
 
-Người đọc cần biết: đại số tuyến tính (nhân ma trận, chuẩn vector), giải tích nhiều biến (đạo hàm riêng, quy tắc dây chuyền), xác suất cơ bản (kỳ vọng, phương sai), và Python/NumPy ở mức đọc hiểu.
+Giáo trình dùng lại ký hiệu và quy ước thuật ngữ của *Nền tảng* ([Chương 0 của *Nền tảng*](nentang-ch00.html)), bổ sung các ký hiệu riêng cho mạng nơ-ron và Transformer.
+
+### 0.1. Bảng ký hiệu
 
 | Ký hiệu | Ý nghĩa |
 |---|---|
-| $x \in \mathbb{R}^{d}$ | một mẫu đầu vào, $d$ chiều |
-| $X \in \mathbb{R}^{n \times d}$ | ma trận dữ liệu: $n$ mẫu, mỗi mẫu $d$ chiều |
-| $y$, $\hat{y}$ | nhãn thật và dự đoán |
-| $W$, $b$ | ma trận trọng số và vector độ lệch |
-| $\sigma$, $\phi$ | hàm kích hoạt |
+| $x \in \mathbb{R}^{d}$ | một điểm dữ liệu đầu vào có $d$ đặc trưng |
+| $X \in \mathbb{R}^{n \times d}$ | ma trận dữ liệu gồm $n$ điểm |
+| $y$, $\hat{y}$ | nhãn thật và giá trị dự đoán |
+| $W$, $b$ | ma trận trọng số và vector hệ số chặn của một lớp |
+| $\phi$, $\sigma$ | hàm kích hoạt nói chung; hàm sigmoid |
 | $L$ | hàm mất mát |
 | $\eta$ | tốc độ học (learning rate) |
-| $T$ | độ dài chuỗi (số token, số bước thời gian) |
+| $B$ | kích thước lô (batch size) |
+| $T$ | độ dài chuỗi: số token hoặc số bước thời gian |
 | $d$ hay $d_{\text{model}}$ | số chiều biểu diễn của Transformer |
 | $h$ | số đầu attention |
-| $d_k = d/h$ | số chiều mỗi đầu |
-| $d_{\text{ff}}$ | bề rộng lớp ẩn của FFN |
-| $L_{\text{layers}}$ | số khối Transformer |
+| $d_k = d/h$ | số chiều của mỗi đầu |
+| $d_{\text{ff}}$ | số chiều lớp ẩn của khối FFN |
+| $L_{\text{layers}}$ hoặc $L$ | số khối Transformer, khi không nhầm với hàm mất mát |
 | $V$ | kích thước từ vựng |
+| $N$ | số tham số của mô hình (không tính embedding, trừ khi ghi rõ) |
+| $D$ | số token dữ liệu huấn luyện |
 
-**Một quy ước về chữ.** Tài liệu dùng *thiên lệch* cho bias (theo nghĩa thống kê) và *độ lệch* cho bias (theo nghĩa tham số cộng thêm trong $Wx + b$) — hai thứ khác hẳn nhau mà tiếng Anh gọi trùng tên. Dùng *lớp* cho layer, *khối* cho block, *đầu* cho head, *kết nối tắt* cho skip/residual connection, *trường tiếp nhận* cho receptive field, *hàm kích hoạt* cho activation function. Khi một thuật ngữ đã thành tên riêng (softmax, attention, Transformer, dropout, embedding) thì giữ nguyên. Toàn bộ đối chiếu Việt – Anh nằm ở trang **Từ điển thuật ngữ**.
+Chữ $L$ được dùng cho cả hàm mất mát và số lớp. Chương 12 là chương duy nhất dùng $L$ cho số lớp trong công thức, và ở đó không có hàm mất mát nào.
 
-**Quy ước về chiều.** Tài liệu viết $x W$ (vector hàng nhân ma trận) khi nói về mã nguồn thực tế, và $W x$ (ma trận nhân vector cột) khi viết công thức toán. Hai cách chỉ khác nhau ở phép chuyển vị; chỗ nào dễ nhầm thì có ghi rõ chiều.
+### 0.2. Quy ước thuật ngữ
+
+Thuật ngữ theo cách dùng phổ biến trong cộng đồng học máy tiếng Việt, tham khảo bản dịch tiếng Việt các cheatsheet CS229 và CS230 của Đại học Stanford, giống *Nền tảng*. Các thuật ngữ riêng của giáo trình này:
+
+| Tiếng Anh | Dùng trong giáo trình |
+|---|---|
+| bias (của một ước lượng) | độ chệch |
+| bias (tham số $b$ của một lớp) | hệ số chặn (bias) |
+| inductive bias | thiên kiến quy nạp (inductive bias) |
+| layer, hidden layer | lớp, lớp ẩn |
+| activation function | hàm kích hoạt |
+| forward / backward pass | lượt xuôi / lượt ngược |
+| backpropagation | lan truyền ngược |
+| weight decay | weight decay (suy giảm trọng số) |
+| residual / skip connection | kết nối tắt |
+| convolution, filter, stride, padding, pooling | tích chập, bộ lọc, bước nhảy (stride), phần đệm (padding), gộp (pooling) |
+| receptive field | trường tiếp nhận |
+| recurrent neural network | mạng nơ-ron hồi quy (RNN) |
+| gate, forget gate, cell state | cổng, cổng quên, trạng thái ô nhớ |
+| query, key, value | truy vấn, khoá, giá trị (query, key, value) |
+| head, mask | đầu, mặt nạ |
+| decoding, beam search, temperature | giải mã, beam search, nhiệt độ |
+| ensemble | phương pháp tập hợp (ensemble) |
+| bagging, boosting, dropout, embedding, softmax, attention | giữ nguyên tiếng Anh |
+
+Chữ *bias* có ba nghĩa trong giáo trình, và mỗi nghĩa có một tên riêng. **Độ chệch** là sai lệch có hệ thống của một ước lượng, như trong "ước lượng không chệch". **Hệ số chặn** là tham số cộng thêm $b$ trong $Wx + b$. **Thiên kiến quy nạp** là tập các giả định mà một thuật toán học dùng để chọn giữa các hàm cùng khớp dữ liệu (Mục 1.4).
+
+### 0.3. Quy ước về chiều
+
+Trong công thức, $x$ là vector cột và một lớp viết là $Wx + b$ với $W \in \mathbb{R}^{d_{\text{out}} \times d_{\text{in}}}$. Trong mã, dữ liệu xếp theo hàng nên cả lô viết là `X @ W + b` với `W.shape == (d_in, d_out)`. Hai cách viết chỉ khác nhau một phép chuyển vị. Phần chữ dùng dấu phẩy thập phân (0,15); phần mã và kết quả in ra từ script giữ dấu chấm (0.15).
 
 ---
 
-## 1. Bản đồ các họ mô hình
+## 1. Các họ mô hình
 
-### 1.1. Vì sao cần một bản đồ
+Chương này đặt các họ mô hình chính lên cùng một khung so sánh: mỗi họ giả định gì về hàm cần học, có bao nhiêu tham số, được tối ưu thế nào và kiểm soát overfitting bằng cách nào. Khung này giúp giải thích vì sao cây tăng cường gradient vẫn thường tốt nhất trên dữ liệu dạng bảng, trong khi mạng tích chập và Transformer vượt trội trên ảnh và văn bản. Mục cuối trình bày khái niệm thiên kiến quy nạp, là cơ sở chung cho các so sánh đó.
 
-Học máy có hàng trăm thuật toán. Nhưng chúng chỉ trả lời **bốn câu hỏi thiết kế**, và mọi thuật toán là một bộ câu trả lời cụ thể:
+### 1.1. Bốn câu hỏi khi thiết kế một mô hình
 
-1. **Giả thiết gì về dạng của hàm cần học?** Tuyến tính? Bậc thang theo từng trục? Hợp thành nhiều tầng?
-2. **Tham số hoá thế nào?** Cố định số tham số, hay để số tham số lớn dần theo dữ liệu?
-3. **Tối ưu bằng cách nào?** Có nghiệm đóng? Tìm tham lam? Xuống dốc?
-4. **Chống quá khớp bằng gì?** Phạt chuẩn? Cắt tỉa? Lấy trung bình nhiều mô hình? Dừng sớm?
+Mọi thuật toán học có giám sát đều phải trả lời bốn câu hỏi, và mỗi thuật toán là một cách trả lời cụ thể:
 
-Trả lời được bốn câu này cho một mô hình là hiểu mô hình ấy. Phần còn lại là chi tiết cài đặt.
+1. **Họ hàm nào được xét?** Hàm tuyến tính của đặc trưng, hàm hằng trên từng vùng hình hộp, hay hợp của nhiều phép biến đổi. Đây là thành phần "mô hình" trong ba thành phần của một thuật toán học ([Mục 1.1 của *Nền tảng*](nentang-ch01.html)).
+2. **Số tham số được cố định trước hay tăng theo dữ liệu?** Hồi quy tuyến tính có $d + 1$ tham số dù có bao nhiêu dữ liệu. Cây quyết định có thể mọc thêm nút khi có thêm dữ liệu; các mô hình như vậy gọi là **phi tham số** (nonparametric), dù chúng vẫn có tham số.
+3. **Tìm tham số bằng cách nào?** Có nghiệm dạng đóng (hồi quy tuyến tính), giải bài toán tối ưu lồi (hồi quy logistic, SVM), tìm kiếm tham lam (cây quyết định), hay gradient descent trên hàm không lồi (mạng nơ-ron).
+4. **Kiểm soát overfitting bằng cách nào?** Phạt chuẩn của trọng số, giới hạn độ sâu của cây, lấy trung bình nhiều mô hình, hay dừng sớm quá trình tối ưu.
+
+Trả lời được bốn câu này cho một mô hình là nắm được những đặc điểm quan trọng nhất của nó: nó biểu diễn được gì, cần bao nhiêu dữ liệu, huấn luyện tốn kém thế nào và dễ hỏng ở đâu.
 
 ![Hình 1](figs/models01_families.png)
 
-**Hình 1.** Bốn họ lớn và vị trí của chúng trên cùng một trục. Càng sang phải, mô hình càng ít giả thiết về dạng hàm — nên càng linh hoạt, nhưng càng cần nhiều dữ liệu và càng khó diễn giải.
+**Hình 1.** Bốn họ mô hình lớn. Từ trái sang phải, mô hình càng ít giả định về dạng của hàm cần học, nên càng linh hoạt, nhưng càng cần nhiều dữ liệu và càng khó diễn giải.
 
-### 1.2. Bốn họ, bốn bộ câu trả lời
+### 1.2. So sánh bốn họ mô hình
 
-| | Mô hình tuyến tính | Cây và tập hợp | Mạng nơ-ron | Transformer |
+| | Mô hình tuyến tính | Cây và phương pháp tập hợp | Mạng nơ-ron nhiều lớp | Transformer |
 |---|---|---|---|---|
-| **Giả thiết dạng hàm** | tổ hợp tuyến tính của đặc trưng | hằng số trên các hộp chữ nhật song song trục | hợp thành nhiều tầng biến đổi affine + phi tuyến | như mạng nơ-ron, cộng thêm **quan hệ cặp giữa các vị trí** |
-| **Số tham số** | $d + 1$, cố định | lớn dần theo dữ liệu (phi tham số) | rất nhiều, cố định trước | rất nhiều, cố định trước |
-| **Tối ưu** | nghiệm đóng hoặc lồi | tham lam theo từng nhát cắt | xuống dốc + lan truyền ngược | như mạng nơ-ron |
-| **Chống quá khớp** | phạt $\ell_1$, $\ell_2$ | giới hạn độ sâu, cắt tỉa, lấy trung bình | dừng sớm, dropout, phạt chuẩn, tăng cường dữ liệu | như mạng nơ-ron |
-| **Mạnh nhất khi** | dữ liệu ít, cần giải thích, quan hệ gần tuyến tính | dữ liệu **bảng**, đặc trưng lẫn số và hạng mục, thang đo khác nhau | dữ liệu **thô có cấu trúc**: ảnh, âm thanh, văn bản | chuỗi dài, quan hệ xa, mọi phương thức dữ liệu |
-| **Yếu nhất khi** | quan hệ phi tuyến | phải ngoại suy ra ngoài miền dữ liệu; dữ liệu thô | dữ liệu ít; dữ liệu bảng thuần | chuỗi rất dài (chi phí bậc hai) |
+| Giả định về dạng hàm | tổ hợp tuyến tính của các đặc trưng | hằng số trên các hình hộp có cạnh song song với trục | hợp của nhiều phép biến đổi affine xen với hàm phi tuyến | như mạng nơ-ron, thêm cơ chế kết hợp thông tin giữa mọi cặp vị trí |
+| Số tham số | $d + 1$, cố định | tăng theo dữ liệu | rất nhiều, cố định trước | rất nhiều, cố định trước |
+| Cách tối ưu | nghiệm dạng đóng hoặc tối ưu lồi | tham lam theo từng lần chia | gradient descent và lan truyền ngược | như mạng nơ-ron |
+| Kiểm soát overfitting | regularization $\ell_1$, $\ell_2$ | giới hạn độ sâu, cắt tỉa, lấy trung bình | dừng sớm, weight decay, dropout, tăng cường dữ liệu | như mạng nơ-ron |
+| Phù hợp khi | ít dữ liệu, cần diễn giải, quan hệ gần tuyến tính | dữ liệu dạng bảng, đặc trưng lẫn số và hạng mục | dữ liệu thô có cấu trúc: ảnh, âm thanh | chuỗi dài, văn bản, và ngày càng nhiều loại dữ liệu khác |
+| Hạn chế | không biểu diễn được quan hệ phi tuyến nếu không tự tạo đặc trưng | không ngoại suy được; kém với dữ liệu thô | cần nhiều dữ liệu; kém với dữ liệu bảng thuần | chi phí tăng theo bình phương độ dài chuỗi |
 
-Một điểm hay bị bỏ qua và rất đáng nhớ: **trên dữ liệu bảng, cây tăng cường gradient vẫn thường thắng mạng nơ-ron sâu.** Đây không phải nghịch lý. Dữ liệu bảng có đặc trưng đã được con người thiết kế, thang đo lệch nhau, nhiều biến hạng mục và quan hệ dạng bậc thang — đúng loại cấu trúc mà nhát cắt song song trục mô tả tự nhiên, còn phép biến đổi affine thì không.
+Một kết quả thực nghiệm đáng nhớ: **trên dữ liệu dạng bảng, các mô hình dựa trên cây, nhất là gradient boosting, vẫn thường cho kết quả bằng hoặc tốt hơn mạng nơ-ron sâu**, với chi phí thấp hơn nhiều. Grinsztajn, Oyallon và Varoquaux (2022) so sánh trên 45 bộ dữ liệu dạng bảng và chỉ ra ba nguyên nhân: dữ liệu bảng thường có nhiều đặc trưng không liên quan, hàm cần học thường không trơn (có những bước nhảy theo ngưỡng), và mỗi cột có ý nghĩa riêng nên phép quay không gian đặc trưng làm mất thông tin. Cả ba đặc điểm này hợp với cách chia theo từng trục của cây, và không hợp với phép biến đổi affine của mạng nơ-ron.
 
-### 1.3. Cái gì thực sự quyết định
+### 1.3. Các yếu tố quyết định kết quả
 
-Với cùng một bài toán, thứ tự ảnh hưởng tới kết quả thường là:
+Với cùng một bài toán, kinh nghiệm thực tế cho thấy thứ tự ảnh hưởng tới kết quả thường là:
 
-$$\text{chất lượng dữ liệu và nhãn} \;>\; \text{đặc trưng} \;>\; \text{họ mô hình} \;>\; \text{siêu tham số} \;>\; \text{kiến trúc chi tiết}.$$
+$$\text{dữ liệu và nhãn} \;>\; \text{đặc trưng} \;>\; \text{họ mô hình} \;>\; \text{siêu tham số} \;>\; \text{chi tiết kiến trúc}.$$
 
-Tài liệu này nói về ba mức sau, nhưng nói trước điều ấy để bạn đặt chúng đúng chỗ. Hai giáo trình còn lại trong repo lo hai mức đầu (MLOps) và mức triển khai (Quantization).
+Đây là quy tắc kinh nghiệm, không phải định lý, và có ngoại lệ: với ảnh và văn bản, chọn đúng họ mô hình (mạng tích chập, Transformer) quan trọng hơn nhiều so với tự thiết kế đặc trưng. Nhưng quy tắc nhắc một điều hay bị quên: nhãn sai hoặc dữ liệu không đại diện cho tình huống sử dụng thật là những lỗi mà không mô hình nào sửa được. Giáo trình này tập trung vào ba mức sau; hai mức đầu được bàn trong [*MLOps*](mlops-ch03.html).
+
+### 1.4. Thiên kiến quy nạp
+
+Một tập dữ liệu hữu hạn luôn khớp được với vô số hàm khác nhau. Ví dụ, qua 10 điểm dữ liệu có vô số đường cong đi qua chính xác mọi điểm, và chúng dự đoán rất khác nhau ở những điểm chưa thấy. Muốn dự đoán được, thuật toán học phải ưu tiên một số hàm hơn các hàm khác, bằng những giả định không đến từ dữ liệu.
+
+> **Định nghĩa 1.1 (Thiên kiến quy nạp).** **Thiên kiến quy nạp** (inductive bias) của một thuật toán học là tập các giả định nó dùng để chọn giữa các hàm cùng khớp dữ liệu huấn luyện, và do đó quyết định cách nó dự đoán cho các điểm chưa thấy.
+
+Mỗi họ mô hình có một thiên kiến quy nạp riêng. Hồi quy tuyến tính giả định quan hệ tuyến tính. Regularization $\ell_2$ ưu tiên trọng số nhỏ ([Mục 9.2 của *Nền tảng*](nentang-ch09.html)). k láng giềng gần nhất giả định các điểm gần nhau có nhãn giống nhau. Mạng tích chập giả định đặc trưng có tính cục bộ và giống nhau ở mọi vị trí trong ảnh (Mục 7.1). Transformer giả định rất ít, và vì thế cần rất nhiều dữ liệu.
+
+Không có thiên kiến quy nạp nào tốt nhất cho mọi bài toán. Định lý "không có bữa trưa miễn phí" (no free lunch; Wolpert, 1996) phát biểu chặt chẽ điều này: lấy trung bình trên mọi bài toán có thể, mọi thuật toán học có cùng sai số trên các điểm ngoài tập huấn luyện. Một thuật toán chỉ tốt hơn thuật toán khác trên những bài toán mà giả định của nó phù hợp. Vì vậy câu hỏi "mô hình nào tốt nhất" không có câu trả lời chung; câu hỏi đúng là "giả định của mô hình nào khớp với cấu trúc của dữ liệu này".
+
+Thiên kiến quy nạp mạnh và độ chệch có liên hệ chặt chẽ. Giả định càng mạnh, họ hàm càng hẹp: nếu giả định đúng, mô hình học được từ ít dữ liệu; nếu sai, mô hình mắc sai số có hệ thống mà thêm dữ liệu cũng không sửa được. Chương 2 đo chính xác hai loại sai số này.
 
 ---
 
-## 2. Đánh đổi thiên lệch – phương sai
+## 2. Độ chệch và phương sai
 
-### 2.1. Vì sao chương này đứng đầu
+[Mục 3.6 của *Nền tảng*](nentang-ch03.html) đã tách sai số của một ước lượng thành độ chệch và phương sai. Chương này áp dụng cùng phép tách cho dự đoán của cả một mô hình học máy, rồi đo từng thành phần bằng mô phỏng. Kết quả cho một công cụ chẩn đoán thực tế: biết sai số chủ yếu đến từ độ chệch hay từ phương sai thì biết nên đổi mô hình hay nên thu thêm dữ liệu. Phần cuối chương trình bày hiện tượng double descent, một điểm mà bức tranh cổ điển cần được bổ sung.
 
-Gần như mọi quyết định trong phần còn lại của tài liệu — thêm lớp hay bớt lớp, phạt chuẩn mạnh hay nhẹ, lấy trung bình bao nhiêu mô hình — đều là một điểm trên cùng một đường cong. Hiểu đường cong ấy rồi thì các quyết định sau không còn là ghi nhớ mà là suy luận.
+### 2.1. Vai trò của phân rã độ chệch – phương sai
 
-### 2.2. Phân rã
+Nhiều quyết định trong các chương sau là điều chỉnh độ linh hoạt của mô hình: thêm hay bớt lớp, regularization mạnh hay nhẹ, cây sâu hay nông, lấy trung bình bao nhiêu mô hình. Mỗi quyết định như vậy thay đổi hai loại sai số theo hai chiều ngược nhau. Phân rã độ chệch – phương sai cho biết chính xác hai loại sai số đó là gì, và vì sao tổng của chúng thường nhỏ nhất ở một mức độ linh hoạt vừa phải.
 
-Giả sử dữ liệu sinh ra từ $y = f(x) + \varepsilon$ với $\mathbb{E}[\varepsilon] = 0$ và $\operatorname{Var}(\varepsilon) = \sigma^2$. Ta huấn luyện được $\hat{f}$, phụ thuộc vào tập huấn luyện ngẫu nhiên. Tại một điểm $x_0$, lấy kỳ vọng trên **mọi tập huấn luyện có thể**:
+### 2.2. Phân rã sai số dự đoán
 
-$$\mathbb{E}\big[(y_0 - \hat{f}(x_0))^2\big] \;=\; \underbrace{\big(\mathbb{E}[\hat{f}(x_0)] - f(x_0)\big)^2}_{\text{thiên lệch}^2} \;+\; \underbrace{\operatorname{Var}\big(\hat{f}(x_0)\big)}_{\text{phương sai}} \;+\; \underbrace{\sigma^2}_{\text{nhiễu}}$$
+Giả sử dữ liệu sinh từ mô hình $y = f(x) + \varepsilon$, trong đó $f$ là hàm thật, $\varepsilon$ là nhiễu có $\mathbb{E}[\varepsilon] = 0$, $\operatorname{Var}(\varepsilon) = \sigma^2$ và độc lập với $x$. Một thuật toán học nhận tập huấn luyện $\mathcal{D}$ và trả về hàm dự đoán $\hat f_{\mathcal{D}}$. Vì $\mathcal{D}$ là ngẫu nhiên, giá trị dự đoán $\hat f_{\mathcal{D}}(x_0)$ tại một điểm cố định $x_0$ cũng là một biến ngẫu nhiên.
 
-Đọc ba số hạng bằng lời:
+> **Định lý 2.1 (Phân rã độ chệch – phương sai).** Tại một điểm $x_0$, với $y_0 = f(x_0) + \varepsilon_0$ là một quan sát mới độc lập với tập huấn luyện, sai số bình phương kỳ vọng tách thành ba phần:
+> $$\mathbb{E}\big[(y_0 - \hat f_{\mathcal{D}}(x_0))^2\big] = \underbrace{\big(\mathbb{E}[\hat f_{\mathcal{D}}(x_0)] - f(x_0)\big)^2}_{\text{độ chệch}^2} + \underbrace{\operatorname{Var}\big(\hat f_{\mathcal{D}}(x_0)\big)}_{\text{phương sai}} + \underbrace{\sigma^2}_{\text{nhiễu}},$$
+> trong đó kỳ vọng và phương sai lấy theo phân phối của tập huấn luyện $\mathcal{D}$ và của nhiễu $\varepsilon_0$.
 
-- **Thiên lệch** — sai lệch có hệ thống: mô hình *trung bình* đã sai so với sự thật. Nguyên nhân là giả thiết về dạng hàm quá hẹp. Gọi là **thiếu khớp** (underfitting).
-- **Phương sai** — mức dao động: đổi tập huấn luyện một chút thì mô hình đổi nhiều. Nguyên nhân là mô hình đủ linh hoạt để bám cả nhiễu. Gọi là **quá khớp** (overfitting).
-- **Nhiễu** — phần không thể giảm được bằng bất kỳ mô hình nào. Đây là **trần trên của mọi cố gắng**.
+> **Chứng minh.** Viết gọn $\hat f = \hat f_{\mathcal{D}}(x_0)$, $f = f(x_0)$ và $m = \mathbb{E}[\hat f]$. Ta có $y_0 - \hat f = (f - \hat f) + \varepsilon_0$. Bình phương và lấy kỳ vọng: số hạng chéo $2\,\mathbb{E}[(f - \hat f)\varepsilon_0]$ bằng 0 vì $\varepsilon_0$ độc lập với $\hat f$ và có kỳ vọng 0, còn $\mathbb{E}[\varepsilon_0^2] = \sigma^2$. Phần còn lại $\mathbb{E}[(f - \hat f)^2]$ được tách giống [Định lý 3.2 của *Nền tảng*](nentang-ch03.html): viết $f - \hat f = (f - m) + (m - \hat f)$, số hạng chéo $2(f - m)\,\mathbb{E}[m - \hat f]$ bằng 0, còn lại $(f - m)^2 + \operatorname{Var}(\hat f)$.
 
-> Điểm cần nhớ khi trả lời phỏng vấn: thiên lệch và phương sai được định nghĩa **qua kỳ vọng trên các tập huấn luyện**, không phải trên các điểm dữ liệu. Nói "mô hình này phương sai cao vì dự đoán của nó dao động nhiều giữa các điểm" là nhầm định nghĩa.
+Ba thành phần có ý nghĩa khác nhau:
 
-### 2.3. Đo thật phân rã ấy
+- **Độ chệch** đo sai lệch có hệ thống: lấy trung bình trên rất nhiều tập huấn luyện, mô hình vẫn dự đoán lệch khỏi giá trị thật. Nguyên nhân là họ hàm quá hẹp so với hàm thật. Độ chệch cao tương ứng với underfitting.
+- **Phương sai** đo mức dao động: đổi tập huấn luyện thì dự đoán thay đổi nhiều. Nguyên nhân là mô hình đủ linh hoạt để khớp cả phần nhiễu riêng của từng tập huấn luyện. Phương sai cao tương ứng với overfitting.
+- **Nhiễu** $\sigma^2$ không phụ thuộc vào mô hình. Nó là cận dưới của sai số mà không mô hình nào vượt qua được.
 
-Phân rã trên không chỉ là hình vẽ minh hoạ — nó đo được. Thí nghiệm trong `code/models/experiments.py`: hàm thật là $f(x) = \sin(2{,}2x) + 0{,}35x$, nhiễu $\sigma = 0{,}35$, mỗi lần lấy 40 điểm huấn luyện, lặp lại 400 lần với 400 tập huấn luyện khác nhau, rồi khớp đa thức bậc 1 tới 14.
+> **Lưu ý.** Độ chệch và phương sai được định nghĩa qua kỳ vọng trên **các tập huấn luyện có thể rút ra**, tại một điểm $x_0$ cố định. Chúng không đo mức dao động của dự đoán giữa các điểm dữ liệu khác nhau. Một mô hình có dự đoán thay đổi mạnh theo $x$ vẫn có thể có phương sai thấp, nếu huấn luyện trên tập dữ liệu khác thì nó cho gần như cùng một hàm.
+
+Khi tăng độ linh hoạt của mô hình, độ chệch thường giảm vì họ hàm rộng hơn, còn phương sai thường tăng vì có nhiều cách hơn để khớp theo nhiễu. Tổng của chúng vì vậy thường có dạng chữ U theo độ linh hoạt. Từ "thường" là cần thiết: định lý chỉ khẳng định phép tách, không khẳng định hai thành phần thay đổi đơn điệu, và Mục 2.3 cho thấy các trường hợp ngoại lệ.
+
+### 2.3. Đo độ chệch và phương sai bằng mô phỏng
+
+Với dữ liệu mô phỏng, hàm thật $f$ đã biết, nên có thể đo trực tiếp cả ba thành phần: sinh nhiều tập huấn luyện độc lập, huấn luyện một mô hình trên mỗi tập, rồi tính trung bình và phương sai của các dự đoán tại từng điểm.
+
+Thí nghiệm trong `code/models/experiments.py` dùng hàm thật $f(x) = \sin(2{,}2x) + 0{,}35x$ trên đoạn $[-3, 3]$ và nhiễu Gauss có độ lệch chuẩn $\sigma = 0{,}35$, tức $\sigma^2 = 0{,}1225$. Mỗi tập huấn luyện gồm 40 điểm có $x$ rút đều trên đoạn. Với mỗi bậc đa thức từ 1 tới 14, thí nghiệm khớp đa thức trên 250 tập huấn luyện độc lập, rồi tính độ chệch² và phương sai tại 200 điểm cách đều và lấy trung bình theo các điểm.
 
 ![Hình 2](figs/models02_biasvar.png)
 
-**Hình 2.** Ba đường đo được trên cùng một dữ liệu. Thiên lệch² giảm đơn điệu theo độ phức tạp; phương sai tăng; tổng có một cực tiểu. Đường chấm ngang là $\sigma^2$ — mức sàn không thể vượt qua.
+**Hình 2.** Độ chệch², phương sai và tổng sai số theo bậc đa thức, trục dọc theo thang log. Đường chấm ngang là mức nhiễu $\sigma^2$; đường đứt dọc đánh dấu bậc có tổng sai số nhỏ nhất.
 
-**Kết quả.** (Bảng đầy đủ nằm trong `experiments_output.txt`.)
-
-| Bậc đa thức | Thiên lệch² | Phương sai | Nhiễu² | Tổng MSE |
+| Bậc đa thức | Độ chệch² | Phương sai | Nhiễu $\sigma^2$ | Tổng sai số |
 |---|---|---|---|---|
 | 1 | 0,4221 | 0,0231 | 0,1225 | 0,5677 |
+| 2 | 0,4223 | 0,0418 | 0,1225 | 0,5866 |
 | 3 | 0,4098 | 0,0857 | 0,1225 | 0,6180 |
+| 4 | 0,4191 | 0,1852 | 0,1225 | 0,7268 |
 | **5** | **0,0836** | **0,0767** | 0,1225 | **0,2828** |
+| 7 | 0,0058 | 0,3415 | 0,1225 | 0,4699 |
+| 9 | 0,0024 | 1,2645 | 0,1225 | 1,3894 |
 | 12 | 0,0276 | 52,2156 | 0,1225 | 52,3657 |
-| 14 | 35,1402 | 7392,2751 | 0,1225 | 7427,5379 |
+| 14 | 35,1402 | 7 392,2751 | 0,1225 | 7 427,5379 |
 
-Ba điều đọc ra được, và cả ba đều dùng được:
+Bảng cho thấy năm điều.
 
-1. **Bậc 1 sai vì thiên lệch**: nó chiếm 74% tổng MSE. Thêm dữ liệu sẽ **không** cứu được — đường thẳng không bao giờ thành hình sin. Phải đổi mô hình.
-2. **Bậc cao sai vì phương sai**: ở bậc 12 phương sai đã gấp 1892 lần thiên lệch², và ở bậc 14 nó chiếm gần như toàn bộ MSE. Thêm dữ liệu **sẽ** cứu được, vì phương sai giảm khi cỡ mẫu tăng.
-3. **Vì vậy chẩn đoán đúng quyết định hành động đúng.** Đây là giá trị thực tế của phân rã: nó phân biệt *"cần mô hình mạnh hơn"* với *"cần nhiều dữ liệu hơn"* — hai kết luận trái ngược, và chọn sai thì mất hàng tháng.
+**Ở bậc thấp, sai số đến từ độ chệch.** Với bậc 1, độ chệch² bằng 0,4221, chiếm 74% tổng sai số. Một đường thẳng không thể theo được hình sin dù có bao nhiêu dữ liệu, nên thu thêm dữ liệu không giúp gì; phải dùng họ hàm linh hoạt hơn.
 
-### 2.4. Cách chẩn đoán trong việc thật
+**Bậc chẵn gần như không giảm độ chệch.** Độ chệch² ở bậc 2 bằng bậc 1 (0,4223 so với 0,4221), ở bậc 4 xấp xỉ bậc 3 (0,4191 so với 0,4098). Lý do là hàm thật là hàm lẻ, $f(-x) = -f(x)$, còn dữ liệu rải đối xứng quanh 0, nên các số hạng bậc chẵn không giúp xấp xỉ $f$ tốt hơn; chúng chỉ thêm tham số để khớp nhiễu, nên phương sai tăng. Đây là ví dụ cụ thể cho điều Mục 2.2 lưu ý: độ chệch không nhất thiết giảm đều khi mô hình phức tạp hơn. Nó giảm khi họ hàm mở rộng theo hướng có ích cho việc xấp xỉ hàm thật.
 
-Không cần chạy 400 tập huấn luyện. Chỉ cần vẽ **đường cong học** (learning curve): sai số huấn luyện và sai số kiểm định theo cỡ tập huấn luyện.
+**Tổng sai số nhỏ nhất ở bậc 5**, với độ chệch² 0,0836 và phương sai 0,0767 gần bằng nhau. Tổng 0,2828 vẫn cao hơn mức nhiễu 0,1225, và phần chênh này là cái giá không tránh được khi chỉ có 40 điểm dữ liệu.
 
-| Dấu hiệu | Chẩn đoán | Việc nên làm |
+**Ở bậc cao, sai số đến từ phương sai.** Ở bậc 12, phương sai bằng 52,2, gấp khoảng 1 900 lần độ chệch². Đa thức bậc cao dao động rất mạnh ở hai đầu đoạn, nơi có ít điểm dữ liệu, và mỗi tập huấn luyện cho một kiểu dao động khác nhau. Khác với độ chệch, phương sai giảm khi có thêm dữ liệu, nên với mô hình này thu thêm dữ liệu là cách sửa đúng.
+
+**Ước lượng độ chệch² ở bậc 13 và 14 không đáng tin.** Độ chệch² đo được tăng vọt lên 6,2 và 35,1, nhưng đó không phải độ chệch thật. Trung bình của 250 dự đoán có sai số ngẫu nhiên, và bình phương của sai số đó cộng thêm vào độ chệch² ước lượng một lượng cỡ $\text{phương sai}/250$, bằng khoảng 3,5 ở bậc 13 và 29,6 ở bậc 14. Khi phương sai lớn tới mức này, cần nhiều tập huấn luyện hơn hẳn mới ước lượng được độ chệch; kết luận chắc chắn duy nhất là phương sai chi phối.
+
+> **Nhận xét.** Giá trị thực tế của phân rã là phân biệt hai tình huống cần xử lý ngược nhau. Độ chệch cao cần mô hình linh hoạt hơn, thêm đặc trưng hoặc giảm regularization; thu thêm dữ liệu gần như vô ích. Phương sai cao cần thêm dữ liệu, tăng regularization hoặc dùng mô hình đơn giản hơn. Chẩn đoán sai có thể dẫn tới việc tốn nhiều tuần thu thập dữ liệu cho một mô hình mà dữ liệu không cứu được.
+
+### 2.4. Chẩn đoán bằng đường cong học
+
+Với dữ liệu thật, hàm $f$ không biết trước và không thể rút lại hàng trăm tập huấn luyện, nên không đo trực tiếp được độ chệch và phương sai. Công cụ thay thế là **đường cong học** (learning curve): đồ thị sai số trên tập huấn luyện và sai số trên tập xác thực theo số điểm dữ liệu huấn luyện, hoặc theo số vòng huấn luyện.
+
+| Dấu hiệu | Chẩn đoán | Hướng xử lý |
 |---|---|---|
-| Sai số huấn luyện **cao**, sai số kiểm định cao, hai đường **sát nhau** và đã phẳng | thiên lệch cao | mô hình mạnh hơn, thêm đặc trưng, bớt phạt chuẩn, huấn luyện lâu hơn |
-| Sai số huấn luyện **thấp**, sai số kiểm định cao, **khoảng cách lớn** và chưa khép | phương sai cao | thêm dữ liệu, tăng phạt chuẩn, tăng cường dữ liệu, mô hình đơn giản hơn, dừng sớm |
-| Cả hai đều cao và **vẫn đang giảm** | huấn luyện chưa xong | cứ huấn luyện tiếp |
-| Sai số kiểm định thấp hơn sai số huấn luyện | thường là **lỗi** | nghi rò rỉ dữ liệu, hoặc dropout/augmentation chỉ bật lúc huấn luyện |
+| Sai số huấn luyện cao, sai số xác thực cao, hai đường sát nhau và đã nằm ngang | độ chệch cao (underfitting) | mô hình linh hoạt hơn, thêm đặc trưng, giảm regularization, huấn luyện lâu hơn |
+| Sai số huấn luyện thấp, sai số xác thực cao, khoảng cách lớn và chưa thu hẹp | phương sai cao (overfitting) | thêm dữ liệu, tăng regularization, tăng cường dữ liệu, mô hình đơn giản hơn, dừng sớm |
+| Cả hai đều cao và vẫn đang giảm theo số vòng huấn luyện | huấn luyện chưa xong | huấn luyện tiếp |
+| Sai số xác thực thấp hơn sai số huấn luyện | thường là dấu hiệu có lỗi | kiểm tra rò rỉ dữ liệu; kiểm tra dropout hoặc tăng cường dữ liệu chỉ bật khi huấn luyện |
 
-Hàng cuối đáng nhớ: nó trông như tin mừng nhưng gần như luôn là lỗi. Trường hợp vô hại duy nhất là khi dropout hoặc tăng cường dữ liệu chỉ bật ở lượt huấn luyện, làm sai số huấn luyện bị đo trên bài toán khó hơn.
+Dòng cuối cần chú ý vì nó trông như tin tốt. Tình huống vô hại duy nhất là khi dropout hoặc tăng cường dữ liệu chỉ bật lúc huấn luyện: sai số huấn luyện khi đó được đo trên một bài toán khó hơn bài toán lúc xác thực. Trong các trường hợp còn lại, nguyên nhân thường là rò rỉ dữ liệu ([Mục 8.5 của *Nền tảng*](nentang-ch08.html)), ví dụ tập xác thực chứa bản sao gần giống của dữ liệu huấn luyện.
 
-### 2.5. Chú thích về "double descent"
+Hai đường cong theo số điểm dữ liệu còn trả lời một câu hỏi có giá trị kinh tế: thu thêm dữ liệu có đáng không. Nếu đường sai số xác thực đã nằm ngang và sát đường sai số huấn luyện, thêm dữ liệu không giúp gì; nếu nó vẫn đang giảm và còn cách xa đường huấn luyện, thêm dữ liệu nhiều khả năng giúp được.
 
-Bức tranh chữ U ở trên là bức tranh cổ điển và nó đúng trong chế độ *thiếu tham số*. Với mô hình rất lớn, người ta quan sát được hiện tượng **double descent**: khi số tham số vượt qua điểm nội suy hoàn hảo tập huấn luyện, sai số kiểm định **giảm trở lại** thay vì tiếp tục tăng.
+### 2.5. Double descent
 
-Điều này **không bác bỏ** phân rã ở Mục 2.2 — phân rã ấy là một đẳng thức toán học, luôn đúng. Nó chỉ nói rằng trong chế độ quá tham số, phương sai không đơn điệu tăng theo số tham số như trực giác cổ điển. Lý do là ở chế độ ấy, thuật toán tối ưu (xuống dốc) **ngầm chọn nghiệm có chuẩn nhỏ nhất** trong vô số nghiệm khớp hoàn hảo, tức nó tự phạt chuẩn.
+Đường chữ U ở Mục 2.3 là bức tranh cổ điển, đúng khi số tham số nhỏ hơn số điểm dữ liệu. Với mô hình có số tham số vượt xa số điểm dữ liệu, như các mạng nơ-ron hiện đại, người ta quan sát được hiện tượng **double descent** (Belkin và cộng sự, 2019): sai số xác thực tăng lên tới một đỉnh tại ngưỡng mà mô hình vừa đủ tham số để khớp chính xác mọi điểm huấn luyện (gọi là ngưỡng nội suy), rồi **giảm trở lại** khi số tham số tiếp tục tăng. Nakkiran và cộng sự (2020) quan sát cùng hiện tượng với mạng tích chập và Transformer, theo cả số tham số lẫn số vòng huấn luyện.
 
-Tài liệu này nói ra điều đó để bạn không bị hớ khi được hỏi *"mô hình càng lớn càng quá khớp, đúng không?"*. Câu trả lời đúng: **đúng trong chế độ cổ điển, và không còn đúng hiển nhiên ở chế độ quá tham số** — đó là lý do các mô hình hàng tỉ tham số vẫn tổng quát hoá được.
+Double descent không mâu thuẫn với Định lý 2.1: phân rã là một đẳng thức và luôn đúng. Điều thay đổi là cách phương sai phụ thuộc vào số tham số. Khi có nhiều tham số hơn số điểm dữ liệu, có vô số nghiệm khớp chính xác dữ liệu huấn luyện, và thuật toán tối ưu chọn một trong số đó. Với hồi quy tuyến tính, có thể chứng minh gradient descent khởi tạo từ 0 hội tụ tới nghiệm có chuẩn nhỏ nhất, tức nghiệm giả nghịch đảo ([Mục 4.3 của *Nền tảng*](nentang-ch04.html)); việc chọn nghiệm chuẩn nhỏ nhất tác dụng như một dạng regularization ngầm, và càng nhiều tham số thì nghiệm chuẩn nhỏ nhất càng trơn. Với mạng sâu, cơ chế tương tự được nhiều nghiên cứu ủng hộ nhưng chưa được chứng minh đầy đủ.
+
+> **Nhận xét.** Câu "mô hình càng nhiều tham số càng dễ overfitting" đúng trong chế độ cổ điển, khi số tham số nhỏ hơn số điểm dữ liệu. Trong chế độ nhiều tham số hơn dữ liệu, nó không còn đúng hiển nhiên, và đó là một phần lý do các mô hình hàng tỉ tham số vẫn tổng quát hoá được. Tuy vậy, ngay trong chế độ này regularization, dừng sớm và dữ liệu nhiều hơn vẫn có ích; double descent không có nghĩa là có thể bỏ qua overfitting.
 
 ---
 
-## 3. Cây quyết định và học tập hợp
+## 3. Cây quyết định và phương pháp tập hợp
 
-### 3.1. Một cây làm gì
+Cây quyết định là mô hình dễ diễn giải và không cần tiền xử lý đặc trưng, nhưng một cây đơn lẻ có phương sai rất cao. Chương này trình bày cách xây cây, rồi hai cách kết hợp nhiều cây: bagging giảm phương sai, còn boosting giảm độ chệch. Cả hai được giải thích bằng phân rã ở Chương 2 và được đo trên cùng bài toán mô phỏng. Rừng ngẫu nhiên và gradient boosting là hai trong số các mô hình được dùng nhiều nhất cho dữ liệu dạng bảng.
 
-Cây quyết định chia không gian đặc trưng bằng các nhát cắt **vuông góc với trục**, rồi dự đoán một hằng số trên mỗi hộp.
+### 3.1. Cây quyết định
+
+Cây quyết định chia không gian đặc trưng thành các vùng hình hộp bằng các phép chia dạng "$x_j \le t$", mỗi phép chia dùng một đặc trưng và một ngưỡng. Mỗi lá của cây ứng với một vùng, và dự đoán trong vùng đó là một hằng số: lớp chiếm đa số (phân loại) hoặc giá trị trung bình (hồi quy) của các điểm huấn luyện rơi vào vùng.
 
 ![Hình 3](figs/models03_tree.png)
 
-**Hình 3.** Trái: cây chia mặt phẳng bằng các nhát cắt song song trục. Phải: cùng một mô hình viết dưới dạng cây nhị phân. Đây là hai cách nhìn cùng một vật.
+**Hình 3.** Trái: cây chia mặt phẳng bằng các đường thẳng song song với trục. Phải: cùng mô hình đó vẽ dưới dạng cây nhị phân, mỗi nút trong là một phép chia.
 
-Từ hình này rút ra ngay ba tính chất, và cả ba đều là hệ quả trực tiếp của "nhát cắt song song trục":
+Vì mọi phép chia đều song song với trục, cây có ba tính chất:
 
-1. **Bất biến với phép biến đổi đơn điệu từng đặc trưng.** Lấy log một đặc trưng không đổi cây, vì thứ tự không đổi. Đây là lý do **cây không cần chuẩn hoá đặc trưng** — một điểm hay bị hỏi.
-2. **Không ngoại suy được.** Ngoài miền dữ liệu huấn luyện, cây trả về hằng số của hộp ngoài cùng. Dự đoán giá nhà cho diện tích lớn hơn mọi căn từng thấy sẽ cho đúng giá của căn lớn nhất đã thấy.
-3. **Khó biểu diễn quan hệ chéo.** Một biên quyết định $x_1 + x_2 > 1$ phải được xấp xỉ bằng hình bậc thang, tốn rất nhiều nhát cắt.
+1. **Bất biến với phép biến đổi đơn điệu của từng đặc trưng.** Lấy logarit hay chuẩn hoá một đặc trưng không đổi thứ tự các giá trị, nên không đổi tập các phép chia có thể có. Vì vậy cây không cần chuẩn hoá đặc trưng, khác với hồi quy logistic, SVM hay k-NN.
+2. **Không ngoại suy được.** Ngoài miền dữ liệu huấn luyện, cây trả về hằng số của vùng ngoài cùng. Một cây dự đoán giá nhà theo diện tích sẽ cho căn nhà 500 m² cùng giá với căn lớn nhất trong dữ liệu huấn luyện.
+3. **Khó biểu diễn biên chéo.** Biên quyết định $x_1 + x_2 > 1$ phải được xấp xỉ bằng một đường bậc thang, cần nhiều phép chia; mô hình tuyến tính biểu diễn biên đó bằng ba tham số.
 
-### 3.2. Chọn nhát cắt thế nào
+### 3.2. Chọn phép chia
 
-Tại mỗi nút, thuật toán duyệt mọi đặc trưng và mọi ngưỡng, chọn nhát cắt làm **giảm độ tạp nhất**. Với phân loại, hai thước đo độ tạp phổ biến:
+Cây được xây từ gốc xuống. Tại mỗi nút, thuật toán xét mọi đặc trưng và mọi ngưỡng có thể, rồi chọn phép chia làm giảm **độ không thuần nhất** (impurity) nhiều nhất. Với phân loại, gọi $p_c$ là tỉ lệ điểm thuộc lớp $c$ trong nút; hai thước đo thông dụng là
 
-$$\text{Gini}(p) = 1 - \sum_{c} p_c^2, \qquad \text{Entropy}(p) = -\sum_{c} p_c \log p_c.$$
+$$\text{Gini}(p) = 1 - \sum_c p_c^2, \qquad H(p) = -\sum_c p_c \log_2 p_c.$$
 
-Với hồi quy thì dùng phương sai trong nút. Độ lợi của một nhát cắt là độ tạp của nút cha trừ trung bình có trọng số của hai nút con.
+Cả hai bằng 0 khi nút chỉ chứa một lớp và lớn nhất khi các lớp chia đều. **Độ lợi** của một phép chia là độ không thuần nhất của nút cha trừ trung bình có trọng số (theo số điểm) của hai nút con. Với hồi quy, độ không thuần nhất là phương sai của $y$ trong nút, và phép chia tốt nhất là phép chia làm giảm tổng bình phương sai số nhiều nhất.
 
-> Gini và entropy cho cây gần như giống nhau trong thực tế. Gini rẻ hơn vì không có log. Đừng mất thời gian chọn giữa hai cái; chọn độ sâu và số mẫu tối thiểu mỗi lá mới là việc đáng làm.
+> **Ví dụ 3.1.** Một nút có 10 điểm, 6 điểm lớp A và 4 điểm lớp B, nên $\text{Gini} = 1 - 0{,}6^2 - 0{,}4^2 = 0{,}48$. So sánh hai phép chia:
+>
+> - Phép chia thứ nhất cho nút trái 4 điểm (4A, 0B) và nút phải 6 điểm (2A, 4B). Gini của nút trái bằng 0, của nút phải bằng $1 - (1/3)^2 - (2/3)^2 = 0{,}444$. Trung bình có trọng số là $0{,}4 \cdot 0 + 0{,}6 \cdot 0{,}444 = 0{,}267$, độ lợi $0{,}48 - 0{,}267 = 0{,}213$.
+> - Phép chia thứ hai cho hai nút 5 điểm: (4A, 1B) có Gini 0,32 và (2A, 3B) có Gini 0,48. Trung bình 0,40, độ lợi 0,08.
+>
+> Thuật toán chọn phép chia thứ nhất. Dùng entropy cho cùng kết luận: độ lợi thông tin là 0,420 bit so với 0,125 bit.
 
-**Điểm quan trọng:** thuật toán này **tham lam** — nó chọn nhát cắt tốt nhất ở bước hiện tại mà không nhìn xa. Cây tối ưu toàn cục là bài toán NP-khó. Vì vậy một cây đơn lẻ vừa **phương sai cao** (đổi vài điểm dữ liệu là đổi nhát cắt đầu, đổi luôn cả cây) vừa **không đảm bảo tối ưu**.
+Trong thực tế, Gini và entropy gần như luôn chọn cùng một phép chia, và Gini tính nhanh hơn vì không cần logarit. Các siêu tham số đáng chỉnh hơn nhiều là độ sâu tối đa và số điểm tối thiểu trong mỗi lá, vì chúng quyết định độ linh hoạt của cây.
 
-### 3.3. Hai cách ghép nhiều mô hình lại
+Cách xây cây như trên là **tham lam**: tại mỗi nút nó chọn phép chia tốt nhất lúc đó mà không xét ảnh hưởng tới các phép chia phía dưới. Tìm cây tối ưu toàn cục là bài toán NP-khó (Hyafil và Rivest, 1976). Hệ quả là một cây đơn lẻ có **phương sai cao**: chỉ cần vài điểm dữ liệu thay đổi là phép chia ở gốc có thể đổi, kéo theo toàn bộ cấu trúc phía dưới thay đổi.
 
-Chính vì phương sai cao mà cây trở thành nguyên liệu lý tưởng cho học tập hợp. Có **hai** cách ghép, và chúng tấn công **hai thành phần khác nhau** của phân rã ở Chương 2.
+### 3.3. Bagging, rừng ngẫu nhiên và boosting
 
-**Bagging** (bootstrap aggregating): huấn luyện $B$ mô hình trên $B$ mẫu bootstrap **độc lập**, rồi lấy trung bình. Lập luận rất gọn: nếu $B$ mô hình có cùng phương sai $\sigma^2$ và tương quan từng cặp $\rho$, thì trung bình của chúng có phương sai
+Phương sai cao của cây là điểm yếu khi dùng một cây, nhưng lại làm cây trở thành thành phần phù hợp cho phương pháp tập hợp. Có hai cách kết hợp, và chúng tác động vào hai thành phần khác nhau của phân rã ở Chương 2.
 
-$$\rho\,\sigma^2 + \frac{1-\rho}{B}\sigma^2.$$
+**Bagging** (bootstrap aggregating; Breiman, 1996) huấn luyện $M$ mô hình, mỗi mô hình trên một mẫu bootstrap (rút có hoàn lại $n$ điểm từ $n$ điểm huấn luyện), rồi lấy trung bình dự đoán. Theo [Ví dụ 3.1 của *Nền tảng*](nentang-ch03.html), nếu mỗi mô hình có phương sai $\sigma^2$ và mỗi cặp có hệ số tương quan $\rho$ thì trung bình của $M$ mô hình có phương sai
 
-Cho $B \to \infty$, số hạng thứ hai biến mất và **chỉ còn $\rho \sigma^2$**. Đây là toàn bộ lý thuyết của bagging trong một dòng, và nó nói luôn điều phải làm: muốn giảm tiếp thì phải **giảm $\rho$**, tức làm các mô hình bớt giống nhau. Đó đúng là điều **rừng ngẫu nhiên** (random forest) thêm vào so với bagging thường: ở mỗi nút chỉ xét một tập con ngẫu nhiên các đặc trưng, nên các cây bớt tương quan.
+$$\rho\,\sigma^2 + \frac{1 - \rho}{M}\,\sigma^2.$$
 
-**Boosting**: huấn luyện tuần tự, mỗi mô hình mới sửa phần **dư** của tổng các mô hình trước:
+Khi $M$ tăng, số hạng thứ hai tiến về 0 và chỉ còn $\rho\,\sigma^2$. Công thức cho biết hai điều. Thứ nhất, thêm mô hình không bao giờ làm phương sai tăng, nên thêm cây vào bagging không gây overfitting. Thứ hai, muốn giảm phương sai tiếp thì phải giảm tương quan $\rho$ giữa các mô hình. **Rừng ngẫu nhiên** (random forest; Breiman, 2001) làm đúng việc đó: tại mỗi nút, cây chỉ được chọn phép chia trong một tập con ngẫu nhiên các đặc trưng (thường $\sqrt d$ đặc trưng với phân loại), nên các cây khác nhau hơn và ít tương quan hơn. Vì trung bình của các mô hình có cùng kỳ vọng với từng mô hình, bagging gần như không thay đổi độ chệch.
 
-$$F_m(x) = F_{m-1}(x) + \eta\, h_m(x), \qquad h_m \approx -\frac{\partial L}{\partial F}\bigg|_{F = F_{m-1}}.$$
+**Boosting** huấn luyện các mô hình **tuần tự**, mỗi mô hình mới sửa phần sai của tổng các mô hình trước. **Gradient boosting** (Friedman, 2001) viết điều này dưới dạng
 
-Đây chính là **xuống dốc trong không gian hàm**: mỗi cây mới xấp xỉ gradient âm của hàm mất mát. Vì mỗi cây chỉ phải sửa phần còn thiếu, cây con có thể rất nông (thường sâu 2–6) — và chính vì thế boosting **giảm thiên lệch**.
+$$F_m(x) = F_{m-1}(x) + \eta\, h_m(x),$$
 
-### 3.4. Đo thật xem cái nào cắt vào đâu
+trong đó cây $h_m$ được huấn luyện để xấp xỉ gradient âm của hàm mất mát theo giá trị dự đoán, $-\partial L(y, F)/\partial F$ tại $F = F_{m-1}(x)$, và $\eta$ là tốc độ học (thường 0,01 tới 0,3). Với mất mát bình phương, gradient âm chính là phần dư $y - F_{m-1}(x)$, nên mỗi cây mới học phần dư của các cây trước. Đây là gradient descent trong không gian hàm: thay vì cập nhật tham số, mỗi bước cộng thêm một hàm theo hướng giảm mất mát. Vì mỗi cây chỉ cần sửa một phần nhỏ, các cây trong boosting thường rất nông (độ sâu 2 tới 6). Tổ hợp của nhiều cây nông có độ chệch thấp hơn nhiều so với từng cây, nên boosting chủ yếu **giảm độ chệch**.
 
-Thí nghiệm trong `code/models/experiments.py`: cùng một hàm thật và cùng mức nhiễu như Chương 2, đo thiên lệch² và phương sai của ba mô hình trên 60 tập huấn luyện.
+### 3.4. Đo tác dụng của bagging và boosting
+
+Thí nghiệm trong `code/models/experiments.py` dùng cùng hàm thật và mức nhiễu như Chương 2, mỗi tập huấn luyện 120 điểm, và đo độ chệch² cùng phương sai của ba mô hình trên 40 tập huấn luyện độc lập: một cây sâu 8, bagging 100 cây sâu 8, và gradient boosting 100 cây sâu 2 với tốc độ học 0,1.
 
 ![Hình 4](figs/models04_ensemble.png)
 
-**Hình 4.** Cùng một bài toán, ba mô hình. Cột trái là thiên lệch², cột phải là phương sai.
+**Hình 4.** Độ chệch² và phương sai của ba mô hình trên cùng bài toán.
 
-| Mô hình | Thiên lệch² | Phương sai | Tổng |
+| Mô hình | Độ chệch² | Phương sai | Tổng (không tính nhiễu) |
 |---|---|---|---|
-| Một cây (sâu 8) | 0,0031 | 0,1089 | 0,1120 |
-| Bagging 100 cây | 0,0016 | **0,0534** | 0,0550 |
-| Boosting 100 gốc nông | **0,0032** | 0,0371 | 0,0403 |
+| Một cây, sâu 8 | 0,0031 | 0,1089 | 0,1120 |
+| Bagging, 100 cây sâu 8 | 0,0016 | **0,0534** | 0,0550 |
+| Gradient boosting, 100 cây sâu 2 | 0,0032 | 0,0371 | **0,0403** |
 
-Đọc bảng:
+Cây sâu 8 đủ linh hoạt để có độ chệch rất thấp, nên sai số của nó gần như hoàn toàn là phương sai: phương sai gấp khoảng 35 lần độ chệch². Bagging giảm phương sai đi một nửa (0,1089 xuống 0,0534) và gần như không đổi độ chệch, đúng như phân tích ở Mục 3.3. Phương sai không giảm tới 0 dù có 100 cây, vì các cây huấn luyện trên các mẫu bootstrap của cùng một tập dữ liệu nên vẫn tương quan với nhau; đó là số hạng $\rho\sigma^2$.
 
-- **Bagging cắt phương sai đúng một nửa** (0,1089 → 0,0534) và gần như không đụng tới thiên lệch. Đúng như lý thuyết: lấy trung bình các mô hình gần như không thiên lệch.
-- **Boosting đạt tổng thấp nhất** bằng cách xuất phát từ các cây rất nông — thiên lệch ban đầu cao — rồi cộng dồn để hạ nó xuống, đồng thời giữ phương sai thấp vì mỗi cây rất yếu.
-- Cây đơn lẻ ở đây có thiên lệch rất thấp (0,0031) vì sâu 8 đã đủ linh hoạt; **phương sai lớn gấp 35 lần thiên lệch²**, nên toàn bộ vấn đề của nó là phương sai — đó chính xác là thứ bagging sinh ra để chữa.
+Gradient boosting cho tổng sai số thấp nhất. Mỗi cây sâu 2 chỉ có 4 lá, có độ chệch rất cao nếu dùng một mình; cộng 100 cây như vậy hạ độ chệch xuống ngang cây sâu 8, trong khi phương sai giữ ở mức thấp vì mỗi cây rất đơn giản và tốc độ học 0,1 làm mỗi cây chỉ đóng góp một phần nhỏ.
 
-> Câu hỏi phỏng vấn hay đi kèm: *"random forest hay gradient boosting?"* Câu trả lời tốt không phải tên mô hình mà là: **random forest dễ chỉnh hơn và khó hỏng hơn vì mỗi cây độc lập nên thêm cây không bao giờ làm tệ đi; gradient boosting thường chính xác hơn nhưng nhạy với tốc độ học và số vòng, và thêm vòng thì CÓ THỂ quá khớp.** Nói được tính "thêm cây không hại" của bagging là dấu hiệu hiểu bản chất.
-
-### 3.5. Những chỗ hay nhầm
+### 3.5. Các hiểu lầm thường gặp
 
 | Phát biểu | Thực tế |
 |---|---|
-| "Cây cần chuẩn hoá đặc trưng." | Không. Cây bất biến với mọi phép biến đổi đơn điệu từng đặc trưng. |
-| "Random forest không quá khớp." | Thêm **cây** thì không, nhưng để cây quá **sâu** trên dữ liệu nhiễu thì vẫn quá khớp. |
-| "Độ quan trọng đặc trưng của cây là đáng tin." | Độ quan trọng theo độ giảm độ tạp **thiên vị đặc trưng nhiều giá trị**. Dùng permutation importance hoặc SHAP thì đáng tin hơn. |
-| "Boosting chỉ dùng cây được." | Bất kỳ học máy yếu nào cũng được; cây chỉ là lựa chọn phổ biến vì rẻ và xử lý được đặc trưng hỗn hợp. |
-| "XGBoost là một thuật toán mới." | Nó là một **cài đặt** rất tối ưu của gradient boosting, cộng thêm phạt chuẩn trên cấu trúc cây và xử lý giá trị thiếu. |
+| "Cây quyết định cần chuẩn hoá đặc trưng." | Không cần: cây bất biến với mọi phép biến đổi đơn điệu của từng đặc trưng. |
+| "Rừng ngẫu nhiên không bị overfitting." | Thêm cây không gây overfitting, nhưng cây quá sâu trên dữ liệu nhiễu vẫn làm rừng overfitting. |
+| "Thêm cây vào gradient boosting luôn tốt hơn." | Không: boosting có thể overfitting khi số cây quá lớn. Số cây phải chọn bằng tập xác thực, thường kết hợp dừng sớm. |
+| "Độ quan trọng đặc trưng tính từ cây là đáng tin." | Độ quan trọng tính theo tổng độ giảm độ không thuần nhất thiên về các đặc trưng có nhiều giá trị khác nhau. Permutation importance (Breiman, 2001) hoặc SHAP (Lundberg và Lee, 2017) đáng tin hơn. |
+| "Boosting chỉ dùng được với cây." | Boosting dùng được với mọi mô hình yếu; cây phổ biến vì rẻ và xử lý tốt đặc trưng hỗn hợp. |
+| "XGBoost là một thuật toán khác gradient boosting." | XGBoost (Chen và Guestrin, 2016) là một cài đặt hiệu quả của gradient boosting, có thêm regularization trên cấu trúc cây và cách xử lý giá trị thiếu. |
+
+### 3.6. Gradient boosting trong thực hành
+
+Các thư viện phổ biến là XGBoost, LightGBM (Ke và cộng sự, 2017) và CatBoost (Prokhorenkova và cộng sự, 2018). Chúng khác nhau ở chi tiết cài đặt (cách tìm ngưỡng chia trên dữ liệu lớn, cách xử lý đặc trưng hạng mục), nhưng có chung các siêu tham số quan trọng:
+
+- **Tốc độ học và số cây.** Hai siêu tham số này đi cùng nhau: tốc độ học nhỏ cần nhiều cây hơn nhưng thường tổng quát hoá tốt hơn. Cách làm thông dụng là cố định tốc độ học ở mức nhỏ (ví dụ 0,05) và chọn số cây bằng dừng sớm trên tập xác thực: dừng khi sai số xác thực không giảm sau một số vòng.
+- **Độ phức tạp của mỗi cây.** Độ sâu tối đa hoặc số lá tối đa, và số điểm tối thiểu trong mỗi lá. Cây sâu hơn biểu diễn được tương tác bậc cao hơn giữa các đặc trưng, nhưng tăng phương sai.
+- **Lấy mẫu con.** Mỗi cây chỉ dùng một phần ngẫu nhiên các điểm dữ liệu (ví dụ 80%) và một phần các đặc trưng. Cách này giảm tương quan giữa các cây, giống ý tưởng của rừng ngẫu nhiên, và thường cải thiện tổng quát hoá (Friedman, 2002).
+- **Regularization trên lá.** Phạt $\ell_2$ lên giá trị của các lá và yêu cầu độ lợi tối thiểu cho mỗi phép chia.
+
+So với rừng ngẫu nhiên, gradient boosting thường chính xác hơn khi được chỉnh tốt, nhưng nhạy hơn với siêu tham số. Rừng ngẫu nhiên là lựa chọn mặc định an toàn: các cây độc lập nên dễ song song hoá, và thêm cây không làm kết quả kém đi. Với cả hai, cần chia tập xác thực đúng cách, theo thời gian hoặc theo nhóm khi dữ liệu có cấu trúc đó ([Mục 8.5 của *Nền tảng*](nentang-ch08.html)).
 
 ---
+
 
 ## 4. Mạng nơ-ron nhiều lớp
 
-### 4.1. Từ hồi quy tuyến tính tới mạng
+Hồi quy logistic ở [Chương 6 của *Nền tảng*](nentang-ch06.html) là một mạng nơ-ron một lớp: một phép biến đổi tuyến tính theo sau là hàm sigmoid. Chương này chồng nhiều lớp như vậy lên nhau, giải thích vì sao hàm kích hoạt phi tuyến là bắt buộc, phát biểu định lý xấp xỉ phổ quát cùng giới hạn của nó, và đo bằng một phép dựng tường minh xem độ sâu tiết kiệm được bao nhiêu tham số.
 
-Một mô hình tuyến tính là $\hat{y} = Wx + b$. Chồng hai mô hình tuyến tính lên nhau không cho gì mới:
+### 4.1. Từ mô hình tuyến tính tới mạng nhiều lớp
 
-$$W_2(W_1 x + b_1) + b_2 = (W_2 W_1)x + (W_2 b_1 + b_2)$$
+Một lớp tuyến tính tính $Wx + b$. Chồng hai lớp tuyến tính không tạo ra gì mới, vì
 
-vẫn là một hàm tuyến tính. **Vì vậy phi tuyến không phải là phụ gia — nó là điều kiện để "nhiều lớp" có nghĩa.** Đây là câu hỏi phỏng vấn cơ bản nhất về mạng nơ-ron, và câu trả lời đúng là một dòng đại số.
+$$W_2(W_1 x + b_1) + b_2 = (W_2 W_1)\,x + (W_2 b_1 + b_2)$$
 
-Một lớp ẩn là:
+vẫn là một phép biến đổi affine của $x$. Chồng bao nhiêu lớp tuyến tính cũng chỉ tương đương một lớp. Muốn nhiều lớp biểu diễn được nhiều hơn một lớp, phải xen giữa chúng một hàm phi tuyến.
 
-$$h = \phi(W_1 x + b_1), \qquad \hat{y} = W_2 h + b_2$$
+> **Định nghĩa 4.1 (Mạng nơ-ron truyền thẳng nhiều lớp).** Một **mạng nơ-ron truyền thẳng nhiều lớp** (multilayer perceptron, MLP) có $L$ lớp tính
+> $$h^{(0)} = x, \qquad h^{(l)} = \phi\big(W^{(l)} h^{(l-1)} + b^{(l)}\big) \;\; (l = 1, \dots, L-1), \qquad \hat y = W^{(L)} h^{(L-1)} + b^{(L)},$$
+> trong đó $\phi$ là hàm kích hoạt áp dụng cho từng phần tử. Các $h^{(l)}$ với $1 \le l \le L-1$ gọi là **lớp ẩn**, số phần tử của mỗi lớp ẩn là **bề rộng** của lớp đó.
 
-với $\phi$ áp dụng theo từng phần tử.
+Lớp cuối không có hàm kích hoạt vì nó được chọn theo bài toán. Với hồi quy, $\hat y$ dùng trực tiếp và hàm mất mát là bình phương sai số. Với phân loại nhị phân, $\hat y$ đi qua sigmoid; với nhiều lớp, qua softmax; hàm mất mát là cross-entropy. Cả hai cặp lựa chọn đều đến từ ước lượng hợp lý cực đại ([Chương 10 của *Nền tảng*](nentang-ch10.html)): bình phương sai số ứng với nhiễu Gauss, cross-entropy ứng với phân phối Bernoulli hoặc phân phối phân loại.
 
-### 4.2. Các hàm kích hoạt và vì sao chúng thay nhau
+Một lớp có $d_{\text{in}}$ đầu vào và $d_{\text{out}}$ đầu ra có $d_{\text{in}} d_{\text{out}} + d_{\text{out}}$ tham số. Ví dụ, mạng 784–256–10 cho ảnh chữ số MNIST có $784 \cdot 256 + 256 = 200\,960$ tham số ở lớp ẩn và $256 \cdot 10 + 10 = 2\,570$ tham số ở lớp ra, tổng cộng 203 530.
 
-| Hàm | Công thức | Ưu | Nhược |
-|---|---|---|---|
-| **Sigmoid** | $1/(1+e^{-z})$ | đầu ra trong $(0,1)$, đọc được như xác suất | **bão hoà hai đầu** → gradient $\approx 0$; đầu ra không quanh 0 |
-| **Tanh** | $\tanh z$ | quanh 0, tốt hơn sigmoid | vẫn bão hoà |
-| **ReLU** | $\max(0, z)$ | không bão hoà phía dương, rẻ, gradient đúng bằng 1 | **nơ-ron chết**: rơi vào vùng âm là gradient bằng 0 mãi |
-| **Leaky ReLU** | $\max(\alpha z, z)$ | chữa nơ-ron chết | thêm một siêu tham số |
-| **GELU** | $z\,\Phi(z)$ | trơn, hoạt động tốt trong Transformer | đắt hơn ReLU một chút |
-| **SiLU / Swish** | $z\,\sigma(z)$ | trơn, không đơn điệu | như trên |
+> **Ví dụ 4.1 (Hàm XOR).** Bốn điểm $(0,0)$, $(1,1)$ có nhãn 0 và $(1,0)$, $(0,1)$ có nhãn 1 không tách được bằng một đường thẳng, nên không mô hình tuyến tính nào phân loại đúng cả bốn. Một mạng có hai đơn vị ReLU ở lớp ẩn làm được:
+> $$h_1 = \operatorname{ReLU}(x_1 + x_2), \qquad h_2 = \operatorname{ReLU}(x_1 + x_2 - 1), \qquad \hat y = h_1 - 2h_2.$$
+> Kiểm tra: tại $(0,0)$ có $h = (0, 0)$ nên $\hat y = 0$; tại $(1,0)$ và $(0,1)$ có $h = (1, 0)$ nên $\hat y = 1$; tại $(1,1)$ có $h = (2, 1)$ nên $\hat y = 2 - 2 = 0$. Lớp ẩn đã biến đổi bốn điểm sang một không gian mới, trong đó chúng tách được bằng một hàm tuyến tính. Đó là cách hiểu hữu ích về mạng nhiều lớp: các lớp ẩn học một phép biến đổi đặc trưng, lớp cuối là một mô hình tuyến tính trên đặc trưng đã học.
 
-Ba điều đáng nói:
+### 4.2. Hàm kích hoạt
 
-- **Đạo hàm của ReLU đúng bằng 1 ở phía dương** là lý do chính khiến nó thay được sigmoid trong mạng sâu: chuỗi nhân các đạo hàm không co lại. Sigmoid có đạo hàm tối đa $0{,}25$, nên qua 10 lớp là $0{,}25^{10} \approx 10^{-6}$ — đó chính là gradient tiêu biến ở Chương 6.
-- **Nơ-ron chết** không phải lỗi lý thuyết mà là hiện tượng thật: nếu tốc độ học quá lớn, một bước cập nhật có thể đẩy độ lệch xuống đủ thấp để nơ-ron không bao giờ kích hoạt lại với bất kỳ đầu vào nào.
-- **Ở đầu ra thì khác**: dùng sigmoid cho phân loại nhị phân, softmax cho đa lớp, và **không dùng gì** cho hồi quy. Trộn lẫn hàm kích hoạt của lớp ẩn với hàm của lớp đầu ra là lỗi hay gặp.
+| Hàm | Công thức | Đạo hàm | Ưu điểm | Nhược điểm |
+|---|---|---|---|---|
+| Sigmoid | $\sigma(z) = 1/(1+e^{-z})$ | $\sigma(z)(1-\sigma(z)) \le 1/4$ | đầu ra trong $(0,1)$ | bão hoà ở hai phía, đạo hàm gần 0; đầu ra không có trung bình 0 |
+| Tanh | $\tanh z$ | $1 - \tanh^2 z \le 1$ | đầu ra có trung bình quanh 0 | vẫn bão hoà ở hai phía |
+| ReLU | $\max(0, z)$ | 1 nếu $z > 0$, 0 nếu $z < 0$ | không bão hoà phía dương, tính rất rẻ | đơn vị có thể "chết" (luôn có $z < 0$) |
+| Leaky ReLU | $\max(\alpha z, z)$, $\alpha \approx 0{,}01$ | $1$ hoặc $\alpha$ | tránh đơn vị chết | thêm một siêu tham số |
+| GELU | $z\,\Phi(z)$ | trơn | dùng phổ biến trong Transformer | tính đắt hơn ReLU một chút |
+| SiLU (Swish) | $z\,\sigma(z)$ | trơn | dùng trong nhiều mô hình ngôn ngữ (Mục 10.5) | như GELU |
 
-### 4.3. Định lý xấp xỉ phổ quát, và vì sao nó ít hữu ích hơn ta tưởng
+Trong bảng, $\Phi$ là hàm phân phối tích luỹ của phân phối chuẩn tắc. GELU do Hendrycks và Gimpel (2016) đề xuất; SiLU do Elfwing, Uchibe và Doya (2018) và Ramachandran, Zoph và Le (2017) đề xuất độc lập.
 
-> **Định lý xấp xỉ phổ quát.** Một mạng **một lớp ẩn** với hàm kích hoạt không đa thức, đủ rộng, xấp xỉ được mọi hàm liên tục trên một tập compact tới độ chính xác tuỳ ý.
+Ba điểm cần nắm:
 
-Nghe như mọi chuyện đã xong. Nhưng định lý chỉ nói **tồn tại**, và không nói ba điều quyết định:
+- **Đạo hàm của ReLU bằng 1 ở phía dương** là lý do chính ReLU thay sigmoid trong mạng sâu. Gradient qua nhiều lớp là tích của các đạo hàm (Chương 5). Đạo hàm của sigmoid không vượt quá 1/4, nên qua 10 lớp sigmoid, riêng phần đạo hàm của hàm kích hoạt đã nhân gradient với tối đa $0{,}25^{10} \approx 9{,}5 \times 10^{-7}$. Đây là một nguồn của gradient tiêu biến (Chương 6).
+- **Đơn vị ReLU chết** là hiện tượng có thật: nếu một bước cập nhật lớn đẩy hệ số chặn của một đơn vị xuống đủ âm, đơn vị đó cho $z < 0$ với mọi đầu vào, đạo hàm bằng 0, nên nó không bao giờ được cập nhật lại. Tốc độ học quá lớn là nguyên nhân thường gặp.
+- **Hàm kích hoạt của lớp ra khác với lớp ẩn.** Lớp ra dùng sigmoid, softmax hoặc không dùng gì tuỳ bài toán (Mục 4.1). Dùng ReLU ở lớp ra của bài toán hồi quy có giá trị âm là một lỗi hay gặp: mô hình không bao giờ dự đoán được giá trị âm.
 
-1. Cần **bao nhiêu** nơ-ron — và câu trả lời có thể là số mũ theo số chiều.
-2. Có **tìm ra** được bộ trọng số ấy bằng xuống dốc hay không.
-3. Với **bao nhiêu dữ liệu** thì tìm được mà không quá khớp.
+### 4.3. Định lý xấp xỉ phổ quát
 
-Điều thực sự quan trọng là **độ sâu mua được sự gọn gàng**: có những hàm mà mạng sâu biểu diễn với số nơ-ron tăng đa thức, trong khi mạng một lớp cần số nơ-ron tăng theo hàm mũ.
+> **Định lý 4.1 (Xấp xỉ phổ quát).** Cho $\phi$ là một hàm liên tục không phải đa thức. Với mọi hàm liên tục $f$ trên một tập compact $K \subset \mathbb{R}^d$ và mọi $\varepsilon > 0$, tồn tại một mạng một lớp ẩn $g(x) = \sum_{j=1}^{m} a_j\,\phi(w_j^\top x + b_j)$ sao cho $|f(x) - g(x)| < \varepsilon$ với mọi $x \in K$.
 
-### 4.4. Đo thật: sâu hay rộng
+Cybenko (1989) chứng minh định lý cho hàm sigmoid, Hornik (1991) mở rộng, và Leshno và cộng sự (1993) chứng minh điều kiện "không phải đa thức" là đủ, nên định lý áp dụng cho ReLU.
 
-Câu "độ sâu mua được sự gọn gàng" thường được nói như một niềm tin. Thực ra nó **chứng minh được bằng kiến tạo**, và cách chứng minh ấy đẹp vì không phụ thuộc chút nào vào việc huấn luyện có thành công hay không.
+Định lý nói rằng mạng một lớp ẩn đủ rộng biểu diễn được mọi hàm liên tục, nhưng nó chỉ khẳng định **sự tồn tại**. Nó không cho biết ba điều quan trọng trong thực tế:
 
-Xuất phát từ **hàm lều**, dùng đúng hai đơn vị ReLU:
+1. Cần **bao nhiêu** đơn vị ẩn. Với một số hàm, số đơn vị cần thiết tăng theo hàm mũ của số chiều $d$ hoặc của độ phức tạp của hàm.
+2. Gradient descent có **tìm được** bộ trọng số đó hay không.
+3. Cần **bao nhiêu dữ liệu** để tìm được nó mà không overfitting.
 
-$$g(x) = 2\,\text{ReLU}(x) - 4\,\text{ReLU}\!\left(x - \tfrac12\right).$$
+Vì vậy định lý không giải thích được vì sao mạng sâu hoạt động tốt hơn mạng nông rộng. Mục 4.4 trả lời một phần câu hỏi này: có những hàm mà mạng sâu biểu diễn bằng số tham số tăng tuyến tính, trong khi mạng một lớp ẩn cần số tham số tăng theo hàm mũ.
 
-Hàm này ánh xạ $[0,1]$ lên $[0,1]$: nó đi lên từ $g(0)=0$ tới $g(1/2)=1$ rồi xuống lại $g(1)=0$. Bây giờ **hợp nó với chính nó** $k$ lần. Vì mỗi nhánh của $g$ phủ trọn $[0,1]$, mỗi lần hợp **gấp đôi số đoạn tuyến tính**: hợp $k$ lần cho một sóng răng cưa đúng $2^k$ đoạn, dùng $2k$ đơn vị ReLU xếp thành $k$ lớp.
+### 4.4. Độ sâu và số tham số cần thiết
 
-Câu hỏi: mạng **một lớp ẩn** cần bao nhiêu đơn vị để khớp cùng hàm ấy? Câu trả lời đo được — đặt các điểm gãy đều trên $(0,1)$ rồi giải bình phương tối thiểu cho lớp ra, tức là cho mạng một lớp **lời giải tối ưu chính xác** thay vì bắt nó tự tìm bằng xuống dốc:
+Phép dựng sau, theo ý tưởng của Telgarsky (2016), cho thấy lợi ích của độ sâu mà không phụ thuộc vào việc huấn luyện có thành công hay không. Xuất phát từ **hàm lều** dùng đúng hai đơn vị ReLU:
+
+$$g(x) = 2\operatorname{ReLU}(x) - 4\operatorname{ReLU}\!\left(x - \tfrac12\right).$$
+
+Trên $[0, 1]$, hàm này tăng tuyến tính từ $g(0) = 0$ lên $g(1/2) = 1$ rồi giảm tuyến tính về $g(1) = 0$, nên nó ánh xạ $[0, 1]$ lên $[0, 1]$. Hợp $g$ với chính nó $k$ lần: mỗi nhánh của $g$ phủ trọn đoạn $[0, 1]$, nên mỗi lần hợp làm số đoạn tuyến tính tăng gấp đôi. Kết quả $g^{(k)} = g \circ \dots \circ g$ là một hàm răng cưa có đúng $2^k$ đoạn tuyến tính, biểu diễn bằng một mạng $k$ lớp, mỗi lớp 2 đơn vị ReLU, tổng cộng $6k$ tham số.
+
+Mạng một lớp ẩn cần bao nhiêu đơn vị để biểu diễn cùng hàm? Với đầu vào một chiều, mỗi đơn vị ReLU $\operatorname{ReLU}(w x + b)$ tạo ra đúng một điểm gãy tại $x = -b/w$, và tổng của $m$ đơn vị là hàm tuyến tính từng khúc có tối đa $m$ điểm gãy. Hàm răng cưa có $2^k - 1$ điểm gãy bên trong đoạn, nên mạng một lớp ẩn cần **ít nhất $2^k - 1$ đơn vị** để biểu diễn chính xác nó.
+
+Thí nghiệm trong `code/models/experiments.py` kiểm tra điều này theo hướng xấp xỉ. Với mỗi bề rộng $m$ trong dãy 2, 4, 8, …, 256, thí nghiệm đặt $m$ điểm gãy cách đều trên $(0, 1)$ rồi giải bình phương tối thiểu cho các hệ số của lớp ra. Như vậy mạng một lớp được cho nghiệm tối ưu với các điểm gãy cố định, thay vì phải tự tìm bằng gradient descent. Bề rộng cần thiết là bề rộng nhỏ nhất trong dãy cho sai số bình phương trung bình dưới một nửa phương sai của hàm răng cưa, tức tốt hơn rõ rệt so với dự đoán bằng một hằng số.
 
 ![Hình 5](figs/models05_depth.png)
 
-**Hình 5.** Trái: sai số nhỏ nhất mà mạng một lớp ẩn đạt được, theo bề rộng, cho từng độ sâu $k$ (hai trục log). Mỗi đường **sụp thẳng đứng** đúng khi bề rộng chạm $2^k$. Phải: số tham số cần thiết — tuyến tính theo $k$ so với hàm mũ theo $k$.
+**Hình 5.** Trái: sai số nhỏ nhất của mạng một lớp ẩn theo bề rộng, với từng số lớp $k$ của mạng sâu; hai trục theo thang log. Sai số chỉ bắt đầu giảm khi bề rộng đạt cỡ $2^k$. Phải: số tham số cần thiết của hai loại mạng theo $k$.
 
-| $k$ lớp | Số đoạn $2^k$ | Tham số mạng sâu | Bề rộng một lớp cần | Tham số một lớp | Gấp |
+| $k$ | Số đoạn $2^k$ | Tham số mạng sâu | Bề rộng mạng một lớp cần | Tham số mạng một lớp | Tỉ lệ |
 |---|---|---|---|---|---|
-| 2 | 4 | 12 | 4 | 14 | 1,2× |
-| 3 | 8 | 18 | 8 | 26 | 1,4× |
-| 4 | 16 | 24 | 16 | 50 | 2,1× |
-| 5 | 32 | 30 | 32 | 98 | 3,3× |
-| 6 | 64 | 36 | 64 | 194 | 5,4× |
-| 7 | 128 | 42 | 128 | 386 | **9,2×** |
+| 2 | 4 | 12 | 4 | 14 | 1,2 |
+| 3 | 8 | 18 | 8 | 26 | 1,4 |
+| 4 | 16 | 24 | 16 | 50 | 2,1 |
+| 5 | 32 | 30 | 32 | 98 | 3,3 |
+| 6 | 64 | 36 | 64 | 194 | 5,4 |
+| 7 | 128 | 42 | 128 | 386 | 9,2 |
 
-Bề rộng cần thiết **đúng bằng $2^k$**, không xấp xỉ. Lý do thì hiển nhiên khi đã thấy: một đơn vị ReLU tạo được đúng một điểm gãy, nên muốn có $2^k$ đoạn thì phải có $2^k$ điểm gãy, nên phải có $2^k$ đơn vị. Còn mạng sâu chỉ cần $6k$ tham số. Cột cuối là tỉ lệ giữa hai con số ấy, và nó **tăng không giới hạn**: ở $k = 7$ đã là 9,2 lần, ở $k = 20$ sẽ là hơn 26 000 lần.
+Với mọi $k$, bề rộng cần thiết là $2^k$, khớp với cận dưới $2^k - 1$ ở trên. Dưới bề rộng đó, mạng một lớp không làm tốt hơn dự đoán hằng số: với $k = 7$, mọi bề rộng từ 2 tới 64 đều cho sai số 0,083, đúng bằng phương sai $1/12$ của hàm răng cưa. Số tham số của mạng sâu tăng tuyến tính theo $k$, của mạng một lớp tăng theo $2^k$, nên tỉ lệ giữa chúng tăng không giới hạn: 9,2 lần ở $k = 7$, và hơn 26 000 lần ở $k = 20$.
 
-Ba điều cần nói rõ về cách đọc kết quả này:
+Ba điều cần lưu ý khi đọc kết quả:
 
-1. **Đây là chặn trên cho mạng sâu và gần chặn dưới cho mạng một lớp.** Mạng sâu được cho trọng số **tường minh** — không huấn luyện gì cả. Mạng một lớp được cho lời giải bình phương tối thiểu **tối ưu chính xác** với các điểm gãy ở vị trí tốt nhất cho hàm tuần hoàn này. Nên khoảng cách đo được không phải do bên nào tối ưu kém.
-2. **Bảng nói về khả năng biểu diễn, không nói về khả năng học.** Rằng mạng sâu *biểu diễn được* hàm ấy gọn gàng không có nghĩa xuống dốc *tìm ra được* bộ trọng số ấy. Thực tế thì huấn luyện mạng 7 lớp với 2 đơn vị mỗi lớp trên hàm này gần như luôn thất bại. Đó là lý do Chương 6 tồn tại.
-3. **Không suy ra được "cứ sâu hơn là tốt hơn".** Hàm răng cưa được chọn có chủ đích vì nó là trường hợp *tốt nhất* cho độ sâu — nó có cấu trúc tự lặp mà phép hợp khai thác được. Với dữ liệu bảng, thêm lớp thường không giúp gì (Mục 1.2).
+1. **Đây là so sánh về khả năng biểu diễn, không về khả năng học.** Mạng sâu được cho trọng số tường minh, không qua huấn luyện. Trên thực tế, huấn luyện một mạng 7 lớp chỉ có 2 đơn vị mỗi lớp để học hàm này bằng gradient descent gần như luôn thất bại; Chương 6 giải thích một phần nguyên nhân.
+2. **Hàm răng cưa là trường hợp thuận lợi nhất cho độ sâu.** Nó có cấu trúc lặp lại mà phép hợp hàm khai thác trực tiếp. Kết quả không có nghĩa là mạng càng sâu càng tốt với mọi dữ liệu; với dữ liệu dạng bảng, thêm lớp thường không giúp gì (Mục 1.2).
+3. **Độ sâu không làm tăng những gì mạng biểu diễn được về nguyên tắc**, vì theo Định lý 4.1 mạng một lớp đủ rộng biểu diễn được mọi hàm liên tục. Cái độ sâu mang lại là biểu diễn một số hàm bằng ít tham số hơn rất nhiều.
 
-> Cách nói gọn khi phỏng vấn: *"Định lý xấp xỉ phổ quát nói một lớp là đủ, nhưng nó chỉ nói tồn tại. Có những hàm mà mạng $k$ lớp cần $O(k)$ tham số còn mạng một lớp cần $O(2^k)$ — cấu trúc răng cưa dựng từ hàm lều là ví dụ đo được. Nên độ sâu không mua thêm sức biểu diễn, nó mua sự gọn gàng."*
+### 4.5. Thiết kế MLP trong thực hành
 
-### 4.5. Kiến trúc MLP trong thực tế
+Với dữ liệu không có cấu trúc không gian hay thời gian, các lựa chọn mặc định sau thường là điểm khởi đầu tốt:
 
-Với dữ liệu không có cấu trúc không gian hay thời gian, công thức mặc định đáng tin:
+- **Chuẩn hoá đầu vào.** Đưa mỗi đặc trưng số về trung bình 0, độ lệch chuẩn 1, dùng thống kê tính trên tập huấn luyện. Khác với cây quyết định, mạng nơ-ron nhạy với thang đo của đặc trưng, vì thang đo ảnh hưởng tới số điều kiện của bài toán tối ưu ([Mục 5.3 của *Nền tảng*](nentang-ch05.html)).
+- **Độ sâu và bề rộng.** 2 tới 4 lớp ẩn, bề rộng bằng nhau hoặc giảm dần. Mạng sâu hơn cần kết nối tắt và chuẩn hoá (Chương 6).
+- **Hàm kích hoạt.** ReLU hoặc GELU.
+- **Tối ưu.** Adam hoặc AdamW với tốc độ học khoảng $10^{-3}$ là điểm khởi đầu hợp lý (Mục 5.4).
+- **Chống overfitting.** Dừng sớm dựa trên sai số xác thực là biện pháp rẻ và hiệu quả nhất, nên làm trước; sau đó là weight decay và dropout với tỉ lệ 0,1 tới 0,3 (Mục 6.6).
 
-- **Độ sâu**: 2–4 lớp ẩn. Sâu hơn cần kết nối tắt và chuẩn hoá (Chương 6).
-- **Bề rộng**: thường giữ bằng nhau giữa các lớp, hoặc thu hẹp dần. Bề rộng đáng chỉnh hơn độ sâu.
-- **Kích hoạt**: ReLU hoặc GELU.
-- **Chuẩn hoá**: LayerNorm hoặc BatchNorm sau biến đổi tuyến tính, trước kích hoạt (hoặc sau — xem Mục 6.4).
-- **Chống quá khớp**: dropout 0,1–0,3 và **dừng sớm**. Dừng sớm là biện pháp rẻ nhất và hiệu quả nhất; đáng làm trước mọi thứ khác.
+Trên dữ liệu dạng bảng, nên so sánh MLP với gradient boosting (Mục 3.6) trước khi kết luận: như Mục 1.2 đã nêu, gradient boosting thường tốt hơn.
 
 ---
 
-## 5. Lan truyền ngược và tối ưu hoá
+## 5. Lan truyền ngược và các thuật toán tối ưu
 
-### 5.1. Lan truyền ngược không phải một thuật toán học
+Huấn luyện mạng nơ-ron gồm hai việc tách biệt: tính gradient của hàm mất mát theo mọi tham số, và dùng gradient đó để cập nhật tham số. Lan truyền ngược làm việc thứ nhất; SGD, momentum và Adam làm việc thứ hai. Chương này trình bày cả hai, giải thích vì sao lan truyền ngược rẻ, vì sao nó tốn bộ nhớ, và các thuật toán tối ưu khác nhau ở đâu. Mục cuối là một ví dụ tính tay đầy đủ.
 
-Đây là hiểu lầm phổ biến nhất về lan truyền ngược, và sửa nó là bước đầu để hiểu đúng:
+### 5.1. Lan truyền ngược
 
-> **Lan truyền ngược chỉ là cách tính gradient một cách hiệu quả.** Nó không quyết định cập nhật tham số thế nào — việc đó là của thuật toán tối ưu (SGD, Adam…). Hai thứ độc lập nhau.
+> **Định nghĩa 5.1 (Lan truyền ngược).** **Lan truyền ngược** (backpropagation) là thuật toán tính gradient của một hàm mất mát vô hướng theo mọi tham số của mạng, bằng cách áp dụng quy tắc dây chuyền theo thứ tự từ đầu ra ngược về đầu vào và dùng lại các giá trị trung gian đã tính ở lượt xuôi.
 
-Ý tưởng nằm gọn trong quy tắc dây chuyền. Với chuỗi hàm hợp $L = \ell(f_n(\cdots f_1(x)))$, đạo hàm theo tham số của lớp $i$ là một tích các đạo hàm địa phương. Điều thông minh duy nhất là **thứ tự nhân**.
+Lan truyền ngược không phải là thuật toán học. Nó chỉ tính gradient; việc dùng gradient để cập nhật tham số thế nào là việc của thuật toán tối ưu (Mục 5.4). Hai thành phần độc lập với nhau: cùng một gradient có thể dùng cho SGD hay Adam, và cùng một thuật toán tối ưu nhận gradient tính bằng lan truyền ngược hay bằng cách khác.
+
+Thuật toán gồm hai lượt. **Lượt xuôi** tính đầu ra từ đầu vào, lần lượt qua từng lớp, và lưu lại mọi giá trị trung gian: đầu vào của mỗi lớp, giá trị trước và sau hàm kích hoạt. **Lượt ngược** bắt đầu từ $\partial L/\partial L = 1$ và đi ngược qua từng lớp. Với một lớp $z = Wh + b$, $a = \phi(z)$, khi đã có $\delta_a = \partial L/\partial a$ thì
+
+$$\delta_z = \delta_a \odot \phi'(z), \qquad \frac{\partial L}{\partial W} = \delta_z\, h^\top, \qquad \frac{\partial L}{\partial b} = \delta_z, \qquad \delta_h = W^\top \delta_z.$$
+
+Vector $\delta_h$ lại là đầu vào cho lớp phía trước. Mỗi công thức chỉ cần các giá trị $z$, $h$ đã lưu ở lượt xuôi. Rumelhart, Hinton và Williams (1986) phổ biến thuật toán này cho mạng nơ-ron; trong toán học ứng dụng, nó là trường hợp riêng của vi phân tự động chế độ ngược.
 
 ![Hình 6](figs/models06_backprop.png)
 
-**Hình 6.** Lượt xuôi tính và **ghi lại** mọi giá trị trung gian; lượt ngược nhân dần các đạo hàm địa phương theo chiều ngược, dùng lại đúng những giá trị đã ghi.
+**Hình 6.** Lượt xuôi tính và lưu lại các giá trị trung gian; lượt ngược nhân dần các đạo hàm cục bộ theo thứ tự ngược lại, dùng lại các giá trị đã lưu.
 
-### 5.2. Vì sao phải nhân từ phải sang trái
+### 5.2. Thứ tự nhân các ma trận Jacobi
 
-Giả sử mạng biến $\mathbb{R}^{d} \to \mathbb{R}^{m} \to \mathbb{R}^{1}$. Gradient là tích hai ma trận Jacobi:
+Theo quy tắc dây chuyền, với mạng $x \to h_1 \to \dots \to h_{L-1} \to L$ trong đó $L$ là một số, gradient theo đầu vào là tích các ma trận Jacobi:
 
-$$\frac{\partial L}{\partial x} \;=\; \underbrace{\frac{\partial L}{\partial h}}_{1 \times m} \; \underbrace{\frac{\partial h}{\partial x}}_{m \times d}$$
+$$\frac{\partial L}{\partial x} = \underbrace{\frac{\partial L}{\partial h_{L-1}}}_{1 \times m}\;\underbrace{\frac{\partial h_{L-1}}{\partial h_{L-2}}}_{m \times m}\;\cdots\;\underbrace{\frac{\partial h_1}{\partial x}}_{m \times d}.$$
 
-- Nhân **từ trái sang phải** (chiều ngược, tức lan truyền ngược): mỗi bước là *vector × ma trận*, chi phí $O(md)$.
-- Nhân **từ phải sang trái** (chiều xuôi, tức lan truyền xuôi): mỗi bước là *ma trận × ma trận*, chi phí $O(md^2)$.
+Phép nhân ma trận có tính kết hợp, nên có thể nhân theo bất kỳ thứ tự nào, nhưng chi phí rất khác nhau:
 
-Với $d$ lớn — và trong học sâu $d$ là hàng triệu — khác biệt là một bậc độ lớn theo $d$. Đây là toàn bộ lý do kỹ thuật khiến ta huấn luyện ngược chứ không xuôi:
+- **Nhân từ trái sang phải** (chế độ ngược, tức lan truyền ngược): kết quả trung gian luôn là một vector hàng $1 \times m$, và mỗi bước là một phép nhân vector với ma trận, tốn $O(m^2)$.
+- **Nhân từ phải sang trái** (chế độ xuôi): kết quả trung gian là ma trận $m \times d$, và mỗi bước là một phép nhân ma trận với ma trận, tốn $O(m^2 d)$.
 
-> **Lan truyền ngược rẻ khi có ÍT đầu ra và NHIỀU tham số.** Hàm mất mát là một số vô hướng, nên trường hợp này đúng tuyệt đối.
+Tổng quát hơn: với hàm từ $n$ đầu vào ra $k$ đầu ra, chế độ ngược tính toàn bộ gradient với chi phí cỡ $k$ lần tính hàm, còn chế độ xuôi cần cỡ $n$ lần (Baydin và cộng sự, 2018). Huấn luyện mạng nơ-ron có $k = 1$ (hàm mất mát là một số) và $n$ bằng số tham số, có thể tới hàng tỉ, nên chế độ ngược rẻ hơn hàng tỉ lần. Trên thực tế, một lượt ngược tốn khoảng gấp đôi một lượt xuôi (Mục 12.4), nên tính gradient chỉ tốn cỡ ba lần tính hàm mất mát.
 
-Ngược lại, nếu cần đạo hàm của **nhiều** đầu ra theo **một** đầu vào thì chiều xuôi mới rẻ. Đó là lý do có hai chế độ vi phân tự động: *reverse mode* và *forward mode*.
+Ngược lại, khi cần đạo hàm của nhiều đầu ra theo ít đầu vào, chế độ xuôi rẻ hơn. Các thư viện như PyTorch và JAX cài đặt cả hai chế độ.
 
-### 5.3. Cái giá: bộ nhớ
+### 5.3. Bộ nhớ cho lan truyền ngược
 
-Lan truyền ngược phải **giữ lại các giá trị trung gian của lượt xuôi** để dùng ở lượt ngược. Đây là khoản chi phí bị đánh giá thấp nhất khi huấn luyện mô hình lớn:
+Lượt ngược cần các giá trị trung gian của lượt xuôi, nên chúng phải được giữ trong bộ nhớ cho tới khi lượt ngược dùng xong. Phần bộ nhớ này, gọi là **bộ nhớ kích hoạt**, tỉ lệ với
 
-$$\text{bộ nhớ kích hoạt} \;\approx\; \text{số lớp} \times \text{kích thước lô} \times \text{độ dài chuỗi} \times d \times \text{số byte}.$$
+$$\text{số lớp} \times \text{kích thước lô} \times \text{độ dài chuỗi} \times \text{bề rộng} \times \text{số byte mỗi số}.$$
 
-Nó **không** tỉ lệ với số tham số mà tỉ lệ với **kích thước lô và độ dài chuỗi**. Đó là vì sao hết bộ nhớ khi huấn luyện thường được chữa bằng giảm kích thước lô, chứ không bằng giảm mô hình.
+Bộ nhớ kích hoạt không tỉ lệ với số tham số mà tỉ lệ với kích thước lô và độ dài chuỗi. Vì vậy khi huấn luyện bị hết bộ nhớ, cách xử lý đầu tiên thường là giảm kích thước lô, không phải thu nhỏ mô hình. Hai kỹ thuật đổi thời gian tính lấy bộ nhớ:
 
-Hai kỹ thuật đổi thời gian lấy bộ nhớ:
+- **Gradient checkpointing** (Chen và cộng sự, 2016): chỉ lưu giá trị trung gian tại một số lớp mốc, các lớp khác được tính lại từ mốc gần nhất khi lượt ngược cần tới. Đặt mốc cách nhau $\sqrt{L}$ lớp thì bộ nhớ kích hoạt giảm từ $O(L)$ xuống $O(\sqrt L)$, đổi lại phải tính thêm khoảng một lượt xuôi, tức thời gian tăng khoảng một phần ba.
+- **Tích luỹ gradient** (gradient accumulation): chia một lô lớn thành nhiều lô nhỏ, cộng dồn gradient của các lô nhỏ rồi mới cập nhật một lần. Kết quả tương đương huấn luyện với lô lớn, bộ nhớ chỉ bằng của lô nhỏ, nhưng không nhanh hơn.
 
-- **Gradient checkpointing**: chỉ giữ kích hoạt ở một số lớp mốc, các lớp còn lại **tính lại** khi cần ở lượt ngược. Với $L$ lớp và mốc mỗi $\sqrt{L}$ lớp, bộ nhớ giảm từ $O(L)$ xuống $O(\sqrt{L})$, đổi lại khoảng **một lần lượt xuôi thêm**, tức tăng khoảng 30% thời gian.
-- **Tích luỹ gradient**: chạy nhiều lô nhỏ, cộng dồn gradient rồi mới cập nhật một lần. Cho hiệu ứng của lô lớn với bộ nhớ của lô nhỏ, nhưng **không** nhanh hơn.
+### 5.4. SGD, momentum và Adam
 
-### 5.4. Xuống dốc và các biến thể
+Gradient descent cập nhật $\theta_{t+1} = \theta_t - \eta\, g_t$ với $g_t = \nabla_\theta L(\theta_t)$ ([Chương 5 của *Nền tảng*](nentang-ch05.html)). Với mạng nơ-ron, $L$ là trung bình trên hàng triệu điểm dữ liệu, nên tính gradient đầy đủ ở mỗi bước là quá đắt.
 
-Cập nhật cơ bản:
+**SGD theo mini-batch** ước lượng $g_t$ bằng gradient trên một lô nhỏ $B$ điểm chọn ngẫu nhiên. Ước lượng này không chệch, và phương sai của nó giảm theo $1/B$. Nhiễu của ước lượng không hoàn toàn có hại: nhiều nghiên cứu cho thấy nó giúp tránh một số điểm cực tiểu hẹp và có tác dụng như một dạng regularization, dù cơ chế chính xác vẫn đang được nghiên cứu.
 
-$$\theta_{t+1} = \theta_t - \eta\, g_t, \qquad g_t = \nabla_\theta L(\theta_t).$$
-
-**Xuống dốc ngẫu nhiên theo lô nhỏ (mini-batch SGD)** ước lượng $g_t$ trên một lô nhỏ. Nhiễu của phép ước lượng này không chỉ là cái giá phải trả — nó còn là một dạng phạt chuẩn ngầm, giúp thoát khỏi các cực tiểu hẹp.
-
-**Momentum** cộng dồn hướng đi:
+**Momentum** giữ một trung bình trượt của các gradient:
 
 $$v_{t+1} = \beta v_t + g_t, \qquad \theta_{t+1} = \theta_t - \eta\, v_{t+1}.$$
 
-Trực giác đúng: trong một khe hẹp và dài, gradient dao động mạnh theo chiều ngang khe và yếu theo chiều dọc khe. Lấy trung bình trượt **triệt tiêu dao động ngang** và **cộng dồn phần dọc**. Với $\beta = 0{,}9$, bước đi hiệu dụng lớn gấp khoảng $1/(1-\beta) = 10$ lần.
+Trong một thung lũng hẹp và dài, gradient đổi dấu liên tục theo chiều ngang thung lũng và giữ cùng dấu theo chiều dọc. Trung bình trượt triệt tiêu phần dao động ngang và cộng dồn phần dọc, nên với $\beta = 0{,}9$ bước đi theo hướng ổn định lớn gấp khoảng $1/(1-\beta) = 10$ lần. [Mục 5.3 của *Nền tảng*](nentang-ch05.html) đo được tác dụng này: số vòng lặp giảm từ bậc $\kappa$ xuống bậc $\sqrt\kappa$.
 
-**Adam** thêm một ý nữa: chia mỗi toạ độ cho căn bậc hai của trung bình trượt bình phương gradient, tức **mỗi tham số có tốc độ học riêng**:
+**Adam** (Kingma và Ba, 2015) giữ trung bình trượt của cả gradient và bình phương gradient, rồi chia từng toạ độ cho căn bậc hai của trung bình bình phương, nên mỗi tham số có một bước đi riêng:
 
-$$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t, \qquad v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t^2$$
-$$\hat{m}_t = \frac{m_t}{1-\beta_1^t}, \qquad \hat{v}_t = \frac{v_t}{1-\beta_2^t}, \qquad \theta_{t+1} = \theta_t - \eta\,\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}.$$
+$$m_t = \beta_1 m_{t-1} + (1-\beta_1)\,g_t, \qquad v_t = \beta_2 v_{t-1} + (1-\beta_2)\,g_t^2,$$
+$$\hat m_t = \frac{m_t}{1-\beta_1^t}, \qquad \hat v_t = \frac{v_t}{1-\beta_2^t}, \qquad \theta_{t+1} = \theta_t - \eta\,\frac{\hat m_t}{\sqrt{\hat v_t} + \epsilon}.$$
 
-**Hai phép chia cho $1-\beta^t$ là hiệu chỉnh thiên lệch**, và đây là chi tiết hay bị hỏi. Lý do: $m_0 = 0$, nên ở bước đầu $m_1 = (1-\beta_1) g_1$ — nhỏ hơn $g_1$ khoảng 10 lần với $\beta_1 = 0{,}9$. Không hiệu chỉnh thì các bước đầu tiên nhỏ một cách giả tạo. Chia cho $1-\beta_1^t$ đúng bằng việc bù lại phần khuyết đó, và ảnh hưởng của nó tắt dần khi $t$ lớn.
+Các giá trị mặc định là $\beta_1 = 0{,}9$, $\beta_2 = 0{,}999$, $\epsilon = 10^{-8}$.
 
-| | SGD + momentum | Adam |
+Hai phép chia cho $1 - \beta^t$ gọi là **hiệu chỉnh độ chệch** (bias correction), và tên gọi này đúng theo nghĩa thống kê của Mục 2.2. Vì khởi tạo $m_0 = 0$, khai triển công thức truy hồi được $m_t = (1-\beta_1)\sum_{i=1}^{t}\beta_1^{t-i} g_i$. Nếu các $g_i$ có cùng kỳ vọng $\mathbb{E}[g]$ thì
+
+$$\mathbb{E}[m_t] = (1-\beta_1)\big(1 + \beta_1 + \dots + \beta_1^{t-1}\big)\,\mathbb{E}[g] = (1 - \beta_1^t)\,\mathbb{E}[g].$$
+
+Như vậy $m_t$ là ước lượng chệch về phía 0 của $\mathbb{E}[g]$, và chia cho $1 - \beta_1^t$ cho ước lượng không chệch. Ở bước đầu, $m_1 = 0{,}1\,g_1$ với $\beta_1 = 0{,}9$; không hiệu chỉnh thì các bước đầu nhỏ đi một cách giả tạo. Với $\beta_2 = 0{,}999$ thì vấn đề nặng hơn nhiều, vì $1 - \beta_2^t$ còn nhỏ trong hàng nghìn bước đầu. Khi $t$ lớn, $\beta^t \to 0$ và phép hiệu chỉnh không còn tác dụng.
+
+**AdamW** (Loshchilov và Hutter, 2019) sửa cách Adam xử lý weight decay. Nếu thêm $\lambda\|\theta\|^2$ vào hàm mất mát rồi dùng Adam, gradient của thành phần phạt $2\lambda\theta$ cũng bị chia cho $\sqrt{\hat v_t}$, nên tham số có gradient lớn lại bị phạt ít hơn, ngược với mục đích của regularization. AdamW tách weight decay ra khỏi gradient và trừ trực tiếp $\eta\lambda\theta_t$ ở mỗi bước. AdamW là lựa chọn mặc định khi huấn luyện Transformer.
+
+| | SGD với momentum | Adam, AdamW |
 |---|---|---|
-| Siêu tham số nhạy | rất nhạy với $\eta$ | ít nhạy hơn nhiều |
-| Hội tụ ban đầu | chậm hơn | nhanh hơn |
-| Tổng quát hoá | thường **tốt hơn** trên thị giác máy tính | thường kém hơn một chút ở đó |
-| Bộ nhớ trạng thái | 1× số tham số | **2×** số tham số |
-| Mặc định hợp lý | thị giác, khi có thời gian chỉnh | NLP, Transformer, khi muốn chạy được ngay |
+| Độ nhạy với tốc độ học | cao | thấp hơn nhiều |
+| Tốc độ giảm mất mát ban đầu | chậm hơn | nhanh hơn |
+| Tổng quát hoá | trên một số bài toán thị giác, tốt hơn (Wilson và cộng sự, 2017) | thường tốt, là mặc định cho Transformer |
+| Bộ nhớ trạng thái | 1 giá trị mỗi tham số | 2 giá trị mỗi tham số |
 
-Hàng "bộ nhớ trạng thái" rất đáng nhớ khi nói về huấn luyện mô hình lớn: Adam giữ **hai** trạng thái cho mỗi tham số, nên bộ nhớ tối ưu hoá gấp đôi bộ nhớ trọng số. Với mô hình 7 tỉ tham số ở FP32, riêng trạng thái Adam đã là $7 \times 10^9 \times 2 \times 4 = 56$ GB.
-
-**AdamW** tách phần suy giảm trọng số ra khỏi gradient thay vì cộng vào nó. Khác biệt không phải chuyện nhỏ: với Adam thường, phạt $\ell_2$ bị chia cho $\sqrt{\hat{v}}$ nên tham số có gradient lớn bị phạt **ít** hơn — ngược hẳn với ý định. AdamW là mặc định cho Transformer vì lý do đó.
+Dòng cuối quan trọng khi huấn luyện mô hình lớn. Adam giữ $m$ và $v$ cho mọi tham số, thường ở FP32. Với mô hình 7 tỉ tham số, riêng trạng thái Adam đã chiếm $7 \times 10^9 \times 2 \times 4 = 56$ GB. Mục 12.5 tính đầy đủ bộ nhớ huấn luyện.
 
 ### 5.5. Lịch tốc độ học
 
-Tốc độ học là siêu tham số quan trọng nhất, và **lịch** của nó gần như cũng quan trọng ngang thế.
+Tốc độ học là siêu tham số quan trọng nhất khi huấn luyện mạng nơ-ron, và cách thay đổi nó theo thời gian cũng quan trọng gần như vậy.
 
-- **Warmup** — tăng dần $\eta$ từ 0 trong vài trăm tới vài nghìn bước đầu. Lý do với Adam: ở các bước đầu, $\hat{v}_t$ được ước lượng từ rất ít mẫu nên rất nhiễu, khiến bước đi có thể lớn bất thường và đẩy mô hình vào vùng xấu. Warmup là bắt buộc trên thực tế với Transformer post-LN (Mục 6.4).
-- **Cosine decay** — giảm $\eta$ theo hình cos về gần 0 ở cuối. Đây là lịch mặc định của gần như mọi mô hình ngôn ngữ lớn hiện nay.
-- **Giảm theo bậc thang** — chia $\eta$ cho 10 tại các mốc. Vẫn phổ biến trong thị giác máy tính.
+- **Warmup**: tăng tuyến tính tốc độ học từ gần 0 lên giá trị đích trong vài trăm tới vài nghìn bước đầu. Với Adam, $\hat v_t$ ở các bước đầu được ước lượng từ rất ít gradient nên rất nhiễu, và bước đi có thể lớn bất thường. Warmup cũng cần thiết với Transformer dùng post-LN (Mục 10.2).
+- **Cosine decay** (Loshchilov và Hutter, 2017): sau warmup, giảm tốc độ học theo nửa chu kỳ hàm cosin về gần 0 ở bước cuối. Đây là lịch phổ biến khi huấn luyện mô hình ngôn ngữ.
+- **Giảm theo bậc thang**: chia tốc độ học cho 10 tại một số mốc định trước. Vẫn phổ biến trong thị giác máy tính.
 
-Một quy tắc kinh nghiệm hữu ích: **tăng kích thước lô lên $k$ lần thì tăng tốc độ học lên khoảng $k$ lần** (quy tắc tuyến tính) hoặc $\sqrt{k}$ lần (quy tắc căn). Quy tắc tuyến tính hợp với SGD, quy tắc căn hợp hơn với Adam. Cả hai đều là quy tắc kinh nghiệm, không phải định lý, và đều hỏng khi lô quá lớn.
+Khi tăng kích thước lô lên $k$ lần, gradient ít nhiễu hơn nên có thể dùng tốc độ học lớn hơn. Với SGD, Goyal và cộng sự (2017) dùng **quy tắc tuyến tính**: nhân tốc độ học với $k$, kèm warmup, và huấn luyện được ResNet-50 trên ImageNet với lô 8 192 ảnh mà không giảm độ chính xác. Với Adam, Malladi và cộng sự (2022) lập luận rằng quy tắc phù hợp là nhân với $\sqrt{k}$. Cả hai là quy tắc kinh nghiệm có cơ sở lý thuyết một phần, và đều không còn đúng khi lô quá lớn.
 
-### 5.6. Những chỗ hay nhầm
+### 5.6. Các hiểu lầm thường gặp
 
 | Phát biểu | Thực tế |
 |---|---|
-| "Lan truyền ngược là thuật toán học." | Nó chỉ tính gradient. Thuật toán học là SGD/Adam. |
-| "Mạng nơ-ron kẹt ở cực tiểu địa phương." | Ở số chiều lớn, **điểm yên ngựa** phổ biến hơn cực tiểu địa phương xấu rất nhiều. Phần lớn cực tiểu địa phương trong mạng lớn có chất lượng gần như nhau. |
-| "Adam luôn tốt hơn SGD." | Adam hội tụ nhanh hơn; SGD + momentum thường **tổng quát hoá tốt hơn** trên thị giác. |
-| "Gradient bằng 0 nghĩa là đã hội tụ." | Cũng có thể là điểm yên ngựa, hoặc nơ-ron ReLU đã chết, hoặc gradient đã tiêu biến. |
-| "Lô càng lớn càng tốt." | Lô rất lớn làm mất phần nhiễu có ích và thường cần chỉnh lại lịch tốc độ học; lợi ích về thời gian cũng bão hoà. |
+| "Lan truyền ngược là thuật toán học." | Nó chỉ tính gradient. Việc cập nhật tham số do SGD, Adam hay thuật toán tối ưu khác đảm nhận. |
+| "Mạng nơ-ron hay bị kẹt ở cực tiểu địa phương xấu." | Trong không gian nhiều chiều, điểm yên ngựa phổ biến hơn nhiều so với cực tiểu địa phương xấu (Dauphin và cộng sự, 2014), và thực nghiệm cho thấy các cực tiểu mà gradient descent tìm được trong mạng lớn thường có mất mát gần nhau. |
+| "Adam luôn tốt hơn SGD." | Adam giảm mất mát nhanh hơn và ít phải chỉnh; SGD với momentum có thể tổng quát hoá tốt hơn trên một số bài toán thị giác. |
+| "Gradient bằng 0 nghĩa là đã hội tụ." | Cũng có thể là điểm yên ngựa, đơn vị ReLU đã chết, hoặc gradient đã tiêu biến qua nhiều lớp. |
+| "Lô càng lớn càng tốt." | Lô rất lớn làm mất phần nhiễu có ích, cần chỉnh lại tốc độ học, và lợi ích về thời gian giảm dần khi lô tăng. |
+
+### 5.7. Ví dụ tính tay
+
+Ví dụ sau thực hiện đầy đủ một lượt xuôi, một lượt ngược và một bước cập nhật trên mạng nhỏ nhất có lớp ẩn, để thấy từng công thức ở Mục 5.1 hoạt động thế nào.
+
+> **Ví dụ 5.1.** Mạng có đầu vào $x = (1, 2)$, lớp ẩn 2 đơn vị ReLU và một đầu ra tuyến tính, hàm mất mát $L = \tfrac12(\hat y - y)^2$ với $y = 1$. Tham số:
+> $$W_1 = \begin{pmatrix} 0{,}1 & 0{,}2 \\ -0{,}3 & 0{,}1 \end{pmatrix}, \quad b_1 = (0, 0), \quad w_2 = (0{,}5;\; -0{,}4), \quad b_2 = 0{,}2.$$
+>
+> **Lượt xuôi.** $z = W_1 x + b_1 = (0{,}1 + 0{,}4;\; -0{,}3 + 0{,}2) = (0{,}5;\; -0{,}1)$. Qua ReLU: $h = (0{,}5;\; 0)$. Đầu ra $\hat y = w_2^\top h + b_2 = 0{,}25 + 0 + 0{,}2 = 0{,}45$. Mất mát $L = \tfrac12(0{,}45 - 1)^2 = 0{,}15125$.
+>
+> **Lượt ngược.** $\partial L/\partial \hat y = \hat y - y = -0{,}55$. Lớp ra: $\partial L/\partial w_2 = -0{,}55 \cdot h = (-0{,}275;\; 0)$, $\partial L/\partial b_2 = -0{,}55$, và $\delta_h = -0{,}55 \cdot w_2 = (-0{,}275;\; 0{,}22)$. Qua ReLU: $\delta_z = \delta_h \odot \mathbb{1}[z > 0] = (-0{,}275;\; 0)$. Lớp ẩn: $\partial L/\partial W_1 = \delta_z\, x^\top = \begin{pmatrix} -0{,}275 & -0{,}55 \\ 0 & 0 \end{pmatrix}$ và $\partial L/\partial b_1 = (-0{,}275;\; 0)$.
+>
+> **Kiểm tra bằng sai phân.** Tăng rồi giảm $W_1[1,2]$ một lượng $10^{-4}$: mất mát thành $0{,}151195$ và $0{,}151305$, nên đạo hàm xấp xỉ $(0{,}151195 - 0{,}151305)/(2 \cdot 10^{-4}) = -0{,}55$, khớp với lượt ngược.
+>
+> **Cập nhật.** Một bước gradient descent với $\eta = 0{,}1$ đưa $\hat y$ từ 0,45 lên 0,606 và mất mát từ 0,151 xuống 0,078.
+
+Ví dụ cho thấy một chi tiết quan trọng: đơn vị ẩn thứ hai có $z_2 = -0{,}1 < 0$, nên đạo hàm của ReLU tại đó bằng 0 và toàn bộ hàng thứ hai của $W_1$ nhận gradient bằng 0. Đơn vị nào không kích hoạt với một đầu vào thì không học gì từ đầu vào đó. Nếu một đơn vị không kích hoạt với **mọi** đầu vào, nó không bao giờ được cập nhật nữa; đó là đơn vị ReLU chết ở Mục 4.2. Cách kiểm tra bằng sai phân, và cách chọn bước sai phân, được trình bày ở [Mục 5.5 của *Nền tảng*](nentang-ch05.html).
 
 ---
 
 ## 6. Khởi tạo, chuẩn hoá và kết nối tắt
 
-### 6.1. Bài toán: tín hiệu co lại hoặc phình ra
+Mạng càng sâu thì tín hiệu càng dễ co lại hoặc phình ra khi đi qua các lớp, ở cả lượt xuôi lẫn lượt ngược. Chương này trình bày ba kỹ thuật giữ độ lớn của tín hiệu ổn định: khởi tạo trọng số đúng phương sai, chuẩn hoá, và kết nối tắt. Một thí nghiệm trên mạng 40 lớp đo tác dụng của từng kỹ thuật và của các cách kết hợp, trong đó có một kết quả hay bị hiểu sai: kết nối tắt một mình không đủ. Mục cuối trình bày dropout và các phương pháp regularization khác cho mạng sâu.
 
-Một mạng sâu là một tích các ma trận Jacobi. Nếu mỗi lớp nhân tín hiệu với một hệ số trung bình $\gamma$, thì qua $L$ lớp tín hiệu bị nhân với $\gamma^L$. Chỉ cần $\gamma$ lệch khỏi 1 một chút là sau vài chục lớp mọi thứ hoặc **tiêu biến** về 0 hoặc **bùng nổ** ra vô cực.
+### 6.1. Tín hiệu co lại hoặc phình ra qua nhiều lớp
 
-Toàn bộ chương này là về ba cách giữ $\gamma \approx 1$, và ba cách ấy **cộng dồn** chứ không thay thế nhau.
+Theo Mục 5.2, gradient theo đầu vào của một lớp là tích của các ma trận Jacobi của mọi lớp phía sau. Nếu mỗi lớp nhân độ lớn của gradient với một hệ số trung bình $\gamma$, thì qua $L$ lớp gradient bị nhân với khoảng $\gamma^L$. Với $\gamma = 0{,}9$ và $L = 50$, hệ số là $0{,}005$; với $\gamma = 1{,}1$, hệ số là 117. Chỉ cần $\gamma$ lệch khỏi 1 một chút, gradient ở các lớp đầu sẽ **tiêu biến** về gần 0 hoặc **bùng nổ**. Lượt xuôi gặp vấn đề tương tự với độ lớn của các giá trị kích hoạt.
 
-### 6.2. Khởi tạo: chọn phương sai cho đúng
+Ba kỹ thuật trong chương này đều nhằm giữ $\gamma$ gần 1, và chúng bổ sung cho nhau chứ không thay thế nhau.
 
-Xét một lớp $z = Wx$ với $W \in \mathbb{R}^{n_{\text{out}} \times n_{\text{in}}}$, các phần tử độc lập có phương sai $\sigma_W^2$, và $x$ có các thành phần độc lập phương sai $\sigma_x^2$. Khi đó
+### 6.2. Khởi tạo Xavier và He
 
-$$\operatorname{Var}(z_i) = \sum_{j=1}^{n_{\text{in}}} \operatorname{Var}(W_{ij} x_j) = n_{\text{in}}\,\sigma_W^2\,\sigma_x^2.$$
+Xét một lớp $z = Wa$ với $W \in \mathbb{R}^{n_{\text{out}} \times n_{\text{in}}}$. Giả sử các phần tử của $W$ độc lập, có trung bình 0 và phương sai $\sigma_W^2$, và độc lập với $a$. Khi đó mỗi thành phần của $z$ có
 
-Muốn $\operatorname{Var}(z) = \operatorname{Var}(x)$ thì phải có $\sigma_W^2 = 1/n_{\text{in}}$. Đó là **khởi tạo Xavier/Glorot**, thường lấy trung bình hài hoà của hai chiều để lượt ngược cũng được giữ:
+$$\operatorname{Var}(z_i) = \sum_{j=1}^{n_{\text{in}}} \operatorname{Var}(W_{ij} a_j) = n_{\text{in}}\,\sigma_W^2\,\mathbb{E}[a_j^2].$$
+
+Nếu $a$ có trung bình 0 thì $\mathbb{E}[a_j^2] = \operatorname{Var}(a_j)$, và muốn phương sai không đổi qua lớp thì cần $\sigma_W^2 = 1/n_{\text{in}}$. Áp dụng cùng lập luận cho lượt ngược, nơi gradient nhân với $W^\top$, cho điều kiện $\sigma_W^2 = 1/n_{\text{out}}$. **Khởi tạo Xavier** (Glorot và Bengio, 2010) dung hoà hai điều kiện bằng
 
 $$\sigma_W^2 = \frac{2}{n_{\text{in}} + n_{\text{out}}}.$$
 
-Với **ReLU** thì phải sửa: ReLU vứt đi một nửa số giá trị, nên nó cắt phương sai đi đúng một nửa. Bù lại bằng cách nhân đôi:
+Lập luận trên đúng với hàm kích hoạt gần tuyến tính quanh 0 như tanh. Với ReLU thì phải sửa: nếu $z$ đối xứng quanh 0 thì $a = \operatorname{ReLU}(z)$ bằng 0 với một nửa số giá trị, nên
 
-$$\boxed{\sigma_W^2 = \frac{2}{n_{\text{in}}}} \qquad \text{(khởi tạo He)}.$$
+$$\mathbb{E}[a^2] = \tfrac12\,\mathbb{E}[z^2] = \tfrac12 \operatorname{Var}(z).$$
 
-> Hệ số 2 trong khởi tạo He **đến từ ReLU**, không phải từ đâu khác. Đây là một câu hỏi phỏng vấn rất hay: nó kiểm tra xem bạn có hiểu rằng khởi tạo phải khớp với hàm kích hoạt hay không. Với tanh thì dùng Xavier; với ReLU dùng He; với SELU lại có hằng số riêng.
+Thay vào công thức trên, phương sai giữ nguyên qua các lớp khi $n_{\text{in}}\,\sigma_W^2 \cdot \tfrac12 = 1$, tức
 
-### 6.3. Đo thật: điều gì xảy ra qua 40 lớp
+$$\sigma_W^2 = \frac{2}{n_{\text{in}}}.$$
 
-Thí nghiệm trong `code/models/experiments.py`: một mạng 40 lớp, mỗi lớp rộng 128, đo **chuẩn của gradient theo kích hoạt** $\|\partial L / \partial a_i\|$ ở từng lớp, chuẩn hoá theo lớp trên cùng.
+Đây là **khởi tạo He** (He và cộng sự, 2015). Hệ số 2 đến trực tiếp từ việc ReLU loại bỏ một nửa phân phối. Nguyên tắc chung là khởi tạo phải khớp với hàm kích hoạt: Xavier cho tanh và sigmoid, He cho ReLU và các biến thể gần giống.
+
+### 6.3. Thí nghiệm: gradient qua 40 lớp
+
+Thí nghiệm trong `code/models/experiments.py` dùng mạng 40 lớp, mỗi lớp rộng 128 đơn vị ReLU, với một lô 128 đầu vào ngẫu nhiên. Sau lượt xuôi, một gradient ngẫu nhiên có chuẩn 1 được truyền ngược từ lớp cuối, và thí nghiệm đo chuẩn của gradient theo giá trị kích hoạt $\|\partial L/\partial a_l\|$ tại từng lớp. Kết quả lấy trung bình trên 5 lần khởi tạo và chia cho giá trị ở lớp cuối. Trọng số khởi tạo với phương sai $\text{gain}^2/n_{\text{in}}$; khởi tạo He ứng với $\text{gain} = \sqrt 2$. Sáu cách dựng lớp được so sánh:
+
+- ba mức khởi tạo 0,5, $\sqrt2$ và 2,0 cho mạng thường, mỗi lớp tính $a_{l+1} = \operatorname{ReLU}(W a_l)$;
+- khởi tạo He kèm LayerNorm trước ReLU: $a_{l+1} = \operatorname{ReLU}(\operatorname{LN}(W a_l))$;
+- khởi tạo He kèm kết nối tắt, không chuẩn hoá: $a_{l+1} = a_l + \operatorname{ReLU}(W a_l)$;
+- khởi tạo He kèm cả chuẩn hoá lẫn kết nối tắt: $a_{l+1} = a_l + \operatorname{ReLU}(\operatorname{LN}(W a_l))$. Chuẩn hoá nằm trong nhánh, còn đường tắt đi thẳng, cùng nguyên tắc với pre-LN của Transformer (Mục 10.2).
 
 ![Hình 7](figs/models07_vanish.png)
 
-**Hình 7.** Cùng độ sâu 40, chỉ khác khởi tạo và cách dựng lớp. Trục dọc là thang log, trải hơn 26 bậc độ lớn.
+**Hình 7.** Chuẩn của gradient tại từng lớp, chia cho giá trị ở lớp cuối, với sáu cách dựng lớp. Trục dọc theo thang log.
 
-| Cách dựng lớp | $\|\nabla a\|$ tại lớp 1 so với lớp 40 | Kết luận |
+| Cách dựng lớp | Gradient tại lớp 1 so với lớp 40 | Kết luận |
 |---|---|---|
-| gain 0,5 — khởi tạo quá nhỏ | $1{,}2 \times 10^{-18}$ | **tiêu biến** |
-| gain $\sqrt{2}$ — khởi tạo He | $1{,}42$ | **ổn định** |
-| gain 2,0 — khởi tạo quá lớn | $1{,}5 \times 10^{6}$ | **bùng nổ** |
-| He + LayerNorm | $1{,}15$ | ổn định, phẳng hơn nữa |
-| He + kết nối tắt, **không** chuẩn hoá | $2{,}4 \times 10^{8}$ | **bùng nổ** |
-| He + chuẩn hoá + kết nối tắt (pre-LN) | $2{,}22$ | **ổn định** |
+| Khởi tạo với gain 0,5 (quá nhỏ) | $1{,}2 \times 10^{-18}$ | tiêu biến |
+| Khởi tạo He, gain $\sqrt2$ | $1{,}42$ | ổn định |
+| Khởi tạo với gain 2,0 (quá lớn) | $1{,}5 \times 10^{6}$ | bùng nổ |
+| He và LayerNorm | $1{,}15$ | ổn định |
+| He và kết nối tắt, không chuẩn hoá | $2{,}4 \times 10^{8}$ | bùng nổ |
+| He, chuẩn hoá trong nhánh và kết nối tắt | $2{,}22$ | ổn định |
 
-Bốn điều rút ra, và điều thứ ba là điều hay bị nói sai nhất:
+Bảng cho thấy bốn điều.
 
-1. **Khởi tạo là cái nút chính.** Chỉ đổi hệ số từ 0,5 sang 2,0 đã làm gradient đi từ $10^{-18}$ tới $10^{6}$ — trải 24 bậc độ lớn, trên **cùng một kiến trúc**.
-2. **Khởi tạo He làm đúng việc nó được thiết kế để làm**: tỉ lệ 1,42 sau 40 lớp, tức gần như giữ nguyên.
-3. **Kết nối tắt một mình thì KHÔNG đủ — nó làm bùng nổ.** Lý do đơn giản: mỗi lớp *cộng thêm* vào tín hiệu, nên chuẩn của kích hoạt lớn dần theo chiều xuôi, và đường tắt ở lượt ngược cũng cộng dồn theo. Đây là lý do ResNet **luôn** có chuẩn hoá đi kèm, và vì sao nói "residual chữa gradient tiêu biến" là nói chưa đủ.
-4. **Kết hợp chuẩn hoá với kết nối tắt mới cho cấu hình vừa ổn định vừa huấn luyện được** — đúng cấu hình pre-LN mà mọi Transformer hiện đại dùng (Chương 10).
+**Khởi tạo có ảnh hưởng rất lớn.** Trên cùng một kiến trúc, chỉ đổi gain từ 0,5 sang 2,0 làm gradient ở lớp đầu thay đổi từ $10^{-18}$ tới $10^{6}$, tức 24 bậc độ lớn. Với gain 0,5, mỗi lớp nhân gradient với khoảng $0{,}5/\sqrt2 \approx 0{,}35$, và $0{,}35^{40} \approx 10^{-18}$.
 
-### 6.4. Chuẩn hoá: BatchNorm và LayerNorm
+**Khởi tạo He giữ gradient gần như không đổi**: tỉ lệ 1,42 sau 40 lớp, đúng như lập luận ở Mục 6.2.
 
-Cả hai cùng làm một việc: chuẩn hoá về trung bình 0, phương sai 1, rồi học lại một phép co giãn và dịch chuyển $\gamma, \beta$. Khác nhau ở **trục nào được lấy thống kê**.
+**Kết nối tắt một mình làm gradient bùng nổ.** Đây là điều hay bị hiểu sai. Với khởi tạo He, nhánh $\operatorname{ReLU}(Wa_l)$ có độ lớn cùng cỡ với $a_l$, nên mỗi lớp cộng thêm vào tín hiệu một lượng xấp xỉ bằng chính nó, và độ lớn của tín hiệu tăng gần gấp đôi sau mỗi lớp. Ở lượt ngược, Jacobi của mỗi lớp là $I + J_l$ với $J_l$ có độ lớn cỡ 1, và tích của 40 ma trận như vậy tăng theo cấp số nhân. Vì vậy mạng ResNet luôn có chuẩn hoá đi kèm kết nối tắt.
 
-| | BatchNorm | LayerNorm |
+**Chuẩn hoá trong nhánh kèm đường tắt đi thẳng cho gradient ổn định**, tỉ lệ 2,22. Chuẩn hoá giữ đầu ra của mỗi nhánh ở độ lớn cố định, nên tín hiệu chỉ tăng theo kiểu cộng dồn thay vì nhân lên, còn đường tắt bảo đảm gradient luôn có một đường đi không qua ma trận trọng số nào. Đây là cấu hình mà các Transformer hiện nay dùng (Mục 10.2).
+
+Trang thí nghiệm tương tác của giáo trình cho phép tự chọn gain, số lớp và các thành phần để quan sát các đường trong Hình 7.
+
+### 6.4. BatchNorm, LayerNorm và RMSNorm
+
+Các lớp chuẩn hoá đưa giá trị kích hoạt về trung bình 0, phương sai 1, rồi nhân với một hệ số $\gamma$ và cộng một độ dịch $\beta$ học được, để mạng vẫn biểu diễn được mọi thang đo nếu cần:
+
+$$\operatorname{Norm}(x) = \gamma \odot \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta.$$
+
+Các phương pháp khác nhau ở tập giá trị dùng để tính $\mu$ và $\sigma^2$.
+
+| | BatchNorm (Ioffe và Szegedy, 2015) | LayerNorm (Ba, Kiros và Hinton, 2016) |
 |---|---|---|
-| Lấy thống kê trên | **cả lô**, cho mỗi kênh đặc trưng | **các đặc trưng**, cho mỗi mẫu |
-| Phụ thuộc kích thước lô | **có** — lô nhỏ thì thống kê nhiễu | **không** |
-| Khác nhau giữa huấn luyện và suy luận | **có** — suy luận dùng trung bình trượt | **không** |
-| Hợp với | CNN, thị giác | Transformer, RNN, chuỗi độ dài thay đổi |
+| Tính thống kê trên | mọi mẫu trong lô, riêng cho từng đặc trưng (từng kênh) | mọi đặc trưng của một mẫu, riêng cho từng mẫu |
+| Phụ thuộc kích thước lô | có: lô nhỏ cho thống kê nhiễu | không |
+| Khác nhau giữa huấn luyện và suy luận | có: suy luận dùng trung bình trượt tích luỹ khi huấn luyện | không |
+| Dùng phổ biến trong | mạng tích chập cho ảnh | Transformer, RNN |
 
-**Vì sao Transformer dùng LayerNorm chứ không BatchNorm** — câu hỏi phỏng vấn rất hay. Ba lý do, nêu được hai là tốt:
+Transformer dùng LayerNorm thay cho BatchNorm vì ba lý do:
 
-1. **Độ dài chuỗi thay đổi.** Thống kê theo lô trên trục thời gian trở nên vô nghĩa khi các chuỗi trong lô dài ngắn khác nhau và có phần đệm.
-2. **Có sự khác biệt giữa huấn luyện và suy luận.** BatchNorm dùng thống kê lô lúc huấn luyện nhưng trung bình trượt lúc suy luận — một nguồn lệch kinh điển, và khi sinh văn bản từng token thì lô hiệu dụng bằng 1.
-3. **Phụ thuộc lẫn nhau giữa các mẫu.** BatchNorm làm dự đoán cho một mẫu phụ thuộc các mẫu khác trong cùng lô — điều khó chấp nhận khi phục vụ.
+1. **Độ dài chuỗi thay đổi.** Các chuỗi trong một lô có độ dài khác nhau và được đệm thêm; thống kê theo lô trên trục thời gian khi đó bị phần đệm làm sai lệch.
+2. **Khác biệt giữa huấn luyện và suy luận.** BatchNorm dùng thống kê của lô khi huấn luyện và trung bình trượt khi suy luận. Khi sinh văn bản từng token, mỗi bước chỉ xử lý một vị trí, và sự khác biệt giữa hai chế độ trở thành nguồn sai lệch.
+3. **Phụ thuộc giữa các mẫu.** Với BatchNorm, dự đoán cho một mẫu phụ thuộc vào các mẫu khác cùng lô, điều không mong muốn khi phục vụ nhiều người dùng cùng lúc.
 
-**RMSNorm** bỏ luôn bước trừ trung bình, chỉ chia cho chuẩn bậc hai:
+**RMSNorm** (Zhang và Sennrich, 2019) bỏ bước trừ trung bình và độ dịch $\beta$, chỉ chia cho căn trung bình bình phương:
 
-$$\text{RMSNorm}(x) = \frac{x}{\sqrt{\frac{1}{d}\sum_i x_i^2 + \epsilon}} \odot \gamma.$$
+$$\operatorname{RMSNorm}(x) = \gamma \odot \frac{x}{\sqrt{\frac{1}{d}\sum_{i=1}^{d} x_i^2 + \epsilon}}.$$
 
-Rẻ hơn (bớt một lần quét để tính trung bình, bớt tham số $\beta$) và gần như không mất chất lượng. Nó là mặc định của phần lớn mô hình ngôn ngữ hiện nay.
+Phép tính rẻ hơn LayerNorm, và thực nghiệm cho chất lượng tương đương. RMSNorm là lựa chọn của nhiều mô hình ngôn ngữ hiện nay, như Llama.
+
+Lý do chuẩn hoá giúp huấn luyện vẫn còn được thảo luận. Bài báo gốc của BatchNorm giải thích bằng việc giảm "dịch chuyển hiệp biến nội tại" (internal covariate shift), nhưng Santurkar và cộng sự (2018) cho thấy lợi ích chủ yếu đến từ việc làm hàm mất mát trơn hơn, cho phép dùng tốc độ học lớn hơn. Tác dụng giữ ổn định độ lớn của tín hiệu, đo được ở Mục 6.3, là một phần của lời giải thích đó.
 
 ### 6.5. Kết nối tắt
 
-$$h = x + f(x) \qquad \text{thay cho} \qquad h = f(x).$$
+Kết nối tắt thay $h = F(x)$ bằng
 
-Hai cách hiểu, cả hai đều đúng và nên nói được cả hai:
+$$h = x + F(x),$$
 
-**Cách 1 — đường đi của gradient.** $\dfrac{\partial h}{\partial x} = I + \dfrac{\partial f}{\partial x}$. Số hạng $I$ bảo đảm gradient luôn có một đường đi **không bị nhân với ma trận trọng số nào**. Qua $L$ lớp, tích trở thành $\prod (I + J_i)$ thay vì $\prod J_i$ — và tích thứ nhất không tự triệt tiêu về 0.
+trong đó $F$ là một khối gồm vài lớp. Có hai cách hiểu bổ sung cho nhau.
 
-**Cách 2 — bài toán được đặt lại.** Thay vì học hàm $H(x)$, mạng học **phần dư** $F(x) = H(x) - x$. Nếu ánh xạ đồng nhất đã gần đúng thì mạng chỉ cần học một hiệu chỉnh nhỏ, tức khởi điểm đã tốt. Đây chính là lập luận của bài báo ResNet, và nó giải thích **vấn đề suy thoái**: mạng 56 lớp *thường* có sai số **huấn luyện** cao hơn mạng 20 lớp — không phải do quá khớp mà do khó tối ưu hơn.
+**Theo đường đi của gradient.** Jacobi của một khối là $\partial h/\partial x = I + \partial F/\partial x$. Số hạng $I$ bảo đảm gradient luôn có một đường đi thẳng từ đầu ra về đầu vào mà không nhân với ma trận trọng số nào. Qua nhiều khối, tích $\prod_l (I + J_l)$ khai triển thành tổng của mọi tích con, trong đó có số hạng $I$, nên không tự co về 0 như $\prod_l J_l$.
 
-> Nói được rằng ResNet sinh ra để chữa **vấn đề suy thoái** (sai số *huấn luyện* tăng theo độ sâu), chứ không phải để chữa quá khớp, là một dấu hiệu rõ của người đã đọc bài báo.
+**Theo bài toán cần học.** Thay vì học trực tiếp hàm $H(x)$, khối học phần dư $F(x) = H(x) - x$. Nếu ánh xạ đồng nhất đã là một xấp xỉ tốt, khối chỉ cần học một hiệu chỉnh nhỏ, và khởi tạo $F \approx 0$ đã là một điểm xuất phát tốt. Đây là lập luận của bài báo ResNet (He và cộng sự, 2016), xuất phát từ **vấn đề suy thoái** (degradation problem): trên CIFAR-10, mạng thường 56 lớp có sai số **huấn luyện** cao hơn mạng 20 lớp. Mạng 56 lớp biểu diễn được mọi hàm mà mạng 20 lớp biểu diễn được (chỉ cần 36 lớp thừa là ánh xạ đồng nhất), nên sai số huấn luyện cao hơn không phải do overfitting mà do khó tối ưu. Kết nối tắt làm ánh xạ đồng nhất trở nên dễ biểu diễn, và mạng ResNet với hơn 100 lớp huấn luyện được bình thường.
 
-### 6.6. Dropout và các cách phạt chuẩn khác
+> **Lưu ý.** Kết nối tắt ra đời để giải quyết vấn đề suy thoái, tức sai số huấn luyện tăng theo độ sâu, không phải để chống overfitting. Và như Mục 6.3 cho thấy, kết nối tắt cần đi kèm chuẩn hoá thì gradient mới ổn định.
 
-**Dropout**: lúc huấn luyện, tắt ngẫu nhiên mỗi nơ-ron với xác suất $p$, rồi chia phần còn lại cho $1-p$ để giữ kỳ vọng (gọi là *inverted dropout*). Lúc suy luận thì tắt hẳn dropout. Cách hiểu đúng: nó xấp xỉ việc lấy trung bình một tập hợp khổng lồ các mạng con chia sẻ trọng số — tức đúng cơ chế bagging ở Mục 3.3, nhưng miễn phí.
+### 6.6. Dropout và các phương pháp regularization khác
 
-Điều đáng nói: **dropout đã giảm hẳn vai trò trong Transformer lớn.** Với mô hình ngôn ngữ huấn luyện một lượt qua kho dữ liệu khổng lồ, quá khớp không phải vấn đề chính, nên nhiều mô hình lớn đặt dropout bằng 0. Nói được điều này cho thấy bạn theo dõi thực hành chứ không chỉ đọc giáo trình cũ.
+**Dropout** (Srivastava và cộng sự, 2014): khi huấn luyện, mỗi đơn vị bị đặt bằng 0 với xác suất $p$, độc lập ở mỗi bước; các đơn vị còn lại được chia cho $1 - p$ để kỳ vọng của đầu ra không đổi (cách làm này gọi là inverted dropout). Khi suy luận, dropout bị tắt và mạng dùng mọi đơn vị. Mỗi bước huấn luyện vì vậy dùng một mạng con khác nhau chia sẻ trọng số, và mạng đầy đủ khi suy luận xấp xỉ trung bình của rất nhiều mạng con. Cơ chế giảm phương sai vì thế tương tự bagging ở Mục 3.3, nhưng không phải huấn luyện nhiều mô hình.
 
-| Cách | Cơ chế | Hay dùng ở đâu |
+Với mô hình ngôn ngữ lớn, vai trò của dropout giảm nhiều. Khi tiền huấn luyện trên kho dữ liệu cực lớn, mỗi mẫu thường chỉ được xem một lần nên overfitting không phải vấn đề chính, và một số mô hình như PaLM (Chowdhery và cộng sự, 2022) không dùng dropout khi tiền huấn luyện. Dropout vẫn hữu ích khi tinh chỉnh trên tập dữ liệu nhỏ.
+
+| Phương pháp | Cơ chế | Dùng ở đâu |
 |---|---|---|
-| Suy giảm trọng số ($\ell_2$) | phạt chuẩn trọng số | khắp nơi; với Adam thì phải dùng **AdamW** (Mục 5.4) |
-| Dropout | trung bình nhiều mạng con | MLP, CNN; ít dần ở LLM |
-| Dừng sớm | hạn chế số bước tối ưu | khắp nơi — rẻ nhất, nên làm trước |
-| Tăng cường dữ liệu | mở rộng tập huấn luyện | thị giác, âm thanh |
-| Làm mượt nhãn | ngăn mô hình quá tự tin | phân loại nhiều lớp |
+| Weight decay | phạt chuẩn $\ell_2$ của trọng số ([Mục 9.2 của *Nền tảng*](nentang-ch09.html)); với Adam phải dùng dạng AdamW (Mục 5.4) | hầu hết mọi nơi |
+| Dropout | huấn luyện trên các mạng con ngẫu nhiên | MLP, mạng tích chập, tinh chỉnh; ít dùng khi tiền huấn luyện LLM |
+| Dừng sớm | dừng khi sai số xác thực ngừng giảm | hầu hết mọi nơi; rẻ nhất |
+| Tăng cường dữ liệu | tạo thêm mẫu bằng các biến đổi giữ nguyên nhãn: lật, cắt, xoay ảnh, thêm nhiễu vào âm thanh | ảnh, âm thanh |
+| Làm mượt nhãn | thay nhãn one-hot $e_y$ bằng $(1 - \epsilon)\,e_y + \epsilon/K$, để mô hình không bị đẩy tới xác suất tuyệt đối 0 và 1 (Szegedy và cộng sự, 2016) | phân loại nhiều lớp |
+
+Weight decay có một cách hiểu từ *Nền tảng*: regularization $\ell_2$ tương đương ước lượng MAP với tiên nghiệm Gauss trên trọng số ([Chương 10 của *Nền tảng*](nentang-ch10.html)). Dừng sớm cũng có liên hệ với regularization: với hồi quy tuyến tính, dừng gradient descent sau $t$ bước cho kết quả gần giống hồi quy ridge với $\lambda$ tỉ lệ nghịch với $\eta t$.
 
 ---
 
-## 7. Mạng tích chập
 
-### 7.1. Ba giả thiết, ba món lợi
+## 7. Mạng nơ-ron tích chập
 
-Một lớp kết nối đầy đủ trên ảnh $224 \times 224 \times 3$ với 1000 nơ-ron cần $224 \times 224 \times 3 \times 1000 \approx 1{,}5 \times 10^8$ tham số — cho **một** lớp. Tích chập cắt con số ấy bằng ba giả thiết về cấu trúc của ảnh:
+Ảnh có cấu trúc mà dữ liệu dạng bảng không có: các điểm ảnh gần nhau liên quan với nhau, và một chi tiết như cạnh hay góc có ý nghĩa như nhau ở mọi vị trí. Mạng nơ-ron tích chập (convolutional neural network, CNN) đưa hai tính chất này vào kiến trúc, nhờ đó giảm số tham số hàng nghìn lần so với mạng kết nối đầy đủ. Chương này định nghĩa phép tích chập, cách tính kích thước đầu ra, số tham số và số phép tính, trường tiếp nhận, các khối thường dùng, rồi so sánh CNN với Vision Transformer.
 
-| Giả thiết | Tên | Món lợi |
+### 7.1. Phép tích chập
+
+Một lớp kết nối đầy đủ nhận ảnh $224 \times 224 \times 3$ và cho 1 000 đơn vị ẩn cần $224 \cdot 224 \cdot 3 \cdot 1\,000 \approx 1{,}5 \times 10^8$ tham số, chỉ cho một lớp. Mạng tích chập giảm con số đó bằng ba giả định về ảnh:
+
+| Giả định | Cách thực hiện | Tác dụng |
 |---|---|---|
-| Đặc trưng có ý nghĩa là **cục bộ** | kết nối cục bộ | mỗi nơ-ron chỉ nhìn một vùng $k \times k$ |
-| Một đặc trưng hữu ích ở chỗ này thì cũng hữu ích ở chỗ khác | **chia sẻ trọng số** | cùng một bộ lọc quét khắp ảnh |
-| Vị trí chính xác ít quan trọng hơn sự có mặt | gộp / bước nhảy | bất biến dịch chuyển gần đúng, giảm độ phân giải |
+| Đặc trưng có tính cục bộ | mỗi đơn vị chỉ nối với một vùng nhỏ $k \times k$ của lớp trước | số kết nối của mỗi đơn vị không phụ thuộc kích thước ảnh |
+| Một đặc trưng hữu ích ở một vị trí thì cũng hữu ích ở vị trí khác | **chia sẻ trọng số**: cùng một bộ lọc quét qua mọi vị trí | số tham số không phụ thuộc kích thước ảnh |
+| Vị trí chính xác của đặc trưng ít quan trọng hơn sự có mặt của nó | gộp (pooling) hoặc bước nhảy lớn hơn 1 | giảm độ phân giải; bất biến gần đúng với dịch chuyển nhỏ |
 
-Số tham số của một lớp tích chập **không phụ thuộc kích thước ảnh**:
+> **Định nghĩa 7.1 (Lớp tích chập hai chiều).** Cho đầu vào $X \in \mathbb{R}^{H \times W \times C_{\text{in}}}$ và bộ lọc $K \in \mathbb{R}^{k_h \times k_w \times C_{\text{in}} \times C_{\text{out}}}$. Lớp tích chập với bước nhảy $s$ tính
+> $$Z[i, j, o] = b_o + \sum_{c=1}^{C_{\text{in}}} \sum_{u=0}^{k_h - 1} \sum_{v=0}^{k_w - 1} K[u, v, c, o]\; X[s\,i + u,\; s\,j + v,\; c].$$
+> Mỗi kênh đầu ra $o$ ứng với một bộ lọc, và giá trị tại vị trí $(i, j)$ là tích vô hướng giữa bộ lọc và vùng ảnh tương ứng.
 
-$$\text{tham số} = k_h \times k_w \times C_{\text{in}} \times C_{\text{out}} + C_{\text{out}}.$$
+Về mặt toán học, công thức trên là phép tương quan chéo (cross-correlation), vì bộ lọc không bị lật như trong định nghĩa tích chập của xử lý tín hiệu. Vì bộ lọc được học, việc lật hay không không thay đổi những gì mạng biểu diễn được, nên trong học sâu cả hai được gọi chung là tích chập.
 
-Còn số phép tính thì có: $\;\text{FLOP} \approx 2 \times H_{\text{out}} \times W_{\text{out}} \times k_h k_w C_{\text{in}} C_{\text{out}}$.
+**Kích thước đầu ra.** Với đầu vào cao $H$, bộ lọc cao $k$, bước nhảy $s$ và phần đệm (padding) $p$ ô mỗi phía, chiều cao đầu ra là
 
-> Sự tách rời này — **tham số không phụ thuộc kích thước ảnh, FLOP thì có** — là nguồn của nhiều nhầm lẫn khi ước lượng chi phí. Một mô hình "nhẹ" về tham số vẫn có thể rất đắt khi chạy trên ảnh lớn.
+$$H_{\text{out}} = \left\lfloor \frac{H + 2p - k}{s} \right\rfloor + 1,$$
+
+và tương tự cho chiều rộng.
+
+**Số tham số và số phép tính.** Một lớp tích chập có $k_h k_w C_{\text{in}} C_{\text{out}} + C_{\text{out}}$ tham số, **không phụ thuộc** kích thước ảnh. Số phép tính thì có phụ thuộc: mỗi giá trị đầu ra cần $k_h k_w C_{\text{in}}$ phép nhân và cộng, nên cả lớp tốn khoảng
+
+$$\text{FLOP} \approx 2\, H_{\text{out}}\, W_{\text{out}}\, k_h k_w\, C_{\text{in}}\, C_{\text{out}}.$$
+
+> **Ví dụ 7.1 (Lớp đầu của ResNet-50).** Lớp tích chập đầu tiên nhận ảnh $224 \times 224 \times 3$, dùng 64 bộ lọc $7 \times 7$, bước nhảy 2, phần đệm 3. Kích thước đầu ra là $\lfloor (224 + 6 - 7)/2 \rfloor + 1 = 112$, tức $112 \times 112 \times 64$. Số tham số là $7 \cdot 7 \cdot 3 \cdot 64 = 9\,408$ (lớp này không có hệ số chặn vì có BatchNorm theo sau). Số phép tính là $2 \cdot 112 \cdot 112 \cdot 9\,408 \approx 2{,}4 \times 10^8$ FLOP. So với lớp kết nối đầy đủ ở đầu mục, số tham số nhỏ hơn khoảng 16 000 lần.
+
+Sự tách rời giữa số tham số và số phép tính hay gây nhầm lẫn khi ước lượng chi phí: một mô hình "nhẹ" về tham số vẫn có thể rất tốn tính toán khi chạy trên ảnh độ phân giải cao, vì số phép tính tăng theo diện tích ảnh.
+
+Chia sẻ trọng số làm lớp tích chập **đẳng biến** với phép dịch chuyển (translation equivariant): dịch ảnh đầu vào đi một số ô thì bản đồ đặc trưng đầu ra dịch theo đúng số ô đó (bỏ qua hiệu ứng ở biên). Gộp và bước nhảy biến tính đẳng biến này thành **bất biến gần đúng**: dịch chuyển nhỏ không làm thay đổi đầu ra sau khi gộp. Tính bất biến này chỉ gần đúng; Azulay và Weiss (2019) cho thấy các CNN hiện đại có thể đổi dự đoán khi ảnh chỉ dịch đi một điểm ảnh, vì bước nhảy lớn hơn 1 phá vỡ tính đẳng biến.
 
 ### 7.2. Trường tiếp nhận
 
-**Trường tiếp nhận** của một nơ-ron là vùng đầu vào ảnh hưởng tới giá trị của nó.
+> **Định nghĩa 7.2 (Trường tiếp nhận).** **Trường tiếp nhận** (receptive field) của một đơn vị là vùng của ảnh đầu vào có ảnh hưởng tới giá trị của đơn vị đó.
 
 ![Hình 8](figs/models08_cnn.png)
 
-**Hình 8.** Mỗi lớp $3\times3$ nới trường tiếp nhận thêm 2 ô về mỗi chiều. Với bước nhảy 1, nó tăng **tuyến tính** theo số lớp.
+**Hình 8.** Mỗi lớp tích chập $3 \times 3$ với bước nhảy 1 mở rộng trường tiếp nhận thêm 2 ô theo mỗi chiều.
 
-Công thức đệ quy, với $k_i$ là kích thước hạt nhân và $s_i$ là bước nhảy của lớp $i$:
+Với lớp thứ $i$ có bộ lọc kích thước $k_i$ và bước nhảy $s_i$, kích thước trường tiếp nhận tính theo công thức truy hồi
 
-$$r_0 = 1, \qquad r_i = r_{i-1} + (k_i - 1)\prod_{j<i} s_j.$$
+$$r_0 = 1, \qquad r_i = r_{i-1} + (k_i - 1)\prod_{j < i} s_j.$$
 
-Với bước nhảy toàn bộ bằng 1 và hạt nhân $3\times3$: $r_L = 1 + 2L$. Muốn trường tiếp nhận phủ hết ảnh $224\times224$ thì cần hơn 110 lớp — **không khả thi**. Đó là lý do CNN thật luôn giảm độ phân giải: mỗi lần bước nhảy 2 thì mọi lớp sau đó nới trường tiếp nhận nhanh gấp đôi.
+Tích các bước nhảy phía trước cho biết một ô ở lớp $i - 1$ ứng với bao nhiêu điểm ảnh của đầu vào. Với bước nhảy 1 và bộ lọc $3 \times 3$ ở mọi lớp, $r_L = 1 + 2L$: trường tiếp nhận tăng **tuyến tính** theo số lớp, và phải cần tới 112 lớp mới phủ được ảnh rộng 224 điểm. Vì vậy các CNN thực tế đều giảm độ phân giải sớm: sau mỗi lần bước nhảy 2, mọi lớp phía sau mở rộng trường tiếp nhận nhanh gấp đôi. Chẳng hạn, lớp $7 \times 7$ bước nhảy 2 cho $r = 7$; lớp gộp $3 \times 3$ bước nhảy 2 phía sau đưa lên $r = 7 + 2 \cdot 2 = 11$; mỗi lớp $3 \times 3$ tiếp theo thêm $2 \cdot 4 = 8$ điểm ảnh.
 
-Hai chi tiết tinh tế đáng biết:
+Hai kết quả liên quan đáng biết:
 
-- **Hai lớp $3\times3$ có cùng trường tiếp nhận với một lớp $5\times5$**, nhưng dùng $2 \times 9 = 18$ tham số thay vì 25, và có **thêm một phi tuyến** ở giữa. Đây là lập luận trung tâm của VGG và là lý do hạt nhân lớn gần như biến mất.
-- **Trường tiếp nhận hiệu dụng nhỏ hơn nhiều trường tiếp nhận lý thuyết.** Đóng góp của các điểm ở rìa rất yếu; phân bố ảnh hưởng gần như Gauss và bề rộng hiệu dụng tăng theo $O(\sqrt{L})$ chứ không phải $O(L)$.
+- **Hai lớp $3 \times 3$ có cùng trường tiếp nhận với một lớp $5 \times 5$**, nhưng dùng $2 \cdot 9 = 18$ trọng số cho mỗi cặp kênh thay vì 25, và có thêm một hàm phi tuyến ở giữa. Ba lớp $3 \times 3$ thay được một lớp $7 \times 7$ với 27 thay vì 49 trọng số. Đây là lập luận của mạng VGG (Simonyan và Zisserman, 2015), và là lý do bộ lọc lớn ít được dùng trong các mạng sau đó.
+- **Trường tiếp nhận hiệu dụng nhỏ hơn nhiều so với lý thuyết.** Luo và cộng sự (2016) cho thấy ảnh hưởng của các điểm ảnh lên một đơn vị có phân bố gần với phân phối Gauss tập trung ở giữa trường tiếp nhận, và độ rộng hiệu dụng chỉ tăng theo $\sqrt L$ thay vì $L$. Các điểm ảnh ở rìa trường tiếp nhận lý thuyết gần như không có ảnh hưởng.
 
-### 7.3. Các khối đã thành chuẩn
+### 7.3. Các khối thường dùng
 
-| Khối | Ý tưởng | Vì sao quan trọng |
+| Khối | Cấu tạo | Tác dụng |
 |---|---|---|
-| **Tích chập $1\times1$** | trộn kênh mà không trộn không gian | đổi số kênh rẻ; là "nút cổ chai" của ResNet |
-| **Nút cổ chai** ($1\times1 \to 3\times3 \to 1\times1$) | hạ số kênh, tính, rồi nâng lại | giảm mạnh FLOP ở cùng độ sâu |
-| **Depthwise separable** | tách thành tích chập theo từng kênh rồi $1\times1$ | giảm chi phí khoảng $k^2$ lần; nền tảng của MobileNet |
-| **Khối residual** | $h = x + f(x)$ | cho phép độ sâu hàng trăm lớp (Mục 6.5) |
-| **Gộp trung bình toàn cục** | trung bình theo không gian trước lớp phân loại | bỏ được lớp kết nối đầy đủ khổng lồ; nhận ảnh kích thước bất kỳ |
+| Tích chập $1 \times 1$ | bộ lọc kích thước $1 \times 1$ | trộn thông tin giữa các kênh tại từng vị trí; thay đổi số kênh với chi phí thấp |
+| Khối cổ chai (bottleneck) | $1 \times 1$ giảm số kênh, $3 \times 3$, rồi $1 \times 1$ tăng lại số kênh | giảm mạnh số phép tính ở cùng độ sâu; dùng trong ResNet-50 trở lên |
+| Tích chập tách theo chiều sâu (depthwise separable) | tích chập $k \times k$ riêng cho từng kênh, rồi tích chập $1 \times 1$ | giảm chi phí khoảng $k^2$ lần; là nền tảng của MobileNet (Howard và cộng sự, 2017) |
+| Khối dư (residual block) | $h = x + F(x)$ | cho phép mạng sâu hàng trăm lớp (Mục 6.5) |
+| Gộp trung bình toàn cục | lấy trung bình mỗi kênh trên toàn bộ không gian trước lớp phân loại | bỏ được lớp kết nối đầy đủ lớn ở cuối mạng; nhận ảnh có kích thước bất kỳ |
 
-**Depthwise separable đáng tính thử một lần.** Tích chập thường: $k^2 C_{\text{in}} C_{\text{out}}$. Depthwise separable: $k^2 C_{\text{in}} + C_{\text{in}} C_{\text{out}}$. Tỉ lệ:
+Với tích chập tách theo chiều sâu, số trọng số của tích chập thường là $k^2 C_{\text{in}} C_{\text{out}}$, còn của phiên bản tách là $k^2 C_{\text{in}} + C_{\text{in}} C_{\text{out}}$. Tỉ lệ giữa hai con số là
 
-$$\frac{k^2 C_{\text{in}} + C_{\text{in}}C_{\text{out}}}{k^2 C_{\text{in}} C_{\text{out}}} = \frac{1}{C_{\text{out}}} + \frac{1}{k^2}.$$
+$$\frac{k^2 C_{\text{in}} + C_{\text{in}} C_{\text{out}}}{k^2 C_{\text{in}} C_{\text{out}}} = \frac{1}{C_{\text{out}}} + \frac{1}{k^2}.$$
 
-Với $k=3$ và $C_{\text{out}}$ lớn, tỉ lệ $\approx 1/9$ — **rẻ hơn khoảng 9 lần**. Đây cũng chính là lớp mà giáo trình Quantization chỉ ra là nhạy nhất với lượng tử per-tensor, vì mỗi kênh chỉ có 9 trọng số.
+Với $k = 3$ và $C_{\text{out}} = 256$, tỉ lệ là 0,115, tức rẻ hơn khoảng 8,7 lần; số phép tính giảm theo cùng tỉ lệ. Cái giá là mỗi kênh của lớp depthwise chỉ có 9 trọng số, và dải giá trị của các kênh có thể chênh nhau rất nhiều; [Mục 5.3 của *Quantization*](ch05.html) cho thấy đây là loại lớp nhạy nhất khi lượng tử hoá với một thang đo chung cho cả lớp.
 
-### 7.4. CNN so với Transformer trong thị giác
+### 7.4. CNN và Vision Transformer
 
-Vision Transformer cắt ảnh thành các mảnh rồi coi chúng như token. Điểm cần hiểu là **đánh đổi về thiên lệch quy nạp**:
+**Vision Transformer** (ViT; Dosovitskiy và cộng sự, 2021) cắt ảnh thành các mảnh $16 \times 16$ điểm ảnh, chiếu mỗi mảnh thành một vector, rồi xử lý dãy vector như dãy token bằng Transformer (Chương 9). Ảnh $224 \times 224$ cho $14 \times 14 = 196$ token.
 
-- CNN **cài sẵn** tính cục bộ và bất biến dịch chuyển. Đó là thiên lệch quy nạp mạnh: rất có lợi khi dữ liệu ít, nhưng là một ràng buộc khi dữ liệu nhiều.
-- ViT gần như **không cài sẵn gì**, nên phải học cả những thứ CNN được cho không. Vì vậy ViT thua CNN khi huấn luyện trên dữ liệu vừa phải, và **vượt** khi có đủ dữ liệu hoặc được tiền huấn luyện quy mô lớn.
+Khác biệt giữa hai kiến trúc là khác biệt về thiên kiến quy nạp (Mục 1.4). CNN đưa sẵn vào kiến trúc tính cục bộ và tính đẳng biến với dịch chuyển; đây là giả định đúng với ảnh tự nhiên, nên CNN học được từ lượng dữ liệu vừa phải. ViT gần như không giả định gì về cấu trúc không gian: mọi mảnh có thể tương tác với mọi mảnh ngay từ lớp đầu, và mô hình phải tự học từ dữ liệu những quan hệ mà CNN có sẵn. Kết quả trong bài báo ViT phản ánh đúng đánh đổi này: khi chỉ huấn luyện trên ImageNet (1,3 triệu ảnh), ViT kém các mạng ResNet cùng cỡ; khi tiền huấn luyện trên tập JFT-300M (300 triệu ảnh), ViT vượt ResNet.
 
-Đây là một ví dụ sạch của đánh đổi thiên lệch – phương sai ở Chương 2, nhưng ở mức **kiến trúc** thay vì mức số tham số: thiên lệch quy nạp mạnh = thiên lệch cao, phương sai thấp.
+Theo ngôn ngữ của Chương 2, thiên kiến quy nạp mạnh tương ứng với độ chệch cao hơn và phương sai thấp hơn: có lợi khi dữ liệu ít, trở thành giới hạn khi dữ liệu nhiều. Khoảng cách giữa hai họ không cố định: ConvNeXt (Liu và cộng sự, 2022) cho thấy một CNN được hiện đại hoá theo các lựa chọn thiết kế của Transformer cạnh tranh được với ViT ở cùng quy mô, và nhiều kiến trúc hiện nay kết hợp tích chập với attention.
 
 ---
 
-## 8. Mạng hồi quy và giới hạn của nó
+## 8. Mạng nơ-ron hồi quy
 
-### 8.1. Ý tưởng và công thức
+Văn bản, tiếng nói và chuỗi thời gian là dữ liệu dạng chuỗi có độ dài thay đổi. Mạng nơ-ron hồi quy (recurrent neural network, RNN) xử lý chuỗi bằng cách giữ một trạng thái được cập nhật qua từng bước. Chương này trình bày mô hình, đo hiện tượng gradient tiêu biến và bùng nổ theo thời gian, giải thích vì sao LSTM giúp được và giúp tới mức nào, rồi chỉ ra giới hạn khiến RNN bị Transformer thay thế trong phần lớn ứng dụng: không song song hoá được theo thời gian.
 
-RNN xử lý chuỗi bằng cách giữ một **trạng thái ẩn** và cập nhật nó ở mỗi bước:
+### 8.1. Mô hình
 
-$$h_t = \phi(W_{hh} h_{t-1} + W_{xh} x_t + b), \qquad \hat{y}_t = W_{hy} h_t.$$
+> **Định nghĩa 8.1 (Mạng nơ-ron hồi quy).** Với chuỗi đầu vào $x_1, \dots, x_T$, một RNN cập nhật **trạng thái ẩn** $h_t$ theo
+> $$h_t = \tanh\big(W_{hh}\, h_{t-1} + W_{xh}\, x_t + b\big), \qquad \hat y_t = W_{hy}\, h_t,$$
+> với $h_0$ cho trước, thường bằng 0. Cùng các ma trận $W_{hh}$, $W_{xh}$, $W_{hy}$ được dùng ở mọi bước.
 
-Cùng một bộ trọng số dùng cho mọi bước thời gian — đây là "chia sẻ trọng số" của Mục 7.1, nhưng theo trục thời gian thay vì trục không gian. Nhờ đó RNN xử lý được chuỗi dài tuỳ ý với số tham số cố định.
+Dùng chung trọng số ở mọi bước là dạng chia sẻ trọng số theo trục thời gian, giống chia sẻ trọng số theo không gian của tích chập (Mục 7.1). Nhờ đó RNN xử lý được chuỗi dài tuỳ ý với số tham số cố định, và cách xử lý một mẫu ở vị trí thứ 5 giống ở vị trí thứ 500.
 
-### 8.2. Vì sao nó hỏng
+Để huấn luyện, RNN được **trải ra theo thời gian** thành một mạng truyền thẳng $T$ lớp dùng chung trọng số, rồi áp dụng lan truyền ngược lên mạng đó. Thuật toán này gọi là lan truyền ngược theo thời gian (backpropagation through time). Gradient theo trọng số dùng chung là tổng các gradient tại mọi bước.
 
-Gradient của mất mát tại bước $T$ theo trạng thái tại bước $t$ là một **tích các ma trận Jacobi**:
+### 8.2. Gradient tiêu biến và bùng nổ theo thời gian
 
-$$\frac{\partial h_T}{\partial h_t} = \prod_{i=t+1}^{T} \frac{\partial h_i}{\partial h_{i-1}} = \prod_{i=t+1}^{T} W_{hh}^\top \operatorname{diag}\big(\phi'(z_i)\big).$$
+Theo quy tắc dây chuyền, đạo hàm của trạng thái ở bước $T$ theo trạng thái ở bước $t < T$ là
 
-Đây đúng là tình huống ở Mục 6.1, nhưng tệ hơn ở một điểm: **cùng một ma trận $W_{hh}$ được nhân lặp lại**. Nếu bán kính phổ của nó nhỏ hơn 1 thì tích co về 0 theo hàm mũ; lớn hơn 1 thì bùng nổ.
+$$\frac{\partial h_T}{\partial h_t} = \prod_{i=t+1}^{T} \frac{\partial h_i}{\partial h_{i-1}} = \prod_{i=t+1}^{T} \operatorname{diag}\big(\tanh'(z_i)\big)\, W_{hh},$$
 
-Thí nghiệm trong `code/models/experiments.py` đo trực tiếp điều đó: khởi tạo $W_{hh}$ với các phần tử phương sai $g^2/n$ (nên bán kính phổ $\approx g$), rồi truyền ngược 100 bước.
+với $z_i$ là giá trị trước hàm tanh ở bước $i$. Tình huống giống Mục 6.1, nhưng nghiêm trọng hơn ở một điểm: **cùng một ma trận $W_{hh}$ được nhân lặp lại** $T - t$ lần. Pascanu, Mikolov và Bengio (2013) chỉ ra: nếu giá trị suy biến lớn nhất của $W_{hh}$ nhỏ hơn 1 thì gradient chắc chắn tiêu biến theo hàm mũ (vì $|\tanh'| \le 1$); còn để gradient bùng nổ thì bán kính phổ của $W_{hh}$ phải lớn hơn 1.
+
+Thí nghiệm trong `code/models/experiments.py` đo trực tiếp: một RNN tanh 64 chiều, $W_{hh}$ có các phần tử độc lập với phương sai $g^2/64$ (nên bán kính phổ xấp xỉ $g$), trạng thái đầu nhỏ, chạy 100 bước. Một gradient ngẫu nhiên được truyền ngược từ bước cuối, và thí nghiệm đo chuẩn của gradient sau 10, 50 và 100 bước lùi, chia cho chuẩn sau 1 bước và lấy trung bình trên 8 lần khởi tạo.
 
 ![Hình 9](figs/models09_rnn.png)
 
-**Hình 9.** Chuẩn gradient tương đối khi truyền ngược qua thời gian. Trục dọc là thang log.
+**Hình 9.** Chuẩn tương đối của gradient khi truyền ngược qua thời gian, theo số bước lùi; trục dọc theo thang log.
 
-| Mô hình | sau 10 bước | sau 50 bước | sau 100 bước |
+| Mô hình | Sau 10 bước | Sau 50 bước | Sau 100 bước |
 |---|---|---|---|
-| RNN, gain 0,9 | $3{,}2 \times 10^{-1}$ | $6{,}8 \times 10^{-2}$ | $3{,}2 \times 10^{-2}$ |
-| RNN, gain 1,0 | $4{,}2 \times 10^{-1}$ | $1{,}8 \times 10^{-1}$ | $1{,}1$ |
-| RNN, gain 1,2 | $6{,}4 \times 10^{-1}$ | $3{,}8 \times 10^{-1}$ | $3{,}0$ |
-| **LSTM, bias cổng quên = 1** | $5{,}0 \times 10^{-2}$ | $8{,}0 \times 10^{-8}$ | $3{,}0 \times 10^{-15}$ |
-| **LSTM, bias cổng quên = 4** | $8{,}3 \times 10^{-1}$ | $3{,}6 \times 10^{-1}$ | $1{,}3 \times 10^{-1}$ |
+| RNN, $g = 0{,}9$ | $3{,}2 \times 10^{-1}$ | $6{,}8 \times 10^{-2}$ | $3{,}2 \times 10^{-2}$ |
+| RNN, $g = 1{,}0$ | $4{,}2 \times 10^{-1}$ | $1{,}8 \times 10^{-1}$ | $1{,}1$ |
+| RNN, $g = 1{,}2$ | $6{,}4 \times 10^{-1}$ | $3{,}8 \times 10^{-1}$ | $3{,}0$ |
+| Đường ô nhớ của LSTM, hệ số chặn cổng quên 1 | $5{,}0 \times 10^{-2}$ | $8{,}0 \times 10^{-8}$ | $3{,}0 \times 10^{-15}$ |
+| Đường ô nhớ của LSTM, hệ số chặn cổng quên 4 | $8{,}3 \times 10^{-1}$ | $3{,}6 \times 10^{-1}$ | $1{,}3 \times 10^{-1}$ |
 
-Bảng này nói ba điều, và điều thứ ba là điều quan trọng nhất:
+Với $g = 0{,}9$, gradient giảm đều. Với $g = 1{,}0$ và $1{,}2$, gradient giảm trong khoảng 50 bước lùi đầu rồi tăng trở lại, tới 3,0 sau 100 bước với $g = 1{,}2$. Lý do là trạng thái đầu nhỏ: ở các bước đầu của chuỗi, $h$ còn nhỏ nên tanh gần như tuyến tính và Jacobi xấp xỉ $W_{hh}$, có bán kính phổ lớn hơn 1; ở các bước sau, với $g > 1$ trạng thái lớn dần, tanh bão hoà và đạo hàm của nó kéo Jacobi xuống. Như vậy độ lớn của gradient phụ thuộc cả vào $W_{hh}$ lẫn vào mức bão hoà của các đơn vị dọc theo chuỗi, và trong khi huấn luyện cả hai đều thay đổi.
 
-1. **Bán kính phổ quyết định tất cả** với RNN thường: dưới 1 thì tiêu biến, trên 1 thì bùng nổ. Điểm 1,0 là ranh giới, và nó **không ổn định** — trong huấn luyện thật trọng số thay đổi nên không ở lại đó được.
-2. **Bùng nổ dễ chữa, tiêu biến thì không.** Bùng nổ chữa bằng **cắt ngưỡng gradient** (gradient clipping): chia cho chuẩn nếu chuẩn vượt ngưỡng. Tiêu biến thì không có mẹo nào tương đương, vì thông tin đã mất chứ không phải quá lớn.
-3. **LSTM không tự động cứu được gì — cái cứu là giá trị của cổng quên.**
+Hai loại sự cố cần xử lý khác nhau:
 
-### 8.3. LSTM: vì sao nó giúp, và giúp tới đâu
+- **Bùng nổ dễ xử lý.** **Cắt ngưỡng gradient** (gradient clipping): nếu chuẩn của gradient vượt ngưỡng $\tau$ thì nhân gradient với $\tau/\|g\|$, giữ nguyên hướng và giới hạn độ lớn (Pascanu, Mikolov và Bengio, 2013). Kỹ thuật này được dùng rộng rãi, kể cả khi huấn luyện Transformer.
+- **Tiêu biến khó xử lý hơn nhiều.** Gradient nhỏ không thể phóng to lại một cách có ý nghĩa, vì thông tin về ảnh hưởng của các bước xa đã bị lẫn trong nhiễu. Cần thay đổi kiến trúc, và đó là việc LSTM làm.
 
-LSTM thêm một **đường trạng thái ô nhớ** $c_t$ được cập nhật bằng phép **cộng** thay vì nhân ma trận:
+### 8.3. LSTM và GRU
 
-$$c_t = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t, \qquad h_t = o_t \odot \tanh(c_t),$$
+**LSTM** (long short-term memory; Hochreiter và Schmidhuber, 1997, với cổng quên do Gers, Schmidhuber và Cummins, 2000 bổ sung) thêm một **trạng thái ô nhớ** $c_t$ bên cạnh trạng thái ẩn $h_t$, và ba cổng có giá trị trong $(0, 1)$:
 
-với $f_t$ (quên), $i_t$ (vào), $o_t$ (ra) là các cổng sigmoid. Gradient dọc theo đường $c$ là
+$$f_t = \sigma(W_f [h_{t-1}, x_t] + b_f), \quad i_t = \sigma(W_i [h_{t-1}, x_t] + b_i), \quad o_t = \sigma(W_o [h_{t-1}, x_t] + b_o),$$
+$$\tilde c_t = \tanh(W_c [h_{t-1}, x_t] + b_c), \qquad c_t = f_t \odot c_{t-1} + i_t \odot \tilde c_t, \qquad h_t = o_t \odot \tanh(c_t).$$
 
-$$\frac{\partial c_T}{\partial c_t} = \prod_{i=t+1}^{T} f_i$$
+Cổng quên $f_t$ quyết định giữ lại bao nhiêu phần của ô nhớ cũ, cổng vào $i_t$ quyết định ghi thêm bao nhiêu thông tin mới, cổng ra $o_t$ quyết định đưa bao nhiêu phần của ô nhớ ra trạng thái ẩn.
 
-— một tích các **số vô hướng trong $(0,1)$**, không phải tích các ma trận. Khác biệt then chốt: mạng **học được** giá trị $f_i$, nên nó có thể chọn $f_i \approx 1$ để giữ thông tin lâu.
+Điểm mấu chốt là ô nhớ được cập nhật bằng phép **cộng** có trọng số, không qua phép nhân ma trận. Dọc theo đường đi qua ô nhớ, bỏ qua các đường gián tiếp qua $h$,
 
-Nhưng bảng trên cho thấy điều mà sách giáo khoa hay bỏ: **nếu $f \approx 0{,}73$ (tức bias cổng quên bằng 1) thì sau 100 bước gradient còn $10^{-15}$ — tệ hơn cả RNN.** Với bias bằng 4, tức $f \approx 0{,}98$, gradient còn 0,13. Đây chính là lý do có thủ thuật kinh điển **khởi tạo độ lệch của cổng quên bằng một số dương** (thường 1 tới 3): nó đặt điểm xuất phát ở chỗ ô nhớ có xu hướng *giữ* thay vì *quên*.
+$$\frac{\partial c_T}{\partial c_t} = \prod_{i=t+1}^{T} \operatorname{diag}(f_i).$$
 
-> Nói được rằng LSTM biến *tích các ma trận Jacobi* thành *tích các số vô hướng học được*, và rằng lợi ích ấy phụ thuộc giá trị cổng quên, là câu trả lời đầy đủ cho "vì sao LSTM tốt hơn RNN".
+Đây là tích của các số trong $(0, 1)$, không phải tích của các ma trận, và mạng **học được** giá trị của $f_i$: khi cần giữ thông tin lâu, nó có thể đặt $f_i$ gần 1. Cơ chế này tương tự kết nối tắt ở Mục 6.5, theo trục thời gian.
 
-**GRU** gộp cổng quên và cổng vào thành một, bỏ cổng ra, còn 2 cổng thay vì 3. Ít tham số hơn khoảng 25%, chất lượng thường tương đương. Chọn cái nào là chuyện thực nghiệm, không có câu trả lời lý thuyết.
+Hai dòng cuối của bảng ở Mục 8.2 mô phỏng riêng đường đi này: gradient nhân với $f_t = \sigma(b_f + \xi_t)$ ở mỗi bước, với $\xi_t$ là nhiễu nhỏ. Kết quả cho thấy lợi ích của LSTM phụ thuộc vào giá trị cổng quên. Với hệ số chặn $b_f = 1$, cổng quên trung bình khoảng $\sigma(1) = 0{,}73$, và sau 100 bước gradient chỉ còn $3 \times 10^{-15}$. Với $b_f = 4$, cổng quên khoảng $0{,}98$, và gradient còn 0,13.
 
-### 8.4. Giới hạn thật sự: tính tuần tự
+Có thể hiểu con số này qua **thang thời gian của bộ nhớ**: với cổng quên không đổi $f$, thông tin suy giảm theo $f^t$, tức có thang thời gian khoảng $1/(1-f)$ bước. Với $f = 0{,}73$ là khoảng 4 bước; với $f = 0{,}98$ là khoảng 50 bước. Khuyến nghị phổ biến là khởi tạo $b_f = 1$ (Jozefowicz, Zaremba và Sutskever, 2015), đủ cho các phụ thuộc cỡ vài bước tới vài chục bước ngay từ đầu huấn luyện. Khi biết trước chuỗi có phụ thuộc rất xa, Tallec và Ollivier (2018) đề xuất khởi tạo $b_f$ theo thang thời gian mong muốn, để các đơn vị khác nhau có bộ nhớ dài ngắn khác nhau.
 
-Vấn đề gradient có thể giảm nhẹ. Cái không giảm nhẹ được là:
+**GRU** (gated recurrent unit; Cho và cộng sự, 2014) đơn giản hoá LSTM: gộp cổng quên và cổng vào thành một cổng cập nhật, bỏ ô nhớ riêng và cổng ra. GRU có ba khối trọng số thay vì bốn, tức ít hơn khoảng 25% tham số. Chung và cộng sự (2014) so sánh trên nhiều bài toán và không thấy bên nào tốt hơn một cách nhất quán, nên chọn giữa hai loại là việc thực nghiệm.
 
-> $h_t$ phụ thuộc $h_{t-1}$, nên **không thể tính song song theo trục thời gian.** Huấn luyện trên chuỗi dài $T$ cần $T$ bước tuần tự, bất kể có bao nhiêu GPU.
+### 8.4. Giới hạn về tính song song
 
-Đây mới là lý do RNN bị thay thế. Với độ dài chuỗi $T$ và mô hình chiều $d$:
+Vấn đề gradient có thể giảm nhẹ bằng LSTM, cắt ngưỡng gradient và khởi tạo tốt. Giới hạn không khắc phục được nằm ở chính định nghĩa: $h_t$ phụ thuộc $h_{t-1}$, nên các bước phải tính **tuần tự**. Xử lý chuỗi dài $T$ cần $T$ bước nối tiếp nhau, dù có bao nhiêu phần cứng song song. Bảng sau so sánh một lớp RNN với một lớp self-attention (Chương 9), theo Vaswani và cộng sự (2017):
 
-| | RNN | Self-attention |
+| | Lớp RNN | Lớp self-attention |
 |---|---|---|
-| Phép tính mỗi lớp | $O(T d^2)$ | $O(T^2 d)$ |
-| **Số bước tuần tự** | $O(T)$ | $O(1)$ |
-| Đường đi dài nhất giữa hai vị trí | $O(T)$ | $O(1)$ |
+| Số phép tính mỗi lớp | $O(T d^2)$ | $O(T^2 d)$ |
+| Số bước phải thực hiện tuần tự | $O(T)$ | $O(1)$ |
+| Độ dài đường đi dài nhất giữa hai vị trí | $O(T)$ | $O(1)$ |
 
-Hai hàng cuối là toàn bộ câu chuyện. Attention đắt hơn về phép tính khi $T > d$, nhưng phép tính thì song song hoá được còn **các bước tuần tự thì không**. Và đường đi ngắn giữa hai vị trí bất kỳ nghĩa là gradient không phải đi qua $T$ phép nhân để nối hai token xa nhau.
+Self-attention tốn nhiều phép tính hơn khi $T > d$, nhưng các phép tính đó thực hiện song song được trên GPU, còn các bước tuần tự thì không. Đường đi ngắn giữa hai vị trí bất kỳ còn có nghĩa là gradient nối hai token cách xa nhau không phải đi qua $T$ phép nhân như trong RNN. Hai điểm này là lý do Transformer thay thế RNN trong phần lớn bài toán xử lý ngôn ngữ, và là nội dung của Chương 9.
 
-Đó là nội dung của chương tiếp theo.
+Hướng hồi quy chưa kết thúc. Các mô hình không gian trạng thái (state space model) như Mamba (Gu và Dao, 2023) dùng phép truy hồi tuyến tính theo thời gian, cho phép huấn luyện song song bằng thuật toán quét (scan) và suy luận với bộ nhớ không đổi theo độ dài chuỗi, và cạnh tranh được với Transformer ở một số quy mô.
 
 ---
 
 ## 9. Attention và Transformer
 
-### 9.1. Ý tưởng: tra cứu mềm
+Transformer (Vaswani và cộng sự, 2017) là kiến trúc của gần như mọi mô hình ngôn ngữ lớn hiện nay. Thành phần cốt lõi của nó, attention, cho phép mỗi vị trí trong chuỗi lấy thông tin trực tiếp từ mọi vị trí khác. Chương này định nghĩa attention, chứng minh và đo vì sao phải chia cho $\sqrt{d_k}$, trình bày attention nhiều đầu, mặt nạ, cấu trúc một khối Transformer, cách đưa thông tin vị trí vào mô hình, và ba kiểu kiến trúc encoder, decoder, encoder–decoder.
 
-Attention là một **phép tra cứu từ điển có thể lấy đạo hàm**. Trong một từ điển thường, ta có khoá và giá trị, đưa vào một truy vấn, khớp đúng một khoá, lấy về một giá trị. Attention làm y hệt, chỉ khác là thay vì khớp cứng thì nó **khớp mềm**: tính độ giống giữa truy vấn và mọi khoá, chuẩn hoá thành trọng số, rồi lấy tổ hợp có trọng số của các giá trị.
+### 9.1. Attention như phép tra cứu mềm
 
-$$\text{Attention}(Q, K, V) = \operatorname{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V.$$
+Một từ điển trả về giá trị ứng với khoá khớp đúng truy vấn. Attention làm việc tương tự nhưng mềm hơn: nó so truy vấn với mọi khoá, biến các độ giống nhau thành trọng số dương có tổng bằng 1, rồi trả về trung bình có trọng số của các giá trị. Vì mọi bước đều khả vi, cả phép tra cứu có thể học bằng gradient descent.
 
-Ba vai trò, và phân biệt được chúng là bước đầu để hiểu:
+> **Định nghĩa 9.1 (Scaled dot-product attention).** Cho ma trận truy vấn $Q \in \mathbb{R}^{T_q \times d_k}$, khoá $K \in \mathbb{R}^{T_k \times d_k}$ và giá trị $V \in \mathbb{R}^{T_k \times d_v}$,
+> $$\operatorname{Attention}(Q, K, V) = \operatorname{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V,$$
+> trong đó softmax áp dụng cho từng hàng. Ma trận $A = \operatorname{softmax}(QK^\top/\sqrt{d_k}) \in \mathbb{R}^{T_q \times T_k}$ gọi là ma trận trọng số attention; mỗi hàng của nó không âm và có tổng bằng 1.
 
-| Ký hiệu | Vai trò | Câu hỏi nó trả lời |
-|---|---|---|
-| $Q$ (query) | vị trí đang hỏi | "tôi đang cần thông tin gì?" |
-| $K$ (key) | nhãn của từng vị trí | "tôi có loại thông tin gì?" |
-| $V$ (value) | nội dung của từng vị trí | "thông tin đó cụ thể là gì" |
+| Ký hiệu | Vai trò |
+|---|---|
+| $Q$ (query, truy vấn) | thông tin mà vị trí đang xét cần tìm |
+| $K$ (key, khoá) | đặc điểm để so khớp của từng vị trí |
+| $V$ (value, giá trị) | nội dung được lấy về từ từng vị trí |
 
-Trong **self-attention**, cả ba đều là phép chiếu tuyến tính của **cùng một** dãy đầu vào: $Q = XW_Q$, $K = XW_K$, $V = XW_V$. Trong **cross-attention**, $Q$ đến từ một dãy còn $K, V$ đến từ dãy khác.
+Trong **self-attention**, cả ba ma trận là phép chiếu tuyến tính của cùng một chuỗi đầu vào $X \in \mathbb{R}^{T \times d}$: $Q = XW_Q$, $K = XW_K$, $V = XW_V$. Trong **cross-attention**, $Q$ lấy từ một chuỗi còn $K$ và $V$ lấy từ chuỗi khác, ví dụ câu đang dịch và câu nguồn. Cơ chế attention được Bahdanau, Cho và Bengio (2015) đưa vào dịch máy trước khi có Transformer, dùng kết hợp với RNN.
 
-### 9.2. Vì sao phải chia cho $\sqrt{d_k}$
+> **Ví dụ 9.1.** Truy vấn $q = (1, 0)$, ba khoá $k_1 = (1, 0)$, $k_2 = (0, 1)$, $k_3 = (1, 1)$ và ba giá trị $v_1 = (1, 0)$, $v_2 = (0, 1)$, $v_3 = (2, 2)$, với $d_k = 2$. Điểm số $q \cdot k_j$ là $(1, 0, 1)$; chia cho $\sqrt2$ được $(0{,}707;\; 0;\; 0{,}707)$. Softmax cho trọng số $(0{,}401;\; 0{,}198;\; 0{,}401)$: truy vấn "giống" khoá 1 và khoá 3 như nhau và giống khoá 2 ít hơn. Đầu ra là $0{,}401\,v_1 + 0{,}198\,v_2 + 0{,}401\,v_3 = (1{,}203;\; 1{,}000)$.
 
-Bài báo gốc nêu lý do trong đúng một chú thích, và lập luận rất gọn: nếu các thành phần của $q$ và $k$ là biến ngẫu nhiên độc lập có trung bình 0 và phương sai 1, thì
+### 9.2. Phép chia cho $\sqrt{d_k}$
 
-$$q \cdot k = \sum_{i=1}^{d_k} q_i k_i \quad\text{có trung bình } 0 \text{ và phương sai } d_k.$$
+> **Mệnh đề 9.1.** Nếu các thành phần của $q, k \in \mathbb{R}^{d_k}$ là các biến ngẫu nhiên độc lập, có trung bình 0 và phương sai 1, thì $q \cdot k$ có trung bình 0 và phương sai $d_k$.
 
-Tức độ lệch chuẩn của điểm số tăng theo $\sqrt{d_k}$. Với $d_k = 64$, điểm số dao động trong khoảng $\pm 8$; với $d_k = 1024$ là $\pm 32$. Softmax của các số cách nhau hàng chục là một vector gần như one-hot — và **đạo hàm của softmax tại vùng bão hoà gần bằng 0**. Chia cho $\sqrt{d_k}$ đưa phương sai về đúng 1, bất kể $d_k$.
+> **Chứng minh.** $q \cdot k = \sum_{i=1}^{d_k} q_i k_i$. Mỗi số hạng có $\mathbb{E}[q_i k_i] = \mathbb{E}[q_i]\mathbb{E}[k_i] = 0$ và $\operatorname{Var}(q_i k_i) = \mathbb{E}[q_i^2]\mathbb{E}[k_i^2] = 1$. Các số hạng độc lập với nhau, nên phương sai của tổng bằng tổng các phương sai, tức $d_k$.
 
-Thí nghiệm trong `code/models/experiments.py` đo trực tiếp cả hai vế:
+Như vậy độ lệch chuẩn của điểm số tăng theo $\sqrt{d_k}$: với $d_k = 64$ các điểm số trải trong khoảng cỡ $\pm 8$, với $d_k = 1\,024$ là $\pm 32$. Softmax của các số chênh nhau hàng chục đơn vị gần như là một vector one-hot. Đạo hàm của softmax là $\partial p_i/\partial s_j = p_i(\delta_{ij} - p_j)$, và khi $p$ gần one-hot thì mọi phần tử của ma trận này đều gần 0: gradient gần như không truyền qua được. Chia điểm số cho $\sqrt{d_k}$ đưa phương sai về 1 với mọi $d_k$. Vaswani và cộng sự (2017) nêu lập luận này trong chú thích 4 của bài báo.
+
+Thí nghiệm trong `code/models/experiments.py` kiểm tra cả hai vế: tạo 4 000 truy vấn và 64 khoá ngẫu nhiên theo phân phối chuẩn tắc, đo phương sai của điểm số và entropy của phân phối attention trên 64 khoá, có và không có phép chia.
 
 ![Hình 10](figs/models10_scaling.png)
 
-**Hình 10.** Trái: phương sai của $q \cdot k$ đo được, so với dự đoán lý thuyết $d_k$ (đường chấm). Phải: entropy của phân phối attention trên 64 khoá, có và không có phép chia.
+**Hình 10.** Trái: phương sai đo được của $q \cdot k$ so với giá trị lý thuyết $d_k$ (đường chấm). Phải: entropy của phân phối attention trên 64 khoá theo $d_k$, có và không có phép chia cho $\sqrt{d_k}$.
 
-| $d_k$ | $\operatorname{Var}(q\cdot k)$ đo được | Lý thuyết | Entropy **không** chia | Entropy **có** chia | softmax lớn nhất |
+| $d_k$ | $\operatorname{Var}(q \cdot k)$ đo được | Lý thuyết | Entropy, không chia | Entropy, có chia | Trọng số lớn nhất, không chia |
 |---|---|---|---|---|---|
 | 4 | 3,63 | 4 | 2,892 | 3,739 | 0,258 |
+| 16 | 15,99 | 16 | 1,360 | 3,685 | 0,584 |
 | 64 | 64,66 | 64 | 0,582 | 3,680 | 0,791 |
-| 1024 | 1021,97 | 1024 | **0,118** | 3,685 | **0,953** |
+| 256 | 251,67 | 256 | 0,275 | 3,692 | 0,894 |
+| 1 024 | 1 021,97 | 1 024 | 0,118 | 3,685 | 0,953 |
 
-Đọc bảng:
+Phương sai đo được khớp lý thuyết ở mọi $d_k$. Không chia thì entropy giảm dần về 0: ở $d_k = 1\,024$ entropy chỉ còn 0,118 nat, trong khi giá trị lớn nhất có thể là $\ln 64 = 4{,}159$ nat khi trọng số chia đều, và trọng số lớn nhất trung bình là 0,953, tức attention gần như chỉ chọn một khoá. Có chia thì entropy giữ quanh 3,68 với mọi $d_k$: hành vi của attention không còn phụ thuộc vào số chiều được chọn cho mỗi đầu.
 
-- **Phương sai khớp lý thuyết tới hai chữ số** ở mọi $d_k$. Đây không phải trực giác mà là một đẳng thức kiểm chứng được.
-- **Không chia thì attention hoá cứng.** Ở $d_k = 1024$, entropy còn 0,118 nat trong khi mức tối đa là $\ln 64 = 4{,}159$ — tức phân phối đã gần như one-hot, và trọng số lớn nhất trung bình là 0,953. Softmax ở trạng thái ấy gần như không có gradient.
-- **Có chia thì entropy đứng yên ở khoảng 3,68 bất kể $d_k$.** Đúng mục tiêu thiết kế: hành vi của attention không được phụ thuộc vào việc ta chọn bao nhiêu chiều cho mỗi đầu.
+### 9.3. Attention nhiều đầu
 
-> Câu trả lời phỏng vấn đầy đủ gồm ba phần: **(1)** phương sai của tích vô hướng bằng $d_k$; **(2)** điểm số lớn đẩy softmax vào vùng bão hoà nơi gradient gần 0; **(3)** chia cho $\sqrt{d_k}$ đưa phương sai về 1. Nói được cả ba, kèm con số, là đã hơn hẳn mức "để ổn định huấn luyện".
+Thay vì một phép attention trên $d$ chiều, **attention nhiều đầu** (multi-head attention) chiếu đầu vào xuống $h$ không gian con, mỗi không gian $d_k = d/h$ chiều, thực hiện $h$ phép attention song song, rồi nối kết quả và chiếu lại:
 
-### 9.3. Nhiều đầu
+$$\operatorname{head}_i = \operatorname{Attention}(XW_Q^{(i)},\, XW_K^{(i)},\, XW_V^{(i)}), \qquad \operatorname{MultiHead}(X) = \operatorname{Concat}(\operatorname{head}_1, \dots, \operatorname{head}_h)\, W_O.$$
 
-Thay vì một phép attention trên $d$ chiều, ta chiếu xuống $h$ không gian con $d_k = d/h$ chiều và làm $h$ phép attention song song, rồi nối lại và chiếu một lần nữa:
+Bài báo gốc dùng $d = 512$, $h = 8$, $d_k = 64$. Vì mỗi đầu hẹp đi $h$ lần, tổng số tham số ($4d^2$ cho $W_Q$, $W_K$, $W_V$, $W_O$) và tổng số phép tính gần như bằng attention một đầu trên đủ $d$ chiều. Nhiều đầu không mua thêm khả năng tính toán mà cho phép mô hình **cùng lúc** chú ý tới những loại quan hệ khác nhau ở những vị trí khác nhau, ví dụ một đầu theo quan hệ cú pháp, một đầu theo từ đồng tham chiếu. Với một đầu duy nhất, phép lấy trung bình có trọng số sẽ trộn lẫn các quan hệ đó.
 
-$$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\,W_O.$$
-
-Bài báo gốc dùng $h = 8$ và $d_k = d_v = d_{\text{model}}/h = 64$, và nêu rõ **tổng chi phí tính toán xấp xỉ bằng attention một đầu ở chiều đầy đủ** — vì mỗi đầu hẹp đi đúng $h$ lần.
-
-Vậy nhiều đầu mua được gì nếu không phải sức tính? Bài báo trả lời: nó cho phép mô hình **cùng lúc chú ý tới thông tin từ nhiều không gian biểu diễn khác nhau ở những vị trí khác nhau**; với một đầu duy nhất thì phép lấy trung bình sẽ làm nhoè điều đó. Nói cách khác, nhiều đầu mua **sự đa dạng của quan hệ**, không mua sức tính.
+Không phải đầu nào cũng quan trọng như nhau. Michel, Levy và Neubig (2019) cho thấy có thể bỏ phần lớn các đầu của một mô hình đã huấn luyện mà chất lượng giảm rất ít, dù một số ít đầu là thiết yếu. Nhận xét này là cơ sở cho các cách chia sẻ khoá và giá trị giữa các đầu ở Mục 10.4.
 
 ### 9.4. Mặt nạ
 
-Hai loại mặt nạ, khác mục đích, hay bị gộp làm một:
+Hai loại mặt nạ có mục đích khác nhau:
 
-| Loại | Che gì | Vì sao |
+| Loại | Che các vị trí nào | Mục đích |
 |---|---|---|
-| **Mặt nạ nhân quả** (causal) | mọi vị trí $j > i$ | để mô hình sinh không nhìn thấy tương lai — nếu không thì bài toán dự đoán token kế tiếp trở nên tầm thường |
-| **Mặt nạ đệm** (padding) | các vị trí đệm | để phần đệm không đóng góp vào tổng có trọng số |
+| Mặt nạ nhân quả (causal mask) | mọi vị trí $j > i$ khi tính đầu ra tại vị trí $i$ | mô hình sinh văn bản không được nhìn thấy các token phía sau |
+| Mặt nạ đệm (padding mask) | các vị trí đệm thêm để các chuỗi trong lô dài bằng nhau | phần đệm không đóng góp vào kết quả |
 
-Cài đặt: cộng $-\infty$ (thực tế là một số âm rất lớn) vào điểm số **trước** softmax, để sau softmax trọng số đúng bằng 0.
+Cách cài đặt: cộng $-\infty$ (trong thực tế là một số âm rất lớn) vào điểm số của các vị trí bị che **trước** softmax, để sau softmax trọng số của chúng bằng đúng 0.
 
-### 9.5. Bên trong một khối
+Mặt nạ nhân quả còn cho phép một điều quan trọng khi huấn luyện: với một chuỗi $T$ token, một lượt xuôi duy nhất tính được dự đoán cho cả $T$ vị trí cùng lúc, vị trí nào cũng chỉ thấy các token phía trước nó. Mỗi chuỗi huấn luyện vì vậy cho $T$ bài toán dự đoán token tiếp theo, tính song song. RNN cũng cho $T$ dự đoán nhưng phải tính tuần tự.
+
+### 9.5. Cấu trúc một khối Transformer
 
 ![Hình 11](figs/models11_block.png)
 
-**Hình 11.** Một khối Transformer đầy đủ, vẽ theo thứ tự pre-LN. Hai khối con, mỗi khối con có một kết nối tắt đi vòng qua nó.
+**Hình 11.** Một khối Transformer, vẽ theo thứ tự pre-LN (Mục 10.2): hai khối con, mỗi khối con có một kết nối tắt đi vòng qua.
 
-Điều đáng nhớ nhất về cấu trúc này là **phân công lao động giữa hai khối con**:
+Một khối Transformer theo thứ tự pre-LN tính
 
-| | Khối con 1 — attention | Khối con 2 — FFN |
+$$x \leftarrow x + \operatorname{MultiHead}(\operatorname{LN}(x)), \qquad x \leftarrow x + \operatorname{FFN}(\operatorname{LN}(x)),$$
+
+trong đó $\operatorname{FFN}(x) = W_2\,\phi(W_1 x + b_1) + b_2$ là một MLP hai lớp áp dụng riêng cho từng vị trí, thường với $d_{\text{ff}} = 4d$. Một mô hình gồm nhiều khối như vậy xếp chồng, cộng với lớp embedding ở đầu và lớp chiếu ra từ vựng ở cuối.
+
+Hai khối con phân công rõ ràng:
+
+| | Khối con attention | Khối con FFN |
 |---|---|---|
-| Trộn theo trục nào | **giữa các vị trí** | **giữa các chiều đặc trưng** |
-| Mỗi vị trí có độc lập không | không — mọi vị trí nhìn thấy nhau | **có** — hoàn toàn độc lập |
-| Số tham số (với $d_{\text{ff}} = 4d$) | $4d^2$ | $8d^2$ |
-| Chi phí theo độ dài chuỗi | $O(T^2 d)$ | $O(T d^2)$ |
+| Kết hợp thông tin theo trục nào | giữa các vị trí | giữa các chiều đặc trưng của cùng một vị trí |
+| Các vị trí có được xử lý độc lập không | không: mỗi vị trí nhìn thấy các vị trí khác | có: từng vị trí xử lý riêng |
+| Số tham số, với $d_{\text{ff}} = 4d$, bỏ qua hệ số chặn | $4d^2$ | $8d^2$ |
+| Số phép tính theo độ dài chuỗi | $O(T^2 d + T d^2)$ | $O(T d^2)$ |
 
-Hai điều rút ra:
+Hai điều rút ra từ bảng. Thứ nhất, **FFN chiếm hai phần ba số tham số** của mỗi khối, dù attention là phần được nói tới nhiều hơn; Chương 12 kiểm chứng con số này trên GPT-2. Thứ hai, **attention là thành phần duy nhất kết hợp thông tin giữa các vị trí**. Bỏ attention đi, Transformer chỉ còn là một MLP áp dụng độc lập cho từng token.
 
-1. **FFN chiếm hai phần ba số tham số của khối**, dù attention mới là phần được nói tới nhiều. Chương 12 kiểm chứng con số này trên GPT-2 thật.
-2. **Attention là phần duy nhất trộn thông tin giữa các vị trí.** Bỏ nó đi thì Transformer chỉ còn là một MLP áp dụng độc lập cho từng token. Đây là cách trả lời gọn nhất cho "attention làm gì".
+### 9.6. Mã hoá vị trí
 
-### 9.6. Vị trí: vì sao cần mã hoá thêm
+Self-attention không có khái niệm thứ tự: nếu hoán vị các token đầu vào (khi không có mặt nạ) thì các vector đầu ra chỉ hoán vị theo, giá trị của từng vector không đổi. Hai câu "chó cắn người" và "người cắn chó" vì vậy sẽ cho cùng một tập biểu diễn. Thông tin vị trí phải được đưa vào riêng. Có ba cách chính:
 
-Self-attention **hoán vị bất biến**: đảo thứ tự các token đầu vào thì đầu ra cũng chỉ đảo theo, giá trị không đổi. Với ngôn ngữ thì đó là tai hoạ — "chó cắn người" và "người cắn chó" sẽ cho cùng biểu diễn.
+1. **Mã hoá sin–cos cố định** (Vaswani và cộng sự, 2017): cộng vào embedding của token ở vị trí $i$ vector $p_i$ với $p_{i,2t} = \sin(i/10000^{2t/d})$ và $p_{i,2t+1} = \cos(i/10000^{2t/d})$. Không có tham số học. Các tần số khác nhau cho phép biểu diễn cả khoảng cách gần lẫn xa, và $p_{i+k}$ là một phép biến đổi tuyến tính của $p_i$, nên mô hình có thể học quan hệ theo khoảng cách tương đối.
+2. **Embedding vị trí học được** (BERT, GPT-2): một bảng tra kích thước $T_{\max} \times d$, học như embedding của từ. Đơn giản, nhưng không dùng được cho vị trí vượt quá $T_{\max}$ (512 với BERT, 1 024 với GPT-2).
+3. **Vị trí tương đối trong attention**: thay vì cộng vào embedding, đưa khoảng cách giữa hai vị trí trực tiếp vào điểm số attention. RoPE (Mục 10.3) xoay truy vấn và khoá theo vị trí; ALiBi (Press, Smith và Lewis, 2022) cộng vào điểm số một đại lượng tỉ lệ với khoảng cách. Đây là hướng mà phần lớn mô hình ngôn ngữ hiện nay đi theo.
 
-Vì thế phải đưa thông tin vị trí vào bằng tay. Ba thế hệ:
+### 9.7. Ba kiểu kiến trúc: encoder, decoder, encoder–decoder
 
-1. **Sin/cos cố định** (bài báo gốc): $p_{i,2t} = \sin(i/10000^{2t/d})$, $p_{i,2t+1} = \cos(i/10000^{2t/d})$, cộng thẳng vào embedding. Không có tham số học được; các tần số khác nhau cho phép mô hình suy ra khoảng cách.
-2. **Embedding vị trí học được** (BERT, GPT-2): một bảng tra $T_{\max} \times d$. Đơn giản, nhưng **không ngoại suy** được quá $T_{\max}$.
-3. **RoPE** — nội dung của Mục 10.3.
+Bài báo gốc của Transformer dùng kiến trúc encoder–decoder cho dịch máy. Các mô hình về sau dùng một trong ba kiểu:
+
+| Kiểu | Attention | Mục tiêu tiền huấn luyện | Mô hình tiêu biểu | Dùng cho |
+|---|---|---|---|---|
+| Chỉ encoder | hai chiều: mỗi token thấy mọi token | đoán các token bị che (masked language modeling) | BERT (Devlin và cộng sự, 2019), 110 triệu tham số với bản base | phân loại, trích xuất thông tin, embedding cho tìm kiếm |
+| Chỉ decoder | nhân quả: mỗi token chỉ thấy các token phía trước | đoán token tiếp theo | GPT-2 (Radford và cộng sự, 2019), các mô hình ngôn ngữ lớn hiện nay | sinh văn bản, và qua sinh văn bản là hầu hết các nhiệm vụ khác |
+| Encoder–decoder | encoder hai chiều; decoder nhân quả, thêm cross-attention tới đầu ra của encoder | khôi phục các đoạn văn bị che | T5 (Raffel và cộng sự, 2020) | dịch máy, tóm tắt, các bài toán biến chuỗi thành chuỗi |
+
+BERT che ngẫu nhiên 15% số token và học đoán lại chúng từ cả hai phía, nên biểu diễn của mỗi token chứa thông tin của toàn câu; đây là lý do các mô hình embedding văn bản thường dựa trên encoder ([Chương 4 của *Biểu diễn & Căn chỉnh*](bieudien-ch04.html)). Mô hình chỉ decoder học từ mọi vị trí của mọi chuỗi (Mục 9.4), dùng một mục tiêu duy nhất, và sinh văn bản một cách tự nhiên; khi mở rộng quy mô, kiểu kiến trúc này trở thành lựa chọn của gần như mọi mô hình ngôn ngữ lớn. Các chương tiếp theo tập trung vào kiểu chỉ decoder.
 
 ---
 
-## 10. Transformer hiện đại
 
-### 10.1. Cùng bộ khung, năm chi tiết đã đổi
+## 10. Các cải tiến của Transformer
+
+Khung kiến trúc của Transformer gần như không đổi từ năm 2017, nhưng nhiều chi tiết đã được thay thế. Chương này trình bày các thay đổi mà phần lớn mô hình ngôn ngữ hiện nay dùng, mỗi thay đổi kèm vấn đề nó giải quyết và cái giá của nó: vị trí của lớp chuẩn hoá, mã hoá vị trí bằng phép quay (RoPE), chia sẻ khoá và giá trị giữa các đầu (MQA, GQA), hàm kích hoạt có cổng (SwiGLU), mixture of experts, và cách tính attention tiết kiệm bộ nhớ (FlashAttention).
+
+### 10.1. Tổng quan
 
 ![Hình 12](figs/models14_modern.png)
 
-**Hình 12.** Kiến trúc năm 2017 so với thứ phổ biến hiện nay. Bộ khung không đổi; năm chi tiết đổi, mỗi chi tiết vì một lý do cụ thể.
+**Hình 12.** Các thành phần của Transformer năm 2017 và lựa chọn phổ biến hiện nay. Khung kiến trúc giữ nguyên; các thành phần thay đổi vì những lý do cụ thể.
 
-### 10.2. Pre-LN thay cho post-LN
+| Thành phần | Transformer 2017 | Phổ biến hiện nay | Lý do thay đổi | Mục |
+|---|---|---|---|---|
+| Vị trí lớp chuẩn hoá | sau khối con (post-LN) | trước khối con (pre-LN) | huấn luyện ổn định hơn | 10.2 |
+| Loại chuẩn hoá | LayerNorm | RMSNorm | rẻ hơn, chất lượng tương đương | 6.4 |
+| Thông tin vị trí | sin–cos cộng vào embedding | RoPE | quan hệ tương đối, mở rộng ngữ cảnh tốt hơn | 10.3 |
+| Khoá và giá trị | mỗi đầu một cặp (MHA) | nhiều đầu chung một cặp (GQA) | KV cache nhỏ hơn khi suy luận | 10.4 |
+| Khối FFN | ReLU, $d_{\text{ff}} = 4d$ | SwiGLU, $d_{\text{ff}} \approx \tfrac83 d$ | chất lượng tốt hơn ở cùng số tham số | 10.5 |
 
-Bài báo gốc đặt chuẩn hoá **sau** khối con: $x \leftarrow \text{LN}(x + \text{Sublayer}(x))$. Cách làm phổ biến hiện nay đặt chuẩn hoá **trước**: $x \leftarrow x + \text{Sublayer}(\text{LN}(x))$.
+Llama 2 (Touvron và cộng sự, 2023) là một ví dụ dùng cả năm lựa chọn ở cột thứ ba; bản 7B và 13B dùng MHA, bản 70B dùng GQA.
 
-Khác biệt nằm ở chỗ **đường tắt có bị chuẩn hoá hay không**. Với post-LN, mọi đường tắt đều đi qua một phép LN, nên tín hiệu từ đầu vào tới đầu ra bị co lại nhiều lần. Với pre-LN, đường tắt đi **thẳng** từ đầu vào tới đầu ra mà không qua phép biến đổi nào — đúng cấu hình đã đo ở Mục 6.3 cho tỉ lệ gradient 2,22 sau 40 lớp.
+### 10.2. Pre-LN và post-LN
 
-Hệ quả thực tế: **post-LN cần warmup dài và nhạy với tốc độ học**; pre-LN huấn luyện ổn định hơn nhiều và bớt phụ thuộc warmup. Cái giá là pre-LN thường cho chất lượng cuối hơi thấp hơn ở cùng ngân sách, nên một số mô hình dùng các biến thể lai.
+Bài báo gốc đặt chuẩn hoá **sau** phép cộng của kết nối tắt: $x \leftarrow \operatorname{LN}(x + F(x))$, gọi là post-LN. Phần lớn mô hình hiện nay đặt chuẩn hoá **trước** khối con: $x \leftarrow x + F(\operatorname{LN}(x))$, gọi là pre-LN, và thêm một lớp chuẩn hoá sau khối cuối cùng.
+
+Khác biệt nằm ở đường tắt. Với post-LN, tín hiệu đi từ đầu vào tới đầu ra phải qua một lớp chuẩn hoá ở mỗi khối. Với pre-LN, đường tắt đi thẳng qua mọi khối mà không qua phép biến đổi nào, đúng cấu hình "chuẩn hoá trong nhánh, đường tắt đi thẳng" mà Mục 6.3 đo được là ổn định. Xiong và cộng sự (2020) phân tích gradient lúc khởi tạo và chỉ ra rằng với post-LN, gradient của các tham số gần đầu ra rất lớn, nên cần warmup để tránh các bước cập nhật quá lớn ở đầu quá trình huấn luyện; với pre-LN, gradient có độ lớn hợp lý ở mọi lớp, và mô hình huấn luyện được với ít hoặc không cần warmup.
+
+Pre-LN cũng có nhược điểm: độ lớn của tín hiệu trên đường tắt tăng dần theo độ sâu, nên các khối ở sâu đóng góp tương đối ít hơn. Một số nghiên cứu cho thấy post-LN, khi huấn luyện được ổn định, có thể cho chất lượng cuối cao hơn một chút, và đã có các biến thể kết hợp ưu điểm của cả hai. Trong thực hành, pre-LN vẫn là lựa chọn mặc định vì độ ổn định quan trọng hơn khi huấn luyện mô hình lớn tốn kém.
 
 ### 10.3. RoPE
 
-Ý tưởng: thay vì **cộng** thông tin vị trí vào embedding, hãy **xoay** các vector $Q$ và $K$ một góc tỉ lệ với vị trí.
+**RoPE** (rotary position embedding; Su và cộng sự, 2024) đưa thông tin vị trí vào attention bằng cách **quay** vector truy vấn và khoá một góc tỉ lệ với vị trí, thay vì cộng một vector vị trí vào embedding.
 
-Chia $d$ chiều thành $d/2$ cặp. Cặp thứ $i$ được xoay một góc $m\theta_i$ với $\theta_i = 10000^{-2i/d}$ — đúng dãy tần số của mã hoá sin/cos gốc. Viết $R_m$ là phép xoay khối tại vị trí $m$, tính chất then chốt là
+> **Định nghĩa 10.1 (RoPE).** Chia $d$ chiều của một vector thành $d/2$ cặp. Với vị trí $m$, phép biến đổi $R_m$ quay cặp thứ $i$ một góc $m\theta_i$ trong mặt phẳng của cặp đó, với $\theta_i = 10000^{-2i/d}$, $i = 0, \dots, d/2 - 1$. Truy vấn tại vị trí $m$ và khoá tại vị trí $n$ được thay bằng $R_m q$ và $R_n k$ trước khi tính điểm số attention.
 
-$$\langle R_m q,\; R_n k \rangle = \langle R_{m-n}\, q,\; k \rangle.$$
+> **Mệnh đề 10.1.** Với mọi $q$, $k$ và mọi vị trí $m$, $n$: $\langle R_m q,\, R_n k\rangle = \langle q,\, R_{n-m}\, k\rangle$. Như vậy điểm số attention chỉ phụ thuộc vào khoảng cách tương đối $n - m$.
 
-Tức **điểm số attention chỉ phụ thuộc khoảng cách tương đối $m-n$**, dù mỗi vector được mã hoá bằng vị trí tuyệt đối.
+> **Chứng minh.** $R_m$ là ma trận khối đường chéo gồm các ma trận quay $2 \times 2$, nên nó trực giao: $R_m^\top = R_m^{-1} = R_{-m}$. Hai phép quay cùng mặt phẳng cộng góc, nên $R_{-m} R_n = R_{n-m}$. Do đó $\langle R_m q, R_n k\rangle = q^\top R_m^\top R_n k = q^\top R_{n-m}\, k$.
 
-Thí nghiệm trong `code/models/experiments.py` kiểm chứng trực tiếp:
+Dãy tần số $\theta_i$ giống dãy tần số của mã hoá sin–cos ở Mục 9.6: cặp đầu quay nhanh, phù hợp để phân biệt khoảng cách gần; cặp cuối quay rất chậm, phân biệt được khoảng cách xa.
+
+Thí nghiệm trong `code/models/experiments.py` kiểm tra mệnh đề với $d = 64$ và hai vector ngẫu nhiên:
 
 ![Hình 13](figs/models12_rope.png)
 
-**Hình 13.** Trái: cùng khoảng cách tương đối cho cùng một tích vô hướng, dù vị trí tuyệt đối khác nhau hàng trăm. Phải: độ tương đồng của cùng một vector ở hai vị trí, theo khoảng cách.
+**Hình 13.** Trái: tích vô hướng sau khi quay chỉ phụ thuộc khoảng cách tương đối, dù vị trí tuyệt đối khác nhau hàng trăm. Phải: độ tương đồng của một vector với chính nó ở hai vị trí, theo khoảng cách giữa hai vị trí.
 
-| $m$ | $n$ | $m-n$ | $\langle R_m q, R_n k\rangle$ |
+| $m$ | $n$ | $m - n$ | $\langle R_m q, R_n k\rangle$ |
 |---|---|---|---|
 | 5 | 2 | 3 | 6,851342 |
 | 105 | 102 | 3 | 6,851342 |
-| 500 | 497 | 3 | **6,851342** |
+| 500 | 497 | 3 | 6,851342 |
 | 9 | 3 | 6 | 5,861634 |
 | 109 | 103 | 6 | 5,861634 |
 
-Giá trị **trùng khít tới chữ số cuối** — đây là một đẳng thức, không phải xấp xỉ. Và đo độ tương đồng của cùng một vector ở hai vị trí cách nhau $\Delta$:
+Các cặp có cùng khoảng cách cho cùng giá trị tới chữ số thứ sáu sau dấu phẩy, đúng như mệnh đề. Đo độ tương đồng của một vector với chính nó ở hai vị trí cách nhau $\Delta$, trung bình trên 300 vector ngẫu nhiên:
 
 | $\Delta$ | 0 | 8 | 64 | 255 |
 |---|---|---|---|---|
-| $\langle R_m q, R_0 q\rangle / \|q\|^2$ | 1,000 | 0,708 | 0,439 | **0,319** |
+| $\langle R_\Delta v, v\rangle / \lVert v\rVert^2$ | 1,000 | 0,708 | 0,439 | 0,319 |
 
-Đây là tính chất **suy giảm theo khoảng cách** mà bài báo RoPE nêu: hai token cách xa nhau thì có xu hướng liên hệ yếu hơn. Nó được cài sẵn vào hình học chứ không phải học ra.
+Kết quả này có công thức rõ ràng: $\langle R_\Delta v, v\rangle = \sum_i (v_{2i}^2 + v_{2i+1}^2)\cos(\Delta\theta_i)$, tức một trung bình có trọng số của $\cos(\Delta \theta_i)$. Khi $\Delta$ tăng, các cặp có tần số khác nhau lệch pha nhau và trung bình giảm dần. Đây là tính chất **suy giảm theo khoảng cách** mà bài báo RoPE nêu: cùng một nội dung, ở xa thì có xu hướng nhận điểm attention thấp hơn.
 
-Ba món lợi của RoPE, nên nói được cả ba:
+RoPE có ba ưu điểm. Nó mã hoá vị trí tương đối mà không cần bảng tham số riêng. Nó chỉ tác động lên $Q$ và $K$, không thay đổi $V$, không thêm tham số và không đổi kích thước tensor. Và nó cho phép **mở rộng ngữ cảnh** sau khi huấn luyện: vì không có bảng vị trí giới hạn cứng, có thể co giãn các góc quay để mô hình huấn luyện với ngữ cảnh 4 096 token dùng được cho ngữ cảnh dài hơn, kèm một bước tinh chỉnh ngắn. Hai phương pháp phổ biến là nội suy vị trí (position interpolation; Chen và cộng sự, 2023), chia chỉ số vị trí cho hệ số mở rộng, và YaRN (Peng và cộng sự, 2024), co giãn khác nhau cho các dải tần số.
 
-1. **Quan hệ tương đối miễn phí** — không cần bảng tra bias tương đối như một số phương án khác.
-2. **Ngoại suy độ dài tốt hơn** — không có bảng vị trí nào để hết chỗ; và có các kỹ thuật kéo giãn tần số để mở rộng ngữ cảnh sau khi đã huấn luyện.
-3. **Chỉ tác động vào $Q$ và $K$** — không đụng $V$, không thêm tham số, không đổi hình dạng tensor.
+### 10.4. MQA và GQA
 
-### 10.4. GQA và MQA
+Khi sinh văn bản, mỗi token mới cần khoá và giá trị của mọi token trước đó ở mọi lớp. Để không phải tính lại, chúng được lưu trong **KV cache**. Với attention nhiều đầu thông thường (multi-head attention, MHA), mỗi đầu có khoá và giá trị riêng, nên dung lượng KV cache tỉ lệ với số đầu:
 
-Trong attention nhiều đầu chuẩn, mỗi đầu có $K$ và $V$ riêng. Khi sinh văn bản, toàn bộ $K$ và $V$ của các token trước phải được lưu lại — đó là **KV cache**, và dung lượng của nó tỉ lệ với số đầu.
+$$\text{KV cache} = 2 \times L \times n_{\text{kv}} \times d_{\text{head}} \times T \times B \times \text{số byte mỗi số},$$
 
-- **MQA** (multi-query): mọi đầu dùng chung **một** cặp $K, V$.
-- **GQA** (grouped-query): chia $h$ đầu thành $g$ nhóm, mỗi nhóm chung một cặp $K, V$. MQA là trường hợp $g = 1$, MHA là $g = h$.
+trong đó hệ số 2 cho khoá và giá trị, $n_{\text{kv}}$ là số đầu có khoá và giá trị riêng, $B$ là số chuỗi xử lý cùng lúc.
 
-KV cache giảm đúng theo tỉ lệ $h/g$. Chất lượng giảm rất ít khi $g$ không quá nhỏ — đó là lý do GQA với $g = 8$ trở thành mặc định. Phép tính dung lượng cụ thể nằm ở giáo trình MLOps, Mục 11.7; ở đây chỉ cần nhớ rằng **GQA là một quyết định kiến trúc được đưa ra vì lý do bộ nhớ lúc suy luận, không phải vì chất lượng**.
+- **MQA** (multi-query attention; Shazeer, 2019): mọi đầu truy vấn dùng chung **một** cặp khoá và giá trị, $n_{\text{kv}} = 1$.
+- **GQA** (grouped-query attention; Ainslie và cộng sự, 2023): chia $h$ đầu truy vấn thành $g$ nhóm, mỗi nhóm dùng chung một cặp khoá và giá trị, $n_{\text{kv}} = g$. MQA là trường hợp $g = 1$, MHA là trường hợp $g = h$.
+
+KV cache giảm đúng $h/g$ lần. Với mô hình cỡ Llama 2 70B (80 lớp, $d_{\text{head}} = 128$, 64 đầu truy vấn), ngữ cảnh 4 096 token, 8 chuỗi cùng lúc, lưu ở FP16: MHA với 64 đầu khoá–giá trị cần 80 GiB, GQA với 8 đầu cần 10 GiB. Mỗi token của mỗi chuỗi tốn 2,5 MiB với MHA và 0,3125 MiB với GQA.
+
+MQA giảm KV cache nhiều nhất nhưng có thể làm giảm chất lượng và làm huấn luyện kém ổn định. Ainslie và cộng sự (2023) cho thấy GQA cho chất lượng gần MHA với tốc độ suy luận gần MQA, và một mô hình MHA đã huấn luyện có thể chuyển sang GQA bằng cách huấn luyện thêm với khoảng 5% lượng tính toán ban đầu. GQA vì vậy là một quyết định thiết kế vì bộ nhớ lúc suy luận, không phải vì chất lượng. [Mục 2.2 của *Ứng dụng LLM*](ungdung-ch02.html) tính KV cache của Llama 3 8B, một mô hình dùng GQA, và hệ quả của nó lên chi phí phục vụ.
 
 ### 10.5. SwiGLU
 
-FFN gốc là $W_2\,\phi(W_1 x)$ với $\phi$ = ReLU và $d_{\text{ff}} = 4d$, dùng **hai** ma trận. Các biến thể GLU thay lớp tuyến tính thứ nhất và hàm kích hoạt bằng một **cổng nhân**:
+Khối FFN gốc là $W_2\,\operatorname{ReLU}(W_1 x)$ với $d_{\text{ff}} = 4d$, gồm hai ma trận. Shazeer (2020) thử các biến thể có **cổng**, trong đó đầu ra của một nhánh tuyến tính được nhân từng phần tử với đầu ra của một nhánh khác:
 
-$$\text{SwiGLU}(x) = \big(\text{Swish}(xW) \odot xV\big)W_2.$$
+$$\operatorname{FFN}_{\text{SwiGLU}}(x) = W_2\big(\operatorname{SiLU}(W x) \odot V x\big).$$
 
-Điểm phải nhớ: **có ba ma trận thay vì hai**. Để giữ nguyên số tham số và số phép tính, bề rộng ẩn phải giảm đi đúng $2/3$. Bài báo đề xuất SwiGLU làm đúng điều đó: mô hình nền có $d_{\text{ff}} = 3072$, còn các biến thể GLU dùng $d_{\text{ff}} = 2048$ để **khớp cả số tham số lẫn số phép tính** với mô hình nền.
+Biến thể dùng SiLU (Swish), gọi là SwiGLU, cho chất lượng tốt nhất trong các thí nghiệm của bài báo và được nhiều mô hình ngôn ngữ dùng.
 
-Vì vậy con số hay gặp trong các mô hình hiện đại là
+SwiGLU có **ba** ma trận $W$, $V$, $W_2$ thay vì hai. Để số tham số và số phép tính bằng khối FFN gốc, số chiều ẩn phải giảm: $3\,d\,d_{\text{ff}}' = 2\,d \cdot 4d$ cho
 
-$$d_{\text{ff}} \approx \frac{2}{3} \times 4d = \frac{8}{3}d,$$
+$$d_{\text{ff}}' = \frac{2}{3} \cdot 4d = \frac{8}{3}\,d.$$
 
-thường được làm tròn lên bội của 128 hoặc 256 cho vừa phần cứng. Biết vì sao có phân số $2/3$ là dấu hiệu đã đọc bài báo chứ không chỉ chép cấu hình.
+Bài báo làm đúng như vậy: mô hình gốc có $d_{\text{ff}} = 3\,072$, các biến thể có cổng dùng $d_{\text{ff}} = 2\,048$. Trong thực tế, $\tfrac83 d$ được làm tròn lên bội của một số như 128 hoặc 256 cho hiệu quả phần cứng. Với Llama 2 7B, $d = 4\,096$ nên $\tfrac83 d \approx 10\,923$, và giá trị thật $d_{\text{ff}} = 11\,008 = 43 \times 256$ chính là số đó làm tròn lên bội của 256.
 
-### 10.6. Mixture of Experts
+### 10.6. Mixture of experts
 
-Ý tưởng: thay lớp FFN bằng $E$ lớp FFN song song ("chuyên gia") và một **bộ định tuyến** chọn $k$ chuyên gia cho mỗi token (thường $k = 1$ hoặc 2).
+Trong một lớp **mixture of experts** (MoE; Shazeer và cộng sự, 2017), khối FFN được thay bằng $E$ khối FFN song song gọi là chuyên gia (expert), cùng một **bộ định tuyến** (router) chọn $k$ chuyên gia cho mỗi token, thường $k = 1$ hoặc 2. Đầu ra là tổng có trọng số của các chuyên gia được chọn, với trọng số do bộ định tuyến tính.
 
-Hệ quả là **tách rời số tham số khỏi số phép tính**: mô hình có tổng tham số rất lớn nhưng mỗi token chỉ kích hoạt một phần nhỏ. Cái giá là ba vấn đề kỹ thuật thật:
+MoE tách số tham số khỏi số phép tính: tổng số tham số tăng theo $E$, nhưng mỗi token chỉ đi qua $k$ chuyên gia. Ví dụ, Mixtral 8x7B (Jiang và cộng sự, 2024) có 8 chuyên gia mỗi lớp, mỗi token dùng 2, tổng khoảng 47 tỉ tham số nhưng mỗi token chỉ dùng khoảng 13 tỉ. Cái giá gồm ba vấn đề kỹ thuật:
 
-1. **Cân bằng tải** — bộ định tuyến có xu hướng dồn vào vài chuyên gia; phải thêm một hàm mất mát phụ để phạt sự mất cân bằng.
-2. **Bộ nhớ** — dù chỉ kích hoạt một phần, **toàn bộ** trọng số vẫn phải nằm sẵn trong bộ nhớ.
-3. **Giao tiếp** — chuyên gia thường nằm trên các thiết bị khác nhau, nên định tuyến sinh ra trao đổi dữ liệu qua mạng.
+1. **Cân bằng tải.** Bộ định tuyến có xu hướng dồn phần lớn token vào vài chuyên gia, làm các chuyên gia khác không được huấn luyện. Cách xử lý thông dụng là thêm một hàm mất mát phụ phạt sự mất cân bằng (Fedus, Zoph và Shazeer, 2022).
+2. **Bộ nhớ.** Dù mỗi token chỉ dùng một phần, **mọi** chuyên gia đều phải nằm sẵn trong bộ nhớ, vì token tiếp theo có thể cần bất kỳ chuyên gia nào.
+3. **Truyền dữ liệu.** Khi các chuyên gia nằm trên nhiều GPU khác nhau, mỗi lớp MoE phải gửi token tới GPU chứa chuyên gia được chọn và nhận kết quả về.
 
-> Câu trả lời gọn cho "MoE mua được gì": nó mua **dung lượng tham số trên mỗi FLOP**, và trả bằng **bộ nhớ và giao tiếp**. Nếu nút thắt của bạn là bộ nhớ chứ không phải phép tính thì MoE không giúp.
+MoE có lợi khi giới hạn là số phép tính; nếu giới hạn là bộ nhớ, MoE không giúp được.
+
+### 10.7. FlashAttention
+
+Cách tính attention trực tiếp theo Định nghĩa 9.1 tạo ra ma trận điểm số $T \times T$ cho mỗi đầu và lưu nó trong bộ nhớ chính của GPU (HBM). Với $T = 4\,096$, 32 đầu và số 16 bit, riêng các ma trận này đã chiếm 1 GiB cho một chuỗi ở một lớp. Ngoài dung lượng, việc ghi và đọc lại ma trận lớn này từ HBM còn tốn thời gian hơn chính các phép tính, vì trên GPU hiện đại tốc độ tính toán vượt xa tốc độ truy cập bộ nhớ.
+
+**FlashAttention** (Dao và cộng sự, 2022) tính **chính xác** cùng kết quả mà không bao giờ tạo ra toàn bộ ma trận $T \times T$. Thuật toán chia $Q$, $K$, $V$ thành các khối đủ nhỏ để nằm trong bộ nhớ nhanh trên chip (SRAM), và tính softmax theo từng khối bằng kỹ thuật softmax trực tuyến (Milakov và Gimelshein, 2018): với mỗi hàng, giữ giá trị lớn nhất $m$ và tổng $\ell = \sum_j e^{s_j - m}$ của các điểm số đã xử lý; khi gặp khối mới có giá trị lớn nhất $m' > m$, nhân tổng cũ và kết quả tích luỹ cũ với $e^{m - m'}$ rồi cộng phần của khối mới. Ở lượt ngược, các giá trị cần thiết được tính lại từ các khối thay vì đọc từ bộ nhớ.
+
+Kết quả: bộ nhớ cho attention tăng tuyến tính theo $T$ thay vì theo $T^2$, và thời gian chạy giảm đáng kể vì ít truy cập HBM hơn, dù số phép tính tăng nhẹ do tính lại ở lượt ngược. FlashAttention không thay đổi bậc $O(T^2)$ của số phép tính; nó thay đổi cách thực hiện chúng trên phần cứng. Các thư viện huấn luyện và phục vụ mô hình ngôn ngữ hiện nay đều dùng FlashAttention hoặc các cài đặt cùng ý tưởng (Dao, 2024).
 
 ---
 
-## 11. Sinh văn bản: các chiến lược giải mã
+## 11. Các chiến lược giải mã
 
-### 11.1. Bài toán
+Một mô hình ngôn ngữ cho phân phối xác suất của token tiếp theo; để có văn bản, cần một quy tắc chọn token từ phân phối đó. Quy tắc này gọi là chiến lược giải mã, và nó nằm hoàn toàn ngoài mô hình: cùng một mô hình với hai chiến lược khác nhau cho ra hai hệ thống có hành vi rất khác nhau. Chương này trình bày các chiến lược phổ biến, đo tác động của chúng lên một phân phối có đuôi dài, và các vấn đề giải mã khi đưa vào hệ thống thực tế.
 
-Mô hình cho một phân phối $p(\text{token kế tiếp} \mid \text{ngữ cảnh})$ trên toàn bộ từ vựng. **Giải mã** là quy tắc biến phân phối ấy thành một token cụ thể. Đây là một quyết định **hoàn toàn nằm ngoài mô hình** — cùng một mô hình với hai chiến lược giải mã khác nhau cho ra hai hệ thống rất khác nhau.
+### 11.1. Bài toán giải mã
+
+Tại mỗi bước, mô hình cho vector logit $z \in \mathbb{R}^{V}$ trên toàn bộ từ vựng, và phân phối của token tiếp theo là $p = \operatorname{softmax}(z)$. **Giải mã** (decoding) là quy tắc chọn một token từ $p$, nối vào chuỗi, rồi lặp lại cho tới khi gặp token kết thúc hoặc đạt độ dài tối đa.
+
+Để so sánh các chiến lược, dùng hai đại lượng mô tả một phân phối:
+
+- **Entropy** $H(p) = -\sum_i p_i \ln p_i$ (đơn vị nat) đo mức không chắc chắn. $e^{H}$ gọi là perplexity của phân phối, có thể hiểu là số lựa chọn hiệu dụng: phân phối đều trên $n$ token có $e^H = n$.
+- **Số token phủ 90% xác suất**: số token ít nhất, lấy theo thứ tự xác suất giảm dần, có tổng xác suất đạt 0,9.
 
 ### 11.2. Các chiến lược
 
-| Chiến lược | Quy tắc | Hợp với |
+| Chiến lược | Quy tắc | Phù hợp với |
 |---|---|---|
-| **Greedy** | luôn lấy token xác suất cao nhất | bài toán có một đáp án đúng: dịch, trích xuất, phân loại |
-| **Beam search** | giữ $B$ chuỗi tốt nhất, mở rộng song song | dịch máy, tóm tắt — nơi cần xác suất chuỗi cao |
-| **Lấy mẫu + nhiệt độ** | chia logits cho $T$ rồi lấy mẫu | sáng tạo, hội thoại |
-| **Top-$k$** | chỉ giữ $k$ token cao nhất rồi lấy mẫu | chặn đuôi rác với ngưỡng cố định |
-| **Top-$p$ (nucleus)** | giữ tập nhỏ nhất có tổng xác suất $\ge p$ | chặn đuôi rác với ngưỡng **thích ứng** |
+| Greedy | luôn chọn token có xác suất cao nhất | bài toán có một đáp án đúng: trích xuất, phân loại, trả lời ngắn |
+| Beam search | giữ $b$ chuỗi có xác suất cao nhất ở mỗi bước, mở rộng song song | dịch máy, nhận dạng tiếng nói |
+| Lấy mẫu với nhiệt độ | lấy mẫu từ $p_i \propto \exp(z_i / \tau)$ | văn bản mở, hội thoại |
+| Top-$k$ (Fan, Lewis và Dauphin, 2018) | chỉ giữ $k$ token có xác suất cao nhất, chuẩn hoá lại rồi lấy mẫu | cắt đuôi phân phối với ngưỡng cố định |
+| Top-$p$, hay nucleus (Holtzman và cộng sự, 2020) | giữ tập nhỏ nhất các token có tổng xác suất ít nhất $p$, chuẩn hoá lại rồi lấy mẫu | cắt đuôi với ngưỡng thích ứng theo phân phối |
 
-### 11.3. Đo thật: mỗi chiến lược nhào nặn phân phối thế nào
+Nhiệt độ $\tau < 1$ làm phân phối nhọn hơn, $\tau > 1$ làm phân phối phẳng hơn; $\tau \to 0$ cho greedy, $\tau = 1$ giữ nguyên phân phối của mô hình. Các biến thể mới hơn tiếp tục điều chỉnh cách cắt đuôi, ví dụ min-$p$ (Nguyen và cộng sự, 2025) chỉ giữ các token có xác suất ít nhất một tỉ lệ cố định của xác suất lớn nhất.
 
-Thí nghiệm trong `code/models/experiments.py`: một phân phối 50 000 token có dạng đuôi dài giống thực tế, rồi đo entropy, số token phủ 90% xác suất, và xác suất của token đứng đầu.
+### 11.3. Thí nghiệm: ảnh hưởng tới phân phối
+
+Thí nghiệm trong `code/models/experiments.py` dựng một phân phối trên 50 000 token có đuôi dài, với logit lấy từ phân phối chuẩn có độ lệch chuẩn 2,2, rồi đo entropy, số token phủ 90% xác suất và xác suất của token đứng đầu sau mỗi phép biến đổi.
 
 ![Hình 14](figs/models13_decode.png)
 
-**Hình 14.** Trái: hình dạng phân phối sau mỗi phép biến đổi (thang log). Phải: số token còn thực sự nằm trong cuộc chơi.
+**Hình 14.** Trái: xác suất theo thứ hạng của token sau mỗi phép biến đổi, trục dọc theo thang log. Phải: số token phủ 90% xác suất.
 
-| Chiến lược | Entropy (nat) | Số token phủ 90% | Xác suất top-1 |
-|---|---|---|---|
-| Gốc ($T = 1$) | 8,223 | **8 362** | 0,027 |
-| $T = 0{,}7$ | 5,886 | 1 215 | 0,128 |
-| $T = 1{,}3$ | 9,305 | 16 766 | 0,008 |
-| Top-$k$ = 40 | 3,449 | **33** | 0,139 |
-| Top-$p$ = 0,9 | 7,669 | 4 141 | 0,030 |
-| Top-$p$ = 0,5 | 5,673 | 376 | 0,055 |
-
-Ba điều đọc ra:
-
-1. **Phân phối gốc có đuôi khổng lồ.** Cần 8 362 token để phủ 90% xác suất. Nếu lấy mẫu thẳng từ nó thì xác suất chọn phải một token vô nghĩa là rất đáng kể ở mỗi bước — và một bước sai sẽ kéo theo cả phần còn lại.
-2. **Nhiệt độ co giãn toàn bộ phân phối, top-$k$/top-$p$ thì cắt.** $T = 0{,}7$ vẫn để lại 1 215 token trong cuộc chơi; top-$k$ = 40 chỉ để lại 33. Hai cơ chế khác hẳn nhau, và **thường dùng chung**: cắt đuôi bằng top-$p$ rồi chỉnh độ sắc bằng nhiệt độ.
-3. **Vì sao top-$p$ thường hơn top-$k$**: với ngữ cảnh mà mô hình rất chắc chắn, top-$k$ = 40 vẫn ép giữ 40 lựa chọn, trong đó 39 là rác; với ngữ cảnh mơ hồ, nó lại cắt mất những lựa chọn hợp lý. Top-$p$ **tự co giãn theo độ chắc chắn** của từng bước.
-
-### 11.4. Vì sao không phải lúc nào cũng greedy
-
-Greedy tối đa hoá xác suất **từng bước**, không phải xác suất của cả chuỗi — một dạng tham lam như thuật toán dựng cây ở Mục 3.2. Beam search giảm nhẹ điều đó bằng cách giữ nhiều ứng viên.
-
-Nhưng với văn bản mở, **beam search cho kết quả tệ một cách đáng ngạc nhiên**: nó sinh ra văn bản lặp lại, nhạt nhẽo và chung chung. Lý do được chấp nhận rộng rãi: văn bản do người viết **không** có xác suất cao một cách đều đặn — nó có những chỗ bất ngờ. Tối đa hoá xác suất chuỗi vì thế đẩy mô hình về phía văn bản "an toàn" và nhàm chán. Đây là lý do văn bản mở dùng **lấy mẫu**, còn dịch máy — nơi có một đáp án đúng — vẫn dùng beam.
-
-Hai công cụ chữa lặp thường gặp: **phạt lặp** (giảm logit của token đã xuất hiện) và **chặn n-gram lặp** (cấm lặp lại một cụm $n$ từ). Cả hai là biện pháp vá, không phải lời giải gốc.
-
-### 11.5. Giải mã và hệ thống
-
-Ba điều thuộc về vận hành nhưng phải quyết ở đây:
-
-- **Nhiệt độ 0 không phải lúc nào cũng tất định.** Với $T = 0$ thì quy tắc là greedy, nhưng thứ tự cộng dồn trên GPU có thể đổi giữa các lần chạy, và với kích thước lô khác nhau thì kết quả cũng có thể khác. Hứa "tất định" với người dùng là hứa liều.
-- **Giải mã suy đoán** (speculative decoding) dùng một mô hình nhỏ đề xuất vài token rồi mô hình lớn kiểm tra một lượt. Nó tăng tốc mà **không đổi phân phối đầu ra** — một trong số rất ít bữa trưa miễn phí trong lĩnh vực này.
-- **Chi phí sinh tỉ lệ với số token sinh ra**, và mỗi token cần một lượt xuôi đầy đủ. Đó là vì sao "bảo mô hình trả lời ngắn gọn" là một đòn bẩy chi phí thật sự, không phải mẹo vặt.
-
----
-
-## 12. Đếm tham số, FLOP và bộ nhớ
-
-### 12.1. Vì sao chương này quan trọng
-
-Đây là chương ứng dụng nhất của cả tài liệu. Biết đếm tham số và FLOP cho phép trả lời, **trên giấy và trong vài phút**, những câu hỏi mà nếu không biết thì phải thử nghiệm hàng giờ: mô hình này có vừa GPU không, huấn luyện mất bao lâu, tăng ngữ cảnh gấp đôi thì đắt lên bao nhiêu.
-
-### 12.2. Đếm tham số của một khối Transformer
-
-Với $d$ = chiều mô hình, $d_{\text{ff}}$ = bề rộng FFN:
-
-| Thành phần | Tham số |
-|---|---|
-| $W_Q, W_K, W_V$ | $3d^2$ |
-| $W_O$ | $d^2$ |
-| FFN ($W_1$, $W_2$) | $2 d\, d_{\text{ff}}$ |
-| **Tổng một khối, với $d_{\text{ff}} = 4d$** | $4d^2 + 8d^2 = \mathbf{12d^2}$ |
-
-Nhân với số khối $L$:
-
-$$\boxed{N_{\text{phi-embedding}} \approx 12\,L\,d^2}$$
-
-Đây đúng là công thức mà bài báo về quy luật co giãn của Kaplan và cộng sự dùng, với quy ước $d_{\text{attn}} = d_{\text{ff}}/4 = d_{\text{model}}$.
-
-Cộng thêm phần embedding: $V d$ cho từ vựng và $T_{\max} d$ cho vị trí học được (RoPE thì không có phần này).
-
-### 12.3. Kiểm chứng trên GPT-2 thật
-
-Công thức chỉ đáng tin nếu nó tái lập được con số đã công bố. Thí nghiệm trong `code/models/experiments.py` tính đầy đủ — kể cả độ lệch và LayerNorm — rồi đối chiếu:
-
-| Mô hình | Công thức | Đã công bố | Lệch | Phi-embedding |
+| Chiến lược | Entropy (nat) | Số lựa chọn hiệu dụng $e^H$ | Số token phủ 90% | Xác suất token đầu |
 |---|---|---|---|---|
-| GPT-2 small | 124 439 808 | 124 439 808 | **0** | 84 934 656 |
-| GPT-2 medium | 354 823 168 | 354 823 168 | **0** | 301 989 888 |
-| GPT-2 large | 774 030 080 | 774 030 080 | **0** | 707 788 800 |
+| Phân phối gốc, $\tau = 1$ | 8,223 | 3 726 | 8 362 | 0,027 |
+| $\tau = 0{,}7$ | 5,886 | 360 | 1 215 | 0,128 |
+| $\tau = 1{,}3$ | 9,305 | 10 993 | 16 766 | 0,008 |
+| Top-$k$, $k = 40$ | 3,449 | 31 | 33 | 0,139 |
+| Top-$p$, $p = 0{,}9$ | 7,669 | 2 141 | 4 141 | 0,030 |
+| Top-$p$, $p = 0{,}5$ | 5,673 | 291 | 376 | 0,055 |
 
-Khớp **chính xác tới từng tham số** trên cả ba kích thước. Và phần phi-embedding của GPT-2 small là 84 934 656, đúng bằng $12 \times 12 \times 768^2$ — tức công thức $12Ld^2$ không phải xấp xỉ mà là đẳng thức khi bỏ độ lệch và LayerNorm.
+Bảng cho thấy ba điều:
 
-Tách nhỏ GPT-2 small:
+1. **Phân phối gốc có đuôi rất dài.** Cần 8 362 token để phủ 90% xác suất. Lấy mẫu trực tiếp từ phân phối này nghĩa là ở mỗi bước có xác suất đáng kể chọn phải một token rất ít khả năng, và một token sai có thể kéo lệch cả phần văn bản sau đó.
+2. **Nhiệt độ co giãn cả phân phối; top-$k$ và top-$p$ cắt bỏ phần đuôi.** Với $\tau = 0{,}7$, vẫn còn 1 215 token trong vùng 90%; top-$k$ với $k = 40$ chỉ còn 33. Hai cơ chế khác nhau và thường được dùng cùng nhau: cắt đuôi bằng top-$p$, rồi điều chỉnh độ tập trung bằng nhiệt độ.
+3. **Top-$p$ thích ứng theo phân phối, top-$k$ thì không.** Khi mô hình rất chắc chắn, gần như toàn bộ xác suất nằm ở một vài token, nhưng top-$k$ với $k = 40$ vẫn giữ 40 lựa chọn; khi mô hình không chắc chắn, hàng trăm token đều hợp lý, nhưng top-$k$ cắt bớt còn 40. Top-$p$ giữ ít token ở trường hợp đầu và nhiều token ở trường hợp sau.
 
-| Thành phần | Tham số | Tỉ lệ |
-|---|---|---|
-| Embedding từ vựng | 38 597 376 | **31,0%** |
-| Embedding vị trí | 786 432 | 0,6% |
-| Attention (12 khối) | 28 348 416 | 22,8% |
-| FFN (12 khối) | 56 669 184 | **45,5%** |
+Số lựa chọn hiệu dụng $e^H$ còn được dùng để đo độ đa dạng của mẫu sinh ra, ví dụ số chế độ dữ liệu mà một mạng đối sinh phủ được ([Chương 10 của *Biểu diễn & Căn chỉnh*](bieudien-ch10.html)).
 
-Hai con số đáng nhớ:
+### 11.4. Beam search và văn bản mở
 
-- **Embedding chiếm 31% tham số của GPT-2 small.** Với mô hình nhỏ và từ vựng lớn, phần embedding **chi phối**. Đây là lý do các bài báo về quy luật co giãn tách riêng phần phi-embedding: chỉ khi tách ra thì quy luật mới sạch.
-- **Trong khối Transformer, FFN chiếm 67% tham số** (56,7 triệu trên tổng 85 triệu của hai khối con). Attention được nói tới nhiều hơn, nhưng phần lớn trọng số nằm ở FFN.
+Greedy chọn token tốt nhất ở từng bước, nhưng chuỗi gồm các lựa chọn tốt nhất từng bước chưa chắc là chuỗi có xác suất cao nhất; đây là cùng kiểu hạn chế của thuật toán tham lam khi xây cây ở Mục 3.2. Beam search giảm hạn chế này bằng cách giữ nhiều ứng viên song song.
 
-### 12.4. Đếm FLOP
+Với văn bản mở, beam search lại cho kết quả kém: văn bản thường lặp lại, nhạt và chung chung. Holtzman và cộng sự (2020) giải thích rằng văn bản do con người viết không có xác suất cao một cách đều đặn theo mô hình, mà thường có những lựa chọn ít khả năng. Tối đa hoá xác suất của cả chuỗi vì vậy đẩy kết quả về phía văn bản an toàn và đơn điệu. Do đó sinh văn bản mở thường dùng lấy mẫu, còn các bài toán có một đáp án đúng rõ ràng như dịch máy vẫn dùng beam search.
 
-Quy tắc nền: một phép nhân ma trận $(m \times k) \times (k \times n)$ tốn $2mkn$ FLOP — hệ số 2 vì mỗi phần tử cần một phép nhân và một phép cộng.
+Hai kỹ thuật thường dùng để giảm lặp là phạt lặp (giảm logit của các token đã xuất hiện; Keskar và cộng sự, 2019) và cấm lặp lại một cụm $n$ token đã có. Cả hai là biện pháp điều chỉnh bên ngoài, không giải quyết nguyên nhân từ phía mô hình.
 
-Từ đó, cho **mỗi token**:
+### 11.5. Giải mã trong hệ thống thực tế
 
-$$C_{\text{xuôi}} \approx 2N, \qquad C_{\text{xuôi + ngược}} \approx 6N$$
-
-với $N$ là số tham số phi-embedding. Hệ số 3 giữa xuôi và toàn bộ là vì lượt ngược tốn khoảng **hai lần** lượt xuôi: một lần cho gradient theo đầu vào, một lần cho gradient theo trọng số.
-
-Vì vậy chi phí huấn luyện toàn bộ trên $D$ token là
-
-$$\boxed{C \approx 6 N D \ \text{FLOP}}$$
-
-— một trong những công thức hữu dụng nhất trong toàn bộ lĩnh vực.
-
-**Kiểm chứng với GPT-2 small:** $N = 84\,934\,656$, nên suy luận tốn $2N = 169{,}9$ triệu FLOP mỗi token và huấn luyện tốn $6N = 509{,}6$ triệu FLOP mỗi token.
-
-**Phần attention thì sao?** Công thức $2N$ bỏ qua phép tính $QK^\top$ và $\cdot V$, vốn tốn thêm khoảng $2 L T d$ FLOP mỗi token với ngữ cảnh $T$. Phần này **tỉ lệ với $T$**, còn $2N$ thì không. Tỉ lệ giữa chúng:
-
-$$\frac{\text{attention}}{\text{phần còn lại}} \approx \frac{2LTd}{12Ld^2} = \frac{T}{6d}.$$
-
-Với GPT-2 ($d = 768$, $T = 1024$): tỉ lệ $= 1024/4608 \approx 22\%$ — đáng kể nhưng chưa chi phối. Với $T = 32\,768$ và cùng $d$: tỉ lệ $\approx 7{,}1$, tức **attention chiếm phần lớn chi phí**. Đây là lý do định lượng cho việc "chi phí bậc hai theo độ dài" chỉ trở thành vấn đề khi $T$ vượt quá $6d$.
-
-### 12.5. Đếm bộ nhớ
-
-Ba khoản khác nhau, và nhầm lẫn giữa chúng là nguồn gốc của phần lớn sự cố hết bộ nhớ:
-
-| Khoản | Công thức | Phụ thuộc |
-|---|---|---|
-| **Trọng số** | $N \times$ số byte | chỉ số tham số |
-| **Trạng thái tối ưu hoá** | $2N \times$ số byte (Adam) | chỉ số tham số |
-| **Kích hoạt** | $\approx L \times B \times T \times d \times$ số byte $\times c$ | **kích thước lô và độ dài chuỗi** |
-| **KV cache** (lúc sinh) | $2 \times L \times n_{kv} \times d_{\text{head}} \times T \times B \times$ số byte | độ dài và batch |
-
-Ví dụ cụ thể cho một mô hình 7 tỉ tham số huấn luyện ở hỗn hợp độ chính xác với Adam:
-
-- trọng số FP16: $7 \times 10^9 \times 2 = 14$ GB
-- bản sao trọng số FP32 cho bộ tối ưu: 28 GB
-- trạng thái Adam ($m$ và $v$) ở FP32: 56 GB
-- **cộng lại đã 98 GB, chưa tính kích hoạt**
-
-Đây là lý do huấn luyện mô hình 7B không vừa một GPU 80 GB nếu không có kỹ thuật phân mảnh trạng thái tối ưu hoá. Và cũng là lý do giáo trình Quantization tồn tại: giảm số byte mỗi tham số là đòn bẩy trực tiếp lên cả bốn dòng của bảng trên.
-
-### 12.6. Bảng bỏ túi
-
-| Đại lượng | Công thức | Dùng khi |
-|---|---|---|
-| Tham số phi-embedding | $12 L d^2$ | ước lượng cỡ mô hình |
-| FLOP suy luận mỗi token | $2N$ | ước lượng độ trễ |
-| FLOP huấn luyện | $6ND$ | ước lượng ngân sách tính toán |
-| Khi nào attention chi phối | $T > 6d$ | quyết định có cần attention thưa không |
-| KV cache mỗi token | $2 L n_{kv} d_{\text{head}} \times$ byte | ước lượng bộ nhớ lúc sinh |
-| Bộ nhớ Adam | $2N \times$ byte, cộng bản sao FP32 | ước lượng bộ nhớ huấn luyện |
+- **Nhiệt độ 0 chưa chắc cho kết quả tất định.** Với $\tau = 0$, quy tắc là greedy, nhưng phép cộng số thực không có tính kết hợp, và thứ tự cộng trong các kernel trên GPU có thể phụ thuộc vào kích thước lô, tức vào những yêu cầu khác đang được xử lý cùng lúc. Hai lần gọi giống hệt nhau vì vậy có thể cho kết quả khác nhau khi hai logit gần bằng nhau (He, 2025). Không nên hứa với người dùng rằng đầu ra là tất định nếu hệ thống không được thiết kế riêng cho điều đó.
+- **Giải mã suy đoán** (speculative decoding; Leviathan, Kalman và Matias, 2023; Chen và cộng sự, 2023): một mô hình nhỏ đề xuất trước vài token, mô hình lớn kiểm tra tất cả trong một lượt xuôi, và một quy tắc chấp nhận–từ chối bảo đảm phân phối của đầu ra đúng bằng phân phối của mô hình lớn. Kỹ thuật này giảm độ trễ mà không thay đổi chất lượng.
+- **Chi phí tỉ lệ với số token sinh ra.** Mỗi token đầu ra cần một lượt xuôi qua toàn bộ mô hình. Yêu cầu mô hình trả lời ngắn gọn vì vậy giảm chi phí và độ trễ một cách trực tiếp.
+- **Giải mã có ràng buộc.** Đặt xác suất bằng 0 cho các token làm đầu ra vi phạm một cú pháp cho trước, ví dụ lược đồ JSON, bảo đảm đầu ra đúng định dạng. [Mục 4.4 của *Ứng dụng LLM*](ungdung-ch04.html) trình bày cách dùng kỹ thuật này.
 
 ---
+
+## 12. Tham số, FLOP và bộ nhớ của Transformer
+
+Chương này xây dựng các công thức ước lượng số tham số, số phép tính và bộ nhớ của một Transformer, rồi kiểm chứng chúng với các con số đã công bố của GPT-2 và Llama 2. Các công thức cho phép trả lời trên giấy, trong vài phút, những câu hỏi mà nếu không có thì phải thử nghiệm: mô hình có vừa bộ nhớ GPU không, huấn luyện mất bao lâu, tăng gấp đôi độ dài ngữ cảnh thì chi phí tăng bao nhiêu.
+
+### 12.1. Mục đích của việc ước lượng
+
+Ba loại câu hỏi thường gặp khi làm việc với mô hình lớn:
+
+- **Mô hình có vừa không?** Số tham số nhân số byte mỗi tham số cho dung lượng trọng số; cộng thêm KV cache khi suy luận, hoặc gradient, trạng thái tối ưu và giá trị kích hoạt khi huấn luyện.
+- **Tốn bao nhiêu thời gian?** Số phép tính chia cho tốc độ tính thực tế của phần cứng cho thời gian huấn luyện hoặc độ trễ.
+- **Thay đổi một cấu hình thì chi phí đổi thế nào?** Ví dụ tăng độ dài ngữ cảnh, dùng GQA, hay lượng tử hoá trọng số xuống 4 bit.
+
+### 12.2. Số tham số của một khối Transformer
+
+Với $d$ là số chiều của mô hình và $d_{\text{ff}}$ là số chiều ẩn của FFN, bỏ qua hệ số chặn và tham số của các lớp chuẩn hoá:
+
+| Thành phần | Số tham số |
+|---|---|
+| $W_Q$, $W_K$, $W_V$ | $3d^2$ |
+| $W_O$ | $d^2$ |
+| FFN, hai ma trận $W_1$, $W_2$ | $2\,d\,d_{\text{ff}}$ |
+| Tổng một khối, với $d_{\text{ff}} = 4d$ | $4d^2 + 8d^2 = 12d^2$ |
+
+Với $L$ khối, số tham số không tính embedding là
+
+$$N \approx 12\,L\,d^2.$$
+
+Đây là công thức Kaplan và cộng sự (2020) dùng trong nghiên cứu về quy luật co giãn. Phần embedding thêm $Vd$ tham số cho bảng embedding từ vựng, cộng $T_{\max} d$ nếu dùng embedding vị trí học được. Nếu lớp chiếu ra từ vựng không dùng chung trọng số với bảng embedding, cộng thêm $Vd$ nữa.
+
+### 12.3. Kiểm chứng trên GPT-2 và Llama 2
+
+Thí nghiệm trong `code/models/experiments.py` tính đầy đủ số tham số, kể cả hệ số chặn và tham số của LayerNorm, rồi so với số tham số của các mô hình GPT-2 đã công bố:
+
+| Mô hình | Theo công thức | Đã công bố | Chênh lệch | $12Ld^2$ |
+|---|---|---|---|---|
+| GPT-2 small ($L = 12$, $d = 768$) | 124 439 808 | 124 439 808 | 0 | 84 934 656 |
+| GPT-2 medium ($L = 24$, $d = 1\,024$) | 354 823 168 | 354 823 168 | 0 | 301 989 888 |
+| GPT-2 large ($L = 36$, $d = 1\,280$) | 774 030 080 | 774 030 080 | 0 | 707 788 800 |
+
+Công thức khớp chính xác tới từng tham số với cả ba kích thước. Chia nhỏ GPT-2 small:
+
+| Thành phần | Số tham số | Tỉ lệ |
+|---|---|---|
+| Embedding từ vựng ($50\,257 \times 768$) | 38 597 376 | 31,0% |
+| Embedding vị trí ($1\,024 \times 768$) | 786 432 | 0,6% |
+| Attention, 12 khối | 28 348 416 | 22,8% |
+| FFN, 12 khối | 56 669 184 | 45,5% |
+
+Hai điều đáng chú ý. Embedding chiếm 31% số tham số của GPT-2 small: với mô hình nhỏ và từ vựng lớn, phần embedding chiếm tỉ trọng lớn, và đó là lý do các nghiên cứu về quy luật co giãn tách riêng số tham số không tính embedding. Trong các khối Transformer, FFN chiếm 67% số tham số, đúng tỉ lệ $8d^2/12d^2$ ở Mục 12.2.
+
+Cùng cách đếm áp dụng cho kiến trúc kiểu Llama, với ba khác biệt: FFN SwiGLU có ba ma trận, nên mỗi khối có $4d^2 + 3\,d\,d_{\text{ff}}$ tham số; RMSNorm chỉ có $\gamma$; không có hệ số chặn và không có embedding vị trí (dùng RoPE); lớp chiếu ra không dùng chung trọng số với embedding. Kết quả cho Llama 2 7B là 6 738 415 616 và cho Llama 2 13B là 13 015 864 320, khớp chính xác với số đã công bố. Bài tập 1 yêu cầu tự tính con số của bản 7B.
+
+### 12.4. Số FLOP
+
+Phép nhân ma trận $(m \times k)$ với $(k \times n)$ tốn $2mkn$ FLOP: mỗi phần tử kết quả cần $k$ phép nhân và $k$ phép cộng. Với mỗi token, mỗi tham số của một lớp tuyến tính tham gia đúng một phép nhân và một phép cộng ở lượt xuôi, nên
+
+$$C_{\text{xuôi}} \approx 2N \quad \text{FLOP mỗi token}.$$
+
+Lượt ngược tốn khoảng gấp đôi lượt xuôi: một lần cho gradient theo đầu vào của mỗi lớp (để truyền tiếp về phía trước), một lần cho gradient theo trọng số. Vì vậy huấn luyện tốn khoảng $6N$ FLOP mỗi token, và toàn bộ quá trình huấn luyện trên $D$ token tốn
+
+$$C \approx 6\,N\,D \quad \text{FLOP}.$$
+
+Với GPT-2 small, $N = 84\,934\,656$, nên suy luận tốn khoảng 170 triệu FLOP mỗi token và huấn luyện khoảng 510 triệu FLOP mỗi token.
+
+> **Ví dụ 12.1 (Ngân sách huấn luyện Llama 2 7B).** Llama 2 7B có $N = 6\,476\,005\,376$ tham số không tính embedding và được huấn luyện trên $D = 2 \times 10^{12}$ token, nên $C \approx 6ND = 7{,}77 \times 10^{22}$ FLOP. GPU A100 đạt tối đa 312 TFLOPS với số bf16, nhưng trong thực tế chỉ dùng được một phần; tỉ lệ này gọi là mức sử dụng phần cứng (model FLOPs utilization, MFU), thường 30% tới 50% với mô hình lớn. Với MFU 30%, 37,6% và 40%, ước lượng lần lượt là 230 627, 184 011 và 172 970 giờ-GPU. Meta công bố 184 320 giờ-GPU (Touvron và cộng sự, 2023), ứng với MFU khoảng 37,5%, nằm trong khoảng thông thường. Công thức $6ND$ vì vậy cho đúng bậc độ lớn của chi phí huấn luyện; con số chính xác phụ thuộc hiệu suất của hệ thống.
+
+**Quy luật co giãn.** Với một ngân sách tính toán $C$ cố định, nên chia $C$ giữa kích thước mô hình $N$ và lượng dữ liệu $D$ thế nào? Hoffmann và cộng sự (2022) huấn luyện hơn 400 mô hình và kết luận $N$ và $D$ nên tăng cùng tỉ lệ khi $C$ tăng, với khoảng 20 token dữ liệu cho mỗi tham số; mô hình Chinchilla 70B huấn luyện trên 1,4 nghìn tỉ token theo nguyên tắc này tốt hơn các mô hình lớn hơn nhiều nhưng ít dữ liệu hơn. Trong thực tế, nhiều mô hình được huấn luyện trên lượng dữ liệu vượt xa tỉ lệ 20 token mỗi tham số, vì mô hình nhỏ hơn rẻ hơn khi phục vụ; Llama 2 7B dùng khoảng 300 token mỗi tham số.
+
+**Phần tính toán của attention.** Công thức $2N$ chỉ tính các phép nhân với ma trận trọng số, chưa tính hai phép nhân phụ thuộc độ dài ngữ cảnh: điểm số $QK^\top$ và tích với $V$. Với mỗi token và mỗi lớp, mỗi phép tốn khoảng $2Td$ FLOP khi tính trên cả ngữ cảnh $T$ token, tổng $4LTd$ cho cả mô hình. So với $2N = 24Ld^2$:
+
+$$\frac{\text{phần attention}}{\text{phần còn lại}} \approx \frac{4LTd}{24Ld^2} = \frac{T}{6d}.$$
+
+Với GPT-2 small ($d = 768$, $T = 1\,024$), tỉ lệ là 0,22: attention chiếm phần nhỏ. Với $d = 4\,096$, tỉ lệ là 0,17 ở $T = 4\,096$, nhưng 1,33 ở $T = 32\,768$ và 5,33 ở $T = 131\,072$: attention trở thành phần chính. Như vậy chi phí tăng theo bình phương độ dài chỉ thực sự chi phối khi $T$ vượt khoảng $6d$. Nếu cài đặt bỏ qua phần bị mặt nạ nhân quả che, như FlashAttention, chi phí attention giảm khoảng một nửa và ngưỡng thành $T \approx 12d$, là con số mà Kaplan và cộng sự (2020) dùng.
+
+### 12.5. Bộ nhớ
+
+Bộ nhớ gồm các khoản khác nhau, phụ thuộc vào những đại lượng khác nhau, và nhầm lẫn giữa chúng là nguyên nhân của nhiều sự cố hết bộ nhớ:
+
+| Khoản | Công thức | Phụ thuộc vào |
+|---|---|---|
+| Trọng số | $N \times$ số byte mỗi tham số | số tham số |
+| Gradient | $N \times$ số byte | số tham số; chỉ khi huấn luyện |
+| Trạng thái của bộ tối ưu | Adam: $2N \times 4$ byte, cộng bản sao FP32 của trọng số khi huấn luyện với độ chính xác hỗn hợp | số tham số; chỉ khi huấn luyện |
+| Giá trị kích hoạt | tỉ lệ với $L \times B \times T \times d$, cộng một phần tỉ lệ với $T^2$ nếu lưu ma trận attention | kích thước lô, độ dài chuỗi; chỉ khi huấn luyện |
+| KV cache | $2 \times L \times n_{\text{kv}} \times d_{\text{head}} \times T \times B \times$ số byte | độ dài ngữ cảnh, số chuỗi; chỉ khi suy luận |
+
+**Khi huấn luyện.** Huấn luyện với độ chính xác hỗn hợp và Adam cần khoảng 16 byte mỗi tham số (Rajbhandari và cộng sự, 2020): 2 byte cho trọng số 16 bit, 2 byte cho gradient 16 bit, 4 byte cho bản sao trọng số FP32 mà bộ tối ưu cập nhật, và 8 byte cho hai trạng thái $m$, $v$ của Adam ở FP32. Với mô hình 7 tỉ tham số, con số là 112 GB, chưa tính giá trị kích hoạt, nên không vừa một GPU 80 GB. Các kỹ thuật như ZeRO (Rajbhandari và cộng sự, 2020) chia gradient và trạng thái bộ tối ưu cho nhiều GPU để giải quyết vấn đề này.
+
+Giá trị kích hoạt có thể còn lớn hơn. Korthikanti và cộng sự (2022) ước lượng mỗi khối Transformer huấn luyện với số 16 bit cần khoảng $sbd\,(34 + 5as/d)$ byte cho giá trị kích hoạt, với $s$ là độ dài chuỗi, $b$ là kích thước lô và $a$ là số đầu attention. Với cấu hình của Llama 2 7B ($d = 4\,096$, $a = 32$, 32 khối), một chuỗi 4 096 token cần khoảng 97 GiB, trong đó 80 GiB là số hạng $5as/d$ đến từ các ma trận attention $T \times T$. FlashAttention (Mục 10.7) không lưu các ma trận này, đưa con số xuống khoảng 17 GiB; gradient checkpointing (Mục 5.3) giảm tiếp bằng cách tính lại.
+
+**Khi suy luận.** Trọng số và KV cache là hai khoản chính. Với Llama 2 7B dùng MHA (32 lớp, 32 đầu, $d_{\text{head}} = 128$) ở FP16, KV cache tốn $2 \cdot 32 \cdot 32 \cdot 128 \cdot 2 = 524\,288$ byte, tức 0,5 MiB mỗi token; một chuỗi 4 096 token cần 2 GiB, bằng khoảng 16% dung lượng trọng số 13,5 GB. Với nhiều chuỗi và ngữ cảnh dài, KV cache có thể vượt dung lượng trọng số. [Mục 3.3 của *Ứng dụng LLM*](ungdung-ch03.html) dùng các con số này để ước lượng bộ nhớ khi tự triển khai mô hình.
+
+Giảm số byte mỗi số là cách tác động trực tiếp lên mọi dòng của bảng trên. Đó là chủ đề của giáo trình [*Quantization*](ch01.html).
+
+### 12.6. Bảng tóm tắt công thức
+
+| Đại lượng | Công thức | Dùng để |
+|---|---|---|
+| Số tham số không tính embedding | $12 L d^2$ (FFN hai ma trận, $d_{\text{ff}} = 4d$) | ước lượng kích thước mô hình |
+| FLOP suy luận mỗi token | $2N$, cộng $4LTd$ cho attention | ước lượng độ trễ |
+| FLOP huấn luyện | $6ND$ | ước lượng ngân sách tính toán |
+| Ngưỡng attention chi phối chi phí | $T \approx 6d$ (tính đủ ma trận), $12d$ (bỏ phần bị che) | quyết định có cần attention hiệu quả hơn không |
+| KV cache mỗi token | $2 L\, n_{\text{kv}}\, d_{\text{head}} \times$ số byte | ước lượng bộ nhớ khi suy luận |
+| Bộ nhớ huấn luyện với Adam | khoảng 16 byte mỗi tham số, cộng giá trị kích hoạt | ước lượng bộ nhớ khi huấn luyện |
+
+---
+
 
 ## 13. Bài tập
 
-**Bài 1 (tính tay).** Tính số tham số của một mô hình kiểu Llama-2 7B: 32 lớp, $d = 4096$, $d_{\text{ff}} = 11008$, từ vựng 32 000, 32 đầu attention và 32 đầu KV, dùng RoPE (không có embedding vị trí), RMSNorm (chỉ có $\gamma$), không có độ lệch, FFN kiểu SwiGLU, lớp ra **không** dùng chung trọng số với embedding. Đối chiếu với con số đã công bố 6 738 415 616. Tỉ lệ $d_{\text{ff}}/d$ bằng bao nhiêu, và vì sao nó không phải 4?
-*Gợi ý: SwiGLU có ba ma trận chứ không phải hai. So $d_{\text{ff}}$ với $\tfrac{8}{3}d$.*
+**Bài 1 (tính tay).** Tính số tham số của Llama 2 7B từ cấu hình: 32 khối, $d = 4\,096$, $d_{\text{ff}} = 11\,008$, từ vựng 32 000 token, 32 đầu attention và 32 đầu khoá–giá trị, RoPE (không có embedding vị trí), RMSNorm (chỉ có $\gamma$), không có hệ số chặn, FFN dạng SwiGLU, lớp chiếu ra **không** dùng chung trọng số với embedding.
+(a) Tính riêng số tham số của attention, FFN, các lớp chuẩn hoá, embedding và lớp chiếu ra.
+(b) So tổng với con số đã công bố 6 738 415 616.
+(c) Tỉ số $d_{\text{ff}}/d$ bằng bao nhiêu? Vì sao nó không bằng 4?
+*Gợi ý: SwiGLU có ba ma trận. So $d_{\text{ff}}$ với $\tfrac83 d$ (Mục 10.5).*
 
-**Bài 2 (tính tay).** Dùng kết quả Bài 1, tính tổng FLOP để huấn luyện mô hình ấy trên 2 nghìn tỉ token. Nếu chạy trên A100 (312 TFLOPS ở bf16) với hiệu suất sử dụng 37,6%, mất bao nhiêu giờ-GPU? Đối chiếu với con số Meta công bố là 184 320 giờ-GPU và cho biết phép ước lượng lệch bao nhiêu phần trăm.
-*Gợi ý: $C \approx 6ND$ với $N$ là số tham số **phi-embedding**.*
+**Bài 2 (tính tay).** Dùng kết quả Bài 1.
+(a) Tính số FLOP để huấn luyện Llama 2 7B trên $2 \times 10^{12}$ token theo công thức $C \approx 6ND$.
+(b) Trên GPU A100 (312 TFLOPS với bf16), ước lượng số giờ-GPU khi mức sử dụng phần cứng (MFU) là 30% và 40%.
+(c) Meta công bố 184 320 giờ-GPU. Từ con số này, suy ra MFU thực tế. Giá trị đó có hợp lý không?
+(d) Vì sao $N$ trong công thức không tính tham số của embedding?
 
-**Bài 3 (suy luận).** Chứng minh rằng nếu các thành phần của $q$ và $k$ độc lập, trung bình 0, phương sai 1 thì $\operatorname{Var}(q \cdot k) = d_k$. Rồi giải thích, bằng đạo hàm của softmax, vì sao phương sai lớn làm gradient gần như biến mất. Cuối cùng: nếu ai đó đề xuất chia cho $d_k$ thay vì $\sqrt{d_k}$ thì điều gì xảy ra?
+**Bài 3 (suy luận).** (a) Chứng minh: nếu các thành phần của $q, k \in \mathbb{R}^{d_k}$ độc lập, có trung bình 0 và phương sai 1 thì $\operatorname{Var}(q \cdot k) = d_k$.
+(b) Dùng đạo hàm của softmax để giải thích vì sao điểm số có phương sai lớn làm gradient qua attention gần như bằng 0.
+(c) Nếu chia điểm số cho $d_k$ thay vì $\sqrt{d_k}$ thì điều gì xảy ra khi $d_k$ lớn?
 
-**Bài 4 (tính tay).** Một CNN chỉ gồm các lớp tích chập $3\times3$, bước nhảy 1, không gộp.
-(a) Cần bao nhiêu lớp để trường tiếp nhận phủ hết ảnh $224 \times 224$?
-(b) Nếu cứ hai lớp lại có một lớp bước nhảy 2, tính trường tiếp nhận sau 10 lớp.
-(c) Giải thích vì sao trường tiếp nhận **hiệu dụng** nhỏ hơn con số lý thuyết.
-*Gợi ý: $r_i = r_{i-1} + (k_i - 1)\prod_{j<i} s_j$.*
+**Bài 4 (tính tay).** Một CNN chỉ gồm các lớp tích chập $3 \times 3$.
+(a) Với bước nhảy 1 ở mọi lớp, cần bao nhiêu lớp để trường tiếp nhận phủ hết ảnh rộng 224 điểm ảnh?
+(b) Nếu các lớp thứ 2, 4, 6, … có bước nhảy 2 và các lớp còn lại có bước nhảy 1, tính trường tiếp nhận sau 10 lớp. Cần bao nhiêu lớp để phủ 224 điểm ảnh?
+(c) Vì sao trường tiếp nhận hiệu dụng nhỏ hơn con số tính ở trên?
+*Gợi ý: $r_i = r_{i-1} + (k_i - 1)\prod_{j<i} s_j$ (Mục 7.2).*
 
-**Bài 5 (chẩn đoán).** Với mỗi tình huống, cho biết đó là vấn đề thiên lệch hay phương sai, và nêu **hai** việc nên làm:
-(a) Sai số huấn luyện 2%, sai số kiểm định 18%, khoảng cách chưa khép khi thêm dữ liệu.
-(b) Sai số huấn luyện 24%, sai số kiểm định 25%, cả hai đã phẳng.
-(c) Sai số kiểm định 12%, sai số huấn luyện 15%.
+**Bài 5 (chẩn đoán).** Với mỗi tình huống, cho biết vấn đề chủ yếu là độ chệch hay phương sai, hay là dấu hiệu của lỗi, và nêu hai việc nên làm:
+(a) Sai số huấn luyện 2%, sai số xác thực 18%, khoảng cách không thu hẹp khi thêm dữ liệu vào tập huấn luyện nhưng vẫn giảm dần.
+(b) Sai số huấn luyện 24%, sai số xác thực 25%, cả hai đã nằm ngang.
+(c) Sai số xác thực 12%, sai số huấn luyện 15%.
 
-**Bài 6 (suy luận).** Hàm lều $g(x) = 2\,\text{ReLU}(x) - 4\,\text{ReLU}(x - \tfrac12)$ dùng đúng 2 đơn vị ReLU. Chứng minh $g$ ánh xạ $[0,1]$ lên $[0,1]$ và hợp $k$ lần cho một sóng răng cưa $2^k$ đoạn tuyến tính. Suy ra số đơn vị mà mạng **một lớp ẩn** cần để biểu diễn hàm ấy, và so với $2k$ đơn vị của mạng sâu.
+**Bài 6 (suy luận).** Cho hàm lều $g(x) = 2\operatorname{ReLU}(x) - 4\operatorname{ReLU}(x - \tfrac12)$.
+(a) Chứng minh $g$ ánh xạ $[0, 1]$ lên $[0, 1]$.
+(b) Chứng minh bằng quy nạp rằng $g$ hợp với chính nó $k$ lần là một hàm tuyến tính từng khúc có $2^k$ đoạn.
+(c) Chứng minh một mạng một lớp ẩn với đầu vào một chiều cần ít nhất $2^k - 1$ đơn vị ReLU để biểu diễn chính xác hàm đó, và so với $2k$ đơn vị của mạng sâu.
 
-**Bài 7 (suy luận).** Cho một RNN có $W_{hh}$ với bán kính phổ $\rho$.
-(a) Ước lượng gradient còn lại sau 100 bước truyền ngược khi $\rho = 0{,}9$ và khi $\rho = 1{,}1$.
-(b) Với LSTM, gradient dọc đường ô nhớ là $\prod f_i$. Nếu độ lệch cổng quên đặt sao cho $f \approx 0{,}73$, sau 100 bước còn lại bao nhiêu? Nếu $f \approx 0{,}98$?
-(c) Vì sao bùng nổ dễ chữa hơn tiêu biến?
+**Bài 7 (suy luận).** (a) Bỏ qua hàm tanh, gradient của một RNN tuyến tính sau 100 bước lùi có độ lớn cỡ $\rho^{100}$ với $\rho$ là bán kính phổ của $W_{hh}$. Tính giá trị này khi $\rho = 0{,}9$ và $\rho = 1{,}1$. So với số đo ở Mục 8.2 và giải thích vì sao chúng khác nhau.
+(b) Dọc theo ô nhớ của LSTM, gradient nhân với cổng quên $f$ ở mỗi bước. Tính $f^{100}$ khi hệ số chặn của cổng quên là 1 và là 4 (bỏ qua phần phụ thuộc đầu vào), và thang thời gian $1/(1 - f)$ tương ứng.
+(c) Vì sao gradient bùng nổ dễ xử lý hơn gradient tiêu biến?
 
-**Bài 8 (tính tay).** Một mô hình 70 tỉ tham số có 80 lớp, $d_{\text{head}} = 128$, 64 đầu query. Tính dung lượng KV cache ở FP16 cho ngữ cảnh 4096 token, batch 8, trong hai trường hợp: (a) MHA với 64 đầu KV; (b) GQA với 8 đầu KV. Nêu tỉ lệ giảm và giải thích vì sao GQA là quyết định về **bộ nhớ lúc suy luận** chứ không phải về chất lượng.
+**Bài 8 (tính tay).** Một mô hình 70 tỉ tham số có 80 lớp, $d_{\text{head}} = 128$ và 64 đầu truy vấn. Tính dung lượng KV cache ở FP16 cho ngữ cảnh 4 096 token và 8 chuỗi cùng lúc, trong hai trường hợp:
+(a) MHA với 64 đầu khoá–giá trị;
+(b) GQA với 8 đầu khoá–giá trị.
+(c) So với dung lượng trọng số ở FP16. Vì sao GQA là quyết định về bộ nhớ khi suy luận chứ không phải về chất lượng?
 
-**Bài 9 (thiết kế).** Với mỗi bài toán, chọn họ mô hình và nêu **lý do dựa trên giả thiết quy nạp**, không dựa trên độ phổ biến:
-(a) Dự đoán rời bỏ từ 40 đặc trưng bảng, 30 000 khách hàng, cần giải thích được cho bộ phận kinh doanh.
-(b) Phân loại ảnh khuyết tật trên dây chuyền, 3 000 ảnh có nhãn, ảnh rất giống nhau về bố cục.
-(c) Trích xuất trường thông tin từ hợp đồng dài 50 trang.
+**Bài 9 (thiết kế).** Với mỗi bài toán, chọn họ mô hình và giải thích bằng thiên kiến quy nạp của mô hình và cấu trúc của dữ liệu, không dựa vào mức độ phổ biến của mô hình:
+(a) Dự đoán khách hàng rời bỏ dịch vụ từ 40 đặc trưng dạng bảng, 30 000 khách hàng, kết quả cần giải thích được cho bộ phận kinh doanh.
+(b) Phân loại ảnh sản phẩm lỗi trên dây chuyền, 3 000 ảnh có nhãn, các ảnh có bố cục rất giống nhau.
+(c) Trích xuất các trường thông tin từ hợp đồng dài 50 trang.
 (d) Dự báo phụ tải điện theo giờ cho 12 tháng tới.
 
-**Bài 10 (thí nghiệm).** Trong phần (E) của `code/models/experiments.py`, thay softmax bằng một hàm không bão hoà (ví dụ chuẩn hoá $\ell_1$ của ReLU) rồi đo lại entropy theo $d_k$ khi **không** chia $\sqrt{d_k}$. Hiện tượng bão hoà có biến mất không? Từ đó rút ra: phép chia $\sqrt{d_k}$ là để chữa vấn đề của **softmax** hay của **tích vô hướng**?
+**Bài 10 (thí nghiệm).** Trong phần (E) của `code/models/experiments.py`, thay softmax bằng một phép chuẩn hoá không có hàm mũ, ví dụ $w_i = \operatorname{ReLU}(s_i)/\sum_j \operatorname{ReLU}(s_j)$, rồi đo lại entropy theo $d_k$ khi **không** chia cho $\sqrt{d_k}$.
+(a) Hiện tượng bão hoà còn xuất hiện không? Giải thích.
+(b) Từ đó cho biết phép chia $\sqrt{d_k}$ xử lý vấn đề của softmax hay của tích vô hướng.
+(c) Nêu lý do attention vẫn dùng softmax.
 
 ---
 
-## 14. Ôn phỏng vấn
+## 14. Câu hỏi phỏng vấn
 
-### 14.1. Khung trả lời
+### 14.1. Cách trình bày câu trả lời
 
-Câu hỏi về mô hình và kiến trúc hầu hết có dạng "vì sao X". Khung ba bước dùng được cho gần hết:
+Phần lớn câu hỏi phỏng vấn về mô hình và kiến trúc có dạng "vì sao X". Một câu trả lời tốt thường gồm ba phần:
 
-1. **Nêu vấn đề mà X sinh ra để chữa.** Không có X thì hỏng chuyện gì?
-2. **Nêu cơ chế.** X chữa bằng cách nào — tốt nhất là một dòng toán hoặc một con số.
-3. **Nêu cái giá.** X đắt ở đâu, hỏng khi nào.
+1. **Vấn đề mà X giải quyết.** Không có X thì điều gì hỏng.
+2. **Cơ chế.** X giải quyết bằng cách nào, tốt nhất bằng một công thức ngắn hoặc một con số.
+3. **Cái giá và giới hạn.** X tốn kém ở đâu, khi nào nó không còn tác dụng.
 
-Bước 3 là bước phân biệt rõ nhất. Người học thuộc chỉ nói được bước 1 và 2.
+Phần thứ ba thường là phần phân biệt người hiểu với người chỉ nhớ. Các câu trả lời mẫu dưới đây dẫn số liệu từ các thí nghiệm của giáo trình; khi phỏng vấn không cần nhớ chính xác từng con số, nhưng cần nắm độ lớn và chiều của hiệu ứng.
 
-### 14.2. Nhóm nền tảng
+### 14.2. Học máy cổ điển và mạng nơ-ron
 
-**"Giải thích đánh đổi thiên lệch – phương sai."**
+**Câu hỏi: Giải thích phân rã độ chệch – phương sai.**
 
-> Sai số kỳ vọng tách thành ba phần: thiên lệch² (mô hình *trung bình* đã sai vì giả thiết quá hẹp), phương sai (mô hình đổi nhiều khi đổi tập huấn luyện), và nhiễu không giảm được.
->
-> *Ghi điểm thêm:* nhấn rằng kỳ vọng lấy **trên các tập huấn luyện**, và nêu giá trị thực tế của phân rã — nó phân biệt *"cần mô hình mạnh hơn"* với *"cần nhiều dữ liệu hơn"*, hai kết luận trái ngược. Kể một con số: trong thí nghiệm ở Mục 2.3, đa thức bậc 1 có thiên lệch² chiếm 74% MSE nên thêm dữ liệu vô ích; bậc 12 có phương sai chiếm gần như toàn bộ nên thêm dữ liệu thì cứu được.
+> **Trả lời.** Sai số bình phương kỳ vọng tại một điểm tách thành độ chệch², phương sai và nhiễu, với kỳ vọng lấy trên các tập huấn luyện có thể rút ra. Độ chệch là sai lệch có hệ thống do họ hàm quá hẹp; phương sai là mức dự đoán thay đổi khi đổi tập huấn luyện; nhiễu không giảm được. Giá trị thực tế của phân rã là phân biệt hai tình huống cần xử lý ngược nhau. Ở Mục 2.3, đa thức bậc 1 có độ chệch² chiếm 74% sai số, nên thêm dữ liệu không giúp gì; đa thức bậc 12 có phương sai gấp khoảng 1 900 lần độ chệch², nên thêm dữ liệu là cách sửa đúng.
 
-**"Vì sao mạng nơ-ron cần hàm kích hoạt phi tuyến?"**
+**Câu hỏi: Vì sao mạng nơ-ron cần hàm kích hoạt phi tuyến?**
 
-> Vì hợp của hai phép biến đổi affine vẫn là một phép affine: $W_2(W_1x + b_1) + b_2 = (W_2W_1)x + (\ldots)$. Không có phi tuyến thì mọi mạng sâu sụp về một lớp tuyến tính duy nhất.
+> **Trả lời.** Vì hợp của các phép biến đổi affine vẫn là một phép biến đổi affine: $W_2(W_1 x + b_1) + b_2 = (W_2 W_1)x + (W_2 b_1 + b_2)$. Không có hàm phi tuyến thì mạng bao nhiêu lớp cũng tương đương một lớp tuyến tính. Ví dụ đơn giản nhất là hàm XOR: không mô hình tuyến tính nào biểu diễn được, nhưng hai đơn vị ReLU ở lớp ẩn là đủ.
 
-**"Sâu hơn hay rộng hơn?"**
+**Câu hỏi: Mạng sâu hay mạng rộng?**
 
-> Định lý xấp xỉ phổ quát nói một lớp ẩn đủ rộng là đủ, nhưng nó chỉ nói **tồn tại**, không nói cần bao nhiêu nơ-ron.
->
-> *Kể một con số:* trong thí nghiệm ở Mục 4.4, một mạng $k$ lớp với 2 đơn vị mỗi lớp biểu diễn chính xác một sóng răng cưa $2^k$ đoạn, dùng $6k$ tham số. Mạng một lớp ẩn cần bề rộng **đúng bằng $2^k$**, tức $3 \cdot 2^k + 2$ tham số. Ở $k = 7$ là 42 so với 386 tham số. Đó là **tuyến tính so với hàm mũ** — "độ sâu mua được sự gọn gàng".
->
-> *Cái giá:* mạng sâu khó tối ưu hơn, và cần kết nối tắt cùng chuẩn hoá mới huấn luyện được.
+> **Trả lời.** Định lý xấp xỉ phổ quát nói mạng một lớp ẩn đủ rộng biểu diễn được mọi hàm liên tục, nhưng chỉ khẳng định sự tồn tại, không cho biết cần bao nhiêu đơn vị. Có những hàm mà mạng sâu biểu diễn với ít tham số hơn theo cấp số mũ. Ở Mục 4.4, hàm răng cưa $2^k$ đoạn biểu diễn được bằng mạng $k$ lớp với $6k$ tham số, trong khi mạng một lớp ẩn cần ít nhất $2^k - 1$ đơn vị; với $k = 7$ là 42 so với 386 tham số. Cái giá là mạng sâu khó tối ưu hơn, cần khởi tạo đúng, chuẩn hoá và kết nối tắt.
 
-### 14.3. Nhóm huấn luyện
+**Câu hỏi: Rừng ngẫu nhiên hay gradient boosting?**
 
-**"Vì sao gradient tiêu biến, và chữa thế nào?"**
+> **Trả lời.** Hai phương pháp tác động vào hai thành phần khác nhau của sai số. Rừng ngẫu nhiên lấy trung bình các cây sâu huấn luyện độc lập, nên giảm phương sai; thêm cây không gây overfitting, dễ chỉnh và dễ song song hoá. Gradient boosting cộng dần các cây nông, mỗi cây sửa phần sai của các cây trước, nên giảm độ chệch; thường chính xác hơn khi chỉnh tốt, nhưng nhạy với tốc độ học và số cây, và có thể overfitting nếu không dừng sớm. Ở Mục 3.4, bagging giảm phương sai của một cây sâu 8 đi một nửa, còn boosting 100 cây sâu 2 cho tổng sai số thấp nhất.
 
-> Vì gradient qua $L$ lớp là một tích $L$ ma trận Jacobi; hệ số trung bình lệch khỏi 1 một chút là sau vài chục lớp tích co về 0 hoặc bùng nổ.
->
-> *Kể một con số:* trong thí nghiệm ở Mục 6.3, cùng một mạng 40 lớp, chỉ đổi hệ số khởi tạo từ 0,5 sang 2,0 làm gradient ở lớp đầu đi từ $10^{-18}$ tới $10^{6}$ — trải 24 bậc độ lớn.
->
-> *Ba cách chữa, và chúng cộng dồn:* khởi tạo đúng phương sai (He cho ReLU: $2/n_{\text{in}}$, hệ số 2 đến từ việc ReLU vứt một nửa), chuẩn hoá, và kết nối tắt.
->
-> *Ghi điểm thêm — chi tiết hay bị nói sai:* **kết nối tắt một mình thì làm bùng nổ**, vì mỗi lớp cộng thêm vào tín hiệu. Đo được $2{,}4 \times 10^{8}$ sau 40 lớp. Phải **kết hợp với chuẩn hoá** mới ổn định (đo được 2,22). Đó đúng là cấu hình pre-LN của Transformer hiện đại.
+**Câu hỏi: Vì sao cây quyết định không cần chuẩn hoá đặc trưng?**
 
-**"Vì sao hệ số 2 trong khởi tạo He?"** — Vì ReLU đưa một nửa số giá trị về 0, nên nó cắt phương sai đi một nửa; nhân đôi phương sai trọng số để bù lại. Với tanh thì không cần, nên dùng Xavier.
+> **Trả lời.** Vì mỗi phép chia có dạng $x_j \le t$ chỉ phụ thuộc thứ tự các giá trị của đặc trưng. Mọi phép biến đổi đơn điệu, như chuẩn hoá hay lấy logarit, giữ nguyên thứ tự, nên không đổi tập các phép chia có thể có và không đổi cây. Mạng nơ-ron, hồi quy logistic, SVM và k-NN thì nhạy với thang đo.
 
-**"BatchNorm khác LayerNorm thế nào, vì sao Transformer dùng LayerNorm?"**
+### 14.3. Huấn luyện mạng sâu
 
-> BatchNorm lấy thống kê **trên cả lô** cho mỗi kênh; LayerNorm lấy **trên các đặc trưng** cho mỗi mẫu.
->
-> *Ba lý do Transformer chọn LayerNorm:* độ dài chuỗi thay đổi nên thống kê theo lô trên trục thời gian vô nghĩa; BatchNorm có hành vi **khác nhau giữa huấn luyện và suy luận** mà lúc sinh từng token thì lô hiệu dụng bằng 1; và BatchNorm làm dự đoán của một mẫu phụ thuộc các mẫu khác trong lô.
->
-> *Ghi điểm thêm:* RMSNorm bỏ luôn bước trừ trung bình, rẻ hơn và gần như không mất chất lượng — là mặc định hiện nay.
+**Câu hỏi: Vì sao có gradient tiêu biến, và xử lý thế nào?**
 
-**"Adam khác SGD thế nào? Vì sao có hiệu chỉnh thiên lệch?"**
+> **Trả lời.** Gradient qua $L$ lớp là tích của $L$ ma trận Jacobi; nếu mỗi lớp nhân độ lớn với một hệ số lệch khỏi 1, tích co về 0 hoặc tăng vọt theo hàm mũ. Ở Mục 6.3, cùng một mạng 40 lớp, chỉ đổi hệ số khởi tạo từ 0,5 sang 2,0 làm gradient ở lớp đầu thay đổi từ $10^{-18}$ tới $10^{6}$. Ba cách xử lý bổ sung cho nhau: khởi tạo đúng phương sai (He cho ReLU), chuẩn hoá, và kết nối tắt. Kết nối tắt một mình làm gradient bùng nổ ($2{,}4 \times 10^8$ sau 40 lớp) vì mỗi lớp cộng thêm vào tín hiệu một lượng cùng cỡ; phải kết hợp với chuẩn hoá trong nhánh (tỉ lệ 2,22), đúng như cấu hình pre-LN của Transformer.
 
-> Adam giữ trung bình trượt của gradient ($m$) và của bình phương gradient ($v$), rồi chia — tức **mỗi tham số một tốc độ học riêng**.
->
-> *Hiệu chỉnh thiên lệch:* vì $m_0 = v_0 = 0$, các bước đầu bị kéo về 0 một cách giả tạo — với $\beta_1 = 0{,}9$ thì $m_1$ chỉ bằng 10% của $g_1$. Chia cho $1 - \beta^t$ bù đúng phần khuyết ấy và tắt dần khi $t$ lớn.
->
-> *Cái giá:* Adam giữ **hai** trạng thái mỗi tham số, nên bộ nhớ tối ưu hoá gấp đôi bộ nhớ trọng số. Với mô hình 7B ở FP32 đó là 56 GB.
->
-> *Ghi điểm thêm:* AdamW tách suy giảm trọng số ra khỏi gradient, vì với Adam thường thì phạt $\ell_2$ bị chia cho $\sqrt{\hat v}$ nên tham số có gradient lớn lại bị phạt ít — ngược ý định.
+**Câu hỏi: Hệ số 2 trong khởi tạo He đến từ đâu?**
 
-### 14.4. Nhóm Transformer
+> **Trả lời.** Từ ReLU. Với $z$ đối xứng quanh 0, $\mathbb{E}[\operatorname{ReLU}(z)^2] = \tfrac12 \operatorname{Var}(z)$ vì ReLU đặt một nửa phân phối bằng 0. Muốn phương sai giữ nguyên qua lớp thì $n_{\text{in}}\sigma_W^2 \cdot \tfrac12 = 1$, tức $\sigma_W^2 = 2/n_{\text{in}}$. Với tanh, gần tuyến tính quanh 0, không có hệ số này và dùng khởi tạo Xavier.
 
-**"Giải thích attention."**
+**Câu hỏi: BatchNorm khác LayerNorm thế nào? Vì sao Transformer dùng LayerNorm?**
 
-> Là phép tra cứu từ điển lấy đạo hàm được: truy vấn $Q$ hỏi, khoá $K$ mô tả từng vị trí có gì, giá trị $V$ là nội dung. Độ giống $QK^\top$ đi qua softmax thành trọng số, rồi lấy tổ hợp có trọng số của $V$.
->
-> *Ghi điểm thêm:* attention là **phần duy nhất trong khối Transformer trộn thông tin giữa các vị trí**; FFN xử lý từng vị trí hoàn toàn độc lập. Bỏ attention đi thì Transformer chỉ còn là một MLP áp cho từng token.
+> **Trả lời.** BatchNorm tính trung bình và phương sai trên các mẫu trong lô, riêng cho từng đặc trưng; LayerNorm tính trên các đặc trưng của một mẫu. Transformer dùng LayerNorm vì ba lý do: các chuỗi trong lô có độ dài khác nhau và có phần đệm; BatchNorm dùng thống kê của lô khi huấn luyện nhưng trung bình trượt khi suy luận, gây sai lệch khi sinh từng token; và BatchNorm làm dự đoán của một mẫu phụ thuộc các mẫu khác trong lô. RMSNorm bỏ bước trừ trung bình, rẻ hơn và chất lượng tương đương, nên được nhiều mô hình ngôn ngữ dùng.
 
-**"Vì sao chia cho $\sqrt{d_k}$?"** — Câu này được hỏi nhiều nhất.
+**Câu hỏi: Adam khác SGD thế nào? Hiệu chỉnh độ chệch trong Adam để làm gì?**
 
-> Nếu các thành phần của $q$, $k$ độc lập, trung bình 0, phương sai 1 thì $q \cdot k$ có **phương sai đúng bằng $d_k$**. Điểm số lớn đẩy softmax vào vùng bão hoà, nơi gradient gần 0. Chia cho $\sqrt{d_k}$ đưa phương sai về 1 bất kể $d_k$.
->
-> *Kể một con số:* đo được ở Mục 9.2 — với $d_k = 1024$, phương sai đo được là 1022 (lý thuyết 1024); entropy của attention rơi xuống **0,118 nat** khi không chia, trong khi mức tối đa là $\ln 64 = 4{,}159$; trọng số lớn nhất trung bình là 0,953, tức gần như one-hot. Có chia thì entropy đứng yên ở 3,68 với mọi $d_k$.
+> **Trả lời.** Adam giữ trung bình trượt của gradient ($m$) và của bình phương gradient ($v$), chia $m$ cho $\sqrt v$, nên mỗi tham số có bước đi riêng và ít nhạy với tốc độ học hơn SGD. Vì $m_0 = 0$, ta có $\mathbb{E}[m_t] = (1 - \beta_1^t)\,\mathbb{E}[g]$, tức $m_t$ là ước lượng chệch về 0 ở các bước đầu; chia cho $1 - \beta_1^t$ cho ước lượng không chệch, và tương tự với $v$. Cái giá là hai trạng thái mỗi tham số: với mô hình 7 tỉ tham số, 56 GB ở FP32. AdamW tách weight decay khỏi gradient, vì với Adam thường, thành phần phạt bị chia cho $\sqrt v$ và tham số có gradient lớn lại bị phạt ít hơn.
 
-**"Nhiều đầu attention mua được gì?"**
+**Câu hỏi: Kết nối tắt giải quyết vấn đề gì?**
 
-> Không mua sức tính — bài báo gốc nêu rõ tổng chi phí **xấp xỉ bằng** attention một đầu ở chiều đầy đủ, vì mỗi đầu hẹp đi đúng $h$ lần. Nó mua **sự đa dạng của quan hệ**: cho phép chú ý tới nhiều không gian biểu diễn khác nhau ở những vị trí khác nhau, điều mà một đầu duy nhất sẽ làm nhoè đi vì lấy trung bình.
+> **Trả lời.** Vấn đề suy thoái: trên CIFAR-10, mạng thường 56 lớp có sai số huấn luyện cao hơn mạng 20 lớp. Đây là vấn đề tối ưu, không phải overfitting, vì mạng sâu hơn biểu diễn được mọi thứ mạng nông biểu diễn được. Kết nối tắt $h = x + F(x)$ làm ánh xạ đồng nhất dễ biểu diễn và cho gradient một đường đi không qua ma trận trọng số nào, vì Jacobi là $I + \partial F/\partial x$. Kết nối tắt cần đi kèm chuẩn hoá mới ổn định.
 
-**"Vì sao Transformer thay được RNN?"**
+**Câu hỏi: Dropout hoạt động thế nào, và vì sao ít dùng khi tiền huấn luyện mô hình ngôn ngữ lớn?**
 
-> Không phải vì rẻ hơn — attention tốn $O(T^2 d)$ còn RNN tốn $O(Td^2)$. Lý do là **số bước tuần tự**: RNN cần $O(T)$ bước không song song hoá được, attention cần $O(1)$. Và đường đi giữa hai vị trí bất kỳ là $O(1)$ thay vì $O(T)$, nên gradient không phải đi qua $T$ phép nhân.
+> **Trả lời.** Khi huấn luyện, mỗi đơn vị bị tắt với xác suất $p$ và các đơn vị còn lại được chia cho $1 - p$; khi suy luận dùng mọi đơn vị. Mạng đầy đủ xấp xỉ trung bình của rất nhiều mạng con, nên dropout giảm phương sai tương tự bagging. Khi tiền huấn luyện trên kho dữ liệu cực lớn, mỗi mẫu thường chỉ được thấy một lần nên overfitting không phải vấn đề chính, và một số mô hình như PaLM không dùng dropout. Dropout vẫn hữu ích khi tinh chỉnh trên tập nhỏ.
 
-**"Vì sao cần mã hoá vị trí?"** — Vì self-attention **hoán vị bất biến**: đảo thứ tự token thì đầu ra chỉ đảo theo. Với ngôn ngữ thì đó là tai hoạ.
+### 14.4. Transformer
 
-**"RoPE hoạt động thế nào?"**
+**Câu hỏi: Giải thích attention.**
 
-> Thay vì cộng vị trí vào embedding, nó **xoay** từng cặp chiều của $Q$ và $K$ một góc tỉ lệ với vị trí, với tần số $\theta_i = 10000^{-2i/d}$. Tính chất then chốt: $\langle R_m q, R_n k\rangle = \langle R_{m-n}q, k\rangle$ — điểm số **chỉ phụ thuộc khoảng cách tương đối**.
->
-> *Kể một con số:* đo được ở Mục 10.3 — cặp $(5,2)$, $(105,102)$ và $(500,497)$ đều cho **đúng cùng một giá trị 6,851342**. Và độ tương đồng của cùng một vector ở hai vị trí suy giảm 1,000 → 0,439 khi khoảng cách đi từ 0 tới 64.
->
-> *Ba món lợi:* quan hệ tương đối miễn phí, ngoại suy độ dài tốt hơn, và chỉ chạm $Q$, $K$ nên không thêm tham số.
+> **Trả lời.** Attention là phép tra cứu mềm, khả vi: mỗi vị trí tạo một truy vấn, so với khoá của mọi vị trí bằng tích vô hướng, chuẩn hoá các điểm số bằng softmax, rồi lấy trung bình có trọng số của các giá trị: $\operatorname{softmax}(QK^\top/\sqrt{d_k})V$. Trong một khối Transformer, attention là thành phần duy nhất kết hợp thông tin giữa các vị trí; FFN xử lý từng vị trí độc lập.
 
-**"GQA là gì, vì sao dùng?"**
+**Câu hỏi: Vì sao chia điểm số cho $\sqrt{d_k}$?**
 
-> Nhiều đầu query dùng chung một cặp $K$, $V$. **Lý do là bộ nhớ lúc suy luận**, không phải chất lượng: KV cache giảm đúng theo tỉ lệ nhóm.
->
-> *Kể một con số:* mô hình 70B, ngữ cảnh 4096, batch 8, FP16 — MHA với 64 đầu KV cần **80 GiB**, GQA với 8 đầu KV cần **10 GiB**. Đúng 8 lần.
+> **Trả lời.** Nếu các thành phần của $q$ và $k$ độc lập, trung bình 0, phương sai 1 thì $q \cdot k$ có phương sai $d_k$. Điểm số lớn đẩy softmax về gần one-hot, nơi đạo hàm $p_i(\delta_{ij} - p_j)$ gần bằng 0. Chia cho $\sqrt{d_k}$ đưa phương sai về 1 với mọi $d_k$. Ở Mục 9.2, với $d_k = 1\,024$ và 64 khoá, không chia thì entropy của attention chỉ còn 0,118 nat so với tối đa 4,159, trọng số lớn nhất trung bình 0,953; có chia thì entropy giữ quanh 3,68 với mọi $d_k$.
 
-**"Vì sao $d_{\text{ff}}$ của các mô hình mới không phải $4d$?"**
+**Câu hỏi: Attention nhiều đầu mang lại gì?**
 
-> Vì SwiGLU dùng **ba** ma trận thay vì hai. Để giữ nguyên số tham số và số phép tính, bề rộng ẩn phải giảm còn $2/3$, tức $d_{\text{ff}} \approx \tfrac{8}{3}d$.
->
-> *Kiểm chứng:* Llama-2 7B có $d = 4096$ nên $\tfrac{8}{3}d = 10\,923$, và giá trị thật là **11 008** — đúng là 10 923 làm tròn lên bội của 256.
+> **Trả lời.** Không mang lại thêm khả năng tính toán: mỗi đầu hẹp đi $h$ lần nên tổng số tham số và số phép tính gần như bằng attention một đầu ở đủ số chiều. Nó cho phép mô hình cùng lúc theo dõi nhiều loại quan hệ khác nhau ở những vị trí khác nhau, điều mà một phép lấy trung bình duy nhất sẽ trộn lẫn. Các đầu có mức độ dư thừa nhất định: nhiều đầu có thể bỏ đi sau khi huấn luyện mà chất lượng giảm ít, và đó là cơ sở của MQA, GQA.
 
-### 14.5. Nhóm tính toán
+**Câu hỏi: Vì sao Transformer thay thế RNN?**
 
-**"Một mô hình $L$ lớp, chiều $d$ có bao nhiêu tham số?"**
+> **Trả lời.** Không phải vì ít phép tính hơn: một lớp self-attention tốn $O(T^2 d)$, một lớp RNN tốn $O(Td^2)$. Lý do là số bước tuần tự: RNN cần $O(T)$ bước không song song hoá được, self-attention cần $O(1)$. Thêm vào đó, đường đi giữa hai vị trí bất kỳ trong self-attention dài $O(1)$ thay vì $O(T)$, nên gradient nối hai token cách xa không phải qua hàng trăm phép nhân. Khi huấn luyện với mặt nạ nhân quả, một lượt xuôi tính được dự đoán cho mọi vị trí của chuỗi cùng lúc.
 
-> $12 L d^2$ cho phần phi-embedding: $4d^2$ cho attention ($W_Q, W_K, W_V, W_O$) và $8d^2$ cho FFN với $d_{\text{ff}} = 4d$. Cộng $Vd$ cho embedding.
->
-> *Ghi điểm thêm:* nêu rằng **FFN chiếm hai phần ba** tham số của khối, và rằng với mô hình nhỏ thì embedding chi phối — ở GPT-2 small nó là **31%** tổng tham số, đó là lý do các bài báo về quy luật co giãn tách riêng phần phi-embedding.
+**Câu hỏi: Vì sao cần mã hoá vị trí, và RoPE hoạt động thế nào?**
 
-**"Huấn luyện tốn bao nhiêu FLOP?"**
+> **Trả lời.** Self-attention không có khái niệm thứ tự: hoán vị các token đầu vào thì đầu ra chỉ hoán vị theo, nên "chó cắn người" và "người cắn chó" cho cùng một tập biểu diễn. RoPE quay từng cặp chiều của truy vấn và khoá một góc tỉ lệ với vị trí, với tần số $\theta_i = 10000^{-2i/d}$. Vì phép quay trực giao, $\langle R_m q, R_n k\rangle = \langle q, R_{n-m}k\rangle$: điểm số chỉ phụ thuộc khoảng cách tương đối. Ở Mục 10.3, các cặp vị trí $(5, 2)$, $(105, 102)$ và $(500, 497)$ cho cùng giá trị 6,851342. RoPE không thêm tham số, chỉ tác động lên $Q$ và $K$, và cho phép mở rộng ngữ cảnh sau huấn luyện bằng cách co giãn góc quay.
 
-> $C \approx 6ND$: mỗi token tốn $2N$ cho lượt xuôi và $4N$ cho lượt ngược.
->
-> *Kể một con số kiểm chứng:* Llama-2 7B có $N = 6{,}48$ tỉ tham số phi-embedding, huấn luyện trên 2 nghìn tỉ token, nên $C = 7{,}77 \times 10^{22}$ FLOP. Trên A100 ở 37,6% hiệu suất sử dụng, đó là **184 011 giờ-GPU** — so với **184 320 giờ-GPU** mà Meta công bố, tức lệch 0,17%.
+**Câu hỏi: GQA là gì, và vì sao được dùng?**
 
-**"Khi nào chi phí bậc hai của attention mới thành vấn đề?"**
+> **Trả lời.** Nhiều đầu truy vấn dùng chung một cặp khoá và giá trị, nên KV cache giảm đúng theo tỉ số số đầu truy vấn trên số đầu khoá–giá trị. Với mô hình cỡ 70B, ngữ cảnh 4 096 token, 8 chuỗi, FP16: MHA với 64 đầu cần 80 GiB KV cache, GQA với 8 đầu cần 10 GiB. GQA là quyết định vì bộ nhớ và băng thông khi suy luận; chất lượng gần MHA nhưng không tốt hơn.
 
-> Tỉ lệ giữa chi phí attention và phần còn lại là $T/(6d)$. Với $d = 4096$, attention chỉ chi phối khi $T > 24\,576$. Ở ngữ cảnh 4096 nó mới chiếm 17%.
->
-> Đây là câu trả lời định lượng cho "vì sao chưa cần attention thưa": với phần lớn hệ thống hiện nay thì $T$ chưa vượt $6d$.
+**Câu hỏi: Vì sao $d_{\text{ff}}$ của nhiều mô hình mới không bằng $4d$?**
 
-**"Vì sao hết bộ nhớ khi huấn luyện?"** — Vì bộ nhớ kích hoạt tỉ lệ với **kích thước lô × độ dài chuỗi × số lớp**, chứ không tỉ lệ với số tham số. Đó là lý do cách chữa đầu tiên là giảm kích thước lô, rồi tới gradient checkpointing (đổi khoảng 30% thời gian lấy bộ nhớ từ $O(L)$ xuống $O(\sqrt{L})$).
+> **Trả lời.** Vì FFN dạng SwiGLU có ba ma trận thay vì hai. Để giữ số tham số và số phép tính, số chiều ẩn giảm còn $\tfrac23 \cdot 4d = \tfrac83 d$. Với Llama 2 7B, $\tfrac83 \cdot 4\,096 \approx 10\,923$, làm tròn lên bội của 256 được 11 008, đúng giá trị trong cấu hình.
 
-### 14.6. Những câu trả lời tự tố cáo
+**Câu hỏi: Encoder, decoder và encoder–decoder khác nhau thế nào?**
 
-| Câu trả lời | Vì sao nó tố cáo |
+> **Trả lời.** Encoder dùng attention hai chiều, tiền huấn luyện bằng cách đoán token bị che, cho biểu diễn tốt cho phân loại và tìm kiếm (BERT). Decoder dùng mặt nạ nhân quả, tiền huấn luyện bằng cách đoán token tiếp theo, dùng để sinh văn bản (GPT và gần như mọi mô hình ngôn ngữ lớn hiện nay). Encoder–decoder đọc đầu vào hai chiều rồi sinh đầu ra có cross-attention tới đầu vào, phù hợp với dịch máy và tóm tắt (T5).
+
+**Câu hỏi: FlashAttention làm gì?**
+
+> **Trả lời.** Tính chính xác attention mà không lưu ma trận $T \times T$ trong bộ nhớ chính của GPU: chia $Q$, $K$, $V$ thành khối nằm vừa bộ nhớ trên chip, tính softmax theo từng khối bằng softmax trực tuyến, và tính lại ở lượt ngược. Bộ nhớ cho attention tăng tuyến tính theo $T$ thay vì bậc hai, và thời gian giảm vì ít truy cập bộ nhớ. Số phép tính vẫn là $O(T^2)$.
+
+### 14.5. Tính toán tài nguyên
+
+**Câu hỏi: Một Transformer $L$ lớp, số chiều $d$ có bao nhiêu tham số?**
+
+> **Trả lời.** Khoảng $12Ld^2$ không tính embedding: $4d^2$ cho $W_Q$, $W_K$, $W_V$, $W_O$ và $8d^2$ cho FFN với $d_{\text{ff}} = 4d$. Cộng $Vd$ cho embedding từ vựng. FFN chiếm hai phần ba tham số của mỗi khối. Với mô hình nhỏ, embedding chiếm tỉ trọng lớn: 31% ở GPT-2 small. Mục 12.3 kiểm chứng công thức khớp chính xác với GPT-2 và Llama 2.
+
+**Câu hỏi: Huấn luyện một mô hình tốn bao nhiêu phép tính?**
+
+> **Trả lời.** $C \approx 6ND$: mỗi token tốn khoảng $2N$ FLOP ở lượt xuôi và $4N$ ở lượt ngược, với $N$ là số tham số không tính embedding. Với Llama 2 7B, $N \approx 6{,}48$ tỉ và $D = 2 \times 10^{12}$ token, $C \approx 7{,}8 \times 10^{22}$ FLOP. Con số 184 320 giờ-GPU A100 mà Meta công bố ứng với mức sử dụng phần cứng khoảng 37,5%, nằm trong khoảng thông thường 30–50%.
+
+**Câu hỏi: Khi nào chi phí bậc hai của attention trở thành vấn đề?**
+
+> **Trả lời.** Tỉ số giữa phần tính toán của attention và phần còn lại xấp xỉ $T/(6d)$ khi tính đủ ma trận điểm số. Với $d = 4\,096$, attention chỉ chiếm phần chính khi $T$ vượt khoảng 24 000 token; ở $T = 4\,096$ nó mới bằng 17% phần còn lại. Về bộ nhớ, vấn đề xuất hiện sớm hơn nhiều nếu lưu ma trận attention, và đó là lý do FlashAttention được dùng rộng rãi.
+
+**Câu hỏi: Vì sao hết bộ nhớ khi huấn luyện, và xử lý thế nào?**
+
+> **Trả lời.** Bộ nhớ gồm trọng số, gradient và trạng thái bộ tối ưu (khoảng 16 byte mỗi tham số với Adam và độ chính xác hỗn hợp, tức 112 GB cho mô hình 7B), cộng giá trị kích hoạt tỉ lệ với kích thước lô và độ dài chuỗi. Nếu phần tăng theo lô là nguyên nhân, giảm kích thước lô và dùng tích luỹ gradient; tiếp theo là gradient checkpointing (bộ nhớ kích hoạt từ $O(L)$ xuống $O(\sqrt L)$, đổi lấy khoảng một lượt xuôi tính lại), FlashAttention, và chia trạng thái bộ tối ưu cho nhiều GPU như ZeRO.
+
+### 14.6. Các câu trả lời chưa đạt
+
+| Câu trả lời | Vì sao chưa đạt |
 |---|---|
-| "Chia $\sqrt{d_k}$ để ổn định huấn luyện." | Đúng nhưng rỗng. Không nói được phương sai bằng $d_k$ là chưa hiểu. |
-| "Nhiều đầu để mô hình mạnh hơn." | Không nói được rằng tổng chi phí **không đổi** và cái mua được là sự đa dạng. |
-| "ResNet chữa quá khớp." | Sai. Nó sinh ra để chữa **vấn đề suy thoái**: sai số *huấn luyện* tăng theo độ sâu. |
-| "Kết nối tắt chữa gradient tiêu biến." | Chưa đủ — một mình nó làm **bùng nổ**; phải kèm chuẩn hoá. |
-| "Càng nhiều tham số càng quá khớp." | Đúng ở chế độ cổ điển; chế độ quá tham số có double descent. |
-| "Cây cần chuẩn hoá đặc trưng." | Cây bất biến với mọi phép biến đổi đơn điệu từng đặc trưng. |
-| "Adam luôn tốt hơn SGD." | Adam hội tụ nhanh hơn; SGD + momentum thường tổng quát hoá tốt hơn trên thị giác. |
-| "Transformer nhanh hơn RNN." | Về **FLOP** thì không. Cái nó thắng là **số bước tuần tự**. |
-| "Dropout luôn cần." | Nhiều LLM lớn đặt dropout bằng 0, vì quá khớp không phải vấn đề chính ở quy mô đó. |
-| "GQA để tăng chất lượng." | Nó **giảm** chất lượng một chút; lý do dùng là bộ nhớ KV cache. |
+| "Chia $\sqrt{d_k}$ để huấn luyện ổn định." | Đúng nhưng chưa đủ. Cần nêu phương sai của tích vô hướng bằng $d_k$ và hiện tượng bão hoà của softmax. |
+| "Nhiều đầu attention làm mô hình mạnh hơn." | Không nêu được rằng tổng chi phí không đổi và cái nhận được là khả năng theo dõi nhiều loại quan hệ. |
+| "ResNet ra đời để chống overfitting." | Sai: nó giải quyết vấn đề suy thoái, tức sai số huấn luyện tăng theo độ sâu. |
+| "Kết nối tắt giải quyết gradient tiêu biến." | Chưa đủ: một mình kết nối tắt làm gradient bùng nổ, cần đi kèm chuẩn hoá. |
+| "Mô hình càng nhiều tham số càng overfitting." | Đúng khi số tham số nhỏ hơn số điểm dữ liệu; với mô hình nhiều tham số hơn dữ liệu có hiện tượng double descent. |
+| "Cây quyết định cần chuẩn hoá đặc trưng." | Sai: cây bất biến với phép biến đổi đơn điệu của từng đặc trưng. |
+| "Adam luôn tốt hơn SGD." | Adam hội tụ nhanh hơn và ít phải chỉnh, nhưng SGD với momentum có thể tổng quát hoá tốt hơn trên một số bài toán thị giác. |
+| "Transformer nhanh hơn RNN vì ít phép tính hơn." | Sai: self-attention tốn nhiều phép tính hơn khi $T > d$. Transformer thắng ở số bước tuần tự. |
+| "Mạng nào cũng cần dropout." | Nhiều mô hình ngôn ngữ lớn không dùng dropout khi tiền huấn luyện. |
+| "GQA làm tăng chất lượng." | GQA giảm chất lượng một chút so với MHA; lý do dùng là KV cache nhỏ hơn. |
 
 ---
 
 ## 15. Tài liệu tham khảo
 
-**Nền tảng**
+**Sách và học máy cổ điển**
 
-1. T. Hastie, R. Tibshirani, J. Friedman. *The Elements of Statistical Learning.* Springer, 2009. — nguồn chuẩn cho phân rã thiên lệch–phương sai, cây, bagging và boosting.
-2. C. Bishop. *Pattern Recognition and Machine Learning.* Springer, 2006.
-3. I. Goodfellow, Y. Bengio, A. Courville. *Deep Learning.* MIT Press, 2016. — nguồn chuẩn cho lan truyền ngược, khởi tạo, tối ưu hoá.
-4. L. Breiman. *Random Forests.* Machine Learning, 2001. — nguồn của lập luận về tương quan giữa các cây.
-5. J. Friedman. *Greedy Function Approximation: A Gradient Boosting Machine.* Annals of Statistics, 2001.
-6. T. Chen, C. Guestrin. *XGBoost: A Scalable Tree Boosting System.* KDD 2016.
+1. T. Hastie, R. Tibshirani, J. Friedman. *The Elements of Statistical Learning*, 2nd ed. Springer, 2009. Nguồn chuẩn cho phân rã độ chệch – phương sai, cây quyết định, bagging và boosting.
+2. C. M. Bishop. *Pattern Recognition and Machine Learning*. Springer, 2006.
+3. I. Goodfellow, Y. Bengio, A. Courville. *Deep Learning*. MIT Press, 2016. Nguồn chuẩn cho lan truyền ngược, khởi tạo, regularization và tối ưu.
+4. D. H. Wolpert. The Lack of A Priori Distinctions Between Learning Algorithms. *Neural Computation*, 1996. Định lý "không có bữa trưa miễn phí" ở Mục 1.4.
+5. L. Hyafil, R. L. Rivest. Constructing Optimal Binary Decision Trees is NP-Complete. *Information Processing Letters*, 1976.
+6. L. Breiman. Bagging Predictors. *Machine Learning*, 1996.
+7. L. Breiman. Random Forests. *Machine Learning*, 2001. Lập luận về tương quan giữa các cây và permutation importance.
+8. J. H. Friedman. Greedy Function Approximation: A Gradient Boosting Machine. *Annals of Statistics*, 2001.
+9. J. H. Friedman. Stochastic Gradient Boosting. *Computational Statistics & Data Analysis*, 2002.
+10. T. Chen, C. Guestrin. XGBoost: A Scalable Tree Boosting System. *KDD*, 2016.
+11. G. Ke và cộng sự. LightGBM: A Highly Efficient Gradient Boosting Decision Tree. *NeurIPS*, 2017.
+12. L. Prokhorenkova và cộng sự. CatBoost: Unbiased Boosting with Categorical Features. *NeurIPS*, 2018.
+13. S. M. Lundberg, S.-I. Lee. A Unified Approach to Interpreting Model Predictions. *NeurIPS*, 2017. Phương pháp SHAP.
+14. L. Grinsztajn, E. Oyallon, G. Varoquaux. Why Do Tree-Based Models Still Outperform Deep Learning on Typical Tabular Data? *NeurIPS Datasets and Benchmarks*, 2022. Nguồn của nhận định ở Mục 1.2.
+15. M. Belkin, D. Hsu, S. Ma, S. Mandal. Reconciling Modern Machine-Learning Practice and the Classical Bias–Variance Trade-off. *PNAS*, 2019. Double descent.
+16. P. Nakkiran và cộng sự. Deep Double Descent: Where Bigger Models and More Data Hurt. *ICLR*, 2020.
 
-**Huấn luyện mạng sâu**
+**Mạng nơ-ron và cách huấn luyện**
 
-7. X. Glorot, Y. Bengio. *Understanding the difficulty of training deep feedforward neural networks.* AISTATS 2010. — khởi tạo Xavier.
-8. K. He và cộng sự. *Delving Deep into Rectifiers.* ICCV 2015. — khởi tạo He và hệ số 2 cho ReLU.
-9. S. Ioffe, C. Szegedy. *Batch Normalization.* ICML 2015.
-10. J. L. Ba, J. Kiros, G. Hinton. *Layer Normalization.* arXiv:1607.06450, 2016.
-11. B. Zhang, R. Sennrich. *Root Mean Square Layer Normalization.* NeurIPS 2019. — RMSNorm.
-12. K. He và cộng sự. *Deep Residual Learning for Image Recognition.* CVPR 2016. — nguồn của **vấn đề suy thoái** và kết nối tắt.
-13. D. Kingma, J. Ba. *Adam: A Method for Stochastic Optimization.* ICLR 2015. — nguồn của hiệu chỉnh thiên lệch.
-14. I. Loshchilov, F. Hutter. *Decoupled Weight Decay Regularization.* ICLR 2019. — AdamW.
-15. N. Srivastava và cộng sự. *Dropout: A Simple Way to Prevent Neural Networks from Overfitting.* JMLR 2014.
+17. G. Cybenko. Approximation by Superpositions of a Sigmoidal Function. *Mathematics of Control, Signals and Systems*, 1989.
+18. K. Hornik. Approximation Capabilities of Multilayer Feedforward Networks. *Neural Networks*, 1991.
+19. M. Leshno, V. Y. Lin, A. Pinkus, S. Schocken. Multilayer Feedforward Networks with a Nonpolynomial Activation Function Can Approximate Any Function. *Neural Networks*, 1993.
+20. M. Telgarsky. Benefits of Depth in Neural Networks. *COLT*, 2016. Ý tưởng của phép dựng hàm răng cưa ở Mục 4.4.
+21. D. Hendrycks, K. Gimpel. Gaussian Error Linear Units (GELUs). arXiv:1606.08415, 2016.
+22. S. Elfwing, E. Uchibe, K. Doya. Sigmoid-Weighted Linear Units for Neural Network Function Approximation in Reinforcement Learning. *Neural Networks*, 2018.
+23. P. Ramachandran, B. Zoph, Q. V. Le. Searching for Activation Functions. arXiv:1710.05941, 2017.
+24. D. E. Rumelhart, G. E. Hinton, R. J. Williams. Learning Representations by Back-Propagating Errors. *Nature*, 1986.
+25. A. G. Baydin, B. A. Pearlmutter, A. A. Radul, J. M. Siskind. Automatic Differentiation in Machine Learning: a Survey. *JMLR*, 2018. Chế độ xuôi và chế độ ngược ở Mục 5.2.
+26. T. Chen, B. Xu, C. Zhang, C. Guestrin. Training Deep Nets with Sublinear Memory Cost. arXiv:1604.06174, 2016. Gradient checkpointing.
+27. D. P. Kingma, J. Ba. Adam: A Method for Stochastic Optimization. *ICLR*, 2015.
+28. I. Loshchilov, F. Hutter. SGDR: Stochastic Gradient Descent with Warm Restarts. *ICLR*, 2017. Lịch cosine.
+29. I. Loshchilov, F. Hutter. Decoupled Weight Decay Regularization. *ICLR*, 2019. AdamW.
+30. P. Goyal và cộng sự. Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour. arXiv:1706.02677, 2017. Quy tắc tuyến tính cho tốc độ học.
+31. S. Malladi, K. Lyu, A. Panigrahi, S. Arora. On the SDEs and Scaling Rules for Adaptive Gradient Algorithms. *NeurIPS*, 2022. Quy tắc căn bậc hai cho Adam.
+32. A. C. Wilson và cộng sự. The Marginal Value of Adaptive Gradient Methods in Machine Learning. *NeurIPS*, 2017.
+33. Y. N. Dauphin và cộng sự. Identifying and Attacking the Saddle Point Problem in High-Dimensional Non-Convex Optimization. *NeurIPS*, 2014.
+34. X. Glorot, Y. Bengio. Understanding the Difficulty of Training Deep Feedforward Neural Networks. *AISTATS*, 2010. Khởi tạo Xavier.
+35. K. He, X. Zhang, S. Ren, J. Sun. Delving Deep into Rectifiers. *ICCV*, 2015. Khởi tạo He.
+36. S. Ioffe, C. Szegedy. Batch Normalization. *ICML*, 2015.
+37. J. L. Ba, J. R. Kiros, G. E. Hinton. Layer Normalization. arXiv:1607.06450, 2016.
+38. B. Zhang, R. Sennrich. Root Mean Square Layer Normalization. *NeurIPS*, 2019.
+39. S. Santurkar, D. Tsipras, A. Ilyas, A. Madry. How Does Batch Normalization Help Optimization? *NeurIPS*, 2018.
+40. K. He, X. Zhang, S. Ren, J. Sun. Deep Residual Learning for Image Recognition. *CVPR*, 2016. Vấn đề suy thoái và kết nối tắt.
+41. N. Srivastava và cộng sự. Dropout: A Simple Way to Prevent Neural Networks from Overfitting. *JMLR*, 2014.
+42. C. Szegedy và cộng sự. Rethinking the Inception Architecture for Computer Vision. *CVPR*, 2016. Làm mượt nhãn.
+43. A. Chowdhery và cộng sự. PaLM: Scaling Language Modeling with Pathways. arXiv:2204.02311, 2022.
 
-**Tích chập và hồi quy**
+**Mạng tích chập và mạng hồi quy**
 
-16. K. Simonyan, A. Zisserman. *Very Deep Convolutional Networks.* ICLR 2015. — lập luận hai lớp $3\times3$ thay một lớp $5\times5$.
-17. A. Howard và cộng sự. *MobileNets.* arXiv:1704.04861, 2017. — depthwise separable.
-18. W. Luo và cộng sự. *Understanding the Effective Receptive Field in Deep CNNs.* NeurIPS 2016. — nguồn của kết quả trường tiếp nhận hiệu dụng tăng theo $O(\sqrt{L})$.
-19. S. Hochreiter, J. Schmidhuber. *Long Short-Term Memory.* Neural Computation, 1997.
-20. R. Pascanu, T. Mikolov, Y. Bengio. *On the difficulty of training Recurrent Neural Networks.* ICML 2013. — bán kính phổ, cắt ngưỡng gradient.
-21. R. Jozefowicz, W. Zaremba, I. Sutskever. *An Empirical Exploration of Recurrent Network Architectures.* ICML 2015. — nguồn của thủ thuật khởi tạo độ lệch cổng quên dương.
+44. K. Simonyan, A. Zisserman. Very Deep Convolutional Networks for Large-Scale Image Recognition. *ICLR*, 2015.
+45. A. G. Howard và cộng sự. MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications. arXiv:1704.04861, 2017.
+46. W. Luo, Y. Li, R. Urtasun, R. Zemel. Understanding the Effective Receptive Field in Deep Convolutional Neural Networks. *NeurIPS*, 2016.
+47. A. Azulay, Y. Weiss. Why Do Deep Convolutional Networks Generalize So Poorly to Small Image Transformations? *JMLR*, 2019.
+48. A. Dosovitskiy và cộng sự. An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale. *ICLR*, 2021.
+49. Z. Liu và cộng sự. A ConvNet for the 2020s. *CVPR*, 2022.
+50. S. Hochreiter, J. Schmidhuber. Long Short-Term Memory. *Neural Computation*, 1997.
+51. F. A. Gers, J. Schmidhuber, F. Cummins. Learning to Forget: Continual Prediction with LSTM. *Neural Computation*, 2000.
+52. R. Pascanu, T. Mikolov, Y. Bengio. On the Difficulty of Training Recurrent Neural Networks. *ICML*, 2013. Điều kiện về giá trị suy biến và cắt ngưỡng gradient.
+53. R. Jozefowicz, W. Zaremba, I. Sutskever. An Empirical Exploration of Recurrent Network Architectures. *ICML*, 2015.
+54. C. Tallec, Y. Ollivier. Can Recurrent Neural Networks Warp Time? *ICLR*, 2018.
+55. K. Cho và cộng sự. Learning Phrase Representations using RNN Encoder–Decoder for Statistical Machine Translation. *EMNLP*, 2014. Mạng GRU.
+56. J. Chung, C. Gulcehre, K. Cho, Y. Bengio. Empirical Evaluation of Gated Recurrent Neural Networks on Sequence Modeling. arXiv:1412.3555, 2014.
+57. A. Gu, T. Dao. Mamba: Linear-Time Sequence Modeling with Selective State Spaces. arXiv:2312.00752, 2023.
 
 **Transformer**
 
-22. A. Vaswani và cộng sự. *Attention Is All You Need.* NeurIPS 2017. — nguồn của scaled dot-product attention, lập luận $\sqrt{d_k}$ (chú thích 4), multi-head, và bảng so sánh số bước tuần tự.
-23. J. Su và cộng sự. *RoFormer: Enhanced Transformer with Rotary Position Embedding.* arXiv:2104.09864. — nguồn của RoPE, $\theta_i = 10000^{-2i/d}$ và tính chất suy giảm theo khoảng cách.
-24. N. Shazeer. *GLU Variants Improve Transformer.* arXiv:2002.05202, 2020. — nguồn của SwiGLU và của việc giảm $d_{\text{ff}}$ còn $2/3$ để khớp tham số.
-25. N. Shazeer. *Fast Transformer Decoding: One Write-Head is All You Need.* arXiv:1911.02150, 2019. — MQA.
-26. J. Ainslie và cộng sự. *GQA: Training Generalized Multi-Query Transformer Models.* EMNLP 2023.
-27. R. Xiong và cộng sự. *On Layer Normalization in the Transformer Architecture.* ICML 2020. — phân tích pre-LN so với post-LN.
-28. J. Kaplan và cộng sự. *Scaling Laws for Neural Language Models.* arXiv:2001.08361, 2020. — nguồn của $N = 12 L d^2$, $C_{\text{xuôi}} \approx 2N$ và $C \approx 6NBS$.
-29. J. Hoffmann và cộng sự. *Training Compute-Optimal Large Language Models.* NeurIPS 2022. — Chinchilla.
-30. A. Dosovitskiy và cộng sự. *An Image is Worth 16x16 Words.* ICLR 2021. — ViT và đánh đổi thiên lệch quy nạp.
-31. H. Touvron và cộng sự. *Llama 2: Open Foundation and Fine-Tuned Chat Models.* arXiv:2307.09288, 2023. — nguồn của cấu hình và con số 184 320 giờ-GPU dùng để đối chiếu ở Mục 12.4.
+58. A. Vaswani và cộng sự. Attention Is All You Need. *NeurIPS*, 2017. Scaled dot-product attention, lập luận $\sqrt{d_k}$ ở chú thích 4, attention nhiều đầu và bảng so sánh với RNN.
+59. D. Bahdanau, K. Cho, Y. Bengio. Neural Machine Translation by Jointly Learning to Align and Translate. *ICLR*, 2015.
+60. P. Michel, O. Levy, G. Neubig. Are Sixteen Heads Really Better than One? *NeurIPS*, 2019.
+61. O. Press, N. A. Smith, M. Lewis. Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation. *ICLR*, 2022. ALiBi.
+62. J. Devlin, M.-W. Chang, K. Lee, K. Toutanova. BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. *NAACL*, 2019.
+63. A. Radford và cộng sự. *Language Models are Unsupervised Multitask Learners*. OpenAI, 2019. GPT-2.
+64. C. Raffel và cộng sự. Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer. *JMLR*, 2020. T5.
+65. R. Xiong và cộng sự. On Layer Normalization in the Transformer Architecture. *ICML*, 2020. Pre-LN và post-LN.
+66. J. Su và cộng sự. RoFormer: Enhanced Transformer with Rotary Position Embedding. *Neurocomputing*, 2024. RoPE.
+67. S. Chen, S. Wong, L. Chen, Y. Tian. Extending Context Window of Large Language Models via Positional Interpolation. arXiv:2306.15595, 2023.
+68. B. Peng, J. Quesnelle, H. Fan, E. Shippole. YaRN: Efficient Context Window Extension of Large Language Models. *ICLR*, 2024.
+69. N. Shazeer. Fast Transformer Decoding: One Write-Head is All You Need. arXiv:1911.02150, 2019. MQA.
+70. J. Ainslie và cộng sự. GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints. *EMNLP*, 2023.
+71. N. Shazeer. GLU Variants Improve Transformer. arXiv:2002.05202, 2020. SwiGLU và việc giảm $d_{\text{ff}}$ còn hai phần ba.
+72. N. Shazeer và cộng sự. Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer. *ICLR*, 2017.
+73. W. Fedus, B. Zoph, N. Shazeer. Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity. *JMLR*, 2022.
+74. A. Q. Jiang và cộng sự. Mixtral of Experts. arXiv:2401.04088, 2024.
+75. H. Touvron và cộng sự. Llama 2: Open Foundation and Fine-Tuned Chat Models. arXiv:2307.09288, 2023. Cấu hình mô hình và con số 184 320 giờ-GPU.
+76. T. Dao, D. Y. Fu, S. Ermon, A. Rudra, C. Ré. FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. *NeurIPS*, 2022.
+77. T. Dao. FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning. *ICLR*, 2024.
+78. M. Milakov, N. Gimelshein. Online Normalizer Calculation for Softmax. arXiv:1805.02867, 2018.
 
 **Giải mã**
 
-32. A. Holtzman và cộng sự. *The Curious Case of Neural Text Degeneration.* ICLR 2020. — nguồn của top-$p$ và của lập luận vì sao beam search cho văn bản nhạt.
-33. Y. Leviathan, M. Kalman, Y. Matias. *Fast Inference from Transformers via Speculative Decoding.* ICML 2023.
+79. A. Fan, M. Lewis, Y. Dauphin. Hierarchical Neural Story Generation. *ACL*, 2018. Lấy mẫu top-$k$.
+80. A. Holtzman, J. Buys, L. Du, M. Forbes, Y. Choi. The Curious Case of Neural Text Degeneration. *ICLR*, 2020. Top-$p$ và nhận xét về beam search.
+81. M. Nguyen và cộng sự. Turning Up the Heat: Min-p Sampling for Creative and Coherent LLM Outputs. *ICLR*, 2025.
+82. N. S. Keskar và cộng sự. CTRL: A Conditional Transformer Language Model for Controllable Generation. arXiv:1909.05858, 2019. Phạt lặp.
+83. Y. Leviathan, M. Kalman, Y. Matias. Fast Inference from Transformers via Speculative Decoding. *ICML*, 2023.
+84. C. Chen và cộng sự. Accelerating Large Language Model Decoding with Speculative Sampling. arXiv:2302.01318, 2023.
+85. H. He. *Defeating Nondeterminism in LLM Inference*. Thinking Machines Lab, 2025.
 
-**Chế độ quá tham số**
+**Tài nguyên tính toán**
 
-34. M. Belkin và cộng sự. *Reconciling modern machine-learning practice and the classical bias–variance trade-off.* PNAS, 2019. — double descent.
+86. J. Kaplan và cộng sự. Scaling Laws for Neural Language Models. arXiv:2001.08361, 2020. Công thức $12Ld^2$, $2N$ và $6ND$.
+87. J. Hoffmann và cộng sự. Training Compute-Optimal Large Language Models. *NeurIPS*, 2022. Chinchilla.
+88. S. Rajbhandari, J. Rasley, O. Ruwase, Y. He. ZeRO: Memory Optimizations Toward Training Trillion Parameter Models. *SC*, 2020. Con số 16 byte mỗi tham số.
+89. V. Korthikanti và cộng sự. Reducing Activation Recomputation in Large Transformer Models. arXiv:2205.05198, 2022. Công thức bộ nhớ kích hoạt ở Mục 12.5.
 
 ---
 
-## Phụ lục: chạy lại toàn bộ thí nghiệm
+## Phụ lục: chạy lại thí nghiệm
 
 ```text
 code/models/
 ├── experiments.py            # Hình 2, 4, 5, 7, 9, 10, 13, 14 và mọi số liệu đo được
 ├── experiments_output.txt    # kết quả in ra của script trên
-└── fig_diagrams.py           # Hình 1, 3, 6, 8, 11, 12 (các sơ đồ khái niệm)
+└── fig_diagrams.py           # Hình 1, 3, 6, 8, 11, 12 (sơ đồ khái niệm)
 ```
 
 ```bash
 pip install numpy scipy matplotlib scikit-learn
-python code/models/experiments.py     # vài phút
+python code/models/experiments.py     # khoảng một tới vài phút trên CPU
 python code/models/fig_diagrams.py
 ```
 
-Hai script đặt hạt giống cố định nên mọi con số trong tài liệu lặp lại được y hệt trên cùng phiên bản thư viện. Môi trường đã dùng: Python 3.13, NumPy 2.3, SciPy 1.16, scikit-learn 1.7, matplotlib 3.10.
+Hai script đặt hạt giống cố định nên mọi con số trong giáo trình lặp lại được trên cùng phiên bản thư viện. Môi trường đã dùng: Python 3.13, NumPy 2.3, SciPy 1.16, scikit-learn 1.7, matplotlib 3.10. Trên Windows, đặt `PYTHONIOENCODING=utf-8` khi ghi kết quả ra tệp.
 
-Bốn kết quả trong tài liệu là **đối chiếu với con số đã công bố**, không phải mô phỏng: số tham số của GPT-2 small/medium/large, số tham số của Llama-2 7B/13B, ngân sách giờ-GPU của Llama-2 7B, và phương sai của tích vô hướng trong chú thích 4 của bài báo Transformer. Bốn kết quả ấy là phép kiểm tra rằng các công thức trong Chương 12 đúng chứ không chỉ hợp lý.
+Một số kết quả là phép đối chiếu với con số đã công bố, không phải mô phỏng: số tham số của GPT-2 small, medium, large và của Llama 2 7B, 13B; ngân sách giờ-GPU của Llama 2 7B; và phương sai của tích vô hướng trong chú thích 4 của bài báo Transformer. Các phép đối chiếu này kiểm tra rằng công thức ở Chương 12 đúng, không chỉ hợp lý.
+
+Các thí nghiệm dùng dữ liệu mô phỏng nhỏ để quan sát cơ chế một cách rõ ràng. Hai điểm cần nhớ khi đọc kết quả: thí nghiệm ở Mục 4.4 so sánh khả năng biểu diễn chứ không phải khả năng học bằng gradient descent; và thí nghiệm về LSTM ở Mục 8.2 chỉ mô phỏng đường đi qua ô nhớ, không phải một mạng LSTM đầy đủ.

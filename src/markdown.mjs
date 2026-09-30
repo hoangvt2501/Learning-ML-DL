@@ -116,6 +116,16 @@ export function createMarkdownIt(registry) {
     strict: 'ignore',
     throwOnError: false,
   });
+  // Riêng cảnh báo "No character metrics" được KaTeX in thẳng bằng console.warn,
+  // không theo tuỳ chọn strict, nên phải lọc ở đây.
+  if (!console.warn.__locKatex) {
+    const warn = console.warn;
+    console.warn = (...a) => {
+      if (typeof a[0] === 'string' && a[0].startsWith('No character metrics')) return;
+      warn(...a);
+    };
+    console.warn.__locKatex = true;
+  }
 
   // ---------------------------------------------------------------- tiêu đề
   md.renderer.rules.heading_open = (tokens, idx, options, env, self) => {

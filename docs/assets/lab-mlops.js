@@ -151,18 +151,18 @@ window.QZ_INIT['labMlops'] = function () {
     setStat('abSaved', cuped > 0 ? fmtInt(n0 - n) + ' mẫu' : '—');
 
     var msgs = [];
-    msgs.push('Chênh lệch tuyệt đối cần bắt chỉ là <b>' + fmt(p1 * lift * 100, 4) +
-      ' điểm phần trăm</b> — đây mới là con số đi vào mẫu số, không phải con số ' +
-      fmt(lift * 100, 1) + '% nghe to.');
+    msgs.push('Chênh lệch tuyệt đối cần phát hiện chỉ là <b>' + fmt(p1 * lift * 100, 4) +
+      ' điểm phần trăm</b>. Đây là đại lượng đi vào mẫu số của công thức, không phải mức cải thiện tương đối ' +
+      fmt(lift * 100, 1) + '%.');
     if (days > 28) {
-      msgs.push('<b>Hơn bốn tuần cho một ý tưởng.</b> Cân nhắc: giảm phương sai bằng CUPED, ' +
-        'tăng tỉ lệ lưu lượng vào thí nghiệm, hoặc chấp nhận bắt hiệu ứng lớn hơn — ' +
-        'nhớ rằng $n \\propto 1/\\Delta^2$ nên bắt hiệu ứng lớn hơn 1,41 lần thì cỡ mẫu giảm một nửa.'
+      msgs.push('<b>Hơn bốn tuần cho một ý tưởng.</b> Các cách rút ngắn: giảm phương sai bằng CUPED, ' +
+        'tăng tỉ lệ lưu lượng dành cho thí nghiệm, hoặc chấp nhận chỉ phát hiện hiệu ứng lớn hơn; ' +
+        'vì $n \\propto 1/\\Delta^2$, hiệu ứng cần phát hiện lớn hơn khoảng 1,41 lần thì cỡ mẫu giảm một nửa.'
           .replace('$n \\propto 1/\\Delta^2$', '<i>n</i> tỉ lệ nghịch với bình phương Δ'));
     }
     if (cuped > 0) {
-      msgs.push('CUPED giảm phương sai ' + fmt(cuped * 100, 0) + '% nên cỡ mẫu giảm đúng ' +
-        fmt(cuped * 100, 0) + '% — từ ' + fmtInt(n0) + ' xuống ' + fmtInt(n) +
+      msgs.push('CUPED giảm phương sai ' + fmt(cuped * 100, 0) + '% nên cỡ mẫu giảm cùng tỉ lệ, ' +
+        'từ ' + fmtInt(n0) + ' xuống ' + fmtInt(n) +
         ', tức tiết kiệm ' + fmt((n0 - n) / traffic, 1) + ' ngày.');
     }
     $('abNote').innerHTML = msgs.join(' ');
@@ -191,7 +191,7 @@ window.QZ_INIT['labMlops'] = function () {
         sy(Math.log10(Math.max(days, 1e-3))).toFixed(2) + '" r="4.5"/>');
     }
     for (var p = 0.05; p <= 0.25; p += 0.05) parts.push(text(sx(p), H - B + 16, fmt(p * 100, 0) + '%'));
-    parts.push(text((L + W - R) / 2, H - 4, 'mức cải thiện tương đối cần bắt'));
+    parts.push(text((L + W - R) / 2, H - 4, 'mức cải thiện tương đối cần phát hiện'));
     $('abChart').innerHTML = svg(W, H, parts.join(''));
   }
 
@@ -223,17 +223,17 @@ window.QZ_INIT['labMlops'] = function () {
 
     var msgs = [];
     msgs.push('Với <b>n = ' + fmtInt(n) + '</b> và <b>k = ' + k + ' bin</b>, PSI trung bình khi ' +
-      '<b>không hề có dịch chuyển</b> đã là <b>' + fmt(mean, 4) + '</b>.');
+      '<b>không có dịch chuyển</b> đã là <b>' + fmt(mean, 4) + '</b>.');
     if (mean > 0.1) {
-      msgs.push('<b>Con số này đã vượt ngưỡng 0,10.</b> Ở cấu hình này quy tắc kinh nghiệm hoàn toàn vô dụng — ' +
-        'hoặc tăng n, hoặc giảm số bin.');
+      msgs.push('<b>Con số này đã vượt ngưỡng 0,10.</b> Ở cấu hình này, quy tắc kinh nghiệm báo động cả khi dữ liệu không đổi; ' +
+        'cần tăng n hoặc giảm số bin.');
     }
     if (fa25 > budget * 2) {
       msgs.push('Dùng ngưỡng 0,25 sẽ cho <b>' + fmt(fa25, 2) + ' báo động giả mỗi ngày</b> trên ' +
-        fmtInt(tests) + ' lượt đo — quá ngân sách ' + fmt(budget, 2) + ' bạn đặt.');
+        fmtInt(tests) + ' lượt đo, vượt mức ' + fmt(budget, 2) + ' đã chọn.');
     } else if (fa25 < budget / 50 && mean < 0.02) {
-      msgs.push('Ở cỡ mẫu này ngưỡng 0,25 gần như <b>không bao giờ chạm tới</b> (' + fmt(fa25, 4) +
-        ' báo động/ngày), tức nó mù với cả dịch chuyển thật. Ngưỡng nên dùng là <b>' +
+      msgs.push('Ở cỡ mẫu này, ngưỡng 0,25 gần như <b>không bao giờ bị vượt</b> khi không có dịch chuyển (' + fmt(fa25, 4) +
+        ' báo động/ngày), và cũng khó bị vượt khi có dịch chuyển nhỏ. Ngưỡng nên dùng là <b>' +
         fmt(thresh, 4) + '</b>.');
     }
     msgs.push('Ngưỡng <b>' + fmt(thresh, 4) + '</b> cho đúng ' + fmt(budget, 3) +
@@ -264,7 +264,7 @@ window.QZ_INIT['labMlops'] = function () {
       parts2.push(text(Math.min(sx2(0.25), W - R - 30), H - B + 22, 'quy tắc 0,25', 'end'));
     }
     for (var q = 0; q <= 4; q++) parts2.push(text(sx2(xMax * q / 4), H - B + 12, fmt(xMax * q / 4, 3)));
-    parts2.push(text((L + W - R) / 2, H - 2, 'giá trị PSI khi hai mẫu CÙNG phân phối'));
+    parts2.push(text((L + W - R) / 2, H - 2, 'giá trị PSI khi hai mẫu có cùng phân phối'));
     $('psiChart').innerHTML = svg(W, H, parts2.join(''));
   }
 
@@ -299,14 +299,14 @@ window.QZ_INIT['labMlops'] = function () {
     setStat('tlMedian', fmt(med, 1) + ' ms');
 
     var msgs = [];
-    msgs.push('Với <b>' + k + ' nhánh</b>, <b>' + fmt(slow * 100, 1) + '%</b> số yêu cầu chạm ít nhất ' +
-      'một nhánh vượt p99 — dù <i>mỗi</i> nhánh đều "nhanh ở mức p99".');
+    msgs.push('Với <b>' + k + ' nhánh</b>, <b>' + fmt(slow * 100, 1) + '%</b> số yêu cầu gặp ít nhất ' +
+      'một nhánh chậm hơn p99 của nhánh đó, dù mỗi nhánh chỉ chậm như vậy ở 1% số lần gọi.');
     msgs.push('Muốn p99 tổng thể bằng p99 của một nhánh thì mỗi nhánh phải đạt <b>p' +
       fmt(need * 100, 4) + '</b>, tức chỉ 1 trong ' + fmtInt(1 / (1 - need)) + ' yêu cầu được phép chậm.');
     if (res > budget) {
-      msgs.push('<b>Vượt ngân sách ' + fmt(budget, 0) + ' ms.</b> Trong ngân sách này bạn chỉ toả được ' +
+      msgs.push('<b>Vượt ngân sách ' + fmt(budget, 0) + ' ms.</b> Trong ngân sách này chỉ toả được tối đa ' +
         (kmax >= 1 ? '<b>' + kmax + ' nhánh</b>' : '<b>không nhánh nào</b>') +
-        '. Ba cách chữa: giảm số nhánh (gộp lô, lưu đệm), đặt thời hạn chờ và trả lời một phần, ' +
+        '. Ba cách xử lý: giảm số nhánh (gộp lô, lưu đệm), đặt thời hạn chờ và trả lời với kết quả một phần, ' +
         'hoặc gửi yêu cầu dự phòng.');
     }
     $('tlNote').innerHTML = msgs.join(' ');
@@ -343,11 +343,11 @@ window.QZ_INIT['labMlops'] = function () {
 
   function mtsBand(s) {
     if (s === 0) return 'Giống một dự án nghiên cứu hơn là một hệ thống sản xuất.';
-    if (s <= 1) return 'Không phải hoàn toàn chưa kiểm thử, nhưng đáng lo về những lỗ hổng nghiêm trọng.';
+    if (s <= 1) return 'Đã có kiểm thử, nhưng có thể còn những lỗ hổng nghiêm trọng về độ tin cậy.';
     if (s <= 2) return 'Đã có bước đầu đưa vào sản xuất, cần đầu tư thêm.';
-    if (s <= 3) return 'Kiểm thử tương đối đủ, nhưng nhiều mục còn có thể tự động hoá.';
-    if (s <= 5) return 'Mức kiểm thử và giám sát tự động mạnh, hợp cho hệ thống trọng yếu.';
-    return 'Mức tự động hoá xuất sắc.';
+    if (s <= 3) return 'Kiểm thử tương đối đủ, nhiều mục còn có thể tự động hoá.';
+    if (s <= 5) return 'Kiểm thử và giám sát tự động ở mức cao, phù hợp với hệ thống trọng yếu.';
+    return 'Kiểm thử và giám sát tự động ở mức rất cao.';
   }
 
   function updateMTS() {
@@ -368,12 +368,12 @@ window.QZ_INIT['labMlops'] = function () {
     var msg = '<b>' + mtsBand(score) + '</b> ';
     var zeros = sums.map(function (s, i) { return s === score ? MTS_NAMES[i] : null; }).filter(Boolean);
     if (score < total / 4) {
-      msg += 'Vì điểm là <b>giá trị nhỏ nhất</b> của bốn nhóm, đầu tư thêm vào nhóm mạnh sẽ ' +
-        '<b>không nâng được điểm một chút nào</b>. Phải nâng ' +
+      msg += 'Vì điểm là <b>giá trị nhỏ nhất</b> của bốn nhóm, đầu tư thêm vào nhóm mạnh ' +
+        '<b>không làm tăng điểm</b>. Cần nâng ' +
         (zeros.length > 1 ? 'cả ' + zeros.length + ' nhóm đang thấp nhất (' + zeros.join(', ') + ')'
                           : 'nhóm ' + zeros[0]) + ' trước.';
     } else {
-      msg += 'Bốn nhóm đang khá cân nhau — đây là dấu hiệu tốt, vì quy tắc lấy nhỏ nhất thưởng cho sự cân bằng.';
+      msg += 'Bốn nhóm có điểm tương đối cân bằng; quy tắc lấy giá trị nhỏ nhất ưu tiên sự cân bằng này.';
     }
     $('mtsVerdict').innerHTML = msg;
   }

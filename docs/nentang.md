@@ -446,7 +446,7 @@ Học một mô hình từ dữ liệu là ước lượng tham số của nó. 
 
 Định lý 3.2 cho thấy một ước lượng không chệch chưa chắc là ước lượng tốt: nếu phương sai lớn, sai số tổng vẫn lớn. Ngược lại, chấp nhận một chút độ chệch để đổi lấy phương sai nhỏ hơn nhiều có thể làm sai số tổng giảm. Hồi quy ridge ở Chương 9 là ví dụ điển hình: nó là ước lượng có chệch, trong khi bình phương tối thiểu thông thường là ước lượng không chệch, vậy mà ridge thường có sai số nhỏ hơn. Mục 9.3 chỉ ra phần phương sai mà ridge cắt đi nằm ở những hướng nào.
 
-Cùng ý tưởng này áp dụng cho dự đoán của cả mô hình, dưới tên gọi **đánh đổi độ chệch – phương sai** (bias–variance tradeoff). [Chương 2 của *Học sâu*](models-ch02.html) trình bày đầy đủ phân tích đó và đo nó trên 400 tập huấn luyện.
+Cùng ý tưởng này áp dụng cho dự đoán của cả mô hình, dưới tên gọi **đánh đổi độ chệch – phương sai** (bias–variance tradeoff). [Chương 2 của *Học sâu*](models-ch02.html) trình bày đầy đủ phân tích đó và đo từng thành phần trên 250 tập huấn luyện mô phỏng.
 
 ---
 

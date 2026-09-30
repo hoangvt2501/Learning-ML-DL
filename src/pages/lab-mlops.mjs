@@ -1,4 +1,4 @@
-// Phòng thí nghiệm của giáo trình MLOps: bốn công cụ tính toán dùng được trong việc thật.
+// Trang thực hành của giáo trình MLOps: bốn công cụ tính toán theo đúng công thức trong bài.
 
 const num = (id, label, value, attrs = '') =>
   '<label class="ctl"><span class="ctl-label">' + label + '</span>' +
@@ -16,40 +16,40 @@ const stat = (id, label, hint = '') =>
 
 const TESTS = {
   'Dữ liệu': [
-    'Kỳ vọng về đặc trưng được ghi thành schema',
+    'Kỳ vọng về đặc trưng được ghi thành lược đồ',
     'Mọi đặc trưng đều có ích',
     'Không đặc trưng nào quá đắt so với lợi ích',
     'Đặc trưng tuân thủ yêu cầu chính sách',
-    'Pipeline có kiểm soát quyền riêng tư',
-    'Thêm đặc trưng mới được nhanh',
+    'Pipeline dữ liệu có kiểm soát quyền riêng tư',
+    'Có thể thêm đặc trưng mới nhanh chóng',
     'Toàn bộ mã tính đặc trưng được kiểm thử',
   ],
   'Mô hình': [
-    'Đặc tả mô hình qua rà soát mã và quản phiên bản',
-    'Chỉ số đại diện tương quan với tác động thật',
+    'Đặc tả mô hình được rà soát và đưa vào kho mã',
+    'Chỉ số ngoại tuyến tương quan với chỉ số trực tuyến',
     'Mọi siêu tham số đã được tinh chỉnh',
-    'Đã biết ảnh hưởng của độ cũ của mô hình',
+    'Đã biết ảnh hưởng của việc mô hình cũ đi',
     'Một mô hình đơn giản hơn không tốt hơn',
     'Chất lượng đủ tốt trên mọi lát cắt quan trọng',
-    'Đã kiểm tra tính bao hàm / công bằng',
+    'Đã kiểm tra tính bao hàm giữa các nhóm người dùng',
   ],
   'Hạ tầng': [
-    'Huấn luyện lặp lại được',
+    'Huấn luyện tái lập được',
     'Mã đặc tả mô hình có kiểm thử đơn vị',
     'Toàn bộ pipeline có kiểm thử tích hợp',
     'Chất lượng được kiểm định trước khi phục vụ',
-    'Gỡ lỗi được bằng cách quan sát từng bước',
-    'Có quy trình canary trước khi ra toàn bộ',
-    'Quay lui được nhanh và an toàn',
+    'Gỡ lỗi được bằng cách quan sát từng bước tính',
+    'Có canary trước khi phục vụ toàn bộ',
+    'Quay lui mô hình đang phục vụ nhanh và an toàn',
   ],
   'Giám sát': [
-    'Thay đổi ở phụ thuộc thượng nguồn sinh thông báo',
-    'Bất biến dữ liệu giữ đúng ở cả hai phía',
+    'Thay đổi ở hệ thống phía trước sinh ra thông báo',
+    'Bất biến của dữ liệu đúng ở cả huấn luyện lẫn phục vụ',
     'Đặc trưng lúc huấn luyện và phục vụ tính ra cùng giá trị',
     'Mô hình không quá cũ',
     'Mô hình ổn định về mặt số học',
-    'Không bị tụt chất lượng đột ngột',
-    'Không bị tụt chất lượng do hồi quy',
+    'Không suy giảm về tốc độ, độ trễ, thông lượng, bộ nhớ',
+    'Chất lượng dự đoán trên dữ liệu thật không suy giảm',
   ],
 };
 
@@ -61,14 +61,14 @@ export function buildMlopsLabPage(ctx) {
   // ------------------------------------------------------ 1. cỡ mẫu A/B
   const lab1 =
     '<section class="lab" id="co-mau" data-lab="ab">' +
-    '<header class="lab-head"><h3>1 · Máy tính cỡ mẫu A/B</h3><p>' +
-    t('Trả lời câu "thí nghiệm này phải chạy bao lâu". Cỡ mẫu tỉ lệ nghịch với **bình phương** ' +
-      'mức cải thiện, nên đây thường là ràng buộc quyết định cả quy trình ra mắt ' +
+    '<header class="lab-head"><h3>1 · Cỡ mẫu cho A/B test</h3><p>' +
+    t('Tính số mẫu và số ngày một A/B test cần chạy. Cỡ mẫu tỉ lệ nghịch với bình phương ' +
+      'mức cải thiện cần phát hiện, nên đây thường là ràng buộc quyết định quy trình ra mắt ' +
       '([Mục 8.4](mlops-ch08.html#sec-8-4)).') +
     '</p></header>' +
     '<div class="lab-grid"><div class="lab-controls">' +
     num('abBase', 'Tỉ lệ nền (%)', '5', 'step="0.1" min="0.01" max="99"') +
-    num('abLift', 'Cải thiện tương đối cần bắt (%)', '2', 'step="0.1" min="0.05"') +
+    num('abLift', 'Cải thiện tương đối cần phát hiện (%)', '2', 'step="0.1" min="0.05"') +
     select('abPower', 'Lực kiểm định', [['0.8', '80%', true], ['0.9', '90%'], ['0.95', '95%']]) +
     select('abAlpha', 'Mức ý nghĩa α (hai phía)', [['0.05', '0,05', true], ['0.01', '0,01']]) +
     num('abTraffic', 'Lưu lượng mỗi nhánh mỗi ngày', '100000', 'step="1000" min="1"') +
@@ -79,20 +79,20 @@ export function buildMlopsLabPage(ctx) {
     stat('abAbs', 'Chênh lệch tuyệt đối') +
     '</div><div class="stat-row">' +
     stat('abTotal', 'Tổng mẫu cả thí nghiệm') + stat('abWeeks', 'Làm tròn lên tuần trọn') +
-    stat('abSaved', 'CUPED tiết kiệm được') +
+    stat('abSaved', 'Số mẫu CUPED giảm được') +
     '</div>' +
     '<p class="lab-note" id="abNote"></p>' +
     '<div class="chart" id="abChart"></div>' +
     '<p class="chart-cap">' +
-    t('Số ngày cần chạy theo mức cải thiện cần bắt. Chấm là cấu hình đang chọn.') +
+    t('Số ngày cần chạy theo mức cải thiện cần phát hiện. Chấm tròn là cấu hình đang chọn.') +
     '</p></div></div></section>';
 
   // -------------------------------------------------- 2. ngưỡng PSI
   const lab2 =
     '<section class="lab" id="nguong-psi" data-lab="psi">' +
-    '<header class="lab-head"><h3>2 · Hiệu chuẩn ngưỡng PSI</h3><p>' +
+    '<header class="lab-head"><h3>2 · Ngưỡng PSI theo cỡ mẫu và số bin</h3><p>' +
     t('Ngưỡng 0,25 là quy tắc kinh nghiệm không tính tới cỡ mẫu và số bin. Công cụ này tính ' +
-      'ngưỡng **đúng** cho cấu hình của bạn, dựa trên kết quả $\\tfrac{n}{2}\\mathrm{PSI} \\sim \\chi^2_{k-1}$ ' +
+      'ngưỡng cho cấu hình đang xét, dựa trên kết quả $\\tfrac{n}{2}\\mathrm{PSI} \\approx \\chi^2_{k-1}$ ' +
       'ở [Mục 9.5](mlops-ch09.html#sec-9-5).') +
     '</p></header>' +
     '<div class="lab-grid"><div class="lab-controls">' +
@@ -103,7 +103,7 @@ export function buildMlopsLabPage(ctx) {
     num('psiAlarm', 'Báo động giả chấp nhận được mỗi ngày', '0.1', 'step="0.05" min="0.001"') +
     '</div><div class="lab-output">' +
     '<div class="stat-row">' +
-    stat('psiMean', 'PSI kỳ vọng khi KHÔNG dịch chuyển') +
+    stat('psiMean', 'PSI kỳ vọng khi không có dịch chuyển') +
     stat('psiP99', 'Phân vị 99% của PSI') +
     stat('psiThresh', 'Ngưỡng nên dùng', 'cho mức báo động giả đã chọn') +
     '</div><div class="stat-row">' +
@@ -114,16 +114,16 @@ export function buildMlopsLabPage(ctx) {
     '<p class="lab-note" id="psiNote"></p>' +
     '<div class="chart" id="psiChart"></div>' +
     '<p class="chart-cap">' +
-    t('Phân bố của PSI khi hai mẫu **cùng** một phân phối. Vạch đứt là ngưỡng đề nghị, ' +
+    t('Phân phối của PSI khi hai mẫu có cùng phân phối. Vạch đứt là ngưỡng đề nghị, ' +
       'vạch chấm là quy tắc 0,25.') +
     '</p></div></div></section>';
 
   // ------------------------------------------------ 3. đuôi độ trễ
   const lab3 =
     '<section class="lab" id="duoi-do-tre" data-lab="tail">' +
-    '<header class="lab-head"><h3>3 · Đuôi độ trễ khi toả nhánh</h3><p>' +
-    t('Một yêu cầu gọi $k$ nhánh song song và đợi đủ cả $k$. Công cụ tính p99 của tổng thể và ' +
-      'phân vị mà **mỗi** nhánh phải đạt ([Mục 7.3](mlops-ch07.html#sec-7-3)).') +
+    '<header class="lab-head"><h3>3 · Phần đuôi độ trễ khi toả nhánh</h3><p>' +
+    t('Một yêu cầu gọi $k$ nhánh song song và đợi đủ cả $k$ kết quả. Công cụ tính p99 của thời gian trả lời và ' +
+      'phân vị mà mỗi nhánh phải đạt ([Mục 7.3](mlops-ch07.html#sec-7-3)), giả định độ trễ mỗi nhánh có phân phối log-chuẩn.') +
     '</p></header>' +
     '<div class="lab-grid"><div class="lab-controls">' +
     num('tlP50', 'Trung vị một nhánh (ms)', '20', 'step="1" min="0.1"') +
@@ -133,10 +133,10 @@ export function buildMlopsLabPage(ctx) {
     '</div><div class="lab-output">' +
     '<div class="stat-row">' +
     stat('tlP99max', 'p99 của thời gian trả lời') +
-    stat('tlSlow', '% yêu cầu chạm nhánh chậm') +
+    stat('tlSlow', '% yêu cầu gặp nhánh chậm') +
     stat('tlNeed', 'Phân vị mỗi nhánh phải đạt') +
     '</div><div class="stat-row">' +
-    stat('tlOne', 'Chỉ 1 trong bao nhiêu được chậm') +
+    stat('tlOne', 'Mỗi nhánh chỉ được chậm 1 lần trong') +
     stat('tlKmax', 'Số nhánh tối đa trong ngân sách') +
     stat('tlMedian', 'Trung vị của thời gian trả lời') +
     '</div>' +
@@ -166,9 +166,9 @@ export function buildMlopsLabPage(ctx) {
 
   const lab4 =
     '<section class="lab" id="ml-test-score" data-lab="mts">' +
-    '<header class="lab-head"><h3>4 · Tự chấm ML Test Score</h3><p>' +
-    t('Chấm 28 mục của [Mục 6.5](mlops-ch06.html#sec-6-5): 0,5 điểm nếu làm thủ công có ghi chép, ' +
-      '1 điểm nếu có hệ thống chạy tự động định kỳ. Điểm cuối là **giá trị nhỏ nhất** trong bốn nhóm.') +
+    '<header class="lab-head"><h3>4 · Chấm điểm ML Test Score</h3><p>' +
+    t('Chấm 28 mục của [Mục 6.5](mlops-ch06.html#sec-6-5): 0,5 điểm nếu làm thủ công và có ghi lại kết quả, ' +
+      '1 điểm nếu có hệ thống chạy tự động và định kỳ. Điểm cuối cùng là giá trị nhỏ nhất trong bốn nhóm.') +
     '</p></header>' +
     '<div class="mts-wrap">' +
     '<div class="stat-row mts-total">' +
@@ -185,8 +185,8 @@ export function buildMlopsLabPage(ctx) {
     '<article class="prose">' +
     '<div class="chapter-kicker"><span class="kicker-badge">Phòng thí nghiệm</span>' +
     '<span class="kicker-time">4 công cụ</span></div>' +
-    '<h1>Phòng thí nghiệm MLOps</h1>' +
-    '<p class="chapter-lede">Bốn công cụ trả lời bốn câu hỏi hay phải trả lời trong việc thật, và cũng hay bị hỏi trong phỏng vấn. Mọi công thức đều là công thức đã dùng trong giáo trình, không có hằng số bịa.</p>' +
+    '<h1>Phòng thí nghiệm</h1>' +
+    '<p class="chapter-lede">Bốn công cụ tính toán cho bốn câu hỏi thường gặp khi vận hành hệ thống học máy: A/B test cần bao nhiêu mẫu, ngưỡng PSI nên đặt ở đâu, phần đuôi độ trễ tăng thế nào khi toả nhánh, và hệ thống đạt bao nhiêu điểm ML Test Score. Mọi công thức đều lấy từ các chương của giáo trình.</p>' +
     '<nav class="ex-jump">' +
     '<a href="#co-mau">1 · Cỡ mẫu A/B</a>' +
     '<a href="#nguong-psi">2 · Ngưỡng PSI</a>' +
@@ -199,9 +199,9 @@ export function buildMlopsLabPage(ctx) {
   write(
     f('thuc-hanh.html'),
     page({
-      title: 'Phòng thí nghiệm MLOps — ' + ctx.docTitle,
+      title: 'Phòng thí nghiệm — ' + ctx.docTitle,
       description:
-        'Bốn công cụ tương tác: tính cỡ mẫu A/B có CUPED, hiệu chuẩn ngưỡng PSI theo cỡ mẫu và số bin, phân tích đuôi độ trễ khi toả nhánh, và tự chấm ML Test Score.',
+        'Bốn công cụ tương tác: cỡ mẫu A/B test có giảm phương sai bằng CUPED, ngưỡng PSI theo cỡ mẫu và số bin, phần đuôi độ trễ khi toả nhánh, và chấm điểm ML Test Score.',
       body,
       nav,
       file: f('thuc-hanh.html'),

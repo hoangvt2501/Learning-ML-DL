@@ -1,0 +1,76 @@
+
+========================================================================
+Bai 1. PSI khi khong co dich chuyen, n = 500, k = 10
+========================================================================
+Ky vong theo cong thuc 2(k-1)/n     : 0.0360
+Trung binh mo phong (20 000 lan)    : 0.0364
+   phan vi    cong thuc chi2    mo phong
+     0.950            0.0677      0.0684
+     0.990            0.0867      0.0874
+     0.999            0.1115      0.1131
+P(PSI > 0,10) theo cong thuc        : 0.00297
+P(PSI > 0,10) theo mo phong         : 0.00360
+So bao dong gia moi ngay, 200 dac trung: 0.59
+n nho nhat de E[PSI] < 0,01         : n > 1800
+
+========================================================================
+Bai 2. Co mau A/B test: nen 2%, cai thien tuong doi 5%
+========================================================================
+z_(0,975) = 1.95996, z_(0,80) = 0.84162
+Co mau moi nhanh                    : 315,203
+So ngay voi 40 000 luot/nhanh/ngay  : 7.88
+Giam phuong sai 40% (CUPED)         : 189,122 mau, 4.73 ngay
+Muc cai thien de co mau giam mot nua: 7.11% (157,602 mau)
+Luc kiem dinh neu giu 5% va chi chay 3.94 ngay: 0.508
+
+========================================================================
+Bai 3. Toa nhanh 25 dich vu, moi dich vu p99 = 80 ms
+========================================================================
+Ti le yeu cau gap it nhat mot nhanh cham: 0.2222
+Phan vi moi nhanh can dat               : 0.999598 (1 trong 2,488 loi goi duoc phep cham)
+  k =  25: 1 - 0,99^k = 0.2222
+  k =  10: 1 - 0,99^k = 0.0956
+  k =   5: 1 - 0,99^k = 0.0490
+  k =   1: 1 - 0,99^k = 0.0100
+
+========================================================================
+Bai 4. Ghep theo thoi diem tren bang cua de bai
+========================================================================
+Dung (as-of join):
+  user 7  2026-02-10  nhan=0  tong_don_hang=3  (tu ban ghi 2026-01-01)
+  user 7  2026-04-15  nhan=1  tong_don_hang=19  (tu ban ghi 2026-03-01)
+Sai (ghep vao gia tri hien tai):
+  user 7  2026-02-10  nhan=0  tong_don_hang=52
+  user 7  2026-04-15  nhan=1  tong_don_hang=52
+Sai (JOIN vao bang lich su, quen dieu kien thoi gian): 6 dong thay vi 2
+
+========================================================================
+Bai 7. Nhip huan luyen lai theo toc do dich chuyen
+========================================================================
+ drift (rad/tuan)  khong bao gio        moi quy      moi thang     moi 2 tuan       moi tuan   nhip thua nhat trong 1 diem
+            0.010         76.15%         77.67%         77.74%         77.76%         77.76%   moi quy
+            0.035         64.61%         76.89%         77.68%         77.78%         77.80%   moi quy
+            0.080         45.08%         73.04%         76.96%         77.50%         77.66%   moi thang
+
+========================================================================
+Bai 8. Quet epsilon: chat luong he thong biet va chat luong giao toi nguoi dung
+========================================================================
+Danh muc cua bai tap: tran top-10 = 0.610, trung binh = 0.154
+
+30 vong, trung binh 20 lan chay
+ epsilon  top-10 vong cuoi  % tran  giao, ca ky  giao, 5 vong cuoi
+    0.00             0.360     59%       0.3480             0.3604
+    0.10             0.390     64%       0.3495             0.3744
+    0.20             0.404     66%       0.3389             0.3686
+    0.30             0.425     70%       0.3302             0.3626
+    0.40             0.431     71%       0.3108             0.3428
+    0.50             0.453     74%       0.2932             0.3246
+
+300 vong, trung binh 20 lan chay
+ epsilon  top-10 vong cuoi  % tran  giao, ca ky  giao, 5 vong cuoi
+    0.00             0.360     59%       0.3590             0.3601
+    0.10             0.488     80%       0.4237             0.4615
+    0.20             0.518     85%       0.4187             0.4588
+    0.30             0.541     89%       0.4034             0.4424
+    0.40             0.559     92%       0.3864             0.4153
+    0.50             0.570     93%       0.3602             0.3817

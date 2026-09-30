@@ -1,47 +1,139 @@
 [
-  { "num": "0", "file": "bieudien-ch00.html", "label": "Kiến thức nền và quy ước", "part": "Nhập môn",
-    "summary": "Bảng ký hiệu, và một lưu ý về chữ β — nó xuất hiện ở hai chương với hai nghĩa hoàn toàn khác nhau." },
-  { "num": "1", "file": "bieudien-ch01.html", "label": "Bản đồ: bốn câu hỏi", "part": "Nhập môn",
-    "summary": "Bốn nhóm kỹ thuật tưởng rời rạc, xếp thành một hàng khi nhìn theo đường đi của một trợ lý ngôn ngữ từ lúc chưa có gì tới lúc biết nghe lời." },
-
-  { "num": "2", "file": "bieudien-ch02.html", "label": "Word2Vec và thứ nó thực sự phân rã", "part": "Biểu diễn và embedding",
-    "summary": "Từ đếm đồng hiện sang PMI sang embedding. Và kết quả của Levy–Goldberg: skip-gram ngầm phân rã ma trận PMI, kiểm chứng được với tương quan 0,9995." },
-  { "num": "3", "file": "bieudien-ch03.html", "label": "Hình học của không gian embedding", "part": "Biểu diễn và embedding",
-    "summary": "Vì sao cosine hay đánh lừa: 900 vector ngẫu nhiên độc lập vẫn cho cosine trung bình 0,87. Và vì sao chiều thứ 37 thường không mang nghĩa gì." },
-  { "num": "4", "file": "bieudien-ch04.html", "label": "Embedding hiện đại và tìm kiếm vector", "part": "Biểu diễn và embedding",
-    "summary": "Embedding theo ngữ cảnh, mục tiêu tương phản, và ba họ chỉ mục xấp xỉ — kèm con số dung lượng quyết định phần lớn kiến trúc hệ thống." },
-
-  { "num": "5", "file": "bieudien-ch05.html", "label": "Vì sao tiền huấn luyện lại hiệu quả", "part": "Học chuyển giao",
-    "summary": "Đoán từ tiếp theo là một nhiệm vụ đại diện cực rộng: để làm đúng nó, mô hình buộc phải học sự thật về thế giới, ngữ pháp, số học và cấu trúc mã." },
-  { "num": "6", "file": "bieudien-ch06.html", "label": "Tinh chỉnh: đóng băng tới đâu", "part": "Học chuyển giao",
-    "summary": "Ngưỡng đo được giữa đóng băng và tinh chỉnh, và hiện tượng trần chặn — cột đóng băng phẳng ra từ 500 mẫu dù thêm bao nhiêu dữ liệu nữa." },
-  { "num": "7", "file": "bieudien-ch07.html", "label": "LoRA và tinh chỉnh tiết kiệm tham số", "part": "Học chuyển giao",
-    "summary": "Trạng thái Adam 32 MiB so với 48,2 GiB — chênh 1 540 lần. Và món lợi vận hành hay bị quên: 50 khách hàng cần 13,8 GB thay vì 650 GB." },
-
-  { "num": "8", "file": "bieudien-ch08.html", "label": "Bài toán sinh, và ba cách trả lời", "part": "Mô hình sinh",
-    "summary": "Hằng số chuẩn hoá là thứ chặn đường dùng thẳng hợp lý cực đại, và ba họ mô hình sinh là ba cách né nó." },
-  { "num": "9", "file": "bieudien-ch09.html", "label": "Tự mã hoá biến phân", "part": "Mô hình sinh",
-    "summary": "β không chỉ cân hai số hạng — nó quyết định bao nhiêu chiều ẩn còn mang thông tin. Ở β = 1, mô hình tự tìm ra đúng số yếu tố thật." },
-  { "num": "10", "file": "bieudien-ch10.html", "label": "Mạng đối sinh", "part": "Mô hình sinh",
-    "summary": "Bài toán minimax gốc phủ 0/8 chế độ, bản không bão hoà phủ 8/8 — hai hàm cùng điểm tối ưu nhưng gradient khác hẳn. Và một chỗ số liệu bác bỏ điều tôi định viết." },
-  { "num": "11", "file": "bieudien-ch11.html", "label": "Mô hình khuếch tán", "part": "Mô hình sinh",
-    "summary": "Dạng đóng của quá trình thuận cho phép nhảy thẳng tới bước bất kỳ; huấn luyện chỉ là bình phương sai lệch, và đó mới là lý do nó thắng GAN." },
-
-  { "num": "12", "file": "bieudien-ch12.html", "label": "Nhập môn học tăng cường", "part": "Học tăng cường và căn chỉnh",
-    "summary": "Ba cấu hình lưới cho thấy khám phá không chỉ đến từ ε: cách khởi tạo hàm giá trị cũng là một cơ chế khám phá, đôi khi mạnh hơn." },
-  { "num": "13", "file": "bieudien-ch13.html", "label": "Gradient chính sách", "part": "Học tăng cường và căn chỉnh",
-    "summary": "Thủ thuật log, và vì sao trừ một đường nền cắt độ lệch chuẩn 2,3 lần mà không làm lệch ước lượng chút nào." },
-  { "num": "14", "file": "bieudien-ch14.html", "label": "RLHF: học từ so sánh của con người", "part": "Học tăng cường và căn chỉnh",
-    "summary": "Vì sao học từ so sánh phá được trần của học bắt chước, và dạng đóng của bài toán có ràng buộc KL — kiểm chứng tới 10⁻⁹." },
-  { "num": "15", "file": "bieudien-ch15.html", "label": "DPO: bỏ hẳn mô hình thưởng", "part": "Học tăng cường và căn chỉnh",
-    "summary": "Mọi chính sách đều ngầm định nghĩa một hàm thưởng. Chính sách DPO trùng chính sách RLHF hai bước tới 4,2×10⁻⁸ — không phải xấp xỉ." },
-
-  { "num": "16", "file": "bieudien-bai-tap.html", "label": "Bài tập", "kind": "exercises",
-    "summary": "Mười bài tập kèm lời giải chi tiết, và ngân hàng trắc nghiệm theo từng chương." },
-  { "num": "17", "file": "bieudien-ch17.html", "label": "Ôn phỏng vấn",
-    "summary": "Câu hỏi theo bốn nhóm kèm con số để dẫn ra, và mười hai câu trả lời tự tố cáo người nói chỉ học thuộc." },
-  { "num": "18", "file": "bieudien-ch18.html", "label": "Tài liệu tham khảo",
-    "summary": "Ba mươi sáu nguồn, mỗi nguồn ghi rõ nó là nguồn của kết quả nào được dùng trong tài liệu." },
-  { "num": "PL", "file": "bieudien-phu-luc.html", "label": "Phụ lục: chạy lại thí nghiệm",
-    "summary": "Lệnh tái lập, bảng các đẳng thức được kiểm chứng, và ba chỗ số liệu nói ngược lại điều tôi định viết." }
+  {
+    "num": "0",
+    "file": "bieudien-ch00.html",
+    "label": "Ký hiệu và quy ước",
+    "summary": "Bảng ký hiệu, quy ước thuật ngữ, và hai nghĩa khác nhau của hệ số β trong VAE và trong RLHF.",
+    "part": "Mở đầu"
+  },
+  {
+    "num": "1",
+    "file": "bieudien-ch01.html",
+    "label": "Tổng quan",
+    "summary": "Bốn nhóm kỹ thuật của giáo trình, embedding, học chuyển giao, mô hình sinh và căn chỉnh, đặt theo thứ tự một mô hình ngôn ngữ được xây dựng.",
+    "part": "Mở đầu"
+  },
+  {
+    "num": "2",
+    "file": "bieudien-ch02.html",
+    "label": "Word2Vec",
+    "summary": "Từ số lần đồng hiện tới PMI, nén bằng SVD, skip-gram và lấy mẫu âm, chứng minh skip-gram phân rã ma trận PMI, kèm số đo trên một kho ngữ liệu nhân tạo có cấu trúc hai trục.",
+    "part": "Biểu diễn và embedding"
+  },
+  {
+    "num": "3",
+    "file": "bieudien-ch03.html",
+    "label": "Hình học của không gian embedding",
+    "summary": "Tính bất đẳng hướng làm cosine giữa hai vector ngẫu nhiên lên tới 0,87, cách khắc phục bằng trừ trung bình, làm trắng và học tương phản, và vì sao từng chiều của embedding không có nghĩa riêng.",
+    "part": "Biểu diễn và embedding"
+  },
+  {
+    "num": "4",
+    "file": "bieudien-ch04.html",
+    "label": "Embedding theo ngữ cảnh và tìm kiếm vector",
+    "summary": "Giới hạn của embedding tĩnh, embedding theo ngữ cảnh và học tương phản với mẫu âm trong lô, tìm kiếm láng giềng gần đúng, và cách đánh giá hệ thống tìm kiếm vector.",
+    "part": "Biểu diễn và embedding"
+  },
+  {
+    "num": "5",
+    "file": "bieudien-ch05.html",
+    "label": "Tiền huấn luyện",
+    "summary": "Vì sao học tự giám sát trên dữ liệu không nhãn hiệu quả, vì sao dự đoán token tiếp theo dạy được nhiều kỹ năng, bốn cách tái sử dụng mô hình, và giới hạn của tiền huấn luyện.",
+    "part": "Học chuyển giao"
+  },
+  {
+    "num": "6",
+    "file": "bieudien-ch06.html",
+    "label": "Đóng băng và tinh chỉnh",
+    "summary": "Thí nghiệm có kiểm soát so sánh đóng băng, tinh chỉnh toàn phần và huấn luyện từ đầu theo số mẫu có nhãn, giới hạn trên khi đặc trưng bị cố định, và các quy tắc thực hành khi tinh chỉnh.",
+    "part": "Học chuyển giao"
+  },
+  {
+    "num": "7",
+    "file": "bieudien-ch07.html",
+    "label": "LoRA và tinh chỉnh tiết kiệm tham số",
+    "summary": "Chi phí bộ nhớ của tinh chỉnh toàn phần, LoRA và giả định hạng thấp, phép đếm tham số và bộ nhớ cho Llama 2, lợi ích khi phục vụ nhiều adapter, và các phương pháp cùng họ như QLoRA.",
+    "part": "Học chuyển giao"
+  },
+  {
+    "num": "8",
+    "file": "bieudien-ch08.html",
+    "label": "Mô hình sinh",
+    "summary": "Bài toán sinh, vì sao hằng số chuẩn hoá ngăn áp dụng trực tiếp hợp lý cực đại, và so sánh mô hình tự hồi quy, VAE, GAN và mô hình khuếch tán.",
+    "part": "Mô hình sinh"
+  },
+  {
+    "num": "9",
+    "file": "bieudien-ch09.html",
+    "label": "Bộ tự mã hoá biến phân",
+    "summary": "Suy ra chặn dưới ELBO, mẹo tái tham số hoá, thí nghiệm cho thấy β quyết định số chiều ẩn còn mang thông tin và hiện tượng sụp hậu nghiệm, và vì sao mẫu của VAE thường mờ.",
+    "part": "Mô hình sinh"
+  },
+  {
+    "num": "10",
+    "file": "bieudien-ch10.html",
+    "label": "Mạng đối sinh",
+    "summary": "Bài toán minimax và bộ phân biệt tối ưu, vì sao dạng gốc của hàm mất mát cho bộ sinh không học được, kết quả đo về độ phủ các chế độ, và các khó khăn khi huấn luyện GAN.",
+    "part": "Mô hình sinh"
+  },
+  {
+    "num": "11",
+    "file": "bieudien-ch11.html",
+    "label": "Mô hình khuếch tán",
+    "summary": "Quá trình thuận và dạng đóng của nó kiểm chứng bằng mô phỏng, lịch nhiễu và tỉ số tín hiệu trên nhiễu, huấn luyện bằng hồi quy dự đoán nhiễu, tăng tốc lấy mẫu và sinh có điều kiện.",
+    "part": "Mô hình sinh"
+  },
+  {
+    "num": "12",
+    "file": "bieudien-ch12.html",
+    "label": "Nhập môn học tăng cường",
+    "summary": "Trạng thái, hành động, phần thưởng, phương trình Bellman và Q-learning, cùng thí nghiệm cho thấy cách khởi tạo hàm giá trị cũng là một cơ chế khám phá.",
+    "part": "Học tăng cường và căn chỉnh"
+  },
+  {
+    "num": "13",
+    "file": "bieudien-ch13.html",
+    "label": "Gradient chính sách",
+    "summary": "Định lý gradient chính sách và REINFORCE, vì sao đường nền giảm phương sai mà không đổi kỳ vọng, số đo cho thấy độ lệch chuẩn giảm khoảng 2,3 lần, hàm lợi thế và PPO.",
+    "part": "Học tăng cường và căn chỉnh"
+  },
+  {
+    "num": "14",
+    "file": "bieudien-ch14.html",
+    "label": "Học tăng cường từ phản hồi của con người",
+    "summary": "Ba giai đoạn huấn luyện một trợ lý, vì sao học từ so sánh vượt được học bắt chước, mô hình thưởng Bradley–Terry, và nghiệm dạng đóng của bài toán có ràng buộc KL kiểm chứng bằng số.",
+    "part": "Học tăng cường và căn chỉnh"
+  },
+  {
+    "num": "15",
+    "file": "bieudien-ch15.html",
+    "label": "Tối ưu trực tiếp theo sở thích (DPO)",
+    "summary": "Suy ra hàm mất mát DPO từ nghiệm của RLHF, kiểm chứng DPO cho cùng chính sách với RLHF hai bước tới 4,2 × 10⁻⁸, so sánh hai cách và các phương pháp ra đời sau.",
+    "part": "Học tăng cường và căn chỉnh"
+  },
+  {
+    "num": "16",
+    "file": "bieudien-bai-tap.html",
+    "label": "Bài tập",
+    "summary": "Mười bài tập có lời giải chi tiết và ngân hàng câu hỏi trắc nghiệm theo từng chương.",
+    "kind": "exercises"
+  },
+  {
+    "num": "17",
+    "file": "bieudien-ch17.html",
+    "label": "Câu hỏi phỏng vấn",
+    "summary": "Cách trình bày câu trả lời, các câu hỏi thường gặp về biểu diễn, học chuyển giao, mô hình sinh và căn chỉnh kèm câu trả lời mẫu dẫn số liệu, và bảng các câu trả lời chưa đạt."
+  },
+  {
+    "num": "18",
+    "file": "bieudien-ch18.html",
+    "label": "Tài liệu tham khảo",
+    "summary": "Sách và bài báo gốc theo nhóm chủ đề, mỗi nguồn ghi rõ được dùng cho nội dung nào của giáo trình."
+  },
+  {
+    "num": "PL",
+    "file": "bieudien-phu-luc.html",
+    "label": "Phụ lục: chạy lại thí nghiệm",
+    "summary": "Cấu trúc mã nguồn, lệnh chạy lại, các kết quả kiểm chứng đẳng thức, và ba kết quả khác với cách phát biểu thường gặp."
+  }
 ]

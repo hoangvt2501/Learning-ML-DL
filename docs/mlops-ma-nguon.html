@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mã nguồn thí nghiệm — MLOps: đưa mô hình ra sản xuất và giữ cho nó sống</title>
-<meta name="description" content="2 script Python sinh ra toàn bộ hình vẽ và số liệu của giáo trình, kèm kết quả in ra.">
+<title>Mã nguồn thí nghiệm — MLOps: vận hành hệ thống học máy</title>
+<meta name="description" content="3 script Python sinh ra toàn bộ hình vẽ và số liệu của giáo trình, kèm kết quả in ra.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,23 +47,22 @@
 </header>
 
 <div class="shell">
-<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><a class="book-tab" href="models-ch01.html">Học sâu</a><a class="book-tab" href="bieudien-ch01.html">Biểu diễn &amp; Căn chỉnh</a><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Vì sao hệ ML khó</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Kiến thức nền và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Vì sao mô hình tốt vẫn chết</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và ba chữ V</span></a></li><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng và phổ lỗi</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Dữ liệu và kiểm thử</p><ul class="nav-list"><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá cho sản xuất</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Phục vụ và ra mắt</p><ul class="nav-list"><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Giám sát và huấn luyện lại</p><ul class="nav-list"><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>LLMOps</p><ul class="nav-list"><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Ôn phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thi-nghiem"></use></svg></span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-hinh"></use></svg></span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thuat-ngu"></use></svg></span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html" class="is-active" aria-current="page"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-ma-nguon"></use></svg></span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-toan-van"></use></svg></span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-nha"></use></svg></span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lo-trinh"></use></svg></span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><a class="book-tab" href="models-ch01.html">Học sâu</a><a class="book-tab" href="bieudien-ch01.html">Biểu diễn &amp; Căn chỉnh</a><a class="book-tab" href="ungdung-ch01.html">Ứng dụng LLM</a><a class="book-tab" href="ch01.html">Quantization</a><span class="book-tab is-active" aria-current="true">MLOps</span></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Mở đầu</p><ul class="nav-list"><li><a href="mlops-ch00.html"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li><li><a href="mlops-ch01.html"><span class="nav-num">1</span><span class="nav-label">Nợ kỹ thuật của hệ thống học máy</span></a></li><li><a href="mlops-ch02.html"><span class="nav-num">2</span><span class="nav-label">Vòng đời và mức độ tự động hoá</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Dữ liệu và thí nghiệm</p><ul class="nav-list"><li><a href="mlops-ch03.html"><span class="nav-num">3</span><span class="nav-label">Dữ liệu: hợp đồng, kiểm định và các loại lỗi</span></a></li><li><a href="mlops-ch04.html"><span class="nav-num">4</span><span class="nav-label">Đặc trưng và tính đúng theo thời điểm</span></a></li><li><a href="mlops-ch05.html"><span class="nav-num">5</span><span class="nav-label">Thí nghiệm lặp lại được</span></a></li><li><a href="mlops-ch06.html"><span class="nav-num">6</span><span class="nav-label">Đánh giá mô hình cho sản xuất</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Phục vụ và ra mắt</p><ul class="nav-list"><li><a href="mlops-ch07.html"><span class="nav-num">7</span><span class="nav-label">Đóng gói và phục vụ mô hình</span></a></li><li><a href="mlops-ch08.html"><span class="nav-num">8</span><span class="nav-label">Chiến lược ra mắt</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Giám sát và huấn luyện lại</p><ul class="nav-list"><li><a href="mlops-ch09.html"><span class="nav-num">9</span><span class="nav-label">Dịch chuyển phân phối</span></a></li><li><a href="mlops-ch10.html"><span class="nav-num">10</span><span class="nav-label">Giám sát và cảnh báo</span></a></li><li><a href="mlops-ch11.html"><span class="nav-num">11</span><span class="nav-label">Huấn luyện lại</span></a></li><li><a href="mlops-ch12.html"><span class="nav-num">12</span><span class="nav-label">Vòng phản hồi</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>LLMOps</p><ul class="nav-list"><li><a href="mlops-ch13.html"><span class="nav-num">13</span><span class="nav-label">LLMOps</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="mlops-bai-tap.html"><span class="nav-num">14</span><span class="nav-label">Bài tập</span></a></li><li><a href="mlops-ch15.html"><span class="nav-num">15</span><span class="nav-label">Câu hỏi phỏng vấn</span></a></li><li><a href="mlops-ch16.html"><span class="nav-num">16</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="mlops-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="mlops-thuc-hanh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thi-nghiem"></use></svg></span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="mlops-hinh-anh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-hinh"></use></svg></span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="mlops-thuat-ngu.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thuat-ngu"></use></svg></span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="mlops-ma-nguon.html" class="is-active" aria-current="page"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-ma-nguon"></use></svg></span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="mlops-toan-van.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-toan-van"></use></svg></span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-nha"></use></svg></span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lo-trinh"></use></svg></span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
 <div class="scrim" id="scrim" hidden></div>
 <main class="content" id="main">
-<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Tra cứu</span><span class="kicker-time">2 script</span></div><h1>Mã nguồn thí nghiệm</h1><p class="chapter-lede">Mọi hình và mọi con số thực nghiệm trong giáo trình đều do các script dưới đây sinh ra. Chúng được chép nguyên vẹn vào site nên tải về là chạy được ngay.</p><h3 class="heading" id="cach-chay">Cách chạy lại toàn bộ<a class="anchor" href="#cach-chay">#</a></h3><p>Hai script dưới đây sinh ra toàn bộ 14 hình và mọi con số thực nghiệm của giáo trình.
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Tra cứu</span><span class="kicker-time">3 script</span></div><h1>Mã nguồn thí nghiệm</h1><p class="chapter-lede">Mọi hình và mọi con số thực nghiệm trong giáo trình đều do các script dưới đây sinh ra. Chúng được chép nguyên vẹn vào site nên tải về là chạy được ngay.</p><h3 class="heading" id="cach-chay">Cách chạy lại toàn bộ<a class="anchor" href="#cach-chay">#</a></h3><p>Ba script dưới đây sinh ra toàn bộ 14 hình, mọi con số thực nghiệm trong bài và số liệu dùng trong lời giải bài tập.
 Chúng đặt hạt giống cố định nên chạy lại cho kết quả y hệt.</p>
 <div class="code-block" data-lang="bash"><div class="code-head"><span class="code-lang">Bash</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-bash">pip install numpy scipy matplotlib scikit-learn
-python code/mlops/experiments.py     <span class="hljs-comment"># Hình 6, 7, 9–14 — khoảng một phút</span>
+python code/mlops/experiments.py     <span class="hljs-comment"># Hình 6, 7, 9–14 và số liệu trong bài, khoảng một phút</span>
+python code/mlops/bai_tap.py         <span class="hljs-comment"># số liệu cho lời giải bài tập, khoảng một phút rưỡi</span>
 python code/mlops/fig_diagrams.py    <span class="hljs-comment"># Hình 1–5 và Hình 8</span>
 </code></pre></div>
-<p>Môi trường đã dùng để sinh số liệu trong tài liệu: Python 3.13, NumPy 2.3, SciPy 1.16,
-scikit-learn 1.7, matplotlib 3.10.</p>
-<p>Lưu ý về phạm vi: những con số đo được ở đây đến từ <strong>dữ liệu mô phỏng</strong>, được thiết kế để
-cô lập đúng một cơ chế mỗi lần. Chúng dùng để chứng minh <em>cơ chế</em> tồn tại và có độ lớn đáng
-kể, không dùng để suy ra con số cho một hệ thống cụ thể nào. Muốn có con số cho hệ thống của
-mình thì chạy lại đúng thí nghiệm ấy trên dữ liệu của mình — cách làm được nêu trong từng bài
-tập ở <a href="mlops-bai-tap.html#sec-14" class="xref">Chương 14</a>.</p>
-<h3 class="heading" id="danh-sach">Từng script<a class="anchor" href="#danh-sach">#</a></h3><div class="src-list"><section class="src-card" id="experiments-py"><header class="src-head"><h3 class="src-title"><code>code/mlops/experiments.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">385 dòng</span><a class="src-dl" href="code/mlops/experiments.py" download>Tải về</a></header><p class="src-note">Sinh Hình 6, 7 và 9–14 cùng mọi số liệu thực nghiệm của giáo trình: đánh giá theo lát cắt, đuôi độ trễ khi toả nhánh, cỡ mẫu A/B, ba loại dịch chuyển phân phối, PSI dưới giả thuyết không, so sánh phép dò dịch chuyển, độ cũ của mô hình, và vòng phản hồi thoái hoá.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Thí nghiệm sinh số liệu và Hình 6, 7, 9–14 của giáo trình MLOps.
+<p>Môi trường đã dùng để sinh số liệu: Python 3.13, NumPy 2.3, SciPy 1.16, scikit-learn 1.7, matplotlib 3.10.</p>
+<p>Về phạm vi: số liệu thực nghiệm đến từ dữ liệu mô phỏng, mỗi thí nghiệm được thiết kế để cô lập một cơ chế.
+Chúng cho thấy cơ chế đó tồn tại và có độ lớn đáng kể, không dùng để suy ra con số cho một hệ thống cụ thể.
+Muốn có con số cho một hệ thống thật, cần chạy cùng thí nghiệm trên dữ liệu của hệ thống đó; các bài tập ở <a href="mlops-bai-tap.html#sec-14" class="xref">Chương 14</a>
+hướng dẫn cách làm.</p>
+<h3 class="heading" id="danh-sach">Từng script<a class="anchor" href="#danh-sach">#</a></h3><div class="src-list"><section class="src-card" id="experiments-py"><header class="src-head"><h3 class="src-title"><code>code/mlops/experiments.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">385 dòng</span><a class="src-dl" href="code/mlops/experiments.py" download>Tải về</a></header><p class="src-note">Sinh Hình 6, 7 và 9–14 cùng mọi số liệu thực nghiệm trong bài: đánh giá theo lát cắt, phần đuôi độ trễ khi toả nhánh, cỡ mẫu A/B test, ba loại dịch chuyển phân phối, PSI khi không có dịch chuyển, so sánh quy tắc PSI với kiểm định KS, mức suy giảm của mô hình theo nhịp huấn luyện lại, và vòng phản hồi thoái hoá.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Thí nghiệm sinh số liệu và Hình 6, 7, 9–14 của giáo trình MLOps.
 
 Mọi con số thực nghiệm trong tài liệu đều in ra từ script này. Hạt giống cố định
 nên chạy lại cho kết quả y hệt.
@@ -124,7 +123,7 @@ ax[<span class="hljs-number">0</span>].annotate(<span class="hljs-string">f&quot
                textcoords=<span class="hljs-string">&quot;offset points&quot;</span>, fontsize=<span class="hljs-number">8</span>, color=C_DIM)
 ax[<span class="hljs-number">0</span>].set_xscale(<span class="hljs-string">&quot;log&quot;</span>); ax[<span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&quot;số nhánh k gọi song song&quot;</span>)
 ax[<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&quot;p99 của thời gian trả lời (ms)&quot;</span>)
-ax[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Đuôi dài lên rất nhanh theo số nhánh&quot;</span>)
+ax[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;p99 của thời gian trả lời theo số nhánh&quot;</span>)
 ax[<span class="hljs-number">1</span>].plot(ks, slow_frac * <span class="hljs-number">100</span>, <span class="hljs-string">&quot;-o&quot;</span>, ms=<span class="hljs-number">4</span>, color=C_BAD)
 ax[<span class="hljs-number">1</span>].set_xscale(<span class="hljs-string">&quot;log&quot;</span>); ax[<span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&quot;số nhánh k gọi song song&quot;</span>)
 ax[<span class="hljs-number">1</span>].set_ylabel(<span class="hljs-string">&quot;% yêu cầu chạm ít nhất một nhánh chậm&quot;</span>)
@@ -176,7 +175,7 @@ ax.bar(xs + w/<span class="hljs-number">2</span>, [r[<span class="hljs-number">2
                 color=C_BAD <span class="hljs-keyword">if</span> d &lt; <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> C_MAIN)
 ax.set_xticks(xs); ax.set_xticklabels(names); ax.set_ylabel(<span class="hljs-string">&quot;Độ chính xác (%)&quot;</span>)
 ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
-ax.set_title(<span class="hljs-string">&quot;Gộp lại thì v2 tốt hơn — nhóm B thì không&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Độ chính xác của v1 và v2 theo lát cắt&quot;</span>)
 fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops06_slice.png&quot;</span>); plt.close(fig)
 
 
@@ -208,7 +207,7 @@ fig, ax = plt.subplots(figsize=(<span class="hljs-number">5.4</span>, <span clas
     ax.plot(fine * <span class="hljs-number">100</span>, [n_per_arm(p0, l) <span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> fine], color=c, label=<span class="hljs-string">f&quot;CTR nền <span class="hljs-subst">{p0:<span class="hljs-number">.0</span>%}</span>&quot;</span>)
 ax.set_yscale(<span class="hljs-string">&quot;log&quot;</span>); ax.set_xlabel(<span class="hljs-string">&quot;Mức cải thiện tương đối cần phát hiện (%)&quot;</span>)
 ax.set_ylabel(<span class="hljs-string">&quot;Cỡ mẫu mỗi nhánh (log)&quot;</span>)
-ax.set_title(<span class="hljs-string">&quot;Muốn bắt cải thiện nhỏ thì cỡ mẫu tăng theo $1/\\Delta^2$&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Cỡ mẫu mỗi nhánh theo mức cải thiện tương đối cần phát hiện&quot;</span>)
 ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
 fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops09_abtest.png&quot;</span>); plt.close(fig)
 
@@ -378,7 +377,7 @@ fig, ax = plt.subplots(figsize=(<span class="hljs-number">6.0</span>, <span clas
 <span class="hljs-keyword">for</span> lab, a <span class="hljs-keyword">in</span> G.items():
     ax.plot(np.arange(WEEKS), a * <span class="hljs-number">100</span>, lw=<span class="hljs-number">1.6</span>, label=lab)
 ax.set_xlabel(<span class="hljs-string">&quot;tuần kể từ lần huấn luyện đầu&quot;</span>); ax.set_ylabel(<span class="hljs-string">&quot;độ chính xác (%)&quot;</span>)
-ax.set_title(<span class="hljs-string">&quot;Cùng một mô hình, chỉ khác nhịp huấn luyện lại&quot;</span>)
+ax.set_title(<span class="hljs-string">&quot;Độ chính xác theo tuần với bốn nhịp huấn luyện lại&quot;</span>)
 ax.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">8</span>)
 fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;mlops13_staleness.png&quot;</span>); plt.close(fig)
 
@@ -541,7 +540,288 @@ không ngẫu nhiên hoá              9.5%               0.351                 
 Tran co the dat (top-10 that): 0.555 | trung binh danh muc: 0.153
 
 Da luu 8 hinh vao figs/
-</code></pre></div></details></section><section class="src-card" id="fig_diagrams-py"><header class="src-head"><h3 class="src-title"><code>code/mlops/fig_diagrams.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">205 dòng</span><a class="src-dl" href="code/mlops/fig_diagrams.py" download>Tải về</a></header><p class="src-note">Sinh Hình 1–5 và Hình 8: hộp mã ML giữa hạ tầng bao quanh, vòng đời ML là vòng lặp, ba mức tự động hoá, phổ lỗi dữ liệu, tính đúng theo thời điểm, và bốn chiến lược ra mắt. Đây là hình vẽ tay bằng matplotlib, để trong mã nguồn cho sửa được và cho khớp với chữ trong bài.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Sinh Hình 1–5 và Hình 8 của giáo trình MLOps: các sơ đồ khái niệm.
+</code></pre></div></details></section><section class="src-card" id="bai_tap-py"><header class="src-head"><h3 class="src-title"><code>code/mlops/bai_tap.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">206 dòng</span><a class="src-dl" href="code/mlops/bai_tap.py" download>Tải về</a></header><p class="src-note">Sinh số liệu cho lời giải bài tập Chương 14: phân phối của PSI khi không có dịch chuyển (công thức và mô phỏng), cỡ mẫu A/B test, phần đuôi khi toả nhánh 25 dịch vụ, ghép theo thời điểm, nhịp huấn luyện lại theo ba tốc độ dịch chuyển, và quét ε trong mô phỏng vòng phản hồi với 30 và 300 vòng.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;
+Số liệu cho lời giải các bài tập Chương 14 của giáo trình MLOps.
+
+Chạy:  python code/mlops/bai_tap.py
+Mọi nguồn ngẫu nhiên đều có hạt giống cố định, nên chạy lại cho kết quả y hệt.
+
+  Bài 1  PSI khi không có dịch chuyển: công thức tiệm cận và mô phỏng
+  Bài 2  Cỡ mẫu A/B test và các cách rút ngắn thời gian
+  Bài 3  Đuôi độ trễ khi toả nhánh 25 dịch vụ
+  Bài 4  Ghép theo thời điểm (as-of join) trên bảng nhỏ của đề bài
+  Bài 7  Nhịp huấn luyện lại theo tốc độ dịch chuyển
+  Bài 8  Quét epsilon trong mô phỏng vòng phản hồi, 30 và 300 vòng
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> scipy <span class="hljs-keyword">import</span> stats
+<span class="hljs-keyword">from</span> scipy.optimize <span class="hljs-keyword">import</span> brentq
+<span class="hljs-keyword">from</span> sklearn.linear_model <span class="hljs-keyword">import</span> LogisticRegression
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">head</span>(<span class="hljs-params">t</span>):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">72</span> + <span class="hljs-string">&quot;\n&quot;</span> + t + <span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">72</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># Bài 1 — PSI khi không có dịch chuyển, n = 500, k = 10</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;Bai 1. PSI khi khong co dich chuyen, n = 500, k = 10&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">psi</span>(<span class="hljs-params">a, b, bins</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Giống hệt hàm psi trong experiments.py: bin theo phân vị của mẫu tham chiếu.&quot;&quot;&quot;</span>
+    edges = np.quantile(a, np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, bins + <span class="hljs-number">1</span>)); edges[<span class="hljs-number">0</span>], edges[-<span class="hljs-number">1</span>] = -np.inf, np.inf
+    pa = np.histogram(a, edges)[<span class="hljs-number">0</span>] / <span class="hljs-built_in">len</span>(a)
+    pb = np.histogram(b, edges)[<span class="hljs-number">0</span>] / <span class="hljs-built_in">len</span>(b)
+    eps = <span class="hljs-number">1e-6</span>
+    pa, pb = np.clip(pa, eps, <span class="hljs-literal">None</span>), np.clip(pb, eps, <span class="hljs-literal">None</span>)
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">float</span>(np.<span class="hljs-built_in">sum</span>((pb - pa) * np.log(pb / pa)))
+
+n1, k1 = <span class="hljs-number">500</span>, <span class="hljs-number">10</span>
+rng = np.random.default_rng(<span class="hljs-number">2026</span>)
+sim = np.array([psi(rng.normal(size=n1), rng.normal(size=n1), k1) <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">20000</span>)])
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Ky vong theo cong thuc 2(k-1)/n     : <span class="hljs-subst">{<span class="hljs-number">2</span> * (k1 - <span class="hljs-number">1</span>) / n1:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Trung binh mo phong (20 000 lan)    : <span class="hljs-subst">{sim.mean():<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;phan vi&#x27;</span>:&gt;<span class="hljs-number">10</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;cong thuc chi2&#x27;</span>:&gt;<span class="hljs-number">18</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;mo phong&#x27;</span>:&gt;<span class="hljs-number">12</span>}</span>&quot;</span>)
+<span class="hljs-keyword">for</span> q <span class="hljs-keyword">in</span> [<span class="hljs-number">0.95</span>, <span class="hljs-number">0.99</span>, <span class="hljs-number">0.999</span>]:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{q:<span class="hljs-number">10.3</span>f}</span><span class="hljs-subst">{<span class="hljs-number">2</span> / n1 * stats.chi2.ppf(q, k1 - <span class="hljs-number">1</span>):<span class="hljs-number">18.4</span>f}</span><span class="hljs-subst">{np.quantile(sim, q):<span class="hljs-number">12.4</span>f}</span>&quot;</span>)
+p_formula = stats.chi2.sf(<span class="hljs-number">0.10</span> * n1 / <span class="hljs-number">2</span>, k1 - <span class="hljs-number">1</span>)
+p_sim = (sim &gt; <span class="hljs-number">0.10</span>).mean()
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;P(PSI &gt; 0,10) theo cong thuc        : <span class="hljs-subst">{p_formula:<span class="hljs-number">.5</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;P(PSI &gt; 0,10) theo mo phong         : <span class="hljs-subst">{p_sim:<span class="hljs-number">.5</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;So bao dong gia moi ngay, 200 dac trung: <span class="hljs-subst">{<span class="hljs-number">200</span> * p_formula:<span class="hljs-number">.2</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;n nho nhat de E[PSI] &lt; 0,01         : n &gt; <span class="hljs-subst">{<span class="hljs-number">2</span> * (k1 - <span class="hljs-number">1</span>) / <span class="hljs-number">0.01</span>:<span class="hljs-number">.0</span>f}</span>&quot;</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># Bài 2 — Cỡ mẫu A/B test</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;Bai 2. Co mau A/B test: nen 2%, cai thien tuong doi 5%&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">n_per_arm</span>(<span class="hljs-params">p, rel_lift, alpha=<span class="hljs-number">0.05</span>, power=<span class="hljs-number">0.80</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;Giống hàm n_per_arm trong experiments.py: hai phía, hai nhánh bằng nhau.&quot;&quot;&quot;</span>
+    p2 = p * (<span class="hljs-number">1</span> + rel_lift)
+    z_a = stats.norm.ppf(<span class="hljs-number">1</span> - alpha / <span class="hljs-number">2</span>)
+    z_b = stats.norm.ppf(power)
+    <span class="hljs-keyword">return</span> (z_a + z_b) ** <span class="hljs-number">2</span> * (p * (<span class="hljs-number">1</span> - p) + p2 * (<span class="hljs-number">1</span> - p2)) / (p2 - p) ** <span class="hljs-number">2</span>
+
+n2 = n_per_arm(<span class="hljs-number">0.02</span>, <span class="hljs-number">0.05</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;z_(0,975) = <span class="hljs-subst">{stats.norm.ppf(<span class="hljs-number">0.975</span>):<span class="hljs-number">.5</span>f}</span>, z_(0,80) = <span class="hljs-subst">{stats.norm.ppf(<span class="hljs-number">0.80</span>):<span class="hljs-number">.5</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Co mau moi nhanh                    : <span class="hljs-subst">{n2:,<span class="hljs-number">.0</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;So ngay voi 40 000 luot/nhanh/ngay  : <span class="hljs-subst">{n2 / <span class="hljs-number">40000</span>:<span class="hljs-number">.2</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Giam phuong sai 40% (CUPED)         : <span class="hljs-subst">{<span class="hljs-number">0.6</span> * n2:,<span class="hljs-number">.0</span>f}</span> mau, <span class="hljs-subst">{<span class="hljs-number">0.6</span> * n2 / <span class="hljs-number">40000</span>:<span class="hljs-number">.2</span>f}</span> ngay&quot;</span>)
+lift_half = brentq(<span class="hljs-keyword">lambda</span> l: n_per_arm(<span class="hljs-number">0.02</span>, l) - n2 / <span class="hljs-number">2</span>, <span class="hljs-number">0.05</span>, <span class="hljs-number">0.2</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Muc cai thien de co mau giam mot nua: <span class="hljs-subst">{lift_half * <span class="hljs-number">100</span>:<span class="hljs-number">.2</span>f}</span>% &quot;</span>
+      <span class="hljs-string">f&quot;(<span class="hljs-subst">{n_per_arm(<span class="hljs-number">0.02</span>, lift_half):,<span class="hljs-number">.0</span>f}</span> mau)&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Luc kiem dinh neu giu 5% va chi chay <span class="hljs-subst">{n2 / <span class="hljs-number">2</span> / <span class="hljs-number">40000</span>:<span class="hljs-number">.2</span>f}</span> ngay: &quot;</span>
+      <span class="hljs-string">f&quot;<span class="hljs-subst">{stats.norm.cdf(np.sqrt(n2 / <span class="hljs-number">2</span> * (<span class="hljs-number">0.02</span> * <span class="hljs-number">0.05</span>) ** <span class="hljs-number">2</span> / (<span class="hljs-number">0.02</span> * <span class="hljs-number">0.98</span> + <span class="hljs-number">0.021</span> * <span class="hljs-number">0.979</span>)) - stats.norm.ppf(<span class="hljs-number">0.975</span>)):<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># Bài 3 — Toả nhánh 25 dịch vụ</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;Bai 3. Toa nhanh 25 dich vu, moi dich vu p99 = 80 ms&quot;</span>)
+
+k3 = <span class="hljs-number">25</span>
+q_each = <span class="hljs-number">0.99</span> ** (<span class="hljs-number">1</span> / k3)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Ti le yeu cau gap it nhat mot nhanh cham: <span class="hljs-subst">{<span class="hljs-number">1</span> - <span class="hljs-number">0.99</span> ** k3:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Phan vi moi nhanh can dat               : <span class="hljs-subst">{q_each:<span class="hljs-number">.6</span>f}</span> &quot;</span>
+      <span class="hljs-string">f&quot;(1 trong <span class="hljs-subst">{<span class="hljs-number">1</span> / (<span class="hljs-number">1</span> - q_each):,<span class="hljs-number">.0</span>f}</span> loi goi duoc phep cham)&quot;</span>)
+<span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> [<span class="hljs-number">25</span>, <span class="hljs-number">10</span>, <span class="hljs-number">5</span>, <span class="hljs-number">1</span>]:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  k = <span class="hljs-subst">{k:3d}</span>: 1 - 0,99^k = <span class="hljs-subst">{<span class="hljs-number">1</span> - <span class="hljs-number">0.99</span> ** k:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># Bài 4 — Ghép theo thời điểm</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;Bai 4. Ghep theo thoi diem tren bang cua de bai&quot;</span>)
+
+features = [  <span class="hljs-comment"># (user_id, valid_from, tong_don_hang)</span>
+    (<span class="hljs-number">7</span>, <span class="hljs-string">&quot;2026-01-01&quot;</span>, <span class="hljs-number">3</span>),
+    (<span class="hljs-number">7</span>, <span class="hljs-string">&quot;2026-03-01&quot;</span>, <span class="hljs-number">19</span>),
+    (<span class="hljs-number">7</span>, <span class="hljs-string">&quot;2026-06-01&quot;</span>, <span class="hljs-number">52</span>),
+]
+labels = [  <span class="hljs-comment"># (user_id, event_time, nhan)</span>
+    (<span class="hljs-number">7</span>, <span class="hljs-string">&quot;2026-02-10&quot;</span>, <span class="hljs-number">0</span>),
+    (<span class="hljs-number">7</span>, <span class="hljs-string">&quot;2026-04-15&quot;</span>, <span class="hljs-number">1</span>),
+]
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">as_of</span>(<span class="hljs-params">user, t</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Bản ghi mới nhất có valid_from &lt;= t (ngày dạng ISO so sánh được như chuỗi).&quot;&quot;&quot;</span>
+    rows = [f <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> features <span class="hljs-keyword">if</span> f[<span class="hljs-number">0</span>] == user <span class="hljs-keyword">and</span> f[<span class="hljs-number">1</span>] &lt;= t]
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">max</span>(rows, key=<span class="hljs-keyword">lambda</span> f: f[<span class="hljs-number">1</span>]) <span class="hljs-keyword">if</span> rows <span class="hljs-keyword">else</span> <span class="hljs-literal">None</span>
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Dung (as-of join):&quot;</span>)
+<span class="hljs-keyword">for</span> u, t, y <span class="hljs-keyword">in</span> labels:
+    f = as_of(u, t)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  user <span class="hljs-subst">{u}</span>  <span class="hljs-subst">{t}</span>  nhan=<span class="hljs-subst">{y}</span>  tong_don_hang=<span class="hljs-subst">{f[<span class="hljs-number">2</span>]}</span>  (tu ban ghi <span class="hljs-subst">{f[<span class="hljs-number">1</span>]}</span>)&quot;</span>)
+latest = <span class="hljs-built_in">max</span>(features, key=<span class="hljs-keyword">lambda</span> f: f[<span class="hljs-number">1</span>])
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Sai (ghep vao gia tri hien tai):&quot;</span>)
+<span class="hljs-keyword">for</span> u, t, y <span class="hljs-keyword">in</span> labels:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  user <span class="hljs-subst">{u}</span>  <span class="hljs-subst">{t}</span>  nhan=<span class="hljs-subst">{y}</span>  tong_don_hang=<span class="hljs-subst">{latest[<span class="hljs-number">2</span>]}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Sai (JOIN vao bang lich su, quen dieu kien thoi gian): &quot;</span>
+      <span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-built_in">len</span>(labels) * <span class="hljs-built_in">len</span>(features)}</span> dong thay vi <span class="hljs-subst">{<span class="hljs-built_in">len</span>(labels)}</span>&quot;</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># Bài 7 — Nhịp huấn luyện lại theo tốc độ dịch chuyển</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;Bai 7. Nhip huan luyen lai theo toc do dich chuyen&quot;</span>)
+
+WEEKS = <span class="hljs-number">52</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">label</span>(<span class="hljs-params">X, w, r</span>):
+    p = <span class="hljs-number">1</span> / (<span class="hljs-number">1</span> + np.exp(-(X @ w)))
+    <span class="hljs-keyword">return</span> (r.random(<span class="hljs-built_in">len</span>(X)) &lt; p).astype(<span class="hljs-built_in">int</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">world</span>(<span class="hljs-params">week, drift, m=<span class="hljs-number">4000</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;Giống world() trong experiments.py, thêm tham số drift.&quot;&quot;&quot;</span>
+    r = np.random.default_rng(<span class="hljs-number">1000</span> + week)
+    X = r.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, (m, <span class="hljs-number">2</span>))
+    th = drift * week
+    w = np.array([np.cos(th), np.sin(th)]) * <span class="hljs-number">2.0</span>
+    <span class="hljs-keyword">return</span> X, label(X, w, r)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">run</span>(<span class="hljs-params">cadence, drift</span>):
+    X0, y0 = world(<span class="hljs-number">0</span>, drift); model = LogisticRegression().fit(X0, y0)
+    acc = []
+    <span class="hljs-keyword">for</span> wk <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(WEEKS):
+        Xw, yw = world(wk, drift)
+        acc.append(model.score(Xw, yw))
+        <span class="hljs-keyword">if</span> cadence <span class="hljs-keyword">and</span> (wk + <span class="hljs-number">1</span>) % cadence == <span class="hljs-number">0</span>:
+            model = LogisticRegression().fit(Xw, yw)
+    <span class="hljs-keyword">return</span> np.mean(acc)
+
+CADENCES = [(<span class="hljs-literal">None</span>, <span class="hljs-string">&quot;khong bao gio&quot;</span>), (<span class="hljs-number">12</span>, <span class="hljs-string">&quot;moi quy&quot;</span>), (<span class="hljs-number">4</span>, <span class="hljs-string">&quot;moi thang&quot;</span>), (<span class="hljs-number">2</span>, <span class="hljs-string">&quot;moi 2 tuan&quot;</span>), (<span class="hljs-number">1</span>, <span class="hljs-string">&quot;moi tuan&quot;</span>)]
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;drift (rad/tuan)&#x27;</span>:&gt;<span class="hljs-number">17</span>}</span>&quot;</span> + <span class="hljs-string">&quot;&quot;</span>.join(<span class="hljs-string">f&quot;<span class="hljs-subst">{lab:&gt;<span class="hljs-number">15</span>}</span>&quot;</span> <span class="hljs-keyword">for</span> _, lab <span class="hljs-keyword">in</span> CADENCES) + <span class="hljs-string">&quot;   nhip thua nhat trong 1 diem&quot;</span>)
+<span class="hljs-keyword">for</span> drift <span class="hljs-keyword">in</span> [<span class="hljs-number">0.010</span>, <span class="hljs-number">0.035</span>, <span class="hljs-number">0.080</span>]:
+    accs = [run(c, drift) * <span class="hljs-number">100</span> <span class="hljs-keyword">for</span> c, _ <span class="hljs-keyword">in</span> CADENCES]
+    best = accs[-<span class="hljs-number">1</span>]
+    ok = [lab <span class="hljs-keyword">for</span> (c, lab), a <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(CADENCES, accs) <span class="hljs-keyword">if</span> c <span class="hljs-keyword">and</span> best - a &lt;= <span class="hljs-number">1.0</span>]
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{drift:<span class="hljs-number">17.3</span>f}</span>&quot;</span> + <span class="hljs-string">&quot;&quot;</span>.join(<span class="hljs-string">f&quot;<span class="hljs-subst">{a:<span class="hljs-number">14.2</span>f}</span>%&quot;</span> <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> accs) + <span class="hljs-string">f&quot;   <span class="hljs-subst">{ok[<span class="hljs-number">0</span>]}</span>&quot;</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># Bài 8 — Quét epsilon trong mô phỏng vòng phản hồi</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;Bai 8. Quet epsilon: chat luong he thong biet va chat luong giao toi nguoi dung&quot;</span>)
+
+N_ITEM, USERS, TOPK, WARMUP = <span class="hljs-number">2000</span>, <span class="hljs-number">3000</span>, <span class="hljs-number">10</span>, <span class="hljs-number">200</span>
+true_q = np.random.default_rng(<span class="hljs-number">88</span>).beta(<span class="hljs-number">1.6</span>, <span class="hljs-number">9.0</span>, N_ITEM)   <span class="hljs-comment"># danh muc rieng cua bai tap</span>
+ceil10 = np.sort(true_q)[-<span class="hljs-number">10</span>:].mean()
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Danh muc cua bai tap: tran top-10 = <span class="hljs-subst">{ceil10:<span class="hljs-number">.3</span>f}</span>, trung binh = <span class="hljs-subst">{true_q.mean():<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">simulate</span>(<span class="hljs-params">eps, rounds, seed</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Như simulate() trong experiments.py, thêm chất lượng thật của các món đã hiển thị.&quot;&quot;&quot;</span>
+    r = np.random.default_rng(seed)
+    shown = np.zeros(N_ITEM); clicks = np.zeros(N_ITEM)
+    imp = r.choice(N_ITEM, WARMUP)
+    np.add.at(shown, imp, <span class="hljs-number">1</span>)
+    np.add.at(clicks, imp, r.random(WARMUP) &lt; true_q[imp])
+    believed, served = [], []
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(rounds):
+        score = np.where(shown &gt; <span class="hljs-number">0</span>, clicks / np.maximum(shown, <span class="hljs-number">1</span>), <span class="hljs-number">0.0</span>)
+        top = np.argsort(-score)[:TOPK]
+        pool = top
+        <span class="hljs-keyword">if</span> eps &gt; <span class="hljs-number">0</span>:
+            n_rand = <span class="hljs-built_in">max</span>(<span class="hljs-number">1</span>, <span class="hljs-built_in">int</span>(<span class="hljs-built_in">round</span>(eps * TOPK)))
+            pool = np.r_[top[: TOPK - n_rand], r.choice(N_ITEM, n_rand, replace=<span class="hljs-literal">False</span>)]
+        imp = r.choice(pool, USERS)
+        cl = r.random(USERS) &lt; true_q[imp]
+        np.add.at(shown, imp, <span class="hljs-number">1</span>); np.add.at(clicks, imp, cl)
+        believed.append(true_q[top].mean())
+        served.append(true_q[imp].mean())
+    <span class="hljs-keyword">return</span> np.array(believed), np.array(served)
+
+<span class="hljs-keyword">for</span> rounds <span class="hljs-keyword">in</span> [<span class="hljs-number">30</span>, <span class="hljs-number">300</span>]:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n<span class="hljs-subst">{rounds}</span> vong, trung binh 20 lan chay&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;epsilon&#x27;</span>:&gt;<span class="hljs-number">8</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;top-10 vong cuoi&#x27;</span>:&gt;<span class="hljs-number">18</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;% tran&#x27;</span>:&gt;<span class="hljs-number">8</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;giao, ca ky&#x27;</span>:&gt;<span class="hljs-number">13</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;giao, 5 vong cuoi&#x27;</span>:&gt;<span class="hljs-number">19</span>}</span>&quot;</span>)
+    <span class="hljs-comment"># epsilon * 10 là số vị trí ngẫu nhiên trong danh sách 10 món, nên chỉ xét bội của 0,1</span>
+    <span class="hljs-keyword">for</span> eps <span class="hljs-keyword">in</span> [<span class="hljs-number">0.0</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">0.4</span>, <span class="hljs-number">0.5</span>]:
+        bs, ss = [], []
+        <span class="hljs-keyword">for</span> sd <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">20</span>):
+            b, s = simulate(eps, rounds, seed=<span class="hljs-number">500</span> + sd)
+            bs.append(b); ss.append(s)
+        b, s = np.mean(bs, <span class="hljs-number">0</span>), np.mean(ss, <span class="hljs-number">0</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{eps:<span class="hljs-number">8.2</span>f}</span><span class="hljs-subst">{b[-<span class="hljs-number">1</span>]:<span class="hljs-number">18.3</span>f}</span><span class="hljs-subst">{b[-<span class="hljs-number">1</span>] / ceil10 * <span class="hljs-number">100</span>:<span class="hljs-number">7.0</span>f}</span>%<span class="hljs-subst">{s.mean():<span class="hljs-number">13.4</span>f}</span><span class="hljs-subst">{s[-<span class="hljs-number">5</span>:].mean():<span class="hljs-number">19.4</span>f}</span>&quot;</span>)
+</code></pre></div></details><details class="src-details"><summary>Kết quả chạy — <code>bai_tap_output.txt</code></summary><div class="code-block is-output"><div class="code-head"><span class="code-lang">Kết quả chạy</span></div><pre><code>
+========================================================================
+Bai 1. PSI khi khong co dich chuyen, n = 500, k = 10
+========================================================================
+Ky vong theo cong thuc 2(k-1)/n     : 0.0360
+Trung binh mo phong (20 000 lan)    : 0.0364
+   phan vi    cong thuc chi2    mo phong
+     0.950            0.0677      0.0684
+     0.990            0.0867      0.0874
+     0.999            0.1115      0.1131
+P(PSI &gt; 0,10) theo cong thuc        : 0.00297
+P(PSI &gt; 0,10) theo mo phong         : 0.00360
+So bao dong gia moi ngay, 200 dac trung: 0.59
+n nho nhat de E[PSI] &lt; 0,01         : n &gt; 1800
+
+========================================================================
+Bai 2. Co mau A/B test: nen 2%, cai thien tuong doi 5%
+========================================================================
+z_(0,975) = 1.95996, z_(0,80) = 0.84162
+Co mau moi nhanh                    : 315,203
+So ngay voi 40 000 luot/nhanh/ngay  : 7.88
+Giam phuong sai 40% (CUPED)         : 189,122 mau, 4.73 ngay
+Muc cai thien de co mau giam mot nua: 7.11% (157,602 mau)
+Luc kiem dinh neu giu 5% va chi chay 3.94 ngay: 0.508
+
+========================================================================
+Bai 3. Toa nhanh 25 dich vu, moi dich vu p99 = 80 ms
+========================================================================
+Ti le yeu cau gap it nhat mot nhanh cham: 0.2222
+Phan vi moi nhanh can dat               : 0.999598 (1 trong 2,488 loi goi duoc phep cham)
+  k =  25: 1 - 0,99^k = 0.2222
+  k =  10: 1 - 0,99^k = 0.0956
+  k =   5: 1 - 0,99^k = 0.0490
+  k =   1: 1 - 0,99^k = 0.0100
+
+========================================================================
+Bai 4. Ghep theo thoi diem tren bang cua de bai
+========================================================================
+Dung (as-of join):
+  user 7  2026-02-10  nhan=0  tong_don_hang=3  (tu ban ghi 2026-01-01)
+  user 7  2026-04-15  nhan=1  tong_don_hang=19  (tu ban ghi 2026-03-01)
+Sai (ghep vao gia tri hien tai):
+  user 7  2026-02-10  nhan=0  tong_don_hang=52
+  user 7  2026-04-15  nhan=1  tong_don_hang=52
+Sai (JOIN vao bang lich su, quen dieu kien thoi gian): 6 dong thay vi 2
+
+========================================================================
+Bai 7. Nhip huan luyen lai theo toc do dich chuyen
+========================================================================
+ drift (rad/tuan)  khong bao gio        moi quy      moi thang     moi 2 tuan       moi tuan   nhip thua nhat trong 1 diem
+            0.010         76.15%         77.67%         77.74%         77.76%         77.76%   moi quy
+            0.035         64.61%         76.89%         77.68%         77.78%         77.80%   moi quy
+            0.080         45.08%         73.04%         76.96%         77.50%         77.66%   moi thang
+
+========================================================================
+Bai 8. Quet epsilon: chat luong he thong biet va chat luong giao toi nguoi dung
+========================================================================
+Danh muc cua bai tap: tran top-10 = 0.610, trung binh = 0.154
+
+30 vong, trung binh 20 lan chay
+ epsilon  top-10 vong cuoi  % tran  giao, ca ky  giao, 5 vong cuoi
+    0.00             0.360     59%       0.3480             0.3604
+    0.10             0.390     64%       0.3495             0.3744
+    0.20             0.404     66%       0.3389             0.3686
+    0.30             0.425     70%       0.3302             0.3626
+    0.40             0.431     71%       0.3108             0.3428
+    0.50             0.453     74%       0.2932             0.3246
+
+300 vong, trung binh 20 lan chay
+ epsilon  top-10 vong cuoi  % tran  giao, ca ky  giao, 5 vong cuoi
+    0.00             0.360     59%       0.3590             0.3601
+    0.10             0.488     80%       0.4237             0.4615
+    0.20             0.518     85%       0.4187             0.4588
+    0.30             0.541     89%       0.4034             0.4424
+    0.40             0.559     92%       0.3864             0.4153
+    0.50             0.570     93%       0.3602             0.3817
+</code></pre></div></details></section><section class="src-card" id="fig_diagrams-py"><header class="src-head"><h3 class="src-title"><code>code/mlops/fig_diagrams.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">205 dòng</span><a class="src-dl" href="code/mlops/fig_diagrams.py" download>Tải về</a></header><p class="src-note">Sinh Hình 1–5 và Hình 8: phần mã học máy giữa các thành phần hạ tầng, vòng đời của hệ thống học máy, ba mức tự động hoá, ba loại lỗi dữ liệu, tính đúng theo thời điểm, và bốn chiến lược ra mắt. Các sơ đồ vẽ bằng matplotlib để sửa được cùng nội dung bài.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Sinh Hình 1–5 và Hình 8 của giáo trình MLOps: các sơ đồ khái niệm.
 
 Đây là hình vẽ tay bằng matplotlib chứ không phải kết quả thí nghiệm, nhưng vẫn
 để trong mã nguồn để sửa được và để mọi chi tiết khớp với chữ trong bài.

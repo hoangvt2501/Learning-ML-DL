@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9. Agent — Xây dựng ứng dụng với mô hình ngôn ngữ lớn</title>
+<meta name="description" content="Agent và workflow, function calling, ReAct, lập kế hoạch và bộ nhớ, hệ nhiều agent, phân tích độ tin cậy của agent nhiều bước, và cách xây một agent.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+// Đặt theme trước khi vẽ để không bị nháy trắng.
+(function () {
+  try {
+    var t = localStorage.getItem('qz-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
+</head>
+<body class="">
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><defs><symbol id="i-nha" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /> <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></symbol><symbol id="i-lo-trinh" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3" /> <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" /> <circle cx="18" cy="5" r="3" /></symbol><symbol id="i-tim" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34" /> <circle cx="11" cy="11" r="8" /></symbol><symbol id="i-sang" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /> <path d="M12 2v2" /> <path d="M12 20v2" /> <path d="m4.93 4.93 1.41 1.41" /> <path d="m17.66 17.66 1.41 1.41" /> <path d="M2 12h2" /> <path d="M20 12h2" /> <path d="m6.34 17.66-1.41 1.41" /> <path d="m19.07 4.93-1.41 1.41" /></symbol><symbol id="i-toi" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 5h16" /> <path d="M4 12h16" /> <path d="M4 19h16" /></symbol><symbol id="i-truoc" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7" /> <path d="M19 12H5" /></symbol><symbol id="i-sau" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></symbol><symbol id="i-dong-ho" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 6v6h4" /></symbol><symbol id="i-chep" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></symbol><symbol id="i-xong" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol><symbol id="i-ngoai" viewBox="0 0 24 24"><path d="M7 7h10v10" /> <path d="M7 17 17 7" /></symbol><symbol id="i-mo-rong" viewBox="0 0 24 24"><path d="M15 3h6v6" /> <path d="m21 3-7 7" /> <path d="m3 21 7-7" /> <path d="M9 21H3v-6" /></symbol><symbol id="i-chuong" viewBox="0 0 24 24"><path d="M12 5v16" /> <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></symbol><symbol id="i-thi-nghiem" viewBox="0 0 24 24"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2" /> <path d="M6.453 15h11.094" /> <path d="M8.5 2h7" /></symbol><symbol id="i-hinh" viewBox="0 0 24 24"><path d="m22 11-1.296-1.296a2.4 2.4 0 0 0-3.408 0L11 16" /> <path d="M4 8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2" /> <circle cx="13" cy="7" r="1" fill="currentColor" /> <rect x="8" y="2" width="14" height="14" rx="2" /></symbol><symbol id="i-thuat-ngu" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" /> <path d="m8 13 4-7 4 7" /> <path d="M9.1 11h5.7" /></symbol><symbol id="i-ghi-chu" viewBox="0 0 24 24"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" /> <path d="M2 6h4" /> <path d="M2 10h4" /> <path d="M2 14h4" /> <path d="M2 18h4" /> <path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" /></symbol><symbol id="i-ma-nguon" viewBox="0 0 24 24"><path d="M4 12.15V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3.35" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <path d="m5 16-3 3 3 3" /> <path d="m9 22 3-3-3-3" /></symbol><symbol id="i-toan-van" viewBox="0 0 24 24"><path d="M15 12h-5" /> <path d="M15 8h-5" /> <path d="M19 17V5a2 2 0 0 0-2-2H4" /> <path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3" /></symbol><symbol id="i-bai-tap" viewBox="0 0 24 24"><path d="M13 21h8" /> <path d="m15 5 4 4" /> <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /></symbol><symbol id="i-trac-nghiem" viewBox="0 0 24 24"><path d="M13 5h8" /> <path d="M13 12h8" /> <path d="M13 19h8" /> <path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /></symbol><symbol id="i-phong-van" viewBox="0 0 24 24"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /> <path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1" /></symbol><symbol id="i-tai-lieu" viewBox="0 0 24 24"><path d="m16 6 4 14" /> <path d="M12 6v14" /> <path d="M8 8v12" /> <path d="M4 4v16" /></symbol><symbol id="i-phu-luc" viewBox="0 0 24 24"><path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" /></symbol><symbol id="i-dinh-nghia" viewBox="0 0 24 24"><path d="M10 2v7.751a.25.25 0 00.407.195l2.28-1.834a.5.5 0 01.627 0l2.28 1.834A.25.25 0 0016 9.751V2" /> <path d="M4 19.5v-15A2.5 2.5 0 016.5 2H19a1 1 0 011 1v18a1 1 0 01-1 1H6.5a1 1 0 010-5H20" /></symbol><symbol id="i-dinh-ly" viewBox="0 0 24 24"><path d="M18 7V5a1 1 0 0 0-1-1H6.5a.5.5 0 0 0-.4.8l4.5 6a2 2 0 0 1 0 2.4l-4.5 6a.5.5 0 0 0 .4.8H17a1 1 0 0 0 1-1v-2" /></symbol><symbol id="i-vi-du" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /> <path d="M9 18h6" /> <path d="M10 22h4" /></symbol><symbol id="i-nhan-xet" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 16v-4" /> <path d="M12 8h.01" /></symbol><symbol id="i-luu-y" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /> <path d="M12 9v4" /> <path d="M12 17h.01" /></symbol><symbol id="i-chung-minh" viewBox="0 0 24 24"><path d="M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344" /> <path d="m9 11 3 3L22 4" /></symbol><symbol id="i-tra-loi" viewBox="0 0 24 24"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" /> <path d="m10 15-3-3 3-3" /> <path d="M7 12h8a2 2 0 0 1 2 2v1" /></symbol><symbol id="i-nen-tang" viewBox="0 0 24 24"><path d="M18 7V5a1 1 0 0 0-1-1H6.5a.5.5 0 0 0-.4.8l4.5 6a2 2 0 0 1 0 2.4l-4.5 6a.5.5 0 0 0 .4.8H17a1 1 0 0 0 1-1v-2" /></symbol><symbol id="i-hoc-may" viewBox="0 0 24 24"><circle cx="7.5" cy="7.5" r=".5" fill="currentColor" /> <circle cx="18.5" cy="5.5" r=".5" fill="currentColor" /> <circle cx="11.5" cy="11.5" r=".5" fill="currentColor" /> <circle cx="7.5" cy="16.5" r=".5" fill="currentColor" /> <circle cx="17.5" cy="14.5" r=".5" fill="currentColor" /> <path d="M3 3v16a2 2 0 0 0 2 2h16" /></symbol><symbol id="i-mang-no-ron" viewBox="0 0 24 24"><rect x="16" y="16" width="6" height="6" rx="1" /> <rect x="2" y="16" width="6" height="6" rx="1" /> <rect x="9" y="2" width="6" height="6" rx="1" /> <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" /> <path d="M12 12V8" /></symbol><symbol id="i-llm" viewBox="0 0 24 24"><path d="M12 20v2" /> <path d="M12 2v2" /> <path d="M17 20v2" /> <path d="M17 2v2" /> <path d="M2 12h2" /> <path d="M2 17h2" /> <path d="M2 7h2" /> <path d="M20 12h2" /> <path d="M20 17h2" /> <path d="M20 7h2" /> <path d="M7 20v2" /> <path d="M7 2v2" /> <rect x="4" y="4" width="16" height="16" rx="2" /> <rect x="8" y="8" width="8" height="8" rx="1" /></symbol><symbol id="i-prompt" viewBox="0 0 24 24"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" /> <path d="M7 11h10" /> <path d="M7 15h6" /> <path d="M7 7h8" /></symbol><symbol id="i-ngu-canh" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /> <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /> <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></symbol><symbol id="i-mo-hinh" viewBox="0 0 24 24"><path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z" /> <path d="m7 16.5-4.74-2.85" /> <path d="m7 16.5 5-3" /> <path d="M7 16.5v5.17" /> <path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z" /> <path d="m17 16.5-5-3" /> <path d="m17 16.5 4.74-2.85" /> <path d="M17 16.5v5.17" /> <path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z" /> <path d="M12 8 7.26 5.15" /> <path d="m12 8 4.74-2.85" /> <path d="M12 13.5V8" /></symbol><symbol id="i-embedding" viewBox="0 0 24 24"><path d="m10.586 5.414-5.172 5.172" /> <path d="m18.586 13.414-5.172 5.172" /> <path d="M6 12h12" /> <circle cx="12" cy="20" r="2" /> <circle cx="12" cy="4" r="2" /> <circle cx="20" cy="12" r="2" /> <circle cx="4" cy="12" r="2" /></symbol><symbol id="i-vector-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3" /> <path d="M3 5V19A9 3 0 0 0 21 19V5" /> <path d="M3 12A9 3 0 0 0 21 12" /></symbol><symbol id="i-rag" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <circle cx="11.5" cy="14.5" r="2.5" /> <path d="M13.3 16.3 15 18" /></symbol><symbol id="i-agent" viewBox="0 0 24 24"><path d="M12 8V4H8" /> <rect width="16" height="12" x="4" y="8" rx="2" /> <path d="M2 14h2" /> <path d="M20 14h2" /> <path d="M15 13v2" /> <path d="M9 13v2" /></symbol><symbol id="i-mcp" viewBox="0 0 24 24"><path d="M12 22v-5" /> <path d="M15 8V2" /> <path d="M17 8a1 1 0 0 1 1 1v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1z" /> <path d="M9 8V2" /></symbol><symbol id="i-an-toan" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /> <path d="m9 12 2 2 4-4" /></symbol><symbol id="i-danh-gia" viewBox="0 0 24 24"><path d="m12 14 4-4" /> <path d="M3.34 19a10 10 0 1 1 17.32 0" /></symbol><symbol id="i-da-phuong-thuc" viewBox="0 0 24 24"><path d="M15 15.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997a1 1 0 0 1-1.517-.86z" /> <path d="M21 12.17V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6" /> <path d="m6 21 5-5" /> <circle cx="9" cy="9" r="2" /></symbol><symbol id="i-tinh-chinh" viewBox="0 0 24 24"><path d="M10 5H3" /> <path d="M12 19H3" /> <path d="M14 3v4" /> <path d="M16 17v4" /> <path d="M21 12h-9" /> <path d="M21 19h-5" /> <path d="M21 5h-7" /> <path d="M8 10v4" /> <path d="M8 12H3" /></symbol><symbol id="i-mo-hinh-sinh" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" /> <path d="M20 2v4" /> <path d="M22 4h-4" /> <circle cx="4" cy="20" r="2" /></symbol><symbol id="i-luong-tu" viewBox="0 0 24 24"><rect x="14" y="14" width="4" height="6" rx="2" /> <rect x="6" y="4" width="4" height="6" rx="2" /> <path d="M6 20h4" /> <path d="M14 10h4" /> <path d="M6 14h2v6" /> <path d="M14 4h2v6" /></symbol><symbol id="i-van-hanh" viewBox="0 0 24 24"><path d="m10.852 14.772-.383.923" /> <path d="M13.148 14.772a3 3 0 1 0-2.296-5.544l-.383-.923" /> <path d="m13.148 9.228.383-.923" /> <path d="m13.53 15.696-.382-.924a3 3 0 1 1-2.296-5.544" /> <path d="m14.772 10.852.923-.383" /> <path d="m14.772 13.148.923.383" /> <path d="M4.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5" /> <path d="M4.5 14H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-.5" /> <path d="M6 18h.01" /> <path d="M6 6h.01" /> <path d="m9.228 10.852-.923-.383" /> <path d="m9.228 13.148-.923.383" /></symbol><symbol id="i-gioi-thieu" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z" /></symbol></defs></svg>
+<a class="skip-link" href="#main">Bỏ qua điều hướng</a>
+<div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở mục lục" aria-expanded="false">
+    <svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-menu"></use></svg>
+  </button>
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true">Ứ</span>
+    <span class="brand-text"><b>Ứng dụng LLM</b><i>giáo trình tự học</i></span>
+  </a>
+  <button class="search-btn" id="searchBtn" type="button">
+    <svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-tim"></use></svg>
+    <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
+    <svg class="ic ic-sun" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sang"></use></svg>
+    <svg class="ic ic-moon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-toi"></use></svg>
+  </button>
+</header>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><a class="book-tab" href="models-ch01.html">Học sâu</a><a class="book-tab" href="bieudien-ch01.html">Biểu diễn &amp; Căn chỉnh</a><span class="book-tab is-active" aria-current="true">Ứng dụng LLM</span><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Mở đầu</p><ul class="nav-list"><li><a href="ungdung-ch00.html"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li><li><a href="ungdung-ch01.html"><span class="nav-num">1</span><span class="nav-label">Kỹ sư AI</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Làm việc với mô hình ngôn ngữ</p><ul class="nav-list"><li><a href="ungdung-ch02.html"><span class="nav-num">2</span><span class="nav-label">Mô hình ngôn ngữ lớn nhìn từ phía ứng dụng</span></a></li><li><a href="ungdung-ch03.html"><span class="nav-num">3</span><span class="nav-label">Chọn và triển khai mô hình</span></a></li><li><a href="ungdung-ch04.html"><span class="nav-num">4</span><span class="nav-label">Prompt engineering</span></a></li><li><a href="ungdung-ch05.html"><span class="nav-num">5</span><span class="nav-label">Context engineering</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Truy xuất và RAG</p><ul class="nav-list"><li><a href="ungdung-ch06.html"><span class="nav-num">6</span><span class="nav-label">Embedding và tìm kiếm ngữ nghĩa</span></a></li><li><a href="ungdung-ch07.html"><span class="nav-num">7</span><span class="nav-label">Cơ sở dữ liệu vector</span></a></li><li><a href="ungdung-ch08.html"><span class="nav-num">8</span><span class="nav-label">Retrieval-Augmented Generation</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Agent và MCP</p><ul class="nav-list"><li><a href="ungdung-ch09.html" class="is-active" aria-current="page"><span class="nav-num">9</span><span class="nav-label">Agent</span></a></li><li><a href="ungdung-ch10.html"><span class="nav-num">10</span><span class="nav-label">Model Context Protocol</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>An toàn, đánh giá và vận hành</p><ul class="nav-list"><li><a href="ungdung-ch11.html"><span class="nav-num">11</span><span class="nav-label">An toàn và đạo đức</span></a></li><li><a href="ungdung-ch12.html"><span class="nav-num">12</span><span class="nav-label">Đánh giá ứng dụng LLM</span></a></li><li><a href="ungdung-ch13.html"><span class="nav-num">13</span><span class="nav-label">Quan sát và vận hành</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">6</span>Mở rộng</p><ul class="nav-list"><li><a href="ungdung-ch14.html"><span class="nav-num">14</span><span class="nav-label">AI đa phương thức</span></a></li><li><a href="ungdung-ch15.html"><span class="nav-num">15</span><span class="nav-label">Công cụ lập trình có hỗ trợ AI</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="ungdung-bai-tap.html"><span class="nav-num">16</span><span class="nav-label">Bài tập</span></a></li><li><a href="ungdung-ch17.html"><span class="nav-num">17</span><span class="nav-label">Câu hỏi phỏng vấn</span></a></li><li><a href="ungdung-ch18.html"><span class="nav-num">18</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="ungdung-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="ungdung-hinh-anh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-hinh"></use></svg></span><span class="nav-label">Thư viện 15 hình</span></a></li><li><a href="ungdung-thuat-ngu.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thuat-ngu"></use></svg></span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="ungdung-ma-nguon.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-ma-nguon"></use></svg></span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="ungdung-toan-van.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-toan-van"></use></svg></span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-nha"></use></svg></span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lo-trinh"></use></svg></span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
+<div class="scrim" id="scrim" hidden></div>
+<main class="content" id="main">
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 9</span><span class="kicker-time"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-dong-ho"></use></svg>16 phút đọc</span><span class="kicker-part">Agent và MCP</span></div><h2 id="sec-9" class="heading"><span class="hnum">9</span><span class="htext">Agent<a class="anchor" href="#sec-9" aria-label="Liên kết tới mục này">#</a></span></h2><p class="chapter-lede">Agent và workflow, function calling, ReAct, lập kế hoạch và bộ nhớ, hệ nhiều agent, phân tích độ tin cậy của agent nhiều bước, và cách xây một agent.</p>
+<p>Chương này trình bày agent: hệ thống trong đó mô hình ngôn ngữ tự quyết định chuỗi hành động để hoàn thành một nhiệm vụ. Chương phân biệt agent với workflow, trình bày cơ chế function calling và phương pháp ReAct, các mẫu nhiều agent, và phân tích định lượng vì sao độ tin cậy là thách thức lớn nhất khi xây agent.</p>
+<h3 id="sec-9-1" class="heading"><span class="hnum">9.1</span><span class="htext">Agent là gì<a class="anchor" href="#sec-9-1" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Có nhiều định nghĩa khác nhau về agent. Giáo trình dùng cách phân biệt của Anthropic (2024) giữa hai loại hệ thống dùng LLM kết hợp với tool:</p>
+<ul>
+<li><strong>Workflow</strong>: mô hình và tool được điều phối theo <strong>đường đi định sẵn trong mã</strong>. Ví dụ: truy xuất tài liệu, rồi gọi mô hình để trả lời, rồi gọi mô hình để kiểm tra câu trả lời. Các bước và thứ tự do lập trình viên quyết định.</li>
+<li><strong>Agent</strong>: mô hình <strong>tự quyết định</strong> bước tiếp theo, gọi tool nào, với tham số nào, và khi nào dừng, dựa trên kết quả của các bước trước.</li>
+</ul>
+<blockquote class="callout callout--dinh-nghia">
+<p class="callout-label"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-dinh-nghia"></use></svg><span>Định nghĩa 9.1 (Agent)</span></p><p>Một <strong>agent</strong> là hệ thống trong đó mô hình ngôn ngữ được gọi lặp đi lặp lại trong một vòng lặp: ở mỗi vòng, mô hình quan sát trạng thái hiện tại (nhiệm vụ, kết quả các hành động trước), chọn một hành động (gọi một tool hoặc đưa ra câu trả lời cuối), và ứng dụng thực hiện hành động đó rồi đưa kết quả trở lại cho mô hình.</p>
+</blockquote>
+<p>Agent linh hoạt hơn workflow: nó xử lý được các nhiệm vụ mà số bước và thứ tự bước không biết trước. Cái giá là khó dự đoán, tốn nhiều lời gọi mô hình hơn, và có thêm nhiều cách hỏng. Nguyên tắc chung: dùng giải pháp đơn giản nhất đáp ứng được yêu cầu. Nhiều bài toán được giải tốt bằng một lời gọi mô hình với ngữ cảnh tốt, hoặc bằng một workflow vài bước; chỉ dùng agent khi thật sự cần sự linh hoạt đó.</p>
+<p>Các trường hợp sử dụng agent phổ biến:</p>
+<ul>
+<li><strong>Lập trình</strong>: đọc mã, sửa tệp, chạy kiểm thử, sửa tiếp theo kết quả kiểm thử (<a href="ungdung-ch15.html#sec-15" class="xref">Chương 15</a>).</li>
+<li><strong>Hỗ trợ khách hàng có hành động</strong>: tra đơn hàng, kiểm tra chính sách, tạo yêu cầu đổi trả.</li>
+<li><strong>Nghiên cứu</strong>: tìm kiếm nhiều nguồn, đọc, tổng hợp, tìm tiếp theo những gì vừa đọc.</li>
+<li><strong>Phân tích dữ liệu</strong>: viết truy vấn SQL, chạy, xem kết quả, viết truy vấn tiếp.</li>
+</ul>
+<p>Điểm chung của các trường hợp này: nhiệm vụ có kết quả kiểm tra được (kiểm thử chạy qua, truy vấn trả về dữ liệu), cho phép agent tự nhận biết khi bước trước sai.</p>
+<h3 id="sec-9-2" class="heading"><span class="hnum">9.2</span><span class="htext">Các mẫu workflow<a class="anchor" href="#sec-9-2" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Trước khi dùng agent, nên xét các mẫu workflow đơn giản hơn, mô tả trong Anthropic (2024):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mẫu</th>
+<th>Cách làm</th>
+<th>Ví dụ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nối chuỗi prompt (prompt chaining)</td>
+<td>chia nhiệm vụ thành các bước cố định, đầu ra bước trước là đầu vào bước sau, có thể kiểm tra giữa các bước</td>
+<td>viết dàn ý, kiểm tra dàn ý, rồi viết bài</td>
+</tr>
+<tr>
+<td>Định tuyến (routing)</td>
+<td>phân loại yêu cầu rồi chuyển tới quy trình chuyên biệt</td>
+<td>câu hỏi hoàn tiền đi một đường, câu hỏi kỹ thuật đi đường khác</td>
+</tr>
+<tr>
+<td>Song song hoá (parallelization)</td>
+<td>chạy nhiều lời gọi độc lập cùng lúc rồi gộp kết quả</td>
+<td>kiểm tra một văn bản theo năm tiêu chí khác nhau cùng lúc</td>
+</tr>
+<tr>
+<td>Điều phối và thực thi (orchestrator–workers)</td>
+<td>một lời gọi chia việc động thành các phần việc con, các lời gọi khác làm từng phần</td>
+<td>sửa một thay đổi cần chạm nhiều tệp</td>
+</tr>
+<tr>
+<td>Đánh giá và tối ưu (evaluator–optimizer)</td>
+<td>một lời gọi sinh kết quả, lời gọi khác đánh giá và góp ý, lặp lại</td>
+<td>dịch thuật có vòng phản biện</td>
+</tr>
+</tbody>
+</table></div>
+<p>Các mẫu này có thể kết hợp với nhau. Chúng dễ kiểm thử và dễ dự đoán chi phí hơn agent, vì số lời gọi mô hình được giới hạn trong mã.</p>
+<h3 id="sec-9-3" class="heading"><span class="hnum">9.3</span><span class="htext">Tool và function calling<a class="anchor" href="#sec-9-3" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Function calling (<a href="ungdung-ch04.html#sec-4-5" class="xref">Mục 4.5</a>) là cơ chế nền tảng của agent. Một lượt đầy đủ gồm bốn bước.</p>
+<p><strong>Bước 1: mô tả tool.</strong> Ứng dụng gửi cho mô hình danh sách tool, mỗi tool có tên, mô tả và lược đồ tham số theo JSON Schema:</p>
+<div class="code-block" data-lang="json"><div class="code-head"><span class="code-lang">json</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;tra_don_hang&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Tra trạng thái của một đơn hàng theo mã đơn. Dùng khi khách hỏi đơn hàng đang ở đâu, bao giờ tới.&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;parameters&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;ma_don&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;string&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Mã đơn hàng, dạng DH kèm 4 chữ số, ví dụ DH1024&quot;</span><span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;required&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;ma_don&quot;</span><span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</code></pre></div>
+<p><strong>Bước 2: mô hình đề xuất lời gọi.</strong> Với tin nhắn &quot;Đơn DH1024 của tôi giao chưa?&quot;, mô hình trả về một yêu cầu gọi tool thay vì văn bản: tên <code>tra_don_hang</code>, tham số <code>{&quot;ma_don&quot;: &quot;DH1024&quot;}</code>, kèm một mã định danh cho lời gọi.</p>
+<p><strong>Bước 3: ứng dụng thực thi.</strong> Ứng dụng kiểm tra tham số, kiểm tra người dùng có quyền xem đơn này không, gọi hệ thống quản lý đơn hàng, rồi thêm kết quả vào hội thoại dưới dạng một tin nhắn kết quả tool, gắn với mã định danh của lời gọi.</p>
+<p><strong>Bước 4: mô hình tiếp tục.</strong> Mô hình đọc kết quả và trả lời người dùng, hoặc đề xuất một lời gọi tool khác nếu cần thêm thông tin.</p>
+<p>Mô hình được huấn luyện để hiểu định dạng mô tả tool và sinh lời gọi đúng lược đồ, nhưng chất lượng của lời gọi phụ thuộc nhiều vào cách mô tả tool. Một số nguyên tắc thiết kế tool:</p>
+<ul>
+<li><strong>Tên và mô tả rõ ràng</strong>, nói cả khi nào nên dùng và khi nào không nên dùng tool; mô tả tham số kèm định dạng và ví dụ, như mô tả <code>ma_don</code> ở trên.</li>
+<li><strong>Ít tool nhưng đủ.</strong> Nhiều tool có chức năng chồng lấn làm mô hình khó chọn. Anthropic (2025) khuyên giữ một tập tool tối thiểu đủ dùng, sao cho một kỹ sư đọc danh sách cũng biết ngay nên dùng tool nào cho mỗi tình huống.</li>
+<li><strong>Kết quả ngắn gọn và có ích.</strong> Kết quả tool đi thẳng vào ngữ cảnh. Trả về 500 dòng log làm tốn token và làm loãng ngữ cảnh (<a href="ungdung-ch05.html#sec-5" class="xref">Chương 5</a>); nên trả về phần cần thiết kèm cách lấy thêm nếu cần.</li>
+<li><strong>Lỗi là kết quả, không phải ngoại lệ.</strong> Khi tool thất bại, trả về thông báo lỗi dễ hiểu (&quot;không tìm thấy đơn DH1O24, mã đơn gồm DH và 4 chữ số&quot;) để mô hình tự sửa lời gọi, thay vì làm dừng cả vòng lặp.</li>
+<li><strong>Tool có tác dụng phụ cần được bảo vệ.</strong> Với tool gửi email, chuyển tiền, xoá dữ liệu: kiểm tra quyền trong mã chứ không trông vào mô hình, yêu cầu người dùng xác nhận trước khi thực hiện, và thiết kế để gọi lặp lại không gây hại (idempotent) khi có thể.</li>
+</ul>
+<p>Nhiều API cho phép mô hình đề xuất nhiều lời gọi tool trong một lượt (parallel tool calling) khi các lời gọi độc lập, ví dụ tra thời tiết ở ba thành phố; ứng dụng chạy chúng song song để giảm độ trễ.</p>
+<h3 id="sec-9-4" class="heading"><span class="hnum">9.4</span><span class="htext">ReAct<a class="anchor" href="#sec-9-4" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p><strong>ReAct</strong> (Yao và cộng sự, 2023) là phương pháp prompt đặt nền móng cho agent hiện đại. Ý tưởng là cho mô hình xen kẽ <strong>suy luận</strong> (reasoning) và <strong>hành động</strong> (acting): ở mỗi bước, mô hình viết một đoạn suy nghĩ về tình hình hiện tại, rồi một hành động, rồi nhận về một quan sát từ môi trường:</p>
+<div class="code-block" data-lang="text"><div class="code-head"><span class="code-lang">Văn bản</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-text">Suy nghĩ: Tôi cần biết đơn DH1024 đang ở đâu.
+Hành động: tra_don_hang[DH1024]
+Quan sát: Đơn DH1024 đã rời kho Bình Dương lúc 9:40, dự kiến giao 15:00 hôm nay.
+Suy nghĩ: Tôi đã có đủ thông tin để trả lời khách.
+Hành động: tra_loi[Đơn của anh/chị đã rời kho và dự kiến được giao lúc 15 giờ hôm nay.]
+</code></pre></div>
+<p>Suy nghĩ giúp mô hình lập kế hoạch, theo dõi tiến độ và xử lý ngoại lệ; hành động giúp mô hình lấy thông tin thật từ bên ngoài thay vì dựa vào kiến thức sẵn có, giảm ảo giác. Trên các môi trường ra quyết định tương tác ALFWorld và WebShop, bài báo gốc báo cáo ReAct vượt các phương pháp học bắt chước và học tăng cường với chênh lệch tỉ lệ thành công tuyệt đối 34% và 10%, dù chỉ dùng một hai ví dụ trong prompt.</p>
+<p>Function calling hiện nay có thể xem là ReAct đã được đưa vào API: thay vì định dạng &quot;Hành động: ...&quot; trong văn bản tự do, lời gọi tool có cấu trúc JSON, và nhiều mô hình được huấn luyện riêng cho định dạng đó. Phần &quot;suy nghĩ&quot; có thể nằm trong văn bản trước lời gọi tool, hoặc trong chuỗi suy luận của mô hình suy luận.</p>
+<figure class="figure" id="hinh-9">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 9"><img src="figs/ud09_agent.png" alt="Hình 9" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 9.</strong> Vòng lặp của một agent: mô hình suy nghĩ, đề xuất lời gọi tool, ứng dụng thực thi và đưa kết quả trở lại ngữ cảnh, cho tới khi mô hình đưa ra câu trả lời cuối.</figcaption>
+</figure>
+<h3 id="sec-9-5" class="heading"><span class="hnum">9.5</span><span class="htext">Lập kế hoạch, bộ nhớ và tự đánh giá<a class="anchor" href="#sec-9-5" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Ba khả năng bổ sung thường được thêm vào vòng lặp cơ bản:</p>
+<ul>
+<li><strong>Lập kế hoạch.</strong> Trước khi hành động, mô hình viết một kế hoạch gồm các bước, rồi thực hiện và cập nhật kế hoạch khi có thông tin mới. Kế hoạch viết ra nằm trong ngữ cảnh, giúp mô hình không lạc hướng ở nhiệm vụ dài, và giúp người dùng biết agent định làm gì.</li>
+<li><strong>Bộ nhớ.</strong> Với nhiệm vụ dài hơn cửa sổ ngữ cảnh, agent cần ghi lại thông tin quan trọng ra ngoài ngữ cảnh và đọc lại khi cần (<a href="ungdung-ch05.html#sec-5-4" class="xref">Mục 5.4</a>).</li>
+<li><strong>Tự đánh giá.</strong> Sau khi thực hiện, mô hình (hoặc một lời gọi riêng) kiểm tra kết quả và sửa nếu cần. Reflexion (Shinn và cộng sự, 2023) cho agent ghi lại nhận xét về lần thử thất bại vào bộ nhớ để lần thử sau tránh lỗi đó. Tự đánh giá hiệu quả nhất khi có tín hiệu khách quan để dựa vào, như kết quả chạy kiểm thử; khi chỉ dựa vào đánh giá chủ quan của chính mô hình, mô hình có thể tự tin vào câu trả lời sai.</li>
+</ul>
+<h3 id="sec-9-6" class="heading"><span class="hnum">9.6</span><span class="htext">Nhiều agent<a class="anchor" href="#sec-9-6" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Hệ thống <strong>nhiều agent</strong> (multi-agent) chia nhiệm vụ cho nhiều agent, mỗi agent có chỉ dẫn, tool và cửa sổ ngữ cảnh riêng. Mẫu phổ biến nhất là <strong>điều phối viên và agent con</strong>: một agent chính lập kế hoạch và giao các phần việc con cho các agent con chạy song song, rồi tổng hợp kết quả.</p>
+<p>Lợi ích chính của mẫu này là mỗi agent con có một cửa sổ ngữ cảnh sạch dành riêng cho phần việc của nó, và chỉ trả về bản tóm tắt cho agent chính, nên tổng lượng thông tin được xử lý vượt xa một cửa sổ ngữ cảnh (<a href="ungdung-ch05.html#sec-5-5" class="xref">Mục 5.5</a>). Anthropic (2025) báo cáo hệ thống nghiên cứu nhiều agent của họ (một agent chính dùng Claude Opus 4 cùng các agent con dùng Claude Sonnet 4) đạt kết quả tốt hơn 90,2% so với một agent đơn dùng Claude Opus 4 trên bộ đánh giá nghiên cứu nội bộ. Cùng báo cáo cũng cho biết cái giá: agent dùng khoảng 4 lần số token so với một cuộc trò chuyện thông thường, và hệ thống nhiều agent dùng khoảng 15 lần.</p>
+<p>Hệ thống nhiều agent phù hợp với nhiệm vụ chia được thành các phần độc lập, như tìm hiểu nhiều chủ đề con cùng lúc. Nó kém phù hợp với nhiệm vụ mà các phần phụ thuộc chặt vào nhau, như sửa nhiều chỗ liên quan trong cùng một đoạn mã, vì các agent không thấy công việc của nhau và có thể đưa ra quyết định mâu thuẫn.</p>
+<h3 id="sec-9-7" class="heading"><span class="hnum">9.7</span><span class="htext">Độ tin cậy và chi phí<a class="anchor" href="#sec-9-7" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Giả sử mỗi bước của agent thực hiện đúng với xác suất <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span>, độc lập với các bước khác, và nhiệm vụ cần <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> bước đều đúng. Xác suất hoàn thành nhiệm vụ là <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>p</mi><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">p^n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8588em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span></span></span></span>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Số bước</th>
+<th><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0,99</mn></mrow><annotation encoding="application/x-tex">p = 0{,}99</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">99</span></span></span></span></th>
+<th><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0,95</mn></mrow><annotation encoding="application/x-tex">p = 0{,}95</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">95</span></span></span></span></th>
+<th><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0,90</mn></mrow><annotation encoding="application/x-tex">p = 0{,}90</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">90</span></span></span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0,990</td>
+<td>0,950</td>
+<td>0,900</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0,951</td>
+<td>0,774</td>
+<td>0,590</td>
+</tr>
+<tr>
+<td>10</td>
+<td>0,904</td>
+<td>0,599</td>
+<td>0,349</td>
+</tr>
+<tr>
+<td>20</td>
+<td>0,818</td>
+<td>0,358</td>
+<td>0,122</td>
+</tr>
+<tr>
+<td>50</td>
+<td>0,605</td>
+<td>0,077</td>
+<td>0,005</td>
+</tr>
+</tbody>
+</table></div>
+<p>Mô hình giả định độc lập là đơn giản hoá, nhưng kết luận của nó đúng về hướng: một bước đúng 95% nghe có vẻ tốt, nhưng agent 20 bước với độ chính xác đó chỉ hoàn thành 36% số nhiệm vụ. Độ tin cậy của từng bước quan trọng hơn nhiều so với cảm nhận khi thử một bước.</p>
+<p>Cách chữa là <strong>kiểm tra sau mỗi bước và thử lại khi phát hiện lỗi</strong>. Giả sử một bước kiểm tra phát hiện được bước sai với xác suất <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span>, và mỗi bước được thử lại tối đa <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span></span> lần khi bị phát hiện sai. Một bước thành công nếu có một lần thử đúng trước khi hết lượt, và mỗi lần sai chỉ được thử lại khi bị phát hiện:</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>q</mi><mo>=</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mi>r</mi></munderover><mi>p</mi><mtext> </mtext><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo><mtext> </mtext><mi>c</mi><msup><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo><mi>j</mi></msup><mo separator="true">,</mo><mspace width="2em"/><mi>P</mi><mo stretchy="false">(</mo><mrow><mtext>ho</mtext><mover accent="true"><mtext>a</mtext><mo>ˋ</mo></mover><mtext>n th</mtext><mover accent="true"><mtext>a</mtext><mo>ˋ</mo></mover><mtext>nh</mtext></mrow><mo stretchy="false">)</mo><mo>=</mo><msup><mi>q</mi><mi>n</mi></msup><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">q = \sum_{j=0}^{r} p\,\big((1-p)\,c\big)^{j}, \qquad P(\text{hoàn thành}) = q^n.
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.0652em;vertical-align:-1.4138em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.6514em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span><span class="mrel mtight">=</span><span class="mord mtight">0</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">r</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.4138em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="delimsizing size1">(</span></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.4146em;vertical-align:-0.35em;"></span><span class="mord mathnormal">p</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">c</span><span class="mord"><span class="mord"><span class="delimsizing size1">)</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:1.0646em;"><span style="top:-3.3029em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord text"><span class="mord">ho</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">a</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˋ</span></span></span></span></span></span></span><span class="mord">n th</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord">a</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˋ</span></span></span></span></span></span></span><span class="mord">nh</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9088em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7144em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span><span class="mord">.</span></span></span></span></span></p>
+<p>Thí nghiệm mô phỏng 200 000 lần một agent 20 bước với <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0,95</mn></mrow><annotation encoding="application/x-tex">p = 0{,}95</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">95</span></span></span></span>, và so với công thức:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tỉ lệ phát hiện lỗi <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span></th>
+<th>Số lần thử lại tối đa <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span></span></th>
+<th>Công thức</th>
+<th>Mô phỏng</th>
+<th>Lời gọi trung bình mỗi bước</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>0,358</td>
+<td>0,357</td>
+<td>1,000</td>
+</tr>
+<tr>
+<td>0,5</td>
+<td>1</td>
+<td>0,587</td>
+<td>0,586</td>
+<td>1,025</td>
+</tr>
+<tr>
+<td>0,8</td>
+<td>1</td>
+<td>0,785</td>
+<td>0,784</td>
+<td>1,040</td>
+</tr>
+<tr>
+<td>0,8</td>
+<td>3</td>
+<td>0,811</td>
+<td>0,810</td>
+<td>1,042</td>
+</tr>
+<tr>
+<td>0,95</td>
+<td>3</td>
+<td>0,949</td>
+<td>0,949</td>
+<td>1,050</td>
+</tr>
+</tbody>
+</table></div>
+<figure class="figure" id="hinh-10">
+<div class="figure-frame" role="button" tabindex="0" data-zoom="" aria-label="Phóng to Hình 10"><img src="figs/ud11_agent.png" alt="Hình 10" loading="lazy" decoding="async"></div>
+<figcaption><strong>Hình 10.</strong> Xác suất một agent hoàn thành cả chuỗi bước theo số bước, với ba mức độ chính xác của mỗi bước, và với bước kiểm tra phát hiện 80% lỗi kèm tối đa 3 lần thử lại.</figcaption>
+</figure>
+<p>Một bước kiểm tra phát hiện 80% lỗi, cho phép thử lại một lần, nâng tỉ lệ hoàn thành từ 36% lên 79%, trong khi số lời gọi thực hiện bước chỉ tăng 4%. Cột cuối chưa tính chi phí của chính bước kiểm tra; khi kiểm tra là một phép tính rẻ và khách quan (chạy kiểm thử, kiểm tra lược đồ, so với dữ liệu nguồn), đánh đổi này rất có lợi. Tỉ lệ phát hiện <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span> là yếu tố quyết định: tăng số lần thử lại từ 1 lên 3 ở <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mo>=</mo><mn>0,8</mn></mrow><annotation encoding="application/x-tex">c = 0{,}8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">8</span></span></span></span> chỉ thêm 2,6 điểm phần trăm, vì lỗi không bị phát hiện không được thử lại.</p>
+<p>Các biện pháp vận hành để agent an toàn và có chi phí kiểm soát được:</p>
+<ul>
+<li><strong>Giới hạn số bước và ngân sách token</strong> cho mỗi nhiệm vụ, dừng và báo lại khi vượt.</li>
+<li><strong>Quyền tối thiểu</strong> (least privilege): agent chỉ có những tool và quyền cần cho nhiệm vụ; tool truy cập dữ liệu dùng quyền của người dùng đang yêu cầu, không dùng quyền quản trị.</li>
+<li><strong>Người phê duyệt</strong> cho hành động không đảo ngược được: gửi ra ngoài, thanh toán, xoá.</li>
+<li><strong>Môi trường cách ly</strong> (sandbox) cho agent chạy mã hoặc lệnh hệ thống.</li>
+<li><strong>Ghi lại toàn bộ trace</strong> của mỗi lần chạy (<a href="ungdung-ch13.html#sec-13" class="xref">Chương 13</a>) để tìm ra bước nào sai khi nhiệm vụ thất bại.</li>
+</ul>
+<h3 id="sec-9-8" class="heading"><span class="hnum">9.8</span><span class="htext">Xây dựng agent<a class="anchor" href="#sec-9-8" aria-label="Liên kết tới mục này">#</a></span></h3>
+<p>Vòng lặp của một agent đủ ngắn để tự viết, và tự viết giúp hiểu rõ mọi chi tiết:</p>
+<div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">chay_agent</span>(<span class="hljs-params">client, model, tools, ham_tool, tin_nhan, so_buoc_toi_da=<span class="hljs-number">10</span></span>):
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(so_buoc_toi_da):
+        tl = client.chat.completions.create(model=model, messages=tin_nhan, tools=tools)
+        msg = tl.choices[<span class="hljs-number">0</span>].message
+        tin_nhan.append(msg)
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> msg.tool_calls:                      <span class="hljs-comment"># mô hình đưa ra câu trả lời cuối</span>
+            <span class="hljs-keyword">return</span> msg.content
+        <span class="hljs-keyword">for</span> goi <span class="hljs-keyword">in</span> msg.tool_calls:                  <span class="hljs-comment"># thực thi từng lời gọi tool</span>
+            <span class="hljs-keyword">try</span>:
+                ket_qua = ham_tool[goi.function.name](**json.loads(goi.function.arguments))
+            <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> loi:                <span class="hljs-comment"># lỗi được trả về như một kết quả</span>
+                ket_qua = <span class="hljs-string">f&quot;Lỗi: <span class="hljs-subst">{loi}</span>&quot;</span>
+            tin_nhan.append({<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;tool&quot;</span>, <span class="hljs-string">&quot;tool_call_id&quot;</span>: goi.<span class="hljs-built_in">id</span>, <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-built_in">str</span>(ket_qua)})
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Đã dừng vì vượt quá số bước cho phép.&quot;</span>
+</code></pre></div>
+<p>Các thư viện và nền tảng xây agent, được nhắc tới trong roadmap, cung cấp thêm quản lý trạng thái, ghi trace, tích hợp tool và điều phối nhiều agent: OpenAI Agents SDK và AgentKit, Claude Agent SDK, Google Agent Development Kit (ADK) và Vertex AI Agent Builder, cùng các khung mã nguồn mở như LangChain, LangGraph, LlamaIndex. Các thư viện này giúp đi nhanh hơn, nhưng thêm một lớp trừu tượng che bớt prompt và luồng gọi thật sự. Nên bắt đầu bằng vòng lặp đơn giản như trên hoặc một thư viện mỏng, chỉ dùng tới khung phức tạp khi thấy rõ lợi ích, và khi dùng thì bật ghi trace để luôn xem được prompt thật mà mô hình nhận.</p>
+<hr>
+<section class="quiz" data-quiz data-chapter="9"><div class="quiz-head"><h3 class="quiz-title">Tự kiểm tra</h3><p class="quiz-sub">3 câu. Chọn đáp án để xem ngay lời giải thích.</p><button class="quiz-reset btn-ghost" type="button" data-reset>Làm lại</button></div><ol class="quiz-list"><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">1</span><span class="quiz-text">Agent 20 bước, mỗi bước đúng với xác suất 0,95, hoàn thành nhiệm vụ với xác suất khoảng bao nhiêu nếu các bước độc lập?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">95%</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">80%</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">36%</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">5%</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>0,95</mn><mn>20</mn></msup><mo>≈</mo><mn>0,358</mn></mrow><annotation encoding="application/x-tex">0{,}95^{20} \approx 0{,}358</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0085em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">9</span><span class="mord"><span class="mord">5</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">20</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">358</span></span></span></span>. Bước kiểm tra phát hiện 80% lỗi kèm một lần thử lại nâng con số này lên khoảng 79% (<a href="ungdung-ch09.html#sec-9-7" class="xref">Mục 9.7</a>).</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">2</span><span class="quiz-text">Workflow khác agent ở điểm nào?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Workflow không dùng LLM</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Trong workflow, các bước và thứ tự do mã quyết định; trong agent, mô hình tự quyết định bước tiếp theo</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Agent không gọi tool</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Workflow luôn tốn nhiều token hơn</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Nên dùng giải pháp đơn giản nhất đáp ứng yêu cầu; workflow dễ kiểm thử và dự đoán chi phí hơn (<a href="ungdung-ch09.html#sec-9-1" class="xref">Mục 9.1</a>, <a href="ungdung-ch09.html#sec-9-2" class="xref">9.2</a>).</div></li><li class="quiz-q" data-q><p class="quiz-prompt"><span class="quiz-idx">3</span><span class="quiz-text">Khi một tool thất bại trong vòng lặp của agent, nên xử lý thế nào?</span></p><div class="quiz-opts"><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Dừng toàn bộ chương trình</span></button><button class="quiz-opt" type="button" data-correct="1"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Trả về thông báo lỗi dễ hiểu như một kết quả để mô hình tự sửa lời gọi</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Bỏ qua và không báo gì cho mô hình</span></button><button class="quiz-opt" type="button" data-correct="0"><span class="quiz-mark" aria-hidden="true"></span><span class="quiz-opt-text">Tăng temperature rồi gọi lại</span></button></div><div class="quiz-why" hidden><b>Vì sao:</b> Lỗi là kết quả, không phải ngoại lệ; kèm theo đó là giới hạn số bước để tránh vòng lặp vô tận (<a href="ungdung-ch09.html#sec-9-3" class="xref">Mục 9.3</a>, <a href="ungdung-ch09.html#sec-9-8" class="xref">9.8</a>).</div></li></ol><p class="quiz-score" data-score aria-live="polite">Đã trả lời 0/3</p></section></article>
+<nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="ungdung-ch08.html"><span class="pager-dir">← Trước</span><span class="pager-title">Retrieval-Augmented Generation</span></a><a class="pager-link pager-next" href="ungdung-ch10.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Model Context Protocol</span></a></nav>
+</main>
+<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner"><p class="toc-head">Trong trang này</p><ul class="toc-list"><li class="toc-l3"><a href="#sec-9-1"><span class="toc-num">9.1</span><span>Agent là gì</span></a></li><li class="toc-l3"><a href="#sec-9-2"><span class="toc-num">9.2</span><span>Các mẫu workflow</span></a></li><li class="toc-l3"><a href="#sec-9-3"><span class="toc-num">9.3</span><span>Tool và function calling</span></a></li><li class="toc-l3"><a href="#sec-9-4"><span class="toc-num">9.4</span><span>ReAct</span></a></li><li class="toc-l3"><a href="#sec-9-5"><span class="toc-num">9.5</span><span>Lập kế hoạch, bộ nhớ và tự đánh giá</span></a></li><li class="toc-l3"><a href="#sec-9-6"><span class="toc-num">9.6</span><span>Nhiều agent</span></a></li><li class="toc-l3"><a href="#sec-9-7"><span class="toc-num">9.7</span><span>Độ tin cậy và chi phí</span></a></li><li class="toc-l3"><a href="#sec-9-8"><span class="toc-num">9.8</span><span>Xây dựng agent</span></a></li></ul></div></aside>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button" aria-label="Đóng">×</button>
+  <img alt="">
+  <p class="lightbox-cap"></p>
+</div>
+
+<div class="searchpanel" id="searchPanel" hidden>
+  <div class="searchpanel-box" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+    <div class="searchpanel-field">
+      <svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-tim"></use></svg>
+      <input type="search" id="searchInput" placeholder="Gõ từ khoá: scale, zero-point, GPTQ, SQNR…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="searchpanel-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+<script src="assets/router.js" defer></script>
+<script src="assets/preview.js" defer></script>
+
+</body>
+</html>

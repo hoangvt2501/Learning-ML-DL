@@ -23,10 +23,10 @@ Phan ra PPMI bang SVD, giu 8 chieu:
                 12                   0.5875
                 16                   0.2500
                 20                   1.0000
-Bang nay KHONG phai mot duong cong dep: giu 20 chieu (hang day du) lai dat 1,0
-tro lai, vi khi do ta tai dung PPMI chinh xac. Voi tu vung chi 20 tu thi khong
-du cho to ra mot danh doi that su; muon thay duong cong that phai chay tren kho
-ngu lieu that. Bang dua vao day dung de noi ro dieu ay chu khong de ket luan.
+Bang nay khong don dieu: giu 20 chieu (hang day du) lai dat 1,0.
+Tri rieng cua PPMI: 7.28 2.73 2.70 2.68 2.68 2.49 2.46 2.43 -2.09 -2.09 -2.10 -2.10 -2.11 -2.11 -2.12 -2.12 -2.14 -2.14 -2.15 -2.16
+PPMI co 8 tri rieng duong (cau truc hai truc) va 12 tri rieng am (do duong cheo bang 0). SVD khong phan biet dau,
+nen giu 12 hoac 16 chieu la lay them mot phan cac huong ung voi tri rieng am.
 
 Levy & Goldberg (2014) chung minh: skip-gram voi lay mau am AM THAM phan ra
 ma tran PMI dich mot luong log k. Cho dao ham bang 0 se ra dung
@@ -37,8 +37,8 @@ ma tran PMI dich mot luong log k. Cho dao ham bang 0 se ra dung
         20                0.9995              0.0106            0.0251  <- hang day du
 O HANG DAY DU, xuong doc hoi tu ve dung ma tran PMI — day la kiem chung bang so
 cho ket qua ly thuyet o tren, va hai duong tinh khong lien quan gi toi nhau.
-O HANG THAP thi no khong the khop chinh xac, va phai chon giu lai cai gi. Chinh
-su ep buoc ay tao ra embedding co ich: mo hinh buoc phai gom cac tu giong nhau.
+O HANG THAP thi no khong khop chinh xac duoc, va phai chon giu lai phan nao cua
+ma tran; ket qua phu thuoc vao trong so cua ham muc tieu (xem dong duoi).
 
 Do chinh xac loai suy cua embedding skip-gram hang 8: 0.2042
 
@@ -106,10 +106,9 @@ Cai no doi la BO NHO LUC HUAN LUYEN, va do la thu chan nguoi ta lai.
             8,000                        0.6452                  0.8183               0.7545
 Ca ba cot dung CUNG mot cai dat mang, chi khac trong so ban dau cua lop an va
 viec co cap nhat no hay khong — nen so sanh moi co nghia.
-Voi RAT IT nhan, dac trung dong bang thang: no chi phai uoc luong mot lop tuyen
-tinh. Khi du lieu nhieu len, tinh chinh bat kip roi vuot len, vi luc do mo hinh
-du rang buoc de sua lai phan dac trung cho khop nhiem vu. Huan luyen tu dau luon
-di sau tinh chinh cho toi khi du lieu rat nhieu.
+Voi 20 va 50 nhan, ba cot nam trong khoang nhieu cua nhau. Tu 150 nhan tro len,
+tinh chinh toan phan vuot hai cach con lai va khoang cach gian dan; cot dong bang
+gan nhu dung yen tu 500 nhan (tran do dac trung co dinh dat ra).
 
 ==========================================================================
 (F) VAE: beta dieu khien so chieu an con mang thong tin

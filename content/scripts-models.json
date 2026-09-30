@@ -2,11 +2,11 @@
   {
     "file": "experiments.py",
     "added": true,
-    "note": "Sinh Hình 2, 4, 5, 7, 9, 10, 13, 14 cùng mọi số liệu đo được của giáo trình: phân rã thiên lệch–phương sai trên 400 tập huấn luyện, bagging so với boosting, chứng minh kiến tạo cho độ sâu bằng hàm lều, gradient qua 40 lớp với năm cách dựng lớp, RNN so với LSTM theo thời gian, phương sai tích vô hướng và entropy softmax, tính chất tương đối của RoPE, các chiến lược giải mã, và đếm tham số khớp chính xác với GPT-2 cùng Llama-2."
+    "note": "Sinh Hình 2, 4, 5, 7, 9, 10, 13, 14 và mọi số liệu đo được của giáo trình: phân rã độ chệch – phương sai trên 250 tập huấn luyện, bagging so với gradient boosting, phép dựng hàm răng cưa cho thấy lợi ích của độ sâu, gradient qua 40 lớp với sáu cách dựng lớp, gradient theo thời gian của RNN và đường ô nhớ của LSTM, phương sai của tích vô hướng và entropy của attention, tính chất tương đối của RoPE, các chiến lược giải mã, và phép đếm tham số khớp chính xác với GPT-2 và Llama 2."
   },
   {
     "file": "fig_diagrams.py",
     "added": true,
-    "note": "Sinh Hình 1, 3, 6, 8, 11, 12: bản đồ bốn họ mô hình, một cây quyết định và vùng nó chia, đồ thị tính toán của lan truyền ngược, trường tiếp nhận của CNN, cấu trúc một khối Transformer đọc từ dưới lên, và bảng so sánh 2017 với kiến trúc hiện nay. Đây là hình vẽ tay bằng matplotlib, để trong mã nguồn cho sửa được và cho khớp với chữ trong bài."
+    "note": "Sinh Hình 1, 3, 6, 8, 11, 12: bốn họ mô hình, một cây quyết định và các vùng nó chia, lượt xuôi và lượt ngược của lan truyền ngược, trường tiếp nhận của CNN, cấu trúc một khối Transformer, và bảng so sánh Transformer 2017 với các lựa chọn hiện nay. Các sơ đồ được vẽ bằng matplotlib để sửa được cùng với nội dung bài."
   }
 ]

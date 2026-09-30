@@ -2,99 +2,99 @@
   {
     "num": "0",
     "file": "mlops-ch00.html",
-    "label": "Kiến thức nền và quy ước",
-    "summary": "Bảng ký hiệu và quy ước dịch thuật dùng xuyên suốt tài liệu, cùng phần kiến thức cần có trước khi bắt đầu.",
-    "part": "Vì sao hệ ML khó"
+    "label": "Ký hiệu và quy ước",
+    "summary": "Bảng ký hiệu và quy ước thuật ngữ dùng trong giáo trình: sản xuất, phục vụ, dịch chuyển phân phối, lệch huấn luyện–phục vụ, rào chắn.",
+    "part": "Mở đầu"
   },
   {
     "num": "1",
     "file": "mlops-ch01.html",
-    "label": "Vì sao mô hình tốt vẫn chết",
-    "summary": "Nợ kỹ thuật ẩn của hệ thống ML: nguyên lý CACE, mười ba dạng nợ có tên, và cách đọc cho đúng con số 5% mã học máy.",
-    "part": "Vì sao hệ ML khó"
+    "label": "Nợ kỹ thuật của hệ thống học máy",
+    "summary": "Vì sao hệ thống học máy hỏng một cách im lặng: nguyên lý CACE, các dạng nợ kỹ thuật theo Sculley và cộng sự (2015), và cách đọc đúng nhận định về 5% mã học máy.",
+    "part": "Mở đầu"
   },
   {
     "num": "2",
     "file": "mlops-ch02.html",
-    "label": "Vòng đời và ba chữ V",
-    "summary": "Vòng đời ML là vòng lặp; ba biến quyết định thành bại Velocity – Validation – Versioning; ba mức tự động hoá và vì sao ML cần thêm chữ CT.",
-    "part": "Vì sao hệ ML khó"
+    "label": "Vòng đời và mức độ tự động hoá",
+    "summary": "Vòng đời của hệ thống học máy là một vòng lặp; ba yếu tố tốc độ, kiểm định, phiên bản; ba mức tự động hoá của Google Cloud; huấn luyện liên tục so với CI/CD.",
+    "part": "Mở đầu"
   },
   {
     "num": "3",
     "file": "mlops-ch03.html",
-    "label": "Dữ liệu: hợp đồng và phổ lỗi",
-    "summary": "Phổ lỗi cứng → mềm → dịch chuyển và ba cách phản ứng khác nhau; hợp đồng dữ liệu bốn tầng; độ trễ nhãn và phiên bản hoá dữ liệu.",
-    "part": "Vì sao hệ ML khó"
+    "label": "Dữ liệu: hợp đồng, kiểm định và các loại lỗi",
+    "summary": "Ba loại lỗi dữ liệu (cứng, mềm, dịch chuyển) và cách phản ứng với từng loại; hợp đồng dữ liệu bốn tầng; độ trễ nhãn; ba mức phiên bản hoá dữ liệu.",
+    "part": "Dữ liệu và thí nghiệm"
   },
   {
     "num": "4",
     "file": "mlops-ch04.html",
     "label": "Đặc trưng và tính đúng theo thời điểm",
-    "summary": "Hai nỗi đau sinh ra kho đặc trưng: lệch giữa huấn luyện và phục vụ, và rò rỉ nhãn. Point-in-time correctness giải thích bằng SQL và bằng hình.",
-    "part": "Dữ liệu và kiểm thử"
+    "summary": "Lệch giữa huấn luyện và phục vụ, rò rỉ thông tin tương lai, ghép theo thời điểm bằng SQL, ba thành phần của kho đặc trưng và khi nào không cần nó.",
+    "part": "Dữ liệu và thí nghiệm"
   },
   {
     "num": "5",
     "file": "mlops-ch05.html",
     "label": "Thí nghiệm lặp lại được",
-    "summary": "Ba mức lặp lại, sáu thứ phải ghim, ba chỗ hay bị bỏ sót, và sổ đăng ký mô hình tồn tại để làm gì.",
-    "part": "Dữ liệu và kiểm thử"
+    "summary": "Tái lập, tái tạo và tính bền; sáu nhóm yếu tố phải cố định khi huấn luyện; theo dõi thí nghiệm; sổ đăng ký mô hình và thẻ mô hình.",
+    "part": "Dữ liệu và thí nghiệm"
   },
   {
     "num": "6",
     "file": "mlops-ch06.html",
-    "label": "Đánh giá cho sản xuất",
-    "summary": "Vì sao một con số là không đủ: đánh giá theo lát cắt với thí nghiệm đo được, kiểm thử hành vi, và toàn bộ 28 mục của ML Test Score.",
-    "part": "Dữ liệu và kiểm thử"
+    "label": "Đánh giá mô hình cho sản xuất",
+    "summary": "Chỉ số ngoại tuyến và chỉ số sản phẩm, thí nghiệm đánh giá theo lát cắt (tổng thể tăng 19,8 điểm, một nhóm giảm 11,6 điểm), kiểm thử hành vi, và 28 mục của ML Test Score.",
+    "part": "Dữ liệu và thí nghiệm"
   },
   {
     "num": "7",
     "file": "mlops-ch07.html",
-    "label": "Đóng gói và phục vụ",
-    "summary": "Ba chế độ phục vụ, ngân sách độ trễ, và vì sao p99 của một hệ toả nhánh tệ hơn nhiều so với p99 của từng nhánh.",
+    "label": "Đóng gói và phục vụ mô hình",
+    "summary": "Ba chế độ phục vụ, ngân sách độ trễ, phân vị cao của độ trễ khi một yêu cầu toả ra nhiều dịch vụ, và cách đóng gói để môi trường huấn luyện khớp môi trường phục vụ.",
     "part": "Phục vụ và ra mắt"
   },
   {
     "num": "8",
     "file": "mlops-ch08.html",
     "label": "Chiến lược ra mắt",
-    "summary": "Shadow, canary, blue–green và A/B trả lời bốn câu hỏi khác nhau. Cỡ mẫu A/B tỉ lệ nghịch với bình phương mức cải thiện, và ba cái bẫy thống kê.",
+    "summary": "Shadow, canary, blue–green và A/B test trả lời những câu hỏi khác nhau; công thức cỡ mẫu cho A/B test; năm lỗi thống kê thường gặp.",
     "part": "Phục vụ và ra mắt"
   },
   {
     "num": "9",
     "file": "mlops-ch09.html",
     "label": "Dịch chuyển phân phối",
-    "summary": "Ba loại dịch chuyển, loại nào dò được mà không cần nhãn, PSI thực chất là phân kỳ Jeffreys, và vì sao ngưỡng 0,25 không dùng thẳng được.",
+    "summary": "Covariate shift, label shift và concept drift; thí nghiệm cho thấy concept drift không phát hiện được từ X; các phép kiểm tra; PSI và vì sao ngưỡng 0,25 phụ thuộc cỡ mẫu.",
     "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "10",
     "file": "mlops-ch10.html",
     "label": "Giám sát và cảnh báo",
-    "summary": "Bốn lớp giám sát, độ lệch dự đoán, giới hạn hành động, và cách thiết kế cảnh báo để nó không bị mất niềm tin.",
+    "summary": "Chỉ số vận hành và chỉ số riêng của học máy, bốn lớp giám sát, độ lệch dự đoán, giới hạn hành động, nguyên tắc thiết kế cảnh báo, và ngưỡng cố định trong hệ thống thay đổi.",
     "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "11",
     "file": "mlops-ch11.html",
     "label": "Huấn luyện lại",
-    "summary": "Đo giá của việc mô hình cũ đi, bốn loại kích hoạt, huấn luyện lại từ đầu so với học liên tục, và những cửa mà pipeline tự động không được đi tắt.",
+    "summary": "Thí nghiệm đo mức suy giảm của mô hình theo thời gian, bốn loại kích hoạt huấn luyện lại, huấn luyện lại từ đầu so với cập nhật mô hình cũ, và các bước kiểm định của pipeline tự động.",
     "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "12",
     "file": "mlops-ch12.html",
     "label": "Vòng phản hồi",
-    "summary": "Khi mô hình tự tạo ra dữ liệu huấn luyện của mình: vòng phản hồi thoái hoá, thí nghiệm đo mức thiệt hại, và bốn cách chữa.",
+    "summary": "Vòng phản hồi trực tiếp và ẩn, vòng phản hồi thoái hoá trong hệ thống gợi ý, mô phỏng đo thiệt hại và tác dụng của ngẫu nhiên hoá, các cách phát hiện và khắc phục.",
     "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "13",
     "file": "mlops-ch13.html",
     "label": "LLMOps",
-    "summary": "Năm ràng buộc đổi so với MLOps cổ điển: đánh giá ba tầng, thiên lệch của giám khảo LLM, quy lỗi RAG, chi phí theo token và rào chắn.",
+    "summary": "Những gì thay đổi khi dùng mô hình ngôn ngữ lớn: đánh giá ba tầng, thiên lệch của giám khảo LLM, vận hành hệ thống RAG, chi phí và độ trễ theo token, rào chắn, phiên bản hoá.",
     "part": "LLMOps"
   },
   {
@@ -102,24 +102,24 @@
     "file": "mlops-bai-tap.html",
     "label": "Bài tập",
     "kind": "exercises",
-    "summary": "Mười bài tập kèm lời giải chi tiết, và ngân hàng trắc nghiệm theo từng chương."
+    "summary": "Mười bài tập (tính tay, suy luận, thí nghiệm, thiết kế) kèm lời giải chi tiết, và ngân hàng câu hỏi trắc nghiệm theo từng chương."
   },
   {
     "num": "15",
     "file": "mlops-ch15.html",
-    "label": "Ôn phỏng vấn",
-    "summary": "Khung trả lời bốn bước, các nhóm câu hỏi thường gặp kèm câu trả lời mẫu có số liệu, và những câu trả lời tự tố cáo."
+    "label": "Câu hỏi phỏng vấn",
+    "summary": "Cách trình bày câu trả lời, các câu hỏi thường gặp theo năm nhóm chủ đề kèm câu trả lời có số liệu, trình tự thiết kế hệ thống, và các câu trả lời chưa đạt."
   },
   {
     "num": "16",
     "file": "mlops-ch16.html",
     "label": "Tài liệu tham khảo",
-    "summary": "Hai mươi nguồn, mỗi nguồn ghi rõ nó là nguồn của khẳng định nào trong tài liệu."
+    "summary": "Hai mươi chín nguồn, mỗi nguồn ghi rõ được dùng cho nội dung nào trong giáo trình."
   },
   {
     "num": "PL",
     "file": "mlops-phu-luc.html",
     "label": "Phụ lục: chạy lại thí nghiệm",
-    "summary": "Cây thư mục mã nguồn và các lệnh để tái lập toàn bộ hình vẽ cùng số liệu."
+    "summary": "Cây thư mục mã nguồn và các lệnh để tái lập toàn bộ hình vẽ và số liệu."
   }
 ]

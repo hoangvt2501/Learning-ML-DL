@@ -2,117 +2,117 @@
   {
     "num": "0",
     "file": "models-ch00.html",
-    "label": "Kiến thức nền và quy ước",
-    "summary": "Bảng ký hiệu dùng xuyên suốt và quy ước dịch thuật — trong đó chỗ dễ nhầm nhất là hai nghĩa khác nhau của chữ bias.",
-    "part": "Từ tuyến tính tới mạng sâu"
+    "label": "Ký hiệu và quy ước",
+    "summary": "Bảng ký hiệu, quy ước thuật ngữ theo cheatsheet tiếng Việt của Stanford, và ba nghĩa của chữ bias: độ chệch, hệ số chặn và thiên kiến quy nạp.",
+    "part": "Mở đầu"
   },
   {
     "num": "1",
     "file": "models-ch01.html",
-    "label": "Bản đồ các họ mô hình",
-    "summary": "Bốn câu hỏi thiết kế mà mọi kiến trúc đều phải trả lời, và bốn họ mô hình đọc như bốn bộ câu trả lời khác nhau cho cùng bốn câu hỏi ấy.",
-    "part": "Từ tuyến tính tới mạng sâu"
+    "label": "Các họ mô hình",
+    "summary": "Bốn câu hỏi khi thiết kế một mô hình, so sánh mô hình tuyến tính, cây, mạng nơ-ron và Transformer, vì sao cây vẫn mạnh trên dữ liệu dạng bảng, và khái niệm thiên kiến quy nạp.",
+    "part": "Từ học máy cổ điển tới học sâu"
   },
   {
     "num": "2",
     "file": "models-ch02.html",
-    "label": "Đánh đổi thiên lệch – phương sai",
-    "summary": "Phân rã sai số thành thiên lệch², phương sai và nhiễu — đo thật trên 400 tập huấn luyện — rồi dùng nó để phân biệt \"cần mô hình mạnh hơn\" với \"cần nhiều dữ liệu hơn\".",
-    "part": "Từ tuyến tính tới mạng sâu"
+    "label": "Độ chệch và phương sai",
+    "summary": "Chứng minh phân rã độ chệch – phương sai, đo từng thành phần trên 250 tập huấn luyện mô phỏng, chẩn đoán bằng đường cong học, và hiện tượng double descent.",
+    "part": "Từ học máy cổ điển tới học sâu"
   },
   {
     "num": "3",
     "file": "models-ch03.html",
-    "label": "Cây quyết định và học tập hợp",
-    "summary": "Cây chia không gian bằng các nhát cắt trực giao; bagging cắt phương sai, boosting cắt thiên lệch. Có số đo cho thấy đúng mỗi cách cắt vào đâu.",
-    "part": "Từ tuyến tính tới mạng sâu"
+    "label": "Cây quyết định và phương pháp tập hợp",
+    "summary": "Cây quyết định và cách chọn phép chia, bagging và rừng ngẫu nhiên giảm phương sai, gradient boosting giảm độ chệch, kèm số đo trên cùng bài toán và các siêu tham số quan trọng.",
+    "part": "Từ học máy cổ điển tới học sâu"
   },
   {
     "num": "4",
     "file": "models-ch04.html",
     "label": "Mạng nơ-ron nhiều lớp",
-    "summary": "Vì sao hợp các phép biến đổi tuyến tính không được gì, các hàm kích hoạt thay nhau vì lý do gì, và một chứng minh kiến tạo cho câu \"độ sâu mua được sự gọn gàng\".",
-    "part": "Từ tuyến tính tới mạng sâu"
+    "summary": "Vì sao cần hàm kích hoạt phi tuyến, các hàm kích hoạt thông dụng, định lý xấp xỉ phổ quát, và một phép dựng cho thấy độ sâu tiết kiệm số tham số theo cấp số mũ.",
+    "part": "Mạng nơ-ron và cách huấn luyện"
   },
   {
     "num": "5",
     "file": "models-ch05.html",
-    "label": "Lan truyền ngược và tối ưu hoá",
-    "summary": "Lan truyền ngược là quy tắc chuỗi nhân từ phải sang trái, và lý do của thứ tự ấy là chi phí. Kèm SGD, momentum, Adam, AdamW và lý do có bước hiệu chỉnh thiên lệch.",
-    "part": "Huấn luyện mạng sâu"
+    "label": "Lan truyền ngược và các thuật toán tối ưu",
+    "summary": "Lan truyền ngược và lý do nó rẻ, bộ nhớ cho giá trị kích hoạt, SGD, momentum, Adam và hiệu chỉnh độ chệch, AdamW, lịch tốc độ học, và một ví dụ tính tay đầy đủ.",
+    "part": "Mạng nơ-ron và cách huấn luyện"
   },
   {
     "num": "6",
     "file": "models-ch06.html",
     "label": "Khởi tạo, chuẩn hoá và kết nối tắt",
-    "summary": "Ba cơ chế cùng chữa một bệnh: tín hiệu co lại hoặc phình ra qua nhiều lớp. Đo trên mạng 40 lớp cho thấy chúng cộng dồn, và kết nối tắt một mình thì làm bùng nổ.",
-    "part": "Huấn luyện mạng sâu"
+    "summary": "Suy ra khởi tạo Xavier và He, đo gradient qua mạng 40 lớp với sáu cách dựng lớp, BatchNorm, LayerNorm và RMSNorm, kết nối tắt, dropout và các phương pháp regularization khác.",
+    "part": "Mạng nơ-ron và cách huấn luyện"
   },
   {
     "num": "7",
     "file": "models-ch07.html",
-    "label": "Mạng tích chập",
-    "summary": "Ba giả thiết quy nạp của tích chập và ba món lợi tương ứng; cách tính trường tiếp nhận; vì sao tích chập tách được theo chiều sâu lại rẻ tới vậy.",
-    "part": "Thị giác và chuỗi"
+    "label": "Mạng nơ-ron tích chập",
+    "summary": "Phép tích chập, kích thước đầu ra, số tham số và số phép tính, trường tiếp nhận, các khối thường dùng, và so sánh CNN với Vision Transformer theo thiên kiến quy nạp.",
+    "part": "Mạng tích chập và mạng hồi quy"
   },
   {
     "num": "8",
     "file": "models-ch08.html",
-    "label": "Mạng hồi quy và giới hạn của nó",
-    "summary": "Gradient của RNN là một tích các Jacobi, nên nó tiêu biến hoặc bùng nổ. LSTM chữa được phần nào, nhưng giới hạn thật sự là tính tuần tự — và đó là điều Transformer phá bỏ.",
-    "part": "Thị giác và chuỗi"
+    "label": "Mạng nơ-ron hồi quy",
+    "summary": "RNN và lan truyền ngược theo thời gian, đo gradient tiêu biến và bùng nổ, LSTM và vai trò của cổng quên, GRU, và giới hạn về tính song song khiến Transformer thay thế RNN.",
+    "part": "Mạng tích chập và mạng hồi quy"
   },
   {
     "num": "9",
     "file": "models-ch09.html",
     "label": "Attention và Transformer",
-    "summary": "Attention như một phép tra cứu từ điển lấy đạo hàm được, phép chia √dₖ được suy ra và đo bằng entropy, nhiều đầu mua được gì, và bên trong một khối có những gì.",
+    "summary": "Scaled dot-product attention, chứng minh và đo lý do chia cho √dₖ, attention nhiều đầu, mặt nạ, cấu trúc một khối Transformer, mã hoá vị trí và ba kiểu kiến trúc encoder, decoder, encoder–decoder.",
     "part": "Transformer và mô hình ngôn ngữ"
   },
   {
     "num": "10",
     "file": "models-ch10.html",
-    "label": "Transformer hiện đại",
-    "summary": "Năm chi tiết đã đổi từ 2017 tới nay: pre-LN, RMSNorm, RoPE, GQA và SwiGLU — mỗi cái kèm vấn đề nó sinh ra để chữa và cái giá phải trả.",
+    "label": "Các cải tiến của Transformer",
+    "summary": "Pre-LN, RoPE, MQA và GQA, SwiGLU, mixture of experts và FlashAttention: mỗi thay đổi kèm vấn đề nó giải quyết và cái giá của nó.",
     "part": "Transformer và mô hình ngôn ngữ"
   },
   {
     "num": "11",
     "file": "models-ch11.html",
-    "label": "Sinh văn bản: các chiến lược giải mã",
-    "summary": "Greedy, beam, nhiệt độ, top-k và top-p nhào nặn cùng một phân phối theo những cách khác nhau — đo bằng entropy và bằng số token còn sống sót.",
+    "label": "Các chiến lược giải mã",
+    "summary": "Greedy, beam search, nhiệt độ, top-k và top-p, đo tác động lên một phân phối đuôi dài, vì sao beam search kém với văn bản mở, và các vấn đề giải mã trong hệ thống thực tế.",
     "part": "Transformer và mô hình ngôn ngữ"
   },
   {
     "num": "12",
     "file": "models-ch12.html",
-    "label": "Đếm tham số, FLOP và bộ nhớ",
-    "summary": "Các công thức 12Ld², C ≈ 6ND và ngưỡng T > 6d, kiểm chứng khớp chính xác với số tham số công bố của GPT-2 và Llama-2 cùng ngân sách giờ-GPU của Llama-2 7B.",
+    "label": "Tham số, FLOP và bộ nhớ của Transformer",
+    "summary": "Công thức 12Ld², C ≈ 6ND và bộ nhớ khi huấn luyện, suy luận; kiểm chứng khớp chính xác với số tham số của GPT-2 và Llama 2, và ngân sách huấn luyện Llama 2 7B.",
     "part": "Transformer và mô hình ngôn ngữ"
   },
   {
     "num": "13",
     "file": "models-bai-tap.html",
     "label": "Bài tập",
-    "summary": "Mười bài tập kèm lời giải chi tiết, và ngân hàng trắc nghiệm theo từng chương.",
+    "summary": "Mười bài tập có lời giải chi tiết và ngân hàng câu hỏi trắc nghiệm theo từng chương.",
     "kind": "exercises"
   },
   {
     "num": "14",
     "file": "models-ch14.html",
-    "label": "Ôn phỏng vấn",
-    "summary": "Khung trả lời ba bước cho mọi câu \"vì sao X\", các câu hỏi thường gặp theo bốn nhóm kèm con số để dẫn ra, và mười câu trả lời tự tố cáo người nói chỉ học thuộc."
+    "label": "Câu hỏi phỏng vấn",
+    "summary": "Cách trình bày câu trả lời, các câu hỏi thường gặp theo bốn nhóm chủ đề kèm câu trả lời mẫu dẫn số liệu, và bảng các câu trả lời chưa đạt."
   },
   {
     "num": "15",
     "file": "models-ch15.html",
     "label": "Tài liệu tham khảo",
-    "summary": "Ba mươi bốn nguồn, mỗi nguồn kèm ghi chú nó là nguồn gốc của kết quả nào được dùng trong tài liệu."
+    "summary": "Sách và bài báo gốc theo nhóm chủ đề, mỗi nguồn ghi rõ được dùng cho nội dung nào của giáo trình."
   },
   {
     "num": "PL",
     "file": "models-phu-luc.html",
     "label": "Phụ lục: chạy lại thí nghiệm",
-    "summary": "Cây thư mục mã nguồn, các lệnh để tái lập toàn bộ hình vẽ cùng số liệu, và ranh giới giữa phần mô phỏng và phần đối chiếu với số đã công bố."
+    "summary": "Cấu trúc mã nguồn, lệnh chạy lại toàn bộ thí nghiệm, và phân biệt giữa số liệu mô phỏng với phép đối chiếu con số đã công bố."
   }
 ]

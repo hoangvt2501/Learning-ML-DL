@@ -96,10 +96,10 @@ window.QZ_INIT['labBieudien'] = function () {
       so('rlEr', fmt(er(pi)));
       so('rlMax', fmt(Math.max.apply(null, pi)));
       so('rlNote', beta < 0.1
-        ? 'β rất nhỏ: gần như bỏ qua π_ref, dồn xác suất vào câu thưởng cao nhất. Đây là vùng dễ lách điểm thưởng nhất.'
+        ? 'β rất nhỏ: gần như bỏ qua π_ref, dồn xác suất vào câu trả lời có phần thưởng cao nhất. Đây là vùng dễ bị lách phần thưởng nhất.'
         : beta > 5
           ? 'β rất lớn: π* gần trùng π_ref, mô hình hầu như không học được gì từ phần thưởng.'
-          : 'Hai số bên trái đi CÙNG chiều: muốn thưởng cao hơn thì phải chấp nhận lệch xa π_ref hơn. Không có giá trị β nào "đúng" — chỉ có vị trí ta chọn trên đường cong bên phải.');
+          : 'KL và phần thưởng tăng giảm cùng nhau: muốn phần thưởng cao hơn thì phải chấp nhận lệch xa π_ref hơn. β chọn một vị trí trên đường đánh đổi bên phải.');
     }
     nghe(['rlBeta'], chay);
   })();
@@ -152,10 +152,10 @@ window.QZ_INIT['labBieudien'] = function () {
       so('dfSnr', snr < 1e-2 ? snr.toExponential(2).replace('.', ',') : fmt(snr, 4));
       so('dfBd', fmt(Math.sqrt(an) * 100, 2) + '%');
       so('dfNote', t < 60
-        ? 'SNR rất cao: ảnh gần như nguyên vẹn. Ở đây mô hình phải học CHI TIẾT ở mức điểm ảnh — phân biệt nhiễu với kết cấu thật.'
+        ? 'SNR rất cao: tín hiệu gần như nguyên vẹn. Ở các bước này, việc khử nhiễu liên quan tới chi tiết nhỏ: phân biệt nhiễu với kết cấu thật.'
         : t > 700
-          ? 'SNR rất thấp: chi tiết mất sạch, chỉ còn những gì biên độ lớn nhất. Ở đây mô hình chỉ học được BỐ CỤC THÔ.'
-          : 'Vùng giữa: SNR quanh 1. Kéo về hai đầu để thấy mô hình học hai thứ khác hẳn nhau ở hai đầu lịch nhiễu.');
+          ? 'SNR rất thấp: chi tiết đã mất, chỉ còn các thành phần biên độ lớn. Ở các bước này, việc khử nhiễu liên quan tới bố cục tổng thể.'
+          : 'Vùng giữa: SNR quanh 1. Kéo về hai đầu để thấy việc khử nhiễu ở hai đầu lịch nhiễu khác nhau thế nào.');
     }
     nghe(['dfT'], chay);
   })();
@@ -190,8 +190,8 @@ window.QZ_INIT['labBieudien'] = function () {
       so('loFull', fmt(tongFull / Math.pow(2, 30), 1) + ' GiB');
       so('loVua', tongFull / Math.pow(2, 30) > 80 ? 'KHÔNG vừa A100 80 GB' : 'vừa A100 80 GB');
       so('loNote', 2 * r / d < 0.005
-        ? 'Tỉ lệ 2r/d GIẢM khi d tăng — mô hình càng lớn thì LoRA càng có lợi, và lợi theo cấp số.'
-        : 'Hãy tăng d lên 4096 hay 8192 để thấy tỉ lệ 2r/d tụt xuống. Đó là lý do LoRA hợp nhất với mô hình rất lớn.');
+        ? 'Tỉ lệ 2r/d giảm khi d tăng: mô hình càng lớn, LoRA càng tiết kiệm.'
+        : 'Tăng d lên 4096 hoặc 8192 để thấy tỉ lệ 2r/d giảm, lý do LoRA đặc biệt có lợi với mô hình lớn.');
     }
     nghe(['loD', 'loL', 'loR', 'loN', 'loQV'], chay);
   })();

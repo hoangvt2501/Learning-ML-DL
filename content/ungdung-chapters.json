@@ -1,0 +1,139 @@
+[
+  {
+    "num": "0",
+    "file": "ungdung-ch00.html",
+    "label": "Ký hiệu và quy ước",
+    "summary": "Quy ước thuật ngữ cho một lĩnh vực mà phần lớn khái niệm xuất hiện bằng tiếng Anh, bảng ký hiệu, và cách giáo trình nói về tên sản phẩm và giá.",
+    "part": "Mở đầu"
+  },
+  {
+    "num": "1",
+    "file": "ungdung-ch01.html",
+    "label": "Kỹ sư AI",
+    "summary": "Công việc của kỹ sư AI, khác biệt với kỹ sư học máy, phát triển dựa trên đánh giá, các thuật ngữ cơ bản và cấu trúc của một ứng dụng dùng LLM.",
+    "part": "Mở đầu"
+  },
+  {
+    "num": "2",
+    "file": "ungdung-ch02.html",
+    "label": "Mô hình ngôn ngữ lớn nhìn từ phía ứng dụng",
+    "summary": "Token và tokenizer đo trên văn bản tiếng Việt, cửa sổ ngữ cảnh và KV cache, tham số lấy mẫu, các giai đoạn huấn luyện, độ trễ, chi phí và các giới hạn cố hữu.",
+    "part": "Làm việc với mô hình ngôn ngữ"
+  },
+  {
+    "num": "3",
+    "file": "ungdung-ch03.html",
+    "label": "Chọn và triển khai mô hình",
+    "summary": "Mô hình gốc, chỉ dẫn và suy luận; mô hình đóng và mở trọng số; tính bộ nhớ khi tự triển khai; Hugging Face, Ollama, LM Studio, vLLM; gọi API; quy trình chọn mô hình.",
+    "part": "Làm việc với mô hình ngôn ngữ"
+  },
+  {
+    "num": "4",
+    "file": "ungdung-ch04.html",
+    "label": "Prompt engineering",
+    "summary": "Cấu trúc của một prompt, zero-shot và few-shot, chain-of-thought, đầu ra có cấu trúc, function calling, prompt caching, streaming và quản lý prompt trong mã nguồn.",
+    "part": "Làm việc với mô hình ngôn ngữ"
+  },
+  {
+    "num": "5",
+    "file": "ungdung-ch05.html",
+    "label": "Context engineering",
+    "summary": "Quản lý toàn bộ ngữ cảnh ở mỗi lần gọi: nguồn ngữ cảnh, ngân sách token, thí nghiệm tìm dữ kiện theo vị trí trong ngữ cảnh dài, bộ nhớ, cô lập ngữ cảnh và các kiểu hỏng.",
+    "part": "Làm việc với mô hình ngôn ngữ"
+  },
+  {
+    "num": "6",
+    "file": "ungdung-ch06.html",
+    "label": "Embedding và tìm kiếm ngữ nghĩa",
+    "summary": "Embedding văn bản và huấn luyện tương phản, chọn mô hình, độ tương đồng, ứng dụng, và thí nghiệm so sánh BM25, LSA, e5-small và tìm kiếm kết hợp trên văn bản tiếng Việt.",
+    "part": "Truy xuất và RAG"
+  },
+  {
+    "num": "7",
+    "file": "ungdung-ch07.html",
+    "label": "Cơ sở dữ liệu vector",
+    "summary": "Chi phí tìm kiếm chính xác, chỉ mục IVF, product quantization, đồ thị láng giềng và HNSW đo trên cùng dữ liệu, lọc theo metadata, và cách chọn công cụ.",
+    "part": "Truy xuất và RAG"
+  },
+  {
+    "num": "8",
+    "file": "ungdung-ch08.html",
+    "label": "Retrieval-Augmented Generation",
+    "summary": "Khi nào dùng RAG, quy trình lập chỉ mục và trả lời, chia đoạn, cải thiện truy xuất, thí nghiệm RAG trả lời trắc nghiệm, đánh giá và các cách hiện thực.",
+    "part": "Truy xuất và RAG"
+  },
+  {
+    "num": "9",
+    "file": "ungdung-ch09.html",
+    "label": "Agent",
+    "summary": "Agent và workflow, function calling, ReAct, lập kế hoạch và bộ nhớ, hệ nhiều agent, phân tích độ tin cậy của agent nhiều bước, và cách xây một agent.",
+    "part": "Agent và MCP"
+  },
+  {
+    "num": "10",
+    "file": "ungdung-ch10.html",
+    "label": "Model Context Protocol",
+    "summary": "Bài toán tích hợp, kiến trúc host, client, server, tools, resources và prompts, JSON-RPC và thiết kế phi trạng thái của đặc tả 2026-07-28, xây server và các rủi ro an toàn.",
+    "part": "Agent và MCP"
+  },
+  {
+    "num": "11",
+    "file": "ungdung-ch11.html",
+    "label": "An toàn và đạo đức",
+    "summary": "OWASP Top 10 cho ứng dụng LLM, thí nghiệm prompt injection gián tiếp với bốn cách viết prompt, dữ liệu nhạy cảm, thiên kiến và công bằng, rào chắn và các thực hành an toàn.",
+    "part": "An toàn, đánh giá và vận hành"
+  },
+  {
+    "num": "12",
+    "file": "ungdung-ch12.html",
+    "label": "Đánh giá ứng dụng LLM",
+    "summary": "Ba loại đánh giá, các thước đo, cần bao nhiêu câu hỏi để một kết luận đáng tin, so sánh ghép cặp bằng kiểm định McNemar, và kiểm thử hồi quy.",
+    "part": "An toàn, đánh giá và vận hành"
+  },
+  {
+    "num": "13",
+    "file": "ungdung-ch13.html",
+    "label": "Quan sát và vận hành",
+    "summary": "Những gì cần ghi lại, trace và span theo OpenTelemetry, theo dõi chi phí và độ trễ, giám sát chất lượng trong sản xuất và quyền riêng tư của log.",
+    "part": "An toàn, đánh giá và vận hành"
+  },
+  {
+    "num": "14",
+    "file": "ungdung-ch14.html",
+    "label": "AI đa phương thức",
+    "summary": "Các bài toán đa phương thức, cách mô hình ngôn ngữ đọc ảnh và vì sao ảnh tốn token, video, sinh ảnh, nhận dạng và tổng hợp tiếng nói.",
+    "part": "Mở rộng"
+  },
+  {
+    "num": "15",
+    "file": "ungdung-ch15.html",
+    "label": "Công cụ lập trình có hỗ trợ AI",
+    "summary": "Các loại công cụ, bằng chứng từ hai thí nghiệm có đối chứng về hiệu quả, và cách dùng an toàn.",
+    "part": "Mở rộng"
+  },
+  {
+    "num": "16",
+    "file": "ungdung-bai-tap.html",
+    "label": "Bài tập",
+    "kind": "exercises",
+    "summary": "Mười bài tập có lời giải chi tiết và ngân hàng câu hỏi trắc nghiệm theo từng chương."
+  },
+  {
+    "num": "17",
+    "file": "ungdung-ch17.html",
+    "label": "Câu hỏi phỏng vấn",
+    "summary": "Câu hỏi thường gặp khi phỏng vấn vị trí kỹ sư AI theo năm nhóm chủ đề, kèm câu trả lời mẫu và những câu trả lời chưa đạt."
+  },
+  {
+    "num": "18",
+    "file": "ungdung-ch18.html",
+    "label": "Tài liệu tham khảo",
+    "summary": "Đặc tả, bài báo gốc và báo cáo kỹ thuật, mỗi nguồn ghi rõ được dùng cho phần nào của giáo trình."
+  },
+  {
+    "num": "PL",
+    "file": "ungdung-phu-luc.html",
+    "label": "Phụ lục: chạy lại thí nghiệm",
+    "summary": "Cấu trúc mã nguồn, lệnh chạy lại, bản chụp dữ liệu và giới hạn của các thí nghiệm dùng mô hình nhỏ."
+  }
+]

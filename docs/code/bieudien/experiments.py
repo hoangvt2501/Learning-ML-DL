@@ -1,4 +1,4 @@
-"""Thí nghiệm cho giáo trình "Biểu diễn, Sinh và Căn chỉnh".
+"""Thí nghiệm cho giáo trình "Biểu diễn & Căn chỉnh".
 
 Mọi con số thực nghiệm trong tài liệu đều in ra từ script này. Hạt giống cố định
 nên chạy lại cho kết quả y hệt.
@@ -143,10 +143,12 @@ for dim in [2, 4, 6, 8, 12, 16, 20]:
     a_, _ = do_loai_suy(Ed)
     sao = "  <- dung o day" if dim == DIM else ""
     print(f"{dim:18d}{a_:25.4f}{sao}")
-print("Bang nay KHONG phai mot duong cong dep: giu 20 chieu (hang day du) lai dat 1,0")
-print("tro lai, vi khi do ta tai dung PPMI chinh xac. Voi tu vung chi 20 tu thi khong")
-print("du cho to ra mot danh doi that su; muon thay duong cong that phai chay tren kho")
-print("ngu lieu that. Bang dua vao day dung de noi ro dieu ay chu khong de ket luan.")
+print("Bang nay khong don dieu: giu 20 chieu (hang day du) lai dat 1,0.")
+tri_rieng = np.sort(np.linalg.eigvalsh(PPMI))[::-1]
+print("Tri rieng cua PPMI: " + " ".join(f"{x:.2f}" for x in tri_rieng))
+print(f"PPMI co {int((tri_rieng > 0).sum())} tri rieng duong (cau truc hai truc) va "
+      f"{int((tri_rieng < 0).sum())} tri rieng am (do duong cheo bang 0). SVD khong phan biet dau,")
+print("nen giu 12 hoac 16 chieu la lay them mot phan cac huong ung voi tri rieng am.")
 
 # ---- Buoc 3: skip-gram that su dang toi uu cai gi -----------------
 cw = dong_hien.sum(1)
@@ -193,8 +195,8 @@ for dim in (8, V):
 
 print("O HANG DAY DU, xuong doc hoi tu ve dung ma tran PMI — day la kiem chung bang so")
 print("cho ket qua ly thuyet o tren, va hai duong tinh khong lien quan gi toi nhau.")
-print("O HANG THAP thi no khong the khop chinh xac, va phai chon giu lai cai gi. Chinh")
-print("su ep buoc ay tao ra embedding co ich: mo hinh buoc phai gom cac tu giong nhau.")
+print("O HANG THAP thi no khong khop chinh xac duoc, va phai chon giu lai phan nao cua")
+print("ma tran; ket qua phu thuoc vao trong so cua ham muc tieu (xem dong duoi).")
 
 E_sg = W_low / np.linalg.norm(W_low, axis=1, keepdims=True)
 a_sg, _ = do_loai_suy(E_sg)
@@ -250,7 +252,7 @@ ax.plot(Vs, [b[1] for b in Brows], "-o", ms=5, color=C_BAD, label="softmax đầ
 ax.plot(Vs, [b[2] for b in Brows], "-o", ms=5, color=C_MAIN, label="lấy mẫu âm, $k=5$")
 ax.set_xscale("log"); ax.set_yscale("log")
 ax.set_xlabel("kích thước từ vựng $V$"); ax.set_ylabel("phép tính mỗi cặp (log)")
-ax.set_title("Lấy mẫu âm cắt đứt phụ thuộc vào $V$", fontsize=9)
+ax.set_title("Chi phí mỗi cặp huấn luyện theo kích thước từ vựng", fontsize=9)
 ax.legend(frameon=False, fontsize=8)
 fig.tight_layout(); fig.savefig(OUT + "bd03_negsampling.png"); plt.close(fig)
 
@@ -398,10 +400,9 @@ for n in [20, 50, 150, 500, 2000, 8000]:
     print(f"{n:17,}{a_fr:30.4f}{a_ft:24.4f}{a_sc:21.4f}")
 print("Ca ba cot dung CUNG mot cai dat mang, chi khac trong so ban dau cua lop an va")
 print("viec co cap nhat no hay khong — nen so sanh moi co nghia.")
-print("Voi RAT IT nhan, dac trung dong bang thang: no chi phai uoc luong mot lop tuyen")
-print("tinh. Khi du lieu nhieu len, tinh chinh bat kip roi vuot len, vi luc do mo hinh")
-print("du rang buoc de sua lai phan dac trung cho khop nhiem vu. Huan luyen tu dau luon")
-print("di sau tinh chinh cho toi khi du lieu rat nhieu.")
+print("Voi 20 va 50 nhan, ba cot nam trong khoang nhieu cua nhau. Tu 150 nhan tro len,")
+print("tinh chinh toan phan vuot hai cach con lai va khoang cach gian dan; cot dong bang")
+print("gan nhu dung yen tu 500 nhan (tran do dac trung co dinh dat ra).")
 
 fig, ax = plt.subplots(figsize=(5.8, 3.2))
 ns = [e[0] for e in Erows]
@@ -410,7 +411,7 @@ ax.plot(ns, [e[2] for e in Erows], "-o", ms=5, color=C_WARN, label="tinh chỉnh
 ax.plot(ns, [e[3] for e in Erows], "-o", ms=5, color=C_BAD, label="huấn luyện từ đầu")
 ax.set_xscale("log"); ax.set_xlabel("số mẫu có nhãn (log)")
 ax.set_ylabel("độ chính xác trên tập kiểm tra")
-ax.set_title("Ít nhãn thì đóng băng thắng; nhiều nhãn thì ngược lại", fontsize=9)
+ax.set_title("Độ chính xác theo số mẫu có nhãn", fontsize=9)
 ax.legend(frameon=False, fontsize=8, loc="lower right")
 fig.tight_layout(); fig.savefig(OUT + "bd06_transfer.png"); plt.close(fig)
 
@@ -486,7 +487,7 @@ ax[0].plot(bs, [f[1] for f in Frows], "-o", ms=5, color=C_BAD, label="sai số t
 ax[0].plot(bs, [f[2] for f in Frows], "-o", ms=5, color=C_MAIN, label="tổng KL")
 ax[0].set_xscale("symlog", linthresh=.05); ax[0].set_yscale("log")
 ax[0].set_xlabel("$\\beta$"); ax[0].set_ylabel("giá trị (log)")
-ax[0].set_title("Tăng $\\beta$ đổi tái dựng lấy KL nhỏ", fontsize=9)
+ax[0].set_title("Sai số tái dựng và tổng KL theo $\\beta$", fontsize=9)
 ax[0].legend(frameon=False, fontsize=8)
 ax[1].plot(bs, [f[3] for f in Frows], "-o", ms=6, color=C_WARN)
 ax[1].axhline(2, ls=":", color=C_DIM)
@@ -494,7 +495,7 @@ ax[1].text(0.06, 2.15, "số yếu tố thật = 2", fontsize=7.5, color=C_DIM)
 ax[1].set_xscale("symlog", linthresh=.05)
 ax[1].set_xlabel("$\\beta$"); ax[1].set_ylabel("số chiều ẩn còn sống")
 ax[1].set_yticks(range(0, D_Z + 1))
-ax[1].set_title("Các chiều thừa chết dần khi $\\beta$ tăng", fontsize=9)
+ax[1].set_title("Số chiều ẩn còn mang thông tin theo $\\beta$", fontsize=9)
 fig.tight_layout(); fig.savefig(OUT + "bd08_vae.png"); plt.close(fig)
 
 
@@ -739,7 +740,7 @@ ax[1].set_xticks(x_)
 ax[1].set_xticklabels(["0", "0,05", "0,1", "0,3", "1,0"])
 ax[1].set_xlabel("$\\varepsilon$"); ax[1].set_ylabel("% số lần tới được đích")
 ax[1].legend(frameon=False, fontsize=7)
-ax[1].set_title("Khởi tạo $Q$ quyết định nhiều như $\\varepsilon$", fontsize=9)
+ax[1].set_title("Tỉ lệ tới đích theo $\\varepsilon$ ở ba cấu hình", fontsize=9)
 fig.tight_layout(); fig.savefig(OUT + "bd12_rl.png"); plt.close(fig)
 
 

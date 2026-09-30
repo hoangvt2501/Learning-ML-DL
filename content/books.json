@@ -78,12 +78,12 @@
     "solutions": "content/models-loi-giai.md",
     "code": "models",
     "figures": true,
-    "blurb": "Từ đánh đổi thiên lệch–phương sai tới RoPE, GQA và SwiGLU. Mỗi cơ chế đi kèm vấn đề nó sinh ra để chữa, một con số đo được, và cái giá phải trả.",
+    "blurb": "Từ phân rã độ chệch – phương sai, cây quyết định và phương pháp tập hợp, qua mạng nơ-ron, lan truyền ngược, mạng tích chập, mạng hồi quy, tới Transformer, RoPE, GQA, FlashAttention và cách ước lượng tham số, FLOP, bộ nhớ của mô hình ngôn ngữ lớn.",
     "paths": [
       {
-        "tag": "Lần đầu học mô hình",
-        "title": "Nền tảng trước đã",
-        "note": "Bốn chương đầu cho bạn khung tư duy: bản đồ các họ, phân rã sai số, cây, và mạng nơ-ron.",
+        "tag": "Đọc theo lộ trình",
+        "title": "Từ học máy cổ điển sang học sâu",
+        "note": "Bốn chương đầu nối tiếp giáo trình Nền tảng: các họ mô hình, độ chệch và phương sai, phương pháp tập hợp, rồi mạng nơ-ron nhiều lớp.",
         "steps": [
           "1",
           "2",
@@ -92,21 +92,19 @@
         ]
       },
       {
-        "tag": "Sắp đi phỏng vấn",
-        "title": "Lối đi ngắn nhất tới câu trả lời chắc",
-        "note": "Bốn chương bị hỏi nhiều nhất, rồi vào thẳng phần ôn phỏng vấn.",
+        "tag": "Huấn luyện mạng sâu",
+        "title": "Vì sao mạng sâu khó huấn luyện",
+        "note": "Lan truyền ngược và thuật toán tối ưu, khởi tạo, chuẩn hoá, kết nối tắt, rồi gradient theo thời gian trong mạng hồi quy.",
         "steps": [
-          "2",
+          "5",
           "6",
-          "9",
-          "12",
-          "14"
+          "8"
         ]
       },
       {
-        "tag": "Chỉ quan tâm LLM",
+        "tag": "Mô hình ngôn ngữ lớn",
         "title": "Từ attention tới Llama",
-        "note": "Đi thẳng vào Transformer, những gì đã đổi từ 2017, giải mã, và cách đếm tài nguyên.",
+        "note": "Transformer, các cải tiến từ 2017 tới nay, các chiến lược giải mã, và cách ước lượng tài nguyên.",
         "steps": [
           "9",
           "10",
@@ -115,20 +113,21 @@
         ]
       },
       {
-        "tag": "Huấn luyện mạng sâu",
-        "title": "Vì sao nó không chịu học",
-        "note": "Ba chương về lan truyền ngược, khởi tạo, chuẩn hoá, kết nối tắt và gradient theo thời gian.",
+        "tag": "Chuẩn bị phỏng vấn",
+        "title": "Các chương được hỏi nhiều nhất",
+        "note": "Độ chệch và phương sai, huấn luyện mạng sâu, attention, tài nguyên, rồi phần câu hỏi phỏng vấn.",
         "steps": [
-          "5",
+          "2",
           "6",
-          "7",
-          "8"
+          "9",
+          "12",
+          "14"
         ]
       }
     ],
     "codeDir": "code/models",
     "scripts": "content/scripts-models.json",
-    "figuresNote": "Mười hình do mã nguồn trong code/models/ sinh ra từ thí nghiệm chạy thật. Bốn kết quả ở Chương 12 là đối chiếu với số tham số và ngân sách giờ-GPU đã công bố của GPT-2 và Llama-2.",
+    "figuresNote": "Mười bốn hình, trong đó tám hình là kết quả thí nghiệm do code/models/experiments.py sinh ra và sáu hình là sơ đồ khái niệm. Các kết quả ở Chương 12 được đối chiếu với số tham số và ngân sách giờ-GPU đã công bố của GPT-2 và Llama 2.",
     "drills": false,
     "lab": "models"
   },
@@ -144,12 +143,25 @@
     "solutions": "content/bieudien-loi-giai.md",
     "code": "bieudien",
     "figures": true,
-    "blurb": "Cách một trợ lý ngôn ngữ ra đời: từ embedding và học chuyển giao, qua VAE, GAN và khuếch tán, tới RLHF và DPO. Hai đẳng thức được kiểm chứng tới sai số máy, và ba chỗ số liệu nói ngược lại điều tác giả định viết.",
+    "blurb": "Embedding và tìm kiếm vector, tiền huấn luyện, tinh chỉnh và LoRA, ba họ mô hình sinh VAE, GAN, khuếch tán, rồi học tăng cường, RLHF và DPO. Các kết quả quan trọng được suy ra đầy đủ và kiểm chứng bằng số.",
     "paths": [
       {
-        "tag": "Chỉ quan tâm LLM hiện đại",
+        "tag": "Đọc theo lộ trình",
+        "title": "Từ embedding tới tinh chỉnh",
+        "note": "Embedding, hình học của không gian embedding, embedding theo ngữ cảnh, tiền huấn luyện, tinh chỉnh và LoRA.",
+        "steps": [
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7"
+        ]
+      },
+      {
+        "tag": "Mô hình ngôn ngữ lớn",
         "title": "Từ tiền huấn luyện tới trợ lý",
-        "note": "Bốn chương nối thẳng: vì sao tiền huấn luyện hiệu quả, tinh chỉnh thế nào, rồi căn chỉnh bằng RLHF và DPO.",
+        "note": "Tiền huấn luyện, tinh chỉnh, rồi căn chỉnh bằng RLHF và DPO.",
         "steps": [
           "5",
           "6",
@@ -158,19 +170,9 @@
         ]
       },
       {
-        "tag": "Làm hệ tìm kiếm ngữ nghĩa",
-        "title": "Embedding cho ra hồn",
-        "note": "Ba chương về embedding, kèm cái bẫy bất đẳng hướng làm hỏng rất nhiều hệ thống thật.",
-        "steps": [
-          "2",
-          "3",
-          "4"
-        ]
-      },
-      {
-        "tag": "Muốn hiểu mô hình sinh",
-        "title": "VAE, GAN, khuếch tán trên cùng một khung",
-        "note": "Bốn chương cho thấy cả ba đều biến nhiễu Gauss thành mẫu, chỉ khác nhau ở huấn luyện bằng gì.",
+        "tag": "Mô hình sinh",
+        "title": "VAE, GAN và mô hình khuếch tán",
+        "note": "Ba họ mô hình sinh trên cùng một khung so sánh.",
         "steps": [
           "8",
           "9",
@@ -179,25 +181,91 @@
         ]
       },
       {
-        "tag": "Tiết kiệm bộ nhớ huấn luyện",
-        "title": "LoRA và họ hàng",
-        "note": "Vì sao tinh chỉnh toàn phần mô hình 7B cần 96 GiB, và LoRA hạ nó xuống 32 MiB thế nào.",
+        "tag": "Học tăng cường",
+        "title": "Từ Q-learning tới DPO",
+        "note": "Các khái niệm cơ bản, gradient chính sách, RLHF và DPO.",
         "steps": [
-          "6",
-          "7"
+          "12",
+          "13",
+          "14",
+          "15"
         ]
       }
     ],
     "codeDir": "code/bieudien",
     "scripts": "content/scripts-bieudien.json",
-    "figuresNote": "Mười bốn hình đều do mã nguồn trong code/bieudien/ sinh ra. Hai kết quả là kiểm chứng một đẳng thức chứ không phải mô phỏng, và ba chỗ số liệu mâu thuẫn với điều tác giả định viết — Phụ lục nói rõ cả ba.",
+    "figuresNote": "Mười bốn hình: chín hình kết quả thí nghiệm do code/bieudien/experiments.py sinh ra và năm sơ đồ khái niệm. Một số kết quả là kiểm chứng đẳng thức, khớp tới sai số của bộ giải.",
     "drills": false,
     "lab": "bieudien"
   },
   {
+    "id": "ungdung",
+    "slug": "ungdung-",
+    "kicker": "Giáo trình 4",
+    "short": "Ứng dụng LLM",
+    "source": "content/ungdung.md",
+    "chapters": "content/ungdung-chapters.json",
+    "quiz": "content/ungdung-trac-nghiem.md",
+    "glossary": "content/ungdung-thuat-ngu.md",
+    "solutions": "content/ungdung-loi-giai.md",
+    "code": "ungdung",
+    "figures": true,
+    "blurb": "Các chặng của roadmap AI Engineer: cách LLM hoạt động từ phía ứng dụng, chọn và triển khai mô hình, prompt và context engineering, embedding, cơ sở dữ liệu vector, RAG, agent, MCP, an toàn, đánh giá, quan sát vận hành và AI đa phương thức. Thí nghiệm chạy trên chính văn bản tiếng Việt của lộ trình.",
+    "paths": [
+      {
+        "tag": "Mới làm ứng dụng LLM",
+        "title": "Từ lời gọi API đầu tiên tới prompt tốt",
+        "note": "Cách mô hình tính token và chi phí, chọn mô hình, viết prompt và quản lý ngữ cảnh.",
+        "steps": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ]
+      },
+      {
+        "tag": "Hỏi đáp trên tài liệu",
+        "title": "Xây một hệ thống RAG",
+        "note": "Embedding, tìm kiếm vector, quy trình RAG và cách đánh giá nó, với số liệu đo trên văn bản tiếng Việt.",
+        "steps": [
+          "6",
+          "7",
+          "8",
+          "12"
+        ]
+      },
+      {
+        "tag": "Agent",
+        "title": "Cho mô hình hành động",
+        "note": "Function calling, ReAct, MCP, và vì sao độ tin cậy cùng an toàn là thách thức chính.",
+        "steps": [
+          "9",
+          "10",
+          "11"
+        ]
+      },
+      {
+        "tag": "Đưa vào sản xuất",
+        "title": "Đánh giá, quan sát, an toàn",
+        "note": "Cần bao nhiêu câu hỏi để kết luận, ghi lại gì để gỡ lỗi, và các rủi ro trong danh sách OWASP.",
+        "steps": [
+          "11",
+          "12",
+          "13",
+          "17"
+        ]
+      }
+    ],
+    "codeDir": "code/ungdung",
+    "scripts": "content/scripts-ungdung.json",
+    "figuresNote": "Mười lăm hình: tám hình là kết quả thí nghiệm sinh từ code/ungdung/, bảy hình là sơ đồ khái niệm vẽ bằng matplotlib.",
+    "drills": false
+  },
+  {
     "id": "quantization",
     "slug": "",
-    "kicker": "Giáo trình 4",
+    "kicker": "Giáo trình 5",
     "short": "Quantization",
     "source": "content/quantization.md",
     "chapters": "content/chapters.json",
@@ -255,7 +323,7 @@
   {
     "id": "mlops",
     "slug": "mlops-",
-    "kicker": "Giáo trình 5",
+    "kicker": "Giáo trình 6",
     "short": "MLOps",
     "source": "content/mlops.md",
     "chapters": "content/mlops-chapters.json",
@@ -265,12 +333,12 @@
     "lab": "mlops",
     "code": "mlops",
     "figures": true,
-    "blurb": "Vì sao mô hình tốt vẫn chết trong sản xuất, và phải dựng những gì quanh nó để nó sống. Mọi con số đều truy được về bài báo gốc hoặc về mã chạy lại được.",
+    "blurb": "Những gì cần làm sau khi đã có một mô hình tốt: kiểm định dữ liệu, tính đúng theo thời điểm của đặc trưng, thí nghiệm lặp lại được, đánh giá theo lát cắt, phục vụ và ra mắt mô hình, phát hiện dịch chuyển phân phối, giám sát, huấn luyện lại, vòng phản hồi và LLMOps. Các nhận định dựa trên bài báo gốc hoặc trên thí nghiệm chạy lại được.",
     "paths": [
       {
-        "tag": "Lần đầu nghe tới MLOps",
-        "title": "Hiểu vì sao nó khó đã",
-        "note": "Bốn chương đầu cho bạn khung tư duy: nợ kỹ thuật, vòng đời, ba chữ V, và dữ liệu.",
+        "tag": "Mới bắt đầu",
+        "title": "Vì sao vận hành hệ thống học máy khó",
+        "note": "Nợ kỹ thuật, vòng đời và mức độ tự động hoá, lỗi dữ liệu, tính đúng theo thời điểm của đặc trưng.",
         "steps": [
           "1",
           "2",
@@ -279,9 +347,9 @@
         ]
       },
       {
-        "tag": "Sắp đi phỏng vấn",
-        "title": "Lối đi ngắn nhất tới câu trả lời chắc",
-        "note": "Bốn chương bị hỏi nhiều nhất, rồi vào thẳng phần ôn phỏng vấn.",
+        "tag": "Chuẩn bị phỏng vấn",
+        "title": "Các chủ đề được hỏi nhiều nhất",
+        "note": "Nợ kỹ thuật, đánh giá theo lát cắt, dịch chuyển phân phối và giám sát, sau đó là chương câu hỏi phỏng vấn.",
         "steps": [
           "1",
           "6",
@@ -291,9 +359,9 @@
         ]
       },
       {
-        "tag": "Đang vận hành hệ thống thật",
+        "tag": "Vận hành hệ thống",
         "title": "Từ lúc ra mắt tới lúc huấn luyện lại",
-        "note": "Đi theo đúng thứ tự một ca vận hành: phục vụ, ra mắt, giám sát, huấn luyện lại.",
+        "note": "Theo đúng thứ tự vận hành một mô hình: phục vụ, ra mắt, giám sát, huấn luyện lại, vòng phản hồi.",
         "steps": [
           "7",
           "8",
@@ -302,11 +370,21 @@
           "11",
           "12"
         ]
+      },
+      {
+        "tag": "Ứng dụng LLM",
+        "title": "Vận hành hệ thống dùng mô hình ngôn ngữ lớn",
+        "note": "Lát cắt và kiểm thử hành vi, chiến lược ra mắt, rồi những gì thay đổi khi dùng LLM.",
+        "steps": [
+          "6",
+          "8",
+          "13"
+        ]
       }
     ],
     "codeDir": "code/mlops",
     "scripts": "content/scripts-mlops.json",
-    "figuresNote": "Mọi hình đều do mã nguồn trong thư mục code/mlops/ sinh ra, chạy thật và chạy lại được.",
+    "figuresNote": "Mười bốn hình đều do mã nguồn trong code/mlops/ sinh ra. Số liệu thực nghiệm đến từ dữ liệu mô phỏng, mỗi thí nghiệm cô lập một cơ chế; lời giải bài tập dùng số liệu của bai_tap.py.",
     "drills": false
   }
 ]

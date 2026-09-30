@@ -1,192 +1,177 @@
-# Từ điển thuật ngữ — Biểu diễn, Sinh và Căn chỉnh
+# Từ điển thuật ngữ — Biểu diễn, mô hình sinh và căn chỉnh
 
 Cú pháp: `## Nhóm`, rồi `### Tiếng Việt | English` và phần định nghĩa bên dưới.
-Mọi định nghĩa bám sát đúng cách dùng trong giáo trình.
+Mỗi định nghĩa khớp với cách dùng trong giáo trình. Thuật ngữ nào giáo trình giữ nguyên tiếng Anh thì tên tiếng Anh đứng trước.
 
 ## Biểu diễn và embedding
 
-### Biểu diễn dày | dense representation
-Vector số thực ngắn (vài chục tới vài trăm chiều) thay cho one-hot thưa. Khác one-hot ở chỗ **khoảng cách giữa hai vector có nghĩa**, còn one-hot thì mọi cặp cách nhau đúng $\sqrt2$.
+### Embedding | embedding
+Vector số thực, thường vài trăm chiều, biểu diễn một từ, một câu hay một đối tượng, sao cho các đối tượng giống nhau có vector gần nhau. Khác với mã hoá one-hot, trong đó mọi cặp từ cách nhau như nhau.
 
-### Giả thiết phân bố | distributional hypothesis
-Một từ được đặc trưng bởi những từ đi kèm nó. Đây là phép đổi một câu hỏi **không đo được** ("hai từ có gần nghĩa không?") lấy một câu hỏi **đo được** ("chúng có hay xuất hiện trong ngữ cảnh giống nhau không?").
+### Giả thuyết phân bố | distributional hypothesis
+Các từ xuất hiện trong những ngữ cảnh giống nhau thường có nghĩa giống nhau (Harris, 1954). Là cơ sở của mọi phương pháp học embedding từ thống kê đồng hiện (Mục 2.1).
 
 ### Thông tin tương hỗ điểm | pointwise mutual information, PMI
-$\log \frac{p(w,c)}{p(w)p(c)}$ — đo mức đồng hiện **vượt trên** mức ngẫu nhiên. Bằng 0 nghĩa là đồng hiện đúng như thể hai từ độc lập. PMI dương cắt về 0 gọi là **PPMI**.
+$\log\frac{p(w,c)}{p(w)p(c)}$: hai từ cùng xuất hiện nhiều hơn mức kỳ vọng nếu độc lập bao nhiêu. PPMI là PMI với các giá trị âm thay bằng 0 (Mục 2.3).
 
 ### Skip-gram | skip-gram
-Mô hình word2vec đoán các từ ngữ cảnh từ một từ trung tâm. **Không phải học sâu** — nó chỉ có một lớp và không có phi tuyến ở giữa.
+Mô hình của word2vec học hai vector cho mỗi từ, một khi là từ trung tâm và một khi là từ ngữ cảnh, sao cho tích vô hướng lớn với các cặp từ cùng xuất hiện (Mục 2.5).
 
 ### Lấy mẫu âm | negative sampling
-Thay bài toán "chọn đúng 1 trong $V$" bằng $k+1$ bài nhị phân. Điểm mấu chốt: chi phí **không còn phụ thuộc kích thước từ vựng**. Với $V = 2$ triệu thì nó rẻ hơn softmax đầy đủ 333 000 lần.
+Thay softmax trên toàn bộ từ vựng bằng $k + 1$ bài toán phân loại nhị phân: cặp thật và $k$ cặp ghép ngẫu nhiên. Chi phí mỗi cặp huấn luyện không phụ thuộc kích thước từ vựng.
 
-### Kết quả Levy–Goldberg | implicit matrix factorization
-Chứng minh rằng skip-gram với lấy mẫu âm ngầm phân rã ma trận $\mathrm{PMI} - \log k$. Kiểm chứng được: ở hạng đầy đủ, xuống dốc hội tụ về đúng PMI với tương quan 0,9995.
+### Phân rã ma trận ngầm | implicit matrix factorization
+Kết quả của Levy và Goldberg (2014): ở điểm tối ưu, skip-gram với lấy mẫu âm cho $\langle w_i, c_j\rangle = \mathrm{PMI}(i,j) - \log k$, tức word2vec phân rã ma trận PMI mà không lập ma trận đó (Mục 2.6).
 
-### Phép loại suy vector | vector analogy
-$a : b :: c : ?$ giải bằng $\vec b - \vec a + \vec c$. Nó hoạt động được vì chỉ dùng **hiệu vector**, mà hiệu vector bất biến với phép xoay không gian.
+### Phép loại suy | analogy
+Kiểm tra embedding bằng câu hỏi $a : b :: c : ?$, tìm từ có vector gần nhất với $\vec b - \vec a + \vec c$. Chỉ dùng vector hiệu nên không phụ thuộc phép xoay của không gian.
 
-### Bất đẳng hướng | anisotropy
-Tình trạng đám mây embedding lệch khỏi gốc toạ độ, làm mọi cặp vector đều có cosine dương lớn. Đo được: 900 vector **ngẫu nhiên độc lập** vẫn cho cosine trung bình 0,8724. Trừ vector trung bình đi thì về $-0{,}0011$.
+### Tính bất đẳng hướng | anisotropy
+Hiện tượng đám mây embedding lệch khỏi gốc toạ độ, khiến mọi cặp vector có cosine cao dù không liên quan. Ở Mục 3.2, 900 vector ngẫu nhiên lệch tâm có cosine trung bình 0,87.
 
 ### Làm trắng | whitening
-Trừ trung bình rồi nhân $\Sigma^{-1/2}$ để chuẩn hoá phương sai theo mọi hướng. Mạnh hơn việc chỉ trừ trung bình, nhưng cần ước lượng ma trận hiệp phương sai.
-
-### Bất biến với phép xoay | rotation invariance
-Nếu $EE^\top \approx M$ thì $(EQ)(EQ)^\top = EE^\top$ với mọi ma trận trực giao $Q$. Hệ quả: **trục toạ độ của embedding hoàn toàn tuỳ tiện**, nên từng chiều riêng lẻ thường không mang nghĩa gì.
+Trừ trung bình rồi nhân với $\Sigma^{-1/2}$ để phương sai theo mọi hướng bằng nhau. Mạnh hơn trừ trung bình nhưng cần ước lượng ma trận hiệp phương sai.
 
 ### Embedding theo ngữ cảnh | contextual embedding
-Gán vector cho **một lần xuất hiện của từ trong một câu cụ thể** thay vì cho chuỗi ký tự. Đây là cách duy nhất xử lý được từ đa nghĩa.
+Vector gán cho một lần xuất hiện của từ trong một câu cụ thể, do Transformer tạo ra, nên cùng một từ có vector khác nhau trong các ngữ cảnh khác nhau (Mục 4.2).
 
 ### Học tương phản | contrastive learning
-Huấn luyện để cặp cùng nghĩa gần nhau và cặp khác nghĩa xa nhau. Hàm mục tiêu có dạng y hệt entropy chéo softmax, với các câu khác trong cùng lô đóng vai trò mẫu âm.
+Huấn luyện embedding sao cho cặp liên quan gần nhau và cặp không liên quan xa nhau, thường bằng hàm mất mát InfoNCE với các mẫu khác trong lô làm mẫu âm.
 
-### Tìm kiếm láng giềng gần xấp xỉ | approximate nearest neighbour search, ANN
-Bỏ yêu cầu trả về chính xác $k$ mục gần nhất, đổi lấy tốc độ nhanh hơn hàng trăm lần. Cần thiết vì lời nguyền số chiều làm các cấu trúc cổ điển như cây k-d thoái hoá về tìm kiếm tuyến tính.
+### Tìm kiếm láng giềng gần đúng | approximate nearest neighbor search, ANN
+Tìm các vector gần truy vấn mà không bảo đảm tìm đúng $k$ vector gần nhất, đổi lại nhanh hơn nhiều lần so với quét toàn bộ. Các họ phổ biến: IVF, HNSW, product quantization (Mục 4.3).
 
-### HNSW | hierarchical navigable small world
-Chỉ mục ANN dạng đồ thị nhiều tầng, đi tham lam từ tầng thô xuống tầng mịn. Nhanh và chính xác nhất hiện nay, đổi lại tốn bộ nhớ vì phải lưu cả đồ thị.
+### Product quantization | product quantization, PQ
+Chia vector thành nhiều đoạn và lượng tử hoá mỗi đoạn bằng một bảng mã nhỏ, nén vector xuống vài chục byte với sai số chấp nhận được.
 
-### Lượng tử hoá tích | product quantization, PQ
-Chia vector thành nhiều đoạn rồi lượng tử hoá từng đoạn bằng một bảng mã nhỏ. Chính là uniform affine quantization áp cho từng đoạn, với cùng đánh đổi giữa sai số và dung lượng.
-
-### recall@k | recall@k
-Tỉ lệ kết quả trả về thuộc về $k$ kết quả đúng thật sự. Lưu ý: **recall@k cao không đảm bảo hệ thống hữu ích** — nếu embedding không nắm được thứ người dùng coi là liên quan thì tìm chính xác 100% vẫn vô dụng.
+### Recall@k của chỉ mục | index recall@k
+Tỉ lệ trong $k$ kết quả trả về thuộc về $k$ kết quả đúng tìm bằng quét toàn bộ. Đo chất lượng của chỉ mục, khác với chất lượng của bản thân embedding (Mục 4.4).
 
 ## Học chuyển giao
 
 ### Tiền huấn luyện | pre-training
-Huấn luyện trên nhiệm vụ mà **nhãn tự sinh từ chính dữ liệu** (đoán từ tiếp theo, che từ rồi đoán), nên dùng được dữ liệu không nhãn vốn gần như miễn phí.
+Huấn luyện một mô hình lớn trên dữ liệu không nhãn bằng một nhiệm vụ mà nhãn tự sinh ra từ dữ liệu, như đoán token tiếp theo, trước khi dùng cho các nhiệm vụ cụ thể (Chương 5).
 
-### Nhiệm vụ đại diện | pretext task, proxy task
-Nhiệm vụ không phải mục tiêu cuối, được đặt ra để ép mô hình xây dựng biểu diễn hữu ích. Đoán từ tiếp theo là nhiệm vụ đại diện rộng nhất hiện biết.
+### Học tự giám sát | self-supervised learning
+Học từ dữ liệu không nhãn bằng những nhiệm vụ có nhãn tự sinh, ví dụ che một từ rồi đoán lại, hoặc đoán từ tiếp theo.
 
 ### Đóng băng | freezing
-Giữ nguyên trọng số một phần mô hình, không cập nhật. Thắng khi rất ít nhãn, nhưng đặt ra một **trần chặn** mà thêm dữ liệu không phá được.
-
-### Trần chặn của đặc trưng đóng băng | frozen-feature ceiling
-Hiện tượng độ chính xác phẳng ra dù thêm dữ liệu, vì mô hình chỉ còn là hồi quy softmax trên các đặc trưng cố định. Đo được: 0,6220 → 0,6375 → 0,6452 khi dữ liệu tăng từ 500 lên 8 000. Đây là chẩn đoán thiên lệch cao ở một dạng khác.
+Giữ nguyên trọng số của một phần mô hình khi huấn luyện, thường là phần trích đặc trưng, và chỉ học các lớp phía trên.
 
 ### Tinh chỉnh | fine-tuning
-Cập nhật toàn bộ trọng số từ điểm khởi đầu là mô hình tiền huấn luyện. Thắng từ khoảng 150 mẫu trở lên, và khoảng cách giãn dần theo lượng dữ liệu.
+Tiếp tục huấn luyện một mô hình đã tiền huấn luyện trên dữ liệu của nhiệm vụ cụ thể, thường với tốc độ học nhỏ hơn 10 tới 100 lần so với huấn luyện từ đầu.
 
-### Quên tai hại | catastrophic forgetting
-Mô hình mất khả năng ở những việc nó từng làm được sau khi tinh chỉnh trên miền hẹp. Cách chữa: trộn dữ liệu miền gốc vào, hoặc dùng LoRA vốn giữ nguyên trọng số gốc theo đúng nghĩa đen.
+### Giới hạn của đặc trưng đóng băng | frozen-feature ceiling
+Khi đặc trưng bị cố định, thêm dữ liệu chỉ giúp ước lượng lớp cuối chính xác hơn, không vượt được giới hạn do đặc trưng đặt ra. Ở Mục 6.3, độ chính xác của cách đóng băng gần như không tăng từ 500 mẫu trở đi.
+
+### Quên thảm hoạ | catastrophic forgetting
+Hiện tượng mô hình mất khả năng ở những việc từng làm được sau khi tinh chỉnh trên dữ liệu mới.
 
 ### LoRA | low-rank adaptation
-Đóng băng $W_0$, học phần thêm vào $\Delta W = BA$ với $A$ là $d\times r$, $B$ là $r\times d$. Giả thiết cốt lõi: phần cần sửa cho nhiệm vụ mới có **hạng thấp**. Tỉ lệ tham số là $2r/d$, nên mô hình càng lớn thì LoRA càng lợi.
-
-### Khởi tạo B = 0 | zero-init of B
-Chi tiết cài đặt của LoRA: khởi tạo $B = 0$ để $BA = 0$ lúc bắt đầu, nên mô hình khởi đầu **đúng bằng bản gốc** rồi đi dần ra. Khởi tạo cả hai ngẫu nhiên thì phá mô hình ngay bước đầu.
+Đóng băng $W_0$ và học phần cộng thêm $\Delta W = BA$, với $B \in \mathbb{R}^{d \times r}$, $A \in \mathbb{R}^{r \times d}$ và $r \ll d$; $B$ khởi tạo bằng 0 để mô hình bắt đầu đúng bằng mô hình gốc (Mục 7.2).
 
 ### Gộp adapter | merging
-Cộng $BA$ vào $W_0$ một lần khi suy luận. Vì vậy LoRA **không làm chậm cũng không làm nhanh** mô hình — nó chỉ tiết kiệm bộ nhớ lúc huấn luyện.
+Cộng $BA$ vào $W_0$ sau khi huấn luyện để suy luận với một ma trận duy nhất, nên LoRA không làm chậm mô hình khi suy luận.
 
-### PEFT | parameter-efficient fine-tuning
-Gọi chung các cách tinh chỉnh chỉ cập nhật một phần rất nhỏ tham số: LoRA, adapter, prefix tuning, BitFit.
+### Tinh chỉnh tiết kiệm tham số | parameter-efficient fine-tuning, PEFT
+Các phương pháp chỉ học một phần nhỏ tham số: LoRA, adapter, prefix tuning, prompt tuning, BitFit.
 
 ### QLoRA | QLoRA
-LoRA trên một mô hình gốc đã lượng tử hoá 4 bit. Chạy được vì mô hình gốc **chỉ đọc chứ không cập nhật**, nên lượng tử hoá nó không ảnh hưởng tới việc huấn luyện adapter.
+LoRA trên mô hình gốc đã lượng tử hoá 4 bit. Mô hình gốc chỉ được đọc nên lượng tử hoá không cản trở việc huấn luyện adapter.
 
 ## Mô hình sinh
 
 ### Đa tạp dữ liệu | data manifold
-Tập con rất nhỏ của không gian mà dữ liệu thật nằm trên đó. Với ảnh $256\times256$, số điểm khả dĩ là $256^{196608}$ nhưng ảnh trông như thật chỉ chiếm một phần cực nhỏ.
+Tập con rất nhỏ của không gian dữ liệu chứa các mẫu trông giống thật, thường được xem như có số chiều thấp hơn nhiều so với không gian chứa nó.
 
-### Hằng số chuẩn hoá | partition function, normalising constant
-$Z(\theta) = \int \exp(f_\theta(x))dx$ — tích phân trên toàn bộ không gian, không tính được. Đây là thứ chặn đường dùng thẳng hợp lý cực đại cho bài toán sinh, và ba họ mô hình sinh là ba cách né nó.
+### Hằng số chuẩn hoá | normalizing constant, partition function
+$Z(\theta) = \int\exp(f_\theta(x))\,dx$, cần để một hàm tuỳ ý trở thành mật độ xác suất. Không tính được trong không gian nhiều chiều, nên ngăn áp dụng trực tiếp hợp lý cực đại (Mục 8.2).
+
+### Mô hình tự hồi quy | autoregressive model
+Mô hình viết $p(x) = \prod_t p(x_t \mid x_{<t})$, chỉ cần chuẩn hoá từng bước trên một tập nhỏ như từ vựng. Các mô hình ngôn ngữ thuộc loại này.
 
 ### ELBO | evidence lower bound
-Chặn dưới của log hợp lý, gồm số hạng tái dựng trừ đi số hạng KL. VAE tối đa nó thay vì tối đa hợp lý trực tiếp.
+Chặn dưới của log hợp lý: $\mathbb{E}_{q(z \mid x)}[\log p(x \mid z)] - \mathrm{KL}(q(z \mid x) \,\|\, p(z))$. Hàm mục tiêu của VAE (Mục 9.2).
 
-### Mẹo tái tham số hoá | reparameterisation trick
-Viết $z = \mu + \sigma\odot\varepsilon$ với $\varepsilon\sim\mathcal{N}(0,I)$ để gradient chảy được qua phép lấy mẫu. Là **mẹo cài đặt**, không phải ý tưởng của VAE.
+### Tái tham số hoá | reparameterization trick
+Viết $z = \mu + \sigma \odot \varepsilon$ với $\varepsilon \sim \mathcal{N}(0, I)$ để gradient truyền qua phép lấy mẫu.
 
 ### Sụp hậu nghiệm | posterior collapse
-Trạng thái $q(z\mid x)$ trùng với tiên nghiệm, tức $z$ không còn mang thông tin gì về $x$. Đo được ở $\beta = 16$: cả 6 chiều ẩn đều chết, sai số tái dựng nhảy lên 15,28.
+Hậu nghiệm xấp xỉ trùng tiên nghiệm ở mọi chiều, nên biến ẩn không mang thông tin về dữ liệu. Xảy ra khi $\beta$ quá lớn hoặc bộ giải mã quá mạnh.
 
-### Chiều ẩn còn sống | active latent dimension
-Chiều có KL riêng lớn hơn 0 đáng kể. Số chiều còn sống là thứ $\beta$ thực sự điều khiển: ở $\beta=1$, mô hình giữ lại **đúng** số yếu tố thật sinh ra dữ liệu.
+### Chiều ẩn mang thông tin | active latent dimension
+Chiều ẩn có KL giữa hậu nghiệm và tiên nghiệm lớn hơn 0 đáng kể. Ở Mục 9.3, số chiều này giảm từ 6 xuống 2 rồi 0 khi $\beta$ tăng.
 
-### Bộ sinh, bộ phân biệt | generator, discriminator
-Hai mạng của GAN. Điểm đáng chú ý: **bộ sinh không bao giờ nhìn thấy dữ liệu thật** — mọi thông tin về "thế nào là thật" đi qua một kênh duy nhất là ý kiến của bộ phân biệt.
+### Bộ sinh và bộ phân biệt | generator, discriminator
+Hai mạng của GAN: bộ sinh biến nhiễu thành mẫu, bộ phân biệt cho xác suất một mẫu là thật. Bộ phân biệt tối ưu là $p_{\text{data}}/(p_{\text{data}} + p_g)$.
 
-### Mất mát bão hoà | saturating loss
-Dạng minimax gốc: bộ sinh tối thiểu $\log(1-D(G(z)))$. Đạo hàm là $-\sigma(s)$, gần 0 đúng lúc bộ sinh đang tệ nhất. Đo được: **phủ 0/8 chế độ** ở mọi hạt giống.
-
-### Mất mát không bão hoà | non-saturating loss
-Bộ sinh tối đa $\log D(G(z))$. Cùng điểm tối ưu nhưng đạo hàm là $1-\sigma(s)$, **lớn nhất khi bộ sinh đang tệ nhất**. Đo được: phủ 8/8.
+### Hàm mất mát không bão hoà | non-saturating loss
+Cho bộ sinh cực đại $\log D(G(z))$ thay vì cực tiểu $\log(1 - D(G(z)))$. Gradient $1 - \sigma(s)$ lớn khi bộ sinh còn kém, nên bộ sinh học được ngay từ đầu (Mục 10.2).
 
 ### Sụp chế độ | mode collapse
-Bộ sinh chỉ phủ một phần các chế độ của phân phối thật. Hiện tượng có thật và hay gặp, nhưng **không quan sát được** trong thí nghiệm hai chiều của tài liệu này — và tài liệu nói rõ điều đó thay vì khẳng định.
+Bộ sinh chỉ sinh ra một phần của phân phối dữ liệu, bỏ qua các chế độ khác.
 
 ### Quá trình thuận | forward process
-Chuỗi bước thêm nhiễu Gauss của mô hình khuếch tán. Vì mọi bước đều Gauss tuyến tính nên gộp được thành **dạng đóng** $q(x_t\mid x_0) = \mathcal{N}(\sqrt{\bar\alpha_t}x_0, (1-\bar\alpha_t)I)$.
-
-### Dạng đóng của quá trình thuận | closed form of the forward process
-Chi tiết làm cho khuếch tán huấn luyện được: cho phép nhảy thẳng tới bước $t$ bất kỳ thay vì mô phỏng $t$ bước. Kiểm chứng trên 200 000 quỹ đạo, khớp mô men tới 4–5 chữ số.
+Chuỗi các bước thêm nhiễu Gauss $q(x_t \mid x_{t-1}) = \mathcal{N}(\sqrt{1 - \beta_t}\,x_{t-1}, \beta_t I)$, có dạng đóng $q(x_t \mid x_0) = \mathcal{N}(\sqrt{\bar\alpha_t}\,x_0, (1 - \bar\alpha_t)I)$ (Mục 11.2).
 
 ### Tỉ số tín hiệu trên nhiễu | signal-to-noise ratio, SNR
-$\bar\alpha_t/(1-\bar\alpha_t)$. Cho biết mô hình học gì ở mỗi bước: $t$ nhỏ (SNR cao) thì học chi tiết và kết cấu, $t$ lớn (SNR thấp) thì học bố cục thô.
+$\bar\alpha_t/(1 - \bar\alpha_t)$ ở bước $t$ của quá trình khuếch tán. SNR cao ứng với chi tiết nhỏ, SNR thấp ứng với bố cục tổng thể (Mục 11.3).
 
-### Đoán nhiễu | noise prediction
-Cách đặt mục tiêu của DDPM: mạng đoán lại $\varepsilon$ đã thêm vào, mất mát là bình phương sai lệch. Tương đương về toán với đoán $x_0$, nhưng cho phương sai đồng đều hơn giữa các $t$ nên huấn luyện ổn định hơn.
+### Dự đoán nhiễu | noise prediction
+Hàm mục tiêu của mô hình khuếch tán: hồi quy $\|\varepsilon - \varepsilon_\theta(x_t, t)\|^2$.
 
 ### Khuếch tán trong không gian ẩn | latent diffusion
-Chạy toàn bộ quá trình trong không gian ẩn nén của một VAE. Ví dụ đẹp của việc ghép hai họ mô hình: VAE lo phần nén, khuếch tán lo phần sinh.
+Nén ảnh bằng một bộ tự mã hoá rồi chạy khuếch tán trong không gian ẩn nhỏ hơn, giảm chi phí mỗi bước.
+
+### Classifier-free guidance | classifier-free guidance
+Kết hợp dự đoán có điều kiện và không điều kiện, $\varepsilon(\varnothing) + w\,(\varepsilon(c) - \varepsilon(\varnothing))$ với $w > 1$, để mẫu bám điều kiện chặt hơn (Mục 11.6).
 
 ## Học tăng cường và căn chỉnh
 
 ### Chính sách | policy
-$\pi(a\mid s)$ — quy tắc chọn hành động. Với mô hình ngôn ngữ, chính sách **chính là** mô hình.
+Quy tắc chọn hành động $\pi(a \mid s)$ theo trạng thái. Một mô hình ngôn ngữ là một chính sách chọn token tiếp theo.
 
-### Hàm giá trị hành động | action-value function, Q
-Tổng phần thưởng **kỳ vọng trong tương lai** nếu làm $a$ tại $s$ rồi chơi tốt về sau. Chữ "trong tương lai" là chìa khoá: một hành động có thể cho thưởng tức thì tệ mà vẫn đúng.
+### Hàm giá trị hành động | action-value function
+$Q(s, a)$: tổng phần thưởng chiết khấu kỳ vọng nếu làm $a$ tại $s$ rồi tiếp tục theo chính sách.
 
 ### Phương trình Bellman | Bellman equation
-$Q(s,a) = \mathbb{E}[r + \gamma\max_{a'}Q(s',a')]$. Q-learning biến nó thành quy tắc cập nhật.
+$Q^*(s, a) = \mathbb{E}[r + \gamma\max_{a'}Q^*(s', a')]$: giá trị của hành động bằng phần thưởng nhận ngay cộng giá trị chiết khấu của hành động tốt nhất ở trạng thái kế tiếp.
 
-### Sai số thời gian | temporal-difference error
-Chênh lệch giữa điều vừa quan sát và điều đang tin, tức phần trong ngoặc của quy tắc cập nhật Q-learning.
+### Q-learning | Q-learning
+Cập nhật $Q(s, a)$ theo sai số thời gian $r + \gamma\max_{a'}Q(s', a') - Q(s, a)$. Là thuật toán ngoài chính sách: học giá trị của chính sách tham lam bất kể dữ liệu thu bằng chính sách nào.
 
-### Khám phá và khai thác | exploration–exploitation
-Đánh đổi giữa thử cái mới và tận dụng cái đã biết. **Không tồn tại trong học có giám sát**, vì ở đó nhãn được cho sẵn chứ không phải đi tìm.
+### Khám phá và khai thác | exploration, exploitation
+Cân bằng giữa thử hành động mới để biết thêm và chọn hành động tốt nhất theo hiểu biết hiện tại. $\varepsilon$-tham lam là cách thông dụng nhất.
 
-### Khởi tạo lạc quan | optimistic initialisation
-Khởi tạo $Q$ cao hơn giá trị thật, làm hành động chưa thử luôn trông hấp dẫn hơn hành động đã thử. **Là một cơ chế khám phá hoàn chỉnh** — đo được rằng nó cho 100% thành công ngay cả với $\varepsilon = 0$.
+### Khởi tạo lạc quan | optimistic initialization
+Khởi tạo hàm giá trị cao hơn giá trị thật để các hành động chưa thử trông hấp dẫn, tạo ra khám phá mà không cần yếu tố ngẫu nhiên (Mục 12.4).
 
-### REINFORCE | REINFORCE
-Thuật toán gradient chính sách: lấy mẫu hành động, xem thưởng bao nhiêu, đẩy log xác suất của nó lên với cường độ tỉ lệ thưởng.
-
-### Thủ thuật log | log-derivative trick
-$\nabla_\theta\pi_\theta(a) = \pi_\theta(a)\nabla_\theta\log\pi_\theta(a)$. Nó biến gradient của một kỳ vọng thành một kỳ vọng của gradient, nên ước lượng được bằng lấy mẫu.
+### Gradient chính sách | policy gradient
+$\nabla_\theta J = \mathbb{E}_{a \sim \pi_\theta}[R(a)\,\nabla_\theta\log\pi_\theta(a)]$: tối ưu trực tiếp tham số của chính sách theo phần thưởng kỳ vọng. REINFORCE ước lượng nó bằng lấy mẫu.
 
 ### Đường nền | baseline
-Hằng số trừ khỏi phần thưởng trong REINFORCE. **Không làm lệch ước lượng** vì $\mathbb{E}[b\nabla\log\pi] = b\nabla 1 = 0$, nhưng cắt độ lệch chuẩn đi 2,3 lần — tức cần ít hơn 5,3 lần số mẫu.
+Hằng số $b$ trừ khỏi phần thưởng trong gradient chính sách. Không đổi kỳ vọng của ước lượng mà giảm phương sai; ở Mục 13.4, độ lệch chuẩn giảm khoảng 2,3 lần.
 
 ### Hàm lợi thế | advantage function
-$A(s,a) = Q(s,a) - V(s)$ — đường nền tốt nhất phụ thuộc trạng thái. Trả lời đúng câu hỏi cần hỏi: hành động này tốt hơn mức trung bình bao nhiêu.
+$A(s, a) = Q(s, a) - V(s)$: hành động tốt hơn mức trung bình ở trạng thái đó bao nhiêu.
 
-### PPO | proximal policy optimisation
-Thuật toán actor–critic có **giới hạn mức thay đổi chính sách mỗi lần cập nhật**, vì bước quá lớn trong không gian chính sách có thể phá hỏng mọi thứ mà không quay lại được.
+### PPO | proximal policy optimization
+Thuật toán gradient chính sách giới hạn mức thay đổi của chính sách mỗi lần cập nhật bằng cách cắt tỉ số xác suất mới trên cũ. Được dùng trong RLHF.
 
 ### Mô hình Bradley–Terry | Bradley–Terry model
-$P(y_w \succ y_l) = \sigma(r(y_w) - r(y_l))$ — hồi quy logistic trên hiệu hai điểm thưởng. Hàm thưởng chỉ xác định **tới một hằng số cộng**, nhưng điều đó vô hại vì hằng số bị hằng số chuẩn hoá nuốt mất.
+$P(y_w \succ y_l) = \sigma(r(y_w) - r(y_l))$: xác suất chọn câu trả lời này hơn câu kia phụ thuộc hiệu phần thưởng. Là hồi quy logistic trên hiệu điểm (Mục 14.3).
 
 ### RLHF | reinforcement learning from human feedback
-Quy trình ba giai đoạn, trong đó giai đoạn cuối học từ **so sánh** thay vì ví dụ mẫu. Đây là chỗ mô hình vượt được chất lượng của người viết mẫu, vì **đánh giá dễ hơn sáng tạo**.
+Huấn luyện mô hình thưởng từ dữ liệu so sánh của con người, rồi tối ưu mô hình ngôn ngữ theo mô hình thưởng có ràng buộc KL với mô hình tham chiếu (Chương 14).
 
-### Lách điểm thưởng | reward hacking
-Mô hình khai thác điểm mù của mô hình thưởng thay vì thực sự trả lời tốt hơn. Xảy ra vì mô hình thưởng chỉ là một xấp xỉ học từ dữ liệu hữu hạn.
+### Lách phần thưởng | reward hacking
+Chính sách khai thác điểm yếu của mô hình thưởng để đạt điểm cao mà không thật sự tốt hơn. Ràng buộc KL là một cách hạn chế.
 
-### Ràng buộc KL | KL constraint
-Số hạng $-\beta\,\mathrm{KL}(\pi\|\pi_{\text{ref}})$ chặn mô hình đi quá xa bản gốc. Nghiệm tối ưu có dạng đóng $\pi^* \propto \pi_{\text{ref}}\exp(r/\beta)$ — tức **chính sách tham chiếu đánh trọng số lại theo hàm mũ của thưởng**.
+### Nghiệm có ràng buộc KL | KL-constrained optimum
+$\pi^*(y \mid x) \propto \pi_{\text{ref}}(y \mid x)\exp(r(x, y)/\beta)$: chính sách tham chiếu đánh trọng số lại theo hàm mũ của phần thưởng (Mục 14.4).
 
-### Hệ số beta của RLHF | RLHF beta
-**Không phải** siêu tham số cần chỉnh đúng, mà là **vị trí ta chọn trên một đường đánh đổi** giữa thưởng đạt được và độ lệch khỏi $\pi_{\text{ref}}$. Đừng lẫn với $\beta$ của VAE.
-
-### DPO | direct preference optimisation
-Tối ưu thẳng trên chính sách, bỏ hẳn mô hình thưởng. Chạy được vì dạng đóng đảo ngược được thành $r = \beta\log\frac{\pi}{\pi_{\text{ref}}} + \beta\log Z$, và $\log Z$ **triệt tiêu** khi lấy hiệu hai câu trả lời cho cùng một câu hỏi. **Không phải xấp xỉ** — kiểm chứng được là cho cùng nghiệm tới $4{,}2\times10^{-8}$.
+### DPO | direct preference optimization
+Tối ưu trực tiếp chính sách trên dữ liệu so sánh bằng hàm mất mát cross-entropy nhị phân trên hiệu các tỉ số log xác suất, không cần mô hình thưởng hay học tăng cường; có cùng nghiệm tối ưu với RLHF (Chương 15).
 
 ### IPO, KTO | IPO, KTO
-Hai hướng sau DPO. IPO thêm phạt chuẩn để chặn hiện tượng đẩy tỉ lệ xác suất ra vô cùng khi dữ liệu so sánh gần như tất định. KTO bỏ yêu cầu dữ liệu phải là cặp, chỉ cần nhãn tốt/tệ cho từng câu riêng lẻ.
+Các biến thể sau DPO: IPO sửa hàm mất mát để tránh đẩy tỉ số xác suất ra vô cùng khi dữ liệu so sánh gần tất định; KTO chỉ cần nhãn tốt hoặc không tốt cho từng câu trả lời riêng lẻ.

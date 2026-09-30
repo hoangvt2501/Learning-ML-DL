@@ -1235,3 +1235,69 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
 }
 .toc-l4 .toc-num { min-width: 2.5rem; }
 .toc-list a.is-current .toc-num { color: var(--accent); }
+
+/* ---------------------------------------------- lộ trình theo chặng */
+.lt-strip {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
+  gap: .5rem; margin: 1.5rem 0 .5rem;
+}
+.lt-strip-item {
+  display: flex; align-items: center; gap: .55rem; padding: .55rem .7rem;
+  border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface);
+  text-decoration: none; color: var(--text); font-family: var(--font-ui); font-size: .8rem;
+  line-height: 1.3; transition: border-color .12s, background .12s;
+}
+.lt-strip-item:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+.lt-strip-icon { color: var(--accent); display: inline-flex; }
+.lt-strip-icon .ic { width: 17px; height: 17px; }
+.lt-strip-no {
+  flex: 0 0 auto; min-width: 1.35rem; text-align: center; font-weight: 700; font-size: .72rem;
+  color: var(--accent); font-variant-numeric: tabular-nums;
+}
+.lt-strip-name { font-weight: 550; }
+
+.lt-chang { margin: 0 0 3.25rem; scroll-margin-top: calc(var(--topbar-h) + 1rem); }
+.lt-chang-head {
+  display: flex; gap: 1rem; align-items: flex-start;
+  padding-bottom: 1rem; margin-bottom: .9rem; border-bottom: 1px solid var(--line);
+}
+.lt-chang-icon {
+  flex: 0 0 auto; width: 2.6rem; height: 2.6rem; border-radius: .7rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent-soft); color: var(--accent); margin-top: .15rem;
+}
+.lt-chang-icon .ic { width: 22px; height: 22px; }
+.lt-chang-text { min-width: 0; }
+.lt-chang-head h2 { margin: 0 0 .45rem; font-size: 1.45rem; line-height: 1.22; }
+.lt-tags { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; margin: .2rem 0 0; }
+.lt-tags-lead { font-family: var(--font-ui); font-size: .72rem; color: var(--text-3); margin-right: .15rem; }
+.lt-tag {
+  font-family: var(--font-ui); font-size: .72rem; padding: .12rem .5rem; border-radius: 99px;
+  border: 1px solid var(--line-2); color: var(--text-2); background: var(--surface);
+}
+
+.lt-map, .lt-aux { margin: 3.5rem 0 2.5rem; scroll-margin-top: calc(var(--topbar-h) + 1rem); }
+.lt-map-title { display: flex; align-items: center; gap: .6rem; font-size: 1.45rem; margin: 0 0 .5rem; }
+.lt-map-title .ic { color: var(--accent); width: 22px; height: 22px; }
+.lt-map-node { font-weight: 600; white-space: nowrap; }
+.lt-map-refs { display: flex; flex-wrap: wrap; gap: .3rem; }
+.lt-ref {
+  display: inline-flex; gap: .3rem; align-items: baseline; padding: .12rem .5rem;
+  border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--accent-2);
+  text-decoration: none; font-size: .78rem; font-weight: 600; white-space: nowrap;
+}
+.lt-ref span { font-weight: 400; color: var(--text-2); font-size: .72rem; }
+.lt-ref:hover { background: var(--accent); color: #fff; }
+.lt-ref:hover span { color: #fff; }
+:root[data-theme='dark'] .lt-ref:hover, :root[data-theme='dark'] .lt-ref:hover span { color: #10211f; }
+
+.lt-aux-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1rem 1.5rem; }
+.lt-aux-book ul { list-style: none; margin: 0; padding: 0; font-family: var(--font-ui); font-size: .85rem; }
+.lt-aux-book li { margin: 0 0 .3rem; }
+.lt-aux-book a { color: var(--text-2); text-decoration: none; }
+.lt-aux-book a:hover { color: var(--accent); }
+.lt-aux-no { display: inline-block; min-width: 1.6rem; color: var(--text-3); font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  .lt-map-node { white-space: normal; }
+  .lt-chang-icon { width: 2.1rem; height: 2.1rem; }
+}
