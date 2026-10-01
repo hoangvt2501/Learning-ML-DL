@@ -25,10 +25,12 @@ vm.createContext(sandbox);
 vm.runInContext(fs.readFileSync(path.join(ROOT, 'src/assets/playground.js'), 'utf8'), sandbox);
 vm.runInContext(fs.readFileSync(path.join(ROOT, 'src/assets/lab-mlops.js'), 'utf8'), sandbox);
 vm.runInContext(fs.readFileSync(path.join(ROOT, 'src/assets/viz.js'), 'utf8'), sandbox);
+vm.runInContext(fs.readFileSync(path.join(ROOT, 'src/assets/lab-ungdung.js'), 'utf8'), sandbox);
 
 const L = sandbox.window.QZ_LAB;
 const M = sandbox.window.QZ_MLOPS;
 const Z = sandbox.window.QZ_VIZ;
+const U = sandbox.window.QZ_UNGDUNG;
 
 let pass = 0;
 let fail = 0;
@@ -729,6 +731,78 @@ check('khác hạt giống thì khác dãy', (() => {
   for (let i = 0; i < 50; i++) d += Math.abs(a.n() - b.n());
   return d > 1;
 })(), true);
+
+
+// ---------------------------------------------------------------------------
+// Ứng dụng LLM — phòng thí nghiệm, đối chiếu với các con số đã in trong giáo trình
+// ---------------------------------------------------------------------------
+
+group('Ứng dụng LLM Mục 2.5 — chi phí một yêu cầu RAG');
+{
+  const k = U.chiPhi({ heThong: 600, soDoan: 5, doan: 350, lichSu: 800, cauHoi: 60, ra: 350,
+    giaVao: 1, giaRa: 4, cache: false, giaCache: 0.1, soYeuCau: 660000 });
+  check('tổng token đầu vào = 3 210', k.tongVao, 3210);
+  check('chi phí mỗi yêu cầu = 0,00461', k.moiYC, 0.00461, 1e-12);
+  check('đầu ra chiếm 9,8% số token', k.tiLeTokenRa, 0.098, 0.0005);
+  check('đầu ra chiếm 30,4% chi phí', k.tiLeRa, 0.304, 0.0005);
+  check('câu hỏi chiếm 1,9% đầu vào', k.tiLeHoi, 0.019, 0.0005);
+  check('bộ đệm prompt cho chỉ dẫn hệ thống giảm 11,7%', k.tietKiem, 0.117, 0.0005);
+  check('Ví dụ 2.1: chi phí tháng ≈ 3 043', k.thang, 3042.6, 0.05);
+  const kc = U.chiPhi({ heThong: 600, soDoan: 5, doan: 350, lichSu: 800, cauHoi: 60, ra: 350,
+    giaVao: 1, giaRa: 4, cache: true, giaCache: 0.1, soYeuCau: 1 });
+  check('bật bộ đệm thì chi phí giảm đúng 11,7%', 1 - kc.moiYC / k.moiYC, k.tietKiem, 1e-12);
+}
+
+group('Ứng dụng LLM Mục 2.2 — KV cache của Llama 3 8B');
+{
+  const moi = U.kvMoiToken(32, 8, 128, 2);
+  const GiB = Math.pow(2, 30);
+  check('mỗi token 131 072 byte = 128 KiB', moi, 131072);
+  check('2 048 token: 0,25 GiB', moi * 2048 / GiB, 0.25, 1e-12);
+  check('8 192 token: 1 GiB', moi * 8192 / GiB, 1, 1e-12);
+  check('32 768 token: 4 GiB', moi * 32768 / GiB, 4, 1e-12);
+  check('131 072 token: 16 GiB', moi * 131072 / GiB, 16, 1e-12);
+  check('không dùng GQA (32 đầu KV) thì lớn gấp 4', U.kvMoiToken(32, 32, 128, 2) / moi, 4);
+}
+
+group('Ứng dụng LLM Mục 9.7 — độ tin cậy của agent nhiều bước');
+{
+  const bang = [
+    [1, [0.990, 0.950, 0.900]], [5, [0.951, 0.774, 0.590]], [10, [0.904, 0.599, 0.349]],
+    [20, [0.818, 0.358, 0.122]], [50, [0.605, 0.077, 0.005]],
+  ];
+  for (const [n, vs] of bang) {
+    [0.99, 0.95, 0.90].forEach((p, i) => {
+      check(`p = ${p}, ${n} bước: ${vs[i]}`, U.agent(p, n, 0, 0).khong, vs[i], 0.0005);
+    });
+  }
+  const kiemTra = [
+    [0.0, 0, 0.358, 1.000], [0.5, 1, 0.587, 1.025], [0.8, 1, 0.785, 1.040],
+    [0.8, 3, 0.811, 1.042], [0.95, 3, 0.949, 1.050],
+  ];
+  for (const [c, r, pc, goi] of kiemTra) {
+    const k = U.agent(0.95, 20, c, r);
+    check(`c = ${c}, r = ${r}: hoàn thành ${pc}`, k.co, pc, 0.0005);
+    check(`c = ${c}, r = ${r}: ${goi} lời gọi mỗi bước`, k.goiMoiBuoc, goi, 0.0005);
+  }
+}
+
+group('Ứng dụng LLM Mục 12.4 — cỡ bộ đánh giá');
+{
+  const ktc = [[50, 11.1], [100, 7.8], [200, 5.5], [500, 3.5], [1000, 2.5], [2000, 1.8]];
+  for (const [n, v] of ktc) check(`n = ${n}: ± ${v} điểm`, U.ktc(0.8, n) * 100, v, 0.05);
+  // Bảng Mục 12.4 là mô phỏng 2 000 lần mỗi n, nên chỉ so trong sai số mô phỏng.
+  // A đúng 80%; B giữ 97% số câu A đúng và sửa 27% số câu A sai.
+  const p01 = 0.2 * 0.27, p10 = 0.8 * 0.03;
+  const luc = [[100, 0.086, 0.076], [300, 0.392, 0.154], [1000, 0.919, 0.410], [3000, 1.000, 0.857]];
+  for (const [n, cap, rieng] of luc) {
+    check(`n = ${n}: ghép cặp ≈ ${cap} (McNemar chính xác)`, U.lucGhepCap(n, p01, p10, 0.05), cap, 0.03);
+    check(`n = ${n}: hai bộ độc lập ≈ ${rieng}`, U.lucDocLap(n, 0.8, 0.83, 0.05), rieng, 0.02);
+  }
+  check('ghép cặp cần ít hơn một phần ba số câu so với hai bộ độc lập',
+    U.nGhepCap(p01, p10, 0.05, 0.8) / U.nDocLap(0.8, 0.83, 0.05, 0.8) < 1 / 3, true);
+  check('normCdf(1,96) ≈ 0,975', U.normCdf(1.959964), 0.975, 1e-6);
+}
 
 
 console.log('\n' + (fail === 0 ? 'Tất cả ' + pass + ' phép kiểm tra đều đạt.' : pass + ' đạt, ' + fail + ' HỎNG.'));

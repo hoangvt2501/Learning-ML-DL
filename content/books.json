@@ -260,7 +260,8 @@
     "codeDir": "code/ungdung",
     "scripts": "content/scripts-ungdung.json",
     "figuresNote": "Mười lăm hình: tám hình là kết quả thí nghiệm sinh từ code/ungdung/, bảy hình là sơ đồ khái niệm vẽ bằng matplotlib.",
-    "drills": false
+    "drills": false,
+    "lab": "ungdung"
   },
   {
     "id": "quantization",

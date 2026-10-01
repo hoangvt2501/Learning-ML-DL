@@ -38,9 +38,9 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 ### Với Llama 3 8B, KV cache của một chuỗi 128 nghìn token khoảng bao nhiêu?
 - [ ] 128 KiB
 - [ ] 1 GiB
-- [x] 16 GiB, gấp đôi dung lượng trọng số 16 bit của mô hình
+- [x] 16 GiB, xấp xỉ dung lượng trọng số 16 bit của mô hình
 - [ ] 128 GiB
-> Mỗi token tốn $2 \times 32 \times 8 \times 128 \times 2 = 131\,072$ byte = 128 KiB (Mục 2.2).
+> Mỗi token tốn $2 \times 32 \times 8 \times 128 \times 2 = 131\,072$ byte = 128 KiB, nên 131 072 token tốn 16 GiB, tức khoảng 17,2 GB, xấp xỉ 16 GB trọng số 16 bit của mô hình (Mục 2.2). Công cụ KV cache ở trang Phòng thí nghiệm tính được con số này cho các mô hình và độ dài ngữ cảnh khác.
 
 ### Trong một yêu cầu RAG điển hình ở Mục 2.5, đầu ra chiếm 9,8% số token nhưng chiếm bao nhiêu phần chi phí khi token đầu ra đắt gấp 4 lần?
 - [ ] 9,8%

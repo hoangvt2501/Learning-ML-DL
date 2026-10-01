@@ -14,6 +14,7 @@ import { buildMlopsLabPage } from './pages/lab-mlops.mjs';
 import { buildNentangLabPage } from './pages/lab-nentang.mjs';
 import { buildModelsLabPage } from './pages/lab-models.mjs';
 import { buildBieudienLabPage } from './pages/lab-bieudien.mjs';
+import { buildUngdungLabPage } from './pages/lab-ungdung.mjs';
 import { buildGlossaryPage } from './pages/glossary.mjs';
 import { buildFiguresPage } from './pages/figures.mjs';
 import { buildCodePage } from './pages/code.mjs';
@@ -256,6 +257,7 @@ function buildBook(spec, books) {
   if (spec.lab === 'nentang') buildNentangLabPage(ctx);
   if (spec.lab === 'models') buildModelsLabPage(ctx);
   if (spec.lab === 'bieudien') buildBieudienLabPage(ctx);
+  if (spec.lab === 'ungdung') buildUngdungLabPage(ctx);
   if (spec.glossary) buildGlossaryPage(ctx);
   if (spec.figures && registry.figures.size) buildFiguresPage(ctx);
   if (spec.notes) buildNotesPage(ctx, notes);

@@ -213,7 +213,7 @@ $$\text{KV cache mỗi token} = 2 \times 32 \times 8 \times 128 \times 2 \text{ 
 | 32 768 token | 4 GiB |
 | 131 072 token | 16 GiB |
 
-Ở 128 nghìn token, KV cache của một chuỗi đã bằng khoảng 16 GiB, gấp đôi dung lượng trọng số của chính mô hình (8 tỉ tham số × 2 byte ≈ 16 GB). Nếu không dùng grouped-query attention (tức 32 đầu key/value thay vì 8), con số này lớn gấp 4 lần. Đây là lý do nhà cung cấp tính giá theo số token đầu vào, và lý do ngữ cảnh dài làm tăng độ trễ.
+Ở 128 nghìn token, KV cache của một chuỗi đã bằng khoảng 16 GiB, xấp xỉ dung lượng trọng số của chính mô hình (8 tỉ tham số × 2 byte ≈ 16 GB); phục vụ hai chuỗi như vậy cùng lúc thì KV cache đã lớn gấp đôi trọng số. Nếu không dùng grouped-query attention (tức 32 đầu key/value thay vì 8), con số này lớn gấp 4 lần. Đây là lý do nhà cung cấp tính giá theo số token đầu vào, và lý do ngữ cảnh dài làm tăng độ trễ. [Công cụ KV cache](ungdung-thuc-hanh.html#kv-cache) ở trang Phòng thí nghiệm tính các con số này cho những mô hình và độ dài ngữ cảnh khác.
 
 **Chất lượng giảm khi ngữ cảnh dài.** Mô hình có thể nhận một triệu token không có nghĩa là nó sử dụng tốt mọi thông tin trong đó. Nhiều nghiên cứu cho thấy khả năng tìm và dùng một thông tin giảm khi ngữ cảnh dài ra, và phụ thuộc vào vị trí của thông tin trong ngữ cảnh. Mục 5.3 trình bày hiện tượng này cùng một thí nghiệm đo được.
 
@@ -262,7 +262,7 @@ Các nhà cung cấp API tính giá theo triệu token, với đơn giá token �
 
 Chi phí mỗi yêu cầu là $(3\,210 \times 1 + 350 \times 4)/10^6 = 0{,}00461$ đơn vị. Đầu ra chỉ chiếm 9,8% số token nhưng chiếm 30,4% chi phí. Câu hỏi của người dùng chỉ chiếm 1,9% đầu vào; phần lớn chi phí đến từ ngữ cảnh do ứng dụng thêm vào, và đó là phần kỹ sư AI kiểm soát được. Nếu 600 token chỉ dẫn hệ thống được đọc từ bộ đệm prompt với giá bằng 10% giá thường (cơ chế ở Mục 4.6), chi phí giảm 11,7%.
 
-> **Ví dụ 2.1 (Ước lượng chi phí hằng tháng).** Một trợ lý nội bộ phục vụ 2 000 nhân viên, mỗi người 15 yêu cầu mỗi ngày làm việc, 22 ngày mỗi tháng, mỗi yêu cầu như bảng trên. Số yêu cầu mỗi tháng là $2\,000 \times 15 \times 22 = 660\,000$, chi phí là $660\,000 \times 0{,}00461 \approx 3\,043$ đơn vị. Nếu đổi sang mô hình đắt gấp 10 lần, chi phí tăng tương ứng lên khoảng 30 nghìn đơn vị. Phép tính đơn giản này nên làm trước khi chọn mô hình (Chương 3), vì chênh lệch giá giữa các mô hình có thể lên tới hai bậc độ lớn.
+> **Ví dụ 2.1 (Ước lượng chi phí hằng tháng).** Một trợ lý nội bộ phục vụ 2 000 nhân viên, mỗi người 15 yêu cầu mỗi ngày làm việc, 22 ngày mỗi tháng, mỗi yêu cầu như bảng trên. Số yêu cầu mỗi tháng là $2\,000 \times 15 \times 22 = 660\,000$, chi phí là $660\,000 \times 0{,}00461 \approx 3\,043$ đơn vị. Nếu đổi sang mô hình đắt gấp 10 lần, chi phí tăng tương ứng lên khoảng 30 nghìn đơn vị. Phép tính đơn giản này nên làm trước khi chọn mô hình (Chương 3), vì chênh lệch giá giữa các mô hình có thể lên tới hai bậc độ lớn. [Công cụ chi phí](ungdung-thuc-hanh.html#chi-phi) ở trang Phòng thí nghiệm làm phép tính này với các số liệu tự nhập.
 
 ### 2.6. Các giới hạn cố hữu
 
@@ -1079,7 +1079,7 @@ Thí nghiệm mô phỏng 200 000 lần một agent 20 bước với $p = 0{,}95
 
 **Hình 10.** Xác suất một agent hoàn thành cả chuỗi bước theo số bước, với ba mức độ chính xác của mỗi bước, và với bước kiểm tra phát hiện 80% lỗi kèm tối đa 3 lần thử lại.
 
-Một bước kiểm tra phát hiện 80% lỗi, cho phép thử lại một lần, nâng tỉ lệ hoàn thành từ 36% lên 79%, trong khi số lời gọi thực hiện bước chỉ tăng 4%. Cột cuối chưa tính chi phí của chính bước kiểm tra; khi kiểm tra là một phép tính rẻ và khách quan (chạy kiểm thử, kiểm tra lược đồ, so với dữ liệu nguồn), đánh đổi này rất có lợi. Tỉ lệ phát hiện $c$ là yếu tố quyết định: tăng số lần thử lại từ 1 lên 3 ở $c = 0{,}8$ chỉ thêm 2,6 điểm phần trăm, vì lỗi không bị phát hiện không được thử lại.
+Một bước kiểm tra phát hiện 80% lỗi, cho phép thử lại một lần, nâng tỉ lệ hoàn thành từ 36% lên 79%, trong khi số lời gọi thực hiện bước chỉ tăng 4%. Cột cuối chưa tính chi phí của chính bước kiểm tra; khi kiểm tra là một phép tính rẻ và khách quan (chạy kiểm thử, kiểm tra lược đồ, so với dữ liệu nguồn), đánh đổi này rất có lợi. Tỉ lệ phát hiện $c$ là yếu tố quyết định: tăng số lần thử lại từ 1 lên 3 ở $c = 0{,}8$ chỉ thêm 2,6 điểm phần trăm, vì lỗi không bị phát hiện không được thử lại. Có thể thử các giá trị khác của $p$, $n$, $c$, $r$ ở [công cụ agent](ungdung-thuc-hanh.html#agent) của trang Phòng thí nghiệm.
 
 Các biện pháp vận hành để agent an toàn và có chi phí kiểm soát được:
 
@@ -1401,7 +1401,7 @@ Thí nghiệm mô phỏng tình huống điển hình: phiên bản A đúng 80%
 
 **Hình 13.** Trái: nửa độ rộng khoảng tin cậy 95% của độ chính xác theo số câu hỏi. Phải: xác suất phát hiện một cải thiện 3 điểm phần trăm, khi so sánh ghép cặp và khi dùng hai bộ câu hỏi độc lập.
 
-Với 100 câu, một cải thiện thật 3 điểm phần trăm gần như không bao giờ được phát hiện (dưới 9% số lần). Với 1 000 câu, so sánh ghép cặp phát hiện được 92% số lần, trong khi hai bộ độc lập chỉ 41%: ghép cặp tương đương với việc có bộ đánh giá lớn hơn nhiều lần mà không tốn thêm câu hỏi nào.
+Với 100 câu, một cải thiện thật 3 điểm phần trăm gần như không bao giờ được phát hiện (dưới 9% số lần). Với 1 000 câu, so sánh ghép cặp phát hiện được 92% số lần, trong khi hai bộ độc lập chỉ 41%: ghép cặp tương đương với việc có bộ đánh giá lớn hơn nhiều lần mà không tốn thêm câu hỏi nào. [Công cụ cỡ bộ đánh giá](ungdung-thuc-hanh.html#bo-danh-gia) ở trang Phòng thí nghiệm tính chính xác các xác suất này, không qua mô phỏng, cho các tỉ lệ đúng và số câu khác.
 
 > **Nhận xét (Quy tắc thực hành).** Bộ đánh giá vài chục câu đủ để phát hiện lỗi lớn và thói quen xấu của một prompt, không đủ để chọn giữa hai phiên bản gần nhau. Muốn phân biệt cải thiện cỡ vài điểm phần trăm cần cỡ nghìn câu và so sánh ghép cặp. Khi không có nhiều câu như vậy, chỉ nên chấp nhận thay đổi có cải thiện lớn, hoặc có lý do rõ ràng ngoài con số. Tránh chạy hàng chục biến thể prompt trên cùng bộ đánh giá nhỏ rồi chọn biến thể có điểm cao nhất: đó là overfitting vào bộ đánh giá ([Mục 9.5 của *Nền tảng*](nentang-ch09.html)).
 
@@ -1638,7 +1638,7 @@ Câu hỏi phỏng vấn cho vị trí kỹ sư AI thường xoay quanh ba nội
 
 **Câu hỏi: Vì sao ngữ cảnh dài làm tăng chi phí và độ trễ?**
 
-> **Trả lời.** Pha nạp ngữ cảnh xử lý mọi token đầu vào, và mỗi token cần lưu key và value ở mọi lớp trong KV cache. Với Llama 3 8B, mỗi token tốn 128 KiB KV cache, nên 128 nghìn token tốn 16 GiB cho một chuỗi, gấp đôi trọng số của mô hình. Ngoài chi phí, chất lượng cũng giảm khi ngữ cảnh dài: khả năng tìm và dùng thông tin phụ thuộc vào độ dài và vị trí (Mục 5.3).
+> **Trả lời.** Pha nạp ngữ cảnh xử lý mọi token đầu vào, và mỗi token cần lưu key và value ở mọi lớp trong KV cache. Với Llama 3 8B, mỗi token tốn 128 KiB KV cache, nên 128 nghìn token tốn 16 GiB cho một chuỗi, xấp xỉ dung lượng trọng số của mô hình. Ngoài chi phí, chất lượng cũng giảm khi ngữ cảnh dài: khả năng tìm và dùng thông tin phụ thuộc vào độ dài và vị trí (Mục 5.3).
 
 **Câu hỏi: Đặt temperature bằng 0 có làm kết quả hoàn toàn tất định không?**
 
