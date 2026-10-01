@@ -17,7 +17,7 @@
     {
       "ten": "Học sâu",
       "icon": "mang-no-ron",
-      "mo_ta": "Mạng nơ-ron nhiều lớp, lan truyền ngược và các thuật toán tối ưu, khởi tạo, chuẩn hoá, kết nối tắt, mạng tích chập và mạng hồi quy.",
+      "mo_ta": "Mạng nơ-ron nhiều lớp, lan truyền ngược và các thuật toán tối ưu, khởi tạo, chuẩn hoá, kết nối tắt, mạng tích chập, phát hiện đối tượng và phân đoạn ảnh, mạng hồi quy.",
       "roadmap": ["kiến thức tiên quyết"],
       "bai": [["models", "4", "8"]]
     },

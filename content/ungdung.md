@@ -320,11 +320,11 @@ Bước đầu tiên khi tự triển khai là ước lượng bộ nhớ GPU c�
 
 **Trọng số.** Số tham số nhân số byte mỗi tham số. Mô hình 8 tỉ tham số cần khoảng 16 GB ở dạng 16 bit, 8 GB ở dạng 8 bit, và khoảng 4 tới 5 GB ở dạng 4 bit (4 bit là 0,5 byte, cộng thêm các hệ số tỉ lệ của lượng tử hoá). Giáo trình *Quantization* trình bày cách giảm số bit mà vẫn giữ chất lượng; [Mục 11.4 của *Quantization*](ch11.html) nói về GPTQ và AWQ, hai phương pháp lượng tử 4 bit phổ biến cho LLM.
 
-**KV cache.** Tỉ lệ với độ dài ngữ cảnh và số yêu cầu phục vụ đồng thời (Mục 2.2). Phục vụ 16 yêu cầu đồng thời, mỗi yêu cầu 8 nghìn token, với Llama 3 8B cần $16 \times 1 = 16$ GiB chỉ cho KV cache, bằng dung lượng trọng số ở dạng 16 bit.
+**KV cache.** Tỉ lệ với độ dài ngữ cảnh và số yêu cầu phục vụ đồng thời (Mục 2.2). Phục vụ 16 yêu cầu đồng thời, mỗi yêu cầu 8 nghìn token, với Llama 3 8B cần $16 \times 1 = 16$ GiB chỉ cho KV cache, xấp xỉ dung lượng trọng số ở dạng 16 bit.
 
 **Bộ nhớ trung gian.** Các kích hoạt tạm thời trong lúc tính, thường nhỏ hơn hai phần trên khi suy luận, nhưng cần chừa một khoảng dự phòng.
 
-> **Ví dụ 3.1.** Phục vụ một mô hình 8 tỉ tham số lượng tử 4 bit (khoảng 5 GB trọng số) cho 8 người dùng đồng thời, mỗi người ngữ cảnh 8 nghìn token (8 × 1 GiB KV cache ở dạng 16 bit), cần khoảng 13 GB cộng thêm dự phòng, vừa với một GPU 16 GB hoặc 24 GB. Cùng mô hình ở dạng 16 bit cần 16 + 8 = 24 GB cộng dự phòng, không vừa GPU 24 GB. Lượng tử hoá KV cache xuống 8 bit giảm thêm một nửa phần KV cache ([Mục 11.7 của *Quantization*](ch11.html)).
+> **Ví dụ 3.1.** Phục vụ một mô hình 8 tỉ tham số lượng tử 4 bit (khoảng 5 GB trọng số) cho 8 người dùng đồng thời, mỗi người ngữ cảnh 8 nghìn token (8 × 1 GiB KV cache ở dạng 16 bit, tức khoảng 8,6 GB), cần khoảng 13,6 GB cộng thêm dự phòng, vừa với một GPU 16 GB hoặc 24 GB. Cùng mô hình ở dạng 16 bit cần khoảng 16 + 8,6 ≈ 24,6 GB cộng dự phòng, không vừa GPU 24 GB. Lượng tử hoá KV cache xuống 8 bit giảm thêm một nửa phần KV cache ([Mục 11.7 của *Quantization*](ch11.html)).
 
 Các công cụ tự triển khai phổ biến, từ đơn giản tới phức tạp:
 

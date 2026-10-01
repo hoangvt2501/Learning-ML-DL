@@ -220,3 +220,37 @@ rồi đo entropy của trọng số theo $d_k = 4, 16, 64, 256, 1\,024$ khi kh�
 3. **Có thể chọn dứt khoát khi cần.** Một số nhiệm vụ cần phân phối gần one-hot, ví dụ sao chép chính xác một token từ ngữ cảnh. Tính chất hàm mũ của softmax cho phép điều đó với điểm số vừa phải.
 
 > **Nhận xét.** Khi chạy, nên ghi thêm entropy khi có chia $\sqrt{d_k}$ cho cả hai hàm để có bốn cột so sánh: chuẩn hoá ReLU cho entropy gần như không đổi trong cả hai trường hợp, còn softmax chỉ ổn định khi có phép chia.
+
+## Bài 11
+@meta chuong=7 | dang=Tính tay | kho=Trung bình
+
+**(a) IoU.** Hộp $A$ có diện tích $40 \times 30 = 1\,200$, hộp $B$ có diện tích $40 \times 40 = 1\,600$. Phần giao theo trục ngang là $[30, 50]$, theo trục dọc là $[20, 40]$, diện tích $20 \times 20 = 400$. Phần hợp là $1\,200 + 1\,600 - 400 = 2\,400$, nên
+
+$$\operatorname{IoU}(A, B) = \frac{400}{2\,400} = \frac{1}{6} \approx 0{,}167.$$
+
+**(b) NMS.** Các IoU cần dùng: $\operatorname{IoU}(P_1, P_2) = 81/119 \approx 0{,}681$ (giao $9 \times 9$, hợp $100 + 100 - 81$); $\operatorname{IoU}(P_1, P_3) = 25/175 \approx 0{,}143$; $\operatorname{IoU}(P_1, P_4) = 0$; $\operatorname{IoU}(P_3, P_4) = 0$.
+
+1. Chọn $P_1$ (điểm 0,9). Bỏ $P_2$ vì IoU 0,681 vượt 0,5; giữ $P_3$ và $P_4$.
+2. Trong các hộp còn lại, chọn $P_3$ (0,7); IoU với $P_4$ bằng 0 nên giữ $P_4$.
+3. Chọn $P_4$.
+
+Kết quả: $P_1$, $P_3$, $P_4$. Lưu ý rằng $P_2$ bị loại vì trùng với $P_1$ chứ không vì trùng với $P_3$ (IoU giữa $P_2$ và $P_3$ chỉ là $36/164 \approx 0{,}22$).
+
+**(c) Precision, recall và AP.** Với 4 hộp thật:
+
+| Hộp thứ | Kết quả | TP tích luỹ | Precision | Recall |
+|---|---|---|---|---|
+| 1 | đúng | 1 | 1,000 | 0,25 |
+| 2 | đúng | 2 | 1,000 | 0,50 |
+| 3 | sai | 2 | 0,667 | 0,50 |
+| 4 | đúng | 3 | 0,750 | 0,75 |
+| 5 | sai | 3 | 0,600 | 0,75 |
+| 6 | sai | 3 | 0,500 | 0,75 |
+
+Precision nội suy tại mỗi mức recall là precision lớn nhất ở các mức recall lớn hơn hoặc bằng: tại recall 0,25 và 0,50 là 1; tại recall 0,75 là 0,75. Recall không bao giờ đạt 1 vì một hộp thật không được phát hiện, nên đoạn từ 0,75 tới 1 đóng góp 0. AP theo cách tính mọi điểm:
+
+$$\text{AP} = 0{,}25 \times 1 + 0{,}25 \times 1 + 0{,}25 \times 0{,}75 = 0{,}6875.$$
+
+Theo cách tính 11 điểm của VOC 2007: precision nội suy bằng 1 tại 6 mức recall $0; 0{,}1; \dots; 0{,}5$, bằng 0,75 tại hai mức 0,6 và 0,7, và bằng 0 tại 0,8; 0,9; 1. AP $= (6 + 1{,}5)/11 \approx 0{,}682$, gần nhưng không bằng cách tính mọi điểm.
+
+**(d) Hộp trùng.** Mỗi hộp thật chỉ được ghép với một hộp dự đoán. Hộp dự đoán thứ hai của cùng một đối tượng không còn hộp thật nào để ghép, nên bị tính là dương tính giả và làm giảm precision. Đó là lý do NMS làm tăng AP: nó loại các hộp trùng trước khi đánh giá. Trong thí nghiệm ở Mục 7.5, AP50 tăng từ 0,885 lên 0,913 sau NMS. Nhưng nếu ngưỡng NMS quá thấp, hộp đúng của một đối tượng khác đứng sát bên cũng bị loại, và recall giảm.

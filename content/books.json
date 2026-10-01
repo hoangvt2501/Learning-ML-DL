@@ -78,7 +78,7 @@
     "solutions": "content/models-loi-giai.md",
     "code": "models",
     "figures": true,
-    "blurb": "Từ phân rã độ chệch – phương sai, cây quyết định và phương pháp tập hợp, qua mạng nơ-ron, lan truyền ngược, mạng tích chập, mạng hồi quy, tới Transformer, RoPE, GQA, FlashAttention và cách ước lượng tham số, FLOP, bộ nhớ của mô hình ngôn ngữ lớn.",
+    "blurb": "Từ phân rã độ chệch – phương sai, cây quyết định và phương pháp tập hợp, qua mạng nơ-ron, lan truyền ngược, mạng tích chập, phát hiện đối tượng và phân đoạn ảnh, mạng hồi quy, tới Transformer, RoPE, GQA, FlashAttention và cách ước lượng tham số, FLOP, bộ nhớ của mô hình ngôn ngữ lớn.",
     "paths": [
       {
         "tag": "Đọc theo lộ trình",
@@ -127,7 +127,7 @@
     ],
     "codeDir": "code/models",
     "scripts": "content/scripts-models.json",
-    "figuresNote": "Mười bốn hình, trong đó tám hình là kết quả thí nghiệm do code/models/experiments.py sinh ra và sáu hình là sơ đồ khái niệm. Các kết quả ở Chương 12 được đối chiếu với số tham số và ngân sách giờ-GPU đã công bố của GPT-2 và Llama 2.",
+    "figuresNote": "Mười lăm hình: tám hình là kết quả thí nghiệm do code/models/experiments.py sinh ra, một hình do code/models/thi_giac.py sinh ra, và sáu hình là sơ đồ khái niệm. Các kết quả ở Chương 12 được đối chiếu với số tham số và ngân sách giờ-GPU đã công bố của GPT-2 và Llama 2.",
     "drills": false,
     "lab": "models"
   },

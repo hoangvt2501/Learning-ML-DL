@@ -682,7 +682,7 @@ Weight decay có một cách hiểu từ *Nền tảng*: regularization $\ell_2$
 
 ## 7. Mạng nơ-ron tích chập
 
-Ảnh có cấu trúc mà dữ liệu dạng bảng không có: các điểm ảnh gần nhau liên quan với nhau, và một chi tiết như cạnh hay góc có ý nghĩa như nhau ở mọi vị trí. Mạng nơ-ron tích chập (convolutional neural network, CNN) đưa hai tính chất này vào kiến trúc, nhờ đó giảm số tham số hàng nghìn lần so với mạng kết nối đầy đủ. Chương này định nghĩa phép tích chập, cách tính kích thước đầu ra, số tham số và số phép tính, trường tiếp nhận, các khối thường dùng, rồi so sánh CNN với Vision Transformer.
+Ảnh có cấu trúc mà dữ liệu dạng bảng không có: các điểm ảnh gần nhau liên quan với nhau, và một chi tiết như cạnh hay góc có ý nghĩa như nhau ở mọi vị trí. Mạng nơ-ron tích chập (convolutional neural network, CNN) đưa hai tính chất này vào kiến trúc, nhờ đó giảm số tham số hàng nghìn lần so với mạng kết nối đầy đủ. Chương này định nghĩa phép tích chập, cách tính kích thước đầu ra, số tham số và số phép tính, trường tiếp nhận, các khối thường dùng, so sánh CNN với Vision Transformer, rồi trình bày hai bài toán thị giác máy tính ngoài phân loại ảnh: phát hiện đối tượng và phân đoạn ảnh.
 
 ### 7.1. Phép tích chập
 
@@ -759,6 +759,107 @@ Khác biệt giữa hai kiến trúc là khác biệt về thiên kiến quy n�
 
 Theo ngôn ngữ của Chương 2, thiên kiến quy nạp mạnh tương ứng với độ chệch cao hơn và phương sai thấp hơn: có lợi khi dữ liệu ít, trở thành giới hạn khi dữ liệu nhiều. Khoảng cách giữa hai họ không cố định: ConvNeXt (Liu và cộng sự, 2022) cho thấy một CNN được hiện đại hoá theo các lựa chọn thiết kế của Transformer cạnh tranh được với ViT ở cùng quy mô, và nhiều kiến trúc hiện nay kết hợp tích chập với attention.
 
+### 7.5. Phát hiện đối tượng
+
+Phân loại ảnh trả lời câu hỏi "ảnh có gì". **Phát hiện đối tượng** (object detection) trả lời thêm câu hỏi "ở đâu": đầu ra là một danh sách **hộp bao** (bounding box), mỗi hộp kèm nhãn lớp và một điểm tin cậy. Số đối tượng thay đổi theo từng ảnh, nên đầu ra không có kích thước cố định như bài toán phân loại; phần lớn cấu trúc của các bộ phát hiện đến từ việc giải quyết điều này.
+
+Một hộp thường được biểu diễn bằng toạ độ góc trên bên trái và góc dưới bên phải $(x_1, y_1, x_2, y_2)$, hoặc bằng tâm và kích thước $(x, y, w, h)$. Để so sánh hai hộp, cần một thước đo mức trùng khớp.
+
+> **Định nghĩa 7.3 (IoU).** Độ trùng khớp **IoU** (intersection over union) giữa hai hộp $A$ và $B$ là tỉ số giữa diện tích phần giao và diện tích phần hợp:
+>
+> $$\operatorname{IoU}(A, B) = \frac{|A \cap B|}{|A \cup B|} = \frac{|A \cap B|}{|A| + |B| - |A \cap B|}.$$
+>
+> IoU nằm trong $[0, 1]$, bằng 1 khi hai hộp trùng nhau hoàn toàn và bằng 0 khi chúng không giao nhau.
+
+> **Ví dụ 7.2.** Hộp $A = (0, 0, 4, 4)$ và $B = (2, 2, 6, 6)$: phần giao là hình vuông $2 \times 2$, diện tích 4; phần hợp là $16 + 16 - 4 = 28$; nên $\operatorname{IoU} = 4/28 \approx 0{,}143$. Hộp $B' = (1, 0, 5, 4)$ chỉ là $A$ dịch sang phải 1 đơn vị: giao $3 \times 4 = 12$, hợp $20$, IoU $= 0{,}6$. Hộp $B'' = (0, 0, 4, 2)$ là nửa trên của $A$: IoU $= 8/16 = 0{,}5$. Ví dụ cuối cho thấy một hộp chỉ phủ nửa đối tượng vẫn đạt ngưỡng 0,5 thường dùng khi đánh giá.
+
+**Hai họ kiến trúc.** Các bộ phát hiện dựa trên CNN chia thành hai họ.
+
+- **Hai giai đoạn** (two-stage): giai đoạn thứ nhất đề xuất các vùng có khả năng chứa đối tượng, giai đoạn thứ hai phân loại từng vùng và tinh chỉnh hộp. R-CNN (Girshick và cộng sự, 2014) lấy khoảng 2 000 vùng đề xuất từ thuật toán selective search và chạy CNN riêng trên từng vùng, nên rất chậm. Fast R-CNN (Girshick, 2015) chạy CNN một lần cho cả ảnh rồi cắt đặc trưng của từng vùng bằng phép RoI pooling. Faster R-CNN (Ren và cộng sự, 2015) thay selective search bằng một **mạng đề xuất vùng** (region proposal network, RPN) dùng chung đặc trưng với phần phát hiện, nên toàn bộ hệ thống là một mạng nơ-ron huấn luyện được từ đầu tới cuối.
+- **Một giai đoạn** (one-stage): dự đoán trực tiếp hộp và lớp trên một lưới dày đặc, không có bước đề xuất vùng riêng. YOLO (Redmon và cộng sự, 2016) chia ảnh thành lưới $7 \times 7$; mỗi ô dự đoán 2 hộp và xác suất của 20 lớp, nên đầu ra là một tensor $7 \times 7 \times 30$, và mô hình chạy được 45 khung hình mỗi giây. SSD (Liu và cộng sự, 2016) dự đoán trên nhiều bản đồ đặc trưng có độ phân giải khác nhau, để bản đồ chi tiết bắt đối tượng nhỏ và bản đồ thô bắt đối tượng lớn.
+
+Bộ một giai đoạn thường nhanh hơn; bộ hai giai đoạn từng chính xác hơn. Lin và cộng sự (2017) chỉ ra nguyên nhân chính của khoảng cách này: bộ một giai đoạn đánh giá hàng chục nghìn vị trí trên mỗi ảnh, phần lớn là nền dễ nhận ra, và tổng hàm mất mát của số đông mẫu dễ này lấn át số ít đối tượng thật. Họ đề xuất **focal loss**:
+
+$$\operatorname{FL}(p_t) = -\alpha_t\,(1 - p_t)^{\gamma}\,\log p_t,$$
+
+trong đó $p_t$ là xác suất mô hình gán cho lớp đúng và $\alpha_t$ là trọng số theo lớp. Hệ số $(1 - p_t)^{\gamma}$ giảm trọng số của các mẫu đã được phân loại tốt: với $\gamma = 2$, một mẫu có $p_t = 0{,}9$ nhận trọng số $0{,}01$, tức đóng góp nhỏ hơn 100 lần so với cross-entropy; một mẫu khó với $p_t = 0{,}5$ nhận trọng số $0{,}25$. Bộ phát hiện một giai đoạn RetinaNet dùng hàm mất mát này đạt độ chính xác của các bộ hai giai đoạn cùng thời.
+
+**Hộp neo.** Faster R-CNN, SSD và RetinaNet đặt tại mỗi vị trí trên bản đồ đặc trưng một số **hộp neo** (anchor box) có kích thước và tỉ lệ cạnh định trước; RPN của Faster R-CNN dùng 3 kích thước và 3 tỉ lệ, tức 9 hộp neo mỗi vị trí. Mạng không dự đoán toạ độ tuyệt đối mà dự đoán độ lệch so với hộp neo:
+
+$$t_x = \frac{x - x_a}{w_a}, \qquad t_y = \frac{y - y_a}{h_a}, \qquad t_w = \log\frac{w}{w_a}, \qquad t_h = \log\frac{h}{h_a},$$
+
+với $(x, y, w, h)$ là tâm và kích thước của hộp, chỉ số $a$ chỉ hộp neo. Chia cho kích thước hộp neo làm độ lệch không phụ thuộc vào kích thước đối tượng, và logarit làm phép co giãn đối xứng: hộp lớn gấp đôi hay nhỏ đi một nửa cho $t_w$ bằng $+\log 2$ hay $-\log 2$. Khi huấn luyện, mỗi hộp neo được gán nhãn theo IoU với các hộp thật: trong RPN, hộp neo có IoU lớn hơn 0,7 với một hộp thật là mẫu dương, nhỏ hơn 0,3 với mọi hộp thật là mẫu âm, ở giữa thì bỏ qua. Các bộ phát hiện không dùng hộp neo (anchor-free) như FCOS (Tian và cộng sự, 2019) và CenterNet (Zhou và cộng sự, 2019) dự đoán trực tiếp từ từng điểm của bản đồ đặc trưng, bớt được các siêu tham số về kích thước và tỉ lệ của hộp neo.
+
+**Lọc trùng bằng NMS.** Vì dự đoán trên một lưới dày đặc, một đối tượng thường được nhiều hộp gần nhau cùng phát hiện. Bước **non-maximum suppression** (NMS) lọc các hộp trùng:
+
+1. Sắp xếp các hộp theo điểm tin cậy giảm dần.
+2. Đưa hộp có điểm cao nhất vào kết quả.
+3. Bỏ mọi hộp còn lại có IoU với hộp vừa chọn lớn hơn một ngưỡng, thường là 0,5.
+4. Lặp lại bước 2 và 3 với các hộp còn lại cho tới khi hết.
+
+> **Ví dụ 7.3 (Hình 9, trái).** Sáu hộp dự đoán có điểm A 0,92; B 0,85; D 0,80; C 0,60; E 0,55; F 0,40. IoU giữa A và B là 0,822, giữa A và C là 0,566, giữa A và F là 0,143, giữa D và E là 0,716. Với ngưỡng 0,5: chọn A, bỏ B và C; trong các hộp còn lại D có điểm cao nhất, chọn D và bỏ E; còn F, chọn F. Kết quả là ba hộp A, D, F.
+
+Hộp F chỉ trùng 0,143 với A nên được giữ: NMS coi đó là một đối tượng khác. Đây cũng là giới hạn của NMS: hai đối tượng thật đứng sát nhau, như người trong đám đông, có hộp trùng nhau nhiều, và hộp có điểm thấp hơn bị loại nhầm. DETR (Carion và cộng sự, 2020) bỏ hẳn NMS và hộp neo: một Transformer encoder–decoder nhận đặc trưng của ảnh và 100 vector truy vấn, mỗi truy vấn sinh ra một hộp hoặc "không có đối tượng"; khi huấn luyện, các dự đoán được ghép một–một với hộp thật bằng thuật toán Hungary, nên mỗi đối tượng chỉ có một dự đoán chịu trách nhiệm. Cái giá là huấn luyện lâu hơn nhiều: bài báo gốc dùng 500 epoch trên COCO.
+
+**Đánh giá: AP và mAP.** Cách đánh giá bộ phát hiện dựa trên precision và recall ([Mục 8.3 của *Nền tảng*](nentang-ch08.html)), với định nghĩa đúng sai qua IoU:
+
+- Xét các hộp dự đoán theo điểm giảm dần. Một hộp là **dương tính thật** nếu IoU của nó với một hộp thật cùng lớp, chưa được ghép với dự đoán nào trước đó, đạt ngưỡng (thường 0,5); ngược lại nó là **dương tính giả**. Hộp thật không được ghép là âm tính giả. Mỗi hộp thật chỉ ghép một lần, nên hộp trùng của cùng một đối tượng bị tính là dương tính giả.
+- Hạ dần ngưỡng điểm ta được đường precision–recall. **AP** (average precision) là diện tích dưới đường này sau khi thay mỗi giá trị precision bằng precision lớn nhất ở các mức recall lớn hơn hoặc bằng: $p_{\text{nội suy}}(r) = \max_{r' \ge r} p(r')$. PASCAL VOC 2007 lấy trung bình tại 11 mức recall $0; 0{,}1; \dots; 1$; từ VOC 2010, AP là diện tích tính tại mọi điểm (Everingham và cộng sự, 2010). **mAP** là trung bình AP của các lớp.
+- COCO (Lin và cộng sự, 2014) tính AP tại 101 mức recall và lấy trung bình trên 10 ngưỡng IoU $0{,}50; 0{,}55; \dots; 0{,}95$. Con số này được ký hiệu AP@[0,5:0,95], hoặc gọn là AP trong các bài báo dùng COCO; AP50 và AP75 là AP tại một ngưỡng IoU.
+
+**Thí nghiệm.** Script `code/models/thi_giac.py` mô phỏng một bộ phát hiện trên 300 ảnh kích thước $100 \times 100$, mỗi ảnh 1 tới 4 đối tượng, tổng cộng 765 hộp thật. Mỗi đối tượng được phát hiện với xác suất 0,9 bằng một hộp lệch ngẫu nhiên khoảng 6% kích thước ở mỗi cạnh; với xác suất 0,3 có thêm một hộp trùng lệch hơn và điểm thấp hơn; ngoài ra mỗi ảnh có trung bình 0,6 hộp báo nhầm ở chỗ không có gì. Không có mô hình nào được huấn luyện: mô phỏng cô lập đúng phần cần hiểu là cách ghép hộp, lọc trùng và tính AP.
+
+![Hình 9](figs/models15_detect.png)
+
+**Hình 9.** Trái: NMS với ngưỡng IoU 0,5 trên sáu hộp của Ví dụ 7.3; nét liền là hộp được giữ, nét đứt là hộp bị loại. Phải: đường precision–recall của bộ phát hiện mô phỏng, khi không lọc trùng và khi có NMS, ở ngưỡng IoU 0,5 và 0,75.
+
+| Cách đánh giá | AP (mọi điểm) | AP (101 điểm) | Recall lớn nhất |
+|---|---|---|---|
+| IoU 0,5, không lọc trùng | 0,885 | 0,879 | 0,928 |
+| IoU 0,5, có NMS | 0,913 | 0,908 | 0,916 |
+| IoU 0,75, có NMS | 0,708 | 0,708 | 0,792 |
+
+Với NMS, AP theo cách tính của COCO tại các ngưỡng IoU 0,5; 0,6; 0,7; 0,8; 0,9 lần lượt là 0,908; 0,894; 0,829; 0,425; 0,014, và trung bình trên 10 ngưỡng là AP@[0,5:0,95] = 0,569.
+
+Bảng cho hai nhận xét:
+
+1. **NMS tăng AP nhưng loại nhầm một ít hộp đúng.** Không lọc trùng, các hộp trùng bị tính là dương tính giả và AP50 là 0,885; sau NMS, AP50 tăng lên 0,913. Nhưng recall lớn nhất giảm từ 0,928 xuống 0,916: NMS đã loại một số hộp đúng của các đối tượng đứng sát nhau, đúng giới hạn nêu ở trên.
+2. **Ngưỡng IoU thay đổi con số rất nhiều.** Cùng một bộ phát hiện, AP giảm từ 0,908 ở ngưỡng 0,5 xuống 0,708 ở 0,75 và gần 0 ở 0,9: hộp lệch khoảng 6% kích thước mỗi cạnh là đủ tốt cho ngưỡng 0,5 nhưng hiếm khi đạt 0,9. AP@[0,5:0,95] thưởng cho việc định vị chính xác, nên hai bộ phát hiện có cùng AP50 có thể khác xa nhau theo thước đo này. Khi đọc một con số AP, cần biết nó được tính theo quy ước nào.
+
+### 7.6. Phân đoạn ảnh
+
+**Phân đoạn ảnh** (image segmentation) gán nhãn cho từng điểm ảnh thay vì cho cả ảnh hay cho một hộp. Có ba bài toán:
+
+| Bài toán | Đầu ra | Ví dụ |
+|---|---|---|
+| Phân đoạn ngữ nghĩa (semantic segmentation) | mỗi điểm ảnh một nhãn lớp; không phân biệt các đối tượng cùng lớp | đường, vỉa hè, xe, người trong ảnh từ camera của xe |
+| Phân đoạn thể hiện (instance segmentation) | một mặt nạ riêng cho từng đối tượng | từng chiếc xe, từng người |
+| Phân đoạn toàn cảnh (panoptic segmentation; Kirillov và cộng sự, 2019) | mọi điểm ảnh có nhãn lớp, và các đối tượng đếm được có thêm định danh riêng | bản đồ đầy đủ của một cảnh |
+
+**Từ phân loại sang phân đoạn.** Một CNN phân loại giảm độ phân giải dần qua các lớp, ví dụ từ $224 \times 224$ xuống $7 \times 7$, để trường tiếp nhận đủ lớn (Mục 7.2). Phân đoạn lại cần đầu ra ở độ phân giải gốc. FCN (fully convolutional network; Long, Shelhamer và Darrell, 2015) giải quyết bằng ba thay đổi: thay các lớp kết nối đầy đủ ở cuối bằng tích chập, để mạng cho ra một bản đồ lớp thô thay vì một vector; tăng độ phân giải của bản đồ đó bằng tích chập chuyển vị; và cộng thêm đặc trưng từ các lớp đầu, nơi độ phân giải còn cao, để khôi phục chi tiết ở biên đối tượng.
+
+**Tích chập chuyển vị** (transposed convolution) tăng kích thước không gian. Với đầu vào kích thước $i$, bộ lọc $k$, bước nhảy $s$ và phần đệm $p$, đầu ra có kích thước
+
+$$o = (i - 1)\,s - 2p + k.$$
+
+Ví dụ, $i = 7$, $k = 4$, $s = 2$, $p = 1$ cho $o = 6 \cdot 2 - 2 + 4 = 14$: độ phân giải tăng gấp đôi. Khi $k$ không chia hết cho $s$, các vùng ảnh hưởng của bộ lọc chồng lên nhau không đều và có thể tạo hoa văn ô cờ trên ảnh đầu ra (Odena và cộng sự, 2016); một cách thay thế phổ biến là phóng to bằng nội suy song tuyến tính rồi mới tích chập.
+
+**U-Net** (Ronneberger, Fischer và Brox, 2015) là kiến trúc phân đoạn được dùng rộng rãi nhất. Nó gồm một nhánh mã hoá giảm độ phân giải và tăng số kênh như một CNN phân loại, và một nhánh giải mã đối xứng tăng dần độ phân giải. Ở mỗi mức độ phân giải, nhánh giải mã **ghép** (concatenate) bản đồ đặc trưng của nhánh mã hoá ở cùng mức: đặc trưng sâu cho biết "đây là gì", đặc trưng nông cho biết chính xác "ở đâu". U-Net được thiết kế cho ảnh y sinh, nơi chỉ có vài chục ảnh có nhãn (một bài toán trong bài báo có 30 ảnh huấn luyện), và dựa nhiều vào tăng cường dữ liệu. Ngày nay kiến trúc này còn là mạng khử nhiễu trong nhiều mô hình khuếch tán (Ho và cộng sự, 2020; [Chương 11 của *Biểu diễn & Căn chỉnh*](bieudien-ch11.html)).
+
+**Tích chập giãn** (dilated convolution, atrous convolution) chèn $d - 1$ ô trống giữa các phần tử của bộ lọc. Bộ lọc $k \times k$ với hệ số giãn $d$ phủ một vùng kích thước $k + (k - 1)(d - 1)$ mà vẫn chỉ có $k^2$ trọng số: bộ lọc $3 \times 3$ với $d = 2$ phủ $5 \times 5$, với $d = 4$ phủ $9 \times 9$. Nhờ đó trường tiếp nhận tăng mà không phải giảm độ phân giải. DeepLab (Chen và cộng sự, 2018) dùng tích chập giãn, và chạy song song nhiều hệ số giãn khác nhau để bắt ngữ cảnh ở nhiều tỉ lệ.
+
+**Phân đoạn thể hiện.** Mask R-CNN (He và cộng sự, 2017) thêm vào Faster R-CNN một nhánh dự đoán mặt nạ nhị phân $28 \times 28$ cho mỗi vùng, song song với nhánh phân loại và nhánh hộp. Nó cũng thay RoI pooling bằng **RoIAlign**: RoI pooling làm tròn toạ độ của vùng về lưới của bản đồ đặc trưng, gây lệch tới nửa ô, điều chấp nhận được với hộp nhưng không chấp nhận được khi cần chính xác tới từng điểm ảnh; RoIAlign lấy giá trị tại toạ độ thực bằng nội suy song tuyến tính.
+
+**Đánh giá và hàm mất mát.**
+
+- **Độ chính xác theo điểm ảnh** (pixel accuracy) dễ gây hiểu lầm khi các lớp mất cân bằng: nếu nền chiếm 95% số điểm ảnh, một mô hình gán mọi điểm là nền đạt 95%.
+- **IoU theo lớp** và **mIoU** (trung bình IoU của các lớp) là thước đo chuẩn cho phân đoạn ngữ nghĩa; IoU ở đây tính trên tập điểm ảnh thay vì trên hộp.
+- **Hệ số Dice** $= \dfrac{2|A \cap B|}{|A| + |B|}$, phổ biến trong phân đoạn ảnh y tế. Dice và IoU liên hệ bởi $\text{Dice} = \dfrac{2\,\text{IoU}}{1 + \text{IoU}}$, nên Dice luôn lớn hơn hoặc bằng IoU: IoU 0,3; 0,5; 0,7; 0,9 ứng với Dice 0,462; 0,667; 0,824; 0,947. So sánh kết quả từ hai bài báo cần chú ý chúng dùng thước đo nào.
+
+Hàm mất mát cơ bản là cross-entropy trên từng điểm ảnh. Khi đối tượng chỉ chiếm một phần rất nhỏ của ảnh, như khối u trên ảnh chụp, cross-entropy bị số đông điểm ảnh nền chi phối, giống tình huống của focal loss ở Mục 7.5. Các cách xử lý gồm đặt trọng số theo lớp, focal loss, và **Dice loss** (Milletari và cộng sự, 2016): $1 - \text{Dice}$, với Dice tính từ xác suất dự đoán thay vì nhãn đã làm tròn để lấy đạo hàm được; Dice loss chỉ quan tâm tới mức trùng khớp của vùng đối tượng nên không bị số điểm ảnh nền lấn át.
+
+**Mô hình nền cho phân đoạn.** SAM (Segment Anything; Kirillov và cộng sự, 2023) nhận một ảnh và một gợi ý, có thể là một vài điểm hoặc một hộp, rồi trả về mặt nạ của đối tượng được chỉ tới. Mô hình được huấn luyện trên bộ dữ liệu SA-1B gồm hơn 1 tỉ mặt nạ trên 11 triệu ảnh, và dùng được trên nhiều loại ảnh chưa từng thấy mà không cần huấn luyện thêm. Trong ứng dụng, SAM thường được ghép với một bộ phát hiện: bộ phát hiện đưa ra hộp, SAM biến hộp thành mặt nạ. Đây là cùng xu hướng với mô hình ngôn ngữ ở Chương 9 tới 12: một mô hình nền huấn luyện trên dữ liệu rất lớn, rồi được dùng cho nhiều nhiệm vụ cụ thể.
+
 ---
 
 ## 8. Mạng nơ-ron hồi quy
@@ -785,9 +886,9 @@ với $z_i$ là giá trị trước hàm tanh ở bước $i$. Tình huống gi�
 
 Thí nghiệm trong `code/models/experiments.py` đo trực tiếp: một RNN tanh 64 chiều, $W_{hh}$ có các phần tử độc lập với phương sai $g^2/64$ (nên bán kính phổ xấp xỉ $g$), trạng thái đầu nhỏ, chạy 100 bước. Một gradient ngẫu nhiên được truyền ngược từ bước cuối, và thí nghiệm đo chuẩn của gradient sau 10, 50 và 100 bước lùi, chia cho chuẩn sau 1 bước và lấy trung bình trên 8 lần khởi tạo.
 
-![Hình 9](figs/models09_rnn.png)
+![Hình 10](figs/models09_rnn.png)
 
-**Hình 9.** Chuẩn tương đối của gradient khi truyền ngược qua thời gian, theo số bước lùi; trục dọc theo thang log.
+**Hình 10.** Chuẩn tương đối của gradient khi truyền ngược qua thời gian, theo số bước lùi; trục dọc theo thang log.
 
 | Mô hình | Sau 10 bước | Sau 50 bước | Sau 100 bước |
 |---|---|---|---|
@@ -873,9 +974,9 @@ Như vậy độ lệch chuẩn của điểm số tăng theo $\sqrt{d_k}$: vớ
 
 Thí nghiệm trong `code/models/experiments.py` kiểm tra cả hai vế: tạo 4 000 truy vấn và 64 khoá ngẫu nhiên theo phân phối chuẩn tắc, đo phương sai của điểm số và entropy của phân phối attention trên 64 khoá, có và không có phép chia.
 
-![Hình 10](figs/models10_scaling.png)
+![Hình 11](figs/models10_scaling.png)
 
-**Hình 10.** Trái: phương sai đo được của $q \cdot k$ so với giá trị lý thuyết $d_k$ (đường chấm). Phải: entropy của phân phối attention trên 64 khoá theo $d_k$, có và không có phép chia cho $\sqrt{d_k}$.
+**Hình 11.** Trái: phương sai đo được của $q \cdot k$ so với giá trị lý thuyết $d_k$ (đường chấm). Phải: entropy của phân phối attention trên 64 khoá theo $d_k$, có và không có phép chia cho $\sqrt{d_k}$.
 
 | $d_k$ | $\operatorname{Var}(q \cdot k)$ đo được | Lý thuyết | Entropy, không chia | Entropy, có chia | Trọng số lớn nhất, không chia |
 |---|---|---|---|---|---|
@@ -912,9 +1013,9 @@ Mặt nạ nhân quả còn cho phép một điều quan trọng khi huấn luy�
 
 ### 9.5. Cấu trúc một khối Transformer
 
-![Hình 11](figs/models11_block.png)
+![Hình 12](figs/models11_block.png)
 
-**Hình 11.** Một khối Transformer, vẽ theo thứ tự pre-LN (Mục 10.2): hai khối con, mỗi khối con có một kết nối tắt đi vòng qua.
+**Hình 12.** Một khối Transformer, vẽ theo thứ tự pre-LN (Mục 10.2): hai khối con, mỗi khối con có một kết nối tắt đi vòng qua.
 
 Một khối Transformer theo thứ tự pre-LN tính
 
@@ -962,9 +1063,9 @@ Khung kiến trúc của Transformer gần như không đổi từ năm 2017, nh
 
 ### 10.1. Tổng quan
 
-![Hình 12](figs/models14_modern.png)
+![Hình 13](figs/models14_modern.png)
 
-**Hình 12.** Các thành phần của Transformer năm 2017 và lựa chọn phổ biến hiện nay. Khung kiến trúc giữ nguyên; các thành phần thay đổi vì những lý do cụ thể.
+**Hình 13.** Các thành phần của Transformer năm 2017 và lựa chọn phổ biến hiện nay. Khung kiến trúc giữ nguyên; các thành phần thay đổi vì những lý do cụ thể.
 
 | Thành phần | Transformer 2017 | Phổ biến hiện nay | Lý do thay đổi | Mục |
 |---|---|---|---|---|
@@ -998,9 +1099,9 @@ Dãy tần số $\theta_i$ giống dãy tần số của mã hoá sin–cos ở 
 
 Thí nghiệm trong `code/models/experiments.py` kiểm tra mệnh đề với $d = 64$ và hai vector ngẫu nhiên:
 
-![Hình 13](figs/models12_rope.png)
+![Hình 14](figs/models12_rope.png)
 
-**Hình 13.** Trái: tích vô hướng sau khi quay chỉ phụ thuộc khoảng cách tương đối, dù vị trí tuyệt đối khác nhau hàng trăm. Phải: độ tương đồng của một vector với chính nó ở hai vị trí, theo khoảng cách giữa hai vị trí.
+**Hình 14.** Trái: tích vô hướng sau khi quay chỉ phụ thuộc khoảng cách tương đối, dù vị trí tuyệt đối khác nhau hàng trăm. Phải: độ tương đồng của một vector với chính nó ở hai vị trí, theo khoảng cách giữa hai vị trí.
 
 | $m$ | $n$ | $m - n$ | $\langle R_m q, R_n k\rangle$ |
 |---|---|---|---|
@@ -1100,9 +1201,9 @@ Nhiệt độ $\tau < 1$ làm phân phối nhọn hơn, $\tau > 1$ làm phân ph
 
 Thí nghiệm trong `code/models/experiments.py` dựng một phân phối trên 50 000 token có đuôi dài, với logit lấy từ phân phối chuẩn có độ lệch chuẩn 2,2, rồi đo entropy, số token phủ 90% xác suất và xác suất của token đứng đầu sau mỗi phép biến đổi.
 
-![Hình 14](figs/models13_decode.png)
+![Hình 15](figs/models13_decode.png)
 
-**Hình 14.** Trái: xác suất theo thứ hạng của token sau mỗi phép biến đổi, trục dọc theo thang log. Phải: số token phủ 90% xác suất.
+**Hình 15.** Trái: xác suất theo thứ hạng của token sau mỗi phép biến đổi, trục dọc theo thang log. Phải: số token phủ 90% xác suất.
 
 | Chiến lược | Entropy (nat) | Số lựa chọn hiệu dụng $e^H$ | Số token phủ 90% | Xác suất token đầu |
 |---|---|---|---|---|
@@ -1300,6 +1401,12 @@ Giảm số byte mỗi số là cách tác động trực tiếp lên mọi dòn
 (b) Từ đó cho biết phép chia $\sqrt{d_k}$ xử lý vấn đề của softmax hay của tích vô hướng.
 (c) Nêu lý do attention vẫn dùng softmax.
 
+**Bài 11 (tính tay).** Phát hiện đối tượng (Mục 7.5).
+(a) Tính IoU của hai hộp $A = (10, 10, 50, 40)$ và $B = (30, 20, 70, 60)$, toạ độ dạng $(x_1, y_1, x_2, y_2)$.
+(b) Chạy NMS với ngưỡng IoU 0,5 trên bốn hộp: $P_1 = (0, 0, 10, 10)$ điểm 0,9; $P_2 = (1, 1, 11, 11)$ điểm 0,8; $P_3 = (5, 5, 15, 15)$ điểm 0,7; $P_4 = (20, 20, 30, 30)$ điểm 0,6. Những hộp nào được giữ?
+(c) Một lớp có 4 hộp thật. Bộ phát hiện trả về 6 hộp; xếp theo điểm giảm dần, kết quả ghép ở ngưỡng IoU 0,5 lần lượt là: đúng, đúng, sai, đúng, sai, sai. Tính precision và recall sau mỗi hộp, rồi tính AP theo cách tính mọi điểm của PASCAL VOC.
+(d) Vì sao một hộp dự đoán trùng với hộp đúng của cùng đối tượng bị tính là dương tính giả, và điều đó liên quan gì tới NMS?
+
 ---
 
 ## 14. Câu hỏi phỏng vấn
@@ -1418,7 +1525,29 @@ Phần thứ ba thường là phần phân biệt người hiểu với người
 
 > **Trả lời.** Bộ nhớ gồm trọng số, gradient và trạng thái bộ tối ưu (khoảng 16 byte mỗi tham số với Adam và độ chính xác hỗn hợp, tức 112 GB cho mô hình 7B), cộng giá trị kích hoạt tỉ lệ với kích thước lô và độ dài chuỗi. Nếu phần tăng theo lô là nguyên nhân, giảm kích thước lô và dùng tích luỹ gradient; tiếp theo là gradient checkpointing (bộ nhớ kích hoạt từ $O(L)$ xuống $O(\sqrt L)$, đổi lấy khoảng một lượt xuôi tính lại), FlashAttention, và chia trạng thái bộ tối ưu cho nhiều GPU như ZeRO.
 
-### 14.6. Các câu trả lời chưa đạt
+### 14.6. Thị giác máy tính
+
+**Câu hỏi: IoU là gì, và vì sao dùng nó để đánh giá bộ phát hiện?**
+
+> **Trả lời.** IoU là diện tích phần giao chia cho diện tích phần hợp của hai hộp, nằm trong khoảng từ 0 tới 1. Nó đo mức trùng khớp mà không phụ thuộc vào kích thước tuyệt đối của đối tượng, nên một ngưỡng như 0,5 dùng được cho cả đối tượng lớn lẫn nhỏ. Cần biết giới hạn của ngưỡng 0,5: một hộp chỉ phủ nửa đối tượng đã đạt IoU 0,5 (Ví dụ 7.2), vì vậy COCO lấy trung bình AP trên các ngưỡng từ 0,5 tới 0,95.
+
+**Câu hỏi: NMS hoạt động thế nào, và nó có nhược điểm gì?**
+
+> **Trả lời.** Sắp xếp các hộp theo điểm, lấy hộp điểm cao nhất, bỏ các hộp còn lại có IoU với nó vượt ngưỡng, rồi lặp lại. NMS cần thiết vì bộ phát hiện dự đoán trên lưới dày nên một đối tượng có nhiều hộp. Nhược điểm: với các đối tượng đứng sát nhau, hộp đúng của đối tượng thứ hai có thể bị loại vì trùng nhiều với hộp của đối tượng thứ nhất; trong thí nghiệm ở Mục 7.5, NMS làm recall lớn nhất giảm từ 0,928 xuống 0,916. DETR tránh NMS bằng cách ghép một–một giữa dự đoán và hộp thật khi huấn luyện.
+
+**Câu hỏi: AP50 và AP@[0,5:0,95] khác nhau thế nào?**
+
+> **Trả lời.** AP50 là diện tích dưới đường precision–recall khi một dự đoán được tính là đúng nếu IoU với hộp thật đạt 0,5. AP@[0,5:0,95], thước đo chính của COCO, là trung bình AP trên 10 ngưỡng IoU từ 0,5 tới 0,95, nên thưởng cho việc định vị chính xác. Cùng một bộ phát hiện mô phỏng ở Mục 7.5 có AP50 bằng 0,908 nhưng AP@[0,5:0,95] chỉ bằng 0,569. So sánh hai con số AP chỉ có nghĩa khi chúng cùng quy ước.
+
+**Câu hỏi: Vì sao focal loss giúp bộ phát hiện một giai đoạn?**
+
+> **Trả lời.** Bộ một giai đoạn đánh giá hàng chục nghìn vị trí mỗi ảnh, phần lớn là nền dễ. Với cross-entropy, tổng mất mát nhỏ của rất nhiều mẫu dễ lấn át mất mát của số ít đối tượng thật. Focal loss nhân thêm hệ số $(1 - p_t)^{\gamma}$: với $\gamma = 2$, mẫu đã đúng với xác suất 0,9 chỉ còn 1% trọng số, nên gradient tập trung vào các mẫu khó.
+
+**Câu hỏi: U-Net khác một CNN phân loại ở điểm nào?**
+
+> **Trả lời.** U-Net có nhánh mã hoá giống CNN phân loại và thêm một nhánh giải mã tăng dần độ phân giải về kích thước ảnh gốc. Ở mỗi mức độ phân giải, nhánh giải mã ghép đặc trưng của nhánh mã hoá cùng mức, để kết hợp thông tin "là gì" của lớp sâu với thông tin "ở đâu" của lớp nông. Nhờ vậy nó cho ra nhãn cho từng điểm ảnh với biên đối tượng chính xác, và học được từ ít ảnh có nhãn nếu tăng cường dữ liệu tốt.
+
+### 14.7. Các câu trả lời chưa đạt
 
 | Câu trả lời | Vì sao chưa đạt |
 |---|---|
@@ -1432,6 +1561,7 @@ Phần thứ ba thường là phần phân biệt người hiểu với người
 | "Transformer nhanh hơn RNN vì ít phép tính hơn." | Sai: self-attention tốn nhiều phép tính hơn khi $T > d$. Transformer thắng ở số bước tuần tự. |
 | "Mạng nào cũng cần dropout." | Nhiều mô hình ngôn ngữ lớn không dùng dropout khi tiền huấn luyện. |
 | "GQA làm tăng chất lượng." | GQA giảm chất lượng một chút so với MHA; lý do dùng là KV cache nhỏ hơn. |
+| "Bộ phát hiện này có AP 0,9 nên rất tốt." | Phải biết ngưỡng IoU và quy ước tính: cùng một bộ phát hiện có thể có AP50 bằng 0,91 và AP@[0,5:0,95] bằng 0,57 (Mục 7.5). |
 
 ---
 
@@ -1503,46 +1633,70 @@ Phần thứ ba thường là phần phân biệt người hiểu với người
 56. J. Chung, C. Gulcehre, K. Cho, Y. Bengio. Empirical Evaluation of Gated Recurrent Neural Networks on Sequence Modeling. arXiv:1412.3555, 2014.
 57. A. Gu, T. Dao. Mamba: Linear-Time Sequence Modeling with Selective State Spaces. arXiv:2312.00752, 2023.
 
+**Thị giác máy tính: phát hiện đối tượng và phân đoạn**
+
+58. R. Girshick, J. Donahue, T. Darrell, J. Malik. Rich Feature Hierarchies for Accurate Object Detection and Semantic Segmentation. *CVPR*, 2014. R-CNN.
+59. R. Girshick. Fast R-CNN. *ICCV*, 2015.
+60. S. Ren, K. He, R. Girshick, J. Sun. Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks. *NeurIPS*, 2015. Mạng đề xuất vùng và hộp neo.
+61. J. Redmon, S. Divvala, R. Girshick, A. Farhadi. You Only Look Once: Unified, Real-Time Object Detection. *CVPR*, 2016.
+62. W. Liu và cộng sự. SSD: Single Shot MultiBox Detector. *ECCV*, 2016.
+63. T.-Y. Lin, P. Goyal, R. Girshick, K. He, P. Dollár. Focal Loss for Dense Object Detection. *ICCV*, 2017. RetinaNet.
+64. Z. Tian, C. Shen, H. Chen, T. He. FCOS: Fully Convolutional One-Stage Object Detection. *ICCV*, 2019.
+65. X. Zhou, D. Wang, P. Krähenbühl. Objects as Points. arXiv:1904.07850, 2019. CenterNet.
+66. N. Carion và cộng sự. End-to-End Object Detection with Transformers. *ECCV*, 2020. DETR.
+67. M. Everingham, L. Van Gool, C. K. I. Williams, J. Winn, A. Zisserman. The PASCAL Visual Object Classes (VOC) Challenge. *IJCV*, 2010. Cách tính AP 11 điểm và mọi điểm.
+68. T.-Y. Lin và cộng sự. Microsoft COCO: Common Objects in Context. *ECCV*, 2014. AP@[0,5:0,95].
+69. J. Long, E. Shelhamer, T. Darrell. Fully Convolutional Networks for Semantic Segmentation. *CVPR*, 2015.
+70. O. Ronneberger, P. Fischer, T. Brox. U-Net: Convolutional Networks for Biomedical Image Segmentation. *MICCAI*, 2015.
+71. V. Dumoulin, F. Visin. A Guide to Convolution Arithmetic for Deep Learning. arXiv:1603.07285, 2016. Kích thước đầu ra của tích chập chuyển vị.
+72. A. Odena, V. Dumoulin, C. Olah. Deconvolution and Checkerboard Artifacts. *Distill*, 2016.
+73. L.-C. Chen, G. Papandreou, I. Kokkinos, K. Murphy, A. L. Yuille. DeepLab: Semantic Image Segmentation with Deep Convolutional Nets, Atrous Convolution, and Fully Connected CRFs. *TPAMI*, 2018.
+74. K. He, G. Gkioxari, P. Dollár, R. Girshick. Mask R-CNN. *ICCV*, 2017. RoIAlign.
+75. A. Kirillov, K. He, R. Girshick, C. Rother, P. Dollár. Panoptic Segmentation. *CVPR*, 2019.
+76. F. Milletari, N. Navab, S.-A. Ahmadi. V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation. *3DV*, 2016. Dice loss.
+77. A. Kirillov và cộng sự. Segment Anything. *ICCV*, 2023. SAM và bộ dữ liệu SA-1B.
+78. J. Ho, A. Jain, P. Abbeel. Denoising Diffusion Probabilistic Models. *NeurIPS*, 2020. U-Net làm mạng khử nhiễu.
+
 **Transformer**
 
-58. A. Vaswani và cộng sự. Attention Is All You Need. *NeurIPS*, 2017. Scaled dot-product attention, lập luận $\sqrt{d_k}$ ở chú thích 4, attention nhiều đầu và bảng so sánh với RNN.
-59. D. Bahdanau, K. Cho, Y. Bengio. Neural Machine Translation by Jointly Learning to Align and Translate. *ICLR*, 2015.
-60. P. Michel, O. Levy, G. Neubig. Are Sixteen Heads Really Better than One? *NeurIPS*, 2019.
-61. O. Press, N. A. Smith, M. Lewis. Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation. *ICLR*, 2022. ALiBi.
-62. J. Devlin, M.-W. Chang, K. Lee, K. Toutanova. BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. *NAACL*, 2019.
-63. A. Radford và cộng sự. *Language Models are Unsupervised Multitask Learners*. OpenAI, 2019. GPT-2.
-64. C. Raffel và cộng sự. Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer. *JMLR*, 2020. T5.
-65. R. Xiong và cộng sự. On Layer Normalization in the Transformer Architecture. *ICML*, 2020. Pre-LN và post-LN.
-66. J. Su và cộng sự. RoFormer: Enhanced Transformer with Rotary Position Embedding. *Neurocomputing*, 2024. RoPE.
-67. S. Chen, S. Wong, L. Chen, Y. Tian. Extending Context Window of Large Language Models via Positional Interpolation. arXiv:2306.15595, 2023.
-68. B. Peng, J. Quesnelle, H. Fan, E. Shippole. YaRN: Efficient Context Window Extension of Large Language Models. *ICLR*, 2024.
-69. N. Shazeer. Fast Transformer Decoding: One Write-Head is All You Need. arXiv:1911.02150, 2019. MQA.
-70. J. Ainslie và cộng sự. GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints. *EMNLP*, 2023.
-71. N. Shazeer. GLU Variants Improve Transformer. arXiv:2002.05202, 2020. SwiGLU và việc giảm $d_{\text{ff}}$ còn hai phần ba.
-72. N. Shazeer và cộng sự. Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer. *ICLR*, 2017.
-73. W. Fedus, B. Zoph, N. Shazeer. Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity. *JMLR*, 2022.
-74. A. Q. Jiang và cộng sự. Mixtral of Experts. arXiv:2401.04088, 2024.
-75. H. Touvron và cộng sự. Llama 2: Open Foundation and Fine-Tuned Chat Models. arXiv:2307.09288, 2023. Cấu hình mô hình và con số 184 320 giờ-GPU.
-76. T. Dao, D. Y. Fu, S. Ermon, A. Rudra, C. Ré. FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. *NeurIPS*, 2022.
-77. T. Dao. FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning. *ICLR*, 2024.
-78. M. Milakov, N. Gimelshein. Online Normalizer Calculation for Softmax. arXiv:1805.02867, 2018.
+79. A. Vaswani và cộng sự. Attention Is All You Need. *NeurIPS*, 2017. Scaled dot-product attention, lập luận $\sqrt{d_k}$ ở chú thích 4, attention nhiều đầu và bảng so sánh với RNN.
+80. D. Bahdanau, K. Cho, Y. Bengio. Neural Machine Translation by Jointly Learning to Align and Translate. *ICLR*, 2015.
+81. P. Michel, O. Levy, G. Neubig. Are Sixteen Heads Really Better than One? *NeurIPS*, 2019.
+82. O. Press, N. A. Smith, M. Lewis. Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation. *ICLR*, 2022. ALiBi.
+83. J. Devlin, M.-W. Chang, K. Lee, K. Toutanova. BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. *NAACL*, 2019.
+84. A. Radford và cộng sự. *Language Models are Unsupervised Multitask Learners*. OpenAI, 2019. GPT-2.
+85. C. Raffel và cộng sự. Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer. *JMLR*, 2020. T5.
+86. R. Xiong và cộng sự. On Layer Normalization in the Transformer Architecture. *ICML*, 2020. Pre-LN và post-LN.
+87. J. Su và cộng sự. RoFormer: Enhanced Transformer with Rotary Position Embedding. *Neurocomputing*, 2024. RoPE.
+88. S. Chen, S. Wong, L. Chen, Y. Tian. Extending Context Window of Large Language Models via Positional Interpolation. arXiv:2306.15595, 2023.
+89. B. Peng, J. Quesnelle, H. Fan, E. Shippole. YaRN: Efficient Context Window Extension of Large Language Models. *ICLR*, 2024.
+90. N. Shazeer. Fast Transformer Decoding: One Write-Head is All You Need. arXiv:1911.02150, 2019. MQA.
+91. J. Ainslie và cộng sự. GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints. *EMNLP*, 2023.
+92. N. Shazeer. GLU Variants Improve Transformer. arXiv:2002.05202, 2020. SwiGLU và việc giảm $d_{\text{ff}}$ còn hai phần ba.
+93. N. Shazeer và cộng sự. Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer. *ICLR*, 2017.
+94. W. Fedus, B. Zoph, N. Shazeer. Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity. *JMLR*, 2022.
+95. A. Q. Jiang và cộng sự. Mixtral of Experts. arXiv:2401.04088, 2024.
+96. H. Touvron và cộng sự. Llama 2: Open Foundation and Fine-Tuned Chat Models. arXiv:2307.09288, 2023. Cấu hình mô hình và con số 184 320 giờ-GPU.
+97. T. Dao, D. Y. Fu, S. Ermon, A. Rudra, C. Ré. FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. *NeurIPS*, 2022.
+98. T. Dao. FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning. *ICLR*, 2024.
+99. M. Milakov, N. Gimelshein. Online Normalizer Calculation for Softmax. arXiv:1805.02867, 2018.
 
 **Giải mã**
 
-79. A. Fan, M. Lewis, Y. Dauphin. Hierarchical Neural Story Generation. *ACL*, 2018. Lấy mẫu top-$k$.
-80. A. Holtzman, J. Buys, L. Du, M. Forbes, Y. Choi. The Curious Case of Neural Text Degeneration. *ICLR*, 2020. Top-$p$ và nhận xét về beam search.
-81. M. Nguyen và cộng sự. Turning Up the Heat: Min-p Sampling for Creative and Coherent LLM Outputs. *ICLR*, 2025.
-82. N. S. Keskar và cộng sự. CTRL: A Conditional Transformer Language Model for Controllable Generation. arXiv:1909.05858, 2019. Phạt lặp.
-83. Y. Leviathan, M. Kalman, Y. Matias. Fast Inference from Transformers via Speculative Decoding. *ICML*, 2023.
-84. C. Chen và cộng sự. Accelerating Large Language Model Decoding with Speculative Sampling. arXiv:2302.01318, 2023.
-85. H. He. *Defeating Nondeterminism in LLM Inference*. Thinking Machines Lab, 2025.
+100. A. Fan, M. Lewis, Y. Dauphin. Hierarchical Neural Story Generation. *ACL*, 2018. Lấy mẫu top-$k$.
+101. A. Holtzman, J. Buys, L. Du, M. Forbes, Y. Choi. The Curious Case of Neural Text Degeneration. *ICLR*, 2020. Top-$p$ và nhận xét về beam search.
+102. M. Nguyen và cộng sự. Turning Up the Heat: Min-p Sampling for Creative and Coherent LLM Outputs. *ICLR*, 2025.
+103. N. S. Keskar và cộng sự. CTRL: A Conditional Transformer Language Model for Controllable Generation. arXiv:1909.05858, 2019. Phạt lặp.
+104. Y. Leviathan, M. Kalman, Y. Matias. Fast Inference from Transformers via Speculative Decoding. *ICML*, 2023.
+105. C. Chen và cộng sự. Accelerating Large Language Model Decoding with Speculative Sampling. arXiv:2302.01318, 2023.
+106. H. He. *Defeating Nondeterminism in LLM Inference*. Thinking Machines Lab, 2025.
 
 **Tài nguyên tính toán**
 
-86. J. Kaplan và cộng sự. Scaling Laws for Neural Language Models. arXiv:2001.08361, 2020. Công thức $12Ld^2$, $2N$ và $6ND$.
-87. J. Hoffmann và cộng sự. Training Compute-Optimal Large Language Models. *NeurIPS*, 2022. Chinchilla.
-88. S. Rajbhandari, J. Rasley, O. Ruwase, Y. He. ZeRO: Memory Optimizations Toward Training Trillion Parameter Models. *SC*, 2020. Con số 16 byte mỗi tham số.
-89. V. Korthikanti và cộng sự. Reducing Activation Recomputation in Large Transformer Models. arXiv:2205.05198, 2022. Công thức bộ nhớ kích hoạt ở Mục 12.5.
+107. J. Kaplan và cộng sự. Scaling Laws for Neural Language Models. arXiv:2001.08361, 2020. Công thức $12Ld^2$, $2N$ và $6ND$.
+108. J. Hoffmann và cộng sự. Training Compute-Optimal Large Language Models. *NeurIPS*, 2022. Chinchilla.
+109. S. Rajbhandari, J. Rasley, O. Ruwase, Y. He. ZeRO: Memory Optimizations Toward Training Trillion Parameter Models. *SC*, 2020. Con số 16 byte mỗi tham số.
+110. V. Korthikanti và cộng sự. Reducing Activation Recomputation in Large Transformer Models. arXiv:2205.05198, 2022. Công thức bộ nhớ kích hoạt ở Mục 12.5.
 
 ---
 
@@ -1550,18 +1704,21 @@ Phần thứ ba thường là phần phân biệt người hiểu với người
 
 ```text
 code/models/
-├── experiments.py            # Hình 2, 4, 5, 7, 9, 10, 13, 14 và mọi số liệu đo được
+├── experiments.py            # Hình 2, 4, 5, 7, 10, 11, 14, 15 và mọi số liệu đo được
 ├── experiments_output.txt    # kết quả in ra của script trên
-└── fig_diagrams.py           # Hình 1, 3, 6, 8, 11, 12 (sơ đồ khái niệm)
+├── thi_giac.py               # Hình 9 và số liệu về IoU, NMS, AP ở Mục 7.5–7.6
+├── thi_giac_output.txt       # kết quả in ra của thi_giac.py
+└── fig_diagrams.py           # Hình 1, 3, 6, 8, 12, 13 (sơ đồ khái niệm)
 ```
 
 ```bash
 pip install numpy scipy matplotlib scikit-learn
 python code/models/experiments.py     # khoảng một tới vài phút trên CPU
+python code/models/thi_giac.py        # vài giây
 python code/models/fig_diagrams.py
 ```
 
-Hai script đặt hạt giống cố định nên mọi con số trong giáo trình lặp lại được trên cùng phiên bản thư viện. Môi trường đã dùng: Python 3.13, NumPy 2.3, SciPy 1.16, scikit-learn 1.7, matplotlib 3.10. Trên Windows, đặt `PYTHONIOENCODING=utf-8` khi ghi kết quả ra tệp.
+Các script đặt hạt giống cố định nên mọi con số trong giáo trình lặp lại được trên cùng phiên bản thư viện. Môi trường đã dùng: Python 3.13, NumPy 2.3, SciPy 1.16, scikit-learn 1.7, matplotlib 3.10. Trên Windows, đặt `PYTHONIOENCODING=utf-8` khi ghi kết quả ra tệp.
 
 Một số kết quả là phép đối chiếu với con số đã công bố, không phải mô phỏng: số tham số của GPT-2 small, medium, large và của Llama 2 7B, 13B; ngân sách giờ-GPU của Llama 2 7B; và phương sai của tích vô hướng trong chú thích 4 của bài báo Transformer. Các phép đối chiếu này kiểm tra rằng công thức ở Chương 12 đúng, không chỉ hợp lý.
 

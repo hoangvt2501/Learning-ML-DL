@@ -2,11 +2,16 @@
   {
     "file": "experiments.py",
     "added": true,
-    "note": "Sinh Hình 2, 4, 5, 7, 9, 10, 13, 14 và mọi số liệu đo được của giáo trình: phân rã độ chệch – phương sai trên 250 tập huấn luyện, bagging so với gradient boosting, phép dựng hàm răng cưa cho thấy lợi ích của độ sâu, gradient qua 40 lớp với sáu cách dựng lớp, gradient theo thời gian của RNN và đường ô nhớ của LSTM, phương sai của tích vô hướng và entropy của attention, tính chất tương đối của RoPE, các chiến lược giải mã, và phép đếm tham số khớp chính xác với GPT-2 và Llama 2."
+    "note": "Sinh Hình 2, 4, 5, 7, 10, 11, 14, 15 và mọi số liệu đo được của giáo trình: phân rã độ chệch – phương sai trên 250 tập huấn luyện, bagging so với gradient boosting, phép dựng hàm răng cưa cho thấy lợi ích của độ sâu, gradient qua 40 lớp với sáu cách dựng lớp, gradient theo thời gian của RNN và đường ô nhớ của LSTM, phương sai của tích vô hướng và entropy của attention, tính chất tương đối của RoPE, các chiến lược giải mã, và phép đếm tham số khớp chính xác với GPT-2 và Llama 2."
+  },
+  {
+    "file": "thi_giac.py",
+    "added": true,
+    "note": "Sinh Hình 9 và các số liệu của Mục 7.5–7.6: IoU của các cặp hộp, NMS từng bước trên sáu hộp, đường precision–recall và AP của một bộ phát hiện mô phỏng trên 300 ảnh (ở các ngưỡng IoU 0,5 tới 0,95, có và không có NMS), và liên hệ giữa Dice với IoU."
   },
   {
     "file": "fig_diagrams.py",
     "added": true,
-    "note": "Sinh Hình 1, 3, 6, 8, 11, 12: bốn họ mô hình, một cây quyết định và các vùng nó chia, lượt xuôi và lượt ngược của lan truyền ngược, trường tiếp nhận của CNN, cấu trúc một khối Transformer, và bảng so sánh Transformer 2017 với các lựa chọn hiện nay. Các sơ đồ được vẽ bằng matplotlib để sửa được cùng với nội dung bài."
+    "note": "Sinh Hình 1, 3, 6, 8, 12, 13: bốn họ mô hình, một cây quyết định và các vùng nó chia, lượt xuôi và lượt ngược của lan truyền ngược, trường tiếp nhận của CNN, cấu trúc một khối Transformer, và bảng so sánh Transformer 2017 với các lựa chọn hiện nay. Các sơ đồ được vẽ bằng matplotlib để sửa được cùng với nội dung bài."
   }
 ]

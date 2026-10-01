@@ -52,7 +52,7 @@
     "num": "7",
     "file": "models-ch07.html",
     "label": "Mạng nơ-ron tích chập",
-    "summary": "Phép tích chập, kích thước đầu ra, số tham số và số phép tính, trường tiếp nhận, các khối thường dùng, và so sánh CNN với Vision Transformer theo thiên kiến quy nạp.",
+    "summary": "Phép tích chập, kích thước đầu ra, số tham số và số phép tính, trường tiếp nhận, các khối thường dùng, CNN so với Vision Transformer, phát hiện đối tượng (IoU, hộp neo, NMS, AP) và phân đoạn ảnh (FCN, U-Net, Mask R-CNN).",
     "part": "Mạng tích chập và mạng hồi quy"
   },
   {
@@ -94,14 +94,14 @@
     "num": "13",
     "file": "models-bai-tap.html",
     "label": "Bài tập",
-    "summary": "Mười bài tập có lời giải chi tiết và ngân hàng câu hỏi trắc nghiệm theo từng chương.",
+    "summary": "Mười một bài tập có lời giải chi tiết và ngân hàng câu hỏi trắc nghiệm theo từng chương.",
     "kind": "exercises"
   },
   {
     "num": "14",
     "file": "models-ch14.html",
     "label": "Câu hỏi phỏng vấn",
-    "summary": "Cách trình bày câu trả lời, các câu hỏi thường gặp theo bốn nhóm chủ đề kèm câu trả lời mẫu dẫn số liệu, và bảng các câu trả lời chưa đạt."
+    "summary": "Cách trình bày câu trả lời, các câu hỏi thường gặp theo năm nhóm chủ đề (học máy cổ điển và mạng nơ-ron, huấn luyện mạng sâu, Transformer, tài nguyên tính toán, thị giác máy tính) kèm câu trả lời có số liệu, và bảng các câu trả lời chưa đạt."
   },
   {
     "num": "15",

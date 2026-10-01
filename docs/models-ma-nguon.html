@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mã nguồn thí nghiệm — Học sâu và các kiến trúc mô hình</title>
-<meta name="description" content="2 script Python sinh ra toàn bộ hình vẽ và số liệu của giáo trình, kèm kết quả in ra.">
+<meta name="description" content="3 script Python sinh ra toàn bộ hình vẽ và số liệu của giáo trình, kèm kết quả in ra.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,27 +47,26 @@
 </header>
 
 <div class="shell">
-<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><span class="book-tab is-active" aria-current="true">Học sâu</span><a class="book-tab" href="bieudien-ch01.html">Biểu diễn &amp; Căn chỉnh</a><a class="book-tab" href="ungdung-ch01.html">Ứng dụng LLM</a><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Mở đầu</p><ul class="nav-list"><li><a href="models-ch00.html"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Từ học máy cổ điển tới học sâu</p><ul class="nav-list"><li><a href="models-ch01.html"><span class="nav-num">1</span><span class="nav-label">Các họ mô hình</span></a></li><li><a href="models-ch02.html"><span class="nav-num">2</span><span class="nav-label">Độ chệch và phương sai</span></a></li><li><a href="models-ch03.html"><span class="nav-num">3</span><span class="nav-label">Cây quyết định và phương pháp tập hợp</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Mạng nơ-ron và cách huấn luyện</p><ul class="nav-list"><li><a href="models-ch04.html"><span class="nav-num">4</span><span class="nav-label">Mạng nơ-ron nhiều lớp</span></a></li><li><a href="models-ch05.html"><span class="nav-num">5</span><span class="nav-label">Lan truyền ngược và các thuật toán tối ưu</span></a></li><li><a href="models-ch06.html"><span class="nav-num">6</span><span class="nav-label">Khởi tạo, chuẩn hoá và kết nối tắt</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Mạng tích chập và mạng hồi quy</p><ul class="nav-list"><li><a href="models-ch07.html"><span class="nav-num">7</span><span class="nav-label">Mạng nơ-ron tích chập</span></a></li><li><a href="models-ch08.html"><span class="nav-num">8</span><span class="nav-label">Mạng nơ-ron hồi quy</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>Transformer và mô hình ngôn ngữ</p><ul class="nav-list"><li><a href="models-ch09.html"><span class="nav-num">9</span><span class="nav-label">Attention và Transformer</span></a></li><li><a href="models-ch10.html"><span class="nav-num">10</span><span class="nav-label">Các cải tiến của Transformer</span></a></li><li><a href="models-ch11.html"><span class="nav-num">11</span><span class="nav-label">Các chiến lược giải mã</span></a></li><li><a href="models-ch12.html"><span class="nav-num">12</span><span class="nav-label">Tham số, FLOP và bộ nhớ của Transformer</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="models-bai-tap.html"><span class="nav-num">13</span><span class="nav-label">Bài tập</span></a></li><li><a href="models-ch14.html"><span class="nav-num">14</span><span class="nav-label">Câu hỏi phỏng vấn</span></a></li><li><a href="models-ch15.html"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="models-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="models-thuc-hanh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thi-nghiem"></use></svg></span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="models-hinh-anh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-hinh"></use></svg></span><span class="nav-label">Thư viện 14 hình</span></a></li><li><a href="models-thuat-ngu.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thuat-ngu"></use></svg></span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="models-ma-nguon.html" class="is-active" aria-current="page"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-ma-nguon"></use></svg></span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="models-toan-van.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-toan-van"></use></svg></span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-nha"></use></svg></span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lo-trinh"></use></svg></span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
+<nav class="sidebar" id="sidebar" aria-label="Mục lục giáo trình"><div class="sidebar-inner"><div class="book-switch" role="group" aria-label="Chọn giáo trình"><a class="book-tab" href="nentang-ch01.html">Nền tảng</a><span class="book-tab is-active" aria-current="true">Học sâu</span><a class="book-tab" href="bieudien-ch01.html">Biểu diễn &amp; Căn chỉnh</a><a class="book-tab" href="ungdung-ch01.html">Ứng dụng LLM</a><a class="book-tab" href="ch01.html">Quantization</a><a class="book-tab" href="mlops-ch01.html">MLOps</a></div><p class="nav-group nav-group--part"><span class="nav-part-no">1</span>Mở đầu</p><ul class="nav-list"><li><a href="models-ch00.html"><span class="nav-num">0</span><span class="nav-label">Ký hiệu và quy ước</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">2</span>Từ học máy cổ điển tới học sâu</p><ul class="nav-list"><li><a href="models-ch01.html"><span class="nav-num">1</span><span class="nav-label">Các họ mô hình</span></a></li><li><a href="models-ch02.html"><span class="nav-num">2</span><span class="nav-label">Độ chệch và phương sai</span></a></li><li><a href="models-ch03.html"><span class="nav-num">3</span><span class="nav-label">Cây quyết định và phương pháp tập hợp</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">3</span>Mạng nơ-ron và cách huấn luyện</p><ul class="nav-list"><li><a href="models-ch04.html"><span class="nav-num">4</span><span class="nav-label">Mạng nơ-ron nhiều lớp</span></a></li><li><a href="models-ch05.html"><span class="nav-num">5</span><span class="nav-label">Lan truyền ngược và các thuật toán tối ưu</span></a></li><li><a href="models-ch06.html"><span class="nav-num">6</span><span class="nav-label">Khởi tạo, chuẩn hoá và kết nối tắt</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">4</span>Mạng tích chập và mạng hồi quy</p><ul class="nav-list"><li><a href="models-ch07.html"><span class="nav-num">7</span><span class="nav-label">Mạng nơ-ron tích chập</span></a></li><li><a href="models-ch08.html"><span class="nav-num">8</span><span class="nav-label">Mạng nơ-ron hồi quy</span></a></li></ul><p class="nav-group nav-group--part"><span class="nav-part-no">5</span>Transformer và mô hình ngôn ngữ</p><ul class="nav-list"><li><a href="models-ch09.html"><span class="nav-num">9</span><span class="nav-label">Attention và Transformer</span></a></li><li><a href="models-ch10.html"><span class="nav-num">10</span><span class="nav-label">Các cải tiến của Transformer</span></a></li><li><a href="models-ch11.html"><span class="nav-num">11</span><span class="nav-label">Các chiến lược giải mã</span></a></li><li><a href="models-ch12.html"><span class="nav-num">12</span><span class="nav-label">Tham số, FLOP và bộ nhớ của Transformer</span></a></li></ul><p class="nav-group">Tra cứu trong giáo trình</p><ul class="nav-list"><li><a href="models-bai-tap.html"><span class="nav-num">13</span><span class="nav-label">Bài tập</span></a></li><li><a href="models-ch14.html"><span class="nav-num">14</span><span class="nav-label">Câu hỏi phỏng vấn</span></a></li><li><a href="models-ch15.html"><span class="nav-num">15</span><span class="nav-label">Tài liệu tham khảo</span></a></li><li><a href="models-phu-luc.html"><span class="nav-num">PL</span><span class="nav-label">Phụ lục: chạy lại thí nghiệm</span></a></li></ul><p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list"><li><a href="models-thuc-hanh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thi-nghiem"></use></svg></span><span class="nav-label">Phòng thí nghiệm</span></a></li><li><a href="models-hinh-anh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-hinh"></use></svg></span><span class="nav-label">Thư viện 15 hình</span></a></li><li><a href="models-thuat-ngu.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-thuat-ngu"></use></svg></span><span class="nav-label">Từ điển thuật ngữ</span></a></li><li><a href="models-ma-nguon.html" class="is-active" aria-current="page"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-ma-nguon"></use></svg></span><span class="nav-label">Mã nguồn thí nghiệm</span></a></li><li><a href="models-toan-van.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-toan-van"></use></svg></span><span class="nav-label">Toàn văn một trang</span></a></li></ul><p class="nav-group">Toàn site</p><ul class="nav-list"><li><a href="index.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-nha"></use></svg></span><span class="nav-label">Trang chủ</span></a></li><li><a href="lo-trinh.html"><span class="nav-num nav-num--icon"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lo-trinh"></use></svg></span><span class="nav-label">Lộ trình cả bộ</span></a></li></ul></div></nav>
 <div class="scrim" id="scrim" hidden></div>
 <main class="content" id="main">
-<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Tra cứu</span><span class="kicker-time">2 script</span></div><h1>Mã nguồn thí nghiệm</h1><p class="chapter-lede">Mọi hình và mọi con số thực nghiệm trong giáo trình đều do các script dưới đây sinh ra. Chúng được chép nguyên vẹn vào site nên tải về là chạy được ngay.</p><h3 class="heading" id="cach-chay">Cách chạy lại toàn bộ<a class="anchor" href="#cach-chay">#</a></h3><p>Hai script dưới đây sinh ra toàn bộ 14 hình và mọi con số đo được của giáo trình.
+<article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Tra cứu</span><span class="kicker-time">3 script</span></div><h1>Mã nguồn thí nghiệm</h1><p class="chapter-lede">Mọi hình và mọi con số thực nghiệm trong giáo trình đều do các script dưới đây sinh ra. Chúng được chép nguyên vẹn vào site nên tải về là chạy được ngay.</p><h3 class="heading" id="cach-chay">Cách chạy lại toàn bộ<a class="anchor" href="#cach-chay">#</a></h3><p>Ba script dưới đây sinh ra toàn bộ 15 hình và mọi con số đo được của giáo trình.
 Chúng đặt hạt giống cố định nên chạy lại cho kết quả y hệt.</p>
 <div class="code-block" data-lang="bash"><div class="code-head"><span class="code-lang">Bash</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-bash">pip install numpy scipy matplotlib scikit-learn
-python code/models/experiments.py     <span class="hljs-comment"># Hình 2, 4, 5, 7, 9, 10, 13, 14 — vài phút</span>
-python code/models/fig_diagrams.py    <span class="hljs-comment"># Hình 1, 3, 6, 8, 11, 12</span>
+python code/models/experiments.py     <span class="hljs-comment"># Hình 2, 4, 5, 7, 10, 11, 14, 15, vài phút</span>
+python code/models/thi_giac.py        <span class="hljs-comment"># Hình 9 và số liệu về IoU, NMS, AP, vài giây</span>
+python code/models/fig_diagrams.py    <span class="hljs-comment"># Hình 1, 3, 6, 8, 12, 13</span>
 </code></pre></div>
-<p>Môi trường đã dùng để sinh số liệu trong tài liệu: Python 3.13, NumPy 2.3, SciPy 1.16,
-scikit-learn 1.7, matplotlib 3.10.</p>
-<p>Lưu ý về phạm vi, và ở giáo trình này nó có hai nửa khác nhau.</p>
-<p>Phần lớn số liệu đến từ <strong>dữ liệu mô phỏng</strong>, được thiết kế để cô lập đúng một cơ chế mỗi
-lần — ví dụ thí nghiệm gradient qua 40 lớp chỉ đổi một biến là cách dựng lớp. Chúng chứng
-minh cơ chế tồn tại và có độ lớn đáng kể, không dùng để suy ra con số cho một mô hình cụ thể.</p>
-<p>Nhưng bốn kết quả là <strong>đối chiếu với con số đã công bố</strong>, không phải mô phỏng: số tham số của
-GPT-2 small, medium, large; số tham số của Llama-2 7B và 13B; ngân sách giờ-GPU của Llama-2 7B;
-và phương sai tích vô hướng nêu trong chú thích 4 của bài báo Transformer. Bốn kết quả ấy là
-phép kiểm tra rằng các công thức ở <a href="models-ch12.html#sec-12" class="xref">Chương 12</a> đúng chứ không chỉ hợp lý — chúng khớp tới từng
-tham số, và với ngân sách giờ-GPU thì lệch 0,17%.</p>
-<h3 class="heading" id="danh-sach">Từng script<a class="anchor" href="#danh-sach">#</a></h3><div class="src-list"><section class="src-card" id="experiments-py"><header class="src-head"><h3 class="src-title"><code>code/models/experiments.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">531 dòng</span><a class="src-dl" href="code/models/experiments.py" download>Tải về</a></header><p class="src-note">Sinh Hình 2, 4, 5, 7, 9, 10, 13, 14 và mọi số liệu đo được của giáo trình: phân rã độ chệch – phương sai trên 250 tập huấn luyện, bagging so với gradient boosting, phép dựng hàm răng cưa cho thấy lợi ích của độ sâu, gradient qua 40 lớp với sáu cách dựng lớp, gradient theo thời gian của RNN và đường ô nhớ của LSTM, phương sai của tích vô hướng và entropy của attention, tính chất tương đối của RoPE, các chiến lược giải mã, và phép đếm tham số khớp chính xác với GPT-2 và Llama 2.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Thí nghiệm sinh số liệu và hình cho giáo trình &quot;Học sâu&quot;.
+<p>Môi trường đã dùng để sinh số liệu: Python 3.13, NumPy 2.3, SciPy 1.16, scikit-learn 1.7, matplotlib 3.10.</p>
+<p>Về phạm vi: phần lớn số liệu đến từ dữ liệu mô phỏng, mỗi thí nghiệm được thiết kế để cô lập một cơ chế,
+ví dụ thí nghiệm gradient qua 40 lớp chỉ đổi cách dựng lớp, và thí nghiệm phát hiện đối tượng chỉ làm nhiễu
+hộp thật thay vì huấn luyện một mô hình. Chúng cho thấy cơ chế tồn tại và có độ lớn đáng kể, không dùng để
+suy ra con số cho một mô hình cụ thể.</p>
+<p>Một số kết quả là đối chiếu với con số đã công bố, không phải mô phỏng: số tham số của GPT-2 small, medium,
+large; số tham số của Llama 2 7B và 13B; ngân sách giờ-GPU của Llama 2 7B; và phương sai của tích vô hướng
+trong chú thích 4 của bài báo Transformer. Các phép đối chiếu này kiểm tra rằng công thức ở <a href="models-ch12.html#sec-12" class="xref">Chương 12</a> đúng,
+không chỉ hợp lý.</p>
+<h3 class="heading" id="danh-sach">Từng script<a class="anchor" href="#danh-sach">#</a></h3><div class="src-list"><section class="src-card" id="experiments-py"><header class="src-head"><h3 class="src-title"><code>code/models/experiments.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">531 dòng</span><a class="src-dl" href="code/models/experiments.py" download>Tải về</a></header><p class="src-note">Sinh Hình 2, 4, 5, 7, 10, 11, 14, 15 và mọi số liệu đo được của giáo trình: phân rã độ chệch – phương sai trên 250 tập huấn luyện, bagging so với gradient boosting, phép dựng hàm răng cưa cho thấy lợi ích của độ sâu, gradient qua 40 lớp với sáu cách dựng lớp, gradient theo thời gian của RNN và đường ô nhớ của LSTM, phương sai của tích vô hướng và entropy của attention, tính chất tương đối của RoPE, các chiến lược giải mã, và phép đếm tham số khớp chính xác với GPT-2 và Llama 2.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Thí nghiệm sinh số liệu và hình cho giáo trình &quot;Học sâu&quot;.
 
 Mọi con số thực nghiệm trong tài liệu đều in ra từ script này. Hạt giống cố định
 nên chạy lại cho kết quả y hệt. Chỉ cần NumPy, SciPy, scikit-learn, matplotlib.
@@ -757,7 +756,264 @@ Ti le chi phi attention tren phan con lai = T / (6d):
   d= 4096, T=131072:    5.33   (attention chi phoi)
 
 Da luu 8 hinh vao figs/
-</code></pre></div></details></section><section class="src-card" id="fig_diagrams-py"><header class="src-head"><h3 class="src-title"><code>code/models/fig_diagrams.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">266 dòng</span><a class="src-dl" href="code/models/fig_diagrams.py" download>Tải về</a></header><p class="src-note">Sinh Hình 1, 3, 6, 8, 11, 12: bốn họ mô hình, một cây quyết định và các vùng nó chia, lượt xuôi và lượt ngược của lan truyền ngược, trường tiếp nhận của CNN, cấu trúc một khối Transformer, và bảng so sánh Transformer 2017 với các lựa chọn hiện nay. Các sơ đồ được vẽ bằng matplotlib để sửa được cùng với nội dung bài.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Sinh Hình 1, 3, 6, 8, 11 và 12 của giáo trình &quot;Học sâu&quot;: các sơ đồ.
+</code></pre></div></details></section><section class="src-card" id="thi_giac-py"><header class="src-head"><h3 class="src-title"><code>code/models/thi_giac.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">215 dòng</span><a class="src-dl" href="code/models/thi_giac.py" download>Tải về</a></header><p class="src-note">Sinh Hình 9 và các số liệu của Mục 7.5–7.6: IoU của các cặp hộp, NMS từng bước trên sáu hộp, đường precision–recall và AP của một bộ phát hiện mô phỏng trên 300 ảnh (ở các ngưỡng IoU 0,5 tới 0,95, có và không có NMS), và liên hệ giữa Dice với IoU.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Số liệu và hình cho Mục 7.5–7.6 của giáo trình &quot;Học sâu&quot;: IoU, NMS, AP và Dice.
+
+Không huấn luyện mô hình nào: một bộ phát hiện được mô phỏng bằng cách làm nhiễu
+hộp thật, để cô lập đúng phần cần học là cách ghép hộp, cách lọc trùng và cách tính AP.
+Hạt giống cố định nên chạy lại cho kết quả y hệt.
+
+    python code/models/thi_giac.py
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib
+matplotlib.use(<span class="hljs-string">&quot;Agg&quot;</span>)
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> matplotlib.patches <span class="hljs-keyword">import</span> Rectangle
+
+OUT = <span class="hljs-string">&quot;figs/&quot;</span>
+plt.rcParams.update({
+    <span class="hljs-string">&quot;figure.dpi&quot;</span>: <span class="hljs-number">150</span>, <span class="hljs-string">&quot;font.size&quot;</span>: <span class="hljs-number">9</span>, <span class="hljs-string">&quot;axes.grid&quot;</span>: <span class="hljs-literal">True</span>,
+    <span class="hljs-string">&quot;grid.alpha&quot;</span>: <span class="hljs-number">.25</span>, <span class="hljs-string">&quot;axes.spines.top&quot;</span>: <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;axes.spines.right&quot;</span>: <span class="hljs-literal">False</span>,
+})
+C_MAIN, C_WARN, C_BAD, C_DIM = <span class="hljs-string">&quot;#1f6f68&quot;</span>, <span class="hljs-string">&quot;#b8860b&quot;</span>, <span class="hljs-string">&quot;#b0413e&quot;</span>, <span class="hljs-string">&quot;#8a857c&quot;</span>
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">head</span>(<span class="hljs-params">t</span>):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">74</span> + <span class="hljs-string">&quot;\n&quot;</span> + t + <span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">74</span>)
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">iou</span>(<span class="hljs-params">a, b</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Hộp dạng (x1, y1, x2, y2).&quot;&quot;&quot;</span>
+    w = <span class="hljs-built_in">max</span>(<span class="hljs-number">0.0</span>, <span class="hljs-built_in">min</span>(a[<span class="hljs-number">2</span>], b[<span class="hljs-number">2</span>]) - <span class="hljs-built_in">max</span>(a[<span class="hljs-number">0</span>], b[<span class="hljs-number">0</span>]))
+    h = <span class="hljs-built_in">max</span>(<span class="hljs-number">0.0</span>, <span class="hljs-built_in">min</span>(a[<span class="hljs-number">3</span>], b[<span class="hljs-number">3</span>]) - <span class="hljs-built_in">max</span>(a[<span class="hljs-number">1</span>], b[<span class="hljs-number">1</span>]))
+    inter = w * h
+    union = (a[<span class="hljs-number">2</span>] - a[<span class="hljs-number">0</span>]) * (a[<span class="hljs-number">3</span>] - a[<span class="hljs-number">1</span>]) + (b[<span class="hljs-number">2</span>] - b[<span class="hljs-number">0</span>]) * (b[<span class="hljs-number">3</span>] - b[<span class="hljs-number">1</span>]) - inter
+    <span class="hljs-keyword">return</span> inter / union <span class="hljs-keyword">if</span> union &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> <span class="hljs-number">0.0</span>
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">nms</span>(<span class="hljs-params">boxes, scores, nguong</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Giữ hộp điểm cao nhất, bỏ mọi hộp còn lại trùng với nó quá ngưỡng, lặp lại.&quot;&quot;&quot;</span>
+    thu_tu = <span class="hljs-built_in">list</span>(np.argsort(-np.asarray(scores)))
+    giu = []
+    <span class="hljs-keyword">while</span> thu_tu:
+        i = thu_tu.pop(<span class="hljs-number">0</span>)
+        giu.append(i)
+        thu_tu = [j <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> thu_tu <span class="hljs-keyword">if</span> iou(boxes[i], boxes[j]) &lt;= nguong]
+    <span class="hljs-keyword">return</span> giu
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (A) IoU tính tay</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(A) IoU cua hai cap hop&quot;</span>)
+<span class="hljs-keyword">for</span> a, b <span class="hljs-keyword">in</span> [((<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">4</span>, <span class="hljs-number">4</span>), (<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">6</span>, <span class="hljs-number">6</span>)), ((<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">4</span>, <span class="hljs-number">4</span>), (<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">5</span>, <span class="hljs-number">4</span>)), ((<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">4</span>, <span class="hljs-number">4</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">4</span>, <span class="hljs-number">2</span>))]:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  <span class="hljs-subst">{a}</span> va <span class="hljs-subst">{b}</span>: IoU = <span class="hljs-subst">{iou(a, b):<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (B) NMS từng bước trên sáu hộp</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(B) NMS tren sau hop du doan, nguong IoU 0.5&quot;</span>)
+VD = {  <span class="hljs-comment"># tên: (x1, y1, x2, y2, điểm)</span>
+    <span class="hljs-string">&quot;A&quot;</span>: (<span class="hljs-number">10</span>, <span class="hljs-number">10</span>, <span class="hljs-number">50</span>, <span class="hljs-number">50</span>, <span class="hljs-number">0.92</span>), <span class="hljs-string">&quot;B&quot;</span>: (<span class="hljs-number">12</span>, <span class="hljs-number">8</span>, <span class="hljs-number">52</span>, <span class="hljs-number">48</span>, <span class="hljs-number">0.85</span>), <span class="hljs-string">&quot;C&quot;</span>: (<span class="hljs-number">16</span>, <span class="hljs-number">16</span>, <span class="hljs-number">56</span>, <span class="hljs-number">56</span>, <span class="hljs-number">0.60</span>),
+    <span class="hljs-string">&quot;D&quot;</span>: (<span class="hljs-number">60</span>, <span class="hljs-number">60</span>, <span class="hljs-number">90</span>, <span class="hljs-number">95</span>, <span class="hljs-number">0.80</span>), <span class="hljs-string">&quot;E&quot;</span>: (<span class="hljs-number">63</span>, <span class="hljs-number">58</span>, <span class="hljs-number">93</span>, <span class="hljs-number">92</span>, <span class="hljs-number">0.55</span>), <span class="hljs-string">&quot;F&quot;</span>: (<span class="hljs-number">30</span>, <span class="hljs-number">30</span>, <span class="hljs-number">70</span>, <span class="hljs-number">70</span>, <span class="hljs-number">0.40</span>),
+}
+ten = <span class="hljs-built_in">list</span>(VD)
+hop = [VD[k][:<span class="hljs-number">4</span>] <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> ten]
+diem = [VD[k][<span class="hljs-number">4</span>] <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> ten]
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;IoU giua cac hop:&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;     &quot;</span> + <span class="hljs-string">&quot;&quot;</span>.join(<span class="hljs-string">f&quot;<span class="hljs-subst">{k:&gt;<span class="hljs-number">7</span>}</span>&quot;</span> <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> ten))
+<span class="hljs-keyword">for</span> i, k <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(ten):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  <span class="hljs-subst">{k}</span>  &quot;</span> + <span class="hljs-string">&quot;&quot;</span>.join(<span class="hljs-string">f&quot;<span class="hljs-subst">{iou(hop[i], hop[j]):<span class="hljs-number">7.3</span>f}</span>&quot;</span> <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(ten))))
+giu = nms(hop, diem, <span class="hljs-number">0.5</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Giu lai:&quot;</span>, [ten[i] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> giu])
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (C) AP trên một bộ dữ liệu mô phỏng</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(C) AP cua mot bo phat hien mo phong: 300 anh, mot lop doi tuong&quot;</span>)
+rng = np.random.default_rng(<span class="hljs-number">1207</span>)
+N_ANH = <span class="hljs-number">300</span>
+gt, det = [], []      <span class="hljs-comment"># gt[i]: các hộp thật của ảnh i; det: (ảnh, hộp, điểm)</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(N_ANH):
+    hops = []
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(rng.integers(<span class="hljs-number">1</span>, <span class="hljs-number">5</span>)):
+        w, h = rng.uniform(<span class="hljs-number">15</span>, <span class="hljs-number">45</span>, <span class="hljs-number">2</span>)
+        x, y = rng.uniform(<span class="hljs-number">0</span>, <span class="hljs-number">100</span> - w), rng.uniform(<span class="hljs-number">0</span>, <span class="hljs-number">100</span> - h)
+        hops.append((x, y, x + w, y + h))
+    gt.append(hops)
+    <span class="hljs-keyword">for</span> (x1, y1, x2, y2) <span class="hljs-keyword">in</span> hops:
+        s = np.array([x2 - x1, y2 - y1, x2 - x1, y2 - y1])
+        <span class="hljs-keyword">if</span> rng.random() &lt; <span class="hljs-number">0.9</span>:                               <span class="hljs-comment"># phát hiện được</span>
+            b = np.array([x1, y1, x2, y2]) + rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">0.06</span>, <span class="hljs-number">4</span>) * s
+            det.append((i, <span class="hljs-built_in">tuple</span>(b), <span class="hljs-built_in">float</span>(np.clip(rng.normal(<span class="hljs-number">0.75</span>, <span class="hljs-number">0.12</span>), <span class="hljs-number">0.01</span>, <span class="hljs-number">0.99</span>))))
+        <span class="hljs-keyword">if</span> rng.random() &lt; <span class="hljs-number">0.3</span>:                               <span class="hljs-comment"># thêm một hộp trùng, lệch hơn</span>
+            b = np.array([x1, y1, x2, y2]) + rng.normal(<span class="hljs-number">0</span>, <span class="hljs-number">0.12</span>, <span class="hljs-number">4</span>) * s
+            det.append((i, <span class="hljs-built_in">tuple</span>(b), <span class="hljs-built_in">float</span>(np.clip(rng.normal(<span class="hljs-number">0.55</span>, <span class="hljs-number">0.15</span>), <span class="hljs-number">0.01</span>, <span class="hljs-number">0.99</span>))))
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(rng.poisson(<span class="hljs-number">0.6</span>)):                        <span class="hljs-comment"># báo nhầm ở chỗ không có gì</span>
+        w, h = rng.uniform(<span class="hljs-number">10</span>, <span class="hljs-number">40</span>, <span class="hljs-number">2</span>)
+        x, y = rng.uniform(<span class="hljs-number">0</span>, <span class="hljs-number">100</span> - w), rng.uniform(<span class="hljs-number">0</span>, <span class="hljs-number">100</span> - h)
+        det.append((i, (x, y, x + w, y + h), <span class="hljs-built_in">float</span>(np.clip(rng.normal(<span class="hljs-number">0.35</span>, <span class="hljs-number">0.15</span>), <span class="hljs-number">0.01</span>, <span class="hljs-number">0.99</span>))))
+n_gt = <span class="hljs-built_in">sum</span>(<span class="hljs-built_in">len</span>(g) <span class="hljs-keyword">for</span> g <span class="hljs-keyword">in</span> gt)
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">qua_nms</span>(<span class="hljs-params">dets, nguong=<span class="hljs-number">0.5</span></span>):
+    ra = []
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(N_ANH):
+        cua = [d <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> dets <span class="hljs-keyword">if</span> d[<span class="hljs-number">0</span>] == i]
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> cua:
+            <span class="hljs-keyword">continue</span>
+        giu_i = nms([d[<span class="hljs-number">1</span>] <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> cua], [d[<span class="hljs-number">2</span>] <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> cua], nguong)
+        ra.extend(cua[k] <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> giu_i)
+    <span class="hljs-keyword">return</span> ra
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">duong_pr</span>(<span class="hljs-params">dets, nguong_iou</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Ghép kiểu COCO: xét hộp theo điểm giảm dần; mỗi hộp ghép với hộp thật chưa ghép
+    có IoU lớn nhất; đủ ngưỡng thì là dương tính thật, không thì là dương tính giả.&quot;&quot;&quot;</span>
+    da_ghep = [np.zeros(<span class="hljs-built_in">len</span>(g), <span class="hljs-built_in">bool</span>) <span class="hljs-keyword">for</span> g <span class="hljs-keyword">in</span> gt]
+    tp = []
+    <span class="hljs-keyword">for</span> (i, b, s) <span class="hljs-keyword">in</span> <span class="hljs-built_in">sorted</span>(dets, key=<span class="hljs-keyword">lambda</span> d: -d[<span class="hljs-number">2</span>]):
+        best, j_best = <span class="hljs-number">0.0</span>, -<span class="hljs-number">1</span>
+        <span class="hljs-keyword">for</span> j, g <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(gt[i]):
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> da_ghep[i][j]:
+                v = iou(b, g)
+                <span class="hljs-keyword">if</span> v &gt; best:
+                    best, j_best = v, j
+        <span class="hljs-keyword">if</span> best &gt;= nguong_iou:
+            da_ghep[i][j_best] = <span class="hljs-literal">True</span>
+            tp.append(<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">else</span>:
+            tp.append(<span class="hljs-number">0</span>)
+    tp = np.array(tp)
+    tp_cum, fp_cum = np.cumsum(tp), np.cumsum(<span class="hljs-number">1</span> - tp)
+    <span class="hljs-keyword">return</span> tp_cum / n_gt, tp_cum / np.maximum(tp_cum + fp_cum, <span class="hljs-number">1</span>)
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">ap_moi_diem</span>(<span class="hljs-params">rec, prec</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Diện tích dưới đường bao của precision (cách tính của PASCAL VOC từ năm 2010).&quot;&quot;&quot;</span>
+    r = np.r_[<span class="hljs-number">0</span>, rec, <span class="hljs-number">1</span>]
+    p = np.r_[<span class="hljs-number">0</span>, prec, <span class="hljs-number">0</span>]
+    <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(p) - <span class="hljs-number">2</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>):
+        p[k] = <span class="hljs-built_in">max</span>(p[k], p[k + <span class="hljs-number">1</span>])
+    idx = np.flatnonzero(r[<span class="hljs-number">1</span>:] != r[:-<span class="hljs-number">1</span>])
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">float</span>(np.<span class="hljs-built_in">sum</span>((r[idx + <span class="hljs-number">1</span>] - r[idx]) * p[idx + <span class="hljs-number">1</span>]))
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">ap_101</span>(<span class="hljs-params">rec, prec</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Trung bình precision nội suy tại 101 mức recall 0; 0,01; ...; 1 (cách tính của COCO).&quot;&quot;&quot;</span>
+    p = prec.copy()
+    <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(p) - <span class="hljs-number">2</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>):
+        p[k] = <span class="hljs-built_in">max</span>(p[k], p[k + <span class="hljs-number">1</span>])
+    out = []
+    <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">101</span>):
+        k = np.searchsorted(rec, t, side=<span class="hljs-string">&quot;left&quot;</span>)
+        out.append(p[k] <span class="hljs-keyword">if</span> k &lt; <span class="hljs-built_in">len</span>(p) <span class="hljs-keyword">else</span> <span class="hljs-number">0.0</span>)
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">float</span>(np.mean(out))
+
+
+sau_nms = qua_nms(det)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;So hop that: <span class="hljs-subst">{n_gt}</span>; so hop du doan: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(det)}</span> truoc NMS, <span class="hljs-subst">{<span class="hljs-built_in">len</span>(sau_nms)}</span> sau NMS (nguong 0,5)&quot;</span>)
+r0, p0 = duong_pr(det, <span class="hljs-number">0.5</span>)
+r5, p5 = duong_pr(sau_nms, <span class="hljs-number">0.5</span>)
+r75, p75 = duong_pr(sau_nms, <span class="hljs-number">0.75</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;&#x27;</span>:<span class="hljs-number">28</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;AP (moi diem)&#x27;</span>:&gt;<span class="hljs-number">15</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;AP (101 diem)&#x27;</span>:&gt;<span class="hljs-number">15</span>}</span><span class="hljs-subst">{<span class="hljs-string">&#x27;recall cuoi&#x27;</span>:&gt;<span class="hljs-number">13</span>}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;IoU 0,5, khong NMS&#x27;</span>:<span class="hljs-number">28</span>}</span><span class="hljs-subst">{ap_moi_diem(r0, p0):<span class="hljs-number">15.3</span>f}</span><span class="hljs-subst">{ap_101(r0, p0):<span class="hljs-number">15.3</span>f}</span><span class="hljs-subst">{r0[-<span class="hljs-number">1</span>]:<span class="hljs-number">13.3</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;IoU 0,5, co NMS&#x27;</span>:<span class="hljs-number">28</span>}</span><span class="hljs-subst">{ap_moi_diem(r5, p5):<span class="hljs-number">15.3</span>f}</span><span class="hljs-subst">{ap_101(r5, p5):<span class="hljs-number">15.3</span>f}</span><span class="hljs-subst">{r5[-<span class="hljs-number">1</span>]:<span class="hljs-number">13.3</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-string">&#x27;IoU 0,75, co NMS&#x27;</span>:<span class="hljs-number">28</span>}</span><span class="hljs-subst">{ap_moi_diem(r75, p75):<span class="hljs-number">15.3</span>f}</span><span class="hljs-subst">{ap_101(r75, p75):<span class="hljs-number">15.3</span>f}</span><span class="hljs-subst">{r75[-<span class="hljs-number">1</span>]:<span class="hljs-number">13.3</span>f}</span>&quot;</span>)
+aps = []
+<span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> np.arange(<span class="hljs-number">0.5</span>, <span class="hljs-number">0.96</span>, <span class="hljs-number">0.05</span>):
+    rt, pt = duong_pr(sau_nms, t)
+    aps.append(ap_101(rt, pt))
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;AP 101 diem theo nguong IoU:&quot;</span>, <span class="hljs-string">&quot; &quot;</span>.join(<span class="hljs-string">f&quot;<span class="hljs-subst">{t:<span class="hljs-number">.2</span>f}</span>:<span class="hljs-subst">{a:<span class="hljs-number">.3</span>f}</span>&quot;</span> <span class="hljs-keyword">for</span> t, a <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(np.arange(<span class="hljs-number">0.5</span>, <span class="hljs-number">0.96</span>, <span class="hljs-number">0.05</span>), aps)))
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;AP@[0,5:0,95] (trung binh 10 nguong, kieu COCO) = <span class="hljs-subst">{np.mean(aps):<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># (D) Dice và IoU</span>
+<span class="hljs-comment"># =====================================================================</span>
+head(<span class="hljs-string">&quot;(D) Dice = 2 IoU / (1 + IoU)&quot;</span>)
+<span class="hljs-keyword">for</span> v <span class="hljs-keyword">in</span> [<span class="hljs-number">0.3</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0.7</span>, <span class="hljs-number">0.9</span>]:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  IoU <span class="hljs-subst">{v:<span class="hljs-number">.1</span>f}</span> -&gt; Dice <span class="hljs-subst">{<span class="hljs-number">2</span> * v / (<span class="hljs-number">1</span> + v):<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># Hình</span>
+<span class="hljs-comment"># =====================================================================</span>
+fig, ax = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">9.2</span>, <span class="hljs-number">3.6</span>))
+a0 = ax[<span class="hljs-number">0</span>]
+<span class="hljs-keyword">for</span> i, k <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(ten):
+    x1, y1, x2, y2 = hop[i]
+    giu_k = i <span class="hljs-keyword">in</span> giu
+    a0.add_patch(Rectangle((x1, y1), x2 - x1, y2 - y1, fill=<span class="hljs-literal">False</span>,
+                           lw=<span class="hljs-number">2.0</span> <span class="hljs-keyword">if</span> giu_k <span class="hljs-keyword">else</span> <span class="hljs-number">1.0</span>, ls=<span class="hljs-string">&quot;-&quot;</span> <span class="hljs-keyword">if</span> giu_k <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;--&quot;</span>,
+                           ec=C_MAIN <span class="hljs-keyword">if</span> giu_k <span class="hljs-keyword">else</span> C_BAD))
+    <span class="hljs-comment"># vị trí nhãn chọn tay để các nhãn không đè lên nhau</span>
+    vt = {<span class="hljs-string">&quot;A&quot;</span>: (x1 + <span class="hljs-number">1</span>, y1 + <span class="hljs-number">1</span>, <span class="hljs-string">&quot;left&quot;</span>, <span class="hljs-string">&quot;top&quot;</span>), <span class="hljs-string">&quot;B&quot;</span>: (x2 - <span class="hljs-number">1</span>, y1 - <span class="hljs-number">1</span>, <span class="hljs-string">&quot;right&quot;</span>, <span class="hljs-string">&quot;bottom&quot;</span>),
+          <span class="hljs-string">&quot;C&quot;</span>: (x2 - <span class="hljs-number">1</span>, y2 - <span class="hljs-number">1</span>, <span class="hljs-string">&quot;right&quot;</span>, <span class="hljs-string">&quot;bottom&quot;</span>), <span class="hljs-string">&quot;D&quot;</span>: (x1 + <span class="hljs-number">1</span>, y1 + <span class="hljs-number">1</span>, <span class="hljs-string">&quot;left&quot;</span>, <span class="hljs-string">&quot;top&quot;</span>),
+          <span class="hljs-string">&quot;E&quot;</span>: (x2 - <span class="hljs-number">1</span>, y1 - <span class="hljs-number">1</span>, <span class="hljs-string">&quot;right&quot;</span>, <span class="hljs-string">&quot;bottom&quot;</span>), <span class="hljs-string">&quot;F&quot;</span>: (x1 + <span class="hljs-number">1</span>, y2 - <span class="hljs-number">1</span>, <span class="hljs-string">&quot;left&quot;</span>, <span class="hljs-string">&quot;bottom&quot;</span>)}[k]
+    a0.annotate(<span class="hljs-string">f&quot;<span class="hljs-subst">{k}</span> <span class="hljs-subst">{diem[i]:<span class="hljs-number">.2</span>f}</span>&quot;</span>.replace(<span class="hljs-string">&quot;.&quot;</span>, <span class="hljs-string">&quot;,&quot;</span>), vt[:<span class="hljs-number">2</span>], fontsize=<span class="hljs-number">7.5</span>,
+                ha=vt[<span class="hljs-number">2</span>], va=vt[<span class="hljs-number">3</span>], color=C_MAIN <span class="hljs-keyword">if</span> giu_k <span class="hljs-keyword">else</span> C_BAD)
+a0.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">100</span>); a0.set_ylim(<span class="hljs-number">100</span>, <span class="hljs-number">0</span>); a0.set_aspect(<span class="hljs-string">&quot;equal&quot;</span>)
+a0.set_title(<span class="hljs-string">&quot;NMS, ngưỡng IoU 0,5: nét liền giữ lại, nét đứt bị loại&quot;</span>, fontsize=<span class="hljs-number">8.5</span>)
+a0.grid(<span class="hljs-literal">False</span>)
+
+a1 = ax[<span class="hljs-number">1</span>]
+a1.plot(r0, p0, color=C_DIM, lw=<span class="hljs-number">1.3</span>, ls=<span class="hljs-string">&quot;--&quot;</span>, label=<span class="hljs-string">f&quot;IoU 0,5, không NMS (AP <span class="hljs-subst">{ap_moi_diem(r0, p0):<span class="hljs-number">.2</span>f}</span>)&quot;</span>.replace(<span class="hljs-string">&quot;.&quot;</span>, <span class="hljs-string">&quot;,&quot;</span>, <span class="hljs-number">1</span>))
+a1.plot(r5, p5, color=C_MAIN, lw=<span class="hljs-number">1.8</span>, label=<span class="hljs-string">f&quot;IoU 0,5, có NMS (AP <span class="hljs-subst">{ap_moi_diem(r5, p5):<span class="hljs-number">.2</span>f}</span>)&quot;</span>.replace(<span class="hljs-string">&quot;.&quot;</span>, <span class="hljs-string">&quot;,&quot;</span>, <span class="hljs-number">1</span>))
+a1.plot(r75, p75, color=C_BAD, lw=<span class="hljs-number">1.6</span>, label=<span class="hljs-string">f&quot;IoU 0,75, có NMS (AP <span class="hljs-subst">{ap_moi_diem(r75, p75):<span class="hljs-number">.2</span>f}</span>)&quot;</span>.replace(<span class="hljs-string">&quot;.&quot;</span>, <span class="hljs-string">&quot;,&quot;</span>, <span class="hljs-number">1</span>))
+a1.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); a1.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">1.02</span>)
+a1.set_xlabel(<span class="hljs-string">&quot;recall&quot;</span>); a1.set_ylabel(<span class="hljs-string">&quot;precision&quot;</span>)
+a1.set_title(<span class="hljs-string">&quot;Đường precision–recall của bộ phát hiện mô phỏng&quot;</span>, fontsize=<span class="hljs-number">8.5</span>)
+a1.legend(frameon=<span class="hljs-literal">False</span>, fontsize=<span class="hljs-number">7.5</span>, loc=<span class="hljs-string">&quot;lower left&quot;</span>)
+fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;models15_detect.png&quot;</span>); plt.close(fig)
+head(<span class="hljs-string">&quot;Xong. Da luu figs/models15_detect.png&quot;</span>)
+</code></pre></div></details><details class="src-details"><summary>Kết quả chạy — <code>thi_giac_output.txt</code></summary><div class="code-block is-output"><div class="code-head"><span class="code-lang">Kết quả chạy</span></div><pre><code>
+==========================================================================
+(A) IoU cua hai cap hop
+==========================================================================
+  (0, 0, 4, 4) va (2, 2, 6, 6): IoU = 0.1429
+  (0, 0, 4, 4) va (1, 0, 5, 4): IoU = 0.6000
+  (0, 0, 4, 4) va (0, 0, 4, 2): IoU = 0.5000
+
+==========================================================================
+(B) NMS tren sau hop du doan, nguong IoU 0.5
+==========================================================================
+IoU giua cac hop:
+           A      B      C      D      E      F
+  A    1.000  0.822  0.566  0.000  0.000  0.143
+  B    0.822  1.000  0.562  0.000  0.000  0.141
+  C    0.566  0.562  1.000  0.000  0.000  0.268
+  D    0.000  0.000  0.000  1.000  0.716  0.039
+  E    0.000  0.000  0.000  0.716  1.000  0.033
+  F    0.143  0.141  0.268  0.039  0.033  1.000
+Giu lai: ['A', 'D', 'F']
+
+==========================================================================
+(C) AP cua mot bo phat hien mo phong: 300 anh, mot lop doi tuong
+==========================================================================
+So hop that: 765; so hop du doan: 1107 truoc NMS, 882 sau NMS (nguong 0,5)
+                              AP (moi diem)  AP (101 diem)  recall cuoi
+IoU 0,5, khong NMS                    0.885          0.879        0.928
+IoU 0,5, co NMS                       0.913          0.908        0.916
+IoU 0,75, co NMS                      0.708          0.708        0.792
+AP 101 diem theo nguong IoU: 0.50:0.908 0.55:0.908 0.60:0.894 0.65:0.865 0.70:0.829 0.75:0.708 0.80:0.425 0.85:0.136 0.90:0.014 0.95:0.000
+AP@[0,5:0,95] (trung binh 10 nguong, kieu COCO) = 0.569
+
+==========================================================================
+(D) Dice = 2 IoU / (1 + IoU)
+==========================================================================
+  IoU 0.3 -&gt; Dice 0.462
+  IoU 0.5 -&gt; Dice 0.667
+  IoU 0.7 -&gt; Dice 0.824
+  IoU 0.9 -&gt; Dice 0.947
+
+==========================================================================
+Xong. Da luu figs/models15_detect.png
+==========================================================================
+</code></pre></div></details></section><section class="src-card" id="fig_diagrams-py"><header class="src-head"><h3 class="src-title"><code>code/models/fig_diagrams.py</code></h3><span class="src-badge">viết thêm cho repo này</span><span class="src-meta">266 dòng</span><a class="src-dl" href="code/models/fig_diagrams.py" download>Tải về</a></header><p class="src-note">Sinh Hình 1, 3, 6, 8, 12, 13: bốn họ mô hình, một cây quyết định và các vùng nó chia, lượt xuôi và lượt ngược của lan truyền ngược, trường tiếp nhận của CNN, cấu trúc một khối Transformer, và bảng so sánh Transformer 2017 với các lựa chọn hiện nay. Các sơ đồ được vẽ bằng matplotlib để sửa được cùng với nội dung bài.</p><details class="src-details"><summary>Xem mã nguồn</summary><div class="code-block" data-lang="python"><div class="code-head"><span class="code-lang">Python</span><button class="code-copy" type="button" data-copy>Sao chép</button></div><pre><code class="hljs language-python"><span class="hljs-string">&quot;&quot;&quot;Sinh Hình 1, 3, 6, 8, 11 và 12 của giáo trình &quot;Học sâu&quot;: các sơ đồ.
 
 Đây là hình vẽ tay bằng matplotlib chứ không phải kết quả thí nghiệm, nhưng vẫn để
 trong mã nguồn để sửa được và để mọi chi tiết khớp với chữ trong bài.

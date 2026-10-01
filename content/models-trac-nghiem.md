@@ -234,6 +234,41 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 - [ ] $56 \times 56$
 > $\lfloor (224 + 2 \cdot 3 - 7)/2 \rfloor + 1 = 112$. Lớp có $7 \cdot 7 \cdot 3 \cdot 64 = 9\,408$ trọng số (Ví dụ 7.1).
 
+### Hai hộp $(0, 0, 4, 4)$ và $(2, 2, 6, 6)$ có IoU bằng bao nhiêu?
+- [ ] $1/4$
+- [x] $1/7$
+- [ ] $1/8$
+- [ ] $1/2$
+> Phần giao là hình vuông $2 \times 2$, diện tích 4; phần hợp là $16 + 16 - 4 = 28$; IoU $= 4/28 = 1/7 \approx 0{,}143$ (Ví dụ 7.2). Lỗi hay gặp là chia cho tổng diện tích 32 thay vì diện tích phần hợp.
+
+### Vì sao bộ phát hiện cần bước NMS?
+- [ ] Để tăng độ phân giải của bản đồ đặc trưng
+- [x] Vì dự đoán trên lưới dày nên một đối tượng có nhiều hộp gần nhau; NMS giữ hộp điểm cao nhất và bỏ các hộp trùng với nó quá ngưỡng IoU
+- [ ] Để gán nhãn cho các hộp neo khi huấn luyện
+- [ ] Để chuẩn hoá điểm tin cậy về khoảng từ 0 tới 1
+> Khi đánh giá, hộp trùng của cùng một đối tượng bị tính là dương tính giả, nên NMS làm AP tăng; đổi lại, nó có thể loại nhầm hộp đúng của đối tượng đứng sát bên (Mục 7.5).
+
+### Cùng một bộ phát hiện, vì sao AP@[0,5:0,95] thấp hơn nhiều so với AP50?
+- [ ] Vì AP@[0,5:0,95] chỉ tính các đối tượng nhỏ
+- [x] Vì nó lấy trung bình AP trên các ngưỡng IoU từ 0,5 tới 0,95, và ở ngưỡng cao chỉ những hộp định vị rất chính xác mới được tính là đúng
+- [ ] Vì nó không dùng NMS
+- [ ] Vì nó tính trên tập kiểm tra khác
+> Trong thí nghiệm ở Mục 7.5, AP giảm từ 0,908 ở ngưỡng 0,5 xuống 0,014 ở ngưỡng 0,9, và trung bình trên 10 ngưỡng là 0,569.
+
+### Trong U-Net, các kết nối giữa nhánh mã hoá và nhánh giải mã có tác dụng gì?
+- [ ] Giảm số tham số của mạng
+- [ ] Thay thế cho hàm kích hoạt
+- [x] Đưa đặc trưng độ phân giải cao của các lớp nông sang nhánh giải mã, để khôi phục chính xác vị trí và biên của đối tượng
+- [ ] Giúp mạng không cần tăng cường dữ liệu
+> Đặc trưng sâu cho biết "đây là gì" nhưng đã mất chi tiết vị trí sau nhiều lần giảm độ phân giải; ghép với đặc trưng nông cùng mức cho biết "ở đâu" (Mục 7.6).
+
+### Hai mô hình phân đoạn có IoU 0,5. Hệ số Dice tương ứng là bao nhiêu?
+- [ ] 0,5
+- [ ] 0,25
+- [x] Khoảng 0,667
+- [ ] 1
+> $\text{Dice} = 2\,\text{IoU}/(1 + \text{IoU}) = 1/1{,}5 \approx 0{,}667$. Dice luôn lớn hơn hoặc bằng IoU, nên khi so sánh kết quả phải cùng một thước đo (Mục 7.6).
+
 ## Chương 8
 
 ### Giới hạn nào của RNN là lý do chính khiến Transformer thay thế nó?

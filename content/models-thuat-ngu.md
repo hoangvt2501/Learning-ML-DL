@@ -150,6 +150,39 @@ Tích chập riêng cho từng kênh rồi tích chập $1 \times 1$. Rẻ hơn 
 ### Vision Transformer | Vision Transformer, ViT
 Cắt ảnh thành các mảnh $16 \times 16$ và xử lý chúng như token bằng Transformer. Kém CNN khi ít dữ liệu, vượt CNN khi tiền huấn luyện trên tập rất lớn (Mục 7.4).
 
+### Phát hiện đối tượng | object detection
+Bài toán tìm mọi đối tượng trong ảnh, mỗi đối tượng là một hộp bao kèm nhãn lớp và điểm tin cậy. Số đối tượng thay đổi theo ảnh (Mục 7.5).
+
+### IoU | intersection over union
+Diện tích phần giao chia cho diện tích phần hợp của hai hộp hoặc hai vùng, trong khoảng từ 0 tới 1. Dùng để ghép dự đoán với hộp thật và để đánh giá phân đoạn (Mục 7.5, 7.6).
+
+### Hộp neo | anchor box
+Hộp có kích thước và tỉ lệ cạnh định trước đặt tại mỗi vị trí của bản đồ đặc trưng; mạng dự đoán độ lệch so với hộp neo thay vì toạ độ tuyệt đối. Faster R-CNN dùng 9 hộp neo mỗi vị trí.
+
+### Non-maximum suppression | non-maximum suppression, NMS
+Bước lọc trùng: giữ hộp điểm cao nhất, bỏ các hộp trùng với nó quá một ngưỡng IoU, rồi lặp lại. Có thể loại nhầm hộp đúng của các đối tượng đứng sát nhau.
+
+### Focal loss | focal loss
+Cross-entropy nhân thêm hệ số $(1 - p_t)^{\gamma}$ để giảm trọng số của các mẫu đã được phân loại tốt; giải quyết sự mất cân bằng giữa nền và đối tượng trong bộ phát hiện một giai đoạn (Lin và cộng sự, 2017).
+
+### AP, mAP | average precision, mean average precision
+AP là diện tích dưới đường precision–recall đã nội suy của một lớp; mAP là trung bình AP của các lớp. COCO lấy thêm trung bình trên 10 ngưỡng IoU từ 0,5 tới 0,95.
+
+### Phân đoạn ngữ nghĩa, phân đoạn thể hiện | semantic segmentation, instance segmentation
+Phân đoạn ngữ nghĩa gán nhãn lớp cho từng điểm ảnh; phân đoạn thể hiện tách thêm từng đối tượng riêng (Mục 7.6).
+
+### Tích chập chuyển vị | transposed convolution
+Phép tăng kích thước không gian có tham số học được; đầu ra có kích thước $(i - 1)s - 2p + k$. Có thể tạo hoa văn ô cờ khi $k$ không chia hết cho $s$.
+
+### Tích chập giãn | dilated convolution, atrous convolution
+Bộ lọc có các ô trống giữa các phần tử, phủ vùng rộng $k + (k - 1)(d - 1)$ mà không thêm trọng số; tăng trường tiếp nhận mà không giảm độ phân giải.
+
+### U-Net | U-Net
+Kiến trúc phân đoạn gồm nhánh mã hoá, nhánh giải mã và các kết nối ghép đặc trưng cùng độ phân giải giữa hai nhánh (Ronneberger và cộng sự, 2015).
+
+### Hệ số Dice | Dice coefficient
+$2|A \cap B|/(|A| + |B|)$, bằng $2\,\text{IoU}/(1 + \text{IoU})$; phổ biến trong phân đoạn ảnh y tế, kèm Dice loss cho trường hợp đối tượng rất nhỏ.
+
 ## Mạng hồi quy
 
 ### Mạng nơ-ron hồi quy | recurrent neural network, RNN
