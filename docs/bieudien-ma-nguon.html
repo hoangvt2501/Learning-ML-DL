@@ -1308,7 +1308,7 @@ C_SOFT, C_LINE = <span class="hljs-string">&quot;#eef4f3&quot;</span>, <span cla
 <span class="hljs-comment"># ---------------------------------------------------------------------</span>
 fig, ax = plt.subplots(figsize=(<span class="hljs-number">9.2</span>, <span class="hljs-number">4.6</span>))
 ax.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
-ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.955</span>, <span class="hljs-string">&quot;Bốn câu hỏi, bốn nhóm kỹ thuật&quot;</span>,
+ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.955</span>, <span class="hljs-string">&quot;Các câu hỏi và nhóm kỹ thuật của giáo trình&quot;</span>,
         ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">12</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
 
 nhom = [
@@ -1327,7 +1327,7 @@ nhom = [
 ]
 
 <span class="hljs-keyword">for</span> x, tieu_de, col, cau_hoi, muc <span class="hljs-keyword">in</span> nhom:
-    ax.add_patch(FancyBboxPatch((x, <span class="hljs-number">.13</span>), <span class="hljs-number">.21</span>, <span class="hljs-number">.72</span>,
+    ax.add_patch(FancyBboxPatch((x, <span class="hljs-number">.17</span>), <span class="hljs-number">.21</span>, <span class="hljs-number">.68</span>,
                                 boxstyle=<span class="hljs-string">&quot;round,pad=0.008,rounding_size=0.02&quot;</span>,
                                 facecolor=<span class="hljs-string">&quot;#fcfcfb&quot;</span>, edgecolor=col, linewidth=<span class="hljs-number">1.5</span>))
     ax.add_patch(FancyBboxPatch((x, <span class="hljs-number">.755</span>), <span class="hljs-number">.21</span>, <span class="hljs-number">.095</span>,
@@ -1344,8 +1344,8 @@ nhom = [
     ten(ax, (x, <span class="hljs-number">.49</span>), (x + <span class="hljs-number">.017</span>, <span class="hljs-number">.49</span>), color=<span class="hljs-string">&quot;#6b7a78&quot;</span>, lw=<span class="hljs-number">1.9</span>)
 
 ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.065</span>,
-        <span class="hljs-string">&quot;Đọc từ trái sang phải là đọc theo đúng thứ tự một mô hình ngôn ngữ ra đời: học biểu diễn từ\n&quot;</span>
-        <span class="hljs-string">&quot;dữ liệu thô, tái dùng cho việc mới, học sinh ra nội dung, rồi cuối cùng mới học nói cho phải.&quot;</span>,
+        <span class="hljs-string">&quot;Đọc từ trái sang phải là đi theo thứ tự một mô hình ngôn ngữ được xây dựng: học biểu diễn từ\n&quot;</span>
+        <span class="hljs-string">&quot;dữ liệu thô, tái dùng cho việc mới, học sinh nội dung, rồi điều chỉnh hành vi theo mong muốn của con người.&quot;</span>,
         ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8.4</span>, color=<span class="hljs-string">&quot;#333&quot;</span>, linespacing=<span class="hljs-number">1.6</span>)
 fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;bd01_bando.png&quot;</span>); plt.close(fig)
 
@@ -1355,7 +1355,7 @@ fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;bd01_bando
 <span class="hljs-comment"># ---------------------------------------------------------------------</span>
 fig, ax = plt.subplots(figsize=(<span class="hljs-number">9.4</span>, <span class="hljs-number">3.7</span>))
 ax.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
-ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.95</span>, <span class="hljs-string">&quot;Bốn cách tái dùng một mô hình đã huấn luyện&quot;</span>,
+ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.95</span>, <span class="hljs-string">&quot;Các cách tái sử dụng một mô hình đã huấn luyện&quot;</span>,
         ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">11.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
 
 cach = [
@@ -1397,7 +1397,7 @@ fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;bd05_taidu
 <span class="hljs-comment"># ---------------------------------------------------------------------</span>
 fig, ax = plt.subplots(figsize=(<span class="hljs-number">8.8</span>, <span class="hljs-number">3.6</span>))
 ax.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
-ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.95</span>, <span class="hljs-string">&quot;LoRA: học phần cộng thêm có hạng thấp&quot;</span>, ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">11.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.95</span>, <span class="hljs-string">&quot;LoRA học phần cộng thêm có hạng thấp&quot;</span>, ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">11.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
 
 ax.add_patch(FancyBboxPatch((<span class="hljs-number">.06</span>, <span class="hljs-number">.35</span>), <span class="hljs-number">.2</span>, <span class="hljs-number">.38</span>,
                             boxstyle=<span class="hljs-string">&quot;round,pad=0.008,rounding_size=0.02&quot;</span>,
@@ -1445,7 +1445,7 @@ fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;bd07_lora.
 <span class="hljs-comment"># ---------------------------------------------------------------------</span>
 fig, ax = plt.subplots(figsize=(<span class="hljs-number">9.6</span>, <span class="hljs-number">4.3</span>))
 ax.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
-ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.955</span>, <span class="hljs-string">&quot;Ba cách trả lời cùng một câu hỏi: sinh mẫu mới thế nào&quot;</span>,
+ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.955</span>, <span class="hljs-string">&quot;Các họ mô hình sinh&quot;</span>,
         ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">11.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
 
 ho = [
@@ -1494,7 +1494,7 @@ fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;bd11_mohin
 <span class="hljs-comment"># ---------------------------------------------------------------------</span>
 fig, ax = plt.subplots(figsize=(<span class="hljs-number">9.6</span>, <span class="hljs-number">4.2</span>))
 ax.set_xlim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.set_ylim(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
-ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.955</span>, <span class="hljs-string">&quot;Từ mô hình ngôn ngữ thô tới trợ lý: ba giai đoạn&quot;</span>,
+ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.955</span>, <span class="hljs-string">&quot;Các giai đoạn huấn luyện một trợ lý ngôn ngữ&quot;</span>,
         ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">11.5</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
 
 gd = [
@@ -1537,7 +1537,7 @@ ten(ax, (<span class="hljs-number">.62</span>, <span class="hljs-number">.29</sp
 ten(ax, (<span class="hljs-number">.86</span>, <span class="hljs-number">.29</span>), (<span class="hljs-number">.86</span>, <span class="hljs-number">.265</span>), color=C_WARN, lw=<span class="hljs-number">1.5</span>)
 
 ax.text(<span class="hljs-number">.5</span>, <span class="hljs-number">.055</span>,
-        <span class="hljs-string">&quot;Bước 3 là bước duy nhất mô hình học từ so sánh thay vì từ ví dụ mẫu, và đó là lý do nó vượt được\n&quot;</span>
+        <span class="hljs-string">&quot;Bước 3 là bước duy nhất mô hình học từ so sánh thay vì từ ví dụ mẫu, nhờ vậy nó vượt được\n&quot;</span>
         <span class="hljs-string">&quot;chất lượng của người viết mẫu: nhận ra câu nào hay hơn dễ hơn nhiều so với tự viết ra câu hay nhất.&quot;</span>,
         ha=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">8.3</span>, color=<span class="hljs-string">&quot;#333&quot;</span>, linespacing=<span class="hljs-number">1.6</span>)
 fig.tight_layout(); fig.savefig(OUT + <span class="hljs-string">&quot;bd14_rlhf_quytrinh.png&quot;</span>); plt.close(fig)

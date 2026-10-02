@@ -61,7 +61,7 @@ python code/bieudien/experiments.py     <span class="hljs-comment"># khoảng 5 
 python code/bieudien/fig_diagrams.py
 </code></pre></div>
 <p>Môi trường đã dùng: Python 3.13, NumPy 2.3, SciPy 1.16, scikit-learn 1.7, matplotlib 3.10. Trên Windows, đặt <code>PYTHONIOENCODING=utf-8</code> khi ghi kết quả ra tệp.</p>
-<p><strong>Các kết quả kiểm chứng đẳng thức</strong> phải khớp tới sai số của bộ giải, không phải khớp gần đúng:</p>
+<p>Các kết quả kiểm chứng đẳng thức phải khớp tới sai số của bộ giải chứ không chỉ khớp gần đúng:</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -88,12 +88,7 @@ python code/bieudien/fig_diagrams.py
 </tr>
 </tbody>
 </table></div>
-<p><strong>Ba kết quả khác với cách phát biểu thường gặp.</strong> Chúng được trình bày đúng như số liệu cho thấy:</p>
-<ol>
-<li>Bảng quét số chiều của embedding (<a href="bieudien-ch02.html#sec-2-4" class="xref">Mục 2.4</a>) không phải một đường cong đánh đổi: độ chính xác loại suy đạt 100% ở 8 chiều, giảm ở 12 và 16 chiều, rồi lại 100% ở 20 chiều. Nguyên nhân là phổ của ma trận PPMI có đúng 8 trị riêng dương.</li>
-<li>Thí nghiệm GAN (<a href="bieudien-ch10.html#sec-10-3" class="xref">Mục 10.3</a>) không tái hiện được sụp chế độ; nó cho thấy dạng minimax gốc không học được vì gradient triệt tiêu, và phủ đủ các chế độ vẫn chưa có nghĩa là học đúng phân phối.</li>
-<li>Thí nghiệm học tăng cường (<a href="bieudien-ch12.html#sec-12-4" class="xref">Mục 12.4</a>) cho thấy <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\varepsilon = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> vẫn thành công trong một cấu hình nhờ khởi tạo lạc quan.</li>
-</ol>
+<p>Ba kết quả khác với cách phát biểu thường gặp, và giáo trình trình bày chúng đúng như số liệu cho thấy. Bảng quét số chiều của embedding ở <a href="bieudien-ch02.html#sec-2-4" class="xref">Mục 2.4</a> không phải một đường cong đánh đổi: độ chính xác loại suy đạt 100% ở 8 chiều, giảm ở 12 và 16 chiều, rồi lại 100% ở 20 chiều, vì phổ của ma trận PPMI có đúng 8 trị riêng dương. Thí nghiệm GAN ở <a href="bieudien-ch10.html#sec-10-3" class="xref">Mục 10.3</a> không tái hiện được sụp chế độ; nó cho thấy dạng minimax gốc không học được vì gradient triệt tiêu, và phủ đủ các chế độ vẫn chưa có nghĩa là học đúng phân phối. Thí nghiệm học tăng cường ở <a href="bieudien-ch12.html#sec-12-4" class="xref">Mục 12.4</a> cho thấy <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\varepsilon = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> vẫn thành công trong một cấu hình nhờ khởi tạo lạc quan.</p>
 <p>Ngoài ra, thí nghiệm ở <a href="bieudien-ch06.html#sec-6-3" class="xref">Mục 6.3</a> chạy mỗi cấu hình một lần, nên các chênh lệch nhỏ ở cỡ dữ liệu nhỏ không có ý nghĩa thống kê; mô phỏng ở <a href="bieudien-ch02.html#sec-2-4" class="xref">Mục 2.4</a> dùng kho ngữ liệu nhân tạo 20 từ, nên chỉ minh hoạ cơ chế chứ không đại diện cho embedding trên dữ liệu thật.</p>
 </article>
 <nav class="pager" aria-label="Chuyển trang"><a class="pager-link pager-prev" href="bieudien-ch18.html"><span class="pager-dir">← Trước</span><span class="pager-title">Tài liệu tham khảo</span></a><a class="pager-link pager-next" href="bieudien-thuc-hanh.html"><span class="pager-dir">Tiếp →</span><span class="pager-title">Phòng thí nghiệm</span></a></nav>

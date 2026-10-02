@@ -141,7 +141,7 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 - [ ] Dung lượng của mô hình gốc
 > Khi suy luận, $BA$ được gộp vào $W_0$ nên tốc độ bằng mô hình gốc. Với Llama 2 7B, trạng thái Adam giảm từ 48,2 GiB xuống 32 MiB với $r = 8$.
 
-### Giả định cốt lõi của LoRA là gì?
+### LoRA dựa trên giả định nào?
 - [ ] Mô hình gốc có hạng thấp
 - [x] Phần thay đổi cần thiết khi chuyển sang nhiệm vụ mới có hạng thấp
 - [ ] Dữ liệu huấn luyện có hạng thấp
@@ -259,7 +259,7 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 - [x] Hồi quy: dự đoán nhiễu $\varepsilon$ từ $x_t$ và $t$ với mất mát bình phương sai số
 - [ ] Phân loại nhiều lớp
 - [ ] Học tăng cường
-> Mất mát giảm nghĩa là mô hình tốt lên, không có điểm yên ngựa hay hai mạng cạnh tranh. Đây là lý do chính mô hình khuếch tán dễ huấn luyện hơn GAN.
+> Mất mát giảm nghĩa là mô hình tốt lên, không có điểm yên ngựa hay hai mạng cạnh tranh. Nhờ vậy mô hình khuếch tán dễ huấn luyện hơn GAN nhiều.
 
 ### Vì sao mô hình khuếch tán thường dự đoán nhiễu $\varepsilon$ thay vì dự đoán $x_0$?
 - [ ] Vì dự đoán $x_0$ là không thể
@@ -346,7 +346,7 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 
 ## Chương 15
 
-### Quan sát then chốt của DPO là gì?
+### DPO dựa trên quan sát nào?
 - [ ] Mô hình thưởng không cần thiết vì phần thưởng luôn bằng nhau
 - [x] Nghiệm dạng đóng của RLHF đảo ngược được, nên mọi chính sách ngầm xác định một hàm thưởng $r = \beta\log(\pi/\pi_{\text{ref}}) + \beta\log Z(x)$
 - [ ] Học tăng cường luôn cho kết quả kém

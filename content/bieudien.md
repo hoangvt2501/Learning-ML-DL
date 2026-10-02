@@ -1,6 +1,6 @@
 # Biểu diễn, mô hình sinh và căn chỉnh
 
-> **Giáo trình 3 của lộ trình.** Tài liệu trình bày bốn nhóm kỹ thuật nằm giữa kiến trúc mô hình (giáo trình *Học sâu*) và ứng dụng (giáo trình *Ứng dụng LLM*): biểu diễn dữ liệu bằng vector (embedding), tái sử dụng mô hình đã huấn luyện (tiền huấn luyện, tinh chỉnh, LoRA), mô hình sinh (VAE, GAN, mô hình khuếch tán), và căn chỉnh mô hình ngôn ngữ theo mong muốn của con người (học tăng cường, RLHF, DPO).
+> **Giáo trình 3 của lộ trình.** Giáo trình *Học sâu* dừng ở kiến trúc Transformer và các thành phần của một mô hình ngôn ngữ lớn. Giáo trình này đi tiếp theo con đường một mô hình như vậy được tạo ra rồi đưa vào dùng: biểu diễn dữ liệu bằng vector, tiền huấn luyện trên dữ liệu không nhãn rồi tái sử dụng mô hình bằng tinh chỉnh hoặc LoRA, sinh nội dung mới bằng VAE, GAN và mô hình khuếch tán, và cuối cùng điều chỉnh hành vi của mô hình ngôn ngữ theo mong muốn của con người bằng học tăng cường, RLHF và DPO. Cách dùng các mô hình này trong sản phẩm nằm ở giáo trình *Ứng dụng LLM*.
 >
 > **Kiến thức cần có.** Hồi quy logistic và softmax, cross-entropy, ước lượng hợp lý cực đại, SVD và tối ưu có ràng buộc ở mức của *Nền tảng*; kiến trúc Transformer ở mức của *Học sâu*. Chỗ nào dùng lại kiến thức cũ đều có liên kết tới đúng mục.
 >
@@ -55,12 +55,7 @@ Giáo trình dùng lại ký hiệu và quy ước thuật ngữ của *Nền t�
 
 Chữ $r$ vừa là hạng của LoRA (Chương 7) vừa là hàm thưởng (Chương 12 tới 15); hai nghĩa không xuất hiện trong cùng một chương.
 
-Chữ $\beta$ có hai nghĩa khác nhau, và đây là chỗ dễ nhầm:
-
-- Trong **VAE** (Chương 9), $\beta$ nhân với số hạng KL giữa hậu nghiệm xấp xỉ và tiên nghiệm $\mathcal{N}(0, I)$.
-- Trong **RLHF** (Chương 14), $\beta$ nhân với KL giữa chính sách mới và chính sách tham chiếu.
-
-Điểm chung: cả hai đều là giá phải trả khi đi xa khỏi một phân phối tham chiếu. Điểm khác: phân phối tham chiếu ở VAE là tiên nghiệm Gauss, ở RLHF là mô hình đã tinh chỉnh có giám sát. Trong Chương 11, $\beta_t$ còn là phương sai nhiễu ở bước $t$ của quá trình khuếch tán, theo đúng ký hiệu của bài báo gốc.
+Chữ $\beta$ dễ gây nhầm hơn, vì nó có hai nghĩa gần nhau. Trong VAE (Chương 9), $\beta$ nhân với số hạng KL giữa hậu nghiệm xấp xỉ và tiên nghiệm $\mathcal{N}(0, I)$; trong RLHF (Chương 14), $\beta$ nhân với KL giữa chính sách mới và chính sách tham chiếu. Ở cả hai nơi, $\beta$ là mức phạt khi đi xa khỏi một phân phối tham chiếu. Chỗ khác nhau nằm ở phân phối tham chiếu: ở VAE đó là tiên nghiệm Gauss, ở RLHF là mô hình đã tinh chỉnh có giám sát. Ngoài ra, trong Chương 11, $\beta_t$ là phương sai nhiễu ở bước $t$ của quá trình khuếch tán, theo đúng ký hiệu của bài báo gốc.
 
 ### 0.2. Quy ước thuật ngữ
 
@@ -92,9 +87,9 @@ Bảng đối chiếu đầy đủ nằm ở trang Từ điển thuật ngữ.
 
 ## 1. Tổng quan
 
-Chương này đặt bốn nhóm kỹ thuật của giáo trình vào một mạch chung: con đường một mô hình ngôn ngữ đi từ dữ liệu thô tới một trợ lý làm theo yêu cầu. Mỗi nhóm trả lời một câu hỏi mà nhóm trước để lại.
+Giáo trình *Học sâu* kết thúc với một mô hình ngôn ngữ lớn ở dạng kiến trúc: các khối Transformer, số tham số, lượng bộ nhớ cần để huấn luyện. Từ một kiến trúc như vậy tới một trợ lý trả lời được câu hỏi của người dùng còn nhiều bước, và mỗi bước dùng một nhóm kỹ thuật riêng. Trước khi đi vào chi tiết, ta xếp các bước đó theo thứ tự để thấy mỗi nhóm kỹ thuật trả lời một câu hỏi mà nhóm trước để lại.
 
-### 1.1. Bốn nhóm kỹ thuật và mối liên hệ
+### 1.1. Các nhóm kỹ thuật và mối liên hệ giữa chúng
 
 Embedding, học chuyển giao, mô hình sinh và căn chỉnh ra đời ở những thời điểm khác nhau, cho những mục đích khác nhau. Word2Vec (2013) tạo vector cho từ; mô hình khuếch tán (2020) sinh ảnh; RLHF (2017, phổ biến từ 2022) làm cho mô hình ngôn ngữ trả lời hữu ích hơn. Nhưng nếu đi theo quá trình xây dựng một mô hình ngôn ngữ hiện đại, chúng xếp thành một chuỗi: biểu diễn dữ liệu bằng vector, huấn luyện một mô hình lớn trên dữ liệu không nhãn rồi tái sử dụng nó, sinh ra nội dung mới, và cuối cùng điều chỉnh hành vi của mô hình theo mong muốn của con người.
 
@@ -102,17 +97,19 @@ Embedding, học chuyển giao, mô hình sinh và căn chỉnh ra đời ở nh
 
 **Hình 1.** Bốn câu hỏi và bốn nhóm kỹ thuật trả lời chúng, theo thứ tự một mô hình ngôn ngữ được xây dựng.
 
-### 1.2. Bốn câu hỏi
+### 1.2. Câu hỏi của từng nhóm kỹ thuật
 
-**Làm sao biểu diễn dữ liệu thô bằng số?** Máy tính chỉ xử lý số, nên chữ "mèo" phải trở thành một vector. Gán cho mỗi từ một chỉ số (mèo = 7, chó = 8, tủ lạnh = 9) là đưa vào một quan hệ giả: về mặt số học, mèo gần chó hơn gần tủ lạnh chỉ vì cách đánh số. Mã hoá one-hot, mỗi từ là một vector toàn số 0 với đúng một số 1, không đưa vào quan hệ giả nào, nhưng cũng không có quan hệ thật nào: mọi cặp từ đều cách nhau $\sqrt 2$. Điều cần có là một không gian trong đó khoảng cách phản ánh sự giống nhau về nghĩa. Chương 2 tới 4 trình bày cách xây dựng không gian đó từ thống kê đồng hiện của các từ, không cần nhãn.
+Câu hỏi đầu tiên là biểu diễn dữ liệu thô bằng số. Máy tính chỉ xử lý số, nên chữ "mèo" phải trở thành một vector. Gán cho mỗi từ một chỉ số (mèo = 7, chó = 8, tủ lạnh = 9) là đưa vào một quan hệ giả: về mặt số học, mèo gần chó hơn gần tủ lạnh chỉ vì cách đánh số. Mã hoá one-hot, trong đó mỗi từ là một vector toàn số 0 với đúng một số 1, không đưa vào quan hệ giả nào, nhưng cũng không có quan hệ thật nào: mọi cặp từ đều cách nhau $\sqrt 2$. Điều cần có là một không gian trong đó khoảng cách phản ánh sự giống nhau về nghĩa. Chương 2 tới 4 xây dựng không gian đó từ thống kê đồng hiện của các từ, không cần nhãn.
 
-**Làm sao tái sử dụng một mô hình đã huấn luyện?** Huấn luyện một mô hình ngôn ngữ lớn từ đầu tốn hàng triệu đô la và hàng nghìn tỉ token. Phần lớn ứng dụng lấy một mô hình có sẵn rồi điều chỉnh cho việc của mình, và câu hỏi là điều chỉnh tới đâu, bằng cách nào, với bao nhiêu dữ liệu. Chương 5 tới 7 trả lời, kèm số đo cho thấy ngưỡng dữ liệu mà ở đó tinh chỉnh toàn phần bắt đầu vượt việc chỉ học một lớp tuyến tính trên đặc trưng đóng băng.
+Câu hỏi thứ hai là tái sử dụng một mô hình đã huấn luyện. Huấn luyện một mô hình ngôn ngữ lớn từ đầu tốn hàng triệu đô la và hàng nghìn tỉ token, nên phần lớn ứng dụng lấy một mô hình có sẵn rồi điều chỉnh cho việc của mình. Điều cần biết là điều chỉnh tới đâu, bằng cách nào, với bao nhiêu dữ liệu. Chương 5 tới 7 trả lời các câu hỏi đó, kèm số đo cho thấy ngưỡng dữ liệu mà ở đó tinh chỉnh toàn phần bắt đầu vượt việc chỉ học một lớp tuyến tính trên đặc trưng đóng băng.
 
-**Làm sao sinh ra nội dung mới?** Phân loại đi từ dữ liệu tới nhãn. Sinh đi theo chiều ngược lại và khó hơn nhiều: từ nhiễu ngẫu nhiên, tạo ra một mẫu chưa từng có nhưng trông giống dữ liệu thật. Chương 8 tới 11 trình bày ba họ mô hình: VAE, GAN và mô hình khuếch tán. Cả ba đều biến nhiễu Gauss thành mẫu, và khác nhau chủ yếu ở cách huấn luyện.
+Câu hỏi thứ ba là sinh ra nội dung mới. Phân loại đi từ dữ liệu tới nhãn. Sinh đi theo chiều ngược lại và khó hơn nhiều: từ nhiễu ngẫu nhiên, tạo ra một mẫu chưa từng có nhưng trông giống dữ liệu thật. Chương 8 tới 11 trình bày ba họ mô hình: VAE, GAN và mô hình khuếch tán. Cả ba đều biến nhiễu Gauss thành mẫu, và khác nhau chủ yếu ở cách huấn luyện.
 
-**Làm sao để mô hình làm theo yêu cầu?** Một mô hình vừa tiền huấn luyện biết ngôn ngữ nhưng chưa biết làm theo chỉ dẫn. Hỏi "thủ đô của Pháp là gì?", nó có thể trả lời, nhưng cũng có thể viết tiếp thành một đề kiểm tra gồm mười câu hỏi tương tự, vì trong văn bản trên mạng một câu hỏi thường đi cùng các câu hỏi khác. Chương 12 tới 15 trình bày cách điều chỉnh hành vi này. Điểm đáng chú ý là giai đoạn căn chỉnh học từ **so sánh** giữa các câu trả lời thay vì từ câu trả lời mẫu, và đánh giá câu trả lời nào tốt hơn dễ hơn nhiều so với tự viết câu trả lời tốt nhất. Nhờ vậy mô hình có thể vượt chất lượng của các câu trả lời mẫu do người viết.
+Câu hỏi cuối cùng là làm cho mô hình làm theo yêu cầu. Một mô hình vừa tiền huấn luyện biết ngôn ngữ nhưng chưa biết làm theo chỉ dẫn. Hỏi "thủ đô của Pháp là gì?", nó có thể trả lời, nhưng cũng có thể viết tiếp thành một đề kiểm tra gồm mười câu hỏi tương tự, vì trong văn bản trên mạng một câu hỏi thường đi cùng các câu hỏi khác. Chương 12 tới 15 trình bày cách điều chỉnh hành vi này. Giai đoạn căn chỉnh học từ **so sánh** giữa các câu trả lời thay vì từ câu trả lời mẫu, và việc đánh giá câu trả lời nào tốt hơn dễ hơn nhiều so với tự viết câu trả lời tốt nhất. Nhờ vậy mô hình có thể vượt chất lượng của các câu trả lời mẫu do người viết.
 
 ### 1.3. Liên hệ với các giáo trình khác
+
+Giáo trình dùng lại nhiều kết quả của các giáo trình trước. Bảng dưới ghi nơi trình bày từng nội dung để tra lại khi cần.
 
 | Nội dung cần dùng | Trình bày ở |
 |---|---|
@@ -124,38 +121,41 @@ Embedding, học chuyển giao, mô hình sinh và căn chỉnh ra đời ở nh
 | Embedding và RAG trong ứng dụng | [Chương 6 tới 8 của *Ứng dụng LLM*](ungdung-ch06.html) |
 | Vận hành mô hình ngôn ngữ | [Chương 13 của *MLOps*](mlops-ch13.html) |
 
-Chương 7 dùng trực tiếp phép đếm tham số ở [Chương 12 của *Học sâu*](models-ch12.html), và Chương 14 dùng nhân tử Lagrange ở [Chương 12 của *Nền tảng*](nentang-ch12.html).
+Hai chỗ dùng lại nhiều nhất là phép đếm tham số ở [Chương 12 của *Học sâu*](models-ch12.html), nền của Chương 7, và nhân tử Lagrange ở [Chương 12 của *Nền tảng*](nentang-ch12.html), công cụ để giải bài toán ở Chương 14.
+
+### 1.4. Tóm tắt
+
+Bốn nhóm kỹ thuật của giáo trình ra đời riêng rẽ nhưng xếp thành một chuỗi khi nhìn theo quá trình tạo ra một mô hình ngôn ngữ: biểu diễn dữ liệu bằng vector, tiền huấn luyện rồi tái sử dụng mô hình, sinh nội dung mới, và căn chỉnh hành vi theo mong muốn của con người. Mỗi nhóm trả lời một câu hỏi mà nhóm trước để lại, và các chương đi đúng theo thứ tự đó.
+
+Bước đầu tiên là biểu diễn. Chương 2 bắt đầu từ một việc rất đơn giản, đếm xem hai từ cùng xuất hiện bao nhiêu lần, rồi đi tới word2vec và chỉ ra rằng word2vec thực chất làm cùng một việc với phép đếm đó.
 
 ---
 
 ## 2. Word2Vec
 
-Chương này xây dựng embedding cho từ theo ba bước: đếm số lần các từ cùng xuất hiện, chuyển số đếm thành thông tin tương hỗ điểm (PMI), rồi nén ma trận PMI thành các vector ngắn. Word2Vec thực hiện cùng việc đó mà không cần lập ma trận, và Levy và Goldberg (2014) chứng minh rằng nó thực chất đang phân rã ma trận PMI. Một kho ngữ liệu nhân tạo nhỏ cho phép quan sát từng bước bằng số.
+Câu hỏi đầu tiên ở Chương 1 là gán cho mỗi từ một vector sao cho các từ gần nghĩa có vector gần nhau. Ta đi tới câu trả lời qua ba bước: đếm số lần các từ cùng xuất hiện, chuyển số đếm thành thông tin tương hỗ điểm (PMI), rồi nén ma trận PMI thành các vector ngắn. Word2Vec làm cùng việc đó mà không cần lập ma trận, và Levy và Goldberg (2014) chứng minh rằng nó thực chất đang phân rã ma trận PMI. Một kho ngữ liệu nhân tạo nhỏ cho phép quan sát từng bước bằng số.
 
 ### 2.1. Giả thuyết phân bố
 
-Mục tiêu là gán cho mỗi từ một vector sao cho các từ gần nghĩa có vector gần nhau. Nhưng "gần nghĩa" là khái niệm của con người, không đo trực tiếp được. Tín hiệu thay thế đến từ ngôn ngữ học: **giả thuyết phân bố** (distributional hypothesis; Harris, 1954; Firth, 1957) cho rằng các từ xuất hiện trong những ngữ cảnh giống nhau thường có nghĩa giống nhau. Nếu trong rất nhiều câu tiếng Việt, "mèo" và "chó" cùng thường đi với "nuôi", "thú cưng", "cho ăn", thì hai từ này có điểm chung, và điểm chung đó đo được qua thống kê.
+"Gần nghĩa" là khái niệm của con người, không đo trực tiếp được. Tín hiệu thay thế đến từ ngôn ngữ học: **giả thuyết phân bố** (distributional hypothesis; Harris, 1954; Firth, 1957) cho rằng các từ xuất hiện trong những ngữ cảnh giống nhau thường có nghĩa giống nhau. Nếu trong rất nhiều câu tiếng Việt, "mèo" và "chó" cùng thường đi với "nuôi", "thú cưng", "cho ăn", thì hai từ này có điểm chung, và điểm chung đó đo được qua thống kê.
 
 Như vậy một câu hỏi không đo được ("hai từ này có gần nghĩa không?") được thay bằng một câu hỏi đo được ("hai từ này có xuất hiện trong những ngữ cảnh giống nhau không?"). Sự thay thế không hoàn hảo: hai từ trái nghĩa như "tốt" và "xấu" xuất hiện trong ngữ cảnh gần như giống hệt nhau, nên sẽ có vector gần nhau. Nhưng nó đủ tốt để làm nền cho hầu hết các phương pháp biểu diễn văn bản về sau.
 
 ### 2.2. Kho ngữ liệu thí nghiệm
 
-Để quan sát cơ chế một cách rõ ràng, thí nghiệm trong `code/bieudien/experiments.py` dùng một kho ngữ liệu nhân tạo nhỏ nhưng có cấu trúc: 20 từ, mỗi từ là một cặp (chủ đề, vai trò) với 5 chủ đề và 4 vai trò, đặt tên như `vua_nam`, `mua_nho`, `cay_lon`. Kho gồm 40 000 câu, mỗi câu 3 từ:
+Để quan sát cơ chế một cách rõ ràng, thí nghiệm trong `code/bieudien/experiments.py` dùng một kho ngữ liệu nhân tạo nhỏ nhưng có cấu trúc. Từ vựng có 20 từ, mỗi từ là một cặp (chủ đề, vai trò) với 5 chủ đề và 4 vai trò, đặt tên như `vua_nam`, `mua_nho`, `cay_lon`. Kho gồm 40 000 câu, mỗi câu 3 từ. Một nửa số câu gồm các từ cùng chủ đề, ví dụ `vua_nam vua_nho vua_lon`; nửa còn lại gồm các từ cùng vai trò, ví dụ `vua_nam mua_nam cay_nam`.
 
-- một nửa số câu gồm các từ **cùng chủ đề**, ví dụ `vua_nam vua_nho vua_lon`;
-- nửa còn lại gồm các từ **cùng vai trò**, ví dụ `vua_nam mua_nam cay_nam`.
+Không câu nào cho biết có hai trục "chủ đề" và "vai trò", và không có nhãn nào; dữ liệu chỉ là các dãy từ. Nếu embedding học được tách hai trục thành hai hướng cộng được với nhau, đó là điều mô hình tự rút ra từ thống kê.
 
-Không câu nào cho biết có hai trục "chủ đề" và "vai trò", và không có nhãn nào. Dữ liệu chỉ là các dãy từ. Nếu embedding học được tách hai trục thành hai hướng cộng được với nhau, đó là kết quả mô hình tự rút ra từ thống kê.
+### 2.3. Số lần đồng hiện và PMI
 
-### 2.3. Từ số lần đồng hiện tới PMI
-
-Đếm số lần mỗi cặp từ cùng xuất hiện trong một câu cho ma trận đồng hiện $\#(w, c)$. Số đếm thô có một nhược điểm: một từ rất phổ biến như "của" đồng hiện với hầu hết các từ, không phải vì liên quan mà vì phổ biến. Đại lượng cần đo là: hai từ cùng xuất hiện nhiều hơn mức kỳ vọng nếu chúng độc lập bao nhiêu lần.
+Đếm số lần mỗi cặp từ cùng xuất hiện trong một câu cho ma trận đồng hiện $\#(w, c)$. Số đếm thô có một nhược điểm: một từ rất phổ biến như "của" đồng hiện với hầu hết các từ, không phải vì liên quan mà vì phổ biến. Thứ cần đo là hai từ cùng xuất hiện nhiều hơn bao nhiêu so với mức kỳ vọng nếu chúng độc lập.
 
 > **Định nghĩa 2.1 (Thông tin tương hỗ điểm).** Với $p(w, c)$ là xác suất cặp $(w, c)$ cùng xuất hiện và $p(w)$, $p(c)$ là các xác suất biên,
 > $$\mathrm{PMI}(w, c) = \log\frac{p(w, c)}{p(w)\,p(c)}.$$
 > PMI dương nghĩa là hai từ cùng xuất hiện nhiều hơn mức ngẫu nhiên, bằng 0 nghĩa là đúng mức ngẫu nhiên, âm nghĩa là ít hơn. **PPMI** (positive PMI) là PMI với các giá trị âm thay bằng 0.
 
-Tử số là xác suất thật; mẫu số là xác suất nếu hai từ độc lập. Trong kho ngữ liệu thí nghiệm, PMI chỉ có ba giá trị:
+Tử số là xác suất quan sát được; mẫu số là xác suất nếu hai từ độc lập. Trong kho ngữ liệu thí nghiệm, PMI chỉ có ba giá trị:
 
 | Cặp từ | PMI |
 |---|---|
@@ -182,19 +182,19 @@ Cả 240 phép loại suy đều đúng. Vector $\overrightarrow{vua\_nu} - \ove
 
 **Hình 2.** Trái: ma trận PMI của 20 từ. Giữa: các từ chiếu xuống hai chiều đầu tiên; màu là chủ đề, hình dạng điểm là vai trò. Phải: tích vô hướng học được bằng skip-gram so với PMI (Mục 2.6).
 
-Độ chính xác không tăng đều theo số chiều giữ lại:
+Ta có thể nghĩ giữ càng nhiều chiều thì embedding càng tốt, nhưng độ chính xác không tăng đều theo số chiều giữ lại:
 
 | Số chiều $k$ | 2 | 4 | 6 | 8 | 12 | 16 | 20 |
 |---|---|---|---|---|---|---|---|
 | Độ chính xác loại suy | 0,479 | 0,788 | 0,875 | 1,000 | 0,588 | 0,250 | 1,000 |
 
-Giải thích nằm ở phổ của ma trận. Ma trận PPMI ở đây có đúng 8 trị riêng dương (7,28; 2,73; 2,70; 2,68; 2,68; 2,49; 2,46; 2,43) và 12 trị riêng âm có độ lớn gần bằng nhau, từ $-2{,}09$ tới $-2{,}16$. Tám trị riêng dương ứng với cấu trúc hai trục: một hướng chung cho mọi từ, 4 hướng cho sự khác biệt giữa 5 chủ đề và 3 hướng cho sự khác biệt giữa 4 vai trò, tổng cộng $1 + 4 + 3 = 8$. Mười hai trị riêng âm sinh ra vì đường chéo của ma trận bằng 0: một từ không bao giờ đồng hiện với chính nó. SVD cho giá trị suy biến bằng giá trị tuyệt đối của trị riêng và không phân biệt dấu, nên khi giữ 12 hoặc 16 chiều, embedding lấy thêm một phần các hướng ứng với trị riêng âm và coi chúng như hướng mang thông tin, làm sai lệch hình học; giữ đủ 20 chiều thì ma trận được tái tạo chính xác và phép loại suy lại đúng hết.
+Giải thích nằm ở phổ của ma trận. Ma trận PPMI ở đây có đúng 8 trị riêng dương (7,28; 2,73; 2,70; 2,68; 2,68; 2,49; 2,46; 2,43) và 12 trị riêng âm có độ lớn gần bằng nhau, từ $-2{,}09$ tới $-2{,}16$. Tám trị riêng dương ứng với cấu trúc hai trục: một hướng chung cho mọi từ, 4 hướng cho sự khác biệt giữa 5 chủ đề và 3 hướng cho sự khác biệt giữa 4 vai trò, tổng cộng $1 + 4 + 3 = 8$. Mười hai trị riêng âm sinh ra vì đường chéo của ma trận bằng 0: một từ không bao giờ đồng hiện với chính nó. SVD cho giá trị suy biến bằng giá trị tuyệt đối của trị riêng và không phân biệt dấu, nên khi giữ 12 hoặc 16 chiều, embedding lấy thêm một phần các hướng ứng với trị riêng âm và coi chúng như hướng mang thông tin, làm sai lệch hình học. Giữ đủ 20 chiều thì ma trận được tái tạo chính xác và phép loại suy lại đúng hết.
 
 > **Lưu ý.** Trên kho ngữ liệu thật, không có ranh giới rõ ràng như vậy giữa phần cấu trúc và phần còn lại, và số chiều được chọn bằng thực nghiệm trên các nhiệm vụ đánh giá. Ví dụ này không cho thấy "đường cong đánh đổi" điển hình theo số chiều; nó cho thấy số chiều tốt nhất phụ thuộc vào cấu trúc phổ của ma trận, và giữ thêm chiều không phải lúc nào cũng có lợi.
 
 ### 2.5. Skip-gram và lấy mẫu âm
 
-Mục 2.4 dùng SVD. Word2Vec (Mikolov và cộng sự, 2013) không lập ma trận PMI, vì với từ vựng thật ma trận đó quá lớn. Thay vào đó, nó xử lý từng cặp $(w, c)$ quan sát được bằng gradient descent. Mô hình **skip-gram** gán cho mỗi từ hai vector, $w$ khi là từ trung tâm và $c$ khi là từ ngữ cảnh, và mô hình hoá
+SVD ở Mục 2.4 cần lập toàn bộ ma trận PPMI, và với từ vựng thật ma trận đó quá lớn. Word2Vec (Mikolov và cộng sự, 2013) tránh việc này bằng cách xử lý từng cặp $(w, c)$ quan sát được bằng gradient descent. Mô hình **skip-gram** gán cho mỗi từ hai vector, $w$ khi là từ trung tâm và $c$ khi là từ ngữ cảnh, và mô hình hoá
 
 $$p(c \mid w) = \frac{\exp(\langle w, c\rangle)}{\sum_{c' \in V}\exp(\langle w, c'\rangle)}.$$
 
@@ -215,9 +215,11 @@ Mẫu số là tổng trên toàn bộ từ vựng, tính lại cho mỗi cặp 
 
 $$\log\sigma(\langle w, c\rangle) + \sum_{i=1}^{k}\mathbb{E}_{c_i \sim P_n}\big[\log\sigma(-\langle w, c_i\rangle)\big],$$
 
-với $P_n$ là phân phối để rút từ ngẫu nhiên. Chi phí mỗi cặp không còn phụ thuộc vào $V$. Đó là lý do word2vec huấn luyện được trên kho hàng tỉ từ từ năm 2013. Trong bài báo gốc, $P_n$ tỉ lệ với tần suất của từ mũ $3/4$; số mũ này được chọn bằng thực nghiệm.
+với $P_n$ là phân phối để rút từ ngẫu nhiên. Chi phí mỗi cặp không còn phụ thuộc vào $V$, nhờ vậy word2vec huấn luyện được trên kho hàng tỉ từ ngay từ năm 2013. Trong bài báo gốc, $P_n$ tỉ lệ với tần suất của từ mũ $3/4$; số mũ này được chọn bằng thực nghiệm.
 
 ### 2.6. Skip-gram phân rã ma trận PMI
+
+Đến đây có hai cách tạo embedding trông rất khác nhau: một cách đếm rồi phân rã ma trận, một cách huấn luyện bằng gradient descent trên từng cặp từ. Định lý sau cho thấy chúng nhắm tới cùng một ma trận.
 
 > **Định lý 2.1 (Levy và Goldberg, 2014).** Nếu các vector đủ nhiều chiều để mọi tích vô hướng $\langle w_i, c_j\rangle$ nhận giá trị tuỳ ý, thì điểm tối ưu của skip-gram với lấy mẫu âm, với $k$ mẫu âm rút từ phân phối unigram, thoả
 > $$\langle w_i, c_j\rangle = \mathrm{PMI}(i, j) - \log k.$$
@@ -228,9 +230,9 @@ với $P_n$ là phân phối để rút từ ngẫu nhiên. Chi phí mỗi cặp
 > $$\#(i,j)\,(1 - \sigma(s)) = k\,\#(i)\,P_n(j)\,\sigma(s) \;\Longrightarrow\; e^{s} = \frac{\sigma(s)}{1 - \sigma(s)} = \frac{\#(i,j)}{k\,\#(i)\,P_n(j)}.$$
 > Thay $P_n(j) = \#(j)/N$ được $s = \log\frac{\#(i,j)\,N}{\#(i)\,\#(j)} - \log k = \mathrm{PMI}(i,j) - \log k$.
 
-Như vậy skip-gram với lấy mẫu âm là một cách phân rã ma trận PMI (dịch đi $\log k$) mà không cần lập ma trận: mỗi bước gradient chỉ chạm vào một cặp quan sát được và vài cặp ngẫu nhiên.
+Như vậy skip-gram với lấy mẫu âm là một cách phân rã ma trận PMI (dịch đi $\log k$) mà không cần lập ma trận: mỗi bước gradient chỉ chạm vào một cặp quan sát được và vài cặp ngẫu nhiên. Mô hình cũng không phải mạng nơ-ron sâu như tên gọi thường gợi ý: nó chỉ có một lớp, không có hàm phi tuyến ở giữa.
 
-**Kiểm chứng bằng số.** Thí nghiệm tối ưu hàm mục tiêu kỳ vọng của skip-gram bằng gradient descent, với $k = 1$ (để đích đúng bằng PMI) và phân phối unigram, rồi so tích vô hướng học được với PMI trên các cặp có đồng hiện:
+Định lý kiểm chứng được bằng số. Thí nghiệm tối ưu hàm mục tiêu kỳ vọng của skip-gram bằng gradient descent, với $k = 1$ (để đích đúng bằng PMI) và phân phối unigram, rồi so tích vô hướng học được với PMI trên các cặp có đồng hiện:
 
 | Số chiều | Tương quan với PMI | Sai lệch tuyệt đối trung bình | Sai lệch lớn nhất |
 |---|---|---|---|
@@ -241,23 +243,29 @@ Như vậy skip-gram với lấy mẫu âm là một cách phân rã ma trận P
 
 Ở hạng thấp, mô hình không khớp chính xác được và phải chọn giữ lại phần nào của ma trận. Sự lựa chọn này khác với SVD. SVD cho xấp xỉ tốt nhất theo tổng bình phương sai số với trọng số như nhau cho mọi phần tử; skip-gram cho một xấp xỉ có trọng số theo tần suất của các cặp, và dùng hai bộ vector riêng cho từ và ngữ cảnh. Trên kho ngữ liệu này, embedding skip-gram hạng 8 (lấy các vector từ $w$) chỉ giải đúng 20,4% phép loại suy, so với 100% của SVD trên PPMI cùng số chiều. Kết quả không có nghĩa skip-gram kém hơn nói chung: Levy, Goldberg và Dagan (2015) so sánh trên dữ liệu thật và kết luận rằng khác biệt giữa các phương pháp phụ thuộc vào siêu tham số và cách xử lý dữ liệu nhiều hơn vào bản thân thuật toán. Điều ví dụ cho thấy là hai phương pháp cùng nhắm tới một ma trận vẫn có thể cho embedding rất khác nhau khi bị giới hạn số chiều.
 
-> **Nhận xét.** Word2Vec không phải mạng nơ-ron sâu: mô hình chỉ có một lớp, không có hàm phi tuyến ở giữa. Nó là một cách phân rã ma trận PMI mà không bao giờ phải lập ra ma trận đó.
-
 ### 2.7. Các hiểu lầm thường gặp
+
+Word2Vec thường được giới thiệu như một thành tựu của học sâu, và cách giới thiệu đó để lại khá nhiều hiểu lầm. Bảng dưới đối chiếu những hiểu lầm hay gặp với điều các mục trên đã chỉ ra.
 
 | Phát biểu | Thực tế |
 |---|---|
 | "Word2Vec là học sâu." | Mô hình chỉ có một lớp tuyến tính; về bản chất là phân rã ma trận. |
 | "Lấy mẫu âm là phép xấp xỉ của softmax." | Không hẳn: đó là một hàm mục tiêu khác, có nghiệm là PMI dịch $\log k$, không phải nghiệm của softmax đầy đủ. |
 | "Embedding hiểu nghĩa của từ." | Embedding chỉ nắm thống kê đồng hiện, nên không phân biệt được các từ trái nghĩa xuất hiện trong ngữ cảnh giống nhau. |
-| "Vector cộng trừ được nên mô hình biết suy luận." | Tính cộng được là hệ quả của cấu trúc ma trận PMI. Trên dữ liệu thật, nó đúng với một số quan hệ và sai với nhiều quan hệ khác. |
+| "Vector cộng trừ được nên mô hình biết suy luận." | Tính cộng được đến từ cấu trúc của ma trận PMI. Trên dữ liệu thật, nó đúng với một số quan hệ và sai với nhiều quan hệ khác. |
 | "Số mũ 3/4 trong phân phối lấy mẫu âm có cơ sở lý thuyết." | Bài báo gốc chọn số mũ này bằng thực nghiệm. |
+
+### 2.8. Tóm tắt
+
+Embedding từ dựa trên giả thuyết phân bố: hai từ xuất hiện trong những ngữ cảnh giống nhau thường gần nghĩa. Đếm số lần đồng hiện, chuyển sang PMI để loại ảnh hưởng của tần suất, rồi nén ma trận PPMI bằng SVD đã cho embedding giải đúng cả 240 phép loại suy trên kho ngữ liệu thí nghiệm. Số chiều tốt nhất không phải số chiều lớn nhất mà do phổ của ma trận quyết định. Word2Vec với lấy mẫu âm làm cùng việc mà không lập ma trận, và chi phí mỗi cặp huấn luyện không phụ thuộc kích thước từ vựng. Ở điểm tối ưu, tích vô hướng của nó bằng PMI dịch đi $\log k$; ở hạng đầy đủ, thí nghiệm cho tương quan 0,9995 giữa hai đại lượng.
+
+Có embedding rồi, việc tiếp theo là so sánh chúng, và cách so sánh mặc định là cosine. Chương 3 cho thấy cosine có thể cho con số rất cao giữa hai vector không liên quan gì tới nhau, khi đám mây embedding không nằm quanh gốc toạ độ.
 
 ---
 
 ## 3. Hình học của không gian embedding
 
-Có embedding rồi, việc tiếp theo là đo độ giống nhau giữa hai vector. Cosine là lựa chọn mặc định, nhưng nó có một điểm yếu ít được nhắc tới: khi đám mây embedding không nằm quanh gốc toạ độ, mọi cặp vector đều có cosine cao, kể cả khi không liên quan gì tới nhau. Chương này đo hiện tượng đó, trình bày cách khắc phục, và giải thích vì sao từng chiều riêng lẻ của embedding thường không mang nghĩa.
+Có embedding rồi, việc tiếp theo là đo độ giống nhau giữa hai vector, và lựa chọn mặc định là cosine. Thí nghiệm ở Mục 3.2 cho một kết quả dễ gây hiểu nhầm: 900 vector ngẫu nhiên độc lập có cosine trung bình 0,87 với nhau, một con số rất dễ bị đọc thành "giống nhau 87%". Hiện tượng này xảy ra khi đám mây embedding không nằm quanh gốc toạ độ, và hiểu vì sao nó xảy ra cũng cho thấy cách sửa.
 
 ### 3.1. Đo độ tương đồng bằng cosine
 
@@ -283,19 +291,19 @@ Thí nghiệm tạo ba đám mây, mỗi đám 900 vector 64 chiều: các vecto
 
 **Hình 4.** Phân bố cosine giữa mọi cặp vector trong ba đám mây; vạch đỏ là giá trị trung bình. Ở đám mây lệch tâm mạnh, hai vector ngẫu nhiên độc lập có cosine trung bình 0,87.
 
-Hàng cuối là điểm quan trọng. Đây là 900 vector ngẫu nhiên độc lập, không có quan hệ ngữ nghĩa nào giữa chúng. Vậy mà cosine trung bình giữa hai vector bất kỳ là 0,87. Nếu các vector này là embedding của câu, con số đó có thể bị hiểu nhầm thành "hai câu giống nhau 87%", trong khi nó chỉ phản ánh độ lệch tâm của đám mây.
+Hàng cuối cần đọc kỹ. Đây là 900 vector ngẫu nhiên độc lập, không có quan hệ ngữ nghĩa nào giữa chúng, vậy mà cosine trung bình giữa hai vector bất kỳ là 0,87. Nếu các vector này là embedding của câu, con số đó có thể bị hiểu nhầm thành "hai câu giống nhau 87%", trong khi nó chỉ phản ánh độ lệch tâm của đám mây.
 
 Cột thứ ba cho thấy cách khắc phục đơn giản: trừ vector trung bình của cả tập khỏi mọi vector, cosine trung bình trở về khoảng 0 ở cả ba trường hợp.
 
 ### 3.3. Cách khắc phục
 
-Ba cách, theo thứ tự nên thử:
+Có ba cách, xếp theo thứ tự nên thử. Cách rẻ nhất là trừ trung bình: tính vector trung bình trên một mẫu đại diện rồi trừ khỏi mọi embedding trước khi so sánh. Như bảng ở Mục 3.2 cho thấy, chỉ riêng bước này thường đã đủ để cosine có ý nghĩa trở lại.
 
-1. **Trừ trung bình.** Tính vector trung bình trên một mẫu đại diện rồi trừ khỏi mọi embedding trước khi so sánh. Rẻ nhất, và như bảng trên cho thấy, thường đã đủ để cosine có ý nghĩa trở lại.
-2. **Làm trắng** (whitening). Ngoài trừ trung bình, nhân với $\Sigma^{-1/2}$ để phương sai theo mọi hướng bằng nhau. Mạnh hơn, nhưng cần ước lượng ma trận hiệp phương sai $\Sigma$, việc đòi hỏi nhiều dữ liệu khi số chiều lớn ([Mục 7.4 của *Nền tảng*](nentang-ch07.html)).
-3. **Huấn luyện với mục tiêu tương phản.** Huấn luyện embedding sao cho cặp giống nhau gần nhau và cặp khác nhau xa nhau ngay từ đầu. Đây là cách các mô hình embedding câu hiện nay làm (Mục 4.2).
+Mạnh hơn là **làm trắng** (whitening): sau khi trừ trung bình, nhân thêm với $\Sigma^{-1/2}$ để phương sai theo mọi hướng bằng nhau. Cách này cần ước lượng ma trận hiệp phương sai $\Sigma$, việc đòi hỏi nhiều dữ liệu khi số chiều lớn ([Mục 7.4 của *Nền tảng*](nentang-ch07.html)).
 
-> **Nhận xét.** Nếu một hệ thống tìm kiếm ngữ nghĩa cho mọi kết quả cosine từ 0,8 trở lên, kể cả những kết quả rõ ràng không liên quan, nguyên nhân rất có thể là tính bất đẳng hướng. Nâng ngưỡng không giải quyết được vấn đề, vì thứ hạng giữa các kết quả vẫn bị thành phần chung chi phối; nên trừ trung bình rồi đo lại.
+Cách triệt để nhất là huấn luyện embedding với mục tiêu tương phản, sao cho cặp giống nhau gần nhau và cặp khác nhau xa nhau ngay từ đầu. Đây là cách các mô hình embedding câu hiện nay được huấn luyện (Mục 4.2).
+
+Trong thực tế, tính bất đẳng hướng thường lộ ra qua một hệ thống tìm kiếm ngữ nghĩa cho mọi kết quả cosine từ 0,8 trở lên, kể cả những kết quả rõ ràng không liên quan. Nâng ngưỡng không giải quyết được vấn đề, vì thứ hạng giữa các kết quả vẫn bị thành phần chung chi phối; nên trừ trung bình rồi đo lại.
 
 ### 3.4. Ý nghĩa của từng chiều
 
@@ -305,23 +313,23 @@ $$(EQ)(EQ)^\top = E\,Q Q^\top E^\top = E E^\top.$$
 
 Xoay toàn bộ không gian embedding không làm thay đổi mọi tích vô hướng, nên bài toán chỉ xác định $E$ sai khác một phép xoay, và hệ trục toạ độ là tuỳ ý. Thứ có ý nghĩa là quan hệ giữa các vector: khoảng cách, góc, vector hiệu. Phép loại suy ở Mục 2.4 hoạt động vì nó chỉ dùng vector hiệu, mà vector hiệu biến đổi cùng phép xoay.
 
-Ngoại lệ: nếu huấn luyện có thêm ràng buộc thưa, ví dụ bằng bộ tự mã hoá thưa (sparse autoencoder), thì các chiều có thể trở nên diễn giải được. Đây là một hướng nghiên cứu về khả năng diễn giải của mô hình ngôn ngữ hiện nay, và nó cần thiết chính vì theo mặc định các chiều không có nghĩa riêng.
+Ngoại lệ là khi huấn luyện có thêm ràng buộc thưa, ví dụ bằng bộ tự mã hoá thưa (sparse autoencoder): khi đó các chiều có thể trở nên diễn giải được. Đây là một hướng nghiên cứu về khả năng diễn giải của mô hình ngôn ngữ hiện nay, và hướng này cần thiết chính vì theo mặc định các chiều không có nghĩa riêng.
+
+### 3.5. Tóm tắt
+
+Cosine đo góc giữa hai vector, và góc chỉ có ý nghĩa khi đám mây điểm nằm quanh gốc toạ độ. Embedding thật thường lệch tâm, và khi lệch mạnh, hai vector ngẫu nhiên độc lập đã có cosine trung bình 0,87. Trừ vector trung bình đưa con số đó về khoảng 0; làm trắng mạnh hơn nhưng cần ước lượng ma trận hiệp phương sai; huấn luyện với mục tiêu tương phản sửa tận gốc. Từng chiều riêng lẻ của embedding thường không mang nghĩa, vì xoay cả không gian không làm đổi tích vô hướng nào; thứ mang nghĩa là quan hệ giữa các vector.
+
+Embedding của Chương 2 còn một giới hạn mà không phép biến đổi hình học nào sửa được: mỗi từ chỉ có một vector, dù từ đó có nhiều nghĩa. Chương 4 bỏ giới hạn này bằng embedding theo ngữ cảnh, rồi xét bài toán tìm kiếm trên hàng triệu vector.
 
 ---
 
-
 ## 4. Embedding theo ngữ cảnh và tìm kiếm vector
 
-Word2Vec gán cho mỗi từ đúng một vector, bất kể từ đó xuất hiện trong câu nào. Chương này trình bày giới hạn của cách làm đó, cách Transformer tạo embedding theo ngữ cảnh, vì sao trạng thái ẩn của mô hình ngôn ngữ chưa phải embedding câu tốt và học tương phản khắc phục điều đó thế nào, rồi bài toán tìm kiếm trên hàng triệu vector. [Chương 6 và 7 của *Ứng dụng LLM*](ungdung-ch06.html) trình bày cùng chủ đề từ phía ứng dụng, kèm thí nghiệm trên văn bản tiếng Việt.
+Word2Vec gán cho mỗi từ đúng một vector, bất kể từ đó xuất hiện trong câu nào. Với những từ nhiều nghĩa, đây là giới hạn của chính thiết kế. Transformer bỏ được giới hạn này, nhưng trạng thái ẩn của một mô hình ngôn ngữ chưa phải embedding câu tốt; phải huấn luyện thêm bằng học tương phản. Khi đã có embedding tốt cho hàng triệu văn bản, bài toán chuyển sang tìm kiếm: tìm nhanh những vector gần một truy vấn. [Chương 6 và 7 của *Ứng dụng LLM*](ungdung-ch06.html) trình bày cùng chủ đề từ phía ứng dụng, kèm thí nghiệm trên văn bản tiếng Việt.
 
 ### 4.1. Hạn chế của embedding tĩnh
 
-Một vector cho mỗi từ không phân biệt được các nghĩa khác nhau của cùng một từ:
-
-- "Con **đường** này dài quá."
-- "Cho thêm **đường** vào cà phê."
-
-Vector duy nhất của "đường" phải là một thoả hiệp giữa hai nghĩa, thường nghiêng về nghĩa phổ biến hơn trong dữ liệu, và không biểu diễn tốt nghĩa nào. Đây là giới hạn của thiết kế, không phải của cách huấn luyện: bất kỳ phương pháp nào gán một vector cho một chuỗi ký tự đều gặp vấn đề này.
+Một vector cho mỗi từ không phân biệt được các nghĩa khác nhau của cùng một từ. Trong hai câu "Con **đường** này dài quá" và "Cho thêm **đường** vào cà phê", chữ "đường" mang hai nghĩa không liên quan gì tới nhau. Vector duy nhất của "đường" phải là một thoả hiệp giữa hai nghĩa, thường nghiêng về nghĩa phổ biến hơn trong dữ liệu, và không biểu diễn tốt nghĩa nào. Đây là giới hạn của thiết kế, không phải của cách huấn luyện: bất kỳ phương pháp nào gán một vector cho một chuỗi ký tự đều gặp vấn đề này.
 
 ### 4.2. Embedding theo ngữ cảnh và học tương phản
 
@@ -337,13 +345,13 @@ $$\mathcal{L} = -\log\frac{\exp\big(\cos(u, v^{+})/\tau\big)}{\sum_{j=1}^{B}\exp
 
 trong đó $u$ là embedding của một câu, $v^{+}$ là embedding của câu cặp với nó, các $v_j$ là embedding của mọi câu cặp trong lô (gồm cả $v^{+}$), và $\tau$ là nhiệt độ, thường cỡ 0,01 tới 0,1. Hàm này có dạng cross-entropy của hồi quy softmax ([Mục 6.4 của *Nền tảng*](nentang-ch06.html)), trong đó "lớp đúng" là câu cặp thật và các "lớp sai" là những câu còn lại trong lô. Dạng hàm mất mát này thường được gọi là InfoNCE (van den Oord, Li và Vinyals, 2018).
 
-Các câu khác trong cùng lô đóng vai trò mẫu âm, nên không phải tìm mẫu âm riêng; lô càng lớn thì càng nhiều mẫu âm, và các mô hình embedding tốt thường huấn luyện với lô rất lớn. Đây là cùng ý tưởng lấy mẫu âm ở Mục 2.5. SimCSE (Gao, Yao và Chen, 2021) cho thấy mục tiêu này còn hoạt động khi "câu cặp" chỉ là chính câu đó đi qua mô hình hai lần với dropout khác nhau. Các mô hình embedding hiện nay như họ E5 (Wang và cộng sự, 2022), dùng trong các thí nghiệm của *Ứng dụng LLM*, được huấn luyện theo cách này trên hàng trăm triệu cặp văn bản.
+Các câu khác trong cùng lô đóng vai trò mẫu âm, nên không phải tìm mẫu âm riêng; lô càng lớn thì càng nhiều mẫu âm, và các mô hình embedding tốt thường huấn luyện với lô rất lớn. Đây là cùng ý tưởng lấy mẫu âm ở Mục 2.5. SimCSE (Gao, Yao và Chen, 2021) cho thấy mục tiêu này vẫn hoạt động khi "câu cặp" chỉ là chính câu đó đi qua mô hình hai lần với dropout khác nhau. Các mô hình embedding hiện nay như họ E5 (Wang và cộng sự, 2022), dùng trong các thí nghiệm của *Ứng dụng LLM*, được huấn luyện theo cách này trên hàng trăm triệu cặp văn bản.
 
 ### 4.3. Tìm kiếm vector
 
 Có embedding rồi, bài toán tiếp theo thường là: cho một truy vấn, tìm $k$ vector gần nhất trong một kho $N$ vector. Tìm chính xác bằng cách tính khoảng cách tới mọi vector tốn $O(Nd)$ phép tính cho mỗi truy vấn. Với $N = 10^7$ và $d = 768$, đó là khoảng 7,7 tỉ phép nhân–cộng cho một truy vấn, quá chậm nếu cần trả lời trong vài chục mili giây với nhiều truy vấn mỗi giây. Các cấu trúc dữ liệu cổ điển như cây k-d cũng không giúp được ở số chiều cao, vì lời nguyền số chiều làm chúng thoái hoá về quét toàn bộ ([Mục 7.2 của *Nền tảng*](nentang-ch07.html)).
 
-Lối ra là chấp nhận **tìm kiếm láng giềng gần đúng** (approximate nearest neighbor, ANN): chỉ hứa trả về các vector gần, không hứa trả về đúng $k$ vector gần nhất, đổi lại nhanh hơn hàng chục tới hàng trăm lần.
+Lối ra là chấp nhận **tìm kiếm láng giềng gần đúng** (approximate nearest neighbor, ANN): chỉ hứa trả về các vector gần, không hứa trả về đúng $k$ vector gần nhất, đổi lại nhanh hơn hàng chục tới hàng trăm lần. Ba họ phương pháp chính đánh đổi khác nhau giữa tốc độ, bộ nhớ và độ chính xác:
 
 | Họ phương pháp | Ý tưởng | Đánh đổi |
 |---|---|---|
@@ -353,11 +361,11 @@ Lối ra là chấp nhận **tìm kiếm láng giềng gần đúng** (approxima
 
 PQ có liên hệ trực tiếp với [giáo trình *Quantization*](ch03.html): đó là lượng tử hoá áp dụng cho từng đoạn của vector, với cùng đánh đổi giữa sai số và dung lượng. [Chương 7 của *Ứng dụng LLM*](ungdung-ch07.html) đo cả ba phương pháp trên 4 419 vector.
 
-**Dung lượng.** Một kho 10 triệu vector 768 chiều lưu ở FP32 chiếm
+Trước khi chọn phương pháp hay thư viện, nên tính dung lượng của kho. Một kho 10 triệu vector 768 chiều lưu ở FP32 chiếm
 
 $$10^7 \times 768 \times 4 \text{ byte} = 30{,}7 \text{ GB}.$$
 
-Con số này quyết định phần lớn kiến trúc hệ thống: nó không vừa bộ nhớ của một máy chủ thông thường, nên phải giảm độ chính xác số (FP16 còn 15,4 GB), nén bằng PQ, hoặc chia kho cho nhiều máy. Nên tính dung lượng trước khi chọn thư viện.
+Con số này quyết định phần lớn kiến trúc hệ thống: nó không vừa bộ nhớ của một máy chủ thông thường, nên phải giảm độ chính xác số (FP16 còn 15,4 GB), nén bằng PQ, hoặc chia kho cho nhiều máy.
 
 ### 4.4. Đánh giá hệ thống tìm kiếm vector
 
@@ -365,31 +373,33 @@ Vì đã chấp nhận xấp xỉ, cần đo mức mất mát. Chỉ số chuẩ
 
 Recall của chỉ mục cao không bảo đảm hệ thống tìm kiếm hữu ích. Nếu bản thân embedding không nắm được điều người dùng coi là "liên quan", tìm đúng 100% láng giềng gần nhất vẫn cho kết quả vô dụng. Chất lượng embedding (đo bằng recall theo nhãn liên quan do người gán; [Mục 6.6 của *Ứng dụng LLM*](ungdung-ch06.html)) và chất lượng chỉ mục (đo bằng recall so với tìm chính xác) là hai đại lượng khác nhau và phải đo riêng.
 
+### 4.5. Tóm tắt
+
+Embedding tĩnh gán một vector cho mỗi từ nên không phân biệt được các nghĩa của cùng một từ. Transformer gán vector cho từng lần xuất hiện, nhưng trạng thái ẩn của một mô hình chỉ được huấn luyện để đoán token chưa phải embedding câu tốt: trung bình các vector đầu ra của BERT còn kém trung bình vector GloVe trên các bộ đánh giá độ tương đồng câu. Huấn luyện thêm với hàm mất mát InfoNCE, dùng các câu khác trong lô làm mẫu âm, mới cho embedding câu dùng được. Với hàng triệu vector, tìm chính xác quá chậm, nên các hệ thống dùng tìm kiếm láng giềng gần đúng như IVF, HNSW hoặc PQ, và phải đo riêng hai thứ: chất lượng của embedding và recall của chỉ mục.
+
+Các mô hình embedding ở chương này, cũng như mọi mô hình ngôn ngữ lớn, bắt đầu từ cùng một bước: tiền huấn luyện trên lượng lớn dữ liệu không nhãn. Chương 5 giải thích vì sao bước đó hiệu quả và có những cách nào để dùng lại một mô hình đã tiền huấn luyện.
+
 ---
 
 ## 5. Tiền huấn luyện
 
-Tiền huấn luyện là giai đoạn huấn luyện một mô hình lớn trên dữ liệu không nhãn, trước khi dùng nó cho các nhiệm vụ cụ thể. Chương này giải thích vì sao cách làm này hiệu quả về kinh tế, vì sao nhiệm vụ đơn giản là đoán token tiếp theo buộc mô hình học được nhiều điều, các cách tái sử dụng một mô hình đã tiền huấn luyện, và khi nào tiền huấn luyện không giúp được.
+Mọi mô hình embedding ở Chương 4 đều bắt đầu từ một mô hình đã tiền huấn luyện, tức một mô hình lớn được huấn luyện trên dữ liệu không nhãn trước khi dùng cho nhiệm vụ cụ thể. Đây cũng là bước đầu tiên của mọi mô hình ngôn ngữ lớn. Cách làm này hiệu quả vì một lý do kinh tế đơn giản, và vì nhiệm vụ huấn luyện trông rất hẹp, đoán token tiếp theo, lại buộc mô hình học được nhiều điều hơn hẳn những gì tên gọi của nó gợi ra.
 
 ### 5.1. Dữ liệu có nhãn và dữ liệu không nhãn
 
 Dữ liệu có nhãn đắt: thuê người đọc và gán nhãn vài chục nghìn câu tốn nhiều tuần và nhiều tiền, và với những nhãn cần chuyên môn như y tế hay pháp lý thì còn đắt hơn. Dữ liệu không nhãn rẻ hơn rất nhiều: văn bản, ảnh, mã nguồn công khai có sẵn với khối lượng lớn hơn hàng triệu lần. Bất kỳ cách nào biến dữ liệu không nhãn thành thứ có ích đều có giá trị lớn.
 
-Tiền huấn luyện làm điều đó bằng một nhiệm vụ mà nhãn tự sinh ra từ dữ liệu, gọi là học tự giám sát (self-supervised learning): che một từ rồi đoán lại nó, hoặc đoán từ tiếp theo từ các từ phía trước. Không ai phải gán nhãn, nhưng mô hình vẫn có tín hiệu để học trên mọi vị trí của mọi văn bản.
+Tiền huấn luyện làm điều đó bằng một nhiệm vụ mà nhãn tự sinh ra từ dữ liệu, gọi là **học tự giám sát** (self-supervised learning): che một từ rồi đoán lại nó, hoặc đoán từ tiếp theo từ các từ phía trước. Không ai phải gán nhãn, nhưng mô hình vẫn có tín hiệu để học trên mọi vị trí của mọi văn bản.
 
-### 5.2. Vì sao dự đoán token tiếp theo dạy được nhiều điều
+### 5.2. Những gì mô hình học được khi dự đoán token tiếp theo
 
-Để đoán đúng token tiếp theo trong mọi ngữ cảnh, mô hình buộc phải học nhiều thứ khác. Một số ví dụ:
+Để đoán đúng token tiếp theo trong mọi ngữ cảnh, mô hình buộc phải học nhiều thứ khác. Muốn điền đúng *"Thủ đô của Pháp là ___"*, nó phải biết sự kiện về thế giới. Với *"Cô ấy mở tủ lạnh và lấy ra một chai ___"*, nó phải hiểu tình huống thực tế, tức trong tủ lạnh thường có gì. Câu *"Mặc dù trời mưa rất to, anh ấy vẫn ___"* đòi hỏi nắm quan hệ nhượng bộ trong ngữ pháp, *"2 + 3 = ___"* đòi hỏi làm được phép tính đơn giản, còn *"def fibonacci(n): if n <= 1: return n; return fibonacci(n-1) + ___"* đòi hỏi hiểu cấu trúc của mã nguồn.
 
-- *"Thủ đô của Pháp là ___"*: cần biết sự kiện về thế giới.
-- *"Cô ấy mở tủ lạnh và lấy ra một chai ___"*: cần hiểu tình huống thực tế, trong tủ lạnh thường có gì.
-- *"Mặc dù trời mưa rất to, anh ấy vẫn ___"*: cần nắm quan hệ nhượng bộ trong ngữ pháp.
-- *"2 + 3 = ___"*: cần làm được phép tính đơn giản.
-- *"def fibonacci(n): if n <= 1: return n; return fibonacci(n-1) + ___"*: cần hiểu cấu trúc của mã nguồn.
+Không kỹ năng nào trong số đó được dạy riêng. Mô hình học chúng vì không học thì không giảm được mất mát dự đoán token tiếp theo trên một kho văn bản đủ lớn và đủ đa dạng. Vì vậy dự đoán token tiếp theo là một nhiệm vụ đại diện rất rộng: nó không phải mục tiêu cuối cùng mà là cách buộc mô hình xây dựng biểu diễn hữu ích về ngôn ngữ và về thế giới được mô tả trong văn bản.
 
-Không kỹ năng nào trong số đó được dạy riêng. Chúng là hệ quả của việc giảm mất mát dự đoán token tiếp theo trên một kho văn bản đủ lớn và đủ đa dạng: mô hình học chúng vì không học thì không dự đoán đúng được. Dự đoán token tiếp theo vì vậy là một nhiệm vụ đại diện rất rộng; nó không phải mục tiêu cuối cùng mà là cách buộc mô hình xây dựng biểu diễn hữu ích về ngôn ngữ và thế giới được mô tả trong văn bản.
+### 5.3. Các cách tái sử dụng mô hình tiền huấn luyện
 
-### 5.3. Bốn cách tái sử dụng mô hình
+Có một mô hình đã tiền huấn luyện, ta có bốn cách dùng nó cho nhiệm vụ của mình. Các cách này khác nhau ở phần nào của mô hình được cập nhật (Hình 5), và do đó ở số tham số phải học và lượng dữ liệu có nhãn cần có.
 
 ![Hình 5](figs/bd05_taidung.png)
 
@@ -402,23 +412,29 @@ Không kỹ năng nào trong số đó được dạy riêng. Chúng là hệ qu
 | Tinh chỉnh toàn phần | toàn bộ | nhiều | nhiều nhãn và đủ bộ nhớ |
 | LoRA và các phương pháp tương tự | dưới 1% | ít tới vừa phải | cần điều chỉnh sâu hơn một lớp tuyến tính nhưng bộ nhớ hạn chế |
 
-Cách thứ hai còn gọi là linear probing: đặc trưng của mô hình được giữ nguyên và chỉ học một bộ phân loại tuyến tính trên đó. Câu hỏi thực tế là với bao nhiêu nhãn thì nên chuyển từ cách này sang cách khác; Chương 6 trả lời bằng số đo, Chương 7 trình bày LoRA, và [Chương 3 và 4 của *Ứng dụng LLM*](ungdung-ch04.html) trình bày cách dùng mô hình qua prompt.
+Cách thứ hai còn gọi là linear probing: đặc trưng của mô hình được giữ nguyên và chỉ học một bộ phân loại tuyến tính trên đó. Câu hỏi thực tế là với bao nhiêu nhãn thì nên chuyển từ cách này sang cách khác. Chương 6 trả lời bằng số đo, Chương 7 trình bày LoRA, còn cách dùng mô hình qua prompt nằm ở [Chương 3 và 4 của *Ứng dụng LLM*](ungdung-ch04.html).
 
 ### 5.4. Giới hạn của tiền huấn luyện
 
-- **Miền đích quá xa miền tiền huấn luyện.** Một mô hình học trên văn bản web giúp được rất ít cho tín hiệu cảm biến công nghiệp; các đặc trưng nó học không dùng lại được.
-- **Nhiệm vụ đích cần kỹ năng mà nhiệm vụ tiền huấn luyện ít đòi hỏi.** Mô hình ngôn ngữ thường giỏi ngữ pháp hơn số học nhiều chữ số, vì dự đoán token tiếp theo hiếm khi đòi hỏi tính toán chính xác.
-- **Mô hình mang theo thiên kiến của dữ liệu.** Mô hình học từ văn bản do người viết, nên học cả những định kiến trong đó. Tinh chỉnh có thể làm giảm nhưng không xoá hết. Công cụ để phát hiện vấn đề này là đánh giá theo lát cắt ([Mục 6.3 của *MLOps*](mlops-ch06.html)) và kiểm thử phản thực tế ([Mục 11.4 của *Ứng dụng LLM*](ungdung-ch11.html)).
+Tiền huấn luyện không giúp được trong mọi trường hợp. Khi miền đích quá xa miền tiền huấn luyện, các đặc trưng học được không dùng lại được: một mô hình học trên văn bản web giúp được rất ít cho tín hiệu cảm biến công nghiệp. Khi nhiệm vụ đích cần kỹ năng mà nhiệm vụ tiền huấn luyện ít đòi hỏi, mô hình cũng yếu ở đó: mô hình ngôn ngữ thường giỏi ngữ pháp hơn số học nhiều chữ số, vì dự đoán token tiếp theo hiếm khi đòi hỏi tính toán chính xác.
+
+Mô hình còn mang theo thiên kiến của dữ liệu. Nó học từ văn bản do người viết, nên học cả những định kiến trong đó, và tinh chỉnh có thể làm giảm nhưng không xoá hết các định kiến này. Công cụ để phát hiện vấn đề là đánh giá theo lát cắt ([Mục 6.3 của *MLOps*](mlops-ch06.html)) và kiểm thử phản thực tế ([Mục 11.4 của *Ứng dụng LLM*](ungdung-ch11.html)).
+
+### 5.5. Tóm tắt
+
+Dữ liệu có nhãn đắt, còn dữ liệu không nhãn rẻ và có sẵn với khối lượng lớn hơn hàng triệu lần, nên một nhiệm vụ có nhãn tự sinh ra từ dữ liệu như đoán token tiếp theo có giá trị rất lớn. Nhiệm vụ đó buộc mô hình học sự kiện về thế giới, ngữ pháp, phép tính đơn giản và cấu trúc mã nguồn, vì thiếu chúng thì không đoán đúng được. Một mô hình đã tiền huấn luyện được dùng lại theo bốn cách: chỉ viết prompt, đóng băng và học một lớp tuyến tính, tinh chỉnh toàn phần, hoặc dùng LoRA. Tiền huấn luyện ít giúp ích khi miền đích quá xa hoặc khi nhiệm vụ cần kỹ năng hiếm gặp trong dữ liệu, và mô hình mang theo định kiến của dữ liệu.
+
+Giữa các cách dùng lại, lựa chọn hay gặp nhất là đóng băng hay tinh chỉnh toàn phần. Trực giác nói ít dữ liệu thì đóng băng, nhiều dữ liệu thì tinh chỉnh, nhưng không cho biết ranh giới nằm ở đâu. Chương 6 đo ranh giới đó bằng một thí nghiệm có kiểm soát.
 
 ---
 
 ## 6. Đóng băng và tinh chỉnh
 
-Có một mô hình đã tiền huấn luyện và $n$ mẫu có nhãn cho nhiệm vụ của mình: nên đóng băng phần trích đặc trưng và chỉ học lớp cuối, hay cho cả mô hình học lại? Chương này trả lời bằng một thí nghiệm có kiểm soát, trong đó ba cách làm dùng cùng một cài đặt mạng, và đo độ chính xác theo số mẫu có nhãn.
+Có một mô hình đã tiền huấn luyện và $n$ mẫu có nhãn cho nhiệm vụ của mình: nên đóng băng phần trích đặc trưng và chỉ học lớp cuối, hay cho cả mô hình học lại? Ta trả lời câu hỏi này bằng một thí nghiệm có kiểm soát, trong đó ba cách làm dùng cùng một cài đặt mạng, và đo độ chính xác theo số mẫu có nhãn.
 
-### 6.1. Câu hỏi
+### 6.1. Trực giác về đóng băng và tinh chỉnh
 
-Trực giác thông thường: ít dữ liệu thì đóng băng, nhiều dữ liệu thì tinh chỉnh. Lý do là đóng băng chỉ phải ước lượng một lớp tuyến tính, nên ít có nguy cơ overfitting; còn tinh chỉnh có nhiều tham số hơn nhiều, cần nhiều dữ liệu hơn, nhưng sửa được những đặc trưng chưa phù hợp. Trực giác này không cho biết ngưỡng chuyển đổi nằm ở đâu, và ngưỡng mới là điều cần biết.
+Trực giác thông thường là ít dữ liệu thì đóng băng, nhiều dữ liệu thì tinh chỉnh. Lý do là đóng băng chỉ phải ước lượng một lớp tuyến tính, nên ít có nguy cơ overfitting; còn tinh chỉnh có nhiều tham số hơn nhiều, cần nhiều dữ liệu hơn, nhưng sửa được những đặc trưng chưa phù hợp. Trực giác này không cho biết ngưỡng chuyển đổi nằm ở đâu, mà ngưỡng mới là điều cần biết khi phải quyết định.
 
 ### 6.2. Thiết kế thí nghiệm
 
@@ -432,7 +448,7 @@ Trực giác thông thường: ít dữ liệu thì đóng băng, nhiều dữ l
 
 > **Lưu ý.** Lớp `MLPClassifier` của scikit-learn không cho nạp trọng số ban đầu, nên nếu dùng nó cho cột "tinh chỉnh toàn phần", cấu hình đó thực chất là huấn luyện từ đầu, và hai cột sẽ cho kết quả gần như trùng nhau. Đây là một lỗi thiết kế thí nghiệm dễ mắc: tên cấu hình không khớp với việc mã thực sự làm. Thí nghiệm ở đây tự cài một mạng một lớp ẩn bằng NumPy để kiểm soát được trọng số khởi tạo.
 
-Dữ liệu mô phỏng tình huống thực tế: đầu vào 40 chiều, lớp ẩn 24 đơn vị tanh, 4 lớp. Nhãn được sinh bởi một phép chiếu "thật" $W$ theo sau là một lớp tuyến tính, cộng nhiễu. Mô hình "tiền huấn luyện" dùng $W$ cộng nhiễu, tức đặc trưng gần đúng nhưng không trùng khớp với nhiệm vụ đích, như quan hệ giữa một mô hình tiền huấn luyện và nhiệm vụ cụ thể trong thực tế. Độ chính xác đo trên 4 000 mẫu kiểm tra; mỗi cấu hình chạy một lần với mỗi cỡ dữ liệu.
+Dữ liệu mô phỏng tình huống thực tế: đầu vào 40 chiều, lớp ẩn 24 đơn vị tanh, 4 lớp. Nhãn được sinh bởi một phép chiếu "thật" $W$ theo sau là một lớp tuyến tính, cộng nhiễu. Mô hình "tiền huấn luyện" dùng $W$ cộng nhiễu, tức đặc trưng gần đúng nhưng không trùng khớp với nhiệm vụ đích, giống quan hệ giữa một mô hình tiền huấn luyện và một nhiệm vụ cụ thể trong thực tế. Độ chính xác đo trên 4 000 mẫu kiểm tra; mỗi cấu hình chạy một lần với mỗi cỡ dữ liệu.
 
 ### 6.3. Kết quả
 
@@ -449,29 +465,31 @@ Dữ liệu mô phỏng tình huống thực tế: đầu vào 40 chiều, lớp
 | 2 000 | 0,6375 | 0,7515 | 0,6773 |
 | 8 000 | 0,6452 | 0,8183 | 0,7545 |
 
-Bảng có ba điểm cần đọc.
+Hai hàng đầu cần đọc thận trọng. Với 20 và 50 mẫu, ba cấu hình không phân biệt được: với 20 mẫu và 4 lớp, mỗi lớp chỉ có khoảng 5 mẫu, mỗi cấu hình chỉ chạy một lần, và chênh lệch 0,01 tới 0,02 giữa các cột nằm trong mức dao động giữa các lần chạy. Không nên rút ra kết luận nào từ hai hàng này. Nói riêng, bảng không cho thấy đóng băng thắng khi ít dữ liệu, dù đó là điều trực giác dự đoán.
 
-**Với 20 và 50 mẫu, ba cấu hình không phân biệt được.** Với 20 mẫu và 4 lớp, mỗi lớp chỉ có khoảng 5 mẫu, và mỗi cấu hình chỉ chạy một lần; chênh lệch 0,01 tới 0,02 giữa các cột nằm trong mức dao động giữa các lần chạy. Không nên rút ra kết luận nào từ hai hàng đầu. Đặc biệt, bảng không cho thấy đóng băng thắng khi ít dữ liệu, dù đó là điều trực giác dự đoán.
+Từ 150 mẫu trở lên, tinh chỉnh toàn phần vượt hai cách còn lại, và khoảng cách so với đóng băng tăng dần: 0,04 ở 150 mẫu, 0,11 ở 2 000 mẫu, 0,17 ở 8 000 mẫu. Đặc trưng tiền huấn luyện chỉ gần đúng với nhiệm vụ, nên khi có đủ dữ liệu, sửa chúng có lợi hơn nhiều so với chỉ học một lớp tuyến tính phía trên.
 
-**Từ 150 mẫu trở lên, tinh chỉnh toàn phần vượt hai cách còn lại, và khoảng cách tăng dần:** 0,04 ở 150 mẫu, 0,11 ở 2 000 mẫu, 0,17 ở 8 000 mẫu so với đóng băng. Đặc trưng tiền huấn luyện chỉ gần đúng với nhiệm vụ, nên khi có đủ dữ liệu, sửa chúng có lợi hơn nhiều so với chỉ học một lớp tuyến tính phía trên.
+Cột đóng băng gần như không tăng từ 500 mẫu trở đi (0,622; 0,638; 0,645). Khi đặc trưng bị cố định, mô hình chỉ còn là hồi quy softmax trên các đặc trưng đó. Thêm dữ liệu giúp ước lượng lớp tuyến tính chính xác hơn, nhưng không vượt được giới hạn do chính các đặc trưng đặt ra. Theo ngôn ngữ của [Mục 2.4 của *Học sâu*](models-ch02.html), đây là tình trạng độ chệch cao: nếu đang đóng băng mà thêm dữ liệu không cải thiện độ chính xác, thêm nữa cũng không giúp, và cần cho phép cập nhật các lớp phía dưới.
 
-**Cột đóng băng gần như không tăng từ 500 mẫu trở đi** (0,622; 0,638; 0,645). Khi đặc trưng bị cố định, mô hình chỉ còn là hồi quy softmax trên các đặc trưng đó. Thêm dữ liệu giúp ước lượng lớp tuyến tính chính xác hơn, nhưng không vượt được giới hạn do chính các đặc trưng đặt ra. Theo ngôn ngữ của [Mục 2.4 của *Học sâu*](models-ch02.html), đây là tình trạng độ chệch cao: nếu đang đóng băng mà thêm dữ liệu không cải thiện độ chính xác, thêm nữa cũng không giúp, và cần cho phép cập nhật các lớp phía dưới.
+Tinh chỉnh còn tốt hơn huấn luyện từ đầu ở mọi cỡ dữ liệu từ 150 mẫu trở lên, kể cả ở 8 000 mẫu (0,818 so với 0,755). Trọng số tiền huấn luyện vì vậy vẫn có ích khi dữ liệu đã nhiều: chúng là một điểm khởi đầu tốt hơn cho tối ưu.
 
-Ngoài ra, tinh chỉnh tốt hơn huấn luyện từ đầu ở mọi cỡ dữ liệu từ 150 mẫu trở lên, kể cả ở 8 000 mẫu (0,818 so với 0,755). Trọng số tiền huấn luyện không chỉ hữu ích khi thiếu dữ liệu; chúng là một điểm khởi đầu tốt hơn cho tối ưu.
+### 6.4. Kinh nghiệm khi tinh chỉnh
 
-### 6.4. Quy tắc thực hành
+Ngoài kết quả đo được, có một số kinh nghiệm phổ biến khi tinh chỉnh; chúng không phải kết quả đo trong giáo trình. Tốc độ học khi tinh chỉnh thường nhỏ hơn 10 tới 100 lần so với khi huấn luyện từ đầu, vì trọng số hiện tại đã tốt và một bước cập nhật lớn có thể phá hỏng những gì đã học trước khi kịp học điều mới. Mở đóng băng dần từ các lớp trên xuống thường ổn định hơn mở tất cả cùng lúc (Howard và Ruder, 2018), vì các lớp gần đầu vào học những đặc trưng chung nhất và ít cần sửa nhất.
 
-Các quy tắc sau là kinh nghiệm phổ biến, không phải kết quả đo trong giáo trình:
+Tinh chỉnh trên ít dữ liệu còn có thể gây **quên thảm hoạ** (catastrophic forgetting; McCloskey và Cohen, 1989): mô hình mất khả năng ở những việc nó từng làm được. Nếu điều đó quan trọng, có thể trộn một phần dữ liệu của miền gốc vào dữ liệu tinh chỉnh, hoặc dùng LoRA (Chương 7), vốn giữ nguyên trọng số gốc.
 
-- **Tốc độ học khi tinh chỉnh nhỏ hơn nhiều so với khi huấn luyện từ đầu**, thường nhỏ hơn 10 tới 100 lần. Trọng số hiện tại đã tốt, và bước cập nhật lớn có thể phá hỏng những gì đã học trước khi kịp học điều mới.
-- **Mở đóng băng dần từ các lớp trên xuống** thường ổn định hơn mở tất cả cùng lúc (Howard và Ruder, 2018). Các lớp gần đầu vào học những đặc trưng chung nhất và ít cần sửa nhất.
-- **Tinh chỉnh trên ít dữ liệu có thể gây quên thảm hoạ** (catastrophic forgetting; McCloskey và Cohen, 1989): mô hình mất khả năng ở những việc nó từng làm được. Nếu điều đó quan trọng, có thể trộn một phần dữ liệu của miền gốc vào dữ liệu tinh chỉnh, hoặc dùng LoRA (Chương 7), vốn giữ nguyên trọng số gốc.
+### 6.5. Tóm tắt
+
+Thí nghiệm so sánh ba cấu hình chỉ khác nhau ở trọng số khởi tạo của lớp ẩn và việc lớp ẩn có được cập nhật hay không. Với 20 và 50 mẫu, ba cấu hình không phân biệt được. Từ 150 mẫu, tinh chỉnh toàn phần dẫn đầu, và ở 8 000 mẫu nó hơn đóng băng 0,17 và hơn huấn luyện từ đầu 0,06. Cột đóng băng chững lại từ 500 mẫu: khi đặc trưng bị cố định, thêm dữ liệu không vượt được giới hạn do đặc trưng đặt ra, và đó là dấu hiệu cần cho các lớp dưới học lại. Khi tinh chỉnh, tốc độ học nên nhỏ, và cần đề phòng quên thảm hoạ.
+
+Tinh chỉnh toàn phần thắng khi có đủ dữ liệu, nhưng với một mô hình hàng tỉ tham số, nó đòi hỏi bộ nhớ vượt xa một GPU và tạo ra một bản sao đầy đủ của mô hình cho mỗi nhiệm vụ. Chương 7 tính cụ thể chi phí đó và trình bày LoRA, cách giữ phần lớn lợi ích của tinh chỉnh trong khi chỉ học một phần rất nhỏ số tham số.
 
 ---
 
 ## 7. LoRA và tinh chỉnh tiết kiệm tham số
 
-Tinh chỉnh toàn phần cho kết quả tốt nhất khi có đủ dữ liệu (Chương 6), nhưng đòi hỏi bộ nhớ rất lớn và tạo ra một bản sao đầy đủ của mô hình cho mỗi nhiệm vụ. LoRA (Hu và cộng sự, 2022) giải quyết cả hai vấn đề bằng cách giữ nguyên trọng số gốc và chỉ học một phần cộng thêm có hạng thấp. Chương này trình bày ý tưởng, giả định đứng sau nó, phép đếm tham số và bộ nhớ, và các phương pháp cùng họ.
+Tinh chỉnh toàn phần cho kết quả tốt nhất khi có đủ dữ liệu (Chương 6), nhưng đòi hỏi bộ nhớ rất lớn và tạo ra một bản sao đầy đủ của mô hình cho mỗi nhiệm vụ. LoRA (Hu và cộng sự, 2022) giải quyết cả hai vấn đề bằng cách giữ nguyên trọng số gốc và chỉ học một phần cộng thêm có hạng thấp. Muốn thấy LoRA tiết kiệm được bao nhiêu, trước hết cần tính tinh chỉnh toàn phần tốn bao nhiêu.
 
 ### 7.1. Chi phí bộ nhớ của tinh chỉnh toàn phần
 
@@ -498,9 +516,9 @@ Vấn đề thứ hai là lưu trữ và phục vụ. Nếu 50 khách hàng, m�
 > $$W = W_0 + \Delta W, \qquad \Delta W = BA, \qquad B \in \mathbb{R}^{d \times r},\; A \in \mathbb{R}^{r \times d},$$
 > với hạng $r \ll d$. Khi huấn luyện, đầu ra của lớp là $W_0 x + B(Ax)$; chỉ $A$ và $B$ được cập nhật.
 
-Giả định cốt lõi, và là điều có thể sai: **phần cần thay đổi khi chuyển sang nhiệm vụ mới có hạng thấp.** Mô hình gốc đã đúng gần hết; phần cần điều chỉnh nằm trong một không gian con ít chiều. Có lý do để tin giả định này: nhiệm vụ đích thường chỉ đòi mô hình nhấn mạnh lại những gì nó đã biết, như một văn phong, một định dạng đầu ra hay một miền kiến thức, chứ không đòi học lại ngôn ngữ. Aghajanyan, Zettlemoyer và Gupta (2021) cũng cho thấy các mô hình tiền huấn luyện có "số chiều nội tại" thấp khi tinh chỉnh: tối ưu trong một không gian con ngẫu nhiên vài trăm chiều đã đạt phần lớn hiệu quả của tinh chỉnh toàn phần.
+LoRA dựa trên một giả định, và giả định đó có thể sai: **phần cần thay đổi khi chuyển sang nhiệm vụ mới có hạng thấp.** Mô hình gốc đã đúng gần hết; phần cần điều chỉnh nằm trong một không gian con ít chiều. Có lý do để tin giả định này: nhiệm vụ đích thường chỉ đòi mô hình nhấn mạnh lại những gì nó đã biết, như một văn phong, một định dạng đầu ra hay một miền kiến thức, chứ không đòi học lại ngôn ngữ. Aghajanyan, Zettlemoyer và Gupta (2021) cũng cho thấy các mô hình tiền huấn luyện có "số chiều nội tại" thấp khi tinh chỉnh: tối ưu trong một không gian con ngẫu nhiên vài trăm chiều đã đạt phần lớn hiệu quả của tinh chỉnh toàn phần.
 
-Chi tiết cài đặt quan trọng: $A$ khởi tạo ngẫu nhiên và $B = 0$. Khi đó $BA = 0$ lúc bắt đầu, và mô hình khởi đầu đúng bằng mô hình gốc rồi thay đổi dần. Nếu khởi tạo cả hai ngẫu nhiên, ngay bước đầu mô hình đã bị cộng một nhiễu ngẫu nhiên. Trong bài báo gốc, $BA$ còn được nhân với hệ số $\alpha/r$ để có thể đổi $r$ mà không phải chỉnh lại tốc độ học.
+Có một chi tiết cài đặt cần biết: $A$ được khởi tạo ngẫu nhiên còn $B = 0$. Khi đó $BA = 0$ lúc bắt đầu, và mô hình khởi đầu đúng bằng mô hình gốc rồi thay đổi dần. Nếu khởi tạo cả hai ngẫu nhiên, ngay bước đầu mô hình đã bị cộng một nhiễu ngẫu nhiên. Trong bài báo gốc, $BA$ còn được nhân với hệ số $\alpha/r$ để có thể đổi $r$ mà không phải chỉnh lại tốc độ học.
 
 ### 7.3. Số tham số
 
@@ -532,19 +550,21 @@ Thực tế về sau cho thấy gắn LoRA vào mọi ma trận tuyến tính, c
 
 ### 7.4. Các hiểu lầm thường gặp
 
-**"LoRA làm mô hình chạy nhanh hơn khi suy luận."** Không. Khi suy luận, có thể cộng $BA$ vào $W_0$ một lần rồi dùng ma trận đã gộp, nên tốc độ bằng đúng mô hình gốc. Nếu không gộp, để đổi adapter nhanh giữa các yêu cầu, thì chậm hơn một chút vì có thêm hai phép nhân nhỏ. LoRA tiết kiệm bộ nhớ khi huấn luyện và dung lượng lưu trữ, không tiết kiệm thời gian suy luận.
+Quanh LoRA có ba hiểu lầm hay gặp. Hiểu lầm thứ nhất là LoRA làm mô hình chạy nhanh hơn khi suy luận. Thực tế, khi suy luận có thể cộng $BA$ vào $W_0$ một lần rồi dùng ma trận đã gộp, nên tốc độ bằng đúng mô hình gốc; nếu không gộp, để đổi adapter nhanh giữa các yêu cầu, thì còn chậm hơn một chút vì có thêm hai phép nhân nhỏ. LoRA tiết kiệm bộ nhớ khi huấn luyện và dung lượng lưu trữ, không tiết kiệm thời gian suy luận.
 
-**"LoRA cho chất lượng bằng tinh chỉnh toàn phần."** Bài báo gốc cho kết quả rất gần trên các nhiệm vụ được thử. Với nhiệm vụ đòi mô hình học kiến thức thật sự mới, không chỉ đổi văn phong hay định dạng, giả định hạng thấp yếu đi và khoảng cách có thể rộng ra (Biderman và cộng sự, 2024).
+Hiểu lầm thứ hai là LoRA luôn cho chất lượng bằng tinh chỉnh toàn phần. Bài báo gốc cho kết quả rất gần trên các nhiệm vụ được thử. Nhưng với nhiệm vụ đòi mô hình học kiến thức thật sự mới, chứ không chỉ đổi văn phong hay định dạng, giả định hạng thấp yếu đi và khoảng cách có thể rộng ra (Biderman và cộng sự, 2024).
 
-**"Hạng càng cao càng tốt."** Không nhất thiết. Hạng cao hơn nghĩa là nhiều tham số hơn, tức phương sai lớn hơn với cùng lượng dữ liệu ([Chương 2 của *Học sâu*](models-ch02.html)). Với ít dữ liệu, $r = 4$ hoặc $r = 8$ thường đủ; hạng nên được chọn bằng tập xác thực.
+Hiểu lầm thứ ba là hạng càng cao càng tốt. Hạng cao hơn nghĩa là nhiều tham số hơn, tức phương sai lớn hơn với cùng lượng dữ liệu ([Chương 2 của *Học sâu*](models-ch02.html)). Với ít dữ liệu, $r = 4$ hoặc $r = 8$ thường đủ, và hạng nên được chọn bằng tập xác thực.
 
 ### 7.5. Lợi ích khi phục vụ nhiều mô hình
 
-Với tinh chỉnh toàn phần, 50 khách hàng cần 50 bản sao 13 GB, tức 650 GB. Với LoRA $r = 8$, cần một bản gốc 13 GB cộng 50 adapter, mỗi adapter khoảng 16 MB ở FP32, tổng cộng khoảng 13,8 GB.
+Trở lại bài toán 50 khách hàng ở Mục 7.1. Với tinh chỉnh toàn phần, 50 khách hàng cần 50 bản sao 13 GB, tức 650 GB. Với LoRA $r = 8$, cần một bản gốc 13 GB cộng 50 adapter, mỗi adapter khoảng 16 MB ở FP32, tổng cộng khoảng 13,8 GB.
 
-Vì mọi adapter dùng chung trọng số gốc, có thể giữ mô hình gốc trên GPU và chọn adapter theo từng yêu cầu, nên một GPU phục vụ được nhiều khách hàng cùng lúc. Các máy chủ suy luận như vLLM hỗ trợ trực tiếp cách phục vụ này. Đây là lợi ích độc lập với việc tiết kiệm bộ nhớ khi huấn luyện, và là một lý do chính LoRA được dùng rộng rãi trong sản phẩm.
+Vì mọi adapter dùng chung trọng số gốc, có thể giữ mô hình gốc trên GPU và chọn adapter theo từng yêu cầu, nên một GPU phục vụ được nhiều khách hàng cùng lúc. Các máy chủ suy luận như vLLM hỗ trợ trực tiếp cách phục vụ này. Lợi ích này độc lập với việc tiết kiệm bộ nhớ khi huấn luyện, và là một lý do chính khiến LoRA được dùng rộng rãi trong sản phẩm.
 
 ### 7.6. Các phương pháp liên quan
+
+LoRA không phải cách duy nhất để tinh chỉnh với ít tham số. Bảng dưới đặt nó cạnh các phương pháp cùng họ.
 
 | Phương pháp | Cách làm | Ghi chú |
 |---|---|---|
@@ -555,12 +575,17 @@ Vì mọi adapter dùng chung trọng số gốc, có thể giữ mô hình gố
 
 QLoRA hoạt động được vì mô hình gốc chỉ được đọc, không được cập nhật: lượng tử hoá nó làm giảm bộ nhớ của phần đóng băng mà không cản trở việc huấn luyện adapter, vốn vẫn ở độ chính xác cao. Hai kỹ thuật kết hợp được vì chúng tác động lên hai phần khác nhau của bộ nhớ. Với QLoRA, tinh chỉnh một mô hình 65 tỉ tham số vừa một GPU 48 GB.
 
----
+### 7.7. Tóm tắt
 
+Tinh chỉnh toàn phần Llama 2 7B bằng Adam ở FP32 cần 96,4 GiB chưa tính giá trị kích hoạt, và mỗi nhiệm vụ cần một bản sao đầy đủ của mô hình. LoRA đóng băng trọng số gốc và chỉ học phần cộng thêm $BA$ có hạng $r$, dựa trên giả định phần cần thay đổi nằm trong một không gian con ít chiều. Tỉ lệ tham số $2r/d$ giảm khi mô hình lớn lên; với Llama 2 7B và $r = 8$ trên $W_Q$, $W_V$, trạng thái Adam chỉ còn 32 MiB. LoRA không làm suy luận nhanh hơn, nhưng cho phép một mô hình gốc phục vụ nhiều adapter, và kết hợp được với lượng tử hoá trong QLoRA.
+
+Đến đây, mô hình mới được dùng để biểu diễn và phân loại. Một mô hình ngôn ngữ còn làm một việc khác hẳn: sinh ra văn bản mới. Chương 8 xét bài toán sinh nói chung và lý do bài toán này khó hơn phân loại nhiều.
+
+---
 
 ## 8. Mô hình sinh
 
-Mô hình phân loại học $p(y \mid x)$; mô hình sinh học phân phối của chính dữ liệu, $p(x)$, để có thể lấy ra mẫu mới. Chương này giải thích vì sao bài toán sinh khó, vì sao không áp dụng trực tiếp được ước lượng hợp lý cực đại, và đặt ba họ mô hình của các chương sau, VAE, GAN và mô hình khuếch tán, vào cùng một khung so sánh.
+Các chương trước dùng mô hình để biểu diễn và phân loại, tức học $p(y \mid x)$. Mô hình sinh học phân phối của chính dữ liệu, $p(x)$, để có thể lấy ra mẫu mới: một ảnh chưa từng có, một câu chưa ai viết. Bài toán này khó hơn phân loại nhiều, và công cụ quen thuộc nhất để học một phân phối, ước lượng hợp lý cực đại, không áp dụng trực tiếp được. Hiểu vì sao sẽ giải thích được thiết kế của cả ba họ mô hình ở các chương sau.
 
 ### 8.1. Bài toán sinh
 
@@ -574,14 +599,11 @@ $$p_\theta(x) = \frac{1}{Z(\theta)}\exp\big(f_\theta(x)\big), \qquad Z(\theta) =
 
 thì log hợp lý chứa $-\log Z(\theta)$. $Z(\theta)$ là tích phân trên toàn bộ không gian 196 608 chiều: không tính được, khó xấp xỉ, và phụ thuộc $\theta$ nên không bỏ qua được khi lấy gradient.
 
-Các họ mô hình sinh khác nhau ở cách tránh hằng số này:
+Các họ mô hình sinh khác nhau ở cách tránh hằng số này. Mô hình tự hồi quy, như các mô hình ngôn ngữ, viết $p(x) = \prod_t p(x_t \mid x_{<t})$. Mỗi phân phối có điều kiện chỉ cần chuẩn hoá trên một tập nhỏ, ví dụ từ vựng, bằng softmax, nên hợp lý tính được chính xác; đổi lại, mô hình phải sinh từng phần tử một. VAE tối đa một chặn dưới của log hợp lý, và chặn dưới đó tính được (Chương 9). GAN bỏ hẳn hợp lý, thay bằng một trò chơi giữa hai mạng (Chương 10). Mô hình khuếch tán chia bài toán thành một chuỗi bài toán khử nhiễu, mỗi bài là một bài hồi quy (Chương 11).
 
-- **Mô hình tự hồi quy**, như các mô hình ngôn ngữ, viết $p(x) = \prod_t p(x_t \mid x_{<t})$. Mỗi phân phối có điều kiện chỉ cần chuẩn hoá trên một tập nhỏ, ví dụ từ vựng, bằng softmax, nên hợp lý tính được chính xác. Cái giá là phải sinh từng phần tử một.
-- **VAE** tối đa một chặn dưới của log hợp lý; chặn dưới đó tính được (Chương 9).
-- **GAN** bỏ hẳn hợp lý, thay bằng một trò chơi giữa hai mạng (Chương 10).
-- **Mô hình khuếch tán** chia bài toán thành một chuỗi bài toán khử nhiễu, mỗi bài là một bài hồi quy (Chương 11).
+### 8.3. So sánh các họ mô hình sinh
 
-### 8.3. Ba họ mô hình sinh
+VAE, GAN và mô hình khuếch tán có chung một cách sinh mẫu: lấy nhiễu Gauss rồi biến đổi nó thành dữ liệu (Hình 11). Chúng khác nhau ở cách huấn luyện, và khác biệt đó kéo theo các tính chất trong bảng dưới.
 
 ![Hình 11](figs/bd11_mohinhsinh.png)
 
@@ -597,13 +619,19 @@ Các họ mô hình sinh khác nhau ở cách tránh hằng số này:
 | Có không gian ẩn dùng được | có | có một phần | không trực tiếp |
 | Đánh giá được bằng hợp lý | có (chặn dưới) | không | có (chặn dưới) |
 
-Bảng giải thích diễn biến của lĩnh vực. GAN chiếm ưu thế trong sinh ảnh khoảng 2015 tới 2020 vì cho mẫu sắc nét nhất. Mô hình khuếch tán thay thế GAN từ khoảng 2021 vì đạt độ sắc nét tương đương mà huấn luyện ổn định và phủ phân phối tốt hơn; điểm yếu là lấy mẫu chậm, nhưng lấy mẫu chậm cải thiện được bằng các kỹ thuật ở Mục 11.5, còn huấn luyện bất ổn thì khó khắc phục hơn nhiều.
+Bảng giải thích diễn biến của lĩnh vực. GAN chiếm ưu thế trong sinh ảnh khoảng 2015 tới 2020 vì cho mẫu sắc nét nhất. Mô hình khuếch tán thay thế GAN từ khoảng 2021 vì đạt độ sắc nét tương đương mà huấn luyện ổn định và phủ phân phối tốt hơn. Điểm yếu của nó là lấy mẫu chậm, nhưng lấy mẫu chậm cải thiện được bằng các kỹ thuật ở Mục 11.5, còn huấn luyện bất ổn thì khó khắc phục hơn nhiều.
+
+### 8.4. Tóm tắt
+
+Ảnh thật chỉ chiếm một phần cực nhỏ của không gian mọi ảnh có thể, và mô hình sinh phải học hình dạng của phần đó. Ước lượng hợp lý cực đại vấp phải hằng số chuẩn hoá $Z(\theta)$, một tích phân trên toàn bộ không gian dữ liệu. Mô hình tự hồi quy tránh nó bằng cách chuẩn hoá từng bước trên một tập nhỏ, VAE tối đa một chặn dưới tính được, GAN bỏ hẳn hợp lý, còn mô hình khuếch tán chia bài toán thành nhiều bài hồi quy khử nhiễu. Mô hình khuếch tán thay thế GAN trong sinh ảnh vì đạt độ sắc nét tương đương mà huấn luyện ổn định hơn.
+
+Ta đi qua ba họ theo thứ tự ra đời, bắt đầu từ VAE. Điểm xuất phát của VAE là bộ tự mã hoá, một mô hình nén dữ liệu tốt nhưng không sinh được mẫu mới.
 
 ---
 
 ## 9. Bộ tự mã hoá biến phân
 
-Bộ tự mã hoá nén dữ liệu tốt nhưng không sinh được mẫu mới. Bộ tự mã hoá biến phân (variational autoencoder, VAE; Kingma và Welling, 2014) sửa điểm này bằng cách ép không gian ẩn có một phân phối biết trước. Chương này suy ra hàm mục tiêu của VAE, đo tác dụng của hệ số $\beta$ lên số chiều ẩn còn mang thông tin, và giải thích vì sao mẫu của VAE thường mờ.
+Bộ tự mã hoá nén dữ liệu tốt nhưng không sinh được mẫu mới. Bộ tự mã hoá biến phân (variational autoencoder, VAE; Kingma và Welling, 2014) sửa điểm này bằng cách ép không gian ẩn có một phân phối biết trước. Ràng buộc đó xuất hiện trong hàm mục tiêu dưới dạng một số hạng KL, và hệ số $\beta$ đứng trước số hạng này làm nhiều việc hơn cách nó thường được mô tả: như thí nghiệm ở Mục 9.3 cho thấy, nó quyết định mô hình dùng bao nhiêu chiều ẩn.
 
 ### 9.1. Bộ tự mã hoá và hạn chế khi sinh mẫu
 
@@ -629,12 +657,9 @@ VAE tối đa ELBO theo cả $\theta$ và $\phi$. Thêm hệ số $\beta$ cho s�
 
 $$\mathcal{L} = \underbrace{\mathbb{E}_{q_\phi(z \mid x)}\big[\log p_\theta(x \mid z)\big]}_{\text{tái dựng}} - \beta\,\underbrace{\mathrm{KL}\big(q_\phi(z \mid x)\,\|\,p(z)\big)}_{\text{kéo về tiên nghiệm}},$$
 
-với $\beta = 1$ là VAE gốc. Hai số hạng có ý nghĩa rõ ràng:
+với $\beta = 1$ là VAE gốc.
 
-- **Số hạng tái dựng** yêu cầu giải mã từ $z$ phải dựng lại được $x$. Với bộ giải mã Gauss, đó là bình phương sai số tái dựng với dấu trừ, cộng hằng số.
-- **Số hạng KL** yêu cầu phân phối của $z$ ứng với mỗi $x$ gần $\mathcal{N}(0, I)$. Nếu mọi $q(z \mid x)$ đều gần tiên nghiệm, lấy mẫu $z \sim \mathcal{N}(0, I)$ sẽ rơi vào vùng bộ giải mã đã quen, và việc sinh mẫu trở nên hợp lệ. Với hai phân phối Gauss, số hạng này có dạng đóng: mỗi chiều đóng góp $\tfrac12\big(\mu^2 + \sigma^2 - 1 - \ln\sigma^2\big)$, bằng 0 khi và chỉ khi $\mu = 0$, $\sigma = 1$.
-
-Hai số hạng kéo theo hai hướng ngược nhau, và $\beta$ điều chỉnh sự cân bằng giữa chúng.
+Hai số hạng có ý nghĩa rõ ràng. Số hạng tái dựng yêu cầu giải mã từ $z$ phải dựng lại được $x$; với bộ giải mã Gauss, đó là bình phương sai số tái dựng với dấu trừ, cộng hằng số. Số hạng KL yêu cầu phân phối của $z$ ứng với mỗi $x$ gần $\mathcal{N}(0, I)$. Nếu mọi $q(z \mid x)$ đều gần tiên nghiệm, lấy mẫu $z \sim \mathcal{N}(0, I)$ sẽ rơi vào vùng bộ giải mã đã quen, và việc sinh mẫu trở nên hợp lệ. Với hai phân phối Gauss, số hạng KL có dạng đóng: mỗi chiều đóng góp $\tfrac12\big(\mu^2 + \sigma^2 - 1 - \ln\sigma^2\big)$, bằng 0 khi và chỉ khi $\mu = 0$, $\sigma = 1$. Hai số hạng kéo theo hai hướng ngược nhau, và $\beta$ điều chỉnh sự cân bằng giữa chúng.
 
 > **Lưu ý (Tái tham số hoá).** Lấy mẫu $z \sim q_\phi(z \mid x)$ là phép ngẫu nhiên, và gradient không truyền qua phép lấy mẫu được. Cách giải quyết là viết $z = \mu_\phi(x) + \sigma_\phi(x) \odot \varepsilon$ với $\varepsilon \sim \mathcal{N}(0, I)$: phần ngẫu nhiên nằm ở $\varepsilon$, không phụ thuộc tham số, nên gradient truyền qua $\mu$ và $\sigma$ như bình thường. Đây là kỹ thuật cài đặt để huấn luyện VAE bằng gradient descent, không phải ý tưởng chính của VAE.
 
@@ -657,36 +682,35 @@ Một chiều ẩn được xem là **còn mang thông tin** nếu KL của riê
 | 4 | 4,78 | 0,61 | 2 | 0,36 · 0,007 · 0 · 0,24 · 0 · 0 |
 | 16 | 15,28 | 0 | 0 | 0 · 0 · 0 · 0 · 0 · 0 |
 
-Ba hàng đáng chú ý:
+Ba hàng $\beta = 0$, $\beta = 1$ và $\beta = 16$ cho thấy rõ cơ chế. Ở $\beta = 0$, cả 6 chiều đều mang thông tin. Không có ràng buộc nào kéo hậu nghiệm về tiên nghiệm, nên mô hình dùng mọi chiều được cho. Đây là bộ tự mã hoá thường ở Mục 9.1: tái dựng tốt nhất (0,1219) nhưng không gian ẩn không có cấu trúc để lấy mẫu.
 
-**$\beta = 0$: cả 6 chiều đều mang thông tin.** Không có ràng buộc nào kéo hậu nghiệm về tiên nghiệm, nên mô hình dùng mọi chiều được cho. Đây là bộ tự mã hoá thường ở Mục 9.1: tái dựng tốt nhất (0,1219) nhưng không gian ẩn không có cấu trúc để lấy mẫu.
+Ở $\beta = 1$, đúng 2 chiều mang thông tin, bằng số yếu tố thật sinh ra dữ liệu, còn bốn chiều thừa có KL bằng 0. Số hạng KL đã hoạt động như một cơ chế tự chọn số chiều: mỗi chiều mang thông tin phải trả một "chi phí" KL, và chỉ những chiều giảm sai số tái dựng nhiều hơn chi phí đó mới được giữ lại.
 
-**$\beta = 1$: đúng 2 chiều mang thông tin**, bằng số yếu tố thật sinh ra dữ liệu. Bốn chiều thừa có KL bằng 0. Số hạng KL đã hoạt động như một cơ chế tự chọn số chiều: mỗi chiều mang thông tin phải trả một "chi phí" KL, và chỉ những chiều giảm sai số tái dựng nhiều hơn chi phí đó mới được giữ lại.
+Ở $\beta = 16$, không chiều nào mang thông tin. Đây là hiện tượng **sụp hậu nghiệm** (posterior collapse): $z$ không còn liên quan tới $x$, và bộ giải mã chỉ dự đoán được giá trị trung bình của dữ liệu. Sai số tái dựng tăng lên 15,28, gấp khoảng 125 lần so với $\beta = 0$. Sụp hậu nghiệm cũng gặp khi bộ giải mã quá mạnh, ví dụ một mô hình tự hồi quy, vì khi đó bộ giải mã tự mô hình hoá được dữ liệu mà không cần $z$ (Bowman và cộng sự, 2016).
 
-**$\beta = 16$: không chiều nào mang thông tin.** Đây là hiện tượng **sụp hậu nghiệm** (posterior collapse): $z$ không còn liên quan tới $x$, và bộ giải mã chỉ dự đoán được giá trị trung bình của dữ liệu. Sai số tái dựng tăng lên 15,28, gấp khoảng 125 lần so với $\beta = 0$. Sụp hậu nghiệm cũng gặp khi bộ giải mã quá mạnh, ví dụ một mô hình tự hồi quy, vì khi đó bộ giải mã tự mô hình hoá được dữ liệu mà không cần $z$ (Bowman và cộng sự, 2016).
-
-### 9.4. Vì sao mẫu của VAE thường mờ
+### 9.4. Nguyên nhân mẫu của VAE bị mờ
 
 Với bộ giải mã Gauss, số hạng tái dựng là bình phương sai số ([Mục 10.2 của *Nền tảng*](nentang-ch10.html)), và hàm cực tiểu hoá kỳ vọng bình phương sai số là kỳ vọng có điều kiện:
 
 $$\hat x(z) = \mathbb{E}[x \mid z].$$
 
-Với ảnh, nếu cùng một $z$ ứng với nhiều ảnh thật khả dĩ, ví dụ cùng một khuôn mặt nhưng đường viền tóc lệch nhau vài điểm ảnh, thì trung bình của chúng là một ảnh nhoè ở các đường viền. Trung bình của nhiều ảnh sắc nét lệch nhau không phải một ảnh sắc nét. Độ mờ vì vậy không chủ yếu do mô hình thiếu dung lượng hay huấn luyện chưa đủ; nó là hệ quả của việc chọn hàm mất mát bình phương, tức giả định nhiễu Gauss độc lập trên từng điểm ảnh. Đổi hàm mất mát thì đổi hiện tượng, và đó là điều GAN làm: thay hàm mất mát viết sẵn bằng một hàm mất mát học được.
+Với ảnh, nếu cùng một $z$ ứng với nhiều ảnh thật khả dĩ, ví dụ cùng một khuôn mặt nhưng đường viền tóc lệch nhau vài điểm ảnh, thì trung bình của chúng là một ảnh nhoè ở các đường viền. Trung bình của nhiều ảnh sắc nét lệch nhau không phải một ảnh sắc nét. Độ mờ vì vậy không chủ yếu do mô hình thiếu dung lượng hay huấn luyện chưa đủ; nó đến từ việc chọn hàm mất mát bình phương, tức giả định nhiễu Gauss độc lập trên từng điểm ảnh. Đổi hàm mất mát thì đổi hiện tượng, và đó là điều GAN làm: thay hàm mất mát viết sẵn bằng một hàm mất mát học được.
+
+### 9.5. Tóm tắt
+
+Bộ tự mã hoá không sinh được mẫu vì không gian ẩn của nó không có cấu trúc để lấy mẫu. VAE xem $z$ là biến ẩn có tiên nghiệm $\mathcal{N}(0, I)$ và tối đa ELBO, một chặn dưới của log hợp lý gồm số hạng tái dựng và số hạng KL kéo hậu nghiệm về tiên nghiệm; mẹo tái tham số hoá cho phép huấn luyện bằng gradient descent. Thí nghiệm với dữ liệu sinh từ 2 yếu tố cho thấy $\beta$ quyết định số chiều ẩn còn mang thông tin: 6 chiều ở $\beta = 0$, đúng 2 chiều ở $\beta = 1$, và không chiều nào ở $\beta = 16$, khi hậu nghiệm sụp. Mẫu của VAE mờ vì hàm mất mát bình phương có nghiệm tối ưu là trung bình có điều kiện của nhiều ảnh sắc nét.
+
+Nếu độ mờ đến từ một hàm mất mát viết sẵn, hướng sửa tự nhiên là để mô hình tự học hàm mất mát. Chương 10 trình bày GAN, mô hình làm đúng điều đó bằng một mạng thứ hai.
 
 ---
 
 ## 10. Mạng đối sinh
 
-Mạng đối sinh (generative adversarial network, GAN; Goodfellow và cộng sự, 2014) không viết ra hàm đo mức giống thật mà học nó bằng một mạng thứ hai. Chương này trình bày bài toán minimax, suy ra bộ phân biệt tối ưu, giải thích và đo vì sao dạng gốc của hàm mất mát cho bộ sinh không học được, và bàn về những khó khăn khi huấn luyện GAN.
+Chương 9 kết thúc ở chỗ độ mờ của VAE đến từ hàm mất mát bình phương viết sẵn. Mạng đối sinh (generative adversarial network, GAN; Goodfellow và cộng sự, 2014) không viết ra hàm đo mức giống thật mà học nó bằng một mạng thứ hai. Cách làm này cho mẫu sắc nét, nhưng biến việc huấn luyện thành một trò chơi giữa hai mạng, và trò chơi đó khó điều khiển hơn nhiều so với cực tiểu một hàm mất mát.
 
-### 10.1. Ý tưởng
+### 10.1. Trò chơi giữa bộ sinh và bộ phân biệt
 
-GAN gồm hai mạng có mục tiêu ngược nhau:
-
-- **Bộ sinh** $G$ biến nhiễu $z \sim p(z)$ thành mẫu $G(z)$.
-- **Bộ phân biệt** $D$ nhận một mẫu và cho xác suất mẫu đó là thật.
-
-$D$ được huấn luyện để phân biệt mẫu thật với mẫu sinh ra; $G$ được huấn luyện để $D$ nhầm. Bài toán viết là
+GAN gồm hai mạng có mục tiêu ngược nhau: một **bộ sinh** $G$ biến nhiễu $z \sim p(z)$ thành mẫu $G(z)$, và một **bộ phân biệt** $D$ nhận một mẫu rồi cho xác suất mẫu đó là thật. $D$ được huấn luyện để phân biệt mẫu thật với mẫu sinh ra, còn $G$ được huấn luyện để $D$ nhầm. Bài toán viết là
 
 $$\min_G \max_D\; V(D, G) = \mathbb{E}_{x \sim p_{\text{data}}}\big[\log D(x)\big] + \mathbb{E}_{z}\big[\log\big(1 - D(G(z))\big)\big].$$
 
@@ -702,7 +726,7 @@ Như vậy, nếu bộ phân biệt luôn tối ưu, bộ sinh đang cực tiể
 
 ### 10.2. Gradient của hàm mất mát gốc và bản không bão hoà
 
-Thí nghiệm dùng dữ liệu hai chiều gồm 8 cụm Gauss đặt đều trên một đường tròn bán kính 2,4, mỗi cụm có độ lệch chuẩn 0,13. Bộ sinh và bộ phân biệt đều là MLP một lớp ẩn, huấn luyện 4 000 vòng, với hai hàm mất mát khác nhau cho bộ sinh, mỗi hàm 4 lần khởi tạo. Một cụm được tính là "được phủ" nếu có ít nhất một điểm sinh ra cách tâm cụm dưới 0,55; cột cuối là tỉ lệ điểm sinh ra nằm trong phạm vi đó của một cụm nào đó.
+Phân tích ở Mục 10.1 giả định bộ phân biệt luôn tối ưu. Khi huấn luyện thật, hai mạng cùng học dần từ đầu, và cách viết hàm mất mát cho bộ sinh quyết định nó có học được hay không. Thí nghiệm dùng dữ liệu hai chiều gồm 8 cụm Gauss đặt đều trên một đường tròn bán kính 2,4, mỗi cụm có độ lệch chuẩn 0,13. Bộ sinh và bộ phân biệt đều là MLP một lớp ẩn, huấn luyện 4 000 vòng, với hai hàm mất mát khác nhau cho bộ sinh, mỗi hàm 4 lần khởi tạo. Một cụm được tính là "được phủ" nếu có ít nhất một điểm sinh ra cách tâm cụm dưới 0,55; cột cuối là tỉ lệ điểm sinh ra nằm trong phạm vi đó của một cụm nào đó.
 
 | Hàm mất mát của bộ sinh | Số cụm được phủ (4 lần khởi tạo) | Tỉ lệ điểm nằm trong cụm |
 |---|---|---|
@@ -725,7 +749,7 @@ $$\frac{\partial}{\partial s}\log\sigma(s) = 1 - \sigma(s),$$
 
 lớn nhất đúng khi bộ sinh đang tệ nhất, $\sigma(s) \approx 0$.
 
-> **Nhận xét.** Hai hàm mất mát có cùng điểm tối ưu vẫn có thể cho quá trình huấn luyện rất khác nhau, vì cái quyết định việc học là gradient tại các điểm mà tối ưu thực sự đi qua, không phải vị trí của điểm tối ưu. Cùng ý này xuất hiện khi so sánh hàm mất mát của perceptron, hinge và logistic ở [Chương 6 của *Nền tảng*](nentang-ch06.html).
+Ví dụ này cho thấy hai hàm mất mát có cùng điểm tối ưu vẫn có thể cho quá trình huấn luyện rất khác nhau, vì thứ quyết định việc học là gradient tại các điểm mà quá trình tối ưu thực sự đi qua, không phải vị trí của điểm tối ưu. Ý này đã xuất hiện khi so sánh hàm mất mát của perceptron, hinge và logistic ở [Chương 6 của *Nền tảng*](nentang-ch06.html).
 
 ### 10.3. Độ phủ các chế độ
 
@@ -735,23 +759,29 @@ Thí nghiệm này không tái hiện được sụp chế độ: với hàm m�
 
 Thí nghiệm lại cho thấy một vấn đề khác về chất lượng: chỉ 15,3% số điểm sinh ra nằm trong phạm vi một cụm. Phần lớn điểm nằm rải rác giữa các cụm. Bộ sinh phủ đúng vị trí các chế độ nhưng phân phối của nó không khớp với phân phối dữ liệu. Phủ đủ các chế độ vì vậy chưa có nghĩa là học đúng phân phối.
 
-### 10.4. Vì sao GAN khó huấn luyện
+### 10.4. Khó khăn khi huấn luyện GAN
 
-Ngoài vấn đề gradient ở Mục 10.2, có ba nguyên nhân mang tính cấu trúc:
+Ngoài vấn đề gradient ở Mục 10.2, GAN khó huấn luyện vì ba nguyên nhân mang tính cấu trúc. Nguyên nhân thứ nhất là không có hàm mục tiêu giảm đơn điệu. Khi huấn luyện mô hình thông thường, mất mát giảm là dấu hiệu tiến bộ. Với GAN, mất mát của bộ sinh tăng có thể vì bộ sinh kém đi, cũng có thể vì bộ phân biệt vừa tốt lên, nên đường cong mất mát không cho biết mô hình có đang tốt lên hay không.
 
-1. **Không có hàm mục tiêu giảm đơn điệu.** Khi huấn luyện mô hình thông thường, mất mát giảm là dấu hiệu tiến bộ. Với GAN, mất mát của bộ sinh tăng có thể vì bộ sinh kém đi, cũng có thể vì bộ phân biệt vừa tốt lên. Đường cong mất mát không cho biết mô hình có đang tốt lên hay không.
-2. **Đây là bài toán tìm điểm cân bằng, không phải tìm cực tiểu.** Nghiệm là một điểm yên ngựa của $V(D, G)$ (cân bằng Nash của trò chơi hai người). Gradient descent xen kẽ cho hai bên không có bảo đảm hội tụ tới điểm yên ngựa và có thể dao động quanh nó.
-3. **Không có cách đánh giá dựa trên hợp lý.** VAE và mô hình khuếch tán cho một chặn dưới của log hợp lý để so sánh các mô hình; GAN thì không. Các chỉ số như FID (Heusel và cộng sự, 2017) so sánh thống kê của đặc trưng trích từ một mạng phân loại ảnh, và có những điểm mù riêng.
+Nguyên nhân thứ hai là bài toán tìm điểm cân bằng chứ không phải tìm cực tiểu. Nghiệm là một điểm yên ngựa của $V(D, G)$, tức cân bằng Nash của trò chơi hai người. Gradient descent xen kẽ cho hai bên không có bảo đảm hội tụ tới điểm yên ngựa, và có thể dao động quanh nó.
+
+Nguyên nhân thứ ba là không có cách đánh giá dựa trên hợp lý. VAE và mô hình khuếch tán cho một chặn dưới của log hợp lý để so sánh các mô hình; GAN thì không. Các chỉ số như FID (Heusel và cộng sự, 2017) so sánh thống kê của đặc trưng trích từ một mạng phân loại ảnh, và có những điểm mù riêng.
 
 Nhiều biến thể đã được đề xuất để giảm các khó khăn này, như Wasserstein GAN (Arjovsky, Chintala và Bottou, 2017) thay phân kỳ Jensen–Shannon bằng khoảng cách Wasserstein để gradient có ý nghĩa ngay cả khi hai phân phối không giao nhau. Nhưng ba nguyên nhân trên giải thích vì sao mô hình khuếch tán, vốn được huấn luyện bằng một bài hồi quy thông thường, thay thế GAN trong phần lớn ứng dụng sinh ảnh.
+
+### 10.5. Tóm tắt
+
+GAN học hàm đo mức giống thật bằng một bộ phân biệt. Khi bộ phân biệt tối ưu, bộ sinh cực tiểu phân kỳ Jensen–Shannon giữa phân phối của nó và phân phối dữ liệu. Dạng gốc của hàm mất mát cho bộ sinh có gradient tỉ lệ với $\sigma(s)$, gần 0 đúng lúc bộ sinh còn tệ, nên trong thí nghiệm nó không phủ được cụm nào; dạng không bão hoà phủ đủ 8 cụm ở cả bốn lần khởi tạo. Thí nghiệm không tái hiện được sụp chế độ, nhưng cho thấy phủ đủ các chế độ chưa phải là học đúng phân phối: chỉ 15,3% số điểm sinh ra nằm trong một cụm. Việc không có hàm mục tiêu giảm đơn điệu, phải tìm điểm cân bằng thay vì cực tiểu, và không đánh giá được bằng hợp lý khiến GAN khó huấn luyện.
+
+Một mô hình sinh lý tưởng sẽ cho mẫu sắc nét như GAN mà huấn luyện chỉ bằng cách cực tiểu một hàm mất mát thông thường. Mô hình khuếch tán ở Chương 11 đạt được điều đó bằng cách chia việc sinh thành nhiều bước khử nhiễu nhỏ.
 
 ---
 
 ## 11. Mô hình khuếch tán
 
-Mô hình khuếch tán phá dần dữ liệu bằng nhiễu cho tới khi chỉ còn nhiễu, rồi học cách đảo ngược từng bước. Chương này trình bày quá trình thuận và dạng đóng của nó (kiểm chứng bằng mô phỏng), đọc lịch nhiễu qua tỉ số tín hiệu trên nhiễu, chỉ ra rằng huấn luyện chỉ là một bài hồi quy, và trình bày các cách tăng tốc lấy mẫu và sinh có điều kiện.
+Mô hình khuếch tán phá dần dữ liệu bằng nhiễu cho tới khi chỉ còn nhiễu, rồi học cách đảo ngược từng bước. Mỗi bước đảo ngược là một bài khử nhiễu nhỏ, và như ta sẽ thấy, huấn luyện cả mô hình quy về một bài hồi quy thông thường: không có trò chơi giữa hai mạng như GAN, và mất mát giảm nghĩa là mô hình tốt lên.
 
-### 11.1. Ý tưởng
+### 11.1. Sinh mẫu bằng nhiều bước khử nhiễu
 
 Sinh một ảnh từ nhiễu trong một bước là bài toán rất khó. Nhưng khử một chút nhiễu khỏi một ảnh đã hơi nhiễu là bài toán khử nhiễu quen thuộc, tức một bài hồi quy. Mô hình khuếch tán (Sohl-Dickstein và cộng sự, 2015; Ho, Jain và Abbeel, 2020) ghép nhiều bước khử nhiễu nhỏ, thường 1 000 bước, thành một quá trình sinh. Cách tư duy này dùng được ở nhiều nơi: khi một phép biến đổi quá khó để học trực tiếp, tìm cách viết nó thành một chuỗi nhiều phép biến đổi dễ.
 
@@ -771,7 +801,7 @@ với $\beta_t$ nhỏ, tăng dần theo một lịch định trước. Hệ số
 
 Dạng đóng là điều làm cho huấn luyện khả thi: muốn có $x_t$ với $t$ bất kỳ, lấy trực tiếp từ $x_0$ trong một bước, không phải mô phỏng $t$ bước trung gian.
 
-**Kiểm chứng bằng mô phỏng.** Thí nghiệm dùng lịch tuyến tính $\beta$ từ $10^{-4}$ tới $0{,}02$ qua 1 000 bước, giá trị ban đầu $x_0 = 2$, mô phỏng 200 000 quỹ đạo đi từng bước rồi so trung bình và phương sai với dạng đóng. Chỉ số bước $t$ đánh từ 0 như trong mã, tức $t = 0$ là sau bước nhiễu đầu tiên.
+Dạng đóng kiểm chứng được bằng mô phỏng. Thí nghiệm dùng lịch tuyến tính $\beta$ từ $10^{-4}$ tới $0{,}02$ qua 1 000 bước, giá trị ban đầu $x_0 = 2$, mô phỏng 200 000 quỹ đạo đi từng bước rồi so trung bình và phương sai với dạng đóng. Chỉ số bước $t$ đánh từ 0 như trong mã, tức $t = 0$ là sau bước nhiễu đầu tiên.
 
 | $t$ | Trung bình, mô phỏng | Trung bình, dạng đóng | Phương sai, mô phỏng | Phương sai, dạng đóng |
 |---|---|---|---|---|
@@ -819,11 +849,11 @@ $$\mathcal{L} = \mathbb{E}_{x_0,\,\varepsilon,\,t}\Big[\big\|\varepsilon - \vare
 3. Lấy $\varepsilon \sim \mathcal{N}(0, I)$ và tính $x_t$ bằng dạng đóng.
 4. Tính bình phương sai số giữa $\varepsilon$ và $\varepsilon_\theta(x_t, t)$, cập nhật tham số.
 
-Hàm mất mát này là dạng đơn giản hoá của một chặn dưới biến phân cho log hợp lý, tương tự ELBO của VAE; Ho, Jain và Abbeel (2020) thấy bỏ các trọng số theo $t$ của chặn dưới cho chất lượng mẫu tốt hơn. Vì biết $\varepsilon$ thì suy ra được $x_0$ từ dạng đóng, dự đoán $\varepsilon$ và dự đoán $x_0$ tương đương về mặt toán học; lựa chọn dự đoán $\varepsilon$ là lựa chọn thực nghiệm. Khi sinh mẫu, mỗi bước dùng $\varepsilon_\theta$ để ước lượng giá trị trung bình của $x_{t-1}$, rồi cộng thêm một lượng nhiễu nhỏ.
+Hàm mất mát này là dạng đơn giản hoá của một chặn dưới biến phân cho log hợp lý, tương tự ELBO của VAE; Ho, Jain và Abbeel (2020) thấy bỏ các trọng số theo $t$ của chặn dưới cho chất lượng mẫu tốt hơn. Vì biết $\varepsilon$ thì suy ra được $x_0$ từ dạng đóng, dự đoán $\varepsilon$ và dự đoán $x_0$ tương đương về mặt toán học; dự đoán $\varepsilon$ là một lựa chọn thực nghiệm. Khi sinh mẫu, mỗi bước dùng $\varepsilon_\theta$ để ước lượng giá trị trung bình của $x_{t-1}$, rồi cộng thêm một lượng nhiễu nhỏ.
 
 ### 11.5. Tăng tốc lấy mẫu
 
-Nhược điểm chính: sinh một mẫu cần chạy mạng $T$ lần, với $T = 1\,000$ là chậm hơn GAN khoảng một nghìn lần. Các cách khắc phục:
+Nhược điểm chính của mô hình khuếch tán là lấy mẫu chậm: sinh một mẫu cần chạy mạng $T$ lần, và với $T = 1\,000$ là chậm hơn GAN khoảng một nghìn lần. Bảng dưới tóm tắt các cách khắc phục chính.
 
 | Cách | Ý tưởng | Kết quả điển hình |
 |---|---|---|
@@ -844,14 +874,19 @@ $$\tilde\varepsilon = \varepsilon_\theta(x_t, t, \varnothing) + w\,\big(\varepsi
 
 với $w > 1$ đẩy mẫu theo hướng mà điều kiện $c$ tạo ra. $w$ lớn cho mẫu khớp mô tả hơn nhưng kém đa dạng hơn. [Chương 14 của *Ứng dụng LLM*](ungdung-ch14.html) bàn về việc dùng các mô hình sinh ảnh trong ứng dụng.
 
----
+### 11.7. Tóm tắt
 
+Quá trình thuận thêm nhiễu Gauss từng chút một, và nhờ dạng đóng $x_t = \sqrt{\bar\alpha_t}\,x_0 + \sqrt{1 - \bar\alpha_t}\,\varepsilon$, ta lấy được $x_t$ ở bước bất kỳ trong một phép tính; mô phỏng 200 000 quỹ đạo khớp với dạng đóng trong phạm vi sai số lấy mẫu. Với lịch tuyến tính, ở bước cuối chỉ còn 0,64% biên độ tín hiệu, nên quá trình sinh xuất phát được từ nhiễu Gauss thuần tuý. SNR giảm dần theo bước, nên khi sinh, mô hình quyết định bố cục trước rồi mới thêm chi tiết. Huấn luyện là hồi quy dự đoán nhiễu, ổn định như mọi bài hồi quy. Lấy mẫu chậm được khắc phục bằng DDIM, chưng cất và khuếch tán trong không gian ẩn, còn classifier-free guidance làm mẫu bám điều kiện chặt hơn.
+
+Với ba họ mô hình sinh, ta đã biết cách tạo ra nội dung mới. Nhưng một mô hình ngôn ngữ sinh văn bản trôi chảy chưa chắc làm đúng điều người dùng muốn, như ví dụ câu hỏi về thủ đô của Pháp ở Chương 1. Phần cuối giáo trình bàn về việc điều chỉnh hành vi đó, và công cụ đầu tiên cần có là học tăng cường, cách học từ phần thưởng thay vì từ đáp án đúng (Chương 12).
+
+---
 
 ## 12. Nhập môn học tăng cường
 
-Học tăng cường (reinforcement learning) học từ phần thưởng thay vì từ đáp án đúng. Chương này trình bày các khái niệm tối thiểu cần cho RLHF: trạng thái, hành động, phần thưởng, chính sách, hàm giá trị, phương trình Bellman và Q-learning. Một thí nghiệm trên lưới $7 \times 7$ cho thấy khám phá không chỉ đến từ $\varepsilon$-tham lam mà còn từ cách khởi tạo hàm giá trị.
+Ở Chương 1, mô hình vừa tiền huấn luyện được hỏi thủ đô của Pháp và có thể viết tiếp thành một đề kiểm tra thay vì trả lời. Muốn sửa hành vi đó bằng tín hiệu "câu trả lời này tốt hay tệ", cần một cách học từ phần thưởng thay vì từ đáp án đúng. Đó là **học tăng cường** (reinforcement learning). Ta chỉ xét những khái niệm tối thiểu cần cho RLHF ở Chương 14, kèm một thí nghiệm nhỏ về khám phá cho kết quả khác với cách giải thích thường gặp.
 
-### 12.1. So với học có giám sát
+### 12.1. Khác biệt với học có giám sát
 
 Trong học có giám sát, mỗi mẫu đi kèm đáp án đúng; mô hình dự đoán, so với đáp án, rồi điều chỉnh. Trong học tăng cường, không có đáp án, chỉ có **phần thưởng**: một con số cho biết việc vừa làm tốt hay tệ tới mức nào. Ba khác biệt đi kèm, và cả ba đều làm bài toán khó hơn:
 
@@ -861,15 +896,11 @@ Trong học có giám sát, mỗi mẫu đi kèm đáp án đúng; mô hình d�
 | Thời điểm | ngay sau mỗi dự đoán | có thể đến rất muộn sau hành động gây ra nó |
 | Dữ liệu | cho sẵn, cố định | do chính chính sách đang học sinh ra |
 
-Dòng cuối có hệ quả lớn nhất. Trong học tăng cường, hành động của tác tử quyết định nó sẽ thấy dữ liệu gì tiếp theo. Một chính sách kém chỉ thu thập được dữ liệu kém, rồi học từ dữ liệu đó lại ra chính sách kém. Đây là một vòng phản hồi, cùng bản chất với vòng phản hồi trong các hệ thống gợi ý ([Mục 12.2 của *MLOps*](mlops-ch12.html)).
+Dòng cuối có tác động lớn nhất. Trong học tăng cường, hành động của tác tử quyết định nó sẽ thấy dữ liệu gì tiếp theo. Một chính sách kém chỉ thu thập được dữ liệu kém, rồi học từ dữ liệu đó lại ra chính sách kém. Đây là một vòng phản hồi, cùng bản chất với vòng phản hồi trong các hệ thống gợi ý ([Mục 12.2 của *MLOps*](mlops-ch12.html)).
 
 ### 12.2. Các khái niệm cơ bản
 
-- **Trạng thái** $s$: tình huống hiện tại của môi trường.
-- **Hành động** $a$: lựa chọn của tác tử tại trạng thái đó.
-- **Phần thưởng** $r$: con số nhận được sau hành động.
-- **Chính sách** $\pi(a \mid s)$: quy tắc chọn hành động, có thể ngẫu nhiên.
-- **Hàm giá trị hành động** $Q^\pi(s, a)$: tổng phần thưởng chiết khấu kỳ vọng nếu làm $a$ tại $s$ rồi tiếp tục theo $\pi$. **Hàm giá trị trạng thái** $V^\pi(s)$ là kỳ vọng của $Q^\pi(s, a)$ theo $a \sim \pi(\cdot \mid s)$.
+Một bài toán học tăng cường gồm một tác tử tương tác với môi trường. Tại mỗi thời điểm, môi trường ở một **trạng thái** $s$, tác tử chọn một **hành động** $a$ và nhận về một **phần thưởng** $r$, là một con số. Quy tắc chọn hành động gọi là **chính sách** $\pi(a \mid s)$, và có thể ngẫu nhiên. Để đánh giá một lựa chọn, ta dùng **hàm giá trị hành động** $Q^\pi(s, a)$: tổng phần thưởng chiết khấu kỳ vọng nếu làm $a$ tại $s$ rồi tiếp tục theo $\pi$. **Hàm giá trị trạng thái** $V^\pi(s)$ là kỳ vọng của $Q^\pi(s, a)$ theo $a \sim \pi(\cdot \mid s)$.
 
 Tổng phần thưởng chiết khấu từ thời điểm $t$ là $G_t = r_{t+1} + \gamma r_{t+2} + \gamma^2 r_{t+3} + \dots$, với hệ số chiết khấu $\gamma \in [0, 1)$: $\gamma$ gần 1 nghĩa là coi trọng phần thưởng xa, gần 0 nghĩa là chỉ quan tâm phần thưởng trước mắt. Một hành động có thể cho phần thưởng tức thời thấp mà vẫn là lựa chọn đúng, vì nó dẫn tới phần thưởng lớn về sau; hàm giá trị tồn tại để nắm được điều đó.
 
@@ -887,9 +918,9 @@ $$Q(s, a) \leftarrow Q(s, a) + \alpha\Big[\underbrace{r + \gamma\max_{a'}Q(s', a
 
 ### 12.3. Khám phá và khai thác
 
-Nếu luôn chọn hành động có $Q$ cao nhất theo ước lượng hiện tại (khai thác), tác tử không bao giờ thử những hành động khác, và không bao giờ biết có lựa chọn tốt hơn. Nếu luôn chọn ngẫu nhiên (khám phá), nó biết nhiều nhưng không tận dụng được. Cách cân bằng thông dụng nhất là **$\varepsilon$-tham lam**: với xác suất $\varepsilon$ chọn hành động ngẫu nhiên, còn lại chọn hành động có $Q$ cao nhất. Mục 12.4 cho thấy đây không phải cơ chế khám phá duy nhất.
+Nếu luôn chọn hành động có $Q$ cao nhất theo ước lượng hiện tại (khai thác), tác tử không bao giờ thử những hành động khác, và không bao giờ biết có lựa chọn tốt hơn. Nếu luôn chọn ngẫu nhiên (khám phá), nó biết nhiều nhưng không tận dụng được. Cách cân bằng thông dụng nhất là **$\varepsilon$-tham lam**: với xác suất $\varepsilon$ chọn hành động ngẫu nhiên, còn lại chọn hành động có $Q$ cao nhất. Thí nghiệm ở Mục 12.4 cho thấy đây không phải cơ chế khám phá duy nhất.
 
-### 12.4. Thí nghiệm: khám phá trên lưới 7 × 7
+### 12.4. Thí nghiệm khám phá trên lưới 7 × 7
 
 Môi trường là lưới $7 \times 7$: tác tử xuất phát ở góc dưới bên trái, đích ở góc trên bên phải (phần thưởng $+10$), bốn ô bẫy (phần thưởng $-10$), mỗi lượt kết thúc khi tới đích, rơi vào bẫy hoặc sau 80 bước. Q-learning chạy 6 000 lượt với $\alpha = 0{,}2$, $\gamma = 0{,}97$. Ba cấu hình chỉ khác nhau ở phần thưởng của mỗi bước đi thường và giá trị khởi tạo $Q_0$. Sau khi học, chính sách tham lam theo $Q$ (không còn khám phá) được chạy để đo tỉ lệ tới đích.
 
@@ -905,21 +936,27 @@ Môi trường là lưới $7 \times 7$: tác tử xuất phát ở góc dưới
 
 Cấu hình 1 thành công ngay cả với $\varepsilon = 0$, tức không hề chọn ngẫu nhiên. Lời giải thích "cần $\varepsilon > 0$ để khám phá" không giải thích được kết quả này.
 
-**Cấu hình 1: khởi tạo lạc quan.** Mọi phần thưởng của bước đi thường đều âm, trong khi $Q$ khởi tạo bằng 0. Mỗi lần thử một hành động, $Q$ của nó bị kéo xuống dưới 0, còn các hành động chưa thử vẫn ở 0. Chính sách tham lam vì vậy luôn ưu tiên hành động chưa thử, tức tự khám phá mà không cần yếu tố ngẫu nhiên. Cơ chế này gọi là **khởi tạo lạc quan** (optimistic initialization; Sutton và Barto, 2018): giá trị khởi tạo cao hơn giá trị thật làm mọi lựa chọn chưa thử trông hấp dẫn.
+Lời giải thích nằm ở giá trị khởi tạo. Trong cấu hình 1, mọi phần thưởng của bước đi thường đều âm, trong khi $Q$ khởi tạo bằng 0. Mỗi lần thử một hành động, $Q$ của nó bị kéo xuống dưới 0, còn các hành động chưa thử vẫn ở 0. Chính sách tham lam vì vậy luôn ưu tiên hành động chưa thử, tức tự khám phá mà không cần yếu tố ngẫu nhiên. Cơ chế này gọi là **khởi tạo lạc quan** (optimistic initialization; Sutton và Barto, 2018): giá trị khởi tạo cao hơn giá trị thật làm mọi lựa chọn chưa thử trông hấp dẫn.
 
-**Cấu hình 2: mất tính lạc quan.** Không phạt bước đi thì mọi $Q$ bằng 0 cho tới khi tác tử tình cờ tới đích hoặc rơi vào bẫy. Với $\varepsilon = 0$, hàm argmax luôn trả về cùng một hành động khi các giá trị bằng nhau, nên tác tử đi mãi một hướng, không bao giờ tới đích. Chỉ cần $\varepsilon = 0{,}05$ là đủ để tìm ra đích.
+Cấu hình 2 mất tính lạc quan đó. Không phạt bước đi thì mọi $Q$ bằng 0 cho tới khi tác tử tình cờ tới đích hoặc rơi vào bẫy. Với $\varepsilon = 0$, hàm argmax luôn trả về cùng một hành động khi các giá trị bằng nhau, nên tác tử đi mãi một hướng và không bao giờ tới đích. Chỉ cần $\varepsilon = 0{,}05$ là đủ để tìm ra đích.
 
-**Cấu hình 3: khởi tạo bi quan.** Với $Q_0 = -20$, thấp hơn mọi giá trị thật, hành động đầu tiên được thử có $Q$ tăng lên gần giá trị thật, trong khi các hành động khác vẫn ở $-20$. Chính sách tham lam bám lấy hành động đã thử và gần như không khám phá, và với ngân sách 6 000 lượt, ngay cả $\varepsilon = 0{,}3$ cũng không đủ. Chỉ với $\varepsilon = 1$, tức hành động hoàn toàn ngẫu nhiên, Q-learning mới học được chính sách tối ưu; điều này khả thi vì Q-learning là thuật toán ngoài chính sách.
+Cấu hình 3 khởi tạo bi quan: $Q_0 = -20$, thấp hơn mọi giá trị thật. Hành động đầu tiên được thử có $Q$ tăng lên gần giá trị thật, trong khi các hành động khác vẫn ở $-20$, nên chính sách tham lam bám lấy hành động đã thử và gần như không khám phá. Với ngân sách 6 000 lượt, ngay cả $\varepsilon = 0{,}3$ cũng không đủ. Chỉ với $\varepsilon = 1$, tức hành động hoàn toàn ngẫu nhiên, Q-learning mới học được chính sách tối ưu; điều này khả thi vì Q-learning là thuật toán ngoài chính sách.
 
-> **Nhận xét.** Khám phá không chỉ đến từ $\varepsilon$. Cách khởi tạo hàm giá trị cũng là một cơ chế khám phá, và trong cấu hình 1 nó đủ để thay thế hoàn toàn $\varepsilon$. Ngược lại, khởi tạo bi quan có thể làm $\varepsilon$ nhỏ trở nên vô tác dụng.
+Như vậy $\varepsilon$ không phải nguồn khám phá duy nhất. Cách khởi tạo hàm giá trị cũng là một cơ chế khám phá, và trong cấu hình 1 nó thay thế hoàn toàn $\varepsilon$. Ngược lại, khởi tạo bi quan có thể làm $\varepsilon$ nhỏ trở nên vô tác dụng.
+
+### 12.5. Tóm tắt
+
+Học tăng cường học từ phần thưởng, một con số không cho biết nên làm gì thay thế, có thể đến muộn, và phụ thuộc vào dữ liệu do chính chính sách đang học thu thập. Hàm giá trị $Q$ nắm được phần thưởng về sau của một hành động; nó thoả phương trình Bellman, và Q-learning biến phương trình đó thành quy tắc cập nhật theo sai số thời gian. Thí nghiệm trên lưới $7 \times 7$ cho thấy khởi tạo lạc quan đủ để tác tử tới đích 100% với $\varepsilon = 0$, còn khởi tạo bi quan làm cả $\varepsilon = 0{,}3$ cũng thất bại.
+
+Q-learning cần một bảng giá trị cho mọi cặp trạng thái–hành động. Với mô hình ngôn ngữ, trạng thái là toàn bộ văn bản đã sinh và hành động là chọn một trong hàng chục nghìn token, nên cách làm này không khả thi. Chương 13 chuyển sang tối ưu trực tiếp chính sách, mà với mô hình ngôn ngữ thì chính sách chính là mô hình đã có.
 
 ---
 
 ## 13. Gradient chính sách
 
-Q-learning học hàm giá trị rồi suy ra chính sách. Với mô hình ngôn ngữ, cách tự nhiên hơn là điều chỉnh trực tiếp chính sách, vì chính sách chính là mô hình đã có. Chương này suy ra định lý gradient chính sách, chỉ ra vấn đề phương sai và đo tác dụng của đường nền, rồi giới thiệu hàm lợi thế và PPO, thuật toán dùng trong RLHF.
+Q-learning học hàm giá trị rồi suy ra chính sách. Với mô hình ngôn ngữ, cách tự nhiên hơn là điều chỉnh trực tiếp chính sách, vì chính sách chính là mô hình đã có. PPO, thuật toán dùng trong RLHF, thuộc họ phương pháp này. Để hiểu nó, ta đi từ định lý gradient chính sách, qua vấn đề phương sai của ước lượng gradient và cách đường nền giảm phương sai đó.
 
-### 13.1. Từ Q-learning tới gradient chính sách
+### 13.1. Giới hạn của Q-learning với mô hình ngôn ngữ
 
 Q-learning cần một bảng hoặc một mô hình cho $Q(s, a)$ và cần tính $\max_{a'}Q(s', a')$ ở mỗi bước. Với mô hình ngôn ngữ, hành động là chọn token tiếp theo trong từ vựng hàng chục nghìn token, và trạng thái là toàn bộ văn bản đã sinh, nên số trạng thái là vô hạn. Quan trọng hơn, mô hình ngôn ngữ đã là một chính sách $\pi_\theta(\text{token} \mid \text{ngữ cảnh})$. **Gradient chính sách** (policy gradient) tối ưu trực tiếp tham số của chính sách theo phần thưởng kỳ vọng, không cần học hàm giá trị trước.
 
@@ -934,7 +971,7 @@ $$\nabla_\theta\pi_\theta(a) = \pi_\theta(a)\,\nabla_\theta\log\pi_\theta(a).$$
 
 > **Chứng minh.** $\nabla_\theta J = \sum_a R(a)\,\nabla_\theta\pi_\theta(a) = \sum_a \pi_\theta(a)\,R(a)\,\nabla_\theta\log\pi_\theta(a)$, và tổng cuối chính là kỳ vọng theo $\pi_\theta$.
 
-Vế phải là một kỳ vọng, nên ước lượng được bằng cách lấy mẫu: rút $n$ hành động từ $\pi_\theta$, tính trung bình của $R(a_i)\nabla_\theta\log\pi_\theta(a_i)$. Đây là thuật toán REINFORCE (Williams, 1992). Diễn giải: lấy mẫu một hành động, xem phần thưởng, rồi tăng log xác suất của hành động đó theo tỉ lệ với phần thưởng. Với bài toán nhiều bước, $R(a)$ được thay bằng tổng phần thưởng từ bước đó trở đi, và công thức giữ nguyên dạng (Sutton và cộng sự, 2000).
+Vế phải là một kỳ vọng, nên ước lượng được bằng cách lấy mẫu: rút $n$ hành động từ $\pi_\theta$, tính trung bình của $R(a_i)\nabla_\theta\log\pi_\theta(a_i)$. Đây là thuật toán REINFORCE (Williams, 1992). Về mặt trực giác, REINFORCE lấy mẫu một hành động, xem phần thưởng, rồi tăng log xác suất của hành động đó theo tỉ lệ với phần thưởng. Với bài toán nhiều bước, $R(a)$ được thay bằng tổng phần thưởng từ bước đó trở đi, và công thức giữ nguyên dạng (Sutton và cộng sự, 2000).
 
 ### 13.3. Phương sai và đường nền
 
@@ -950,7 +987,7 @@ $$\mathbb{E}\big[b\,\nabla_\theta\log\pi_\theta(a)\big] = b\sum_a\pi_\theta(a)\,
 
 Tổng xác suất luôn bằng 1, nên đạo hàm của nó bằng 0. Với đường nền gần phần thưởng trung bình, hành động tốt hơn trung bình được đẩy lên, hành động kém hơn bị đẩy xuống, và phương sai giảm.
 
-### 13.4. Thí nghiệm: tác dụng của đường nền
+### 13.4. Thí nghiệm về tác dụng của đường nền
 
 Bài toán một bước có 6 hành động với phần thưởng trung bình $(1{,}0;\ 1{,}2;\ 0{,}9;\ 1{,}1;\ 3{,}0;\ 1{,}05)$, cộng nhiễu Gauss độ lệch chuẩn 0,25; hành động thứ năm tốt hơn hẳn, các hành động còn lại xấp xỉ nhau. Chính sách hiện tại là phân phối đều, tham số hoá bằng softmax. Với mỗi số mẫu $n$, thí nghiệm lặp lại phép ước lượng gradient 400 lần và đo độ lệch chuẩn của ước lượng (trung bình trên 6 thành phần), không có và có đường nền. Đường nền là phần thưởng trung bình của chính $n$ mẫu đó.
 
@@ -971,7 +1008,7 @@ gradient TB co nen    : [-0.06272 -0.02927 -0.07917 -0.04593  0.2716  -0.05451]
 lech lon nhat: 1.15e-03
 ```
 
-Hai vector trùng nhau trong phạm vi sai số lấy mẫu, và cả hai đều chỉ đúng hướng: chỉ thành phần của hành động thứ năm dương. Một chi tiết kỹ thuật: dùng trung bình của chính các mẫu trong lô làm đường nền tạo ra một độ chệch cỡ $1/n$, vì đường nền phụ thuộc vào mẫu đang được dùng; với $n$ lớn độ chệch này không đáng kể, và có thể loại bỏ hoàn toàn bằng cách tính đường nền cho mỗi mẫu từ các mẫu còn lại.
+Hai vector trùng nhau trong phạm vi sai số lấy mẫu, và cả hai đều chỉ đúng hướng: chỉ thành phần của hành động thứ năm dương. Còn một chi tiết kỹ thuật: dùng trung bình của chính các mẫu trong lô làm đường nền tạo ra một độ chệch cỡ $1/n$, vì đường nền phụ thuộc vào mẫu đang được dùng. Với $n$ lớn, độ chệch này không đáng kể, và có thể loại bỏ hoàn toàn bằng cách tính đường nền cho mỗi mẫu từ các mẫu còn lại.
 
 ### 13.5. Hàm lợi thế và PPO
 
@@ -981,31 +1018,33 @@ $$A(s, a) = Q(s, a) - V(s),$$
 
 gọi là **hàm lợi thế** (advantage function): hành động này tốt hơn mức trung bình tại trạng thái này bao nhiêu. Các thuật toán actor–critic học đồng thời chính sách (actor) và một ước lượng của $V$ (critic) để tính lợi thế; GAE (Schulman và cộng sự, 2016) là cách ước lượng lợi thế thông dụng.
 
-**PPO** (proximal policy optimization; Schulman và cộng sự, 2017) là thuật toán được dùng trong RLHF. Ngoài lợi thế, PPO giới hạn mức thay đổi của chính sách trong mỗi lần cập nhật: nó cắt tỉ số $\pi_\theta(a \mid s)/\pi_{\theta_{\text{cũ}}}(a \mid s)$ trong khoảng $[1 - \epsilon, 1 + \epsilon]$, thường với $\epsilon = 0{,}2$, để một bước cập nhật lớn không làm chính sách thay đổi quá nhiều dựa trên những ước lượng lợi thế nhiễu. Ý tưởng tương tự lý do tốc độ học khi tinh chỉnh phải nhỏ (Mục 6.4).
+Thuật toán được dùng trong RLHF là **PPO** (proximal policy optimization; Schulman và cộng sự, 2017). Ngoài lợi thế, PPO giới hạn mức thay đổi của chính sách trong mỗi lần cập nhật: nó cắt tỉ số $\pi_\theta(a \mid s)/\pi_{\theta_{\text{cũ}}}(a \mid s)$ trong khoảng $[1 - \epsilon, 1 + \epsilon]$, thường với $\epsilon = 0{,}2$, để một bước cập nhật lớn không làm chính sách thay đổi quá nhiều dựa trên những ước lượng lợi thế nhiễu. Ý tưởng này tương tự lý do tốc độ học khi tinh chỉnh phải nhỏ (Mục 6.4).
+
+### 13.6. Tóm tắt
+
+Gradient chính sách tối ưu trực tiếp phần thưởng kỳ vọng theo tham số của chính sách. Nhờ thủ thuật log, gradient viết được thành một kỳ vọng, $\mathbb{E}\big[R(a)\,\nabla_\theta\log\pi_\theta(a)\big]$, và ước lượng được bằng lấy mẫu; đó là REINFORCE. Ước lượng này không chệch nhưng phương sai lớn. Trừ một đường nền không làm đổi kỳ vọng, vì tổng xác suất luôn bằng 1, và trong thí nghiệm giảm độ lệch chuẩn khoảng 2,3 lần, tương đương cần ít mẫu hơn khoảng 5,3 lần. Trong bài toán nhiều bước, đường nền tốt là $V(s)$, cho hàm lợi thế $A(s, a)$; PPO dùng lợi thế và cắt tỉ số xác suất để mỗi lần cập nhật không đổi chính sách quá nhiều.
+
+Học tăng cường cần một phần thưởng. Với một trợ lý ngôn ngữ, không có sẵn hàm nào chấm được một câu trả lời là tốt hay tệ. Chương 14 trình bày cách học hàm thưởng đó từ những so sánh của con người.
 
 ---
 
 ## 14. Học tăng cường từ phản hồi của con người
 
-Sau tiền huấn luyện và tinh chỉnh có giám sát, mô hình ngôn ngữ làm theo chỉ dẫn nhưng chỉ tốt bằng các câu trả lời mẫu nó được học. RLHF (reinforcement learning from human feedback) cải thiện tiếp bằng dữ liệu so sánh giữa các câu trả lời. Chương này trình bày quy trình ba giai đoạn, lý do học từ so sánh hiệu quả, mô hình thưởng Bradley–Terry, và nghiệm dạng đóng của bài toán tối ưu có ràng buộc KL, kiểm chứng bằng số.
+Sau tiền huấn luyện và tinh chỉnh có giám sát, mô hình ngôn ngữ làm theo chỉ dẫn nhưng chỉ tốt bằng các câu trả lời mẫu nó được học. RLHF (reinforcement learning from human feedback) cải thiện tiếp bằng dữ liệu so sánh giữa các câu trả lời. Cách làm này dựa trên một quan sát đơn giản về con người: chọn câu trả lời tốt hơn trong hai câu dễ hơn nhiều so với tự viết ra câu trả lời tốt nhất. Từ dữ liệu so sánh, ta học một hàm thưởng, rồi dùng học tăng cường ở Chương 12 và 13 để tối ưu mô hình theo hàm thưởng đó.
 
-### 14.1. Ba giai đoạn huấn luyện một trợ lý
+### 14.1. Các giai đoạn huấn luyện một trợ lý
+
+Quy trình phổ biến, theo InstructGPT (Ouyang và cộng sự, 2022), gồm ba giai đoạn (Hình 14). Giai đoạn đầu là tiền huấn luyện trên hàng nghìn tỉ token không nhãn bằng cách dự đoán token tiếp theo (Chương 5). Giai đoạn thứ hai là **tinh chỉnh có giám sát** (supervised fine-tuning, SFT) trên hàng chục nghìn cặp (yêu cầu, câu trả lời tốt) do người viết; sau bước này, mô hình trả lời câu hỏi thay vì viết tiếp văn bản. Giai đoạn thứ ba học từ so sánh và gồm hai bước, ký hiệu 3a và 3b trên hình. Ở bước 3a, người đánh giá chọn câu trả lời tốt hơn trong các cặp câu trả lời của mô hình, và dữ liệu đó được dùng để huấn luyện một mô hình thưởng. Ở bước 3b, mô hình ngôn ngữ được tối ưu theo mô hình thưởng bằng học tăng cường, thường là PPO.
 
 ![Hình 14](figs/bd14_rlhf_quytrinh.png)
 
 **Hình 14.** Ba giai đoạn huấn luyện một trợ lý ngôn ngữ. DPO (Chương 15) gộp hai bước 3a và 3b thành một.
 
-Quy trình phổ biến, theo InstructGPT (Ouyang và cộng sự, 2022), gồm:
-
-1. **Tiền huấn luyện** trên hàng nghìn tỉ token không nhãn bằng cách dự đoán token tiếp theo (Chương 5).
-2. **Tinh chỉnh có giám sát** (supervised fine-tuning, SFT) trên hàng chục nghìn cặp (yêu cầu, câu trả lời tốt) do người viết. Sau bước này, mô hình trả lời câu hỏi thay vì viết tiếp văn bản.
-3. **Học từ so sánh**: (a) thu thập dữ liệu người đánh giá chọn câu trả lời tốt hơn trong các cặp câu trả lời của mô hình, huấn luyện một mô hình thưởng; (b) tối ưu mô hình ngôn ngữ theo mô hình thưởng bằng học tăng cường, thường là PPO.
-
-Bước 2 có một giới hạn: học bắt chước chỉ đưa mô hình tới chất lượng của các câu trả lời mẫu. Bước 3 được thiết kế để vượt giới hạn đó.
+Giai đoạn thứ hai có một giới hạn: học bắt chước chỉ đưa mô hình tới chất lượng của các câu trả lời mẫu. Giai đoạn thứ ba được thiết kế để vượt giới hạn đó.
 
 ### 14.2. Học từ so sánh
 
-Lý do chính là một bất đối xứng: **đánh giá dễ hơn tạo ra.** Nhiều người không viết được một bài thơ hay, nhưng chỉ ra được bài nào hay hơn trong hai bài. Viết một đoạn mã tối ưu thì khó, nhưng so sánh hai đoạn mã và nói đoạn nào rõ ràng hơn thì dễ hơn nhiều. Thu thập so sánh thay cho câu trả lời mẫu vì vậy cho tín hiệu về chất lượng cao hơn mức người gán nhãn tự viết ra được.
+Lý do chính là một sự bất đối xứng: **đánh giá dễ hơn tạo ra**. Nhiều người không viết được một bài thơ hay, nhưng chỉ ra được bài nào hay hơn trong hai bài. Viết một đoạn mã tối ưu thì khó, nhưng so sánh hai đoạn mã và nói đoạn nào rõ ràng hơn thì dễ hơn nhiều. Thu thập so sánh thay cho câu trả lời mẫu vì vậy cho tín hiệu về chất lượng cao hơn mức người gán nhãn tự viết ra được.
 
 Lý do thứ hai mang tính thực tế: so sánh nhất quán giữa những người gán nhãn hơn chấm điểm tuyệt đối. Hỏi mười người "câu trả lời này bao nhiêu điểm trên thang 10" thường cho những con số rất khác nhau, vì mỗi người dùng thang đo theo cách riêng; hỏi "câu nào tốt hơn" cho mức đồng thuận cao hơn.
 
@@ -1019,7 +1058,7 @@ $$P(y_w \succ y_l \mid x) = \sigma\big(r(x, y_w) - r(x, y_l)\big).$$
 
 Đây là hồi quy logistic trên hiệu của hai điểm thưởng ([Mục 6.3 của *Nền tảng*](nentang-ch06.html)), và mô hình thưởng được huấn luyện bằng hợp lý cực đại, tức cực tiểu $-\log\sigma\big(r(x, y_w) - r(x, y_l)\big)$ trên các cặp. Trong thực tế, $r$ là một mô hình ngôn ngữ đã tinh chỉnh, thay lớp chiếu ra từ vựng bằng một đầu ra vô hướng.
 
-Một hệ quả cần biết: $r$ chỉ xác định được sai khác một hằng số cộng cho mỗi câu hỏi. Cộng cùng một hằng số vào điểm của mọi câu trả lời cho cùng một câu hỏi không thay đổi hiệu, nên không thay đổi hợp lý. Điều này vô hại vì bước sau chỉ dùng $r$ qua hàm mũ rồi chuẩn hoá (Mục 14.4), nên hằng số bị hằng số chuẩn hoá hấp thụ.
+Cần lưu ý rằng $r$ chỉ xác định được sai khác một hằng số cộng cho mỗi câu hỏi. Cộng cùng một hằng số vào điểm của mọi câu trả lời cho cùng một câu hỏi không thay đổi hiệu, nên không thay đổi hợp lý. Điều này vô hại vì bước sau chỉ dùng $r$ qua hàm mũ rồi chuẩn hoá (Mục 14.4), nên hằng số bị hằng số chuẩn hoá hấp thụ.
 
 ### 14.4. Tối ưu có ràng buộc KL và nghiệm dạng đóng
 
@@ -1036,7 +1075,7 @@ $$\max_\pi\; \mathbb{E}_{y \sim \pi(\cdot \mid x)}\big[r(x, y)\big] - \beta\,\ma
 
 Nghiệm có ý nghĩa rõ ràng: chính sách tối ưu là chính sách tham chiếu, đánh trọng số lại theo hàm mũ của phần thưởng. Câu trả lời có phần thưởng cao được tăng xác suất, phần thưởng thấp bị giảm. Nếu $\pi_{\text{ref}}(y) = 0$ thì $\pi^*(y) = 0$ bất kể $r(y)$ lớn tới đâu. $\beta$ điều chỉnh mức đánh trọng số lại: $\beta \to 0$ dồn toàn bộ xác suất vào câu trả lời có phần thưởng cao nhất, $\beta \to \infty$ giữ nguyên $\pi_{\text{ref}}$.
 
-**Kiểm chứng bằng số.** Trên một không gian nhỏ gồm 8 câu trả lời, bài toán được giải theo hai cách độc lập: thay vào công thức dạng đóng, và tối ưu trực tiếp bằng BFGS trên đơn hình xác suất mà không dùng công thức.
+Nghiệm dạng đóng kiểm chứng được bằng số. Trên một không gian nhỏ gồm 8 câu trả lời, bài toán được giải theo hai cách độc lập: thay vào công thức dạng đóng, và tối ưu trực tiếp bằng BFGS trên đơn hình xác suất mà không dùng công thức.
 
 | $\beta$ | Chênh lệch giữa hai cách | $\mathrm{KL}(\pi^* \,\|\, \pi_{\text{ref}})$ | Phần thưởng kỳ vọng đạt được |
 |---|---|---|---|
@@ -1053,13 +1092,19 @@ Hình bên phải cho cách hiểu phù hợp về $\beta$: nó không có một
 
 ### 14.5. Hạn chế của quy trình RLHF
 
-Quy trình RLHF với PPO cần huấn luyện một mô hình thưởng riêng, rồi giữ bốn mô hình trong bộ nhớ cùng lúc khi tối ưu: chính sách đang học, chính sách tham chiếu để tính KL, mô hình thưởng, và mô hình giá trị (critic) của PPO. Quy trình tốn bộ nhớ và nhạy với siêu tham số, vì kế thừa các khó khăn của học tăng cường ở Chương 12 và 13. Câu hỏi tự nhiên là có thể bỏ bớt thành phần nào không. Chương 15 cho thấy có thể bỏ cả mô hình thưởng lẫn học tăng cường mà vẫn tối ưu cùng một mục tiêu.
+Quy trình RLHF với PPO cần huấn luyện một mô hình thưởng riêng, rồi giữ bốn mô hình trong bộ nhớ cùng lúc khi tối ưu: chính sách đang học, chính sách tham chiếu để tính KL, mô hình thưởng, và mô hình giá trị (critic) của PPO. Quy trình tốn bộ nhớ và nhạy với siêu tham số, vì kế thừa các khó khăn của học tăng cường ở Chương 12 và 13. Câu hỏi tự nhiên là có thể bỏ bớt thành phần nào mà vẫn tối ưu cùng một mục tiêu không.
+
+### 14.6. Tóm tắt
+
+Tinh chỉnh có giám sát chỉ đưa mô hình tới chất lượng của câu trả lời mẫu. RLHF vượt giới hạn đó bằng dữ liệu so sánh, vì đánh giá dễ hơn tạo ra và so sánh nhất quán giữa người gán nhãn hơn chấm điểm tuyệt đối. Mô hình thưởng Bradley–Terry là hồi quy logistic trên hiệu hai điểm thưởng. Tối ưu phần thưởng có phạt KL với hệ số $\beta$ có nghiệm dạng đóng: chính sách tham chiếu đánh trọng số lại theo $\exp(r/\beta)$, và trên không gian 8 câu trả lời, nghiệm này khớp với nghiệm tìm bằng BFGS với chênh lệch không quá $4 \times 10^{-7}$. $\beta$ chọn một điểm trên đường đánh đổi giữa phần thưởng và độ lệch khỏi chính sách tham chiếu. Quy trình với PPO giữ bốn mô hình trong bộ nhớ và nhạy với siêu tham số.
+
+Nghiệm dạng đóng ở Mục 14.4 còn dùng được theo chiều ngược lại: biết chính sách thì suy ra được hàm thưởng. Chương 15 khai thác điều đó để bỏ cả mô hình thưởng lẫn học tăng cường mà vẫn tối ưu cùng một mục tiêu.
 
 ---
 
 ## 15. Tối ưu trực tiếp theo sở thích (DPO)
 
-DPO (direct preference optimization; Rafailov và cộng sự, 2023) dựa trên một quan sát: nghiệm dạng đóng ở Mục 14.4 có thể đảo ngược để biểu diễn phần thưởng qua chính sách, và khi thay vào mô hình Bradley–Terry, hằng số chuẩn hoá không tính được tự triệt tiêu. Kết quả là một hàm mất mát tính trực tiếp từ dữ liệu so sánh, không cần mô hình thưởng và không cần học tăng cường. Chương này suy ra hàm mất mát, kiểm chứng rằng DPO cho cùng chính sách với RLHF hai bước, và so sánh hai cách.
+DPO (direct preference optimization; Rafailov và cộng sự, 2023) dựa trên một quan sát: nghiệm dạng đóng ở Mục 14.4 có thể đảo ngược để biểu diễn phần thưởng qua chính sách, và khi thay vào mô hình Bradley–Terry, hằng số chuẩn hoá không tính được tự triệt tiêu. Kết quả là một hàm mất mát tính trực tiếp từ dữ liệu so sánh, không cần mô hình thưởng và không cần học tăng cường. Vì DPO và RLHF tối ưu cùng một mục tiêu, câu hỏi thực tế không phải phương pháp nào đúng hơn mà là mỗi cách đánh đổi những gì.
 
 ### 15.1. Hàm thưởng ẩn trong chính sách
 
@@ -1083,11 +1128,7 @@ Hàm mất mát có dạng cross-entropy nhị phân ([Chương 6 của *Nền t
 
 ### 15.3. Kiểm chứng bằng số
 
-Phép suy ra ở trên chặt chẽ trên giấy; thí nghiệm kiểm tra nó khi chạy thật. Trên một không gian 8 câu trả lời, đủ nhỏ để giải chính xác:
-
-1. Sinh 52 588 cặp so sánh từ một hàm thưởng thật đã biết, theo mô hình Bradley–Terry.
-2. **RLHF hai bước**: khớp hàm thưởng $\hat r$ bằng hợp lý cực đại, rồi tính $\pi_{\text{RLHF}} \propto \pi_{\text{ref}}\exp(\hat r/\beta)$.
-3. **DPO một bước**: cực tiểu trực tiếp $\mathcal{L}_{\text{DPO}}$ theo $\pi$, không dùng mô hình thưởng nào.
+Phép suy ra ở trên chặt chẽ trên giấy; thí nghiệm kiểm tra nó khi chạy thật. Trên một không gian 8 câu trả lời, đủ nhỏ để giải chính xác, ta sinh 52 588 cặp so sánh từ một hàm thưởng thật đã biết theo mô hình Bradley–Terry, rồi tìm chính sách theo hai cách. Cách thứ nhất là RLHF hai bước: khớp hàm thưởng $\hat r$ bằng hợp lý cực đại, rồi tính $\pi_{\text{RLHF}} \propto \pi_{\text{ref}}\exp(\hat r/\beta)$. Cách thứ hai là DPO một bước: cực tiểu trực tiếp $\mathcal{L}_{\text{DPO}}$ theo $\pi$, không dùng mô hình thưởng nào.
 
 | Câu trả lời | $\pi_{\text{ref}}$ | RLHF hai bước | DPO một bước | Chênh lệch |
 |---|---|---|---|---|
@@ -1116,22 +1157,25 @@ So cột $\pi_{\text{ref}}$ với cột kết quả cho thấy phép đánh tr�
 
 Hai dòng cuối là điểm mạnh còn lại của RLHF. RLHF lấy mẫu từ chính sách hiện tại rồi chấm bằng mô hình thưởng, nên học được trên đúng những câu trả lời mô hình đang sinh ra. DPO chỉ học trên tập so sánh đã thu thập sẵn; khi chính sách đi xa khỏi phân phối của tập đó, tín hiệu học yếu đi. Xu và cộng sự (2024) so sánh hai cách trên nhiều nhiệm vụ và thấy PPO được chỉnh tốt vẫn có thể cho kết quả tốt hơn DPO, nhất là ở các nhiệm vụ như sinh mã. Ngoài ra, mô hình thưởng là một thành phần dùng lại được: chấm dữ liệu mới, so sánh các phiên bản mô hình, phát hiện suy giảm chất lượng trong vận hành.
 
-> **Câu hỏi phỏng vấn (DPO hay RLHF).** Câu trả lời tốt không chọn phe. DPO và RLHF tối ưu cùng một mục tiêu và có cùng nghiệm tối ưu trên lý thuyết; DPO đơn giản, rẻ và ổn định hơn nên là lựa chọn mặc định hợp lý. RLHF có lợi thế khi cần học trên phân phối câu trả lời mà mô hình đang sinh ra, hoặc khi mô hình thưởng có giá trị riêng cho đánh giá và giám sát.
+Vì vậy khi phải chọn giữa hai cách, không có phe nào đúng tuyệt đối. Hai phương pháp tối ưu cùng một mục tiêu và có cùng nghiệm tối ưu trên lý thuyết; DPO đơn giản, rẻ và ổn định hơn nên là lựa chọn mặc định hợp lý. RLHF có lợi thế khi cần học trên phân phối câu trả lời mà mô hình đang sinh ra, hoặc khi mô hình thưởng có giá trị riêng cho đánh giá và giám sát.
 
 ### 15.5. Các phương pháp sau DPO
 
-Hướng nghiên cứu này còn phát triển nhanh; dưới đây chỉ là các ý chính:
-
-- **IPO** (Azar và cộng sự, 2024) xử lý một điểm yếu của DPO: khi dữ liệu so sánh gần như tất định, tức một câu trả lời luôn được chọn, DPO có xu hướng đẩy tỉ số xác suất ra vô cùng, giống hiện tượng trọng số của hồi quy logistic tăng không giới hạn trên dữ liệu tách được ([Mục 6.5 của *Nền tảng*](nentang-ch06.html)). IPO thay hàm mất mát để chặn hiện tượng này.
-- **KTO** (Ethayarajh và cộng sự, 2024) chỉ cần nhãn "tốt" hoặc "không tốt" cho từng câu trả lời riêng lẻ, không cần cặp so sánh, nên dữ liệu rẻ hơn khi thu thập.
-- **Phản hồi từ AI** (RLAIF; Bai và cộng sự, 2022b): dùng chính một mô hình ngôn ngữ, theo một bộ nguyên tắc viết sẵn, để tạo dữ liệu so sánh thay cho người gán nhãn.
+Hướng nghiên cứu này còn phát triển nhanh, nên ở đây chỉ nêu các ý chính. IPO (Azar và cộng sự, 2024) xử lý một điểm yếu của DPO: khi dữ liệu so sánh gần như tất định, tức một câu trả lời luôn được chọn, DPO có xu hướng đẩy tỉ số xác suất ra vô cùng, giống hiện tượng trọng số của hồi quy logistic tăng không giới hạn trên dữ liệu tách được ([Mục 6.5 của *Nền tảng*](nentang-ch06.html)). IPO thay hàm mất mát để chặn hiện tượng này. KTO (Ethayarajh và cộng sự, 2024) chỉ cần nhãn "tốt" hoặc "không tốt" cho từng câu trả lời riêng lẻ, không cần cặp so sánh, nên dữ liệu rẻ hơn khi thu thập. Một hướng khác thay người gán nhãn bằng chính một mô hình ngôn ngữ: phản hồi từ AI (RLAIF; Bai và cộng sự, 2022b) dùng một mô hình, theo một bộ nguyên tắc viết sẵn, để tạo dữ liệu so sánh.
 
 Các phương pháp này giữ cùng khung, cực đại phần thưởng có ràng buộc KL, và thay đổi cách lấy tín hiệu hoặc cách hạn chế độ lệch. Nắm được khung ở Mục 14.4 thì đọc một phương pháp mới chủ yếu là xem nó thay đổi thành phần nào.
 
+### 15.6. Tóm tắt
+
+Nghiệm dạng đóng của RLHF cho phép viết phần thưởng qua chính sách, $r = \beta\log(\pi/\pi_{\text{ref}}) + \beta\log Z(x)$. Mô hình Bradley–Terry chỉ dùng hiệu phần thưởng của hai câu trả lời cho cùng một câu hỏi, nên $\log Z(x)$ triệt tiêu, và hàm mất mát DPO tính trực tiếp được từ dữ liệu so sánh. Trên không gian 8 câu trả lời, chính sách DPO trùng chính sách RLHF hai bước tới $4{,}2 \times 10^{-8}$. DPO đơn giản và ổn định hơn, chỉ cần 2 mô hình trong bộ nhớ; RLHF giữ lợi thế khi cần học trên câu trả lời do chính sách hiện tại sinh ra và khi cần một mô hình thưởng dùng lại được. Các phương pháp ra đời sau như IPO, KTO và RLAIF giữ cùng khung cực đại phần thưởng có ràng buộc KL.
+
+Với chương này, giáo trình đã đi hết con đường đặt ra ở Chương 1: biểu diễn dữ liệu bằng vector, tiền huấn luyện và tái sử dụng mô hình, sinh nội dung mới, và căn chỉnh hành vi theo mong muốn của con người. Cách đưa một mô hình đã căn chỉnh vào sản phẩm, với prompt, truy xuất tài liệu và đánh giá, là nội dung của giáo trình *Ứng dụng LLM*.
+
 ---
 
-
 ## 16. Bài tập
+
+Các bài tập đi theo các chương của giáo trình. Bốn bài yêu cầu suy luận lại các phép chứng minh chính: word2vec phân rã ma trận PMI, dạng đóng của quá trình khuếch tán, gradient của hai hàm mất mát GAN và hàm mất mát DPO. Hai bài tính tay số tham số của LoRA và nghiệm của bài toán RLHF, hai bài chẩn đoán các tình huống hay gặp khi dùng embedding và khi huấn luyện, một bài thiết kế trợ lý cho một công ty bảo hiểm, và bài cuối là một thí nghiệm cần chạy mã. Lời giải chi tiết, kèm nhãn chương và độ khó của từng bài, nằm ở trang Lời giải.
 
 **Bài 1 (suy luận).** Levy và Goldberg (2014) chứng minh skip-gram với lấy mẫu âm ngầm phân rã ma trận PMI dịch đi $\log k$.
 (a) Viết phần hàm mục tiêu kỳ vọng phụ thuộc vào $s = \langle w_i, c_j\rangle$ của một cặp $(i, j)$, rồi cho đạo hàm theo $s$ bằng 0.
@@ -1161,7 +1205,7 @@ Các phương pháp này giữ cùng khung, cực đại phần thưởng có r�
 (a) Tính đạo hàm của mỗi hàm theo $s$.
 (b) Lúc bắt đầu huấn luyện, $\sigma(s) \approx 0$ với mẫu giả. Gradient của mỗi hàm lớn cỡ nào?
 (c) Dùng kết quả đo ở Mục 10.2 để nêu hậu quả.
-(d) Hai hàm có cùng điểm cố định. Bài học tổng quát là gì? Nêu một ví dụ khác trong các giáo trình của lộ trình minh hoạ cùng bài học.
+(d) Hai hàm có cùng điểm cố định. Từ đó rút ra nhận định tổng quát nào về việc chọn hàm mất mát? Nêu một ví dụ khác trong các giáo trình của lộ trình cho thấy cùng hiện tượng.
 
 **Bài 6 (tính tay).** Bài toán RLHF $\max_\pi \mathbb{E}_\pi[r] - \beta\,\mathrm{KL}(\pi \,\|\, \pi_{\text{ref}})$ trên $N$ câu trả lời rời rạc.
 (a) Lập hàm Lagrange với ràng buộc $\sum_y\pi(y) = 1$, cho đạo hàm theo $\pi(y)$ bằng 0 và suy ra nghiệm dạng đóng.
@@ -1245,7 +1289,7 @@ Các câu hỏi về biểu diễn, mô hình sinh và căn chỉnh thường c�
 
 **Câu hỏi: VAE, GAN và mô hình khuếch tán khác nhau thế nào?**
 
-> **Trả lời.** Cả ba biến nhiễu Gauss thành mẫu, khác nhau ở cách huấn luyện: VAE cực đại một chặn dưới của log hợp lý; GAN là trò chơi giữa bộ sinh và bộ phân biệt; mô hình khuếch tán giải một bài hồi quy dự đoán nhiễu. Mô hình khuếch tán thay thế GAN trong phần lớn ứng dụng sinh ảnh vì đạt độ sắc nét tương đương mà huấn luyện ổn định; cái giá là lấy mẫu nhiều bước.
+> **Trả lời.** Cả ba biến nhiễu Gauss thành mẫu, khác nhau ở cách huấn luyện: VAE cực đại một chặn dưới của log hợp lý; GAN là trò chơi giữa bộ sinh và bộ phân biệt; mô hình khuếch tán giải một bài hồi quy dự đoán nhiễu. Mô hình khuếch tán thay thế GAN trong phần lớn ứng dụng sinh ảnh vì đạt độ sắc nét tương đương mà huấn luyện ổn định; đổi lại phải lấy mẫu nhiều bước.
 
 **Câu hỏi: Vì sao mẫu của VAE thường mờ?**
 
@@ -1399,7 +1443,7 @@ python code/bieudien/fig_diagrams.py
 
 Môi trường đã dùng: Python 3.13, NumPy 2.3, SciPy 1.16, scikit-learn 1.7, matplotlib 3.10. Trên Windows, đặt `PYTHONIOENCODING=utf-8` khi ghi kết quả ra tệp.
 
-**Các kết quả kiểm chứng đẳng thức** phải khớp tới sai số của bộ giải, không phải khớp gần đúng:
+Các kết quả kiểm chứng đẳng thức phải khớp tới sai số của bộ giải chứ không chỉ khớp gần đúng:
 
 | Đẳng thức | Sai lệch đo được |
 |---|---|
@@ -1408,10 +1452,6 @@ Môi trường đã dùng: Python 3.13, NumPy 2.3, SciPy 1.16, scikit-learn 1.7,
 | Dạng đóng của quá trình thuận khuếch tán (Mục 11.2) | khớp trung bình và phương sai trên 200 000 quỹ đạo |
 | Skip-gram hạng đầy đủ hội tụ về PMI (Mục 2.6) | tương quan 0,9995 |
 
-**Ba kết quả khác với cách phát biểu thường gặp.** Chúng được trình bày đúng như số liệu cho thấy:
-
-1. Bảng quét số chiều của embedding (Mục 2.4) không phải một đường cong đánh đổi: độ chính xác loại suy đạt 100% ở 8 chiều, giảm ở 12 và 16 chiều, rồi lại 100% ở 20 chiều. Nguyên nhân là phổ của ma trận PPMI có đúng 8 trị riêng dương.
-2. Thí nghiệm GAN (Mục 10.3) không tái hiện được sụp chế độ; nó cho thấy dạng minimax gốc không học được vì gradient triệt tiêu, và phủ đủ các chế độ vẫn chưa có nghĩa là học đúng phân phối.
-3. Thí nghiệm học tăng cường (Mục 12.4) cho thấy $\varepsilon = 0$ vẫn thành công trong một cấu hình nhờ khởi tạo lạc quan.
+Ba kết quả khác với cách phát biểu thường gặp, và giáo trình trình bày chúng đúng như số liệu cho thấy. Bảng quét số chiều của embedding ở Mục 2.4 không phải một đường cong đánh đổi: độ chính xác loại suy đạt 100% ở 8 chiều, giảm ở 12 và 16 chiều, rồi lại 100% ở 20 chiều, vì phổ của ma trận PPMI có đúng 8 trị riêng dương. Thí nghiệm GAN ở Mục 10.3 không tái hiện được sụp chế độ; nó cho thấy dạng minimax gốc không học được vì gradient triệt tiêu, và phủ đủ các chế độ vẫn chưa có nghĩa là học đúng phân phối. Thí nghiệm học tăng cường ở Mục 12.4 cho thấy $\varepsilon = 0$ vẫn thành công trong một cấu hình nhờ khởi tạo lạc quan.
 
 Ngoài ra, thí nghiệm ở Mục 6.3 chạy mỗi cấu hình một lần, nên các chênh lệch nhỏ ở cỡ dữ liệu nhỏ không có ý nghĩa thống kê; mô phỏng ở Mục 2.4 dùng kho ngữ liệu nhân tạo 20 từ, nên chỉ minh hoạ cơ chế chứ không đại diện cho embedding trên dữ liệu thật.

@@ -37,7 +37,7 @@ def mui_ten(ax, p0, p1, color=C_DIM, lw=1.1, style="-|>"):
 fig, ax = plt.subplots(figsize=(8.6, 4.5))
 ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
 
-ax.text(.5, .955, "Ba thành phần của một thuật toán học có giám sát",
+ax.text(.5, .955, "Các thành phần của một thuật toán học có giám sát",
         ha="center", fontsize=11.5, weight="bold", color="#1a1a1a")
 
 hop(ax, .04, .70, .27, .16,

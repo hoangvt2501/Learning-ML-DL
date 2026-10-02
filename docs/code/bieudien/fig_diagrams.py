@@ -35,7 +35,7 @@ def ten(ax, p0, p1, color=C_DIM, lw=1.2, style="-|>", rad=0.0):
 # ---------------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(9.2, 4.6))
 ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-ax.text(.5, .955, "Bốn câu hỏi, bốn nhóm kỹ thuật",
+ax.text(.5, .955, "Các câu hỏi và nhóm kỹ thuật của giáo trình",
         ha="center", fontsize=12, weight="bold")
 
 nhom = [
@@ -54,7 +54,7 @@ nhom = [
 ]
 
 for x, tieu_de, col, cau_hoi, muc in nhom:
-    ax.add_patch(FancyBboxPatch((x, .13), .21, .72,
+    ax.add_patch(FancyBboxPatch((x, .17), .21, .68,
                                 boxstyle="round,pad=0.008,rounding_size=0.02",
                                 facecolor="#fcfcfb", edgecolor=col, linewidth=1.5))
     ax.add_patch(FancyBboxPatch((x, .755), .21, .095,
@@ -71,8 +71,8 @@ for x in (.243, .483, .723):
     ten(ax, (x, .49), (x + .017, .49), color="#6b7a78", lw=1.9)
 
 ax.text(.5, .065,
-        "Đọc từ trái sang phải là đọc theo đúng thứ tự một mô hình ngôn ngữ ra đời: học biểu diễn từ\n"
-        "dữ liệu thô, tái dùng cho việc mới, học sinh ra nội dung, rồi cuối cùng mới học nói cho phải.",
+        "Đọc từ trái sang phải là đi theo thứ tự một mô hình ngôn ngữ được xây dựng: học biểu diễn từ\n"
+        "dữ liệu thô, tái dùng cho việc mới, học sinh nội dung, rồi điều chỉnh hành vi theo mong muốn của con người.",
         ha="center", fontsize=8.4, color="#333", linespacing=1.6)
 fig.tight_layout(); fig.savefig(OUT + "bd01_bando.png"); plt.close(fig)
 
@@ -82,7 +82,7 @@ fig.tight_layout(); fig.savefig(OUT + "bd01_bando.png"); plt.close(fig)
 # ---------------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(9.4, 3.7))
 ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-ax.text(.5, .95, "Bốn cách tái dùng một mô hình đã huấn luyện",
+ax.text(.5, .95, "Các cách tái sử dụng một mô hình đã huấn luyện",
         ha="center", fontsize=11.5, weight="bold")
 
 cach = [
@@ -124,7 +124,7 @@ fig.tight_layout(); fig.savefig(OUT + "bd05_taidung.png"); plt.close(fig)
 # ---------------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(8.8, 3.6))
 ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-ax.text(.5, .95, "LoRA: học phần cộng thêm có hạng thấp", ha="center", fontsize=11.5, weight="bold")
+ax.text(.5, .95, "LoRA học phần cộng thêm có hạng thấp", ha="center", fontsize=11.5, weight="bold")
 
 ax.add_patch(FancyBboxPatch((.06, .35), .2, .38,
                             boxstyle="round,pad=0.008,rounding_size=0.02",
@@ -172,7 +172,7 @@ fig.tight_layout(); fig.savefig(OUT + "bd07_lora.png"); plt.close(fig)
 # ---------------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(9.6, 4.3))
 ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-ax.text(.5, .955, "Ba cách trả lời cùng một câu hỏi: sinh mẫu mới thế nào",
+ax.text(.5, .955, "Các họ mô hình sinh",
         ha="center", fontsize=11.5, weight="bold")
 
 ho = [
@@ -221,7 +221,7 @@ fig.tight_layout(); fig.savefig(OUT + "bd11_mohinhsinh.png"); plt.close(fig)
 # ---------------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(9.6, 4.2))
 ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-ax.text(.5, .955, "Từ mô hình ngôn ngữ thô tới trợ lý: ba giai đoạn",
+ax.text(.5, .955, "Các giai đoạn huấn luyện một trợ lý ngôn ngữ",
         ha="center", fontsize=11.5, weight="bold")
 
 gd = [
@@ -264,7 +264,7 @@ ten(ax, (.62, .29), (.62, .265), color=C_WARN, lw=1.5)
 ten(ax, (.86, .29), (.86, .265), color=C_WARN, lw=1.5)
 
 ax.text(.5, .055,
-        "Bước 3 là bước duy nhất mô hình học từ so sánh thay vì từ ví dụ mẫu, và đó là lý do nó vượt được\n"
+        "Bước 3 là bước duy nhất mô hình học từ so sánh thay vì từ ví dụ mẫu, nhờ vậy nó vượt được\n"
         "chất lượng của người viết mẫu: nhận ra câu nào hay hơn dễ hơn nhiều so với tự viết ra câu hay nhất.",
         ha="center", fontsize=8.3, color="#333", linespacing=1.6)
 fig.tight_layout(); fig.savefig(OUT + "bd14_rlhf_quytrinh.png"); plt.close(fig)

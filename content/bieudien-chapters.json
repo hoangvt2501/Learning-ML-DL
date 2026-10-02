@@ -10,105 +10,105 @@
     "num": "1",
     "file": "bieudien-ch01.html",
     "label": "Tổng quan",
-    "summary": "Bốn nhóm kỹ thuật của giáo trình, embedding, học chuyển giao, mô hình sinh và căn chỉnh, đặt theo thứ tự một mô hình ngôn ngữ được xây dựng.",
+    "summary": "Bốn nhóm kỹ thuật ra đời riêng rẽ, embedding, học chuyển giao, mô hình sinh và căn chỉnh, xếp thành một chuỗi khi nhìn theo quá trình tạo ra một trợ lý ngôn ngữ; mỗi nhóm trả lời một câu hỏi mà nhóm trước để lại.",
     "part": "Mở đầu"
   },
   {
     "num": "2",
     "file": "bieudien-ch02.html",
     "label": "Word2Vec",
-    "summary": "Từ số lần đồng hiện tới PMI, nén bằng SVD, skip-gram và lấy mẫu âm, chứng minh skip-gram phân rã ma trận PMI, kèm số đo trên một kho ngữ liệu nhân tạo có cấu trúc hai trục.",
+    "summary": "Đếm số lần đồng hiện, chuyển sang PMI rồi nén bằng SVD đã cho embedding giải đúng mọi phép loại suy trên một kho ngữ liệu nhân tạo; word2vec làm cùng việc mà không lập ma trận, vì ở điểm tối ưu tích vô hướng của nó bằng PMI dịch đi log k.",
     "part": "Biểu diễn và embedding"
   },
   {
     "num": "3",
     "file": "bieudien-ch03.html",
     "label": "Hình học của không gian embedding",
-    "summary": "Tính bất đẳng hướng làm cosine giữa hai vector ngẫu nhiên lên tới 0,87, cách khắc phục bằng trừ trung bình, làm trắng và học tương phản, và vì sao từng chiều của embedding không có nghĩa riêng.",
+    "summary": "Khi đám mây embedding lệch tâm, hai vector ngẫu nhiên độc lập có cosine trung bình tới 0,87; trừ vector trung bình, làm trắng hoặc học tương phản sửa được hiện tượng này, còn từng chiều riêng lẻ của embedding thường không mang nghĩa.",
     "part": "Biểu diễn và embedding"
   },
   {
     "num": "4",
     "file": "bieudien-ch04.html",
     "label": "Embedding theo ngữ cảnh và tìm kiếm vector",
-    "summary": "Giới hạn của embedding tĩnh, embedding theo ngữ cảnh và học tương phản với mẫu âm trong lô, tìm kiếm láng giềng gần đúng, và cách đánh giá hệ thống tìm kiếm vector.",
+    "summary": "Embedding tĩnh không phân biệt được các nghĩa của một từ; Transformer gán vector theo ngữ cảnh nhưng cần học tương phản mới cho embedding câu tốt, và tìm kiếm trên hàng triệu vector dựa vào các chỉ mục gần đúng như IVF, HNSW và PQ.",
     "part": "Biểu diễn và embedding"
   },
   {
     "num": "5",
     "file": "bieudien-ch05.html",
     "label": "Tiền huấn luyện",
-    "summary": "Vì sao học tự giám sát trên dữ liệu không nhãn hiệu quả, vì sao dự đoán token tiếp theo dạy được nhiều kỹ năng, bốn cách tái sử dụng mô hình, và giới hạn của tiền huấn luyện.",
+    "summary": "Dữ liệu không nhãn rẻ và dồi dào, và việc đoán token tiếp theo buộc mô hình học sự kiện, ngữ pháp, phép tính và cấu trúc mã; mô hình đã tiền huấn luyện được dùng lại theo bốn cách, và có những trường hợp tiền huấn luyện không giúp được.",
     "part": "Học chuyển giao"
   },
   {
     "num": "6",
     "file": "bieudien-ch06.html",
     "label": "Đóng băng và tinh chỉnh",
-    "summary": "Thí nghiệm có kiểm soát so sánh đóng băng, tinh chỉnh toàn phần và huấn luyện từ đầu theo số mẫu có nhãn, giới hạn trên khi đặc trưng bị cố định, và các quy tắc thực hành khi tinh chỉnh.",
+    "summary": "Một thí nghiệm có kiểm soát cho thấy với 20 và 50 mẫu ba cách làm không phân biệt được, từ 150 mẫu tinh chỉnh toàn phần dẫn đầu, còn đóng băng chững lại từ 500 mẫu vì đặc trưng cố định đặt ra giới hạn trên.",
     "part": "Học chuyển giao"
   },
   {
     "num": "7",
     "file": "bieudien-ch07.html",
     "label": "LoRA và tinh chỉnh tiết kiệm tham số",
-    "summary": "Chi phí bộ nhớ của tinh chỉnh toàn phần, LoRA và giả định hạng thấp, phép đếm tham số và bộ nhớ cho Llama 2, lợi ích khi phục vụ nhiều adapter, và các phương pháp cùng họ như QLoRA.",
+    "summary": "Tinh chỉnh toàn phần Llama 2 7B cần 96,4 GiB; LoRA chỉ học phần cộng thêm hạng thấp, đưa trạng thái Adam xuống 32 MiB, không làm suy luận nhanh hơn nhưng cho phép một mô hình gốc phục vụ nhiều adapter và kết hợp được với lượng tử hoá trong QLoRA.",
     "part": "Học chuyển giao"
   },
   {
     "num": "8",
     "file": "bieudien-ch08.html",
     "label": "Mô hình sinh",
-    "summary": "Bài toán sinh, vì sao hằng số chuẩn hoá ngăn áp dụng trực tiếp hợp lý cực đại, và so sánh mô hình tự hồi quy, VAE, GAN và mô hình khuếch tán.",
+    "summary": "Hằng số chuẩn hoá làm ước lượng hợp lý cực đại không áp dụng trực tiếp được cho bài toán sinh; mô hình tự hồi quy, VAE, GAN và mô hình khuếch tán là bốn cách tránh nó, với những đánh đổi khác nhau về độ ổn định, độ sắc nét và tốc độ lấy mẫu.",
     "part": "Mô hình sinh"
   },
   {
     "num": "9",
     "file": "bieudien-ch09.html",
     "label": "Bộ tự mã hoá biến phân",
-    "summary": "Suy ra chặn dưới ELBO, mẹo tái tham số hoá, thí nghiệm cho thấy β quyết định số chiều ẩn còn mang thông tin và hiện tượng sụp hậu nghiệm, và vì sao mẫu của VAE thường mờ.",
+    "summary": "VAE tối đa chặn dưới ELBO để không gian ẩn có cấu trúc lấy mẫu được; thí nghiệm cho thấy hệ số β quyết định số chiều ẩn còn mang thông tin, từ 6 chiều ở β = 0 tới không chiều nào khi hậu nghiệm sụp, và mẫu mờ là do hàm mất mát bình phương.",
     "part": "Mô hình sinh"
   },
   {
     "num": "10",
     "file": "bieudien-ch10.html",
     "label": "Mạng đối sinh",
-    "summary": "Bài toán minimax và bộ phân biệt tối ưu, vì sao dạng gốc của hàm mất mát cho bộ sinh không học được, kết quả đo về độ phủ các chế độ, và các khó khăn khi huấn luyện GAN.",
+    "summary": "Bộ sinh học qua đánh giá của bộ phân biệt; dạng gốc của hàm mất mát có gradient gần 0 đúng lúc bộ sinh còn tệ nên không phủ được cụm nào, dạng không bão hoà phủ đủ 8 cụm, và việc phải tìm điểm cân bằng thay vì cực tiểu làm GAN khó huấn luyện.",
     "part": "Mô hình sinh"
   },
   {
     "num": "11",
     "file": "bieudien-ch11.html",
     "label": "Mô hình khuếch tán",
-    "summary": "Quá trình thuận và dạng đóng của nó kiểm chứng bằng mô phỏng, lịch nhiễu và tỉ số tín hiệu trên nhiễu, huấn luyện bằng hồi quy dự đoán nhiễu, tăng tốc lấy mẫu và sinh có điều kiện.",
+    "summary": "Quá trình thuận có dạng đóng, kiểm chứng trên 200 000 quỹ đạo mô phỏng; lịch nhiễu đọc qua tỉ số tín hiệu trên nhiễu, huấn luyện chỉ là hồi quy dự đoán nhiễu, còn lấy mẫu chậm được khắc phục bằng DDIM, chưng cất và khuếch tán trong không gian ẩn.",
     "part": "Mô hình sinh"
   },
   {
     "num": "12",
     "file": "bieudien-ch12.html",
     "label": "Nhập môn học tăng cường",
-    "summary": "Trạng thái, hành động, phần thưởng, phương trình Bellman và Q-learning, cùng thí nghiệm cho thấy cách khởi tạo hàm giá trị cũng là một cơ chế khám phá.",
+    "summary": "Học từ phần thưởng thay vì đáp án đúng: phương trình Bellman, Q-learning, và một thí nghiệm trên lưới 7 × 7 cho thấy khởi tạo lạc quan đủ để khám phá với ε = 0, còn khởi tạo bi quan làm cả ε = 0,3 thất bại.",
     "part": "Học tăng cường và căn chỉnh"
   },
   {
     "num": "13",
     "file": "bieudien-ch13.html",
     "label": "Gradient chính sách",
-    "summary": "Định lý gradient chính sách và REINFORCE, vì sao đường nền giảm phương sai mà không đổi kỳ vọng, số đo cho thấy độ lệch chuẩn giảm khoảng 2,3 lần, hàm lợi thế và PPO.",
+    "summary": "Thủ thuật log biến gradient của phần thưởng kỳ vọng thành một kỳ vọng ước lượng được bằng lấy mẫu; đường nền không đổi kỳ vọng nhưng giảm độ lệch chuẩn khoảng 2,3 lần, và PPO dùng hàm lợi thế cùng phép cắt tỉ số xác suất.",
     "part": "Học tăng cường và căn chỉnh"
   },
   {
     "num": "14",
     "file": "bieudien-ch14.html",
     "label": "Học tăng cường từ phản hồi của con người",
-    "summary": "Ba giai đoạn huấn luyện một trợ lý, vì sao học từ so sánh vượt được học bắt chước, mô hình thưởng Bradley–Terry, và nghiệm dạng đóng của bài toán có ràng buộc KL kiểm chứng bằng số.",
+    "summary": "Học từ so sánh vượt được giới hạn của học bắt chước vì đánh giá dễ hơn tạo ra; mô hình thưởng Bradley–Terry là hồi quy logistic trên hiệu điểm, và bài toán có ràng buộc KL có nghiệm dạng đóng khớp với nghiệm số tới 10⁻⁷.",
     "part": "Học tăng cường và căn chỉnh"
   },
   {
     "num": "15",
     "file": "bieudien-ch15.html",
     "label": "Tối ưu trực tiếp theo sở thích (DPO)",
-    "summary": "Suy ra hàm mất mát DPO từ nghiệm của RLHF, kiểm chứng DPO cho cùng chính sách với RLHF hai bước tới 4,2 × 10⁻⁸, so sánh hai cách và các phương pháp ra đời sau.",
+    "summary": "Đảo ngược nghiệm dạng đóng của RLHF làm hằng số chuẩn hoá triệt tiêu, cho một hàm mất mát tính thẳng từ dữ liệu so sánh; DPO trùng RLHF hai bước tới 4,2 × 10⁻⁸ và đơn giản hơn, nhưng RLHF vẫn có lợi khi cần học trên câu trả lời mới sinh.",
     "part": "Học tăng cường và căn chỉnh"
   },
   {

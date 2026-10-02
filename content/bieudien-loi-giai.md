@@ -18,7 +18,7 @@ $$\ell'(s) = \#(i,j)\,\big(1 - \sigma(s)\big) - k\,\#(i)\,P_n(j)\,\sigma(s) = 0.
 
 $$e^{s} = \frac{\#(i,j)\,N}{k\,\#(i)\,\#(j)} \;\Longrightarrow\; s = \log\frac{\#(i,j)\,N}{\#(i)\,\#(j)} - \log k = \mathrm{PMI}(i,j) - \log k.$$
 
-**(c) Tăng $k$ từ 1 lên 15.** Ma trận đích dịch xuống $\log 15 \approx 2{,}71$. Các cặp không liên quan vốn có PMI khoảng 0 trở thành âm, và sau khi cắt phần âm thì bằng 0: ma trận đích thưa hơn nhiều. Trên kho ngữ liệu thật, điều này lọc bỏ các cặp đồng hiện yếu vốn ước lượng rất nhiễu. Trên kho ngữ liệu 20 từ của Mục 2.2, PMI lớn nhất chỉ là 1,19, nên với $k = 15$ mọi phần tử đều âm và bị cắt về 0, không còn gì để phân rã; đây là lý do thí nghiệm dùng $k = 1$.
+**(c) Tăng $k$ từ 1 lên 15.** Ma trận đích dịch xuống $\log 15 \approx 2{,}71$. Các cặp không liên quan vốn có PMI khoảng 0 trở thành âm, và sau khi cắt phần âm thì bằng 0: ma trận đích thưa hơn nhiều. Trên kho ngữ liệu thật, điều này lọc bỏ các cặp đồng hiện yếu vốn ước lượng rất nhiễu. Trên kho ngữ liệu 20 từ của Mục 2.2, PMI lớn nhất chỉ là 1,19, nên với $k = 15$ mọi phần tử đều âm và bị cắt về 0, không còn gì để phân rã, nên thí nghiệm dùng $k = 1$.
 
 **(d) Hạng đầy đủ và hạng thấp.** Kết quả ở (b) là điều kiện cho từng phần tử của ma trận $WC^\top$. Nếu embedding có đủ $V = 20$ chiều, $WC^\top$ có thể là bất kỳ ma trận $20 \times 20$ nào, nên tối ưu đạt được điều kiện ở mọi phần tử: Mục 2.6 đo được tương quan 0,9995 và sai lệch trung bình 0,0106.
 
@@ -44,7 +44,7 @@ Chi phí chỉ là một phép trừ vector cho mỗi truy vấn.
 2. Ngưỡng không ổn định: vector trung bình thay đổi theo miền dữ liệu, theo mô hình, cả theo độ dài câu. Ngưỡng chỉnh cho dữ liệu hôm nay sẽ sai khi dữ liệu thay đổi.
 3. Dải giá trị quá hẹp: mọi điểm nằm trong $[0{,}82;\ 0{,}94]$, tức toàn bộ thông tin nằm trong một dải rộng 0,12, nên một chênh lệch nhỏ do nhiễu cũng đảo được thứ hạng. Sau khi trừ trung bình, dải này giãn ra gần hết khoảng $[-1, 1]$.
 
-**(d) Cách sửa triệt để: huấn luyện với mục tiêu tương phản.** Huấn luyện embedding sao cho cặp câu liên quan gần nhau và cặp không liên quan xa nhau, với hàm mất mát InfoNCE và các câu khác trong lô làm mẫu âm (Mục 4.2). Cái giá: cần dữ liệu cặp (câu hỏi và câu trả lời, câu và bản dịch, hai cách diễn đạt của cùng một ý), và cần lô lớn để có nhiều mẫu âm. Thứ tự nên thử: trừ trung bình trước, làm trắng nếu chưa đủ, và chỉ huấn luyện tương phản khi hai cách kia không đạt yêu cầu; hoặc dùng ngay một mô hình embedding đã được huấn luyện tương phản sẵn.
+**(d) Cách sửa triệt để: huấn luyện với mục tiêu tương phản.** Huấn luyện embedding sao cho cặp câu liên quan gần nhau và cặp không liên quan xa nhau, với hàm mất mát InfoNCE và các câu khác trong lô làm mẫu âm (Mục 4.2). Đổi lại, cách này cần dữ liệu cặp (câu hỏi và câu trả lời, câu và bản dịch, hai cách diễn đạt của cùng một ý), và cần lô lớn để có nhiều mẫu âm. Thứ tự nên thử: trừ trung bình trước, làm trắng nếu chưa đủ, và chỉ huấn luyện tương phản khi hai cách kia không đạt yêu cầu; hoặc dùng ngay một mô hình embedding đã được huấn luyện tương phản sẵn.
 
 ## Bài 3
 @meta chuong=7 | dang=Tính tay | kho=Cơ bản
@@ -118,7 +118,7 @@ $$\frac{\partial}{\partial s}\log\big(1 - \sigma(s)\big) = \frac{-\sigma(s)(1 - 
 
 Dạng gốc không học được gì ở cả bốn lần. Cơ chế là một vòng luẩn quẩn: bộ sinh kém, bộ phân biệt tự tin, gradient của bộ sinh gần 0, bộ sinh không cải thiện. Vòng này khép lại ngay từ bước đầu, vì lúc đầu bộ sinh luôn kém. Dạng không bão hoà phá vòng này vì gradient lớn nhất đúng khi bộ sinh kém nhất.
 
-**(d) Bài học tổng quát.** Hai hàm mất mát có cùng điểm tối ưu vẫn có thể cho quá trình huấn luyện rất khác nhau, vì thuật toán không nhảy thẳng tới điểm tối ưu mà đi từng bước theo gradient; hình dạng của gradient dọc đường đi mới quyết định việc học.
+**(d) Nhận định tổng quát.** Hai hàm mất mát có cùng điểm tối ưu vẫn có thể cho quá trình huấn luyện rất khác nhau, vì thuật toán không nhảy thẳng tới điểm tối ưu mà đi từng bước theo gradient; hình dạng của gradient dọc đường đi mới quyết định việc học.
 
 Ví dụ khác: [Chương 6 của *Nền tảng*](nentang-ch06.html) so sánh hàm mất mát của perceptron, hinge và logistic. Cả ba đều là chặn trên lồi của mất mát 0–1, nhưng mất mát perceptron bằng 0 ngay khi một điểm vừa được phân loại đúng, nên thuật toán ngừng điều chỉnh điểm đó dù nó nằm sát biên. Trên dữ liệu không tách được, Mục 6.2 của *Nền tảng* đo được 17 977 lần phân loại sai sau 2 000 lượt quét mà không hội tụ.
 
