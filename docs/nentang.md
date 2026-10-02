@@ -50,6 +50,7 @@
 | $\eta$ | tốc độ học (learning rate) |
 | $\lambda$ | hệ số regularization |
 | $\nabla_\theta L$ | gradient của $L$ theo $\theta$ |
+| $\mathcal{L}$ | hàm hợp lý (Chương 10) hoặc hàm Lagrange (Chương 12, 13) |
 | $\Sigma$ | ma trận hiệp phương sai |
 | $\lambda_i$, $v_i$ | trị riêng và vector riêng thứ $i$ |
 | $d_i$ | giá trị suy biến thứ $i$ trong phân tích SVD |

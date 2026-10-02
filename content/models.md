@@ -41,8 +41,9 @@ Giáo trình dùng lại ký hiệu và quy ước thuật ngữ của *Nền t�
 | $X \in \mathbb{R}^{n \times d}$ | ma trận dữ liệu gồm $n$ điểm |
 | $y$, $\hat{y}$ | nhãn thật và giá trị dự đoán |
 | $W$, $b$ | ma trận trọng số và vector hệ số chặn của một lớp |
+| $h^{(l)}$, $h_t$ | đầu ra của lớp ẩn thứ $l$; trạng thái ẩn của RNN tại bước $t$ |
 | $\phi$, $\sigma$ | hàm kích hoạt nói chung; hàm sigmoid |
-| $L$ | hàm mất mát |
+| $\mathcal{L}$ | hàm mất mát |
 | $\eta$ | tốc độ học (learning rate) |
 | $B$ | kích thước lô (batch size) |
 | $T$ | độ dài chuỗi: số token hoặc số bước thời gian |
@@ -50,12 +51,12 @@ Giáo trình dùng lại ký hiệu và quy ước thuật ngữ của *Nền t�
 | $h$ | số đầu attention |
 | $d_k = d/h$ | số chiều của mỗi đầu |
 | $d_{\text{ff}}$ | số chiều lớp ẩn của khối FFN |
-| $L_{\text{layers}}$ hoặc $L$ | số khối Transformer, khi không nhầm với hàm mất mát |
-| $V$ | kích thước từ vựng |
+| $L$ | số lớp của mạng; với Transformer là số khối |
+| $V$ | kích thước từ vựng; trong công thức attention là ma trận giá trị (value) |
 | $N$ | số tham số của mô hình (không tính embedding, trừ khi ghi rõ) |
 | $D$ | số token dữ liệu huấn luyện |
 
-Chữ $L$ được dùng cho cả hàm mất mát và số lớp. Chương 12 là chương duy nhất dùng $L$ cho số lớp trong công thức, và ở đó không có hàm mất mát nào.
+Giáo trình *Nền tảng* viết hàm mất mát là $L$, vì ở đó chưa có mạng nhiều lớp. Từ giáo trình này, chữ $L$ được dành cho số lớp, xuất hiện từ định nghĩa mạng nhiều lớp ở Chương 4 tới phép đếm tham số ở Chương 12, nên hàm mất mát viết là $\mathcal{L}$. Chữ $h$ chỉ vector ẩn khi nói về mạng nhiều lớp, mạng hồi quy và kết nối tắt (Chương 4 tới 8), và chỉ số đầu attention trong các chương về Transformer (Chương 9 tới 12).
 
 ### 0.2. Quy ước thuật ngữ
 
@@ -278,7 +279,7 @@ Cách thứ hai là **boosting**: huấn luyện các mô hình tuần tự, m�
 
 $$F_m(x) = F_{m-1}(x) + \eta\, h_m(x),$$
 
-trong đó cây $h_m$ được huấn luyện để xấp xỉ gradient âm của hàm mất mát theo giá trị dự đoán, $-\partial L(y, F)/\partial F$ tại $F = F_{m-1}(x)$, và $\eta$ là tốc độ học, thường từ 0,01 tới 0,3. Với mất mát bình phương, gradient âm chính là phần dư $y - F_{m-1}(x)$, nên mỗi cây mới học phần dư của các cây trước. Đây là gradient descent trong không gian hàm: thay vì cập nhật tham số, mỗi bước cộng thêm một hàm theo hướng làm giảm mất mát. Vì mỗi cây chỉ cần sửa một phần nhỏ, các cây trong boosting thường rất nông, độ sâu từ 2 tới 6. Tổ hợp của nhiều cây nông có độ chệch thấp hơn nhiều so với từng cây, nên boosting chủ yếu giảm độ chệch.
+trong đó cây $h_m$ được huấn luyện để xấp xỉ gradient âm của hàm mất mát theo giá trị dự đoán, $-\partial \mathcal{L}(y, F)/\partial F$ tại $F = F_{m-1}(x)$, và $\eta$ là tốc độ học, thường từ 0,01 tới 0,3. Với mất mát bình phương, gradient âm chính là phần dư $y - F_{m-1}(x)$, nên mỗi cây mới học phần dư của các cây trước. Đây là gradient descent trong không gian hàm: thay vì cập nhật tham số, mỗi bước cộng thêm một hàm theo hướng làm giảm mất mát. Vì mỗi cây chỉ cần sửa một phần nhỏ, các cây trong boosting thường rất nông, độ sâu từ 2 tới 6. Tổ hợp của nhiều cây nông có độ chệch thấp hơn nhiều so với từng cây, nên boosting chủ yếu giảm độ chệch.
 
 ### 3.4. Đo tác dụng của bagging và boosting
 
@@ -439,9 +440,9 @@ Huấn luyện một mạng nơ-ron gồm hai việc tách biệt: tính gradien
 
 Lan truyền ngược không phải là thuật toán học. Nó chỉ tính gradient; dùng gradient để cập nhật tham số thế nào là việc của thuật toán tối ưu (Mục 5.4). Hai thành phần độc lập với nhau: cùng một gradient có thể dùng cho SGD hay Adam, và cùng một thuật toán tối ưu nhận được gradient tính bằng lan truyền ngược hay bằng cách khác.
 
-Thuật toán gồm hai lượt. **Lượt xuôi** tính đầu ra từ đầu vào, lần lượt qua từng lớp, và lưu lại mọi giá trị trung gian: đầu vào của mỗi lớp, giá trị trước và sau hàm kích hoạt. **Lượt ngược** bắt đầu từ $\partial L/\partial L = 1$ và đi ngược qua từng lớp. Với một lớp $z = Wh + b$, $a = \phi(z)$, khi đã có $\delta_a = \partial L/\partial a$ thì
+Thuật toán gồm hai lượt. **Lượt xuôi** tính đầu ra từ đầu vào, lần lượt qua từng lớp, và lưu lại mọi giá trị trung gian: đầu vào của mỗi lớp, giá trị trước và sau hàm kích hoạt. **Lượt ngược** bắt đầu từ $\partial \mathcal{L}/\partial \mathcal{L} = 1$ và đi ngược qua từng lớp. Với một lớp $z = Wh + b$, $a = \phi(z)$, khi đã có $\delta_a = \partial \mathcal{L}/\partial a$ thì
 
-$$\delta_z = \delta_a \odot \phi'(z), \qquad \frac{\partial L}{\partial W} = \delta_z\, h^\top, \qquad \frac{\partial L}{\partial b} = \delta_z, \qquad \delta_h = W^\top \delta_z.$$
+$$\delta_z = \delta_a \odot \phi'(z), \qquad \frac{\partial \mathcal{L}}{\partial W} = \delta_z\, h^\top, \qquad \frac{\partial \mathcal{L}}{\partial b} = \delta_z, \qquad \delta_h = W^\top \delta_z.$$
 
 Vector $\delta_h$ lại là đầu vào cho lớp phía trước, và mỗi công thức chỉ cần các giá trị $z$, $h$ đã lưu ở lượt xuôi. Rumelhart, Hinton và Williams (1986) phổ biến thuật toán này cho mạng nơ-ron; trong toán học ứng dụng, nó là trường hợp riêng của vi phân tự động chế độ ngược.
 
@@ -451,9 +452,9 @@ Vector $\delta_h$ lại là đầu vào cho lớp phía trước, và mỗi côn
 
 ### 5.2. Thứ tự nhân các ma trận Jacobi
 
-Vì sao phải đi ngược mà không đi xuôi? Theo quy tắc dây chuyền, với mạng $x \to h_1 \to \dots \to h_{L-1} \to L$ trong đó $L$ là một số, gradient theo đầu vào là tích các ma trận Jacobi:
+Vì sao phải đi ngược mà không đi xuôi? Theo quy tắc dây chuyền, với mạng $x \to h_1 \to \dots \to h_{L-1} \to \mathcal{L}$ trong đó $\mathcal{L}$ là một số, gradient theo đầu vào là tích các ma trận Jacobi:
 
-$$\frac{\partial L}{\partial x} = \underbrace{\frac{\partial L}{\partial h_{L-1}}}_{1 \times m}\;\underbrace{\frac{\partial h_{L-1}}{\partial h_{L-2}}}_{m \times m}\;\cdots\;\underbrace{\frac{\partial h_1}{\partial x}}_{m \times d}.$$
+$$\frac{\partial \mathcal{L}}{\partial x} = \underbrace{\frac{\partial \mathcal{L}}{\partial h_{L-1}}}_{1 \times m}\;\underbrace{\frac{\partial h_{L-1}}{\partial h_{L-2}}}_{m \times m}\;\cdots\;\underbrace{\frac{\partial h_1}{\partial x}}_{m \times d}.$$
 
 Phép nhân ma trận có tính kết hợp, nên có thể nhân theo bất kỳ thứ tự nào, nhưng chi phí rất khác nhau. Nhân từ trái sang phải, tức chế độ ngược của lan truyền ngược, thì kết quả trung gian luôn là một vector hàng $1 \times m$, và mỗi bước chỉ là một phép nhân vector với ma trận, tốn $O(m^2)$. Nhân từ phải sang trái, tức chế độ xuôi, thì kết quả trung gian là một ma trận $m \times d$, và mỗi bước là một phép nhân ma trận với ma trận, tốn $O(m^2 d)$.
 
@@ -473,7 +474,7 @@ Có hai kỹ thuật đổi thời gian tính lấy bộ nhớ. **Gradient check
 
 ### 5.4. SGD, momentum và Adam
 
-Có gradient rồi, ta chuyển sang việc thứ hai. Gradient descent cập nhật $\theta_{t+1} = \theta_t - \eta\, g_t$ với $g_t = \nabla_\theta L(\theta_t)$ ([Chương 5 của *Nền tảng*](nentang-ch05.html)). Với mạng nơ-ron, $L$ là trung bình trên hàng triệu điểm dữ liệu, nên tính gradient đầy đủ ở mỗi bước là quá đắt. Cách giải quyết là **SGD theo mini-batch**: ước lượng $g_t$ bằng gradient trên một lô nhỏ $B$ điểm chọn ngẫu nhiên. Ước lượng này không chệch, và phương sai của nó giảm theo $1/B$. Nhiễu của ước lượng không hoàn toàn có hại: nhiều nghiên cứu cho thấy nó giúp tránh một số điểm cực tiểu hẹp và có tác dụng như một dạng regularization, dù cơ chế chính xác vẫn đang được nghiên cứu.
+Có gradient rồi, ta chuyển sang việc thứ hai. Gradient descent cập nhật $\theta_{t+1} = \theta_t - \eta\, g_t$ với $g_t = \nabla_\theta \mathcal{L}(\theta_t)$ ([Chương 5 của *Nền tảng*](nentang-ch05.html)). Với mạng nơ-ron, $L$ là trung bình trên hàng triệu điểm dữ liệu, nên tính gradient đầy đủ ở mỗi bước là quá đắt. Cách giải quyết là **SGD theo mini-batch**: ước lượng $g_t$ bằng gradient trên một lô nhỏ $B$ điểm chọn ngẫu nhiên. Ước lượng này không chệch, và phương sai của nó giảm theo $1/B$. Nhiễu của ước lượng không hoàn toàn có hại: nhiều nghiên cứu cho thấy nó giúp tránh một số điểm cực tiểu hẹp và có tác dụng như một dạng regularization, dù cơ chế chính xác vẫn đang được nghiên cứu.
 
 Cải tiến đầu tiên là **momentum**, giữ một trung bình trượt của các gradient:
 
@@ -529,12 +530,12 @@ Bảng dưới gom những hiểu lầm hay gặp về lan truyền ngược và
 
 Ví dụ sau thực hiện đầy đủ một lượt xuôi, một lượt ngược và một bước cập nhật trên mạng nhỏ nhất có lớp ẩn, để thấy từng công thức ở Mục 5.1 hoạt động thế nào.
 
-> **Ví dụ 5.1.** Mạng có đầu vào $x = (1, 2)$, lớp ẩn 2 đơn vị ReLU và một đầu ra tuyến tính, hàm mất mát $L = \tfrac12(\hat y - y)^2$ với $y = 1$. Tham số:
+> **Ví dụ 5.1.** Mạng có đầu vào $x = (1, 2)$, lớp ẩn 2 đơn vị ReLU và một đầu ra tuyến tính, hàm mất mát $\mathcal{L} = \tfrac12(\hat y - y)^2$ với $y = 1$. Tham số:
 > $$W_1 = \begin{pmatrix} 0{,}1 & 0{,}2 \\ -0{,}3 & 0{,}1 \end{pmatrix}, \quad b_1 = (0, 0), \quad w_2 = (0{,}5;\; -0{,}4), \quad b_2 = 0{,}2.$$
 >
-> **Lượt xuôi.** $z = W_1 x + b_1 = (0{,}1 + 0{,}4;\; -0{,}3 + 0{,}2) = (0{,}5;\; -0{,}1)$. Qua ReLU: $h = (0{,}5;\; 0)$. Đầu ra $\hat y = w_2^\top h + b_2 = 0{,}25 + 0 + 0{,}2 = 0{,}45$. Mất mát $L = \tfrac12(0{,}45 - 1)^2 = 0{,}15125$.
+> **Lượt xuôi.** $z = W_1 x + b_1 = (0{,}1 + 0{,}4;\; -0{,}3 + 0{,}2) = (0{,}5;\; -0{,}1)$. Qua ReLU: $h = (0{,}5;\; 0)$. Đầu ra $\hat y = w_2^\top h + b_2 = 0{,}25 + 0 + 0{,}2 = 0{,}45$. Mất mát $\mathcal{L} = \tfrac12(0{,}45 - 1)^2 = 0{,}15125$.
 >
-> **Lượt ngược.** $\partial L/\partial \hat y = \hat y - y = -0{,}55$. Lớp ra: $\partial L/\partial w_2 = -0{,}55 \cdot h = (-0{,}275;\; 0)$, $\partial L/\partial b_2 = -0{,}55$, và $\delta_h = -0{,}55 \cdot w_2 = (-0{,}275;\; 0{,}22)$. Qua ReLU: $\delta_z = \delta_h \odot \mathbb{1}[z > 0] = (-0{,}275;\; 0)$. Lớp ẩn: $\partial L/\partial W_1 = \delta_z\, x^\top = \begin{pmatrix} -0{,}275 & -0{,}55 \\ 0 & 0 \end{pmatrix}$ và $\partial L/\partial b_1 = (-0{,}275;\; 0)$.
+> **Lượt ngược.** $\partial \mathcal{L}/\partial \hat y = \hat y - y = -0{,}55$. Lớp ra: $\partial \mathcal{L}/\partial w_2 = -0{,}55 \cdot h = (-0{,}275;\; 0)$, $\partial \mathcal{L}/\partial b_2 = -0{,}55$, và $\delta_h = -0{,}55 \cdot w_2 = (-0{,}275;\; 0{,}22)$. Qua ReLU: $\delta_z = \delta_h \odot \mathbb{1}[z > 0] = (-0{,}275;\; 0)$. Lớp ẩn: $\partial \mathcal{L}/\partial W_1 = \delta_z\, x^\top = \begin{pmatrix} -0{,}275 & -0{,}55 \\ 0 & 0 \end{pmatrix}$ và $\partial \mathcal{L}/\partial b_1 = (-0{,}275;\; 0)$.
 >
 > **Kiểm tra bằng sai phân.** Tăng rồi giảm $W_1[1,2]$ một lượng $10^{-4}$: mất mát thành $0{,}151195$ và $0{,}151305$, nên đạo hàm xấp xỉ $(0{,}151195 - 0{,}151305)/(2 \cdot 10^{-4}) = -0{,}55$, khớp với lượt ngược.
 >
@@ -582,7 +583,7 @@ $$\sigma_W^2 = \frac{2}{n_{\text{in}}}.$$
 
 ### 6.3. Thí nghiệm với mạng 40 lớp
 
-Thí nghiệm trong `code/models/experiments.py` dùng một mạng 40 lớp, mỗi lớp rộng 128 đơn vị ReLU, với một lô 128 đầu vào ngẫu nhiên. Sau lượt xuôi, một gradient ngẫu nhiên có chuẩn 1 được truyền ngược từ lớp cuối, và thí nghiệm đo chuẩn của gradient theo giá trị kích hoạt $\|\partial L/\partial a_l\|$ tại từng lớp. Kết quả lấy trung bình trên 5 lần khởi tạo và chia cho giá trị ở lớp cuối. Trọng số được khởi tạo với phương sai $\text{gain}^2/n_{\text{in}}$, nên khởi tạo He ứng với $\text{gain} = \sqrt 2$.
+Thí nghiệm trong `code/models/experiments.py` dùng một mạng 40 lớp, mỗi lớp rộng 128 đơn vị ReLU, với một lô 128 đầu vào ngẫu nhiên. Sau lượt xuôi, một gradient ngẫu nhiên có chuẩn 1 được truyền ngược từ lớp cuối, và thí nghiệm đo chuẩn của gradient theo giá trị kích hoạt $\|\partial \mathcal{L}/\partial a_l\|$ tại từng lớp. Kết quả lấy trung bình trên 5 lần khởi tạo và chia cho giá trị ở lớp cuối. Trọng số được khởi tạo với phương sai $\text{gain}^2/n_{\text{in}}$, nên khởi tạo He ứng với $\text{gain} = \sqrt 2$.
 
 Sáu cách dựng lớp được so sánh. Ba cách đầu là mạng thường, mỗi lớp tính $a_{l+1} = \operatorname{ReLU}(W a_l)$, với ba mức gain 0,5, $\sqrt2$ và 2,0. Cách thứ tư thêm LayerNorm trước ReLU: $a_{l+1} = \operatorname{ReLU}(\operatorname{LN}(W a_l))$. Cách thứ năm thêm kết nối tắt mà không chuẩn hoá: $a_{l+1} = a_l + \operatorname{ReLU}(W a_l)$. Cách thứ sáu dùng cả hai, $a_{l+1} = a_l + \operatorname{ReLU}(\operatorname{LN}(W a_l))$, với chuẩn hoá nằm trong nhánh còn đường tắt đi thẳng, cùng nguyên tắc với pre-LN của Transformer (Mục 10.2). Ba cách sau đều dùng khởi tạo He.
 

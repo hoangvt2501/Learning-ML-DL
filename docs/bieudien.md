@@ -41,6 +41,7 @@ Giáo trình dùng lại ký hiệu và quy ước thuật ngữ của *Nền t�
 | Ký hiệu | Ý nghĩa |
 |---|---|
 | $w$, $c$ | từ trung tâm và từ ngữ cảnh trong word2vec; cũng dùng cho vector của chúng |
+| $V$ | từ vựng và kích thước từ vựng; trong phân tích SVD $U S V^\top$ ở Mục 2.4 là ma trận các vector suy biến phải |
 | $\#(w, c)$ | số lần $w$ và $c$ cùng xuất hiện trong một cửa sổ |
 | $\mathrm{PMI}(w, c)$ | thông tin tương hỗ điểm, $\log \frac{p(w,c)}{p(w)p(c)}$ |
 | $z$ | biến ẩn (VAE) hoặc nhiễu đầu vào (GAN) |
@@ -51,6 +52,7 @@ Giáo trình dùng lại ký hiệu và quy ước thuật ngữ của *Nền t�
 | $r(x, y)$ | hàm thưởng cho câu hỏi $x$ và câu trả lời $y$ |
 | $\pi_\theta$, $\pi_{\text{ref}}$ | chính sách đang huấn luyện và chính sách tham chiếu |
 | $\mathrm{KL}(p \,\|\, q)$ | phân kỳ Kullback–Leibler |
+| $\mathcal{L}$ | hàm mất mát hoặc hàm mục tiêu; trong phép chứng minh ở Mục 14.4 là hàm Lagrange |
 | $A$, $B$, $r$ | hai ma trận hạng thấp và hạng của LoRA |
 
 Chữ $r$ vừa là hạng của LoRA (Chương 7) vừa là hàm thưởng (Chương 12 tới 15); hai nghĩa không xuất hiện trong cùng một chương.

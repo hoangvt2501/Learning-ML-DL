@@ -110,29 +110,27 @@ fig.tight_layout(); fig.savefig(OUT + "models03_tree.png"); plt.close(fig)
 
 # =============================== Hình 6 — đồ thị tính toán và lan truyền ngược
 fig, ax = canvas(8.6, 3.4, (0, 12), (0, 6.2))
-ax.text(6, 5.9, "Lan truyền ngược = quy tắc dây chuyền áp dụng theo thứ tự ngược",
+ax.text(6, 5.9, "Lan truyền ngược là quy tắc dây chuyền áp dụng theo thứ tự ngược",
         ha="center", fontsize=9.5, weight="bold", color=INK)
-nodes = [("$x$", 0.3), ("$z_1 = W_1 x$", 2.0), ("$a_1 = \\sigma(z_1)$", 4.5),
-         ("$z_2 = W_2 a_1$", 7.0), ("$\\hat{y}$", 9.5), ("$L$", 11.0)]
-for t, x in nodes:
-    w = 2.1 if len(t) > 6 else 1.0
+# (nhãn, toạ độ trái, độ rộng): độ rộng ghi rõ để hộp ŷ không đè lên hộp hàm mất mát
+nodes = [("$x$", 0.3, 1.0), ("$z_1 = W_1 x$", 2.0, 2.1), ("$a_1 = \\sigma(z_1)$", 4.5, 2.1),
+         ("$z_2 = W_2 a_1$", 7.0, 2.1), ("$\\hat{y}$", 9.5, 1.0), ("$\\mathcal{L}$", 11.0, 0.9)]
+for t, x, w in nodes:
     box(ax, x, 3.3, w, 1.0, t, fc=TEAL_BG, ec=TEAL, fs=8.5)
-xs = [0.3 + 1.0, 2.0 + 2.1, 4.5 + 2.1, 7.0 + 2.1, 9.5 + 1.0]
-tos = [2.0, 4.5, 7.0, 9.5, 11.0]
-for a, b in zip(xs, tos):
-    arrow(ax, (a, 3.8), (b, 3.8), color=TEAL, lw=1.4)
-ax.text(0.3, 4.6, "lượt xuôi: tính và GHI LẠI mọi giá trị trung gian", fontsize=8, color=TEAL)
+for (_, x0, w0), (_, x1, _) in zip(nodes[:-1], nodes[1:]):
+    arrow(ax, (x0 + w0, 3.8), (x1, 3.8), color=TEAL, lw=1.4)
+ax.text(0.3, 4.6, "lượt xuôi: tính và ghi lại mọi giá trị trung gian", fontsize=8, color=TEAL)
 
-for t, x, w in [("$\\frac{\\partial L}{\\partial x}$", 0.3, 1.0),
-                ("$\\frac{\\partial L}{\\partial z_1}$", 2.0, 2.1),
-                ("$\\frac{\\partial L}{\\partial a_1}$", 4.5, 2.1),
-                ("$\\frac{\\partial L}{\\partial z_2}$", 7.0, 2.1),
-                ("$\\frac{\\partial L}{\\partial \\hat{y}}$", 9.5, 1.0)]:
-    box(ax, x, 1.2, w, 1.0, t, fc=RED_BG, ec=RED, fs=8.5)
+for t, x, w in [("$\\frac{\\partial \\mathcal{L}}{\\partial x}$", 0.3, 1.0),
+                ("$\\frac{\\partial \\mathcal{L}}{\\partial z_1}$", 2.0, 2.1),
+                ("$\\frac{\\partial \\mathcal{L}}{\\partial a_1}$", 4.5, 2.1),
+                ("$\\frac{\\partial \\mathcal{L}}{\\partial z_2}$", 7.0, 2.1),
+                ("$\\frac{\\partial \\mathcal{L}}{\\partial \\hat{y}}$", 9.5, 1.0)]:
+    box(ax, x, 1.2, w, 1.0, t, fc=RED_BG, ec=RED, fs=11)
 for a, b in zip([2.0, 4.5, 7.0, 9.5], [0.3 + 1.0, 2.0 + 2.1, 4.5 + 2.1, 7.0 + 2.1]):
     arrow(ax, (a, 1.7), (b, 1.7), color=RED, lw=1.4)
-arrow(ax, (11.0, 3.3), (10.5, 2.2), color=RED, lw=1.4, rad=-0.2)
-ax.text(0.3, 0.55, "lượt ngược: nhân dần các đạo hàm địa phương, "
+arrow(ax, (11.45, 3.3), (10.5, 2.2), color=RED, lw=1.4, rad=-0.2)
+ax.text(0.3, 0.55, "lượt ngược: nhân dần các đạo hàm cục bộ, "
                    "dùng lại đúng những giá trị đã ghi ở lượt xuôi", fontsize=8, color=RED)
 fig.tight_layout(); fig.savefig(OUT + "models06_backprop.png"); plt.close(fig)
 

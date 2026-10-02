@@ -11,21 +11,21 @@
     "file": "models-ch01.html",
     "label": "Các họ mô hình",
     "summary": "Mỗi họ mô hình là một cách trả lời cùng một nhóm câu hỏi về họ hàm, số tham số, cách tối ưu và cách chống overfitting; các câu trả lời đó quy về thiên kiến quy nạp, và giải thích vì sao cây vẫn mạnh trên dữ liệu dạng bảng.",
-    "part": "Từ học máy cổ điển tới học sâu"
+    "part": "Chọn và kết hợp mô hình"
   },
   {
     "num": "2",
     "file": "models-ch02.html",
     "label": "Độ chệch và phương sai",
     "summary": "Sai số của một mô hình tách thành độ chệch, phương sai và nhiễu; mô phỏng trên 250 tập huấn luyện đo từng thành phần, đường cong học thay phép đo trên dữ liệu thật, và double descent bổ sung cho bức tranh cổ điển.",
-    "part": "Từ học máy cổ điển tới học sâu"
+    "part": "Chọn và kết hợp mô hình"
   },
   {
     "num": "3",
     "file": "models-ch03.html",
     "label": "Cây quyết định và phương pháp tập hợp",
     "summary": "Một cây quyết định có phương sai cao; bagging và rừng ngẫu nhiên giảm phương sai, gradient boosting giảm độ chệch, và số đo trên cùng một bài toán cho thấy từng cách tác động vào đâu.",
-    "part": "Từ học máy cổ điển tới học sâu"
+    "part": "Chọn và kết hợp mô hình"
   },
   {
     "num": "4",
