@@ -303,7 +303,7 @@ Hệ quả là thành phần chính thứ nhất gần như trùng với đặc 
 
 Vì PCA không bất biến với phép co giãn từng đặc trưng, cần chuẩn hoá trước khi áp dụng khi các đặc trưng có đơn vị khác nhau. Việc này tương đương với làm PCA trên ma trận tương quan thay vì ma trận hiệp phương sai. Ngoại lệ là khi mọi đặc trưng đã cùng đơn vị và thang đo có ý nghĩa, như cường độ điểm ảnh.
 
-> **Nhận xét.** Cây quyết định không gặp vấn đề này, vì chúng bất biến với mọi phép biến đổi đơn điệu trên từng đặc trưng; xem [Chương 3 của *Học sâu*](models-ch03.html).
+Cây quyết định không gặp vấn đề này, vì cây bất biến với mọi phép biến đổi đơn điệu trên từng đặc trưng; xem [Chương 3 của *Học sâu*](models-ch03.html).
 
 ## Bài 9
 @meta chuong=15 | dang=Chẩn đoán | kho=Trung bình

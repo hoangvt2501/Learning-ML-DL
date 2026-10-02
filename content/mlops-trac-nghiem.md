@@ -10,7 +10,7 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 - [x] Thay đổi bất kỳ thành phần nào của hệ thống học máy cũng có thể thay đổi hành vi của toàn bộ hệ thống
 - [ ] Mô hình phức tạp luôn tốt hơn mô hình đơn giản
 - [ ] Cấu hình phải được quản lý phiên bản như mã
-> *Changing Anything Changes Everything* (Sculley và cộng sự, 2015). Thêm hay bớt một đặc trưng làm trọng số của mọi đặc trưng khác thay đổi; nguyên lý áp dụng cả cho siêu tham số, cách lấy mẫu và ngưỡng hội tụ. Hệ quả: không có thay đổi nào là nhỏ và cô lập trong một mô hình.
+> *Changing Anything Changes Everything* (Sculley và cộng sự, 2015). Thêm hay bớt một đặc trưng làm trọng số của mọi đặc trưng khác thay đổi; nguyên lý áp dụng cả cho siêu tham số, cách lấy mẫu và ngưỡng hội tụ. Vì vậy không có thay đổi nào là nhỏ và cô lập trong một mô hình.
 
 ### Nhận định "5% mã học máy, 95% mã keo" nói về điều gì?
 - [ ] Chú thích của Hình 1 trong bài báo, về tỉ lệ diện tích các ô
@@ -454,7 +454,7 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 - [x] Người xây dựng tiêu chí chấm thay đổi tiêu chí trong khi đọc và chấm đầu ra thật
 - [ ] Tiêu chí chấm tự động lệch về phía câu trả lời dài
 - [ ] Người chấm khác nhau dùng tiêu chí khác nhau
-> Hệ quả: không thể viết xong tiêu chí chấm một lần từ đầu; cần đọc một lượng đầu ra thật trước và xem lại tiêu chí định kỳ.
+> Vì vậy không thể viết xong tiêu chí chấm một lần từ đầu; cần đọc một lượng đầu ra thật trước và xem lại tiêu chí định kỳ.
 
 ### Đổi mô hình embedding của một hệ thống RAG đòi hỏi gì?
 - [ ] Không cần làm gì, vì vector của các mô hình embedding tương thích với nhau

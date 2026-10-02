@@ -38,7 +38,7 @@ Tổng khớp chính xác con số đã công bố 6 738 415 616.
 
 **(c) Tỉ số $d_{\text{ff}}/d$.** $11\,008/4\,096 = 2{,}6875$, không phải 4. Vì SwiGLU có ba ma trận thay vì hai, muốn giữ số tham số bằng FFN gốc với $d_{\text{ff}} = 4d$ thì phải có $3d\,d_{\text{ff}} = 8d^2$, tức $d_{\text{ff}} = \tfrac83 d = 10\,922{,}67$. Làm tròn lên bội của 256 được $43 \times 256 = 11\,008$ (Mục 10.5).
 
-> **Nhận xét.** Trong phạm vi các khối Transformer, FFN chiếm $3 \times 2{,}6875/(4 + 3 \times 2{,}6875) = 66{,}8\%$ số tham số, gần với tỉ lệ $2/3$ của FFN gốc ở Mục 12.2. Đó chính là mục đích của việc chọn $d_{\text{ff}} \approx \tfrac83 d$.
+Trong phạm vi các khối Transformer, FFN chiếm $3 \times 2{,}6875/(4 + 3 \times 2{,}6875) = 66{,}8\%$ số tham số, gần với tỉ lệ $2/3$ của FFN gốc ở Mục 12.2. Đó chính là mục đích của việc chọn $d_{\text{ff}} \approx \tfrac83 d$.
 
 ## Bài 2
 @meta chuong=12 | dang=Tính tay | kho=Cơ bản
@@ -219,7 +219,7 @@ rồi đo entropy của trọng số theo $d_k = 4, 16, 64, 256, 1\,024$ khi kh�
 2. **Mẫu số luôn dương.** Với ReLU, nếu mọi điểm số đều âm thì tổng bằng 0; phải thêm `eps`, và `eps` trở thành một siêu tham số ngầm.
 3. **Có thể chọn dứt khoát khi cần.** Một số nhiệm vụ cần phân phối gần one-hot, ví dụ sao chép chính xác một token từ ngữ cảnh. Tính chất hàm mũ của softmax cho phép điều đó với điểm số vừa phải.
 
-> **Nhận xét.** Khi chạy, nên ghi thêm entropy khi có chia $\sqrt{d_k}$ cho cả hai hàm để có bốn cột so sánh: chuẩn hoá ReLU cho entropy gần như không đổi trong cả hai trường hợp, còn softmax chỉ ổn định khi có phép chia.
+Khi chạy, nên ghi thêm entropy khi có chia $\sqrt{d_k}$ cho cả hai hàm để có bốn cột so sánh: chuẩn hoá ReLU cho entropy gần như không đổi trong cả hai trường hợp, còn softmax chỉ ổn định khi có phép chia.
 
 ## Bài 11
 @meta chuong=7 | dang=Tính tay | kho=Trung bình

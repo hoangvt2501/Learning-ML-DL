@@ -31,7 +31,7 @@ Với một đặc trưng, xác suất 0,3% mỗi lần đo là nhỏ. Nhưng h�
 
 $$\frac{2(k-1)}{n} < 0{,}01 \iff n > \frac{2 \times 9}{0{,}01} = 1\,800.$$
 
-**Nhận xét.** Ngưỡng PSI hợp lý phụ thuộc vào $n$, $k$ và số đặc trưng được theo dõi. Ba cách xử lý theo Mục 9.5: tính ngưỡng theo phân phối $\chi^2$ hoặc bằng mô phỏng; dùng kiểm định có p-value kèm hiệu chỉnh cho kiểm định nhiều lần; và yêu cầu tín hiệu kéo dài qua nhiều lần đo trước khi cảnh báo (Mục 10.5).
+Ngưỡng PSI hợp lý phụ thuộc vào $n$, $k$ và số đặc trưng được theo dõi. Ba cách xử lý theo Mục 9.5: tính ngưỡng theo phân phối $\chi^2$ hoặc bằng mô phỏng; dùng kiểm định có p-value kèm hiệu chỉnh cho kiểm định nhiều lần; và yêu cầu tín hiệu kéo dài qua nhiều lần đo trước khi cảnh báo (Mục 10.5).
 
 ## Bài 2
 @meta chuong=8 | dang=Tính tay | kho=Cơ bản
@@ -61,7 +61,7 @@ mẫu mỗi nhánh, tức hơn 630 000 mẫu cho cả thí nghiệm.
 
 Mức 7,11% gần bằng $5\% \times \sqrt 2 \approx 7{,}07\%$ vì $n$ tỉ lệ nghịch với $\Delta^2$; chênh lệch nhỏ đến từ việc phương sai $p_2(1-p_2)$ cũng thay đổi theo $p_2$.
 
-**Nhận xét.** Thời gian chạy một A/B test phụ thuộc bốn đại lượng: tỉ lệ nền, mức cải thiện nhỏ nhất cần phát hiện, lưu lượng, và phương sai của chỉ số. Giảm phương sai là cách duy nhất rút ngắn thời gian mà không đổi câu hỏi và không giảm độ tin cậy.
+Thời gian chạy một A/B test phụ thuộc bốn đại lượng: tỉ lệ nền, mức cải thiện nhỏ nhất cần phát hiện, lưu lượng, và phương sai của chỉ số. Giảm phương sai là cách duy nhất rút ngắn thời gian mà không đổi câu hỏi và không giảm độ tin cậy.
 
 ## Bài 3
 @meta chuong=7 | dang=Tính tay | kho=Trung bình
@@ -133,7 +133,7 @@ Bản ghi ngày 2026-06-01 (giá trị 52) không được dùng cho dòng nào,
 
 **(d)** Truy vấn của người dùng có thể giữ nguyên, nhưng kết quả được coi là tốt đã thay đổi, tức $P(Y \mid X)$ thay đổi. Trường hợp này khó hơn (b), vì không có sự kiện nào trong hệ thống đánh dấu thời điểm thay đổi xảy ra: nguyên nhân nằm ở bên ngoài, đúng như phần *Dealing with Changes in the External World* của Sculley và cộng sự (2015).
 
-**Nhận xét.** Hai trong bốn trường hợp không phát hiện được bằng cách giám sát $X$, và đó là hai trường hợp gây hại nhiều nhất cho độ chính xác. Vì vậy thiết kế giám sát phải bắt đầu bằng câu hỏi ở Mục 3.5: sau bao lâu thì biết nhãn thật?
+Hai trong bốn trường hợp không phát hiện được bằng cách giám sát $X$, và đó là hai trường hợp gây hại nhiều nhất cho độ chính xác. Vì vậy thiết kế giám sát phải bắt đầu bằng câu hỏi ở Mục 3.5: sau bao lâu thì biết nhãn thật?
 
 ## Bài 6
 @meta chuong=6 | dang=Suy luận | kho=Trung bình
@@ -176,13 +176,9 @@ Kết quả từ `bai_tap.py`, dùng cùng mô phỏng như phần (G) của `ex
 
 Hàng giữa trùng với bảng ở Mục 11.1, vì dùng cùng mô phỏng và cùng hạt giống.
 
-**Nhận xét.**
+Tốc độ dịch chuyển ảnh hưởng mạnh nhất tới cột "không bao giờ": khi tốc độ tăng 8 lần, thiệt hại của việc không huấn luyện lại tăng từ 1,6 lên 32,6 điểm phần trăm, trong khi nhịp cần thiết chỉ chuyển từ mỗi quý sang mỗi tháng. Nhịp hợp lý có thưa dần khi dịch chuyển chậm lại, nhưng thay đổi ít. Một khi mô hình được huấn luyện lại đủ thường để bám sát dữ liệu hiện tại, thiệt hại còn lại chỉ tăng theo lượng dịch chuyển tích luỹ giữa hai lần huấn luyện, nên làm dày nhịp thêm chỉ giảm được một phần nhỏ. Ở cả ba tốc độ, phần lớn lợi ích đến từ bước đầu tiên, từ "không bao giờ" lên "mỗi quý"; các bước sau nhỏ hơn nhiều.
 
-1. **Tốc độ dịch chuyển ảnh hưởng mạnh nhất tới cột "không bao giờ".** Khi tốc độ tăng 8 lần, thiệt hại của việc không huấn luyện lại tăng từ 1,6 lên 32,6 điểm phần trăm. Nhịp cần thiết chỉ thay đổi từ mỗi quý sang mỗi tháng.
-2. **Nhịp hợp lý thưa dần khi dịch chuyển chậm lại, nhưng thay đổi ít.** Khi mô hình được huấn luyện lại đủ thường để luôn gần với thế giới hiện tại, thiệt hại còn lại tăng theo lượng dịch chuyển tích luỹ giữa hai lần huấn luyện; làm dày thêm nhịp chỉ giảm thêm một phần nhỏ.
-3. **Phần lớn lợi ích đến từ việc có huấn luyện lại.** Ở cả ba tốc độ, bước từ "không bao giờ" lên "mỗi quý" chiếm phần lớn tổng lợi ích; các bước sau nhỏ.
-
-**Quy tắc thực hành.** Chọn nhịp huấn luyện lại bằng cách chạy thí nghiệm này trên dữ liệu lịch sử của chính bài toán, rồi chọn nhịp thưa nhất mà chênh lệch so với nhịp dày nhất nằm trong mức chấp nhận được về mặt kinh doanh. Ở tốc độ vừa, chênh lệch giữa hằng tuần và hằng quý chỉ 0,91 điểm, trong khi số lần huấn luyện gấp 13 lần.
+Từ đó có một quy tắc thực hành: chạy thí nghiệm này trên dữ liệu lịch sử của chính bài toán, rồi chọn nhịp thưa nhất mà chênh lệch so với nhịp dày nhất nằm trong mức chấp nhận được về mặt kinh doanh. Ở tốc độ vừa, chênh lệch giữa hằng tuần và hằng quý chỉ 0,91 điểm, trong khi số lần huấn luyện gấp 13 lần.
 
 ## Bài 8
 @meta chuong=12 | dang=Thí nghiệm | kho=Khó

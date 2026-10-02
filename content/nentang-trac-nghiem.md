@@ -33,7 +33,7 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 - [x] Bằng bình phương số điều kiện của $X$
 - [ ] Bằng một nửa
 - [ ] Không liên quan
-> Vì $X^\top X = VD^2V^\top$, các trị riêng của $X^\top X$ là bình phương các giá trị suy biến của $X$. Đây là lý do các thư viện giải bình phương tối thiểu bằng phân tích QR hoặc SVD thay vì dùng công thức $(X^\top X)^{-1}X^\top y$.
+> Vì $X^\top X = VD^2V^\top$, các trị riêng của $X^\top X$ là bình phương các giá trị suy biến của $X$. Số điều kiện vì thế bị bình phương, nên các thư viện giải bình phương tối thiểu bằng phân tích QR hoặc SVD thay vì dùng công thức $(X^\top X)^{-1}X^\top y$.
 
 ### Vì sao regularization $\ell_1$ cho hệ số bằng đúng 0 còn $\ell_2$ thì không?
 - [ ] Vì $\ell_1$ phạt nặng hơn
@@ -47,7 +47,7 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 - [ ] Ma trận vẫn có thể suy biến
 - [ ] Một ma trận trực giao
 - [ ] Một ma trận có định thức bằng 0
-> Các trị riêng tăng thêm $\lambda$ nên đều dương. Đây là lý do hồi quy ridge luôn có nghiệm duy nhất, kể cả khi $d > n$.
+> Các trị riêng tăng thêm $\lambda$ nên đều dương. Vì vậy hồi quy ridge luôn có nghiệm duy nhất, kể cả khi $d > n$.
 
 ### Khoảng cách từ điểm $x_0 = (2, 1)$ tới đường thẳng $3x_1 + 4x_2 - 5 = 0$ bằng bao nhiêu?
 - [ ] 5

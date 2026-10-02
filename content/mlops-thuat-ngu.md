@@ -9,7 +9,7 @@ Các định nghĩa theo đúng cách dùng trong giáo trình; số mục trong
 Chi phí dài hạn phát sinh từ những lựa chọn giúp đi nhanh trong ngắn hạn. Không phải khoản nợ nào cũng sai, nhưng khoản nợ nào cũng phải trả lãi. Trong hệ thống học máy, phần lớn nợ nằm ở mức hệ thống chứ không ở mức mã nguồn, nên đọc mã không thấy được (Mục 1.2).
 
 ### Nguyên lý CACE | Changing Anything Changes Everything
-Trong một hệ thống học máy, thay đổi bất kỳ thành phần nào cũng có thể thay đổi hành vi của toàn bộ hệ thống: thêm hay bớt một đặc trưng làm trọng số của mọi đặc trưng khác thay đổi; nguyên lý áp dụng cho cả siêu tham số, cách lấy mẫu và ngưỡng hội tụ. Hệ quả: không có thay đổi nào là nhỏ và cô lập trong một mô hình (Mục 1.3).
+Trong một hệ thống học máy, thay đổi bất kỳ thành phần nào cũng có thể thay đổi hành vi của toàn bộ hệ thống: thêm hay bớt một đặc trưng làm trọng số của mọi đặc trưng khác thay đổi; nguyên lý áp dụng cho cả siêu tham số, cách lấy mẫu và ngưỡng hội tụ. Vì vậy không có thay đổi nào là nhỏ và cô lập trong một mô hình (Mục 1.3).
 
 ### Entanglement | entanglement
 Tên của dạng nợ mô tả bởi nguyên lý CACE: các thành phần của mô hình phụ thuộc lẫn nhau tới mức không thể lập luận cục bộ.
@@ -21,7 +21,7 @@ Học một mô hình mới nhận đầu ra của một mô hình có sẵn là
 Một hệ thống khác dùng đầu ra của mô hình làm đầu vào mà không ai biết, thường vì đầu ra được ghi ra nơi không có kiểm soát truy cập. Thay đổi mô hình khi đó làm hỏng hệ thống kia, và có thể tạo ra vòng phản hồi ẩn.
 
 ### Phụ thuộc dữ liệu không ổn định | unstable data dependency
-Đặc trưng lấy từ một hệ thống thay đổi hành vi theo thời gian, ví dụ một mô hình khác được huấn luyện lại định kỳ. Cách xử lý là cố định phiên bản của tín hiệu đầu vào, với cái giá là phải duy trì nhiều phiên bản song song. Mô hình ngôn ngữ gọi qua API là dạng cực đoan của loại phụ thuộc này (Mục 13.1).
+Đặc trưng lấy từ một hệ thống thay đổi hành vi theo thời gian, ví dụ một mô hình khác được huấn luyện lại định kỳ. Cách xử lý là cố định phiên bản của tín hiệu đầu vào, đổi lại phải duy trì nhiều phiên bản song song. Mô hình ngôn ngữ gọi qua API là dạng cực đoan của loại phụ thuộc này (Mục 13.1).
 
 ### Phụ thuộc dữ liệu ít giá trị | underutilized data dependency
 Đặc trưng đóng góp rất ít nhưng vẫn nằm trong mô hình, làm hệ thống dễ hỏng một cách không cần thiết. Bốn nguồn: đặc trưng cũ đã bị thay thế, đặc trưng thêm cả gói, đặc trưng cải thiện rất ít, và đặc trưng tương quan với một đặc trưng khác có quan hệ nhân quả thật. Phát hiện bằng cách định kỳ đánh giá lại mô hình khi bỏ từng đặc trưng.
@@ -183,7 +183,7 @@ Mô hình được huấn luyện để phân biệt dữ liệu cũ với dữ 
 Độ trễ, lưu lượng, tỉ lệ lỗi, mức sử dụng tài nguyên. Khi có sự cố thì biết ngay, giống mọi dịch vụ phần mềm khác (Mục 10.1).
 
 ### Chỉ số riêng của học máy | ML-specific metrics
-Độ chính xác, phân phối dự đoán, phân phối đặc trưng, chất lượng dữ liệu đầu vào. Khi có sự cố thường không biết ngay; đây là lý do hệ thống học máy cần giám sát riêng (Mục 10.1).
+Độ chính xác, phân phối dự đoán, phân phối đặc trưng, chất lượng dữ liệu đầu vào. Khi có sự cố thường không biết ngay, nên hệ thống học máy cần giám sát riêng (Mục 10.1).
 
 ### SLI, SLO | service level indicator, service level objective
 SLI là một đại lượng đo mức dịch vụ, ví dụ p99 độ trễ; SLO là giá trị mục tiêu cho SLI đó, ví dụ p99 dưới 200 ms trong 99,9% số phút (Beyer và cộng sự, 2016).
@@ -243,7 +243,7 @@ Món được xếp ở vị trí cao nhận nhiều lượt nhấp hơn chỉ v
 Dùng một mô hình ngôn ngữ để chấm đầu ra theo tiêu chí cho trước. Rẻ hơn người chấm nhiều lần, nhưng có các thiên lệch đã biết (vị trí, độ dài, tự ưu tiên) và có thể thay đổi theo phiên bản, nên cần đối chiếu định kỳ với người chấm (Mục 13.2, 13.3).
 
 ### Criteria drift | criteria drift
-Hiện tượng người xây dựng tiêu chí chấm thay đổi tiêu chí trong khi đọc và chấm đầu ra của mô hình (Shankar và cộng sự, 2024). Hệ quả: tiêu chí chấm cần được xây dựng sau khi đọc một lượng đầu ra thật, và xem lại định kỳ (Mục 13.3).
+Hiện tượng người xây dựng tiêu chí chấm thay đổi tiêu chí trong khi đọc và chấm đầu ra của mô hình (Shankar và cộng sự, 2024). Vì vậy tiêu chí chấm cần được xây dựng sau khi đọc một lượng đầu ra thật, và xem lại định kỳ (Mục 13.3).
 
 ### Tập đánh giá chuẩn | golden set
 Tập câu hỏi được chọn lọc, gồm cả trường hợp khó, mà hệ thống phải đạt trước mỗi lần phát hành. Cần được cập nhật: mỗi sự cố trong sản xuất nên trở thành một trường hợp mới (Mục 13.4).

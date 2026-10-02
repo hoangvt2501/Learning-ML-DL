@@ -152,7 +152,7 @@ $\mathbb{1}[m \le 0]$, đếm số điểm bị phân loại sai. Không tối �
 Hàm lồi dùng thay cho mất mát 0–1 để có thể tối ưu bằng gradient. Hinge và logistic (theo logarit cơ số 2) còn là chặn trên của mất mát 0–1; mất mát perceptron là hàm thay thế lồi nhưng không phải chặn trên.
 
 ### Mất mát hinge | hinge loss
-$\max(0, 1-m)$. Bằng 0 khi $m \ge 1$, nên đòi hỏi điểm dữ liệu không chỉ được phân loại đúng mà còn nằm ngoài lề. SVM lề mềm tương đương với mất mát hinge cộng regularization $\ell_2$.
+$\max(0, 1-m)$. Bằng 0 khi $m \ge 1$, nên một điểm chỉ có mất mát bằng 0 khi được phân loại đúng và nằm ngoài lề. SVM lề mềm tương đương với mất mát hinge cộng regularization $\ell_2$.
 
 ### Cross-entropy | cross-entropy loss
 $-[y\log p + (1-y)\log(1-p)]$ cho hai lớp. Là âm log hợp lý khi nhãn có phân phối Bernoulli; cực tiểu cross-entropy tương đương cực tiểu phân kỳ KL từ phân phối dữ liệu tới phân phối của mô hình.

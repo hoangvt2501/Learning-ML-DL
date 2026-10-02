@@ -334,7 +334,7 @@ Chương 2 mô tả dữ liệu và mô hình bằng vector và ma trận, như 
 
 ### 3.1. Vai trò của xác suất trong học máy
 
-Xác suất xuất hiện trong giáo trình theo ba cách. Cách thứ nhất là mô tả dự đoán không chắc chắn. Hồi quy logistic (Chương 6) không chỉ trả về nhãn mà trả về xác suất một điểm thuộc lớp dương, và nhờ có xác suất, ta chọn được ngưỡng quyết định theo chi phí của từng loại sai (Chương 8). Cách thứ hai là giải thích nguồn gốc của hàm mất mát. Bình phương sai số và cross-entropy không phải hai lựa chọn tuỳ ý; Chương 10 chỉ ra rằng chúng là hệ quả của nguyên lý hợp lý cực đại dưới hai giả thiết khác nhau về nhiễu. Cách thứ ba là giải thích nguồn gốc của regularization: Mục 10.4 chỉ ra rằng hồi quy ridge trùng với ước lượng hậu nghiệm cực đại khi tiên nghiệm của trọng số là phân phối Gauss, và kiểm chứng điều này bằng số.
+Xác suất xuất hiện trong giáo trình theo ba cách. Cách thứ nhất là mô tả dự đoán không chắc chắn. Hồi quy logistic (Chương 6) trả về xác suất một điểm thuộc lớp dương chứ không chỉ một nhãn, và nhờ có xác suất, ta chọn được ngưỡng quyết định theo chi phí của từng loại sai (Chương 8). Cách thứ hai là giải thích nguồn gốc của hàm mất mát. Bình phương sai số và cross-entropy không phải hai lựa chọn tuỳ ý; Chương 10 chỉ ra rằng chúng là hệ quả của nguyên lý hợp lý cực đại dưới hai giả thiết khác nhau về nhiễu. Cách thứ ba là giải thích nguồn gốc của regularization: Mục 10.4 chỉ ra rằng hồi quy ridge trùng với ước lượng hậu nghiệm cực đại khi tiên nghiệm của trọng số là phân phối Gauss, và kiểm chứng điều này bằng số.
 
 ### 3.2. Kỳ vọng và phương sai
 
@@ -961,7 +961,7 @@ Một mô hình chỉ tốt hay xấu so với một thước đo, và chọn sa
 
 ### 8.1. Hạn chế của độ chính xác
 
-**Độ chính xác** (accuracy) là tỉ lệ điểm được phân loại đúng. Thước đo này dễ hiểu nhưng có một điểm yếu lớn: nó không phân biệt các loại lỗi. Trên dữ liệu có lớp dương hiếm, nó không chỉ ít thông tin mà còn dẫn tới kết luận sai.
+**Độ chính xác** (accuracy) là tỉ lệ điểm được phân loại đúng. Thước đo này dễ hiểu nhưng có một điểm yếu lớn: nó không phân biệt các loại lỗi. Trên dữ liệu có lớp dương hiếm, điểm yếu này đủ để dẫn tới kết luận sai.
 
 Thí nghiệm dựng 20 000 điểm dữ liệu, trong đó 0,98% thuộc lớp dương, và một bộ phân loại cho điểm số cao hơn một chút với lớp dương. Bảng dưới so sánh bộ phân loại này ở ba ngưỡng với một bộ phân loại luôn đoán lớp âm.
 
@@ -986,7 +986,8 @@ Với bài toán hai lớp, mỗi dự đoán rơi vào một trong bốn ô.
 Bảng này gọi là **ma trận nhầm lẫn** (confusion matrix), và các thước đo phổ biến đều tính từ bốn ô của nó.
 
 > **Định nghĩa 8.1 (Precision, recall, F1).**
-> $$\text{precision} = \frac{TP}{TP + FP}, \qquad \text{recall} = \frac{TP}{TP + FN}, \qquad F_1 = \frac{2\cdot \text{precision}\cdot\text{recall}}{\text{precision} + \text{recall}}.$$
+> $$\text{precision} = \frac{TP}{TP + FP}, \qquad \text{recall} = \frac{TP}{TP + FN},$$
+> $$F_1 = \frac{2\cdot \text{precision}\cdot\text{recall}}{\text{precision} + \text{recall}}.$$
 > Recall còn gọi là độ nhạy (sensitivity) hoặc tỉ lệ dương thật (true positive rate, TPR). Tỉ lệ dương giả (false positive rate) là $\text{FPR} = FP/(FP + TN)$.
 
 Người mới hay nhầm precision với recall. Cách nhớ đúng bản chất là đặt mỗi thước đo thành một câu hỏi. Precision trả lời câu hỏi: trong những trường hợp mô hình báo là dương, bao nhiêu phần đúng là dương? Mẫu số của nó là những gì mô hình khẳng định. Recall trả lời câu hỏi: trong những trường hợp thật sự dương, mô hình phát hiện được bao nhiêu phần? Mẫu số của nó là những gì thực tế có.
@@ -1859,7 +1860,7 @@ Thí nghiệm sinh một ma trận đánh giá hạng 4 thật, cộng nhiễu c
 
 Cột cuối là tỉ số giữa RMSE của mô hình và độ lệch chuẩn của ma trận thật (2,0772), tức sai số của cách đoán mọi ô bằng 0. Tỉ số lớn hơn 1 nghĩa là mô hình còn tệ hơn cách đoán đơn giản đó.
 
-Ba dòng đầu có tỉ số lớn hơn 1: với khoảng 10 đánh giá mỗi người trở xuống, phân rã ma trận không những không giúp được mà còn gây hại. Giữa 10,1 và 19,8 đánh giá mỗi người, RMSE giảm từ 3,54 xuống 0,30, hơn 11 lần. Sau ngưỡng đó, thêm dữ liệu chỉ cải thiện từ từ.
+Ba dòng đầu có tỉ số lớn hơn 1: với khoảng 10 đánh giá mỗi người trở xuống, phân rã ma trận cho sai số lớn hơn cả cách đoán mọi ô bằng 0. Giữa 10,1 và 19,8 đánh giá mỗi người, RMSE giảm từ 3,54 xuống 0,30, hơn 11 lần. Sau ngưỡng đó, thêm dữ liệu chỉ cải thiện từ từ.
 
 Có thể hiểu ngưỡng này bằng cách đếm ẩn số. Mỗi người dùng có $k = 4$ ẩn số trong $p_u$, nên cần ít nhất 4 đánh giá để xác định chúng, kể cả khi $Q$ đã biết chính xác. Nhưng các đánh giá có nhiễu, và $Q$ cũng đang được ước lượng từ chính dữ liệu thưa đó, nên số đánh giá cần thiết lớn hơn nhiều lần mức tối thiểu. Trong thí nghiệm, ngưỡng nằm giữa 10 và 20 đánh giá mỗi người, tức khoảng 2,5 tới 5 lần hạng $k$. Lý thuyết hoàn thiện ma trận (matrix completion) cho kết luận cùng chiều: dưới giả thiết vị trí các ô quan sát ngẫu nhiên, số quan sát cần thiết tăng tuyến tính theo hạng, nhân với một thừa số logarit của kích thước ma trận (Candès và Recht, 2009).
 
