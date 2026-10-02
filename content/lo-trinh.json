@@ -45,7 +45,7 @@
     {
       "ten": "Làm việc với mô hình ngôn ngữ",
       "icon": "prompt",
-      "mo_ta": "Kỹ sư AI làm gì, token và chi phí, chọn và triển khai mô hình, prompt engineering, context engineering.",
+      "mo_ta": "Công việc của kỹ sư AI, token và chi phí, chọn và triển khai mô hình, thiết kế prompt và quản lý ngữ cảnh.",
       "roadmap": ["Introduction", "How LLMs Work", "Prompt Engineering", "Context Engineering", "Type of Models", "Hugging Face", "Choosing the Right Model", "Ollama", "LM Studio", "OpenRouter"],
       "bai": [["ungdung", "1", "5"]]
     },
@@ -113,6 +113,6 @@
     {"node": "LLM Evaluations", "vi": "Đánh giá tất định, dựa trên mô hình, bởi con người; cỡ mẫu và so sánh ghép cặp", "ref": [["ungdung", "12"], ["mlops", "13"]]},
     {"node": "Regression Testing", "vi": "Bộ vàng, cửa kiểm tra trong CI, đổi phiên bản mô hình", "ref": [["ungdung", "12.5"]]},
     {"node": "Multimodal AI", "vi": "Hiểu ảnh, sinh ảnh, video, nhận dạng và tổng hợp tiếng nói", "ref": [["ungdung", "14"], ["bieudien", "11"]]},
-    {"node": "Development Tools", "vi": "Công cụ lập trình có hỗ trợ AI và cách dùng an toàn", "ref": [["ungdung", "15"]]}
+    {"node": "Development Tools", "vi": "Lập trình với công cụ AI và cách dùng an toàn", "ref": [["ungdung", "15"]]}
   ]
 }

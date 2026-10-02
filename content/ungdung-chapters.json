@@ -3,112 +3,112 @@
     "num": "0",
     "file": "ungdung-ch00.html",
     "label": "Ký hiệu và quy ước",
-    "summary": "Quy ước thuật ngữ cho một lĩnh vực mà phần lớn khái niệm xuất hiện bằng tiếng Anh, bảng ký hiệu, và cách giáo trình nói về tên sản phẩm và giá.",
+    "summary": "Cách giáo trình gọi tên các thuật ngữ vốn ra đời bằng tiếng Anh, các ký hiệu dùng trong bài, và quy ước về tên sản phẩm và giá dịch vụ.",
     "part": "Mở đầu"
   },
   {
     "num": "1",
     "file": "ungdung-ch01.html",
-    "label": "Kỹ sư AI",
-    "summary": "Công việc của kỹ sư AI, khác biệt với kỹ sư học máy, phát triển dựa trên đánh giá, các thuật ngữ cơ bản và cấu trúc của một ứng dụng dùng LLM.",
+    "label": "Nghề kỹ sư AI",
+    "summary": "Kỹ sư AI xây sản phẩm trên một mô hình có sẵn thay vì huấn luyện từ đầu, nên công sức chính dời sang việc đo xem hệ thống tốt tới đâu; chương mô tả công việc đó và các thành phần của một ứng dụng dùng LLM.",
     "part": "Mở đầu"
   },
   {
     "num": "2",
     "file": "ungdung-ch02.html",
     "label": "Mô hình ngôn ngữ lớn nhìn từ phía ứng dụng",
-    "summary": "Token và tokenizer đo trên văn bản tiếng Việt, cửa sổ ngữ cảnh và KV cache, tham số lấy mẫu, các giai đoạn huấn luyện, độ trễ, chi phí và các giới hạn cố hữu.",
+    "summary": "Những đặc điểm của mô hình ảnh hưởng trực tiếp tới thiết kế: token và tokenizer đo trên văn bản tiếng Việt, cửa sổ ngữ cảnh và KV cache, lấy mẫu, các giai đoạn huấn luyện, chi phí, độ trễ và các giới hạn cố hữu.",
     "part": "Làm việc với mô hình ngôn ngữ"
   },
   {
     "num": "3",
     "file": "ungdung-ch03.html",
     "label": "Chọn và triển khai mô hình",
-    "summary": "Mô hình gốc, chỉ dẫn và suy luận; mô hình đóng và mở trọng số; tính bộ nhớ khi tự triển khai; Hugging Face, Ollama, LM Studio, vLLM; gọi API; quy trình chọn mô hình.",
+    "summary": "Phân loại mô hình, mô hình đóng và mở trọng số, cách tính bộ nhớ GPU khi tự triển khai, cách gọi mô hình qua API, và thứ tự xét các tiêu chí khi chọn mô hình.",
     "part": "Làm việc với mô hình ngôn ngữ"
   },
   {
     "num": "4",
     "file": "ungdung-ch04.html",
-    "label": "Prompt engineering",
-    "summary": "Cấu trúc của một prompt, zero-shot và few-shot, chain-of-thought, đầu ra có cấu trúc, function calling, prompt caching, streaming và quản lý prompt trong mã nguồn.",
+    "label": "Thiết kế prompt",
+    "summary": "Viết prompt như viết một bản đặc tả: cấu trúc của prompt, ví dụ trong prompt, chain-of-thought, đầu ra có cấu trúc, function calling, prompt caching và quản lý prompt như mã nguồn.",
     "part": "Làm việc với mô hình ngôn ngữ"
   },
   {
     "num": "5",
     "file": "ungdung-ch05.html",
-    "label": "Context engineering",
-    "summary": "Quản lý toàn bộ ngữ cảnh ở mỗi lần gọi: nguồn ngữ cảnh, ngân sách token, thí nghiệm tìm dữ kiện theo vị trí trong ngữ cảnh dài, bộ nhớ, cô lập ngữ cảnh và các kiểu hỏng.",
+    "label": "Quản lý ngữ cảnh",
+    "summary": "Phần lớn token mô hình nhận được không do người viết prompt viết ra; chương bàn cách chọn những token đó, đo việc mô hình dùng thông tin kém đi khi ngữ cảnh dài, và các kiểu hỏng của ngữ cảnh.",
     "part": "Làm việc với mô hình ngôn ngữ"
   },
   {
     "num": "6",
     "file": "ungdung-ch06.html",
     "label": "Embedding và tìm kiếm ngữ nghĩa",
-    "summary": "Embedding văn bản và huấn luyện tương phản, chọn mô hình, độ tương đồng, ứng dụng, và thí nghiệm so sánh BM25, LSA, e5-small và tìm kiếm kết hợp trên văn bản tiếng Việt.",
+    "summary": "Embedding văn bản và cách huấn luyện, độ tương đồng, và một thí nghiệm trên văn bản tiếng Việt cho thấy BM25 thắng một mô hình embedding nhỏ, còn kết hợp hai cách tốt nhất ở câu hỏi khó.",
     "part": "Truy xuất và RAG"
   },
   {
     "num": "7",
     "file": "ungdung-ch07.html",
     "label": "Cơ sở dữ liệu vector",
-    "summary": "Chi phí tìm kiếm chính xác, chỉ mục IVF, product quantization, đồ thị láng giềng và HNSW đo trên cùng dữ liệu, lọc theo metadata, và cách chọn công cụ.",
+    "summary": "Vì sao tìm kiếm chính xác quá chậm với kho lớn, và ba ý tưởng tìm gần đúng là IVF, product quantization và đồ thị HNSW, đo trên cùng một bộ dữ liệu; kèm lọc theo quyền và cập nhật chỉ mục.",
     "part": "Truy xuất và RAG"
   },
   {
     "num": "8",
     "file": "ungdung-ch08.html",
-    "label": "Retrieval-Augmented Generation",
-    "summary": "Khi nào dùng RAG, quy trình lập chỉ mục và trả lời, chia đoạn, cải thiện truy xuất, thí nghiệm RAG trả lời trắc nghiệm, đánh giá và các cách hiện thực.",
+    "label": "Hệ thống RAG",
+    "summary": "Truy xuất tài liệu rồi đưa vào ngữ cảnh để mô hình trả lời dựa trên đó; thí nghiệm trên 254 câu trắc nghiệm cho thấy ngữ cảnh đúng giúp còn ngữ cảnh sai làm hại, nên phải đo riêng truy xuất và sinh.",
     "part": "Truy xuất và RAG"
   },
   {
     "num": "9",
     "file": "ungdung-ch09.html",
     "label": "Agent",
-    "summary": "Agent và workflow, function calling, ReAct, lập kế hoạch và bộ nhớ, hệ nhiều agent, phân tích độ tin cậy của agent nhiều bước, và cách xây một agent.",
+    "summary": "Khi để mô hình tự chọn bước tiếp theo: workflow và agent, function calling, ReAct, hệ nhiều agent, và phép tính cho thấy độ tin cậy giảm theo cấp số nhân với số bước cùng cách khắc phục bằng kiểm tra và thử lại.",
     "part": "Agent và MCP"
   },
   {
     "num": "10",
     "file": "ungdung-ch10.html",
     "label": "Model Context Protocol",
-    "summary": "Bài toán tích hợp, kiến trúc host, client, server, tools, resources và prompts, JSON-RPC và thiết kế phi trạng thái của đặc tả 2026-07-28, xây server và các rủi ro an toàn.",
+    "summary": "Một giao thức chung để ứng dụng AI kết nối với tool và dữ liệu: kiến trúc host, client, server, các thành phần, thiết kế phi trạng thái của đặc tả 2026-07-28, cách xây server và các rủi ro an toàn.",
     "part": "Agent và MCP"
   },
   {
     "num": "11",
     "file": "ungdung-ch11.html",
     "label": "An toàn và đạo đức",
-    "summary": "OWASP Top 10 cho ứng dụng LLM, thí nghiệm prompt injection gián tiếp với bốn cách viết prompt, dữ liệu nhạy cảm, thiên kiến và công bằng, rào chắn và các thực hành an toàn.",
+    "summary": "Danh sách rủi ro của OWASP, thí nghiệm prompt injection gián tiếp cho thấy các cách phòng thủ bằng prompt không đáng tin, phòng thủ bằng kiến trúc, dữ liệu nhạy cảm, thiên kiến và rào chắn.",
     "part": "An toàn, đánh giá và vận hành"
   },
   {
     "num": "12",
     "file": "ungdung-ch12.html",
     "label": "Đánh giá ứng dụng LLM",
-    "summary": "Ba loại đánh giá, các thước đo, cần bao nhiêu câu hỏi để một kết luận đáng tin, so sánh ghép cặp bằng kiểm định McNemar, và kiểm thử hồi quy.",
+    "summary": "Ba cách chấm, các thước đo theo nhiệm vụ, cỡ mẫu cần thiết để một kết luận đáng tin, sức mạnh của so sánh ghép cặp bằng kiểm định McNemar, và kiểm thử hồi quy cho mọi thay đổi.",
     "part": "An toàn, đánh giá và vận hành"
   },
   {
     "num": "13",
     "file": "ungdung-ch13.html",
     "label": "Quan sát và vận hành",
-    "summary": "Những gì cần ghi lại, trace và span theo OpenTelemetry, theo dõi chi phí và độ trễ, giám sát chất lượng trong sản xuất và quyền riêng tư của log.",
+    "summary": "Những gì cần ghi lại để tái tạo được lỗi, trace và span theo OpenTelemetry, theo dõi chi phí và độ trễ, ước lượng chất lượng khi không có nhãn, và bảo vệ dữ liệu trong log.",
     "part": "An toàn, đánh giá và vận hành"
   },
   {
     "num": "14",
     "file": "ungdung-ch14.html",
-    "label": "AI đa phương thức",
-    "summary": "Các bài toán đa phương thức, cách mô hình ngôn ngữ đọc ảnh và vì sao ảnh tốn token, video, sinh ảnh, nhận dạng và tổng hợp tiếng nói.",
+    "label": "Mô hình đa phương thức",
+    "summary": "Cách mô hình ngôn ngữ đọc ảnh và vì sao số token tăng theo bình phương độ phân giải, video, sinh ảnh, nhận dạng và tổng hợp tiếng nói.",
     "part": "Mở rộng"
   },
   {
     "num": "15",
     "file": "ungdung-ch15.html",
-    "label": "Công cụ lập trình có hỗ trợ AI",
-    "summary": "Các loại công cụ, bằng chứng từ hai thí nghiệm có đối chứng về hiệu quả, và cách dùng an toàn.",
+    "label": "Lập trình với công cụ AI",
+    "summary": "Các loại công cụ lập trình dựa trên LLM, hai thí nghiệm có đối chứng cho kết quả trái ngược về hiệu quả, và cách dùng an toàn.",
     "part": "Mở rộng"
   },
   {

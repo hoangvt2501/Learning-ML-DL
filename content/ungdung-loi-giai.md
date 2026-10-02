@@ -23,7 +23,7 @@ $$2 \times 40 \text{ lớp} \times 8 \text{ đầu} \times 128 \text{ chiều} \
 
 **(b) Một chuỗi và mười chuỗi.** Một chuỗi 32 768 token: $163\,840 \times 32\,768 = 5 \times 2^{30}$ byte $= 5$ GiB. Mười chuỗi đồng thời: 50 GiB, nhiều hơn dung lượng của một GPU 40 GB.
 
-**(c) Không dùng GQA.** Với 40 đầu key/value, dung lượng gấp $40/8 = 5$ lần: 800 KiB mỗi token, 25 GiB mỗi chuỗi, 250 GiB cho mười chuỗi. Đây là lý do gần như mọi LLM mới đều dùng grouped-query attention ([Mục 10.4 của *Học sâu*](models-ch10.html)).
+**(c) Không dùng GQA.** Với 40 đầu key/value, dung lượng gấp $40/8 = 5$ lần: 800 KiB mỗi token, 25 GiB mỗi chuỗi, 250 GiB cho mười chuỗi. Vì vậy gần như mọi LLM mới đều dùng grouped-query attention ([Mục 10.4 của *Học sâu*](models-ch10.html)).
 
 **(d) Hai cách giảm.** (1) Lượng tử hoá KV cache xuống 8 bit hoặc thấp hơn, giảm một nửa hoặc hơn ([Mục 11.7 của *Quantization*](ch11.html)). (2) Giới hạn độ dài ngữ cảnh của mỗi yêu cầu bằng context engineering: tóm tắt lịch sử, chỉ đưa vào các đoạn truy xuất cần thiết (Chương 5). Ngoài ra, prompt caching và chia sẻ KV cache của tiền tố chung giữa các yêu cầu giảm lượng tính lại.
 
