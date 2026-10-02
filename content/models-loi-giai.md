@@ -103,7 +103,7 @@ Khi một $p_i$ gần 1 và các $p_j$ còn lại gần 0, mọi phần tử c�
 | 11 | 32 | 64 | 189 |
 | 12 | 32 | 64 | 253 |
 
-Sau 10 lớp, trường tiếp nhận rộng 125 điểm ảnh; cần 12 lớp để phủ 224 điểm ảnh, so với 112 lớp khi không có bước nhảy. Bước nhảy nhân vào mọi mức tăng phía sau, nên trường tiếp nhận tăng theo cấp số nhân thay vì tuyến tính. Cái giá là độ phân giải của bản đồ đặc trưng giảm một nửa theo mỗi chiều sau mỗi lớp có bước nhảy 2.
+Sau 10 lớp, trường tiếp nhận rộng 125 điểm ảnh; cần 12 lớp để phủ 224 điểm ảnh, so với 112 lớp khi không có bước nhảy. Bước nhảy nhân vào mọi mức tăng phía sau, nên trường tiếp nhận tăng theo cấp số nhân thay vì tuyến tính. Đổi lại, độ phân giải của bản đồ đặc trưng giảm một nửa theo mỗi chiều sau mỗi lớp có bước nhảy 2.
 
 **(c) Trường tiếp nhận hiệu dụng.** Các điểm trong trường tiếp nhận lý thuyết không ảnh hưởng như nhau. Số đường đi từ một điểm ảnh tới đơn vị đang xét lớn nhất ở tâm và giảm dần ra rìa; ảnh hưởng tổng hợp qua nhiều lớp tích chập giống kết quả của nhiều lần tích chập liên tiếp, và theo định lý giới hạn trung tâm, nó có dạng gần Gauss. Luo và cộng sự (2016) cho thấy độ rộng hiệu dụng chỉ tăng theo $\sqrt L$. Vì vậy chỉ thêm lớp không đủ để mở rộng vùng nhìn; cần bước nhảy, gộp, tích chập giãn cách hoặc attention.
 
@@ -253,4 +253,4 @@ $$\text{AP} = 0{,}25 \times 1 + 0{,}25 \times 1 + 0{,}25 \times 0{,}75 = 0{,}687
 
 Theo cách tính 11 điểm của VOC 2007: precision nội suy bằng 1 tại 6 mức recall $0; 0{,}1; \dots; 0{,}5$, bằng 0,75 tại hai mức 0,6 và 0,7, và bằng 0 tại 0,8; 0,9; 1. AP $= (6 + 1{,}5)/11 \approx 0{,}682$, gần nhưng không bằng cách tính mọi điểm.
 
-**(d) Hộp trùng.** Mỗi hộp thật chỉ được ghép với một hộp dự đoán. Hộp dự đoán thứ hai của cùng một đối tượng không còn hộp thật nào để ghép, nên bị tính là dương tính giả và làm giảm precision. Đó là lý do NMS làm tăng AP: nó loại các hộp trùng trước khi đánh giá. Trong thí nghiệm ở Mục 7.5, AP50 tăng từ 0,885 lên 0,913 sau NMS. Nhưng nếu ngưỡng NMS quá thấp, hộp đúng của một đối tượng khác đứng sát bên cũng bị loại, và recall giảm.
+**(d) Hộp trùng.** Mỗi hộp thật chỉ được ghép với một hộp dự đoán. Hộp dự đoán thứ hai của cùng một đối tượng không còn hộp thật nào để ghép, nên bị tính là dương tính giả và làm giảm precision. Vì vậy NMS làm tăng AP: nó loại các hộp trùng trước khi đánh giá. Trong thí nghiệm ở Mục 7.5, AP50 tăng từ 0,885 lên 0,913 sau NMS. Nhưng nếu ngưỡng NMS quá thấp, hộp đúng của một đối tượng khác đứng sát bên cũng bị loại, và recall giảm.

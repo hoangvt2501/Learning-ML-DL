@@ -3,91 +3,91 @@
     "num": "0",
     "file": "models-ch00.html",
     "label": "Ký hiệu và quy ước",
-    "summary": "Bảng ký hiệu, quy ước thuật ngữ theo cheatsheet tiếng Việt của Stanford, và ba nghĩa của chữ bias: độ chệch, hệ số chặn và thiên kiến quy nạp.",
+    "summary": "Bảng ký hiệu, quy ước thuật ngữ theo cheatsheet tiếng Việt của Stanford, và ba nghĩa của chữ bias trong giáo trình: độ chệch, hệ số chặn và thiên kiến quy nạp.",
     "part": "Mở đầu"
   },
   {
     "num": "1",
     "file": "models-ch01.html",
     "label": "Các họ mô hình",
-    "summary": "Bốn câu hỏi khi thiết kế một mô hình, so sánh mô hình tuyến tính, cây, mạng nơ-ron và Transformer, vì sao cây vẫn mạnh trên dữ liệu dạng bảng, và khái niệm thiên kiến quy nạp.",
+    "summary": "Mỗi họ mô hình là một cách trả lời cùng một nhóm câu hỏi về họ hàm, số tham số, cách tối ưu và cách chống overfitting; các câu trả lời đó quy về thiên kiến quy nạp, và giải thích vì sao cây vẫn mạnh trên dữ liệu dạng bảng.",
     "part": "Từ học máy cổ điển tới học sâu"
   },
   {
     "num": "2",
     "file": "models-ch02.html",
     "label": "Độ chệch và phương sai",
-    "summary": "Chứng minh phân rã độ chệch – phương sai, đo từng thành phần trên 250 tập huấn luyện mô phỏng, chẩn đoán bằng đường cong học, và hiện tượng double descent.",
+    "summary": "Sai số của một mô hình tách thành độ chệch, phương sai và nhiễu; mô phỏng trên 250 tập huấn luyện đo từng thành phần, đường cong học thay phép đo trên dữ liệu thật, và double descent bổ sung cho bức tranh cổ điển.",
     "part": "Từ học máy cổ điển tới học sâu"
   },
   {
     "num": "3",
     "file": "models-ch03.html",
     "label": "Cây quyết định và phương pháp tập hợp",
-    "summary": "Cây quyết định và cách chọn phép chia, bagging và rừng ngẫu nhiên giảm phương sai, gradient boosting giảm độ chệch, kèm số đo trên cùng bài toán và các siêu tham số quan trọng.",
+    "summary": "Một cây quyết định có phương sai cao; bagging và rừng ngẫu nhiên giảm phương sai, gradient boosting giảm độ chệch, và số đo trên cùng một bài toán cho thấy từng cách tác động vào đâu.",
     "part": "Từ học máy cổ điển tới học sâu"
   },
   {
     "num": "4",
     "file": "models-ch04.html",
     "label": "Mạng nơ-ron nhiều lớp",
-    "summary": "Vì sao cần hàm kích hoạt phi tuyến, các hàm kích hoạt thông dụng, định lý xấp xỉ phổ quát, và một phép dựng cho thấy độ sâu tiết kiệm số tham số theo cấp số mũ.",
+    "summary": "Vì sao giữa các lớp phải có hàm phi tuyến, mạng một lớp ẩn biểu diễn được tới đâu theo định lý xấp xỉ phổ quát, và một phép dựng cho thấy độ sâu tiết kiệm số tham số theo cấp số mũ.",
     "part": "Mạng nơ-ron và cách huấn luyện"
   },
   {
     "num": "5",
     "file": "models-ch05.html",
     "label": "Lan truyền ngược và các thuật toán tối ưu",
-    "summary": "Lan truyền ngược và lý do nó rẻ, bộ nhớ cho giá trị kích hoạt, SGD, momentum, Adam và hiệu chỉnh độ chệch, AdamW, lịch tốc độ học, và một ví dụ tính tay đầy đủ.",
+    "summary": "Lan truyền ngược tính gradient với chi phí cỡ ba lần tính hàm mất mát nhưng tốn bộ nhớ kích hoạt; SGD, momentum, Adam và AdamW dùng gradient đó để cập nhật tham số, kèm một ví dụ tính tay đầy đủ.",
     "part": "Mạng nơ-ron và cách huấn luyện"
   },
   {
     "num": "6",
     "file": "models-ch06.html",
     "label": "Khởi tạo, chuẩn hoá và kết nối tắt",
-    "summary": "Suy ra khởi tạo Xavier và He, đo gradient qua mạng 40 lớp với sáu cách dựng lớp, BatchNorm, LayerNorm và RMSNorm, kết nối tắt, dropout và các phương pháp regularization khác.",
+    "summary": "Gradient co lại hoặc phình ra qua nhiều lớp; khởi tạo Xavier và He, chuẩn hoá và kết nối tắt giữ nó ổn định, và thí nghiệm với mạng 40 lớp cho thấy kết nối tắt một mình làm gradient bùng nổ.",
     "part": "Mạng nơ-ron và cách huấn luyện"
   },
   {
     "num": "7",
     "file": "models-ch07.html",
     "label": "Mạng nơ-ron tích chập",
-    "summary": "Phép tích chập, kích thước đầu ra, số tham số và số phép tính, trường tiếp nhận, các khối thường dùng, CNN so với Vision Transformer, phát hiện đối tượng (IoU, hộp neo, NMS, AP) và phân đoạn ảnh (FCN, U-Net, Mask R-CNN).",
+    "summary": "Ba giả định về ảnh giảm số tham số đi hàng nghìn lần; chương đi từ phép tích chập và trường tiếp nhận tới so sánh CNN với ViT, phát hiện đối tượng với IoU, NMS và AP, và phân đoạn ảnh.",
     "part": "Mạng tích chập và mạng hồi quy"
   },
   {
     "num": "8",
     "file": "models-ch08.html",
     "label": "Mạng nơ-ron hồi quy",
-    "summary": "RNN và lan truyền ngược theo thời gian, đo gradient tiêu biến và bùng nổ, LSTM và vai trò của cổng quên, GRU, và giới hạn về tính song song khiến Transformer thay thế RNN.",
+    "summary": "RNN đọc chuỗi bằng một trạng thái cập nhật qua từng bước; gradient tiêu biến và bùng nổ theo thời gian, LSTM giữ thông tin nhờ cổng quên, và giới hạn về tính song song khiến Transformer thay thế RNN.",
     "part": "Mạng tích chập và mạng hồi quy"
   },
   {
     "num": "9",
     "file": "models-ch09.html",
     "label": "Attention và Transformer",
-    "summary": "Scaled dot-product attention, chứng minh và đo lý do chia cho √dₖ, attention nhiều đầu, mặt nạ, cấu trúc một khối Transformer, mã hoá vị trí và ba kiểu kiến trúc encoder, decoder, encoder–decoder.",
+    "summary": "Attention như một phép tra cứu mềm, lý do chia điểm số cho √dₖ được chứng minh và đo, attention nhiều đầu, mặt nạ, cấu trúc một khối Transformer, mã hoá vị trí và ba kiểu kiến trúc.",
     "part": "Transformer và mô hình ngôn ngữ"
   },
   {
     "num": "10",
     "file": "models-ch10.html",
     "label": "Các cải tiến của Transformer",
-    "summary": "Pre-LN, RoPE, MQA và GQA, SwiGLU, mixture of experts và FlashAttention: mỗi thay đổi kèm vấn đề nó giải quyết và cái giá của nó.",
+    "summary": "Khung Transformer giữ nguyên nhưng các thành phần đã đổi: pre-LN, RoPE, GQA, SwiGLU, mixture of experts và FlashAttention, mỗi thay đổi kèm vấn đề nó giải quyết và điểm yếu của nó.",
     "part": "Transformer và mô hình ngôn ngữ"
   },
   {
     "num": "11",
     "file": "models-ch11.html",
     "label": "Các chiến lược giải mã",
-    "summary": "Greedy, beam search, nhiệt độ, top-k và top-p, đo tác động lên một phân phối đuôi dài, vì sao beam search kém với văn bản mở, và các vấn đề giải mã trong hệ thống thực tế.",
+    "summary": "Cùng một mô hình với hai chiến lược giải mã cho hai hành vi rất khác nhau; chương so sánh greedy, beam search, nhiệt độ, top-k và top-p trên một phân phối đuôi dài, và các vấn đề giải mã trong hệ thống thật.",
     "part": "Transformer và mô hình ngôn ngữ"
   },
   {
     "num": "12",
     "file": "models-ch12.html",
     "label": "Tham số, FLOP và bộ nhớ của Transformer",
-    "summary": "Công thức 12Ld², C ≈ 6ND và bộ nhớ khi huấn luyện, suy luận; kiểm chứng khớp chính xác với số tham số của GPT-2 và Llama 2, và ngân sách huấn luyện Llama 2 7B.",
+    "summary": "Công thức số tham số, số phép tính và bộ nhớ của Transformer, kiểm chứng khớp tới từng tham số với GPT-2 và Llama 2, và ngân sách huấn luyện Llama 2 7B ước lượng từ C ≈ 6ND.",
     "part": "Transformer và mô hình ngôn ngữ"
   },
   {
