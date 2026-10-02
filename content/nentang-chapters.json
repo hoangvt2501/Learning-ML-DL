@@ -10,112 +10,112 @@
     "num": "1",
     "file": "nentang-ch01.html",
     "label": "Tổng quan về học máy",
-    "summary": "Định nghĩa học máy, ba thành phần của mọi thuật toán học có giám sát, các dạng bài toán, và quy trình giải một bài toán học máy.",
+    "summary": "Phần lớn thuật toán học máy được ghép từ cùng ba thành phần: một họ hàm, một hàm mất mát và một cách tối ưu; chương dựng khung đó, phân loại các dạng bài toán và mô tả quy trình bao quanh thuật toán, nơi xảy ra phần lớn lỗi.",
     "part": "Mở đầu"
   },
   {
     "num": "2",
     "file": "nentang-ch02.html",
     "label": "Đại số tuyến tính",
-    "summary": "Hạng, tích vô hướng và siêu phẳng, chuẩn, trị riêng, ma trận xác định dương, SVD và đạo hàm theo vector, kèm nơi mỗi khái niệm được dùng.",
+    "summary": "Những khái niệm đại số tuyến tính mà các chương sau cần, mỗi khái niệm kèm lý do: hạng quyết định hồi quy có nghiệm duy nhất hay không, số điều kiện quyết định tốc độ của gradient descent, SVD dẫn tới PCA và ridge.",
     "part": "Toán cho học máy"
   },
   {
     "num": "3",
     "file": "nentang-ch03.html",
     "label": "Xác suất và thống kê",
-    "summary": "Kỳ vọng, phương sai, ma trận hiệp phương sai, phân phối Gauss, định lý Bayes, và độ chệch – phương sai của một ước lượng.",
+    "summary": "Ngôn ngữ để nói về sự không chắc chắn: kỳ vọng, phương sai, ma trận hiệp phương sai, phân phối Gauss và định lý Bayes, cùng phép tách sai số của một ước lượng thành độ chệch và phương sai.",
     "part": "Toán cho học máy"
   },
   {
     "num": "4",
     "file": "nentang-ch04.html",
     "label": "Hồi quy tuyến tính",
-    "summary": "Bài toán bình phương tối thiểu, phương trình chuẩn, trường hợp ma trận suy biến, đa cộng tuyến và các giả định của mô hình.",
+    "summary": "Thuật toán đơn giản nhất có nghiệm dạng đóng, nên các hiện tượng như ma trận suy biến và đa cộng tuyến quan sát được trực tiếp; thí nghiệm cho thấy đa cộng tuyến làm hệ số dao động gấp 25 lần mà dự đoán gần như không đổi.",
     "part": "Mô hình tuyến tính"
   },
   {
     "num": "5",
     "file": "nentang-ch05.html",
     "label": "Gradient descent",
-    "summary": "Thuật toán gradient descent, tốc độ hội tụ theo số điều kiện, cách chọn tốc độ học, kiểm tra gradient bằng sai phân và các biến thể SGD, mini-batch.",
+    "summary": "Khi không có công thức, ta đi từng bước xuống dốc: số vòng lặp tỉ lệ với số điều kiện, momentum hạ nó xuống theo căn bậc hai, và gradient tự tính cần được kiểm tra bằng sai phân với bước sai phân chọn đúng.",
     "part": "Mô hình tuyến tính"
   },
   {
     "num": "6",
     "file": "nentang-ch06.html",
     "label": "Phân loại tuyến tính",
-    "summary": "Perceptron, hồi quy logistic và hồi quy softmax: cùng một mô hình tuyến tính, khác nhau ở hàm mất mát.",
+    "summary": "Perceptron, hồi quy logistic và hồi quy softmax dùng chung mô hình tuyến tính và khác nhau ở hàm mất mát; khác biệt đó quyết định perceptron có hội tụ không và hồi quy logistic có cho ra xác suất không.",
     "part": "Mô hình tuyến tính"
   },
   {
     "num": "7",
     "file": "nentang-ch07.html",
     "label": "k láng giềng gần nhất và Naive Bayes",
-    "summary": "Mô hình phân biệt và mô hình sinh, thuật toán k-NN và lời nguyền số chiều, Naive Bayes, và quan hệ giữa Naive Bayes, LDA, QDA.",
+    "summary": "Hai cách tiếp cận khác với việc học biên quyết định: k-NN tra cứu các điểm gần nhất, còn Naive Bayes mô tả dữ liệu từng lớp rồi suy ngược bằng Bayes; với dữ liệu Gauss, Naive Bayes, LDA và QDA là cùng một mô hình.",
     "part": "Phân loại và đánh giá"
   },
   {
     "num": "8",
     "file": "nentang-ch08.html",
     "label": "Đánh giá mô hình phân loại",
-    "summary": "Ma trận nhầm lẫn, precision, recall, F1, đường cong ROC và precision–recall, đánh giá nhiều lớp và rò rỉ dữ liệu.",
+    "summary": "Độ chính xác có thể chọn nhầm một mô hình vô dụng khi lớp dương hiếm; chương xây các thước đo thay thế từ ma trận nhầm lẫn, so ROC-AUC với PR-AUC, và nêu các lỗi chia dữ liệu làm mọi con số mất ý nghĩa.",
     "part": "Phân loại và đánh giá"
   },
   {
     "num": "9",
     "file": "nentang-ch09.html",
     "label": "Overfitting và regularization",
-    "summary": "Overfitting và underfitting, hồi quy ridge, ridge nhìn qua SVD, lasso và nghiệm thưa, cross-validation.",
+    "summary": "Mô hình có thể khớp dữ liệu huấn luyện rất tốt mà dự đoán kém; ridge và lasso kiểm soát điều đó theo hai cách khác nhau, phân tích được chính xác qua SVD, và cường độ regularization được chọn bằng cross-validation.",
     "part": "Regularization và ước lượng"
   },
   {
     "num": "10",
     "file": "nentang-ch10.html",
     "label": "Ước lượng hợp lý cực đại và hậu nghiệm cực đại",
-    "summary": "MLE cho ra bình phương sai số và cross-entropy; MAP cho ra regularization, với ridge trùng MAP khi tiên nghiệm là Gauss.",
+    "summary": "Phần lớn hàm mất mát và thành phần phạt đã gặp suy ra được từ hai nguyên lý: hợp lý cực đại cho bình phương sai số và cross-entropy, hậu nghiệm cực đại cho ridge, lasso và làm trơn Laplace.",
     "part": "Regularization và ước lượng"
   },
   {
     "num": "11",
     "file": "nentang-ch11.html",
     "label": "Tập lồi và hàm lồi",
-    "summary": "Định nghĩa tập lồi và hàm lồi, điều kiện bậc nhất và bậc hai, các phép toán bảo toàn tính lồi, và ảnh hưởng của tính lồi tới gradient descent.",
+    "summary": "Tính lồi là ranh giới giữa bài toán tối ưu có bảo đảm và không có: định nghĩa, cách nhận ra hàm lồi qua các phép toán bảo toàn, và thí nghiệm cho thấy gradient descent dừng ở nhiều điểm khác nhau khi tính lồi mất đi.",
     "part": "Tối ưu lồi và SVM"
   },
   {
     "num": "12",
     "file": "nentang-ch12.html",
     "label": "Tối ưu lồi và đối ngẫu Lagrange",
-    "summary": "Hàm Lagrange, hàm đối ngẫu, đối ngẫu yếu và mạnh, điều kiện Slater và KKT, minh hoạ bằng một ví dụ tính tay xuyên suốt.",
+    "summary": "Công cụ để xử lý ràng buộc trong bài toán lồi: hàm Lagrange, bài toán đối ngẫu, điều kiện Slater và KKT, với điều kiện bù dẫn thẳng tới vector hỗ trợ; mọi khái niệm được tính tay trên một ví dụ xuyên suốt.",
     "part": "Tối ưu lồi và SVM"
   },
   {
     "num": "13",
     "file": "nentang-ch13.html",
     "label": "Máy vector hỗ trợ",
-    "summary": "SVM lề cứng và lề mềm, bài toán đối ngẫu và vector hỗ trợ, mối liên hệ với mất mát hinge, kernel và chi phí tính toán.",
+    "summary": "SVM chọn siêu phẳng có lề lớn nhất; đối ngẫu chỉ ra rằng chỉ vài vector hỗ trợ quyết định nghiệm, lề mềm tương đương mất mát hinge cộng regularization, và kernel cho biên phi tuyến mà không phải dựng không gian đặc trưng.",
     "part": "Tối ưu lồi và SVM"
   },
   {
     "num": "14",
     "file": "nentang-ch14.html",
     "label": "Giảm chiều dữ liệu",
-    "summary": "Phân tích thành phần chính, định lý Eckart–Young, hạn chế của PCA khi có nhãn, và phân tích biệt thức tuyến tính (LDA).",
+    "summary": "PCA tìm các hướng có phương sai lớn nhất và hoá ra là phân tích trị riêng của ma trận hiệp phương sai; định lý Eckart–Young được kiểm chứng tới 10⁻¹², và một thí nghiệm cho thấy khi có nhãn, LDA chọn hướng tốt hơn hẳn.",
     "part": "Học không giám sát"
   },
   {
     "num": "15",
     "file": "nentang-ch15.html",
     "label": "Phân cụm K-means",
-    "summary": "Thuật toán Lloyd, khởi tạo k-means++, các giả định ngầm về hình dạng cụm, và cách chọn số cụm.",
+    "summary": "K-means đơn giản nhưng đặt ra ba câu hỏi: kết quả phụ thuộc khởi tạo tới mức nào, thuật toán ngầm giả định cụm có hình dạng gì, và chọn số cụm ra sao khi không có nhãn để đối chiếu.",
     "part": "Học không giám sát"
   },
   {
     "num": "16",
     "file": "nentang-ch16.html",
     "label": "Hệ thống gợi ý",
-    "summary": "Lọc cộng tác bằng phân rã ma trận và ALS, lượng dữ liệu cần thiết, chọn hạng, và vấn đề khởi đầu lạnh.",
+    "summary": "Phân rã ma trận dùng lại gần như mọi công cụ của giáo trình; thí nghiệm cho thấy nó chỉ có ích khi mỗi người có số đánh giá gấp vài lần hạng, và người dùng mới cần một phương án dựa trên nội dung.",
     "part": "Học không giám sát"
   },
   {
