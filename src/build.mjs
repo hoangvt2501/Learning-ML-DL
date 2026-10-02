@@ -222,8 +222,9 @@ function buildBook(spec, books) {
     const html = injectNotes(rendered.get(ch.num), ch.num, notes, md);
     const kicker = ch.num === 'PL' ? 'Phụ lục' : 'Chương ' + ch.num;
     const quiz = quizzes.has(ch.num) ? renderQuiz(md, quizzes.get(ch.num), 'chapter') : '';
-    const lede = '<p class="chapter-lede">' + escapeHtml(ch.summary) + '</p>';
-    const withLede = html.includes('</h2>') ? html.replace('</h2>', '</h2>' + lede) : lede + html;
+    // Không chèn dòng tóm tắt dưới tiêu đề: mỗi chương tự mở đầu bằng đoạn dẫn của nó,
+    // và dòng tóm tắt (dùng cho mục lục và thẻ mô tả) chỉ lặp lại đoạn đó.
+    const withLede = html;
 
     write(ch.file, page({
       title: ch.title + ' — ' + docTitle,

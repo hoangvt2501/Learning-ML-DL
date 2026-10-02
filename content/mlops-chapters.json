@@ -3,98 +3,98 @@
     "num": "0",
     "file": "mlops-ch00.html",
     "label": "Ký hiệu và quy ước",
-    "summary": "Bảng ký hiệu và quy ước thuật ngữ dùng trong giáo trình: sản xuất, phục vụ, dịch chuyển phân phối, lệch huấn luyện–phục vụ, rào chắn.",
+    "summary": "Các ký hiệu xác suất dùng trong giáo trình và cách gọi tiếng Việt của các thuật ngữ MLOps.",
     "part": "Mở đầu"
   },
   {
     "num": "1",
     "file": "mlops-ch01.html",
-    "label": "Nợ kỹ thuật của hệ thống học máy",
-    "summary": "Vì sao hệ thống học máy hỏng một cách im lặng: nguyên lý CACE, các dạng nợ kỹ thuật theo Sculley và cộng sự (2015), và cách đọc đúng nhận định về 5% mã học máy.",
+    "label": "Nợ kỹ thuật trong hệ thống học máy",
+    "summary": "Vì sao hệ thống học máy hỏng theo cách khó thấy và khó bảo trì hơn phần mềm thông thường, giải thích qua khái niệm nợ kỹ thuật của Sculley và cộng sự.",
     "part": "Mở đầu"
   },
   {
     "num": "2",
     "file": "mlops-ch02.html",
-    "label": "Vòng đời và mức độ tự động hoá",
-    "summary": "Vòng đời của hệ thống học máy là một vòng lặp; ba yếu tố tốc độ, kiểm định, phiên bản; ba mức tự động hoá của Google Cloud; huấn luyện liên tục so với CI/CD.",
+    "label": "Vòng đời của hệ thống học máy",
+    "summary": "Một hệ thống học máy đi qua những giai đoạn nào, những người vận hành nó đánh giá thành công ra sao, và quy trình được tự động hoá tới mức nào.",
     "part": "Mở đầu"
   },
   {
     "num": "3",
     "file": "mlops-ch03.html",
-    "label": "Dữ liệu: hợp đồng, kiểm định và các loại lỗi",
-    "summary": "Ba loại lỗi dữ liệu (cứng, mềm, dịch chuyển) và cách phản ứng với từng loại; hợp đồng dữ liệu bốn tầng; độ trễ nhãn; ba mức phiên bản hoá dữ liệu.",
+    "label": "Dữ liệu",
+    "summary": "Vì sao dữ liệu là nguồn sự cố phổ biến nhất, cách phân loại lỗi dữ liệu và biến các giả định về dữ liệu thành phép kiểm tra tự động.",
     "part": "Dữ liệu và thí nghiệm"
   },
   {
     "num": "4",
     "file": "mlops-ch04.html",
-    "label": "Đặc trưng và tính đúng theo thời điểm",
-    "summary": "Lệch giữa huấn luyện và phục vụ, rò rỉ thông tin tương lai, ghép theo thời điểm bằng SQL, ba thành phần của kho đặc trưng và khi nào không cần nó.",
+    "label": "Đặc trưng",
+    "summary": "Hai lỗi khó phát hiện nhất của học máy, lệch giữa huấn luyện và phục vụ và rò rỉ thông tin từ tương lai, cùng cách kho đặc trưng hỗ trợ phòng tránh chúng.",
     "part": "Dữ liệu và thí nghiệm"
   },
   {
     "num": "5",
     "file": "mlops-ch05.html",
-    "label": "Thí nghiệm lặp lại được",
-    "summary": "Tái lập, tái tạo và tính bền; sáu nhóm yếu tố phải cố định khi huấn luyện; theo dõi thí nghiệm; sổ đăng ký mô hình và thẻ mô hình.",
+    "label": "Tính lặp lại của thí nghiệm",
+    "summary": "Làm thế nào để huấn luyện lại đúng một mô hình khi cần điều tra sự cố, và cách ghi lại thí nghiệm cùng các mô hình được đưa vào sử dụng.",
     "part": "Dữ liệu và thí nghiệm"
   },
   {
     "num": "6",
     "file": "mlops-ch06.html",
-    "label": "Đánh giá mô hình cho sản xuất",
-    "summary": "Chỉ số ngoại tuyến và chỉ số sản phẩm, thí nghiệm đánh giá theo lát cắt (tổng thể tăng 19,8 điểm, một nhóm giảm 11,6 điểm), kiểm thử hành vi, và 28 mục của ML Test Score.",
+    "label": "Đánh giá mô hình trước khi triển khai",
+    "summary": "Vì sao một chỉ số trên tập kiểm tra không đủ để quyết định triển khai, và các cách đánh giá bổ sung: theo lát cắt, kiểm thử hành vi, bộ tiêu chí ML Test Score.",
     "part": "Dữ liệu và thí nghiệm"
   },
   {
     "num": "7",
     "file": "mlops-ch07.html",
-    "label": "Đóng gói và phục vụ mô hình",
-    "summary": "Ba chế độ phục vụ, ngân sách độ trễ, phân vị cao của độ trễ khi một yêu cầu toả ra nhiều dịch vụ, và cách đóng gói để môi trường huấn luyện khớp môi trường phục vụ.",
+    "label": "Phục vụ mô hình",
+    "summary": "Các cách đưa mô hình vào phục vụ, ngân sách độ trễ, và vì sao phần đuôi của phân phối độ trễ chi phối thời gian trả lời khi gọi nhiều dịch vụ.",
     "part": "Phục vụ và ra mắt"
   },
   {
     "num": "8",
     "file": "mlops-ch08.html",
-    "label": "Chiến lược ra mắt",
-    "summary": "Shadow, canary, blue–green và A/B test trả lời những câu hỏi khác nhau; công thức cỡ mẫu cho A/B test; năm lỗi thống kê thường gặp.",
+    "label": "Triển khai mô hình mới",
+    "summary": "Đưa một mô hình mới tới người dùng từng bước, và cách biết chắc nó tốt hơn mô hình cũ bằng A/B test.",
     "part": "Phục vụ và ra mắt"
   },
   {
     "num": "9",
     "file": "mlops-ch09.html",
     "label": "Dịch chuyển phân phối",
-    "summary": "Covariate shift, label shift và concept drift; thí nghiệm cho thấy concept drift không phát hiện được từ X; các phép kiểm tra; PSI và vì sao ngưỡng 0,25 phụ thuộc cỡ mẫu.",
+    "summary": "Dữ liệu thay đổi theo thời gian theo những cách nào, cách nào phát hiện được khi chưa có nhãn, và vì sao không nên dùng thẳng ngưỡng PSI quen thuộc.",
     "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "10",
     "file": "mlops-ch10.html",
-    "label": "Giám sát và cảnh báo",
-    "summary": "Chỉ số vận hành và chỉ số riêng của học máy, bốn lớp giám sát, độ lệch dự đoán, giới hạn hành động, nguyên tắc thiết kế cảnh báo, và ngưỡng cố định trong hệ thống thay đổi.",
+    "label": "Giám sát",
+    "summary": "Theo dõi một hệ thống học máy đang chạy: chỉ số nào cần đo, đo ở lớp nào khi nhãn đến chậm, và thiết kế cảnh báo sao cho người nhận còn tin vào nó.",
     "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "11",
     "file": "mlops-ch11.html",
     "label": "Huấn luyện lại",
-    "summary": "Thí nghiệm đo mức suy giảm của mô hình theo thời gian, bốn loại kích hoạt huấn luyện lại, huấn luyện lại từ đầu so với cập nhật mô hình cũ, và các bước kiểm định của pipeline tự động.",
+    "summary": "Mô hình cũ đi nhanh tới mức nào, khi nào nên huấn luyện lại, và làm sao để việc tự động hoá huấn luyện lại không tạo ra sự cố mới.",
     "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "12",
     "file": "mlops-ch12.html",
     "label": "Vòng phản hồi",
-    "summary": "Vòng phản hồi trực tiếp và ẩn, vòng phản hồi thoái hoá trong hệ thống gợi ý, mô phỏng đo thiệt hại và tác dụng của ngẫu nhiên hoá, các cách phát hiện và khắc phục.",
+    "summary": "Khi dự đoán của mô hình quyết định dữ liệu huấn luyện của chính nó: cơ chế, mức thiệt hại đo bằng mô phỏng, và cách phát hiện, khắc phục.",
     "part": "Giám sát và huấn luyện lại"
   },
   {
     "num": "13",
     "file": "mlops-ch13.html",
-    "label": "LLMOps",
-    "summary": "Những gì thay đổi khi dùng mô hình ngôn ngữ lớn: đánh giá ba tầng, thiên lệch của giám khảo LLM, vận hành hệ thống RAG, chi phí và độ trễ theo token, rào chắn, phiên bản hoá.",
+    "label": "Vận hành ứng dụng dùng mô hình ngôn ngữ lớn",
+    "summary": "Những gì thay đổi khi hệ thống dùng mô hình ngôn ngữ lớn: đánh giá bằng giám khảo LLM, hệ thống RAG, chi phí theo token, rào chắn và quản lý phiên bản.",
     "part": "LLMOps"
   },
   {
@@ -102,19 +102,19 @@
     "file": "mlops-bai-tap.html",
     "label": "Bài tập",
     "kind": "exercises",
-    "summary": "Mười bài tập (tính tay, suy luận, thí nghiệm, thiết kế) kèm lời giải chi tiết, và ngân hàng câu hỏi trắc nghiệm theo từng chương."
+    "summary": "Mười bài tập theo thứ tự các chương, từ tính tay tới thí nghiệm và thiết kế, kèm lời giải chi tiết và ngân hàng câu hỏi trắc nghiệm."
   },
   {
     "num": "15",
     "file": "mlops-ch15.html",
     "label": "Câu hỏi phỏng vấn",
-    "summary": "Cách trình bày câu trả lời, các câu hỏi thường gặp theo năm nhóm chủ đề kèm câu trả lời có số liệu, trình tự thiết kế hệ thống, và các câu trả lời chưa đạt."
+    "summary": "Các câu hỏi thường gặp khi phỏng vấn vị trí kỹ sư học máy và kỹ sư MLOps, kèm cách trả lời dựa trên nội dung và số liệu của giáo trình."
   },
   {
     "num": "16",
     "file": "mlops-ch16.html",
     "label": "Tài liệu tham khảo",
-    "summary": "Hai mươi chín nguồn, mỗi nguồn ghi rõ được dùng cho nội dung nào trong giáo trình."
+    "summary": "Hai mươi chín bài báo, sách và tài liệu gốc mà giáo trình dựa vào, kèm ghi chú mỗi nguồn được dùng cho phần nào."
   },
   {
     "num": "PL",
