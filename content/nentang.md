@@ -1351,11 +1351,13 @@ Ridge thêm $\lambda\|w\|^2$, lasso thêm $\lambda\|w\|_1$, Naive Bayes cộng $
 
 ## 10. Ước lượng hợp lý cực đại và hậu nghiệm cực đại
 
-Đến đây ta đã dùng khá nhiều hàm mất mát và thành phần phạt: bình phương sai số, cross-entropy, phạt $\ell_2$, phạt $\ell_1$, làm trơn Laplace. Nhìn riêng lẻ, chúng giống một danh sách lựa chọn phải ghi nhớ, và câu hỏi "vì sao là bình phương mà không phải trị tuyệt đối" ở Mục 4.1 vẫn còn treo đó. Thực ra phần lớn chúng suy ra được từ hai nguyên lý thống kê: ước lượng hợp lý cực đại cho ra hàm mất mát, còn ước lượng hậu nghiệm cực đại cho thêm thành phần regularization. Khi đã thấy điều này, câu hỏi "dùng hàm mất mát nào" được thay bằng một câu hỏi dễ trả lời hơn: dữ liệu có nhiễu dạng gì.
+Đến đây ta đã dùng khá nhiều hàm mất mát và thành phần phạt: bình phương sai số, cross-entropy, phạt $\ell_2$, phạt $\ell_1$, làm trơn Laplace. Nhìn riêng lẻ, chúng giống một danh sách lựa chọn phải ghi nhớ, và câu hỏi "vì sao là bình phương mà không phải trị tuyệt đối" ở Mục 4.1 vẫn còn treo đó; con số 1 cộng vào mỗi ô đếm khi làm trơn Laplace ở Mục 7.3 cũng chưa có lý do. Thực ra phần lớn chúng suy ra được từ hai nguyên lý thống kê: ước lượng hợp lý cực đại cho ra hàm mất mát, còn ước lượng hậu nghiệm cực đại cho thêm thành phần regularization. Khi đã thấy điều này, câu hỏi "dùng hàm mất mát nào" được thay bằng một câu hỏi dễ trả lời hơn: dữ liệu có nhiễu dạng gì.
 
 ### 10.1. Mô hình xác suất và hàm mất mát
 
 Ý tưởng chung của chương là mô tả quá trình sinh ra dữ liệu bằng một mô hình xác suất có tham số $\theta$, rồi chọn $\theta$ làm dữ liệu quan sát được trở nên "hợp lý" nhất. Mỗi giả thiết về phân phối của nhiễu hay của nhãn sẽ cho ra một hàm mất mát cụ thể, như các mục sau lần lượt chỉ ra.
+
+Ví dụ nhỏ nhất là một từ trong thư rác. Ở Ví dụ 7.1, từ "miễn phí" xuất hiện trong 3 trên 4 thư rác. Giả sử mỗi thư rác chứa từ này với cùng một xác suất $\theta$, độc lập với nhau. Xác suất để thấy đúng dữ liệu đã thấy, ba thư có từ và một thư không có, là $\theta^3(1 - \theta)$. Với $\theta = 0{,}5$ xác suất này là 0,0625, với $\theta = 0{,}75$ là 0,105, với $\theta = 0{,}9$ là 0,073. Giá trị $\theta = 0{,}75$ làm dữ liệu quan sát được hợp lý nhất trong ba giá trị, và nó đúng bằng tần suất 3/4 mà Mục 7.3 đã dùng.
 
 ### 10.2. Ước lượng hợp lý cực đại
 
@@ -1367,7 +1369,7 @@ Tích của nhiều xác suất khó tối ưu và dễ bị làm tròn về 0 k
 
 $$\hat\theta_{\text{MLE}} = \arg\min_\theta \; -\sum_{i=1}^{n}\log p(y_i \mid x_i, \theta).$$
 
-Đại lượng $-\log p(y_i \mid x_i, \theta)$ đóng vai trò hàm mất mát của điểm thứ $i$, và bài toán có đúng dạng của Định nghĩa 1.1.
+Đại lượng $-\log p(y_i \mid x_i, \theta)$ đóng vai trò hàm mất mát của điểm thứ $i$, và bài toán có đúng dạng của Định nghĩa 1.1. Với từ "miễn phí", âm log hợp lý là $-3\log\theta - \log(1 - \theta)$. Cho đạo hàm $-3/\theta + 1/(1 - \theta)$ bằng 0 được $\theta = 3/4$, nên giá trị 0,75 ở Mục 10.1 là tốt nhất trong mọi giá trị của $\theta$, chứ không riêng ba giá trị đã thử. Cùng phép tính với $k$ thư có từ trong $N$ thư cho $\hat\theta = k/N$: tần suất là ước lượng hợp lý cực đại.
 
 > **Định lý 10.1 (Nhiễu Gauss cho bình phương tối thiểu).** Giả sử $y_i = w^\top x_i + \epsilon_i$ với $\epsilon_i \sim \mathcal{N}(0, \sigma^2)$ độc lập. Khi đó ước lượng hợp lý cực đại của $w$ trùng với nghiệm bình phương tối thiểu.
 
@@ -1375,9 +1377,9 @@ $$\hat\theta_{\text{MLE}} = \arg\min_\theta \; -\sum_{i=1}^{n}\log p(y_i \mid x_
 > $$-\log p(y_i \mid x_i, w) = \frac{(y_i - w^\top x_i)^2}{2\sigma^2} + \tfrac12\log(2\pi\sigma^2).$$
 > Số hạng thứ hai không phụ thuộc $w$, còn hệ số $1/(2\sigma^2)$ dương không đổi vị trí cực tiểu. Do đó cực tiểu tổng theo $w$ tương đương cực tiểu $\sum_i (y_i - w^\top x_i)^2$.
 
-Định lý trả lời câu hỏi đã nêu ở Mục 4.1: bình phương sai số không phải một lựa chọn tuỳ ý, mà là hệ quả của giả thiết nhiễu Gauss. Cực tiểu theo $\sigma^2$ cho thêm ước lượng $\hat\sigma^2 = \frac1n\sum_i (y_i - \hat w^\top x_i)^2$, và giống Ví dụ 3.4, ước lượng hợp lý cực đại này có chệch: mẫu số không chệch là $n - d$.
+Định lý trả lời câu hỏi đã nêu ở Mục 4.1: bình phương sai số không phải một lựa chọn tuỳ ý, mà là hệ quả của giả thiết nhiễu Gauss. Cực tiểu theo $\sigma^2$ cho thêm ước lượng $\hat\sigma^2 = \frac1n\sum_i (y_i - \hat w^\top x_i)^2$, và giống Ví dụ 3.4, ước lượng hợp lý cực đại này có chệch: mẫu số không chệch là $n - d$. Với bốn căn hộ, đường thẳng của Chương 4 chính là ước lượng hợp lý cực đại dưới nhiễu Gauss, và $\hat\sigma^2$ là sai số huấn luyện 0,0045, tức độ lệch chuẩn của nhiễu khoảng 0,067 tỉ. Mẫu số không chệch là $n - d = 4 - 2 = 2$, cho ước lượng 0,009, gấp đôi.
 
-Đổi giả thiết về nhiễu thì đổi hàm mất mát. Nếu nhiễu có phân phối Laplace, $p(\epsilon) \propto e^{-|\epsilon|/b}$, thì $-\log p = |y_i - w^\top x_i|/b + \text{hằng số}$, và MLE trở thành **hồi quy trị tuyệt đối** (least absolute deviations). Phân phối Laplace có đuôi dày hơn Gauss, tức coi các sai số lớn là bình thường hơn, nên hồi quy trị tuyệt đối ít bị ảnh hưởng bởi điểm ngoại lai hơn bình phương tối thiểu. Một điểm ngoại lai có sai số 10 đóng góp 100 vào bình phương sai số nhưng chỉ đóng góp 10 vào tổng trị tuyệt đối.
+Đổi giả thiết về nhiễu thì đổi hàm mất mát. Nếu nhiễu có phân phối Laplace, $p(\epsilon) \propto e^{-|\epsilon|/b}$, thì $-\log p = |y_i - w^\top x_i|/b + \text{hằng số}$, và MLE trở thành **hồi quy trị tuyệt đối** (least absolute deviations). Phân phối Laplace có đuôi dày hơn Gauss, tức coi các sai số lớn là bình thường hơn, nên hồi quy trị tuyệt đối ít bị ảnh hưởng bởi điểm ngoại lai hơn bình phương tối thiểu. Một điểm ngoại lai có sai số 10 đóng góp 100 vào bình phương sai số nhưng chỉ đóng góp 10 vào tổng trị tuyệt đối. Trên bốn căn hộ, hồi quy trị tuyệt đối cho đường $y = 0{,}5 + 0{,}025x$, khá gần đường bình phương tối thiểu $y = 0{,}57 + 0{,}024x$. Thêm một căn thứ năm, 70 m², bị ghi nhầm giá thành 4,0 tỉ. Căn này nằm đúng ở diện tích trung bình, nên nó kéo cả đường bình phương tối thiểu lên 0,35 tỉ mà không đổi độ dốc: hệ số chặn từ 0,57 thành 0,92. Đường hồi quy trị tuyệt đối thì không đổi chút nào.
 
 ### 10.3. Cross-entropy là hợp lý cực đại với phân phối Bernoulli
 
@@ -1389,7 +1391,7 @@ Lấy âm logarit, ta được
 
 $$-\log p(y_i \mid x_i, w) = -\big[y_i\log p_i + (1-y_i)\log(1-p_i)\big].$$
 
-Vế phải đúng là số hạng của hàm mất mát cross-entropy ở Mục 6.3. Vậy cross-entropy không phải một định nghĩa độc lập, mà là âm log hợp lý dưới giả thiết nhãn có phân phối Bernoulli. Tương tự, với $K$ lớp và nhãn có phân phối phân loại (categorical) với xác suất cho bởi softmax, âm log hợp lý là cross-entropy nhiều lớp của hồi quy softmax.
+Vế phải đúng là số hạng của hàm mất mát cross-entropy ở Mục 6.3. Với sáu sinh viên ở Ví dụ 6.1, $w = 1$ và hệ số chặn $-3{,}5$, tích sáu xác suất $p(y_i \mid x_i, w)$ là $e^{-6 \times 0{,}418} \approx 0{,}081$: cross-entropy trung bình 0,418 chính là âm log hợp lý chia cho số điểm. Nghiệm $w \approx 1{,}214$, hệ số chặn $\approx -4{,}249$ ở Mục 6.3 làm cross-entropy nhỏ nhất, tức làm hợp lý lớn nhất, bằng $e^{-6 \times 0{,}413} \approx 0{,}084$. Vậy cross-entropy không phải một định nghĩa độc lập, mà là âm log hợp lý dưới giả thiết nhãn có phân phối Bernoulli. Tương tự, với $K$ lớp và nhãn có phân phối phân loại (categorical) với xác suất cho bởi softmax, âm log hợp lý là cross-entropy nhiều lớp của hồi quy softmax.
 
 Cross-entropy còn có một cách hiểu theo lý thuyết thông tin. Với phân phối dữ liệu $p$ và phân phối của mô hình $q$, cross-entropy $H(p, q) = -\mathbb{E}_{p}[\log q]$ bằng entropy $H(p)$ cộng với phân kỳ Kullback–Leibler $\operatorname{KL}(p\,\|\,q) \ge 0$. Entropy của dữ liệu không phụ thuộc mô hình, nên cực tiểu cross-entropy tương đương cực tiểu khoảng cách KL từ phân phối dữ liệu tới phân phối của mô hình.
 
@@ -1413,6 +1415,8 @@ Số hạng thứ nhất là hàm mất mát của MLE. Số hạng thứ hai ch
 
 Công thức $\lambda = \sigma^2/\tau^2$ có cách hiểu tự nhiên. Tiên nghiệm càng chặt, tức $\tau$ nhỏ và ta tin chắc các hệ số nhỏ, thì $\lambda$ càng lớn. Dữ liệu càng nhiễu, tức $\sigma$ lớn và dữ liệu ít đáng tin, thì tiên nghiệm càng được coi trọng, và $\lambda$ cũng càng lớn.
 
+Với bốn căn hộ, lấy $\sigma^2 = 0{,}0045$ như ước lượng ở Mục 10.2. Giả sử trước khi xem dữ liệu ta tin rằng thêm 10 m² hiếm khi làm giá đổi quá 0,2 tỉ, và diễn đạt niềm tin đó bằng tiên nghiệm Gauss cho độ dốc theo $u$ với $\tau = 0{,}1$. Khi đó $\lambda = 0{,}0045/0{,}01 = 0{,}45$, và theo Mục 9.2 độ dốc MAP là $4{,}8/(20 + 0{,}45) \approx 0{,}235$, chỉ nhỏ hơn độ dốc 0,24 của MLE một chút. Nhiễu nhỏ nên dữ liệu gần như quyết định tất cả.
+
 Thí nghiệm kiểm chứng định lý bằng hai cách tính độc lập: một bên giải hệ tuyến tính dạng đóng của ridge, một bên dùng thuật toán tối ưu BFGS cực tiểu trực tiếp âm log hậu nghiệm.
 
 ```text
@@ -1424,7 +1428,11 @@ Hai nghiệm khớp nhau tới $2{,}0 \times 10^{-8}$, giới hạn bởi dung s
 
 Tương tự, tiên nghiệm Laplace cho từng hệ số, $p(w_j) \propto e^{-|w_j|/b}$, cho $-\log p(w) = \|w\|_1/b + \text{hằng số}$, tức ước lượng MAP là lasso. Hai tiên nghiệm diễn đạt hai niềm tin khác nhau: phân phối Gauss phẳng quanh 0 và nói "các hệ số nên nhỏ", còn phân phối Laplace có đỉnh nhọn tại 0 và nói "nhiều hệ số nên bằng 0". Hình dạng của tiên nghiệm tại 0 chính là nguồn gốc của khác biệt giữa ridge và lasso ở Mục 9.4.
 
-Làm trơn Laplace của Naive Bayes (Mục 7.3) cũng là một ước lượng Bayes. Với biến rời rạc có $V$ giá trị và tiên nghiệm Dirichlet có mọi tham số bằng $\alpha + 1$, ước lượng MAP của xác suất mỗi giá trị là $(N_v + \alpha)/(N + \alpha V)$, đúng công thức làm trơn. Nếu lấy kỳ vọng hậu nghiệm thay vì điểm cực đại, tiên nghiệm Dirichlet với tham số $\alpha$ cho cùng công thức. Bảng dưới gom các thành phần regularization và tiên nghiệm tương ứng.
+Làm trơn Laplace của Naive Bayes (Mục 7.3) cũng là một ước lượng Bayes. Với biến rời rạc có $V$ giá trị và tiên nghiệm Dirichlet có mọi tham số bằng $\alpha + 1$, ước lượng MAP của xác suất mỗi giá trị là $(N_v + \alpha)/(N + \alpha V)$, đúng công thức làm trơn. Nếu lấy kỳ vọng hậu nghiệm thay vì điểm cực đại, tiên nghiệm Dirichlet với tham số $\alpha$ cho cùng công thức.
+
+Từ "cuộc họp" ở Ví dụ 7.1 cho thấy điều này với $V = 2$, khi tiên nghiệm Dirichlet trở thành phân phối Beta. Từ này xuất hiện trong 0 trên 4 thư rác, nên hợp lý là $(1 - \theta)^4$ và MLE là $\theta = 0$, đúng số đếm bằng 0 đã phủ quyết cả thư ở Mục 7.3. Với $\alpha = 1$, tiên nghiệm có hai tham số bằng 2 và mật độ tỉ lệ với $\theta(1 - \theta)$. Mật độ này bằng 0 ở hai đầu, tức nó không tin một từ có xác suất xuất hiện đúng bằng 0 hay đúng bằng 1. Hậu nghiệm tỉ lệ với $\theta(1 - \theta)^5$; cho đạo hàm của logarit, $1/\theta - 5/(1 - \theta)$, bằng 0 được $\theta = 1/6 \approx 0{,}167$, đúng xác suất sau làm trơn ở Ví dụ 7.1.
+
+Bảng dưới gom các thành phần regularization và tiên nghiệm tương ứng.
 
 | Thành phần regularization | Tiên nghiệm tương ứng | Niềm tin được diễn đạt |
 |---|---|---|
@@ -1448,7 +1456,7 @@ Hai nguyên lý của chương gói gọn trong bảng dưới: mỗi giả thi�
 | Nhãn phân phối phân loại | không | hồi quy softmax (Mục 6.4) |
 | Đặc trưng rời rạc độc lập có điều kiện | Dirichlet | Naive Bayes có làm trơn (Mục 7.3) |
 
-Cột trái là giả thiết về dữ liệu, cột phải là thuật toán. Đọc bảng theo chiều ngược lại cũng hữu ích: khi dùng một thuật toán, ta đang ngầm chấp nhận giả thiết tương ứng, và khi giả thiết đó sai rõ ràng, như nhiễu có nhiều điểm ngoại lai hay nhãn không phải nhị phân, đó là tín hiệu nên đổi hàm mất mát. Cùng với bảng, chương cho thấy mọi mô hình tuyến tính tổng quát với hàm liên kết chính tắc có gradient dạng $X^\top(\hat y - y)$, và ridge trùng với MAP dưới tiên nghiệm Gauss khi $\lambda = \sigma^2/\tau^2$, khớp với nghiệm tối ưu bằng số tới $2{,}0 \times 10^{-8}$.
+Cột trái là giả thiết về dữ liệu, cột phải là thuật toán. Đọc bảng theo chiều ngược lại cũng hữu ích: khi dùng một thuật toán, ta đang ngầm chấp nhận giả thiết tương ứng, và khi giả thiết đó sai rõ ràng, như nhiễu có nhiều điểm ngoại lai hay nhãn không phải nhị phân, đó là tín hiệu nên đổi hàm mất mát. Các ví dụ nhỏ của giáo trình nằm đúng trên bảng này: tần suất 3/4 của từ "miễn phí" là MLE của một biến Bernoulli, đường thẳng qua bốn căn hộ là MLE dưới nhiễu Gauss, nghiệm $w \approx 1{,}214$ của sáu sinh viên là MLE dưới nhãn Bernoulli, và xác suất 1/6 của từ "cuộc họp" sau làm trơn là MAP dưới tiên nghiệm Beta. Cùng với bảng, chương cho thấy mọi mô hình tuyến tính tổng quát với hàm liên kết chính tắc có gradient dạng $X^\top(\hat y - y)$, và ridge trùng với MAP dưới tiên nghiệm Gauss khi $\lambda = \sigma^2/\tau^2$, khớp với nghiệm tối ưu bằng số tới $2{,}0 \times 10^{-8}$.
 
 Ước lượng MAP vẫn chưa phải suy luận Bayes đầy đủ. Suy luận Bayes giữ toàn bộ phân phối hậu nghiệm và lấy trung bình dự đoán trên phân phối đó; MAP chỉ lấy một điểm là đỉnh của hậu nghiệm. Vì vậy MAP không cho biết mức độ không chắc chắn của tham số, và khi hậu nghiệm lệch hoặc có nhiều đỉnh, điểm đỉnh có thể không đại diện cho phân phối. Một số thuật toán cũng nằm ngoài bảng trên: mất mát hinge của SVM (Chương 13) không phải là âm log hợp lý của một mô hình xác suất chuẩn hoá được, nên SVM không cho xác suất một cách trực tiếp.
 
