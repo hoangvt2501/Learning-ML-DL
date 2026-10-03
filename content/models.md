@@ -1214,6 +1214,18 @@ Bảng dưới tóm tắt các chiến lược giải mã phổ biến và trư�
 
 Nhiệt độ $\tau < 1$ làm phân phối nhọn hơn, $\tau > 1$ làm phân phối phẳng hơn; $\tau \to 0$ cho greedy, $\tau = 1$ giữ nguyên phân phối của mô hình. Các biến thể mới hơn tiếp tục điều chỉnh cách cắt đuôi, chẳng hạn min-$p$ (Nguyen và cộng sự, 2025) chỉ giữ các token có xác suất ít nhất một tỉ lệ cố định của xác suất lớn nhất.
 
+Một từ vựng chỉ có bốn token đủ để thấy mỗi chiến lược làm gì. Với logit $z = (2, 1, 0, -1)$, softmax cho phân phối $p$ ở dòng đầu của bảng dưới, có entropy 0,948 nat, tức khoảng 2,6 lựa chọn hiệu dụng.
+
+| Chiến lược | Token 1 | Token 2 | Token 3 | Token 4 | Entropy (nat) |
+|---|---|---|---|---|---|
+| Phân phối gốc, $\tau = 1$ | 0,644 | 0,237 | 0,087 | 0,032 | 0,948 |
+| $\tau = 0{,}5$ | 0,865 | 0,117 | 0,016 | 0,002 | 0,455 |
+| $\tau = 2$ | 0,455 | 0,276 | 0,167 | 0,102 | 1,245 |
+| Top-$k$, $k = 2$ | 0,731 | 0,269 | 0 | 0 | 0,582 |
+| Top-$p$, $p = 0{,}9$ | 0,665 | 0,245 | 0,090 | 0 | 0,832 |
+
+Greedy luôn chọn token 1. Nhiệt độ chia mọi logit cho $\tau$ nên đổi xác suất của cả bốn token: $\tau = 0{,}5$ dồn 86,5% vào token 1, $\tau = 2$ làm phân phối phẳng hơn, nhưng không token nào bị loại hẳn. Top-$k$ với $k = 2$ bỏ hai token cuối rồi chuẩn hoá lại. Top-$p$ với $p = 0{,}9$ cộng dồn xác suất theo thứ tự giảm dần, 0,644 rồi 0,881 rồi 0,968, nên giữ ba token đầu, tập nhỏ nhất có tổng đạt 0,9.
+
 ### 11.3. Ảnh hưởng của các chiến lược tới phân phối
 
 Để thấy các chiến lược khác nhau ra sao, thí nghiệm trong `code/models/experiments.py` dựng một phân phối trên 50 000 token có đuôi dài, với logit lấy từ phân phối chuẩn có độ lệch chuẩn 2,2, rồi đo entropy, số token phủ 90% xác suất và xác suất của token đứng đầu sau mỗi phép biến đổi.
