@@ -378,6 +378,12 @@ Khi dữ liệu có nhiều chiều, ta cần biết phương sai của từng c
 
 Đường chéo của $\Sigma$ chứa phương sai của từng đặc trưng; các phần tử ngoài đường chéo chứa hiệp phương sai giữa từng cặp đặc trưng. Ma trận này có ba tính chất, ứng với ba chỗ dùng ở các chương sau. Trước hết, $\Sigma$ đối xứng và nửa xác định dương, vì $z^\top \Sigma z = \operatorname{Var}(z^\top x) \ge 0$ với mọi $z$. Theo định lý phổ, $\Sigma$ có hệ vector riêng trực chuẩn, và đó là các thành phần chính của PCA (Chương 14). Tiếp theo, trị riêng lớn nhất của $\Sigma$ là phương sai lớn nhất mà một phép chiếu lên một hướng đơn vị có thể đạt được, và hướng đạt giá trị đó là vector riêng tương ứng. Cuối cùng, giả thiết "naive" của thuật toán Naive Bayes Gauss tương đương với việc ép $\Sigma$ của mỗi lớp thành ma trận đường chéo, tức coi mọi cặp đặc trưng là không tương quan khi đã biết lớp; Mục 7.4 kiểm chứng điều này bằng số và cho thấy Naive Bayes, LDA và QDA chỉ khác nhau ở ràng buộc đặt lên $\Sigma$.
 
+Bốn căn hộ của Chương 2 cho một ma trận hiệp phương sai cụ thể. Lấy hai đặc trưng là diện tích và giá; trừ trung bình 70 m² và 2,25 tỉ, các hàng của $X_c$ là $(-30;\ -0{,}75)$, $(-10;\ -0{,}15)$, $(10;\ 0{,}15)$ và $(30;\ 0{,}75)$, nên
+
+$$\hat\Sigma = \frac13 X_c^\top X_c = \begin{pmatrix}666{,}7 & 16\\ 16 & 0{,}39\end{pmatrix}.$$
+
+Phương sai của diện tích là 666,7, tức độ lệch chuẩn khoảng 25,8 m²; phương sai của giá là 0,39, tức độ lệch chuẩn khoảng 0,62 tỉ. Hiệp phương sai 16 dương, tức căn rộng hơn thì đắt hơn, và hệ số tương quan $16/\sqrt{666{,}7 \times 0{,}39} \approx 0{,}992$ cho thấy giá gần như tỉ lệ thuận với diện tích. Tỉ số $16/666{,}7 = 0{,}024$ là con số sẽ gặp lại ở Chương 4: đó là độ dốc của đường thẳng khớp bốn căn hộ tốt nhất. Hai phần tử trên đường chéo chênh nhau khoảng 1 700 lần chỉ vì đơn vị đo, mét vuông so với tỉ đồng, nên vector riêng ứng với trị riêng lớn nhất gần như trùng với trục diện tích; Mục 14.2 cho thấy vì sao cần chuẩn hoá trước khi dùng các vector riêng này.
+
 Mẫu số $n - 1$ thay cho $n$ trong ước lượng mẫu có lý do, được giải thích ở Ví dụ 3.4.
 
 ### 3.4. Phân phối Gauss
@@ -447,7 +453,7 @@ Cùng ý tưởng này áp dụng cho dự đoán của cả mô hình, dưới 
 
 ### 3.7. Tóm tắt
 
-Kỳ vọng và phương sai mô tả giá trị trung bình và mức phân tán của một đại lượng ngẫu nhiên. Phương sai của tổng phụ thuộc vào hiệp phương sai, nên lấy trung bình nhiều mô hình chỉ giảm phương sai xuống tới mức $\rho\sigma^2$. Ma trận hiệp phương sai gom phương sai và hiệp phương sai của mọi cặp đặc trưng; nó đối xứng, nửa xác định dương, và các vector riêng của nó là các thành phần chính của PCA. Logarit mật độ Gauss là một hàm bậc hai, điều sẽ biến hợp lý cực đại thành bình phương tối thiểu. Định lý Bayes đổi chiều xác suất có điều kiện, như ví dụ xét nghiệm bệnh hiếm cho thấy chỉ khoảng 16,7% người dương tính thật sự mắc bệnh, và viết hậu nghiệm thành dạng mất mát cộng thành phần phạt. Cuối cùng, sai số bình phương của một ước lượng tách thành độ chệch bình phương cộng phương sai, nên một ước lượng có chệch nhưng ít dao động có thể tốt hơn một ước lượng không chệch.
+Kỳ vọng và phương sai mô tả giá trị trung bình và mức phân tán của một đại lượng ngẫu nhiên. Phương sai của tổng phụ thuộc vào hiệp phương sai, nên lấy trung bình nhiều mô hình chỉ giảm phương sai xuống tới mức $\rho\sigma^2$. Ma trận hiệp phương sai gom phương sai và hiệp phương sai của mọi cặp đặc trưng; nó đối xứng, nửa xác định dương, và các vector riêng của nó là các thành phần chính của PCA. Với bốn căn hộ, hiệp phương sai 16 giữa diện tích và giá chia cho phương sai 666,7 của diện tích cho đúng độ dốc 0,024 của Chương 4. Logarit mật độ Gauss là một hàm bậc hai, điều sẽ biến hợp lý cực đại thành bình phương tối thiểu. Định lý Bayes đổi chiều xác suất có điều kiện, như ví dụ xét nghiệm bệnh hiếm cho thấy chỉ khoảng 16,7% người dương tính thật sự mắc bệnh, và viết hậu nghiệm thành dạng mất mát cộng thành phần phạt. Cuối cùng, sai số bình phương của một ước lượng tách thành độ chệch bình phương cộng phương sai, nên một ước lượng có chệch nhưng ít dao động có thể tốt hơn một ước lượng không chệch.
 
 Có đại số tuyến tính và xác suất, ta đã đủ công cụ cho thuật toán học máy đầu tiên. Chương 4 xét hồi quy tuyến tính, bài toán đơn giản tới mức có nghiệm dạng đóng, nên mọi hiện tượng của nó quan sát được trực tiếp.
 
@@ -512,7 +518,7 @@ $$w_1 = \frac{\sum_i (x_i - \bar x)(y_i - \bar y)}{\sum_i (x_i - \bar x)^2}, \qq
 
 Ở bước cuối, thừa số $x_i$ đứng trước được thay bằng $x_i - \bar x$. Phép thay không làm đổi tử số và mẫu số, vì $\sum_i \bar x\,(y_i - \bar y) = 0$ và $\sum_i \bar x\,(x_i - \bar x) = 0$.
 
-Công thức có một cách đọc quen thuộc từ Chương 3. Chia cả tử và mẫu cho $n$, hệ số góc chính là hiệp phương sai mẫu giữa $x$ và $y$ chia cho phương sai mẫu của $x$. Hệ số góc lớn khi $y$ biến thiên cùng chiều với $x$ và mạnh so với độ phân tán của $x$.
+Công thức có một cách đọc quen thuộc từ Chương 3. Chia cả tử và mẫu cho $n - 1$, hệ số góc chính là hiệp phương sai mẫu giữa $x$ và $y$ chia cho phương sai mẫu của $x$; với bốn căn hộ, đó là tỉ số $16/666{,}7$ ở Mục 3.3. Hệ số góc lớn khi $y$ biến thiên cùng chiều với $x$ và mạnh so với độ phân tán của $x$.
 
 Với bốn căn hộ, $\bar x = 70$ và $\bar y = 2{,}25$. Các độ lệch $x_i - \bar x$ là $-30$; $-10$; $10$; $30$ và các độ lệch $y_i - \bar y$ là $-0{,}75$; $-0{,}15$; $0{,}15$; $0{,}75$, nên tử số bằng $22{,}5 + 1{,}5 + 1{,}5 + 22{,}5 = 48$ và mẫu số bằng $900 + 100 + 100 + 900 = 2\,000$. Do đó $w_1 = 0{,}024$ tỉ đồng mỗi mét vuông, tức 24 triệu đồng, và $w_0 = 2{,}25 - 0{,}024 \cdot 70 = 0{,}57$. Đường thẳng này dự đoán 1,53; 2,01; 2,49 và 2,97 tỉ cho bốn căn, với sai số $-0{,}03$; $0{,}09$; $-0{,}09$; $0{,}03$ và $L = 0{,}018/4 = 0{,}0045$, nhỏ hơn cả đường thứ hai ở Mục 4.1. Căn 90 m² được định giá $0{,}57 + 0{,}024 \cdot 90 = 2{,}73$ tỉ, khớp với ước đoán bằng mắt ở đầu chương.
 
