@@ -1017,7 +1017,7 @@ Không phải đầu nào cũng quan trọng như nhau. Michel, Levy và Neubig 
 | Mặt nạ nhân quả (causal mask) | mọi vị trí $j > i$ khi tính đầu ra tại vị trí $i$ | mô hình sinh văn bản không được nhìn thấy các token phía sau |
 | Mặt nạ đệm (padding mask) | các vị trí đệm thêm để các chuỗi trong lô dài bằng nhau | phần đệm không đóng góp vào kết quả |
 
-Mặt nạ được cài đặt bằng cách cộng $-\infty$, trong thực tế là một số âm rất lớn, vào điểm số của các vị trí bị che trước khi tính softmax, để sau softmax trọng số của chúng bằng đúng 0.
+Mặt nạ được cài đặt bằng cách cộng $-\infty$, trong thực tế là một số âm rất lớn, vào điểm số của các vị trí bị che trước khi tính softmax, để sau softmax trọng số của chúng bằng đúng 0. Chẳng hạn với ba token có điểm số bằng nhau ở mọi cặp, không có mặt nạ thì mỗi hàng của ma trận trọng số là $(1/3;\ 1/3;\ 1/3)$. Có mặt nạ nhân quả, hàng thứ nhất chỉ còn chính nó, $(1;\ 0;\ 0)$; hàng thứ hai chia đều cho hai vị trí đầu, $(0{,}5;\ 0{,}5;\ 0)$; hàng thứ ba giữ nguyên $(1/3;\ 1/3;\ 1/3)$.
 
 Mặt nạ nhân quả còn cho phép một điều quan trọng khi huấn luyện. Với một chuỗi $T$ token, một lượt xuôi duy nhất tính được dự đoán cho cả $T$ vị trí cùng lúc, và vị trí nào cũng chỉ thấy các token phía trước nó. Mỗi chuỗi huấn luyện vì vậy cho $T$ bài toán dự đoán token tiếp theo, tính song song. RNN cũng cho $T$ dự đoán, nhưng phải tính tuần tự.
 
@@ -1046,7 +1046,7 @@ Từ bảng rút ra hai điều mà người mới thường không để ý. FF
 
 ### 9.6. Mã hoá vị trí
 
-Self-attention không có khái niệm thứ tự. Nếu hoán vị các token đầu vào, khi không có mặt nạ, thì các vector đầu ra chỉ hoán vị theo, giá trị của từng vector không đổi. Hai câu "chó cắn người" và "người cắn chó" vì vậy sẽ cho cùng một tập biểu diễn. Thông tin vị trí phải được đưa vào riêng, và có ba cách chính.
+Self-attention không có khái niệm thứ tự. Nếu hoán vị các token đầu vào, khi không có mặt nạ, thì các vector đầu ra chỉ hoán vị theo, giá trị của từng vector không đổi. Hai câu "chó cắn người" và "người cắn chó" vì vậy sẽ cho cùng một tập biểu diễn. Ví dụ 9.1 cho thấy điều này ở quy mô nhỏ: đổi thứ tự ba cặp khoá–giá trị thì ba trọng số đổi chỗ theo, còn đầu ra vẫn là $(1{,}203;\ 1{,}000)$, vì trung bình có trọng số không phụ thuộc thứ tự cộng. Thông tin vị trí phải được đưa vào riêng, và có ba cách chính.
 
 Cách đầu tiên, dùng trong bài báo gốc (Vaswani và cộng sự, 2017), là mã hoá sin–cos cố định: cộng vào embedding của token ở vị trí $i$ vector $p_i$ với $p_{i,2t} = \sin(i/10000^{2t/d})$ và $p_{i,2t+1} = \cos(i/10000^{2t/d})$. Cách này không có tham số học. Các tần số khác nhau cho phép biểu diễn cả khoảng cách gần lẫn xa, và $p_{i+k}$ là một phép biến đổi tuyến tính của $p_i$, nên mô hình có thể học quan hệ theo khoảng cách tương đối.
 
