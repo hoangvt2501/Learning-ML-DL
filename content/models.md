@@ -701,6 +701,8 @@ Một lớp kết nối đầy đủ nhận ảnh $224 \times 224 \times 3$ và 
 
 Về mặt toán học, công thức trên là phép tương quan chéo (cross-correlation), vì bộ lọc không bị lật như trong định nghĩa tích chập của xử lý tín hiệu. Bộ lọc được học từ dữ liệu, nên lật hay không cũng không thay đổi những gì mạng biểu diễn được, và trong học sâu cả hai được gọi chung là tích chập.
 
+Một ví dụ nhỏ cho thấy bộ lọc làm gì. Một ảnh xám cao 3, rộng 5 điểm, có mọi hàng là $(0, 0, 0, 1, 1)$: phần trái tối, phần phải sáng, và một cạnh dọc ở giữa. Bộ lọc $3 \times 3$ có mọi hàng là $(-1, 0, 1)$; tại mỗi vị trí, nó cộng trên ba hàng hiệu giữa điểm ảnh bên phải và điểm ảnh bên trái của cửa sổ. Không đệm và bước nhảy 1, đầu ra có kích thước $1 \times 3$ và bằng $(0, 3, 3)$: bằng 0 ở vùng đồng nhất, bằng 3 ở hai vị trí mà cửa sổ chứa cạnh. Đây là một bộ dò cạnh dọc, và các lớp tích chập đầu tiên của một CNN đã huấn luyện thường học được những bộ dò cạnh theo nhiều hướng như vậy.
+
 Khi thiết kế một mạng tích chập, ba phép tính được dùng liên tục. Phép tính đầu tiên là kích thước đầu ra. Với đầu vào cao $H$, bộ lọc cao $k$, bước nhảy $s$ và phần đệm (padding) $p$ ô mỗi phía, chiều cao đầu ra là
 
 $$H_{\text{out}} = \left\lfloor \frac{H + 2p - k}{s} \right\rfloor + 1,$$
@@ -713,7 +715,7 @@ $$\text{FLOP} \approx 2\, H_{\text{out}}\, W_{\text{out}}\, k_h k_w\, C_{\text{i
 
 Sự tách rời giữa số tham số và số phép tính hay gây nhầm lẫn khi ước lượng chi phí. Một mô hình "nhẹ" về tham số vẫn có thể rất tốn tính toán khi chạy trên ảnh độ phân giải cao, vì số phép tính tăng theo diện tích ảnh.
 
-Chia sẻ trọng số còn làm lớp tích chập **đẳng biến** với phép dịch chuyển (translation equivariant): dịch ảnh đầu vào đi một số ô thì bản đồ đặc trưng đầu ra dịch theo đúng số ô đó, nếu bỏ qua hiệu ứng ở biên. Gộp và bước nhảy biến tính đẳng biến này thành **bất biến gần đúng**: một dịch chuyển nhỏ không làm thay đổi đầu ra sau khi gộp. Tính bất biến này chỉ gần đúng; Azulay và Weiss (2019) cho thấy các CNN hiện đại có thể đổi dự đoán khi ảnh chỉ dịch đi một điểm ảnh, vì bước nhảy lớn hơn 1 phá vỡ tính đẳng biến.
+Chia sẻ trọng số còn làm lớp tích chập **đẳng biến** với phép dịch chuyển (translation equivariant): dịch ảnh đầu vào đi một số ô thì bản đồ đặc trưng đầu ra dịch theo đúng số ô đó, nếu bỏ qua hiệu ứng ở biên. Với ảnh cạnh dọc ở trên, thêm một cột tối vào bên trái, tức dịch cạnh sang phải một ô, thì đầu ra thành $(0, 0, 3, 3)$: hai giá trị 3 dịch theo đúng một ô. Gộp và bước nhảy biến tính đẳng biến này thành **bất biến gần đúng**: một dịch chuyển nhỏ không làm thay đổi đầu ra sau khi gộp. Tính bất biến này chỉ gần đúng; Azulay và Weiss (2019) cho thấy các CNN hiện đại có thể đổi dự đoán khi ảnh chỉ dịch đi một điểm ảnh, vì bước nhảy lớn hơn 1 phá vỡ tính đẳng biến.
 
 ### 7.2. Trường tiếp nhận
 
