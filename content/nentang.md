@@ -117,7 +117,7 @@ Một định nghĩa hay được trích dẫn là của Tom Mitchell (1997): m�
 
 Thành phần thứ nhất là **mô hình**, tập các hàm $f_\theta$ mà ta cho phép thuật toán chọn. Hồi quy tuyến tính chỉ cho phép các hàm tuyến tính, chính xác hơn là affine, của đầu vào; cây quyết định cho phép các hàm hằng trên từng vùng; mạng nơ-ron cho phép hợp của nhiều phép biến đổi tuyến tính xen với các hàm phi tuyến. Thành phần thứ hai là **hàm mất mát**, đo mức sai của một dự đoán so với nhãn thật. Đây là nơi ta nói ra điều mình thực sự muốn: sai lệch lớn có bị phạt nặng hơn không, đoán sai lớp dương có đắt hơn đoán sai lớp âm không. Thành phần thứ ba là **thuật toán tối ưu**, cách tìm tham số $\theta$ làm tổng mất mát trên dữ liệu huấn luyện nhỏ nhất. Có bài toán giải được bằng công thức, có bài toán phải lặp như gradient descent.
 
-Khung ba thành phần biến việc học một thuật toán mới thành việc trả lời ba câu hỏi: mô hình là họ hàm nào, mất mát là gì, tối ưu bằng cách nào. Nó cũng cho thấy nhiều thuật toán mang tên khác nhau thực ra rất gần nhau. Chương 6 sẽ chỉ ra rằng perceptron, hồi quy logistic và SVM dùng chung một mô hình là hàm tuyến tính và chung một cách tối ưu là gradient descent; chúng chỉ khác nhau ở hàm mất mát.
+Khung ba thành phần biến việc học một thuật toán mới thành việc trả lời ba câu hỏi: mô hình là họ hàm nào, mất mát là gì, tối ưu bằng cách nào. Với bài toán định giá căn hộ theo diện tích ở Chương 4, câu trả lời là: mô hình là các đường thẳng $f(x) = w_0 + w_1 x$, mất mát là bình phương độ lệch giữa giá dự đoán và giá thật, còn tối ưu bằng một công thức đóng, hoặc bằng gradient descent ở Chương 5. Nó cũng cho thấy nhiều thuật toán mang tên khác nhau thực ra rất gần nhau. Chương 6 sẽ chỉ ra rằng perceptron, hồi quy logistic và SVM dùng chung một mô hình là hàm tuyến tính và chung một cách tối ưu là gradient descent; chúng chỉ khác nhau ở hàm mất mát.
 
 > **Định nghĩa 1.1 (Bài toán học có giám sát).** Cho tập huấn luyện $\mathcal{D} = \{(x_i, y_i)\}_{i=1}^{n}$, một họ hàm $\{f_\theta\}$ và một hàm mất mát $\ell$. Bài toán học có giám sát là tìm
 > $$\hat\theta = \arg\min_\theta \; \frac{1}{n}\sum_{i=1}^{n} \ell\big(y_i, f_\theta(x_i)\big),$$
@@ -139,6 +139,8 @@ Bảng sau xếp các chương của giáo trình theo cách phân loại trên.
 | Điền giá trị còn thiếu | | phân rã ma trận (Chương 16) |
 
 Ranh giới giữa hai cột không cứng. Trong hệ thống gợi ý ở Chương 16, các ô đánh giá đã biết đóng vai trò nhãn, nhưng phần lớn ma trận là ô trống cần điền, nên bài toán nằm giữa hai loại. Ngoài ra còn các dạng lai như học bán giám sát, khi chỉ một phần nhỏ dữ liệu có nhãn, và học tự giám sát, khi nhãn được tạo ra từ chính dữ liệu, chẳng hạn đoán từ tiếp theo trong câu. Học tự giám sát là cách các mô hình ngôn ngữ lớn được huấn luyện, và được trình bày trong giáo trình *Biểu diễn & Căn chỉnh*.
+
+Ba ví dụ nhỏ đi suốt giáo trình, mỗi ví dụ ứng với một dạng bài toán. Bốn căn hộ với diện tích và giá là bài toán hồi quy, xuất hiện từ Chương 2 tới Chương 11. Sáu sinh viên với số giờ ôn thi và kết quả đỗ hay trượt là bài toán phân loại, từ Chương 6 tới Chương 13. Bốn cửa hàng cần đặt hai kho hàng là bài toán phân cụm ở Chương 15. Các ví dụ đủ nhỏ để tính tay, nên mỗi công thức được kiểm tra trên chúng trước khi đi tới thí nghiệm trên dữ liệu lớn hơn.
 
 ### 1.3. Các yếu tố cần xét trước khi chọn thuật toán
 
@@ -176,7 +178,7 @@ Mô hình được đánh giá và điều chỉnh trên tập xác thực hoặ
 
 ### 1.6. Tóm tắt
 
-Mỗi thuật toán học có giám sát gồm ba thành phần: mô hình là họ hàm được phép chọn, hàm mất mát đo mức sai, và thuật toán tối ưu tìm tham số. Mục tiêu thật của học máy là tổng quát hoá sang dữ liệu chưa gặp, không phải tối thiểu hoá mất mát trên dữ liệu huấn luyện. Bài toán học máy chia theo việc có nhãn hay không thành học có giám sát, gồm hồi quy và phân loại, học không giám sát, và học tăng cường. Trước khi chọn thuật toán cần xét tỉ lệ số điểm trên số đặc trưng, cấu trúc của dữ liệu, và mục tiêu là dự đoán hay giải thích. Quy trình bao quanh thuật toán, từ chọn thước đo, chia dữ liệu tới dùng tập kiểm tra đúng một lần, là nơi xảy ra phần lớn lỗi.
+Mỗi thuật toán học có giám sát gồm ba thành phần: mô hình là họ hàm được phép chọn, hàm mất mát đo mức sai, và thuật toán tối ưu tìm tham số. Mục tiêu thật của học máy là tổng quát hoá sang dữ liệu chưa gặp, không phải tối thiểu hoá mất mát trên dữ liệu huấn luyện. Bài toán học máy chia theo việc có nhãn hay không thành học có giám sát, gồm hồi quy và phân loại, học không giám sát, và học tăng cường; bốn căn hộ, sáu sinh viên và bốn cửa hàng là ba ví dụ của ba dạng đó, đi cùng các chương sau. Trước khi chọn thuật toán cần xét tỉ lệ số điểm trên số đặc trưng, cấu trúc của dữ liệu, và mục tiêu là dự đoán hay giải thích. Quy trình bao quanh thuật toán, từ chọn thước đo, chia dữ liệu tới dùng tập kiểm tra đúng một lần, là nơi xảy ra phần lớn lỗi.
 
 Để làm việc với cả ba thành phần, ta cần một ngôn ngữ chung: dữ liệu là ma trận, mô hình tuyến tính là phép nhân ma trận với vector, và tối ưu cần đạo hàm theo vector. Chương 2 nhắc lại phần đại số tuyến tính cần cho ngôn ngữ đó.
 
