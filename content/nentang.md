@@ -1821,7 +1821,7 @@ Mười ba chương đầu đều làm việc với dữ liệu có nhãn. Ba ch
 
 ## 14. Giảm chiều dữ liệu
 
-Dữ liệu thật thường có hàng trăm đặc trưng, nhưng chỉ vài hướng trong số đó thật sự mang thông tin, phần còn lại là nhiễu hoặc lặp lại những gì đã có. Nếu tìm được các hướng đó, ta nén được dữ liệu, khử được nhiễu, và vẽ được dữ liệu lên mặt phẳng để nhìn. Phương pháp tuyến tính phổ biến nhất cho việc này là PCA, và nó hoá ra chỉ là phân tích trị riêng của ma trận hiệp phương sai ở Chương 3. Ta cũng sẽ thấy giới hạn của PCA khi dữ liệu có nhãn, và phương pháp thay thế có dùng nhãn là LDA.
+Dữ liệu thật thường có hàng trăm đặc trưng, nhưng chỉ vài hướng trong số đó thật sự mang thông tin, phần còn lại là nhiễu hoặc lặp lại những gì đã có. Nếu tìm được các hướng đó, ta nén được dữ liệu, khử được nhiễu, và vẽ được dữ liệu lên mặt phẳng để nhìn. Phương pháp tuyến tính phổ biến nhất cho việc này là PCA, và nó hoá ra chỉ là phân tích trị riêng của ma trận hiệp phương sai ở Chương 3. Ta cũng sẽ thấy giới hạn của PCA khi dữ liệu có nhãn, và phương pháp thay thế có dùng nhãn là LDA. Một ví dụ hai chiều đủ nhỏ để tính tay mọi bước, điểm hai bài kiểm tra của bốn sinh viên, đi suốt chương.
 
 ### 14.1. Mục đích của giảm chiều
 
@@ -1830,6 +1830,15 @@ Giảm chiều là biến đổi dữ liệu từ $d$ chiều xuống $k < d$ ch
 ### 14.2. Phân tích thành phần chính (PCA)
 
 PCA (Pearson, 1901) tìm các hướng mà dữ liệu trải rộng nhất. Hình dung một đám mây điểm có dạng hình elip dẹt trong mặt phẳng: trục dài của elip là hướng giữ được nhiều thông tin nhất về vị trí các điểm, và chiếu mọi điểm lên trục đó mất ít thông tin nhất.
+
+Ví dụ của chương là điểm hai bài kiểm tra của bốn sinh viên A, B, C, D, đã trừ điểm trung bình của lớp ở mỗi bài:
+
+| Sinh viên | A | B | C | D |
+|---|---|---|---|---|
+| Bài 1, $x_1$ | 2 | 1 | −1 | −2 |
+| Bài 2, $x_2$ | 1 | 2 | −2 | −1 |
+
+Bốn điểm nằm dọc theo đường chéo $x_1 = x_2$: người làm tốt bài này thường cũng làm tốt bài kia. Đám mây điểm là một elip dẹt với trục dài nằm trên đường chéo đó.
 
 Gọi $X_c$ là ma trận dữ liệu đã trừ trung bình của từng cột, và $\Sigma = \frac{1}{n-1}X_c^\top X_c$ là ma trận hiệp phương sai mẫu (Mục 3.3). Chiếu dữ liệu lên hướng đơn vị $v$ cho các toạ độ $X_c v$, có phương sai $v^\top \Sigma v$. PCA tìm hướng làm phương sai này lớn nhất:
 
@@ -1841,9 +1850,15 @@ $$2\Sigma v - 2\lambda v = 0 \;\Longleftrightarrow\; \Sigma v = \lambda v.$$
 
 Vậy hướng tối ưu là một vector riêng của $\Sigma$, và phương sai đạt được $v^\top \Sigma v = \lambda v^\top v = \lambda$ đúng bằng trị riêng tương ứng. Để phương sai lớn nhất, ta chọn vector riêng ứng với trị riêng lớn nhất.
 
+Với bốn sinh viên, dữ liệu đã có trung bình bằng 0. Ma trận $X_c^\top X_c$ có các phần tử $\sum x_1^2 = 10$, $\sum x_2^2 = 10$ và $\sum x_1 x_2 = 8$, nên
+
+$$\Sigma = \frac13\begin{pmatrix}10 & 8\\ 8 & 10\end{pmatrix}.$$
+
+Hai vector riêng là $v_1 = (1, 1)/\sqrt2$ với trị riêng $\lambda_1 = 6$ và $v_2 = (1, -1)/\sqrt2$ với $\lambda_2 = 2/3$; có thể kiểm tra trực tiếp, chẳng hạn $\Sigma\,(1, 1)^\top = \tfrac13(18, 18)^\top = 6\,(1, 1)^\top$. Thành phần chính thứ nhất là hướng "làm tốt cả hai bài", thành phần thứ hai là hướng "làm bài 1 tốt hơn bài 2".
+
 > **Định nghĩa 14.1 (Thành phần chính).** Gọi $\lambda_1 \ge \lambda_2 \ge \dots \ge \lambda_d \ge 0$ là các trị riêng của ma trận hiệp phương sai $\Sigma$ và $v_1, \dots, v_d$ là các vector riêng trực chuẩn tương ứng. Vector $v_j$ gọi là **thành phần chính** (principal component) thứ $j$. PCA với $k$ thành phần biểu diễn mỗi điểm $x$ bằng $k$ toạ độ $z_j = v_j^\top(x - \bar x)$, $j = 1, \dots, k$.
 
-Thành phần thứ hai là hướng có phương sai lớn nhất trong các hướng vuông góc với thành phần thứ nhất, và cứ tiếp tục như vậy. Theo định lý phổ, các vector riêng của ma trận đối xứng $\Sigma$ trực giao với nhau, nên các thành phần chính tự động vuông góc, và các toạ độ $z_j$ không tương quan với nhau. Tỉ lệ $\lambda_j/\sum_i \lambda_i$ gọi là **tỉ lệ phương sai được giải thích** bởi thành phần thứ $j$.
+Thành phần thứ hai là hướng có phương sai lớn nhất trong các hướng vuông góc với thành phần thứ nhất, và cứ tiếp tục như vậy. Theo định lý phổ, các vector riêng của ma trận đối xứng $\Sigma$ trực giao với nhau, nên các thành phần chính tự động vuông góc, và các toạ độ $z_j$ không tương quan với nhau. Tỉ lệ $\lambda_j/\sum_i \lambda_i$ gọi là **tỉ lệ phương sai được giải thích** bởi thành phần thứ $j$. Với bốn sinh viên, toạ độ theo thành phần thứ nhất là $z_1 = (x_1 + x_2)/\sqrt2$, bằng $3/\sqrt2$ cho A và B, $-3/\sqrt2$ cho C và D. Phương sai của bốn toạ độ này là $4 \cdot 4{,}5/3 = 6$, đúng bằng $\lambda_1$, và thành phần thứ nhất giải thích $6/(6 + 2/3) = 90\%$ phương sai.
 
 PCA tính được theo hai cách: bằng phân tích trị riêng của $\Sigma$, hoặc bằng SVD của $X_c$, vì theo Mục 2.6 các vector riêng của $X_c^\top X_c$ là các cột của $V$ và trị riêng của $\Sigma$ là $d_i^2/(n-1)$. Thí nghiệm tính theo cả hai cách trên dữ liệu 8 chiều và in ra bốn trị riêng đầu:
 
@@ -1866,7 +1881,7 @@ Từ $k$ toạ độ $z_1, \dots, z_k$ có thể dựng lại gần đúng đi�
 > $$\|X_c - X_k\|_F^2 = (n-1)\sum_{i > k}\lambda_i,$$
 > và $X_k$ là ma trận hạng $k$ gần $X_c$ nhất theo chuẩn Frobenius: không có ma trận hạng $k$ nào cho sai số nhỏ hơn.
 
-Vế phải của đẳng thức là tổng các trị riêng bị bỏ đi, nhân với $n - 1$. Vậy sai số tái tạo bằng đúng phần phương sai không được giữ lại, và đây là đẳng thức chính xác chứ không phải xấp xỉ. Thí nghiệm dùng 300 điểm 8 chiều sinh từ 3 thành phần thật cộng nhiễu để kiểm tra.
+Vế phải của đẳng thức là tổng các trị riêng bị bỏ đi, nhân với $n - 1$. Vậy sai số tái tạo bằng đúng phần phương sai không được giữ lại, và đây là đẳng thức chính xác chứ không phải xấp xỉ. Với bốn sinh viên và $k = 1$, mỗi điểm được dựng lại bằng hình chiếu của nó lên $v_1$: A và B thành $(1{,}5;\ 1{,}5)$, C và D thành $(-1{,}5;\ -1{,}5)$. Mỗi điểm lệch khỏi bản dựng lại một vector $\pm(0{,}5;\ -0{,}5)$ có bình phương độ dài 0,5, nên $\|X_c - X_1\|_F^2 = 4 \cdot 0{,}5 = 2$, đúng bằng $(n - 1)\lambda_2 = 3 \cdot 2/3$. Thí nghiệm dùng 300 điểm 8 chiều sinh từ 3 thành phần thật cộng nhiễu để kiểm tra đẳng thức trên dữ liệu lớn hơn.
 
 ![Hình 10](figs/nt10_pca.png)
 
@@ -1884,7 +1899,9 @@ Hai cột giữa trùng nhau tới $10^{-12}$ ở mọi $k$. Cột cuối cho th
 
 ### 14.4. Hạn chế của PCA và phân tích biệt thức tuyến tính (LDA)
 
-PCA không dùng nhãn. Nó tìm hướng có phương sai lớn, nhưng phương sai lớn không có nghĩa là hữu ích cho bài toán phân loại. Thí nghiệm dựng dữ liệu hai lớp có một hướng nhiễu biên độ lớn, theo đó hai lớp trộn lẫn, và một hướng tín hiệu biên độ nhỏ, theo đó hai lớp tách nhau:
+PCA không dùng nhãn. Nó tìm hướng có phương sai lớn, nhưng phương sai lớn không có nghĩa là hữu ích cho bài toán phân loại. Bốn sinh viên cho thấy điều này. Gắn cho mỗi người nhãn "sa sút" nếu điểm bài 2 thấp hơn bài 1 và "tiến bộ" nếu ngược lại: A và C sa sút, B và D tiến bộ. Theo thành phần chính thứ nhất, A và B có cùng toạ độ $3/\sqrt2$, C và D cùng toạ độ $-3/\sqrt2$, nên hướng giữ 90% phương sai không phân biệt được hai nhóm chút nào. Toàn bộ thông tin về nhãn nằm ở thành phần thứ hai, chiếm 10% phương sai và bị PCA với $k = 1$ bỏ đi: theo $z_2 = (x_1 - x_2)/\sqrt2$, hai người sa sút có toạ độ $1/\sqrt2$, hai người tiến bộ có $-1/\sqrt2$.
+
+Thí nghiệm dựng dữ liệu hai lớp có một hướng nhiễu biên độ lớn, theo đó hai lớp trộn lẫn, và một hướng tín hiệu biên độ nhỏ, theo đó hai lớp tách nhau:
 
 ```text
 truc chinh thu nhat cua PCA: [-1.  0.0067]   (giu 96.1% phuong sai)
@@ -1893,7 +1910,7 @@ AUC khi chieu len truc PCA : 0.5020
 AUC khi chieu len huong LDA: 0.9987
 ```
 
-Thành phần chính thứ nhất giữ 96,1% phương sai, nhưng chiếu dữ liệu lên nó cho ROC-AUC 0,502, không tốt hơn đoán ngẫu nhiên. Hướng do LDA chọn gần như vuông góc với trục đó và cho AUC 0,9987.
+Thành phần chính thứ nhất giữ 96,1% phương sai, nhưng chiếu dữ liệu lên nó cho ROC-AUC 0,502, không tốt hơn đoán ngẫu nhiên. Hướng do LDA chọn gần như vuông góc với trục đó và cho AUC 0,9987, giống thành phần thứ hai của bốn sinh viên.
 
 Phương pháp dùng nhãn để giải quyết vấn đề này là **phân tích biệt thức tuyến tính** (linear discriminant analysis, LDA; Fisher, 1936), tìm hướng tách các lớp tốt nhất. Với hai lớp, gọi $\mu_0, \mu_1$ là trung bình của mỗi lớp, $S_W$ là **ma trận tán xạ trong lớp**, tức tổng các ma trận hiệp phương sai của hai lớp, và $S_B = (\mu_1 - \mu_0)(\mu_1 - \mu_0)^\top$ là **ma trận tán xạ giữa các lớp**. Chiếu dữ liệu lên hướng $w$, LDA muốn khoảng cách giữa trung bình hai lớp lớn trong khi độ phân tán bên trong mỗi lớp nhỏ:
 
@@ -1916,7 +1933,7 @@ Khi chọn phương pháp giảm chiều, câu hỏi đầu tiên là có nhãn 
 
 ### 14.5. Tóm tắt
 
-PCA tìm các hướng có phương sai lớn nhất, và lời giải của bài toán tối ưu có ràng buộc đó là các vector riêng của ma trận hiệp phương sai, với phương sai bằng trị riêng tương ứng. Nên tính PCA bằng SVD của dữ liệu đã trừ trung bình, và chuẩn hoá đặc trưng trước khi áp dụng nếu đơn vị đo khác nhau. Theo định lý Eckart–Young, sai số tái tạo bằng đúng tổng các trị riêng bị bỏ đi nhân với $n - 1$, và thí nghiệm xác nhận đẳng thức này tới $10^{-12}$; chỗ đồ thị phương sai tích luỹ gãy gập cho biết số chiều thật của dữ liệu. PCA không dùng nhãn nên có thể giữ đúng hướng vô dụng cho phân loại, như hướng giữ 96,1% phương sai mà chỉ cho AUC 0,502 trong thí nghiệm; LDA dùng nhãn và chọn hướng $S_W^{-1}(\mu_1 - \mu_0)$.
+PCA tìm các hướng có phương sai lớn nhất, và lời giải của bài toán tối ưu có ràng buộc đó là các vector riêng của ma trận hiệp phương sai, với phương sai bằng trị riêng tương ứng. Với điểm hai bài kiểm tra của bốn sinh viên, thành phần chính thứ nhất là $(1, 1)/\sqrt2$, hướng "làm tốt cả hai bài", và giữ 90% phương sai. Nên tính PCA bằng SVD của dữ liệu đã trừ trung bình, và chuẩn hoá đặc trưng trước khi áp dụng nếu đơn vị đo khác nhau. Theo định lý Eckart–Young, sai số tái tạo bằng đúng tổng các trị riêng bị bỏ đi nhân với $n - 1$: bằng 2 với bốn sinh viên và $k = 1$, và thí nghiệm xác nhận đẳng thức tới $10^{-12}$; chỗ đồ thị phương sai tích luỹ gãy gập cho biết số chiều thật của dữ liệu. PCA không dùng nhãn nên có thể giữ đúng hướng vô dụng cho phân loại: với nhãn tiến bộ hay sa sút, toàn bộ thông tin của bốn sinh viên nằm ở 10% phương sai bị bỏ đi, và trong thí nghiệm, hướng giữ 96,1% phương sai chỉ cho AUC 0,502. LDA dùng nhãn và chọn hướng $S_W^{-1}(\mu_1 - \mu_0)$.
 
 Giảm chiều tìm cấu trúc theo các hướng trong không gian đặc trưng. Một câu hỏi khác về dữ liệu không nhãn là các điểm có tự gom thành nhóm hay không. Chương 15 xét thuật toán phân cụm phổ biến nhất, K-means.
 
