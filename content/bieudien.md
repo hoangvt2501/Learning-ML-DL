@@ -1064,7 +1064,7 @@ $$P(y_w \succ y_l \mid x) = \sigma\big(r(x, y_w) - r(x, y_l)\big).$$
 
 Đây là hồi quy logistic trên hiệu của hai điểm thưởng ([Mục 6.3 của *Nền tảng*](nentang-ch06.html)), và mô hình thưởng được huấn luyện bằng hợp lý cực đại, tức cực tiểu $-\log\sigma\big(r(x, y_w) - r(x, y_l)\big)$ trên các cặp. Trong thực tế, $r$ là một mô hình ngôn ngữ đã tinh chỉnh, thay lớp chiếu ra từ vựng bằng một đầu ra vô hướng.
 
-Cần lưu ý rằng $r$ chỉ xác định được sai khác một hằng số cộng cho mỗi câu hỏi. Cộng cùng một hằng số vào điểm của mọi câu trả lời cho cùng một câu hỏi không thay đổi hiệu, nên không thay đổi hợp lý. Điều này vô hại vì bước sau chỉ dùng $r$ qua hàm mũ rồi chuẩn hoá (Mục 14.4), nên hằng số bị hằng số chuẩn hoá hấp thụ.
+Chẳng hạn nếu mô hình thưởng cho câu được chọn 1,5 điểm và câu bị loại 0,5 điểm, xác suất mô hình gán cho lựa chọn của người đánh giá là $\sigma(1) = 0{,}731$, và mất mát của cặp này là $-\log 0{,}731 = 0{,}313$. Cần lưu ý rằng $r$ chỉ xác định được sai khác một hằng số cộng cho mỗi câu hỏi. Cộng cùng một hằng số vào điểm của mọi câu trả lời cho cùng một câu hỏi không thay đổi hiệu, nên không thay đổi hợp lý: 11,5 và 10,5 điểm cho đúng xác suất 0,731. Điều này vô hại vì bước sau chỉ dùng $r$ qua hàm mũ rồi chuẩn hoá (Mục 14.4), nên hằng số bị hằng số chuẩn hoá hấp thụ.
 
 ### 14.4. Tối ưu có ràng buộc KL và nghiệm dạng đóng
 
@@ -1079,7 +1079,7 @@ $$\max_\pi\; \mathbb{E}_{y \sim \pi(\cdot \mid x)}\big[r(x, y)\big] - \beta\,\ma
 > $$\mathcal{L} = \sum_y \pi(y)\,r(y) - \beta\sum_y\pi(y)\log\frac{\pi(y)}{\pi_{\text{ref}}(y)} + \lambda\Big(\sum_y\pi(y) - 1\Big).$$
 > Đạo hàm theo $\pi(y)$ bằng 0: $r(y) - \beta\log\frac{\pi(y)}{\pi_{\text{ref}}(y)} - \beta + \lambda = 0$, suy ra $\pi(y) \propto \pi_{\text{ref}}(y)\exp(r(y)/\beta)$. Chuẩn hoá để tổng bằng 1 được $Z(x)$. Hàm mục tiêu lõm theo $\pi$ nên điểm dừng này là cực đại.
 
-Nghiệm có ý nghĩa rõ ràng: chính sách tối ưu là chính sách tham chiếu, đánh trọng số lại theo hàm mũ của phần thưởng. Câu trả lời có phần thưởng cao được tăng xác suất, phần thưởng thấp bị giảm. Nếu $\pi_{\text{ref}}(y) = 0$ thì $\pi^*(y) = 0$ bất kể $r(y)$ lớn tới đâu. $\beta$ điều chỉnh mức đánh trọng số lại: $\beta \to 0$ dồn toàn bộ xác suất vào câu trả lời có phần thưởng cao nhất, $\beta \to \infty$ giữ nguyên $\pi_{\text{ref}}$.
+Nghiệm có ý nghĩa rõ ràng: chính sách tối ưu là chính sách tham chiếu, đánh trọng số lại theo hàm mũ của phần thưởng. Câu trả lời có phần thưởng cao được tăng xác suất, phần thưởng thấp bị giảm. Nếu $\pi_{\text{ref}}(y) = 0$ thì $\pi^*(y) = 0$ bất kể $r(y)$ lớn tới đâu. $\beta$ điều chỉnh mức đánh trọng số lại: $\beta \to 0$ dồn toàn bộ xác suất vào câu trả lời có phần thưởng cao nhất, $\beta \to \infty$ giữ nguyên $\pi_{\text{ref}}$. Với hai câu trả lời có $\pi_{\text{ref}} = (0{,}5;\ 0{,}5)$ và phần thưởng $(1;\ 0)$, công thức cho $\pi^* \propto (0{,}5\,e^{1/\beta};\ 0{,}5)$: xác suất của câu tốt hơn là 0,881 với $\beta = 0{,}5$, 0,731 với $\beta = 1$ và chỉ 0,55 với $\beta = 5$.
 
 Nghiệm dạng đóng kiểm chứng được bằng số. Trên một không gian nhỏ gồm 8 câu trả lời, bài toán được giải theo hai cách độc lập: thay vào công thức dạng đóng, và tối ưu trực tiếp bằng BFGS trên đơn hình xác suất mà không dùng công thức.
 
@@ -1130,7 +1130,7 @@ $Z(x)$ phụ thuộc $x$ nhưng không phụ thuộc $y$, nên triệt tiêu khi
 
 $$\begin{aligned} \mathcal{L}_{\text{DPO}}(\theta) = -\,\mathbb{E}_{(x, y_w, y_l)}\Bigg[\log\sigma\Bigg(&\beta\log\frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} \\ &- \beta\log\frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\Bigg)\Bigg]. \end{aligned}$$
 
-Hàm mất mát có dạng cross-entropy nhị phân ([Chương 6 của *Nền tảng*](nentang-ch06.html)); mỗi số hạng log xác suất tính được bằng một lượt xuôi qua mô hình. Không cần mô hình thưởng, không cần lấy mẫu từ chính sách trong khi huấn luyện, và không cần critic.
+Hàm mất mát có dạng cross-entropy nhị phân ([Chương 6 của *Nền tảng*](nentang-ch06.html)); mỗi số hạng log xác suất tính được bằng một lượt xuôi qua mô hình. Với một cặp mà $\pi_{\text{ref}}$ gán 0,5 cho mỗi câu và $\beta = 0{,}5$: lúc bắt đầu, $\pi_\theta = \pi_{\text{ref}}$ nên hiệu phần thưởng ẩn bằng 0 và mất mát là $\log 2 = 0{,}693$. Khi chính sách chuyển xác suất sang câu được chọn, thành 0,7 và 0,3, hiệu phần thưởng ẩn là $0{,}5\,(\ln 1{,}4 - \ln 0{,}6) = 0{,}424$ và mất mát giảm còn 0,504. Không cần mô hình thưởng, không cần lấy mẫu từ chính sách trong khi huấn luyện, và không cần critic.
 
 ### 15.3. Kiểm chứng bằng số
 
