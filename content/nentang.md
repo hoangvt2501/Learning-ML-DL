@@ -1195,15 +1195,21 @@ Thước đo đúng cho biết mô hình tốt tới đâu trên dữ liệu m�
 
 ## 9. Overfitting và regularization
 
-Chương 8 nhấn mạnh việc đo trên dữ liệu mà mô hình chưa thấy. Lý do của yêu cầu đó là hiện tượng quan trọng nhất của học máy: một mô hình có thể khớp dữ liệu huấn luyện rất tốt mà vẫn dự đoán dữ liệu mới rất tệ. Ta gọi tên hiện tượng đó trước, rồi xét công cụ chính để kiểm soát nó là regularization. Hồi quy tuyến tính một lần nữa là nơi thấy cơ chế rõ nhất, vì ridge và lasso đều phân tích được chính xác. Cuối cùng là câu hỏi chọn cường độ regularization, và câu trả lời là cross-validation.
+Chương 8 nhấn mạnh việc đo trên dữ liệu mà mô hình chưa thấy. Lý do của yêu cầu đó là hiện tượng quan trọng nhất của học máy: một mô hình có thể khớp dữ liệu huấn luyện rất tốt mà vẫn dự đoán dữ liệu mới rất tệ. Bốn căn hộ của Chương 4 đủ để thấy điều này. Đường thẳng ở Chương 4 có sai số huấn luyện 0,0045; một đa thức bậc ba đi qua đúng cả bốn căn nên có sai số huấn luyện bằng 0, nhưng lại đoán một căn 20 m² có giá 0 đồng. Ta gọi tên hiện tượng đó trước, rồi xét công cụ chính để kiểm soát nó là regularization. Hồi quy tuyến tính một lần nữa là nơi thấy cơ chế rõ nhất, vì ridge và lasso đều phân tích được chính xác, và trên bốn căn hộ chúng tính được bằng tay. Cuối cùng là câu hỏi chọn cường độ regularization, và câu trả lời là cross-validation.
 
 ### 9.1. Overfitting và underfitting
 
 > **Định nghĩa 9.1 (Overfitting, underfitting).** Mô hình bị **overfitting** (quá khớp) khi nó khớp tốt dữ liệu huấn luyện nhưng dự đoán kém trên dữ liệu mới: sai số huấn luyện nhỏ, sai số trên tập xác thực lớn hơn nhiều. Mô hình bị **underfitting** (chưa khớp) khi nó quá đơn giản để nắm được quan hệ trong dữ liệu: cả sai số huấn luyện lẫn sai số xác thực đều lớn.
 
-Ví dụ kinh điển là khớp đa thức vào 10 điểm dữ liệu có nhiễu sinh từ một đường cong trơn. Đa thức bậc 1 là đường thẳng, không theo được độ cong, nên underfitting. Đa thức bậc 3 theo được hình dạng chung mà bỏ qua nhiễu. Đa thức bậc 9 có đủ 10 hệ số để đi qua chính xác mọi điểm, kể cả phần nhiễu, và dao động mạnh giữa các điểm: sai số huấn luyện bằng 0 nhưng dự đoán ở các điểm mới rất tệ.
+> **Ví dụ 9.1 (Đa thức bậc ba qua bốn căn hộ).** Dùng lại biến $u = (x - 70)/10$ của Mục 5.2, bốn căn hộ có ${u = -3, -1, 1, 3}$ và giá 1,5; 2,1; 2,4; 3,0 tỉ. Đa thức bậc ba có bốn hệ số, đủ để đi qua đúng bốn điểm; giải hệ bốn phương trình được
+> $$p(u) = 2{,}25 + 0{,}1375\,u + 0{,}0125\,u^3.$$
+> Sai số huấn luyện bằng 0. Với căn 120 m², tức $u = 5$, đa thức dự đoán 4,5 tỉ, còn đường thẳng của Chương 4 dự đoán 3,45 tỉ. Với căn 20 m², tức $u = -5$, đa thức dự đoán đúng 0 đồng, và với căn 10 m² nó cho giá âm, $-1{,}275$ tỉ.
 
-Theo ngôn ngữ của Mục 3.6, overfitting là tình trạng phương sai cao: mô hình thay đổi nhiều khi tập huấn luyện thay đổi, vì nó đủ linh hoạt để khớp cả nhiễu của từng tập. Underfitting là tình trạng độ chệch cao: dù có bao nhiêu dữ liệu, mô hình vẫn sai theo cùng một cách vì họ hàm của nó không chứa quan hệ thật. [Chương 2 của *Học sâu*](models-ch02.html) trình bày phân tích độ chệch – phương sai đầy đủ và đo từng thành phần trên dữ liệu.
+Đa thức bậc ba khớp cả phần nhiễu trong bốn mức giá, và vì vậy nó rất nhạy với nhiễu. Tăng giá căn 80 m² thêm 0,1 tỉ, dự đoán của đường thẳng cho căn 120 m² chỉ đổi 0,05 tỉ, từ 3,45 lên 3,5, còn dự đoán của đa thức bậc ba đổi 0,6 tỉ, từ 4,5 xuống 3,9.
+
+Ví dụ kinh điển cho thấy cùng hiện tượng với nhiều điểm hơn: khớp đa thức vào 10 điểm dữ liệu có nhiễu sinh từ một đường cong trơn. Đa thức bậc 1 là đường thẳng, không theo được độ cong, nên underfitting. Đa thức bậc 3 theo được hình dạng chung mà bỏ qua nhiễu. Đa thức bậc 9 có đủ 10 hệ số để đi qua chính xác mọi điểm, kể cả phần nhiễu, và dao động mạnh giữa các điểm: sai số huấn luyện bằng 0 nhưng dự đoán ở các điểm mới rất tệ.
+
+Theo ngôn ngữ của Mục 3.6, overfitting là tình trạng phương sai cao: mô hình thay đổi nhiều khi tập huấn luyện thay đổi, như đa thức bậc ba ở trên, vì nó đủ linh hoạt để khớp cả nhiễu của từng tập. Underfitting là tình trạng độ chệch cao: dù có bao nhiêu dữ liệu, mô hình vẫn sai theo cùng một cách vì họ hàm của nó không chứa quan hệ thật. [Chương 2 của *Học sâu*](models-ch02.html) trình bày phân tích độ chệch – phương sai đầy đủ và đo từng thành phần trên dữ liệu.
 
 Cách chẩn đoán thông dụng là so sánh sai số trên tập huấn luyện và tập xác thực, như bảng dưới.
 
@@ -1226,6 +1232,12 @@ Gradient của thành phần phạt là $2\lambda w$ (Mục 2.7), nên phương 
 
 Khi $\lambda \to 0^{+}$, nghiệm ridge tiến tới nghiệm có chuẩn nhỏ nhất của bình phương tối thiểu, tức nghiệm của giả nghịch đảo ở Mục 4.3. Khi $\lambda \to \infty$, mọi hệ số tiến về 0.
 
+Bốn căn hộ cho thấy sự co này bằng số. Với biến $u$, ta có $\sum_i u_i^2 = 20$ và $\sum_i u_i(y_i - \bar y) = 4{,}8$. Không phạt hệ số chặn, phương trình chuẩn của ridge cho độ dốc theo $u$ là
+
+$$b_{\text{ridge}} = \frac{4{,}8}{20 + \lambda}.$$
+
+Với $\lambda = 0$ ta được lại độ dốc 0,24 của Chương 5; với $\lambda = 20$, độ dốc giảm một nửa còn 0,12; độ dốc chỉ tiến về 0 khi $\lambda \to \infty$. Hệ số chặn vẫn là giá trung bình 2,25 tỉ, vì $u$ có trung bình bằng 0.
+
 > **Lưu ý.** Thành phần phạt $\lambda\|w\|^2$ phụ thuộc vào thang đo của các đặc trưng: một đặc trưng đo bằng milimét có hệ số nhỏ hơn 1 000 lần so với khi đo bằng mét, nên bị phạt ít hơn hẳn. Vì vậy cần chuẩn hoá đặc trưng trước khi dùng ridge hoặc lasso. Ngoài ra, hệ số chặn thường không bị phạt, vì dịch toàn bộ $y$ đi một hằng số không nên làm thay đổi mô hình.
 
 ### 9.3. Hồi quy ridge nhìn qua SVD
@@ -1237,6 +1249,8 @@ $$\hat w_{\text{ridge}} = \sum_{i} v_i \,\frac{d_i}{d_i^2 + \lambda}\, u_i^\top 
 So sánh từng số hạng, ridge nhân thành phần theo hướng $v_i$ của nghiệm bình phương tối thiểu với **hệ số co**
 
 $$\frac{d_i^2}{d_i^2 + \lambda} \in (0, 1).$$
+
+Với bốn căn hộ, khi hệ số chặn không bị phạt và $u$ có trung bình 0, phần bị phạt chỉ gồm một cột $u$, nên chỉ có một giá trị suy biến, $d_1 = \|u\| = \sqrt{20}$. Hệ số co là $20/(20 + \lambda)$, đúng tỉ lệ giữa độ dốc ridge $4{,}8/(20 + \lambda)$ ở Mục 9.2 và độ dốc 0,24 của bình phương tối thiểu. Với nhiều đặc trưng, mỗi hướng $v_i$ có một hệ số co riêng.
 
 Thí nghiệm dùng 80 điểm dữ liệu với 12 đặc trưng và $\lambda = 10$; nghiệm tính qua SVD khớp với nghiệm dạng đóng tới $2{,}3\times10^{-15}$. Bảng liệt kê năm trong mười hai giá trị suy biến, gồm hai lớn nhất, một ở giữa và hai nhỏ nhất, cùng hệ số co tương ứng.
 
@@ -1283,6 +1297,12 @@ $$\begin{aligned} \hat w_j^{\text{ridge}} &= \frac{z_j}{1 + \lambda} && (\text{v
 
 Ridge nhân mọi hệ số với cùng một số nhỏ hơn 1, nên hệ số nào khác 0 vẫn khác 0. Lasso trừ mỗi hệ số đi một lượng $\lambda$ và cắt về 0 những hệ số có trị tuyệt đối nhỏ hơn $\lambda$; phép toán này gọi là **ngưỡng mềm** (soft thresholding). Nguồn gốc của khác biệt nằm ở đạo hàm. Đạo hàm của $w^2$ là $2w$, tiến về 0 khi $w$ tiến về 0, nên lực kéo về 0 yếu dần và không bao giờ kéo được tới đúng 0. Còn $|w|$ không khả vi tại 0, và dưới vi phân của nó tại 0 là cả đoạn $[-1, 1]$; muốn một hệ số rời khỏi 0, gradient của phần bình phương sai số phải lớn hơn $\lambda$, nếu không thì hệ số nằm yên ở 0.
 
+Bốn căn hộ cho thấy hai công thức này bằng số. Cột $u$ có $\sum_i u_i^2 = 20$ chứ không bằng 1, và $z = \sum_i u_i(y_i - \bar y) = 4{,}8$. Cùng lập luận cho độ dốc ridge $4{,}8/(20 + \lambda)$ như ở Mục 9.2, và độ dốc lasso
+
+$$b_{\text{lasso}} = \frac{\max(4{,}8 - \lambda,\ 0)}{20}.$$
+
+Ngưỡng 4,8 chính là độ lớn gradient của phần bình phương sai số tại độ dốc bằng 0. Với $\lambda = 2{,}4$, lasso cho độ dốc 0,12, bằng độ dốc ridge ở $\lambda = 20$. Với mọi $\lambda \ge 4{,}8$, lasso cho độ dốc đúng bằng 0: mô hình bỏ hẳn diện tích và đoán mọi căn hộ có giá 2,25 tỉ. Ridge không có giá trị $\lambda$ hữu hạn nào cho độ dốc bằng 0.
+
 Cách thứ hai là hình học. Bài toán có phạt tương đương với cực tiểu bình phương sai số trong một quả cầu chuẩn có bán kính phụ thuộc $\lambda$. Các đường mức của bình phương sai số là những elip quanh nghiệm bình phương tối thiểu, và nghiệm có ràng buộc là điểm đầu tiên elip chạm vào quả cầu. Quả cầu $\ell_2$ tròn nên điểm chạm thường nằm ở vị trí bất kỳ. Quả cầu $\ell_1$ là hình thoi có các đỉnh nhọn nằm trên trục toạ độ (Mục 2.3), nên elip hay chạm vào đúng các đỉnh, nơi một số toạ độ bằng 0.
 
 Từ đó có thể chọn giữa hai phương pháp. Khi cần chọn đặc trưng, hoặc khi tin rằng chỉ một số ít đặc trưng thật sự có ảnh hưởng, nên dùng lasso. Khi nhiều đặc trưng đều có ảnh hưởng nhỏ, hoặc có các nhóm đặc trưng tương quan cao, nên dùng ridge. Với một nhóm đặc trưng tương quan cao, lasso có xu hướng chọn một đặc trưng đại diện và đưa các đặc trưng còn lại về 0, và đặc trưng được chọn phụ thuộc vào nhiễu. **Elastic net** (Zou và Hastie, 2005) kết hợp cả hai thành phần phạt, $\lambda_1\|w\|_1 + \lambda_2\|w\|_2^2$, để vừa cho nghiệm thưa vừa giữ ổn định với các nhóm đặc trưng tương quan.
@@ -1293,7 +1313,21 @@ Cường độ regularization $\lambda$ không thể học từ tập huấn luy
 
 > **Định nghĩa 9.4 (k-fold cross-validation).** Chia dữ liệu thành $k$ phần có kích thước gần bằng nhau. Lần lượt với $j = 1, \dots, k$: huấn luyện mô hình trên $k - 1$ phần, đo sai số trên phần thứ $j$. Ước lượng cross-validation là trung bình của $k$ sai số đó.
 
-Mỗi điểm dữ liệu được dùng để đánh giá đúng một lần và để huấn luyện $k - 1$ lần. Để chọn $\lambda$, ta tính ước lượng cross-validation cho mỗi giá trị trong một lưới, chẳng hạn $10^{-3}, 10^{-2}, \dots, 10^{3}$, chọn giá trị cho sai số nhỏ nhất, rồi huấn luyện lại trên toàn bộ dữ liệu với giá trị đó. Bảng dưới liệt kê các biến thể thường dùng.
+Mỗi điểm dữ liệu được dùng để đánh giá đúng một lần và để huấn luyện $k - 1$ lần. Để chọn $\lambda$, ta tính ước lượng cross-validation cho mỗi giá trị trong một lưới, chẳng hạn $10^{-3}, 10^{-2}, \dots, 10^{3}$, chọn giá trị cho sai số nhỏ nhất, rồi huấn luyện lại trên toàn bộ dữ liệu với giá trị đó. Cùng cách làm chọn được cả bậc của đa thức.
+
+> **Ví dụ 9.2 (Leave-one-out trên bốn căn hộ).** Lấy $k = 4$: mỗi lần bỏ ra một căn, khớp mô hình trên ba căn còn lại rồi dự đoán căn bị bỏ ra. Ta so sánh đường thẳng với đa thức bậc hai. Trên cả bốn căn, hai mô hình có cùng sai số huấn luyện 0,0045, vì hệ số bậc hai khớp được bằng 0.
+>
+> | Căn bị bỏ ra | Giá thật | Đường thẳng dự đoán | Đa thức bậc hai dự đoán |
+> |---|---|---|---|
+> | 40 m² | 1,5 | 1,600 | 2,100 |
+> | 60 m² | 2,1 | 1,971 | 1,900 |
+> | 80 m² | 2,4 | 2,529 | 2,600 |
+> | 100 m² | 3,0 | 2,900 | 2,400 |
+> | Trung bình bình phương sai số | | 0,0133 | 0,2000 |
+>
+> Với ba điểm, đa thức bậc hai đi qua đúng cả ba và cong mạnh ở hai đầu, nên đoán sai 0,6 tỉ cho căn nhỏ nhất và căn lớn nhất.
+
+Sai số huấn luyện không phân biệt được hai mô hình, còn cross-validation cho thấy đường thẳng tốt hơn khoảng 15 lần. Trường hợp $k = n$ như trên gọi là leave-one-out; bảng dưới liệt kê nó cùng các biến thể thường dùng khác.
 
 | Biến thể | Dùng khi |
 |---|---|
@@ -1309,7 +1343,7 @@ Khi nhiều giá trị $\lambda$ cho sai số cross-validation gần như nhau, 
 
 ### 9.6. Tóm tắt
 
-Overfitting là khi mô hình khớp cả nhiễu của dữ liệu huấn luyện, tức phương sai cao; underfitting là khi họ hàm quá hẹp, tức độ chệch cao; so sánh sai số huấn luyện với sai số xác thực cho biết đang ở tình huống nào. Ridge cộng $\lambda I$ vào $X^\top X$, nên luôn có nghiệm duy nhất, cải thiện số điều kiện, và co mạnh nhất những hướng có giá trị suy biến nhỏ, nơi ước lượng kém tin cậy nhất. Lasso dùng chuẩn $\ell_1$ nên cho nghiệm thưa: trong thí nghiệm, nó đưa đúng 9 hệ số về 0 như mô hình thật, trong khi ridge không đưa hệ số nào về 0. Cường độ regularization được chọn bằng cross-validation, và hiệu năng cuối cùng phải được báo cáo trên dữ liệu không tham gia vào việc chọn.
+Overfitting là khi mô hình khớp cả nhiễu của dữ liệu huấn luyện, tức phương sai cao: đa thức bậc ba đi qua đúng bốn căn hộ nhưng đoán căn 20 m² có giá 0 đồng, và chỉ 0,1 tỉ nhiễu ở một căn làm dự đoán của nó đổi 0,6 tỉ. Underfitting là khi họ hàm quá hẹp, tức độ chệch cao; so sánh sai số huấn luyện với sai số xác thực cho biết đang ở tình huống nào. Ridge cộng $\lambda I$ vào $X^\top X$, nên luôn có nghiệm duy nhất, cải thiện số điều kiện, và nhân thành phần theo mỗi hướng với $d_i^2/(d_i^2 + \lambda)$, co mạnh nhất những hướng có giá trị suy biến nhỏ, nơi ước lượng kém tin cậy nhất. Lasso dùng chuẩn $\ell_1$ nên cho nghiệm thưa: với bốn căn hộ, độ dốc lasso bằng đúng 0 khi $\lambda \ge 4{,}8$, còn độ dốc ridge $4{,}8/(20 + \lambda)$ không bao giờ bằng 0; trong thí nghiệm 12 đặc trưng, lasso đưa đúng 9 hệ số về 0 như mô hình thật. Cường độ regularization, cũng như bậc của mô hình, được chọn bằng cross-validation, và hiệu năng cuối cùng phải được báo cáo trên dữ liệu không tham gia vào việc chọn.
 
 Ridge thêm $\lambda\|w\|^2$, lasso thêm $\lambda\|w\|_1$, Naive Bayes cộng $\alpha$ vào mọi ô đếm. Tới đây, các thành phần phạt này trông như những mẹo có tác dụng. Chương 10 cho thấy chúng, cùng với bình phương sai số và cross-entropy, đều suy ra được từ hai nguyên lý thống kê.
 
