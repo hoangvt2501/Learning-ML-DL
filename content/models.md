@@ -876,6 +876,8 @@ Văn bản, tiếng nói và chuỗi thời gian là dữ liệu dạng chuỗi 
 
 Dùng chung trọng số ở mọi bước là dạng chia sẻ trọng số theo trục thời gian, giống chia sẻ trọng số theo không gian của tích chập (Mục 7.1). Nhờ đó RNN xử lý được chuỗi dài tuỳ ý với số tham số cố định, và cách xử lý một mẫu ở vị trí thứ 5 giống ở vị trí thứ 500.
 
+Trường hợp một chiều cho thấy trạng thái ẩn nhớ và quên ra sao. Lấy $h_t = \tanh(0{,}5\,h_{t-1} + x_t)$ với $h_0 = 0$ và chuỗi đầu vào $1, 0, 0$. Ba trạng thái lần lượt là $h_1 = \tanh 1 = 0{,}76$, $h_2 = \tanh 0{,}38 = 0{,}36$ và $h_3 = \tanh 0{,}18 = 0{,}18$: sau mỗi bước, dấu vết của đầu vào đầu tiên còn chưa tới một nửa, vì nó bị nhân với hệ số 0,5 rồi đi qua tanh.
+
 Để huấn luyện, RNN được **trải ra theo thời gian** thành một mạng truyền thẳng $T$ lớp dùng chung trọng số, rồi áp dụng lan truyền ngược lên mạng đó. Thuật toán này gọi là lan truyền ngược theo thời gian (backpropagation through time). Gradient theo trọng số dùng chung là tổng các gradient tại mọi bước.
 
 ### 8.2. Gradient tiêu biến và bùng nổ theo thời gian
@@ -884,7 +886,7 @@ Mạng trải ra theo thời gian là một mạng sâu $T$ lớp, nên nó gặ
 
 $$\frac{\partial h_T}{\partial h_t} = \prod_{i=t+1}^{T} \frac{\partial h_i}{\partial h_{i-1}} = \prod_{i=t+1}^{T} \operatorname{diag}\big(\tanh'(z_i)\big)\, W_{hh},$$
 
-với $z_i$ là giá trị trước hàm tanh ở bước $i$. Tình huống giống Mục 6.1, nhưng nghiêm trọng hơn ở một điểm: cùng một ma trận $W_{hh}$ được nhân lặp lại $T - t$ lần, thay vì mỗi lớp một ma trận khác nhau. Pascanu, Mikolov và Bengio (2013) chỉ ra rằng nếu giá trị suy biến lớn nhất của $W_{hh}$ nhỏ hơn 1 thì gradient chắc chắn tiêu biến theo hàm mũ, vì $|\tanh'| \le 1$; còn muốn gradient bùng nổ thì bán kính phổ của $W_{hh}$ phải lớn hơn 1.
+với $z_i$ là giá trị trước hàm tanh ở bước $i$. Với RNN một chiều ở Mục 8.1, mỗi thừa số là $0{,}5 \cdot \tanh'(z_i)$, nên $\partial h_3/\partial h_1 = 0{,}5\,(1 - 0{,}36^2) \cdot 0{,}5\,(1 - 0{,}18^2) \approx 0{,}21$, và qua 20 bước đạo hàm không vượt quá $0{,}5^{20} \approx 10^{-6}$. Tình huống giống Mục 6.1, nhưng nghiêm trọng hơn ở một điểm: cùng một ma trận $W_{hh}$ được nhân lặp lại $T - t$ lần, thay vì mỗi lớp một ma trận khác nhau. Pascanu, Mikolov và Bengio (2013) chỉ ra rằng nếu giá trị suy biến lớn nhất của $W_{hh}$ nhỏ hơn 1 thì gradient chắc chắn tiêu biến theo hàm mũ, vì $|\tanh'| \le 1$; còn muốn gradient bùng nổ thì bán kính phổ của $W_{hh}$ phải lớn hơn 1.
 
 Thí nghiệm trong `code/models/experiments.py` đo trực tiếp hiện tượng này. Một RNN tanh 64 chiều có $W_{hh}$ với các phần tử độc lập, phương sai $g^2/64$, nên bán kính phổ xấp xỉ $g$; trạng thái đầu nhỏ, và mạng chạy 100 bước. Một gradient ngẫu nhiên được truyền ngược từ bước cuối, và thí nghiệm đo chuẩn của gradient sau 10, 50 và 100 bước lùi, chia cho chuẩn sau 1 bước và lấy trung bình trên 8 lần khởi tạo.
 
@@ -910,13 +912,13 @@ Kiến trúc giải quyết được vấn đề tiêu biến là **LSTM** (long
 
 $$\begin{aligned} f_t &= \sigma(W_f [h_{t-1}, x_t] + b_f), & \tilde c_t &= \tanh(W_c [h_{t-1}, x_t] + b_c), \\ i_t &= \sigma(W_i [h_{t-1}, x_t] + b_i), & c_t &= f_t \odot c_{t-1} + i_t \odot \tilde c_t, \\ o_t &= \sigma(W_o [h_{t-1}, x_t] + b_o), & h_t &= o_t \odot \tanh(c_t). \end{aligned}$$
 
-Cổng quên $f_t$ quyết định giữ lại bao nhiêu phần của ô nhớ cũ, cổng vào $i_t$ quyết định ghi thêm bao nhiêu thông tin mới, cổng ra $o_t$ quyết định đưa bao nhiêu phần của ô nhớ ra trạng thái ẩn.
+Cổng quên $f_t$ quyết định giữ lại bao nhiêu phần của ô nhớ cũ, cổng vào $i_t$ quyết định ghi thêm bao nhiêu thông tin mới, cổng ra $o_t$ quyết định đưa bao nhiêu phần của ô nhớ ra trạng thái ẩn. Chẳng hạn với một ô nhớ một chiều có $c_{t-1} = 2$, nếu ở bước này $f_t = 0{,}9$, $i_t = 0{,}5$, $\tilde c_t = -1$ và $o_t = 0{,}8$ thì $c_t = 0{,}9 \cdot 2 + 0{,}5 \cdot (-1) = 1{,}3$ và $h_t = 0{,}8 \tanh 1{,}3 \approx 0{,}69$. Ô nhớ giữ lại 90% giá trị cũ, ghi thêm một nửa giá trị mới, và chỉ một phần của nó được đưa ra ngoài.
 
 Chỗ khác biệt quyết định là ô nhớ được cập nhật bằng phép cộng có trọng số, không qua phép nhân ma trận. Dọc theo đường đi qua ô nhớ, nếu bỏ qua các đường gián tiếp qua $h$, ta có
 
 $$\frac{\partial c_T}{\partial c_t} = \prod_{i=t+1}^{T} \operatorname{diag}(f_i).$$
 
-Đây là tích của các số trong $(0, 1)$, không phải tích của các ma trận, và mạng học được giá trị của $f_i$: khi cần giữ thông tin lâu, nó có thể đặt $f_i$ gần 1. Cơ chế này tương tự kết nối tắt ở Mục 6.5, nhưng theo trục thời gian.
+Đây là tích của các số trong $(0, 1)$, không phải tích của các ma trận, và mạng học được giá trị của $f_i$: khi cần giữ thông tin lâu, nó có thể đặt $f_i$ gần 1. Ở ví dụ trên, đạo hàm của $c_t$ theo $c_{t-1}$ dọc theo ô nhớ đúng bằng $f_t = 0{,}9$, không qua hàm tanh hay ma trận trọng số nào. Cơ chế này tương tự kết nối tắt ở Mục 6.5, nhưng theo trục thời gian.
 
 Hai dòng cuối của bảng ở Mục 8.2 mô phỏng riêng đường đi này: gradient nhân với $f_t = \sigma(b_f + \xi_t)$ ở mỗi bước, với $\xi_t$ là nhiễu nhỏ. Kết quả cho thấy lợi ích của LSTM phụ thuộc vào giá trị cổng quên. Với hệ số chặn $b_f = 1$, cổng quên trung bình khoảng $\sigma(1) = 0{,}73$, và sau 100 bước gradient chỉ còn $3 \times 10^{-15}$. Với $b_f = 4$, cổng quên khoảng $0{,}98$, và gradient còn 0,13.
 
