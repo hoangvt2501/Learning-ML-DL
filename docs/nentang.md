@@ -514,7 +514,7 @@ Hệ số chặn $w_0 = 0{,}57$ tỉ không có nghĩa một căn hộ 0 m² đ�
 
 Cách làm vừa rồi tổng quát hoá trực tiếp sang $d$ đặc trưng nhờ ký hiệu ma trận. Viết bình phương chuẩn thành tích vô hướng rồi khai triển như khai triển $(a - b)^2$:
 
-$$L(w) = \frac1n(y - Xw)^\top(y - Xw) = \frac1n\big(y^\top y - 2\,w^\top X^\top y + w^\top X^\top X\,w\big).$$
+$$\begin{aligned} L(w) &= \frac1n(y - Xw)^\top(y - Xw) \\ &= \frac1n\big(y^\top y - 2\,w^\top X^\top y + w^\top X^\top X\,w\big). \end{aligned}$$
 
 Hai số hạng chéo $y^\top X w$ và $w^\top X^\top y$ gộp được làm một vì chúng là cùng một số: một số thực bằng chuyển vị của chính nó. Áp dụng hai quy tắc đạo hàm ở Mục 2.7, $\nabla_w(w^\top a) = a$ và $\nabla_w(w^\top A w) = 2Aw$ với $A$ đối xứng, ta được
 
@@ -534,9 +534,9 @@ Viết dưới dạng $X^\top(y - Xw) = 0$, phương trình chuẩn giải thíc
 Nghiệm này là cực tiểu chứ không phải cực đại hay điểm yên ngựa, vì ma trận Hessian của $L$ bằng $\tfrac{2}{n}X^\top X$, nửa xác định dương theo Mục 2.5. Do đó $L$ là hàm lồi và mọi điểm có gradient bằng 0 đều là cực tiểu toàn cục. Khi $X$ đủ hạng cột, Hessian xác định dương và cực tiểu là duy nhất. Chương 11 trình bày tính lồi một cách đầy đủ.
 
 > **Ví dụ 4.1.** Với bốn căn hộ ở đầu chương, ma trận dữ liệu và các tích cần thiết là
-> $$X = \begin{pmatrix}1&40\\1&60\\1&80\\1&100\end{pmatrix}, \qquad X^\top X = \begin{pmatrix}4&280\\280&21\,600\end{pmatrix}, \qquad X^\top y = \begin{pmatrix}9\\678\end{pmatrix}.$$
+> $$\begin{gathered} X = \begin{pmatrix}1&40\\1&60\\1&80\\1&100\end{pmatrix}, \\ X^\top X = \begin{pmatrix}4&280\\280&21\,600\end{pmatrix}, \qquad X^\top y = \begin{pmatrix}9\\678\end{pmatrix}. \end{gathered}$$
 > Định thức của $X^\top X$ là $4 \cdot 21\,600 - 280^2 = 8\,000$, nên
-> $$\hat w = \frac{1}{8\,000}\begin{pmatrix}21\,600&-280\\-280&4\end{pmatrix}\begin{pmatrix}9\\678\end{pmatrix} = \frac{1}{8\,000}\begin{pmatrix}4\,560\\192\end{pmatrix} = \begin{pmatrix}0{,}57\\0{,}024\end{pmatrix},$$
+> $$\begin{aligned} \hat w &= \frac{1}{8\,000}\begin{pmatrix}21\,600&-280\\-280&4\end{pmatrix}\begin{pmatrix}9\\678\end{pmatrix} \\ &= \frac{1}{8\,000}\begin{pmatrix}4\,560\\192\end{pmatrix} = \begin{pmatrix}0{,}57\\0{,}024\end{pmatrix}, \end{aligned}$$
 > trùng với kết quả tính bằng trung bình, hiệp phương sai và phương sai ở trên.
 
 Trên dữ liệu lớn hơn, ta có thể kiểm tra rằng các cách tính khác nhau cho cùng một nghiệm. Thí nghiệm trong `code/nentang/experiments.py` sinh 200 điểm với bốn hệ số thật $(2; -1{,}5; 0{,}8; 3)$ cộng nhiễu, rồi giải bằng ba cách.
@@ -651,7 +651,7 @@ và tại $(0, 0)$ nó bằng $(-4{,}5;\ -2{,}4)$: cả hai thành phần âm, n
 
 Với $\eta = 0{,}1$, bước đầu tiên đưa $(a, b)$ từ $(0, 0)$ tới $(0{,}45;\ 0{,}24)$, và mất mát giảm từ 5,355 xuống 3,2445. Hệ số góc đã đúng ngay sau một bước, còn hệ số chặn thì chưa. Lý do nằm ở cách mỗi bước tác động lên từng toạ độ. Thay gradient vào quy tắc cập nhật,
 
-$$a_{t+1} - 2{,}25 = (1 - 2\eta)(a_t - 2{,}25), \qquad b_{t+1} - 0{,}24 = (1 - 10\eta)(b_t - 0{,}24).$$
+$$\begin{aligned} a_{t+1} - 2{,}25 &= (1 - 2\eta)(a_t - 2{,}25), \\ b_{t+1} - 0{,}24 &= (1 - 10\eta)(b_t - 0{,}24). \end{aligned}$$
 
 Mỗi bước nhân khoảng cách tới đáy theo hướng $a$ với $1 - 2\eta = 0{,}8$, theo hướng $b$ với $1 - 10\eta = 0$. Vì vậy $b$ tới đích sau một bước, còn $a$ đi các giá trị 0,45; 0,81; 1,098; 1,3284 và cần 35 bước mới cách 2,25 dưới 0,001.
 
@@ -772,16 +772,25 @@ Có công cụ tối ưu cho các hàm mất mát không giải được bằng 
 
 ## 6. Phân loại tuyến tính
 
-Chương 4 dự đoán một số thực. Phần lớn bài toán thực tế lại cần dự đoán một lớp: thư là rác hay không, giao dịch có gian lận không. Cách đơn giản nhất là dùng lại mô hình tuyến tính, nhưng lấy dấu của $w^\top x + b$ làm nhãn. Ba thuật toán kinh điển làm đúng như vậy: perceptron, hồi quy logistic và hồi quy softmax. Chúng dùng chung mô hình và chung cách tối ưu, chỉ khác nhau ở hàm mất mát, và chính khác biệt đó quyết định perceptron có hội tụ hay không, hồi quy logistic có cho ra xác suất hay không. Ta bắt đầu bằng việc đặt các hàm mất mát cạnh nhau.
+Chương 4 và 5 dự đoán giá căn hộ, một số thực. Phần lớn bài toán thực tế lại cần dự đoán một lớp: thư là rác hay không, giao dịch có gian lận không, sinh viên đỗ hay trượt. Ta lấy một ví dụ nhỏ để đi suốt chương: sáu sinh viên, số giờ mỗi người ôn thi và kết quả.
+
+| Sinh viên | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|
+| Giờ ôn $x$ | 1 | 2 | 3 | 4 | 5 | 6 |
+| Kết quả | trượt | trượt | đỗ | trượt | đỗ | đỗ |
+
+Nhìn chung ôn nhiều thì dễ đỗ hơn, nhưng sinh viên 3 ôn 3 giờ đã đỗ còn sinh viên 4 ôn 4 giờ lại trượt, nên không có ngưỡng giờ ôn nào chia đúng cả sáu người. Dữ liệu thật thường như vậy, và cách mỗi thuật toán xử lý những điểm chồng lấn như sinh viên 3 và 4 là chỗ chúng khác nhau.
+
+Cách đơn giản nhất là dùng lại mô hình tuyến tính, nhưng lấy dấu của $w^\top x + b$ làm nhãn. Ba thuật toán kinh điển làm đúng như vậy: perceptron, hồi quy logistic và hồi quy softmax. Chúng dùng chung mô hình và chung cách tối ưu, chỉ khác nhau ở hàm mất mát, và chính khác biệt đó quyết định perceptron có hội tụ hay không, hồi quy logistic có cho ra xác suất hay không. Ta bắt đầu bằng việc đặt các hàm mất mát cạnh nhau.
 
 ### 6.1. Mô hình tuyến tính và các hàm mất mát cho phân loại
 
-Xét bài toán phân loại hai lớp với nhãn $y_i \in \{-1, +1\}$. Một bộ phân loại tuyến tính tính **điểm số** $s = w^\top x + b$ rồi dự đoán lớp $+1$ nếu $s > 0$ và lớp $-1$ nếu $s < 0$. Theo Mục 2.2, biên quyết định $w^\top x + b = 0$ là một siêu phẳng.
+Xét bài toán phân loại hai lớp với nhãn $y_i \in \{-1, +1\}$. Một bộ phân loại tuyến tính tính **điểm số** $s = w^\top x + b$ rồi dự đoán lớp $+1$ nếu $s > 0$ và lớp $-1$ nếu $s < 0$. Theo Mục 2.2, biên quyết định $w^\top x + b = 0$ là một siêu phẳng. Với sáu sinh viên, một bộ phân loại tự nhiên là $s = x - 3{,}5$, tức dự đoán đỗ khi ôn hơn 3,5 giờ; nó đoán sai đúng hai người, sinh viên 3 và 4.
 
 > **Định nghĩa 6.1 (Lề của một điểm).** **Lề** (margin) của điểm $(x_i, y_i)$ đối với bộ phân loại $(w, b)$ là
 > $$m_i = y_i\,(w^\top x_i + b).$$
 
-Lề dương nghĩa là điểm được phân loại đúng, lề âm nghĩa là phân loại sai, và trị tuyệt đối của lề cho biết điểm nằm xa biên quyết định tới mức nào, tỉ lệ với khoảng cách ở Định lý 2.1. Mọi hàm mất mát cho phân loại hai lớp trong chương này đều viết được như một hàm của lề, như Hình 5 và bảng dưới cho thấy.
+Lề dương nghĩa là điểm được phân loại đúng, lề âm nghĩa là phân loại sai, và trị tuyệt đối của lề cho biết điểm nằm xa biên quyết định tới mức nào, tỉ lệ với khoảng cách ở Định lý 2.1. Với bộ phân loại $s = x - 3{,}5$ và nhãn đỗ là $+1$, trượt là $-1$, lề của sáu sinh viên là 2,5; 1,5; $-0{,}5$; $-0{,}5$; 1,5; 2,5. Hai người bị đoán sai có lề âm, còn hai người ở hai đầu, ôn 1 giờ và 6 giờ, nằm xa biên nhất. Mọi hàm mất mát cho phân loại hai lớp trong chương này đều viết được như một hàm của lề, như Hình 5 và bảng dưới cho thấy.
 
 ![Hình 5](figs/nt05_matmat.png)
 
@@ -793,6 +802,17 @@ Lề dương nghĩa là điểm được phân loại đúng, lề âm nghĩa l�
 | Perceptron | $\max(0, -m)$ | lồi, bằng 0 khi $m \ge 0$ | perceptron |
 | Hinge | $\max(0, 1-m)$ | lồi, bằng 0 khi $m \ge 1$ | SVM (Chương 13) |
 | Logistic | $\log_2(1 + e^{-m})$ | lồi, trơn, luôn dương | hồi quy logistic |
+
+Áp dụng bốn hàm mất mát cho sáu sinh viên với bộ phân loại $s = x - 3{,}5$:
+
+| Hàm mất mát | Sinh viên 1 và 6 ($m = 2{,}5$) | Sinh viên 2 và 5 ($m = 1{,}5$) | Sinh viên 3 và 4 ($m = -0{,}5$) |
+|---|---|---|---|
+| 0–1 | 0 | 0 | 1 |
+| Perceptron | 0 | 0 | 0,5 |
+| Hinge | 0 | 0 | 1,5 |
+| Logistic | 0,114 | 0,291 | 1,405 |
+
+Bảng cho thấy mỗi hàm mất mát chú ý tới ai. Perceptron chỉ phạt hai người bị đoán sai, và phạt nhẹ vì họ nằm sát biên. Hinge cũng chỉ phạt hai người đó nhưng nặng hơn, và sẽ phạt cả người được đoán đúng nếu lề của họ nhỏ hơn 1. Logistic phạt tất cả, kể cả người được đoán đúng ở xa biên, chỉ là phạt rất nhẹ: nó luôn còn lý do để đẩy các điểm ra xa biên hơn nữa.
 
 Mất mát 0–1 đếm số điểm bị phân loại sai, đúng là thứ ta muốn giảm. Nhưng nó là hàm bậc thang: đạo hàm bằng 0 ở mọi chỗ khả vi và không tồn tại tại $m = 0$, nên gradient không chỉ ra hướng nào để cải thiện. Hơn nữa, bài toán cực tiểu hoá mất mát 0–1 trên một tập dữ liệu là bài toán NP-khó. Vì vậy người ta thay nó bằng một **hàm thay thế lồi** (convex surrogate) để có thể tối ưu bằng gradient.
 
@@ -829,7 +849,7 @@ Trên dữ liệu không tách được tuyến tính, tình hình khác hẳn:
 hoi tu = False, so lan sai sau 2000 luot = 17,977
 ```
 
-Thuật toán không dừng. Định lý Novikoff chỉ áp dụng cho dữ liệu tách được; ngoài trường hợp đó, perceptron không có bảo đảm nào và có thể dao động mãi mãi. Nguyên nhân nhìn thấy được trên Hình 5: mất mát perceptron bằng 0 ngay khi $m \ge 0$, nên thuật toán ngừng điều chỉnh một điểm ngay khi điểm đó vừa được phân loại đúng, dù nó nằm sát biên. Khi các lớp chồng lấn, sửa một điểm sai này lại làm một điểm khác thành sai, và quá trình lặp lại không kết thúc.
+Thuật toán không dừng. Định lý Novikoff chỉ áp dụng cho dữ liệu tách được; ngoài trường hợp đó, perceptron không có bảo đảm nào và có thể dao động mãi mãi. Nguyên nhân nhìn thấy được trên Hình 5: mất mát perceptron bằng 0 ngay khi $m \ge 0$, nên thuật toán ngừng điều chỉnh một điểm ngay khi điểm đó vừa được phân loại đúng, dù nó nằm sát biên. Khi các lớp chồng lấn, sửa một điểm sai này lại làm một điểm khác thành sai, và quá trình lặp lại không kết thúc. Sáu sinh viên là phiên bản nhỏ nhất của tình huống này: muốn đoán đúng sinh viên 3 thì ngưỡng phải dưới 3 giờ, muốn đoán đúng sinh viên 4 thì ngưỡng phải trên 4 giờ, nên mỗi lần perceptron sửa cho người này thì người kia lại sai.
 
 ### 6.3. Hồi quy logistic
 
@@ -842,7 +862,9 @@ Hồi quy logistic khắc phục hạn chế của perceptron bằng một hàm 
 
 Hàm sigmoid ép mọi số thực vào khoảng $(0, 1)$, với $\sigma(0) = 0{,}5$. Nghịch đảo của nó cho một cách hiểu hệ số rất cụ thể: $w^\top x = \log\frac{p}{1-p}$, tức mô hình tuyến tính đang dự đoán **log tỉ lệ cược** (log-odds). Tăng đặc trưng $x_j$ thêm một đơn vị làm log tỉ lệ cược tăng $w_j$, tức nhân tỉ lệ cược với $e^{w_j}$. Tên gọi "hồi quy" đến từ đây: mô hình hồi quy log tỉ lệ cược theo $x$, dù bài toán là phân loại.
 
-> **Ví dụ 6.1.** Cho $w = (0{,}5;\ -1)$, hệ số chặn $0{,}25$ và điểm $x = (2, 1)$. Điểm số là $0{,}5 \cdot 2 - 1 \cdot 1 + 0{,}25 = 0{,}25$, nên $p(y=1 \mid x) = \sigma(0{,}25) \approx 0{,}562$. Nếu $x_1$ tăng thêm 1 đơn vị, tỉ lệ cược được nhân với $e^{0{,}5} \approx 1{,}65$.
+> **Ví dụ 6.1.** Với $w = 1$ và hệ số chặn $-3{,}5$, xác suất đỗ mà mô hình gán cho sáu sinh viên là $\sigma(x - 3{,}5)$:
+> $$0{,}076;\quad 0{,}182;\quad 0{,}378;\quad 0{,}622;\quad 0{,}818;\quad 0{,}924.$$
+> Sinh viên 3 được cho 38% khả năng đỗ dù thực tế đã đỗ, sinh viên 4 được cho 62% dù đã trượt. Mỗi giờ ôn thêm nhân tỉ lệ cược đỗ với $e^1 \approx 2{,}72$. Cross-entropy cộng $-\log p_i$ cho người đỗ và $-\log(1 - p_i)$ cho người trượt; sáu số hạng là 0,079; 0,201; 0,974; 0,974; 0,201; 0,079, trung bình $L = 0{,}418$. Hai người bị đoán sai đóng góp hơn ba phần tư tổng mất mát.
 
 Gradient của cross-entropy có dạng rất gọn. Dùng tính chất $\sigma'(z) = \sigma(z)\,(1 - \sigma(z))$, đạo hàm của số hạng thứ $i$ theo $w$ là
 
@@ -852,6 +874,8 @@ Lấy trung bình trên mọi điểm, ta được
 
 $$\nabla_w L = \frac{1}{n}X^\top(p - y).$$
 
+Mỗi điểm dữ liệu kéo trọng số theo hướng $x_i$ của chính nó, với độ mạnh bằng sai lệch $p_i - y_i$ giữa xác suất dự đoán và nhãn: điểm được đoán gần đúng gần như không kéo, điểm bị đoán sai kéo mạnh nhất. Ở Ví dụ 6.1, các sai lệch là 0,076; 0,182; $-0{,}622$; 0,622; $-0{,}182$; $-0{,}076$. Chúng có tổng bằng 0, nên đạo hàm theo hệ số chặn bằng 0, còn đạo hàm theo $w$ là $\tfrac16\sum_i (p_i - y_i)\,x_i \approx -0{,}051$. Đạo hàm âm nên tăng $w$ còn giảm được mất mát. Chạy tối ưu tới hội tụ được $w \approx 1{,}214$ và hệ số chặn $\approx -4{,}249$: biên quyết định vẫn ở 3,5 giờ, mất mát giảm còn 0,413, và mỗi giờ ôn thêm nhân tỉ lệ cược với khoảng 3,37.
+
 Công thức có cùng dạng với gradient của hồi quy tuyến tính, $\tfrac{2}{n}X^\top(Xw - y)$: ma trận dữ liệu chuyển vị nhân với vector sai lệch giữa dự đoán và nhãn. Đây không phải trùng hợp. Mục 10.3 giải thích rằng cả hai đều là mô hình tuyến tính tổng quát với hàm liên kết chính tắc, và mọi mô hình như vậy đều có gradient dạng này.
 
 Hàm mất mát cross-entropy của hồi quy logistic là hàm lồi theo $w$ (Mục 11.4 kiểm tra bằng số), nên gradient descent với tốc độ học phù hợp hội tụ về cực tiểu toàn cục, nếu cực tiểu đó tồn tại. Mục 6.5 trình bày trường hợp nó không tồn tại.
@@ -860,7 +884,7 @@ Hàm mất mát cross-entropy của hồi quy logistic là hàm lồi theo $w$ (
 
 ### 6.4. Hồi quy softmax
 
-Khi có $K > 2$ lớp, mỗi lớp $k$ có một vector trọng số $w_k$ và một điểm số $s_k = w_k^\top x$. Hàm softmax biến $K$ điểm số thành $K$ xác suất.
+Khi kết quả có nhiều hơn hai mức, chẳng hạn trượt, đỗ và đỗ loại giỏi, ta có $K > 2$ lớp. Mỗi lớp $k$ có một vector trọng số $w_k$ và một điểm số $s_k = w_k^\top x$. Hàm softmax biến $K$ điểm số thành $K$ xác suất.
 
 > **Định nghĩa 6.4 (Hồi quy softmax).** Mô hình hồi quy softmax cho
 > $$p(y = k \mid x) = \frac{\exp(w_k^\top x)}{\sum_{j=1}^{K}\exp(w_j^\top x)}, \qquad k = 1, \dots, K,$$
@@ -892,6 +916,8 @@ Có một trường hợp hồi quy logistic không có nghiệm, và trường 
 
 Giả sử dữ liệu tách được hoàn toàn: tồn tại $w$ sao cho mọi điểm lớp 1 có $w^\top x > 0$ và mọi điểm lớp 0 có $w^\top x < 0$. Nhân $w$ với một số $c > 1$ không đổi biên quyết định, nhưng đẩy mọi xác suất $p_i$ về gần 0 hoặc 1 hơn, tức gần nhãn đúng hơn, nên hàm mất mát giảm. Hàm mất mát giảm mãi khi $c \to \infty$ mà không bao giờ đạt giá trị nhỏ nhất. Do đó không tồn tại nghiệm hữu hạn, và gradient descent làm $\|w\|$ tăng không giới hạn.
 
+Sáu sinh viên cho thấy điều này bằng số. Đổi kết quả của sinh viên 3 và 4 cho nhau thì dữ liệu tách được ở ngưỡng 3,5 giờ. Giữ biên ở 3,5 giờ và tăng dần độ dốc $w$, cross-entropy là 0,2515 ở $w = 1$, 0,1229 ở $w = 2$, 0,0431 ở $w = 4$ và 0,0061 ở $w = 8$: càng dốc càng tốt, không có điểm dừng. Thí nghiệm dưới chạy gradient descent trên một tập dữ liệu tách được lớn hơn.
+
 | Số vòng lặp | $\|w\|$ khi $\lambda = 0$ | $\|w\|$ khi $\lambda = 0{,}01$ |
 |---|---|---|
 | 500 | 10,164 | 3,993 |
@@ -917,7 +943,7 @@ Bảng dưới gom các phát biểu sai hay gặp về phân loại tuyến tí
 
 ### 6.7. Tóm tắt
 
-Perceptron, hồi quy logistic và hồi quy softmax dùng chung mô hình tuyến tính và khác nhau ở hàm mất mát, viết được như hàm của lề $m = y(w^\top x + b)$. Mất mát 0–1 không tối ưu trực tiếp được, nên được thay bằng các hàm lồi; hinge và logistic là chặn trên của nó, còn mất mát perceptron thì không. Perceptron hội tụ sau không quá $(R/\gamma)^2$ lần cập nhật trên dữ liệu tách được, nhưng dao động mãi trên dữ liệu chồng lấn. Hồi quy logistic dự đoán log tỉ lệ cược, có gradient $\tfrac1n X^\top(p - y)$ cùng dạng với hồi quy tuyến tính, và softmax hai lớp trùng với nó tới sai số làm tròn. Trên dữ liệu tách được hoàn toàn, hồi quy logistic không có nghiệm hữu hạn và cần regularization.
+Perceptron, hồi quy logistic và hồi quy softmax dùng chung mô hình tuyến tính và khác nhau ở hàm mất mát, viết được như hàm của lề $m = y(w^\top x + b)$. Mất mát 0–1 không tối ưu trực tiếp được, nên được thay bằng các hàm lồi; hinge và logistic là chặn trên của nó, còn mất mát perceptron thì không. Với sáu sinh viên, perceptron và hinge chỉ phạt hai người bị đoán sai, còn logistic phạt cả những người được đoán đúng nhưng chưa đủ xa biên. Perceptron hội tụ sau không quá $(R/\gamma)^2$ lần cập nhật trên dữ liệu tách được, nhưng dao động mãi trên dữ liệu chồng lấn. Hồi quy logistic dự đoán log tỉ lệ cược, có gradient $\tfrac1n X^\top(p - y)$ cùng dạng với hồi quy tuyến tính, trong đó mỗi điểm kéo trọng số theo sai lệch của chính nó; softmax hai lớp trùng với nó tới sai số làm tròn. Trên dữ liệu tách được hoàn toàn, hồi quy logistic không có nghiệm hữu hạn và cần regularization.
 
 Cả ba thuật toán trên đều học trực tiếp một biên quyết định. Chương 7 xét hai cách tiếp cận khác: không học tham số nào mà tra cứu những điểm gần nhất, hoặc mô tả dữ liệu của từng lớp rồi suy ngược bằng định lý Bayes.
 
