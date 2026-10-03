@@ -1466,11 +1466,11 @@ Các hàm mất mát trong bảng còn một điểm chung chưa được nói r
 
 ## 11. Tập lồi và hàm lồi
 
-Tính lồi là ranh giới giữa những bài toán tối ưu có bảo đảm và những bài toán không có. Ở các chương trước, ta đã nhiều lần dựa vào nó mà chưa nói rõ: nghiệm của hồi quy tuyến tính là cực tiểu toàn cục vì Hessian nửa xác định dương, hồi quy logistic không cần chạy lại với nhiều khởi tạo. Ở đây ta định nghĩa tập lồi và hàm lồi cho chặt chẽ, học cách nhận ra một hàm lồi mà không phải chứng minh từ đầu, và thấy bằng thí nghiệm điều gì xảy ra với gradient descent khi tính lồi mất đi. Các khái niệm này cũng là nền cho lý thuyết đối ngẫu ở Chương 12 và SVM ở Chương 13.
+Tính lồi là ranh giới giữa những bài toán tối ưu có bảo đảm và những bài toán không có. Ở các chương trước, ta đã nhiều lần dựa vào nó mà chưa nói rõ. Ở Chương 5, gradient descent cho bốn căn hộ xuất phát từ $(0, 0)$, và ta coi điểm nó dừng là nghiệm tốt nhất mà không thử điểm xuất phát nào khác. Ở Chương 6, nghiệm $w \approx 1{,}214$ của sáu sinh viên cũng được tìm bằng một lần chạy tối ưu duy nhất. Cả hai lần, điều cho phép làm vậy là tính lồi. Ở đây ta định nghĩa tập lồi và hàm lồi cho chặt chẽ, học cách nhận ra một hàm lồi mà không phải chứng minh từ đầu, và thấy bằng thí nghiệm điều gì xảy ra với gradient descent khi tính lồi mất đi. Các khái niệm này cũng là nền cho lý thuyết đối ngẫu ở Chương 12 và SVM ở Chương 13.
 
 ### 11.1. Vai trò của tính lồi trong tối ưu
 
-Với bài toán tối ưu lồi, mọi cực tiểu địa phương đều là cực tiểu toàn cục. Hệ quả thực tế rất lớn: điểm khởi tạo không ảnh hưởng tới chất lượng nghiệm, không cần chạy lại nhiều lần với các khởi tạo khác nhau, và khi thuật toán dừng ở một điểm có gradient bằng 0, ta biết chắc đó là nghiệm tốt nhất.
+Với bài toán tối ưu lồi, mọi cực tiểu địa phương đều là cực tiểu toàn cục. Vì vậy điểm khởi tạo không ảnh hưởng tới chất lượng nghiệm, không cần chạy lại nhiều lần với các khởi tạo khác nhau, và khi thuật toán dừng ở một điểm có gradient bằng 0, ta biết chắc đó là nghiệm tốt nhất.
 
 Hồi quy tuyến tính, hồi quy logistic, ridge, lasso và SVM đều là bài toán lồi. Hàm mất mát của mạng nơ-ron có từ hai lớp trở lên thì không lồi, nên không có bảo đảm nào như trên: kết quả phụ thuộc vào khởi tạo, và không có cách nào biết chắc còn nghiệm tốt hơn hay không. Phần lớn kỹ thuật huấn luyện mạng sâu, như khởi tạo cẩn thận, chuẩn hoá và kết nối tắt, tồn tại để xử lý hậu quả của việc mất tính lồi.
 
@@ -1499,19 +1499,21 @@ Chương 13 dùng hai tính chất của tập lồi. Giao của các tập lồ
 > $$f\big(t x + (1-t)y\big) \;\le\; t f(x) + (1-t) f(y).$$
 > $f$ là **lồi chặt** nếu bất đẳng thức là chặt với mọi $x \ne y$ và $t \in (0, 1)$.
 
-Nói bằng lời, đoạn thẳng nối hai điểm trên đồ thị, tức dây cung, luôn nằm phía trên đồ thị. Với hàm khả vi, có hai điều kiện tương đương dễ dùng hơn định nghĩa.
+Nói bằng lời, đoạn thẳng nối hai điểm trên đồ thị, tức dây cung, luôn nằm phía trên đồ thị. Lấy $f(x) = x^2$, $x = 0$, $y = 2$ và $t = 1/2$: đồ thị ở điểm giữa có độ cao $f(1) = 1$, còn trung điểm của dây cung ở độ cao $(0 + 4)/2 = 2$, nên dây cung nằm trên. Với $f(x) = x^4 - 3x^2$, lấy $x = -1$ và $y = 1$: $f(-1) = f(1) = -2$, nên dây cung là đoạn nằm ngang ở độ cao $-2$, trong khi $f(0) = 0$ cao hơn nó 2 đơn vị. Một bộ ba như vậy đủ để kết luận hàm không lồi.
+
+Với hàm khả vi, có hai điều kiện tương đương dễ dùng hơn định nghĩa.
 
 > **Định lý 11.1 (Điều kiện bậc nhất và bậc hai).** Cho $f$ khả vi trên tập lồi mở.
 > 1. $f$ lồi khi và chỉ khi với mọi $x, y$: $\;f(y) \ge f(x) + \nabla f(x)^\top (y - x)$.
 > 2. Nếu $f$ khả vi hai lần, $f$ lồi khi và chỉ khi ma trận Hessian $\nabla^2 f(x)$ nửa xác định dương tại mọi $x$. Với hàm một biến: $f''(x) \ge 0$.
 
-Điều kiện bậc nhất nói rằng tiếp tuyến, hay siêu phẳng tiếp xúc, tại mọi điểm luôn nằm dưới đồ thị. Từ đó suy ra ngay tính chất quan trọng nhất của hàm lồi.
+Điều kiện bậc hai cho lại kết luận về $x^4 - 3x^2$ mà không cần tìm bộ ba vi phạm: đạo hàm cấp hai $12x^2 - 6$ âm khi $|x| < 1/\sqrt2 \approx 0{,}707$, đúng vùng quanh điểm 0 nơi dây cung nằm dưới đồ thị. Điều kiện bậc nhất nói rằng tiếp tuyến, hay siêu phẳng tiếp xúc, tại mọi điểm luôn nằm dưới đồ thị. Từ đó suy ra ngay tính chất quan trọng nhất của hàm lồi.
 
 > **Định lý 11.2 (Cực tiểu của hàm lồi).** Nếu $f$ lồi và khả vi thì mọi điểm $x^*$ có $\nabla f(x^*) = 0$ là cực tiểu toàn cục. Nếu $f$ lồi chặt thì cực tiểu toàn cục, nếu tồn tại, là duy nhất.
 
 > **Chứng minh.** Thay $\nabla f(x^*) = 0$ vào điều kiện bậc nhất: $f(y) \ge f(x^*)$ với mọi $y$. Nếu có hai cực tiểu $x^* \ne y^*$ của hàm lồi chặt, điểm giữa của chúng có giá trị nhỏ hơn giá trị cực tiểu theo định nghĩa lồi chặt, mâu thuẫn.
 
-> **Ví dụ 11.1.** Hàm mất mát của hồi quy tuyến tính, $f(w) = \|y - Xw\|_2^2$, có Hessian $2X^\top X$, nửa xác định dương (Mục 2.5), nên $f$ lồi. Nếu $X$ đủ hạng cột thì Hessian xác định dương, $f$ lồi chặt và nghiệm duy nhất, đúng như Định lý 4.1. Hàm $f(x) = e^x$ có $f''(x) = e^x > 0$ nên lồi chặt, nhưng không có cực tiểu: nó giảm dần về 0 khi $x \to -\infty$. Ví dụ này cho thấy Định lý 11.2 chỉ nói về tính duy nhất, không bảo đảm cực tiểu tồn tại, và đây đúng là tình huống của hồi quy logistic trên dữ liệu tách được ở Mục 6.5.
+> **Ví dụ 11.1.** Hàm mất mát của hồi quy tuyến tính, $f(w) = \|y - Xw\|_2^2$, có Hessian $2X^\top X$, nửa xác định dương (Mục 2.5), nên $f$ lồi. Nếu $X$ đủ hạng cột thì Hessian xác định dương, $f$ lồi chặt và nghiệm duy nhất, đúng như Định lý 4.1. Với bốn căn hộ, hàm mất mát $L(a, b) = (a - 2{,}25)^2 + 5\,(b - 0{,}24)^2 + 0{,}0045$ ở Mục 5.2 có Hessian $\operatorname{diag}(2, 10)$, xác định dương, nên $(2{,}25;\ 0{,}24)$ là cực tiểu toàn cục duy nhất, và gradient descent xuất phát từ đâu cũng về đó. Hàm $f(x) = e^x$ có $f''(x) = e^x > 0$ nên lồi chặt, nhưng không có cực tiểu: nó giảm dần về 0 khi $x \to -\infty$. Ví dụ này cho thấy Định lý 11.2 chỉ nói về tính duy nhất, không bảo đảm cực tiểu tồn tại, và đây đúng là tình huống của hồi quy logistic trên dữ liệu tách được ở Mục 6.5.
 
 ### 11.4. Kiểm tra tính lồi bằng thực nghiệm
 
@@ -1527,7 +1529,7 @@ Nói bằng lời, đoạn thẳng nối hai điểm trên đồ thị, tức d�
 | $\sin x$ | $+1{,}972$ | 0,5051 | không lồi |
 | $x^3$ | $+13{,}17$ | 0,4985 | không lồi |
 
-Với bốn hàm đầu, giá trị vi phạm lớn nhất không dương: các số âm rất nhỏ chỉ là sai số làm tròn ở những bộ ba có hai điểm gần nhau. Với ba hàm sau, có hàng nghìn bộ ba vi phạm, và độ vi phạm lớn.
+Với bốn hàm đầu, giá trị vi phạm lớn nhất không dương: các số âm rất nhỏ chỉ là sai số làm tròn ở những bộ ba có hai điểm gần nhau. Với ba hàm sau, có hàng nghìn bộ ba vi phạm, và độ vi phạm lớn. Với $x^4 - 3x^2$, vi phạm lớn nhất tìm được là 2,237, cùng cỡ với vi phạm 2 của bộ ba $x = -1$, $y = 1$, $t = 1/2$ tính tay ở Mục 11.3.
 
 > **Lưu ý.** Phép thử này có thể bác bỏ tính lồi nhưng không chứng minh được nó. Không tìm thấy vi phạm trong 20 000 lần thử không loại trừ một vùng lõm hẹp ở đâu đó chưa được lấy mẫu. Ngược lại, chỉ một phản ví dụ là đủ để kết luận hàm không lồi. Với một hàm mất mát tự viết, đây là cách rẻ để phát hiện lỗi trước khi đi vào chứng minh.
 
@@ -1549,6 +1551,8 @@ Trên thực tế, người ta hiếm khi kiểm tra tính lồi bằng định 
 
 Các phép toán này giải thích tính lồi của mọi hàm mất mát trong giáo trình. Mất mát hinge $\max(0, 1 - m)$ là max của hai hàm affine theo $m$, mà $m = y(w^\top x + b)$ là hàm affine theo $(w, b)$, nên hinge lồi theo tham số. Hàm $\|y - Xw\|^2$ là hàm lồi $\|\cdot\|^2$ hợp với ánh xạ affine $w \mapsto y - Xw$. Mất mát logistic $\log(1 + e^{-m})$ là một hàm lồi một biến, vì đạo hàm cấp hai của nó bằng $\sigma(m)(1-\sigma(m)) > 0$, hợp với hàm affine $m$ của $w$. Và tổng của một mất mát lồi với một thành phần regularization lồi như $\|w\|_2^2$ hay $\|w\|_1$ là hàm lồi. Vì vậy ridge, lasso, hồi quy logistic có regularization và SVM đều là bài toán tối ưu lồi.
 
+Cross-entropy của sáu sinh viên ở Chương 6 là một trường hợp cụ thể. Khi nhãn được mã hoá là $\pm 1$, nó là trung bình của sáu hàm $\log(1 + e^{-m_i})$, với lề $m_i = y_i(w x_i + b)$ affine theo $(w, b)$. Mỗi số hạng lồi theo $(w, b)$, nên tổng lồi, và nghiệm $w \approx 1{,}214$, hệ số chặn $\approx -4{,}249$ ở Mục 6.3 là cực tiểu toàn cục.
+
 ### 11.6. Tính lồi và kết quả của gradient descent
 
 Điều gì xảy ra khi tính lồi mất đi? Thí nghiệm sau chạy cùng một thuật toán gradient descent từ 21 điểm xuất phát trên một hàm lồi và một hàm không lồi.
@@ -1563,13 +1567,13 @@ ham KHONG LOI x^4-3x^2+x/2   : so diem dung khac nhau = 2, tai x = -1.2645 va 1.
 gia tri ham tai hai diem do  : -2.8725 va -1.6484
 ```
 
-Với hàm không lồi $x^4 - 3x^2 + x/2$, gradient descent dừng ở hai điểm khác nhau tuỳ điểm xuất phát, và hai điểm này có giá trị hàm khác nhau: $-2{,}8725$ và $-1{,}6484$. Những lần chạy xuất phát ở phía dương đều dừng tại cực tiểu địa phương $x \approx 1{,}18$, không phải cực tiểu toàn cục, và thuật toán không có cách nào nhận ra điều đó, vì gradient tại đó cũng bằng 0.
+Với hàm không lồi $x^4 - 3x^2 + x/2$, gradient descent dừng ở hai điểm khác nhau tuỳ điểm xuất phát, và hai điểm này có giá trị hàm khác nhau: $-2{,}8725$ và $-1{,}6484$. Có thể biết trước điểm nào về đâu. Đạo hàm $4x^3 - 6x + 1/2$ bằng 0 tại ba điểm: hai cực tiểu $x \approx -1{,}2645$ và $x \approx 1{,}1807$, và một cực đại địa phương $x \approx 0{,}084$ ngăn cách hai lòng chảo. Với bước học nhỏ, điểm xuất phát bên trái 0,084 trượt về cực tiểu bên trái, điểm bên phải trượt về cực tiểu bên phải: trong 21 điểm xuất phát cách đều từ $-2{,}5$ tới $2{,}5$, 11 điểm từ 0 trở xuống về $-1{,}2645$, 10 điểm còn lại về $1{,}1807$. Những lần chạy xuất phát ở phía dương đều dừng tại cực tiểu địa phương $x \approx 1{,}18$, không phải cực tiểu toàn cục, và thuật toán không có cách nào nhận ra điều đó, vì gradient tại đó cũng bằng 0.
 
 Hàm mất mát của mạng nơ-ron không lồi, nên hiện tượng trên xảy ra ở quy mô lớn hơn nhiều. Tuy vậy, kinh nghiệm thực tế cho thấy với mạng đủ lớn, phần lớn cực tiểu địa phương có giá trị mất mát gần nhau, và trở ngại chính lại là tín hiệu co lại hoặc phình ra qua nhiều lớp. [Chương 6 của *Học sâu*](models-ch06.html) trình bày khởi tạo, chuẩn hoá và kết nối tắt, ba kỹ thuật xử lý trở ngại đó.
 
 ### 11.7. Tóm tắt
 
-Tập lồi chứa trọn đoạn thẳng nối hai điểm bất kỳ của nó, và giao của các tập lồi vẫn lồi. Hàm lồi có dây cung nằm trên đồ thị, tương đương với tiếp tuyến nằm dưới đồ thị hoặc Hessian nửa xác định dương, và với hàm lồi khả vi, mọi điểm có gradient bằng 0 là cực tiểu toàn cục; tính lồi chặt cho thêm tính duy nhất nhưng không bảo đảm cực tiểu tồn tại. Phép thử bằng số bác bỏ được tính lồi nhưng không chứng minh được nó; trong thực tế, tính lồi được suy ra từ các phép toán bảo toàn như cộng, lấy max và hợp với hàm affine, và nhờ vậy mọi hàm mất mát của giáo trình tới đây đều lồi. Trên một hàm không lồi, gradient descent dừng ở những điểm khác nhau tuỳ điểm xuất phát.
+Tập lồi chứa trọn đoạn thẳng nối hai điểm bất kỳ của nó, và giao của các tập lồi vẫn lồi. Hàm lồi có dây cung nằm trên đồ thị, tương đương với tiếp tuyến nằm dưới đồ thị hoặc Hessian nửa xác định dương; một bộ ba điểm như $x = -1$, $y = 1$ với $x^4 - 3x^2$ đủ để bác bỏ tính lồi. Với hàm lồi khả vi, mọi điểm có gradient bằng 0 là cực tiểu toàn cục; tính lồi chặt cho thêm tính duy nhất nhưng không bảo đảm cực tiểu tồn tại. Hàm mất mát của bốn căn hộ có Hessian $\operatorname{diag}(2, 10)$ nên lồi chặt, còn cross-entropy của sáu sinh viên lồi vì là tổng các hàm lồi của lề affine, nên nghiệm tìm được ở Chương 5 và Chương 6 là nghiệm tốt nhất. Phép thử bằng số bác bỏ được tính lồi nhưng không chứng minh được nó; trong thực tế, tính lồi được suy ra từ các phép toán bảo toàn như cộng, lấy max và hợp với hàm affine, và nhờ vậy mọi hàm mất mát của giáo trình tới đây đều lồi. Trên hàm không lồi $x^4 - 3x^2 + x/2$, điểm dừng của gradient descent phụ thuộc vào việc điểm xuất phát nằm bên nào của cực đại địa phương ở $x \approx 0{,}084$.
 
 Tính lồi bảo đảm tối ưu tốt khi không có ràng buộc. SVM lại là một bài toán tối ưu có ràng buộc, và Chương 12 trình bày công cụ để xử lý ràng buộc trong bài toán lồi: hàm Lagrange và bài toán đối ngẫu.
 
