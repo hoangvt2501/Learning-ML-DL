@@ -295,54 +295,62 @@
     }
   }
 
-  $$('[data-quiz]').forEach(function (quiz) {
+  function capNhatDiem(quiz) {
     var questions = $$('[data-q]', quiz);
     var score = $('[data-score]', quiz);
     var total = questions.length;
+    var answered = questions.filter(function (q) { return q.dataset.answered; }).length;
+    var right = questions.filter(function (q) { return q.dataset.answered === 'right'; }).length;
+    score.textContent = answered === total
+      ? 'Xong: đúng ' + right + '/' + total + ' câu'
+      : 'Đã trả lời ' + answered + '/' + total;
+    score.classList.toggle('is-done', answered === total);
+  }
 
-    questions.forEach(function (q) { shuffle($$('.quiz-opt', q)); });
-
-    function refresh() {
-      var answered = questions.filter(function (q) { return q.dataset.answered; }).length;
-      var right = questions.filter(function (q) { return q.dataset.answered === 'right'; }).length;
-      score.textContent = answered === total
-        ? 'Xong: đúng ' + right + '/' + total + ' câu'
-        : 'Đã trả lời ' + answered + '/' + total;
-      score.classList.toggle('is-done', answered === total);
-    }
-
-    quiz.addEventListener('click', function (e) {
-      var opt = e.target.closest('.quiz-opt');
-      if (opt && !opt.disabled) {
-        var q = opt.closest('[data-q]');
-        var correct = opt.dataset.correct === '1';
-        $$('.quiz-opt', q).forEach(function (o) {
-          o.disabled = true;
-          if (o.dataset.correct === '1') o.classList.add('is-correct');
-        });
-        if (!correct) opt.classList.add('is-wrong');
-        $('.quiz-why', q).hidden = false;
-        q.dataset.answered = correct ? 'right' : 'wrong';
-        refresh();
-        return;
-      }
-      if (e.target.closest('[data-reset]')) {
-        questions.forEach(function (q) {
-          delete q.dataset.answered;
-          $('.quiz-why', q).hidden = true;
-          var opts = $$('.quiz-opt', q);
-          opts.forEach(function (o) {
-            o.disabled = false;
-            o.classList.remove('is-correct', 'is-wrong');
-          });
-          shuffle(opts);
-        });
-        refresh();
-      }
+  // Router thay nội dung trang mà không tải lại, nên sự kiện được uỷ quyền cho
+  // document; mỗi khối trắc nghiệm mới chỉ cần trộn đáp án và đếm điểm một lần.
+  function khoiTaoTracNghiem() {
+    $$('[data-quiz]').forEach(function (quiz) {
+      if (quiz.dataset.ready) return;
+      quiz.dataset.ready = '1';
+      $$('[data-q]', quiz).forEach(function (q) { shuffle($$('.quiz-opt', q)); });
+      capNhatDiem(quiz);
     });
+  }
 
-    refresh();
+  document.addEventListener('click', function (e) {
+    var quiz = e.target.closest && e.target.closest('[data-quiz]');
+    if (!quiz) return;
+    var opt = e.target.closest('.quiz-opt');
+    if (opt && !opt.disabled) {
+      var q = opt.closest('[data-q]');
+      var correct = opt.dataset.correct === '1';
+      $$('.quiz-opt', q).forEach(function (o) {
+        o.disabled = true;
+        if (o.dataset.correct === '1') o.classList.add('is-correct');
+      });
+      if (!correct) opt.classList.add('is-wrong');
+      $('.quiz-why', q).hidden = false;
+      q.dataset.answered = correct ? 'right' : 'wrong';
+      capNhatDiem(quiz);
+      return;
+    }
+    if (e.target.closest('[data-reset]')) {
+      $$('[data-q]', quiz).forEach(function (q) {
+        delete q.dataset.answered;
+        $('.quiz-why', q).hidden = true;
+        var opts = $$('.quiz-opt', q);
+        opts.forEach(function (o) {
+          o.disabled = false;
+          o.classList.remove('is-correct', 'is-wrong');
+        });
+        shuffle(opts);
+      });
+      capNhatDiem(quiz);
+    }
   });
+
+  khoiTaoTracNghiem();
 
   /* Đóng thanh bên khi bấm vào một mục điều hướng trên màn hình hẹp. */
   // Uỷ quyền cho document thay vì gắn vào từng thẻ: sau khi router thay thanh
@@ -354,6 +362,7 @@
   /* Router gọi lại hàm này mỗi khi thay nội dung trang. */
   window.QZ_BIND = function () {
     docLaiMucLuc();
+    khoiTaoTracNghiem();
     cuonToiMucDangDoc();
     onScroll();
   };
