@@ -1663,13 +1663,13 @@ Chương 13 áp dụng toàn bộ bộ công cụ này cho SVM: bài toán gốc
 
 ## 13. Máy vector hỗ trợ
 
-Quay lại perceptron ở Mục 6.2: trên dữ liệu tách được, nó dừng ở siêu phẳng tách đúng đầu tiên mà nó tìm được, trong khi có vô số siêu phẳng như vậy. **Máy vector hỗ trợ** (support vector machine, SVM) đặt ra một tiêu chí để chọn giữa chúng: lấy siêu phẳng cách xa dữ liệu nhất. Tiêu chí đơn giản này dẫn tới một bài toán tối ưu có ràng buộc, và toàn bộ công cụ của Chương 11 và 12 giờ được dùng tới: bài toán là lồi, điều kiện bù chỉ ra những điểm quyết định nghiệm, và bài toán đối ngẫu mở đường cho kernel, cách để SVM vẽ được biên quyết định phi tuyến.
+Quay lại perceptron ở Mục 6.2: trên dữ liệu tách được, nó dừng ở siêu phẳng tách đúng đầu tiên mà nó tìm được, trong khi có vô số siêu phẳng như vậy. Với phiên bản tách được của sáu sinh viên ở Mục 6.5, ba người ôn 1, 2, 3 giờ trượt và ba người ôn 4, 5, 6 giờ đỗ, nên mọi ngưỡng nằm giữa 3 và 4 giờ đều tách đúng. Perceptron xuất phát từ $w = 0$, duyệt lần lượt sáu người theo thứ tự, và dừng ở $w = 3$, hệ số chặn $-10$, tức ngưỡng $3\tfrac13$ giờ, cách sinh viên 3 chỉ một phần ba giờ. **Máy vector hỗ trợ** (support vector machine, SVM) đặt ra một tiêu chí để chọn giữa chúng: lấy siêu phẳng cách xa dữ liệu nhất. Tiêu chí đơn giản này dẫn tới một bài toán tối ưu có ràng buộc, và toàn bộ công cụ của Chương 11 và 12 giờ được dùng tới: bài toán là lồi, điều kiện bù chỉ ra những điểm quyết định nghiệm, và bài toán đối ngẫu mở đường cho kernel, cách để SVM vẽ được biên quyết định phi tuyến.
 
 ### 13.1. Ý tưởng lề cực đại
 
 Khi dữ liệu tách được tuyến tính, có vô số siêu phẳng tách đúng hai lớp. Perceptron dừng ở siêu phẳng đầu tiên nó tìm được, và siêu phẳng đó có thể nằm sát một điểm dữ liệu. Một điểm mới ở gần điểm đó, chỉ lệch đi một chút vì nhiễu, có thể bị phân loại sai.
 
-SVM chọn siêu phẳng có **lề** lớn nhất, tức khoảng cách từ siêu phẳng tới điểm dữ liệu gần nhất là lớn nhất. Siêu phẳng như vậy nằm "chính giữa" khoảng trống giữa hai lớp. Trực giác là biên càng xa dữ liệu thì càng chịu được nhiễu. Lý thuyết học thống kê (Vapnik, 1995) chính xác hoá trực giác này: với dữ liệu nằm trong hình cầu bán kính $R$, chiều VC của lớp các siêu phẳng có lề ít nhất $\gamma$ không vượt quá $\min\big(\lceil R^2/\gamma^2\rceil, d\big) + 1$. Khi lề đủ rộng, độ phức tạp của mô hình được kiểm soát bởi tỉ số $R/\gamma$ chứ không bởi số chiều. Tỉ số này cũng là đại lượng xuất hiện trong định lý Novikoff ở Mục 6.2.
+SVM chọn siêu phẳng có **lề** lớn nhất, tức khoảng cách từ siêu phẳng tới điểm dữ liệu gần nhất là lớn nhất. Siêu phẳng như vậy nằm "chính giữa" khoảng trống giữa hai lớp. Với sáu sinh viên tách được, đó là ngưỡng 3,5 giờ, cách đều sinh viên 3 và sinh viên 4 nửa giờ. Trực giác là biên càng xa dữ liệu thì càng chịu được nhiễu. Lý thuyết học thống kê (Vapnik, 1995) chính xác hoá trực giác này: với dữ liệu nằm trong hình cầu bán kính $R$, chiều VC của lớp các siêu phẳng có lề ít nhất $\gamma$ không vượt quá $\min\big(\lceil R^2/\gamma^2\rceil, d\big) + 1$. Khi lề đủ rộng, độ phức tạp của mô hình được kiểm soát bởi tỉ số $R/\gamma$ chứ không bởi số chiều. Tỉ số này cũng là đại lượng xuất hiện trong định lý Novikoff ở Mục 6.2.
 
 ### 13.2. Bài toán tối ưu của SVM lề cứng
 
@@ -1681,6 +1681,8 @@ Cực đại $2/\|w\|$ tương đương cực tiểu $\|w\|$, và tương đươ
 > $$\min_{w,b} \;\tfrac12\|w\|^2 \qquad\text{với}\qquad y_i(w^\top x_i + b) \ge 1, \quad i = 1, \dots, n.$$
 
 Hàm mục tiêu là hàm bậc hai lồi với Hessian bằng ma trận đơn vị, còn các ràng buộc là affine. Đây là một bài toán quy hoạch toàn phương lồi ở đúng dạng chuẩn của Mục 12.1, nên có nghiệm duy nhất và mọi công cụ của Chương 12 đều áp dụng được.
+
+Với sáu sinh viên tách được, mỗi người có một ràng buộc $y_i(w x_i + b) \ge 1$, với $y_i = -1$ cho người trượt và $+1$ cho người đỗ. Hai ràng buộc chặt nhất thuộc về hai người gần ngưỡng nhất: sinh viên 4 cần $4w + b \ge 1$, sinh viên 3 cần $3w + b \le -1$. Trừ hai bất đẳng thức cho nhau được $w \ge 2$. Muốn $\tfrac12 w^2$ nhỏ nhất thì lấy $w = 2$, kéo theo $b = -7$. Biên $2x - 7 = 0$ nằm ở 3,5 giờ, và lề rộng $2/w = 1$ giờ, đúng khoảng trống từ 3 tới 4 giờ. Bốn người còn lại thoả ràng buộc với dư: sinh viên 2 và 5 có $y_i(w x_i + b) = 3$, sinh viên 1 và 6 có 5.
 
 ### 13.3. Bài toán đối ngẫu và vector hỗ trợ
 
@@ -1701,6 +1703,8 @@ Thay $w$ trở lại hàm Lagrange, số hạng chứa $b$ biến mất nhờ $\
 Từ định lý rút ra ngay hai điều. Điều thứ nhất là $w^*$ là tổ hợp tuyến tính của các điểm dữ liệu, với trọng số $\alpha_i^* y_i$. Điều thứ hai đến từ điều kiện bù (Mục 12.4): $\alpha_i^*\,[1 - y_i(w^{*\top} x_i + b^*)] = 0$, nên $\alpha_i^* > 0$ chỉ có thể xảy ra với những điểm có $y_i(w^{*\top} x_i + b^*) = 1$, tức nằm đúng trên lề. Các điểm đó gọi là **vector hỗ trợ**. Mọi điểm khác có $\alpha_i^* = 0$ và không đóng góp gì vào $w^*$.
 
 Hệ số chặn $b^*$ tính được từ một vector hỗ trợ bất kỳ: vì $y_s(w^{*\top} x_s + b^*) = 1$ và $y_s^2 = 1$, ta có $b^* = y_s - w^{*\top} x_s$. Trên thực tế người ta lấy trung bình trên mọi vector hỗ trợ để giảm sai số số học.
+
+Với sáu sinh viên tách được, chỉ sinh viên 3 và 4 nằm trên lề, nên chỉ $\alpha_3$ và $\alpha_4$ có thể khác 0. Điều kiện $\sum_i \alpha_i y_i = 0$ cho $\alpha_3 = \alpha_4$, và $w = \alpha_4 \cdot 4 - \alpha_3 \cdot 3 = \alpha_4$. Vì $w = 2$, ta được $\alpha_3 = \alpha_4 = 2$. Giá trị bài toán đối ngẫu là $\alpha_3 + \alpha_4 - \tfrac12 w^2 = 4 - 2 = 2$, bằng giá trị $\tfrac12 w^2 = 2$ của bài toán gốc, và hệ số chặn tính từ sinh viên 4 là $b = 1 - 2 \cdot 4 = -7$. Bốn sinh viên còn lại có $\alpha_i = 0$: bỏ họ khỏi dữ liệu, nghiệm không đổi.
 
 Thí nghiệm giải SVM bằng thư viện libsvm (qua scikit-learn) trên 120 điểm tách được, rồi kiểm tra các khẳng định trên từ nghiệm đối ngẫu:
 
@@ -1741,6 +1745,8 @@ Bài toán đối ngẫu của SVM lề mềm giống hệt Định lý 13.1, ch
 | $0 < \alpha_i < C$ | đúng trên lề ($y_i f(x_i) = 1$) | có |
 | $\alpha_i = C$ | vi phạm lề: trong lề hoặc sai phía ($y_i f(x_i) \le 1$) | có |
 
+Sáu sinh viên ban đầu, với sinh viên 3 đỗ và sinh viên 4 trượt, có đủ cả ba nhóm. Dữ liệu này không tách được nên SVM lề cứng vô nghiệm. Với lề mềm và mọi $C \ge 1/3$, nghiệm là $w = 2/3$, $b = -7/3$: biên vẫn ở 3,5 giờ, hai mép lề ở 2 giờ và 5 giờ, lề rộng 3 giờ. Sinh viên 1 và 6 nằm ngoài lề, $y_i f(x_i) = 5/3$, nên $\alpha_i = 0$. Sinh viên 2 và 5 nằm đúng trên mép lề, $y_i f(x_i) = 1$, với $0 < \alpha_i < C$; ở $C = 1$ thì $\alpha_i \approx 0{,}556$. Sinh viên 3 và 4 nằm sai phía, $y_i f(x_i) = -1/3$, nên $\alpha_i = C$. Tăng $C$ thêm nữa không đổi nghiệm, vì tăng $w$ chỉ làm lề hẹp lại mà không cứu được sinh viên 3 và 4: không ngưỡng nào phân loại đúng cả hai người. Ngược lại, khi $C$ nhỏ thì vi phạm rẻ và lề rộng ra: ở $C = 0{,}1$, $w = 0{,}4$, hai mép lề ở 1 giờ và 6 giờ, và cả sáu sinh viên đều là vector hỗ trợ.
+
 Thí nghiệm trên hai lớp chồng lấn nhau, với năm giá trị $C$, đếm số điểm trong từng nhóm.
 
 ![Hình 9](figs/nt09_svm.png)
@@ -1755,7 +1761,7 @@ Thí nghiệm trên hai lớp chồng lấn nhau, với năm giá trị $C$, đ�
 | 3,000 | 1,7312 | 45 | 3 | 42 | 0,1667 | 0,1795 |
 | 300,000 | 1,7311 | 45 | 3 | 42 | 0,1667 | 0,1795 |
 
-Với $C$ nhỏ, vi phạm rẻ nên lề rộng (5,61) và rất nhiều điểm vi phạm lề: ở $C = 0{,}003$, cả 114 vector hỗ trợ đều là điểm vi phạm, không điểm nào nằm đúng trên lề. Với $C$ lớn, vi phạm đắt nên lề hẹp lại (1,73) và số vector hỗ trợ giảm còn 45. Từ $C = 3$ trở lên nghiệm gần như không đổi, vì các điểm vi phạm còn lại là những điểm nằm sâu trong vùng chồng lấn, không siêu phẳng nào tránh được.
+Với $C$ nhỏ, vi phạm rẻ nên lề rộng (5,61) và rất nhiều điểm vi phạm lề: ở $C = 0{,}003$, cả 114 vector hỗ trợ đều là điểm vi phạm, không điểm nào nằm đúng trên lề. Với $C$ lớn, vi phạm đắt nên lề hẹp lại (1,73) và số vector hỗ trợ giảm còn 45. Từ $C = 3$ trở lên nghiệm gần như không đổi, vì các điểm vi phạm còn lại là những điểm nằm sâu trong vùng chồng lấn, không siêu phẳng nào tránh được, giống sinh viên 3 và 4 ở trên.
 
 Sai số kiểm tra chỉ dao động trong khoảng 0,173 tới 0,180, tức $C$ ảnh hưởng ít tới chất lượng trong thí nghiệm này. Điều đó phản ánh bản chất của dữ liệu: biên tối ưu ở đây vốn là tuyến tính, và SVM tuyến tính không đủ linh hoạt để overfitting đáng kể. Với kernel phi tuyến, mô hình linh hoạt hơn nhiều, và $C$ trở thành siêu tham số quan trọng cần chọn bằng cross-validation.
 
@@ -1807,7 +1813,7 @@ SVM vẫn là lựa chọn tốt khi số điểm dữ liệu vừa phải, tớ
 
 ### 13.7. Tóm tắt
 
-SVM chọn siêu phẳng có lề lớn nhất, và với thang đo chọn sao cho điểm gần nhất có $|w^\top x + b| = 1$, bài toán trở thành cực tiểu $\tfrac12\|w\|^2$ dưới các ràng buộc affine, một bài toán lồi. Bài toán đối ngẫu cho $w = \sum_i \alpha_i y_i x_i$, và điều kiện bù làm $\alpha_i$ bằng 0 với mọi điểm không nằm trên lề, nên chỉ vài vector hỗ trợ quyết định nghiệm: 3 trên 120 điểm trong thí nghiệm, với khe đối ngẫu cỡ $4 \times 10^{-8}$. SVM lề mềm thêm biến bù và tương đương với mất mát hinge cộng regularization $\ell_2$, với $C$ là nghịch đảo của cường độ regularization. Vì bài toán đối ngẫu chỉ dùng tích vô hướng, thay tích vô hướng bằng kernel cho biên phi tuyến mà không phải dựng không gian đặc trưng. Điểm yếu của SVM với kernel là chi phí tăng nhanh theo số điểm dữ liệu.
+SVM chọn siêu phẳng có lề lớn nhất, và với thang đo chọn sao cho điểm gần nhất có $|w^\top x + b| = 1$, bài toán trở thành cực tiểu $\tfrac12\|w\|^2$ dưới các ràng buộc affine, một bài toán lồi. Với sáu sinh viên tách được, SVM đặt ngưỡng ở 3,5 giờ với $w = 2$, $b = -7$, trong khi perceptron dừng ở $3\tfrac13$ giờ. Bài toán đối ngẫu cho $w = \sum_i \alpha_i y_i x_i$, và điều kiện bù làm $\alpha_i$ bằng 0 với mọi điểm không nằm trên lề, nên chỉ vài vector hỗ trợ quyết định nghiệm: sinh viên 3 và 4 với $\alpha_3 = \alpha_4 = 2$ trong ví dụ, 3 trên 120 điểm trong thí nghiệm, với khe đối ngẫu cỡ $4 \times 10^{-8}$. SVM lề mềm thêm biến bù và tương đương với mất mát hinge cộng regularization $\ell_2$, với $C$ là nghịch đảo của cường độ regularization; trên sáu sinh viên ban đầu, nó chia các điểm thành ba nhóm của điều kiện KKT, với sinh viên 3 và 4 vi phạm lề ở mọi $C$. Vì bài toán đối ngẫu chỉ dùng tích vô hướng, thay tích vô hướng bằng kernel cho biên phi tuyến mà không phải dựng không gian đặc trưng. Điểm yếu của SVM với kernel là chi phí tăng nhanh theo số điểm dữ liệu.
 
 Mười ba chương đầu đều làm việc với dữ liệu có nhãn. Ba chương còn lại chuyển sang dữ liệu không có nhãn, bắt đầu bằng câu hỏi: trong hàng trăm đặc trưng, những hướng nào thật sự mang thông tin? Chương 14 trả lời bằng PCA.
 
