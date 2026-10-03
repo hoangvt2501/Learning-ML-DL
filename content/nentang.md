@@ -617,7 +617,7 @@ Hồi quy tuyến tính giải được bằng một công thức, nhưng công 
 
 ## 5. Gradient descent
 
-Chương 4 giải hồi quy tuyến tính bằng một công thức. Phần lớn bài toán học máy không có công thức như vậy: chỉ cần đổi hàm mất mát sang cross-entropy của hồi quy logistic là phương trình "gradient bằng 0" đã không giải tường minh được nữa. Khi đó ta tìm nghiệm bằng cách đi từng bước nhỏ xuống dốc của hàm mất mát. Ý tưởng này đơn giản, nhưng nó đặt ra hai câu hỏi thực tế mà chương này trả lời bằng số đo: cần bao nhiêu bước, và làm sao biết mình đã tính gradient đúng.
+Chương 4 tìm đường thẳng tốt nhất cho bốn căn hộ bằng một công thức. Phần lớn bài toán học máy không có công thức như vậy: chỉ cần đổi hàm mất mát sang cross-entropy của hồi quy logistic là phương trình "gradient bằng 0" đã không giải tường minh được nữa. Khi đó ta tìm nghiệm bằng cách đi từng bước nhỏ xuống dốc của hàm mất mát. Để thấy cách làm này vận hành ra sao, ta giải lại bài toán căn hộ như thể không biết công thức, rồi dùng chính ví dụ đó để trả lời hai câu hỏi thực tế: cần bao nhiêu bước, và làm sao biết mình đã tính gradient đúng.
 
 ### 5.1. Lý do dùng phương pháp lặp
 
@@ -637,15 +637,29 @@ $$L(\theta + \delta) \approx L(\theta) + \nabla L(\theta)^\top \delta.$$
 
 Trong mọi $\delta$ có cùng độ dài, số hạng $\nabla L^\top \delta$ âm nhất khi $\delta$ ngược hướng với $\nabla L$, theo bất đẳng thức Cauchy–Schwarz. Lập luận này chỉ đúng cục bộ, vì xấp xỉ bậc nhất chỉ chính xác khi bước đi đủ nhỏ. Nếu $\eta$ quá lớn, bước đi có thể vượt qua cực tiểu và làm $L$ tăng lên.
 
-> **Ví dụ 5.1.** Xét $L(w) = (w - 3)^2$ với cực tiểu tại $w^* = 3$. Gradient là $L'(w) = 2(w - 3)$. Với $\eta = 0{,}1$ và $w_0 = 0$:
-> $$\begin{aligned} w_1 &= 0 - 0{,}1 \cdot 2(0 - 3) = 0{,}6, \\ w_2 &= 0{,}6 - 0{,}1 \cdot 2(0{,}6 - 3) = 1{,}08, \\ w_3 &= 1{,}08 - 0{,}1 \cdot 2(1{,}08 - 3) = 1{,}464. \end{aligned}$$
-> Khoảng cách tới cực tiểu lần lượt là $3$; $2{,}4$; $1{,}92$; $1{,}536$, tức mỗi bước nhân với $0{,}8$. Tổng quát, $w_{t+1} - 3 = (1 - 2\eta)(w_t - 3)$, nên thuật toán hội tụ khi $|1 - 2\eta| < 1$, tức $0 < \eta < 1$. Với $\eta = 0{,}5$ nó tới cực tiểu sau đúng một bước; với $\eta = 1$ nó nhảy qua lại giữa $0$ và $6$ mãi mãi; với $\eta > 1$ nó phân kỳ.
+Ta thử thuật toán trên bốn căn hộ của Chương 4. Để các con số gọn, đổi biến diện tích thành $u = (x - 70)/10$, tức độ lệch so với diện tích trung bình, tính bằng chục mét vuông; bốn căn có $u$ lần lượt là $-3$; $-1$; $1$; $3$. Mô hình là $f(u) = a + bu$, trong đó $b$ là phần giá tăng thêm cho mỗi 10 m². Nghiệm của Chương 4 khi đó ứng với $a = 2{,}25$, đúng bằng giá trung bình vì đường thẳng tốt nhất đi qua điểm trung bình, và $b = 0{,}24$.
 
-Ví dụ này chứa gần như mọi điều cần biết về tốc độ học, và Mục 5.4 tổng quát hoá nó.
+Vì các $u_i$ có trung bình bằng 0, hàm mất mát tách được thành
+
+$$L(a, b) = (a - 2{,}25)^2 + 5\,(b - 0{,}24)^2 + 0{,}0045.$$
+
+Khi khai triển $(y_i - a - bu_i)^2$ và lấy trung bình, các số hạng chéo giữa $a$ và $u_i$ có tổng bằng 0, còn trung bình của $u_i^2$ bằng 5; có thể kiểm tra tại điểm $(0, 0)$, nơi cả hai cách tính đều cho $L = 5{,}355$. Dạng này cho thấy ngay hình dạng của bài toán: một cái chén có đáy tại $(2{,}25;\ 0{,}24)$, cong theo hướng $b$ gấp 5 lần theo hướng $a$. Gradient là
+
+$$\nabla L = \big(2(a - 2{,}25);\ 10(b - 0{,}24)\big),$$
+
+và tại $(0, 0)$ nó bằng $(-4{,}5;\ -2{,}4)$: cả hai thành phần âm, nên bước đầu tiên tăng cả $a$ lẫn $b$.
+
+Với $\eta = 0{,}1$, bước đầu tiên đưa $(a, b)$ từ $(0, 0)$ tới $(0{,}45;\ 0{,}24)$, và mất mát giảm từ 5,355 xuống 3,2445. Hệ số góc đã đúng ngay sau một bước, còn hệ số chặn thì chưa. Lý do nằm ở cách mỗi bước tác động lên từng toạ độ. Thay gradient vào quy tắc cập nhật,
+
+$$a_{t+1} - 2{,}25 = (1 - 2\eta)(a_t - 2{,}25), \qquad b_{t+1} - 0{,}24 = (1 - 10\eta)(b_t - 0{,}24).$$
+
+Mỗi bước nhân khoảng cách tới đáy theo hướng $a$ với $1 - 2\eta = 0{,}8$, theo hướng $b$ với $1 - 10\eta = 0$. Vì vậy $b$ tới đích sau một bước, còn $a$ đi các giá trị 0,45; 0,81; 1,098; 1,3284 và cần 35 bước mới cách 2,25 dưới 0,001.
+
+Thử tăng tốc độ học lên $\eta = 0{,}2$ thì hệ số co theo hướng $a$ tốt lên thành $0{,}6$, nhưng theo hướng $b$ thành $1 - 10 \cdot 0{,}2 = -1$: $b$ nhảy qua lại giữa 0,48 và 0 mãi mãi, và thuật toán không hội tụ. Ví dụ nhỏ này chứa gần như mọi điều cần biết về tốc độ học. Mỗi hướng có độ cong $\lambda$ co sai số theo hệ số $1 - \eta\lambda$ mỗi bước, nên hội tụ khi và chỉ khi $0 < \eta < 2/\lambda$. Hướng cong nhất đặt giới hạn trên cho $\eta$, còn hướng phẳng nhất quyết định thuật toán chạy chậm tới đâu. Mục 5.3 và 5.4 tổng quát hoá hai nhận xét này.
 
 ### 5.3. Tốc độ hội tụ và số điều kiện
 
-Với hàm một biến ở Ví dụ 5.1, có thể chọn $\eta$ để hội tụ sau một bước. Với hàm nhiều biến thì không, vì mỗi hướng cần một tốc độ học khác nhau. Xét hàm bậc hai hai biến
+Ví dụ căn hộ cho thấy khó khăn của hàm nhiều biến: mỗi hướng cần một tốc độ học riêng, mà thuật toán chỉ có một. Tốc độ học tốt nhất cân bằng hai hướng, $|1 - 2\eta| = |1 - 10\eta|$, cho $\eta = 1/6$, và khi đó cả hai hướng cùng co sai số theo hệ số $2/3$ mỗi bước. Để thấy hệ số này phụ thuộc vào điều gì, xét hàm bậc hai hai biến
 
 $$f(x) = \tfrac12\big(x_1^2 + \kappa\, x_2^2\big), \qquad \kappa \ge 1,$$
 
@@ -675,15 +689,15 @@ Một cải tiến đơn giản làm giảm đáng kể con số đó là **mome
 
 Bảng khớp với phân tích ở trên theo ba cách. Cột gradient descent tăng đúng 10 lần mỗi khi $\kappa$ tăng 10 lần, và ở $\kappa = 10^4$ số đo 92 104 gần như trùng với ước lượng 92 103. Cột momentum tăng khoảng 3,3 lần mỗi hàng, xấp xỉ $\sqrt{10} \approx 3{,}16$. Còn tỉ số giữa hai cột tăng theo $\sqrt\kappa$ với hệ số khoảng 0,7.
 
-Như vậy tốc độ hội tụ của gradient descent phụ thuộc vào hình dạng của hàm mất mát, đo bằng số điều kiện, chứ không phụ thuộc vào số chiều. Một bài toán một triệu chiều có $\kappa$ nhỏ dễ hơn nhiều một bài toán hai chiều có $\kappa$ lớn. Với hồi quy tuyến tính, $\kappa$ lớn thường do các đặc trưng có thang đo rất khác nhau, chẳng hạn một cột tính bằng mét và một cột tính bằng milimét. **Chuẩn hoá đặc trưng** về cùng thang đo, như trừ trung bình rồi chia độ lệch chuẩn, là cách rẻ nhất để giảm $\kappa$ và tăng tốc huấn luyện.
+Như vậy tốc độ hội tụ của gradient descent phụ thuộc vào hình dạng của hàm mất mát, đo bằng số điều kiện, chứ không phụ thuộc vào số chiều. Một bài toán một triệu chiều có $\kappa$ nhỏ dễ hơn nhiều một bài toán hai chiều có $\kappa$ lớn. Với hồi quy tuyến tính, $\kappa$ lớn thường do các đặc trưng có thang đo rất khác nhau, chẳng hạn một cột tính bằng mét và một cột tính bằng milimét, hoặc do đặc trưng không được trừ trung bình. Bốn căn hộ cho thấy mức độ của vấn đề. Nếu để diện tích nguyên đơn vị mét vuông, từ 40 tới 100, và không trừ trung bình, Hessian của hàm mất mát có hai trị riêng khoảng 10 802 và 0,185, nên $\kappa \approx 58\,340$. Tốc độ học khi đó phải nhỏ hơn $1{,}85 \times 10^{-4}$, và theo công thức trên cần khoảng 537 000 bước để giảm sai số $10^8$ lần. Chỉ chia diện tích cho 100, $\kappa$ còn khoảng 45; trừ trung bình rồi chia cho 10 như ở Mục 5.2, $\kappa = 5$; còn chia cho độ lệch chuẩn 22,36 thì $\kappa = 1$, và gradient descent với $\eta = 0{,}5$ tới nghiệm sau đúng một bước. **Chuẩn hoá đặc trưng** về cùng thang đo, như trừ trung bình rồi chia độ lệch chuẩn, vì vậy là cách rẻ nhất để giảm $\kappa$ và tăng tốc huấn luyện.
 
 ### 5.4. Chọn tốc độ học
 
-Ví dụ 5.1 cho thấy với hàm bậc hai một biến có đạo hàm cấp hai bằng $\lambda$, gradient descent hội tụ khi và chỉ khi $0 < \eta < 2/\lambda$. Với hàm bậc hai nhiều biến, mỗi hướng riêng của Hessian có một điều kiện như vậy, và hướng khắt khe nhất là hướng có trị riêng lớn nhất:
+Ví dụ căn hộ ở Mục 5.2 cho thấy với hàm bậc hai, hướng có độ cong $\lambda$ hội tụ khi và chỉ khi $0 < \eta < 2/\lambda$. Với hàm bậc hai nhiều biến, mỗi hướng riêng của Hessian có một điều kiện như vậy, và hướng khắt khe nhất là hướng có trị riêng lớn nhất:
 
 $$0 < \eta < \frac{2}{\lambda_{\max}}.$$
 
-Vượt ngưỡng này thì thuật toán chắc chắn phân kỳ theo hướng đó, không chỉ là chậm. Với hàm không phải bậc hai, không có ngưỡng chính xác như vậy, nhưng đường cong mất mát vẫn cho biết khá rõ tốc độ học đang ở mức nào, như bảng dưới tóm tắt.
+Vượt ngưỡng này thì thuật toán chắc chắn phân kỳ theo hướng đó, không chỉ là chậm. Với bốn căn hộ, $\lambda_{\max} = 10$ nên ngưỡng là $0{,}2$: đúng tại ngưỡng, hệ số góc dao động mãi giữa hai giá trị như đã thấy, còn vượt ngưỡng một chút là nó phân kỳ. Với hàm không phải bậc hai, không có ngưỡng chính xác như vậy, nhưng đường cong mất mát vẫn cho biết khá rõ tốc độ học đang ở mức nào, như bảng dưới tóm tắt.
 
 | Tốc độ học | Hiện tượng | Dấu hiệu trên đường cong mất mát |
 |---|---|---|
@@ -701,6 +715,8 @@ Suy ra công thức gradient bằng tay, hoặc cài đặt nó trong mã, rất
 $$\begin{aligned} &\text{sai phân tiến:} && \frac{f(x+\varepsilon) - f(x)}{\varepsilon}, \\ &\text{sai phân trung tâm:} && \frac{f(x+\varepsilon) - f(x-\varepsilon)}{2\varepsilon}. \end{aligned}$$
 
 Với hàm nhiều biến, ta áp dụng công thức cho từng toạ độ, mỗi lần dịch chuyển một toạ độ một lượng $\varepsilon$.
+
+Thử trên ví dụ căn hộ tại điểm $(a, b) = (0, 0)$, nơi công thức cho gradient $(-4{,}5;\ -2{,}4)$. Sai phân trung tâm với $\varepsilon = 10^{-5}$ cho khoảng $-4{,}500000000007$ và $-2{,}40000000002$, lệch khỏi công thức cỡ $10^{-11}$. Với hàm bậc hai như hàm mất mát này, sai phân trung tâm đúng tuyệt đối về mặt toán học, nên phần lệch nhỏ đó hoàn toàn do làm tròn số. Với hàm tổng quát, xấp xỉ còn mắc thêm sai số cắt cụt, và việc chọn $\varepsilon$ cần cân nhắc.
 
 Câu hỏi là chọn $\varepsilon$ bao nhiêu. Theo định nghĩa đạo hàm, $\varepsilon$ càng nhỏ thì xấp xỉ càng chính xác. Trên máy tính điều đó không đúng, vì có hai nguồn sai số ngược chiều nhau.
 
@@ -738,6 +754,8 @@ Với hàm mất mát là trung bình trên $n$ điểm dữ liệu, $L(\theta) 
 | Stochastic gradient descent (SGD) | 1 điểm chọn ngẫu nhiên | mỗi bước rất rẻ | gradient nhiễu lớn, đường đi dao động |
 | Mini-batch gradient descent | $B$ điểm chọn ngẫu nhiên | cân bằng hai cách trên, tận dụng tính toán song song | thêm siêu tham số $B$ |
 
+Bốn căn hộ cho thấy gradient tính trên một điểm dữ liệu có thể khác gradient đầy đủ tới mức nào. Tại $(a, b) = (0, 0)$, gradient tính riêng trên căn A, B, C, D lần lượt là $(-3;\ 9)$, $(-4{,}2;\ 4{,}2)$, $(-4{,}8;\ -4{,}8)$ và $(-6;\ -18)$. Thành phần theo $b$ đi từ $-18$ tới $9$, thậm chí đổi dấu, nên một bước SGD có thể đi sai hướng hẳn. Nhưng trung bình của bốn vector đúng bằng gradient đầy đủ $(-4{,}5;\ -2{,}4)$.
+
 Gradient tính trên một mini-batch chọn ngẫu nhiên là một **ước lượng không chệch** của gradient đầy đủ, vì kỳ vọng của nó đúng bằng $\nabla L$. Phương sai của ước lượng này giảm tỉ lệ với $1/B$, nên tăng kích thước mini-batch làm hướng đi chính xác hơn, nhưng lợi ích giảm dần: tăng $B$ gấp 4 lần chỉ giảm độ lệch chuẩn của gradient đi 2 lần.
 
 Vì gradient ngẫu nhiên luôn có nhiễu, SGD với tốc độ học cố định không hội tụ hẳn về cực tiểu mà dao động trong một vùng quanh nó. Muốn hội tụ, tốc độ học phải giảm dần theo thời gian. Điều kiện cổ điển của Robbins và Monro (1951) là $\sum_t \eta_t = \infty$, để đi đủ xa mà tới được cực tiểu, và $\sum_t \eta_t^2 < \infty$, để nhiễu bị dập dần; chẳng hạn $\eta_t \propto 1/t$.
@@ -746,7 +764,7 @@ Mini-batch được dùng phổ biến nhất trên thực tế, chủ yếu vì
 
 ### 5.7. Tóm tắt
 
-Gradient descent đi từng bước ngược hướng gradient, và tốc độ học quyết định nó hội tụ, dao động hay phân kỳ: với hàm bậc hai, điều kiện hội tụ là $\eta < 2/\lambda_{\max}$. Số vòng lặp cần thiết tỉ lệ với số điều kiện $\kappa$, tăng từ 1 lên 92 104 khi $\kappa$ tăng từ 1 lên $10^4$ trong thí nghiệm, còn momentum hạ con số đó xuống tỉ lệ với $\sqrt\kappa$; vì vậy chuẩn hoá đặc trưng là cách tăng tốc rẻ nhất. Gradient tự tính cần được kiểm tra bằng sai phân trung tâm với $\varepsilon$ cỡ $10^{-5}$ tới $10^{-6}$, vì $\varepsilon$ quá nhỏ làm sai số làm tròn lấn át. Mini-batch là cách dùng phổ biến nhất, cho ước lượng gradient không chệch với phương sai giảm theo $1/B$.
+Gradient descent đi từng bước ngược hướng gradient, và tốc độ học quyết định nó hội tụ, dao động hay phân kỳ. Trên bốn căn hộ, mỗi bước nhân khoảng cách tới đáy theo một hướng với $1 - \eta\lambda$, trong đó $\lambda$ là độ cong theo hướng đó; vì vậy với hàm bậc hai, điều kiện hội tụ là $\eta < 2/\lambda_{\max}$, và ở ví dụ này ngưỡng là 0,2. Số vòng lặp cần thiết tỉ lệ với số điều kiện $\kappa$, tăng từ 1 lên 92 104 khi $\kappa$ tăng từ 1 lên $10^4$ trong thí nghiệm, còn momentum hạ con số đó xuống tỉ lệ với $\sqrt\kappa$. Chuẩn hoá đặc trưng là cách tăng tốc rẻ nhất: với diện tích để nguyên mét vuông, bài toán căn hộ có $\kappa \approx 58\,340$; sau khi chuẩn hoá, $\kappa = 1$. Gradient tự tính cần được kiểm tra bằng sai phân trung tâm với $\varepsilon$ cỡ $10^{-5}$ tới $10^{-6}$, vì $\varepsilon$ quá nhỏ làm sai số làm tròn lấn át. Mini-batch là cách dùng phổ biến nhất: gradient trên từng điểm có thể lệch hẳn hướng, nhưng trung bình của chúng không chệch, và phương sai giảm theo $1/B$.
 
 Có công cụ tối ưu cho các hàm mất mát không giải được bằng công thức, ta chuyển sang loại bài toán cần tới nó nhiều nhất: phân loại. Chương 6 dùng lại mô hình tuyến tính, thay đổi hàm mất mát, và thấy mỗi lựa chọn hàm mất mát cho một thuật toán khác nhau.
 
