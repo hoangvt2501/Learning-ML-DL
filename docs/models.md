@@ -405,7 +405,7 @@ Phép dựng sau, theo ý tưởng của Telgarsky (2016), cho thấy lợi ích
 
 $$g(x) = 2\operatorname{ReLU}(x) - 4\operatorname{ReLU}\!\left(x - \tfrac12\right).$$
 
-Trên $[0, 1]$, hàm này tăng tuyến tính từ $g(0) = 0$ lên $g(1/2) = 1$ rồi giảm tuyến tính về $g(1) = 0$, nên nó ánh xạ $[0, 1]$ lên $[0, 1]$. Bây giờ hợp $g$ với chính nó $k$ lần. Mỗi nhánh của $g$ phủ trọn đoạn $[0, 1]$, nên mỗi lần hợp làm số đoạn tuyến tính tăng gấp đôi. Kết quả $g^{(k)} = g \circ \dots \circ g$ là một hàm răng cưa có đúng $2^k$ đoạn tuyến tính, biểu diễn bằng một mạng $k$ lớp, mỗi lớp 2 đơn vị ReLU, tổng cộng $6k$ tham số.
+Trên $[0, 1]$, hàm này tăng tuyến tính từ $g(0) = 0$ lên $g(1/2) = 1$ rồi giảm tuyến tính về $g(1) = 0$, nên nó ánh xạ $[0, 1]$ lên $[0, 1]$. Bây giờ hợp $g$ với chính nó $k$ lần. Mỗi nhánh của $g$ phủ trọn đoạn $[0, 1]$, nên mỗi lần hợp làm số đoạn tuyến tính tăng gấp đôi. Với $k = 2$: $g(1/4) = 1/2$ và $g(1/2) = 1$, nên $g(g(1/4)) = 1$; tương tự $g(3/4) = 1/2$ nên $g(g(3/4)) = 1$, còn $g(g(1/2)) = g(1) = 0$. Hàm $g \circ g$ đi từ 0 lên 1 ở $x = 1/4$, xuống 0 ở $x = 1/2$, lên 1 ở $x = 3/4$ rồi về 0 ở $x = 1$: bốn đoạn tuyến tính, từ hai lớp, mỗi lớp hai đơn vị. Kết quả $g^{(k)} = g \circ \dots \circ g$ là một hàm răng cưa có đúng $2^k$ đoạn tuyến tính, biểu diễn bằng một mạng $k$ lớp, mỗi lớp 2 đơn vị ReLU, tổng cộng $6k$ tham số.
 
 Mạng một lớp ẩn cần bao nhiêu đơn vị để biểu diễn cùng hàm đó? Với đầu vào một chiều, mỗi đơn vị ReLU $\operatorname{ReLU}(w x + b)$ tạo ra đúng một điểm gãy tại $x = -b/w$, và tổng của $m$ đơn vị là một hàm tuyến tính từng khúc có tối đa $m$ điểm gãy. Hàm răng cưa có $2^k - 1$ điểm gãy bên trong đoạn, nên mạng một lớp ẩn cần ít nhất $2^k - 1$ đơn vị để biểu diễn chính xác nó.
 
