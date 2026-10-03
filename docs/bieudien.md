@@ -726,7 +726,7 @@ Bộ sinh không bao giờ nhìn thấy dữ liệu thật; nó chỉ nhận gra
 
 > **Chứng minh.** Viết $V = \int \big[p_{\text{data}}(x)\log D(x) + p_g(x)\log(1 - D(x))\big]dx$. Với mỗi $x$, hàm $a\log y + b\log(1-y)$ đạt cực đại tại $y = a/(a+b)$, cho $D^*$. Thay vào và dùng định nghĩa $\mathrm{JS}(p \,\|\, q) = \tfrac12\mathrm{KL}(p \,\|\, m) + \tfrac12\mathrm{KL}(q \,\|\, m)$ với $m = (p+q)/2$ được biểu thức cần chứng minh.
 
-Như vậy, nếu bộ phân biệt luôn tối ưu, bộ sinh đang cực tiểu phân kỳ Jensen–Shannon giữa phân phối của nó và phân phối dữ liệu, đạt cực tiểu $-\log 4$ khi $p_g = p_{\text{data}}$.
+Công thức của $D^*$ đọc được trực tiếp: tại một điểm mà mật độ dữ liệu là 0,3 còn mật độ của bộ sinh là 0,1, bộ phân biệt tối ưu trả lời $0{,}3/0{,}4 = 0{,}75$; ở nơi hai mật độ bằng nhau, nó trả lời 0,5, tức không phân biệt được. Như vậy, nếu bộ phân biệt luôn tối ưu, bộ sinh đang cực tiểu phân kỳ Jensen–Shannon giữa phân phối của nó và phân phối dữ liệu, đạt cực tiểu $-\log 4$ khi $p_g = p_{\text{data}}$.
 
 ### 10.2. Gradient của hàm mất mát gốc và bản không bão hoà
 
@@ -751,7 +751,7 @@ Bài báo GAN gốc đã nêu vấn đề này và đề xuất cách sửa: tha
 
 $$\frac{\partial}{\partial s}\log\sigma(s) = 1 - \sigma(s),$$
 
-lớn nhất đúng khi bộ sinh đang tệ nhất, $\sigma(s) \approx 0$.
+lớn nhất đúng khi bộ sinh đang tệ nhất, $\sigma(s) \approx 0$. Với một mẫu giả mà bộ phân biệt cho xác suất là thật $\sigma(s) = 0{,}01$, dạng gốc cho đạo hàm theo $s$ bằng $-0{,}01$, còn dạng không bão hoà cho $0{,}99$, lớn gấp 99 lần.
 
 Ví dụ này cho thấy hai hàm mất mát có cùng điểm tối ưu vẫn có thể cho quá trình huấn luyện rất khác nhau, vì thứ quyết định việc học là gradient tại các điểm mà quá trình tối ưu thực sự đi qua, không phải vị trí của điểm tối ưu. Ý này đã xuất hiện khi so sánh hàm mất mát của perceptron, hinge và logistic ở [Chương 6 của *Nền tảng*](nentang-ch06.html).
 
