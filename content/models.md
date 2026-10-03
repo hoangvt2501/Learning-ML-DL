@@ -589,7 +589,7 @@ Thay vào công thức trên, phương sai giữ nguyên qua các lớp khi $n_{
 
 $$\sigma_W^2 = \frac{2}{n_{\text{in}}}.$$
 
-Đây là **khởi tạo He** (He và cộng sự, 2015). Hệ số 2 đến trực tiếp từ việc ReLU loại bỏ một nửa phân phối. Nguyên tắc chung là khởi tạo phải khớp với hàm kích hoạt: Xavier cho tanh và sigmoid, He cho ReLU và các biến thể gần giống.
+Đây là **khởi tạo He** (He và cộng sự, 2015). Hệ số 2 đến trực tiếp từ việc ReLU loại bỏ một nửa phân phối. Với các lớp rộng 128 đơn vị ở Mục 6.3, khởi tạo He lấy $\sigma_W^2 = 2/128 \approx 0{,}0156$, tức độ lệch chuẩn 0,125, còn Xavier lấy $2/256$, tức độ lệch chuẩn khoảng 0,088, nhỏ hơn $\sqrt2$ lần. Dùng Xavier cho mạng ReLU thì mỗi lớp nhân độ lớn tín hiệu với khoảng $1/\sqrt2 \approx 0{,}71$, và qua 40 lớp còn $2^{-20} \approx 10^{-6}$. Nguyên tắc chung là khởi tạo phải khớp với hàm kích hoạt: Xavier cho tanh và sigmoid, He cho ReLU và các biến thể gần giống.
 
 ### 6.3. Thí nghiệm với mạng 40 lớp
 
@@ -639,7 +639,7 @@ Transformer dùng LayerNorm thay cho BatchNorm, và ba hàng đầu của bảng
 
 $$\operatorname{RMSNorm}(x) = \gamma \odot \frac{x}{\sqrt{\frac{1}{d}\sum_{i=1}^{d} x_i^2 + \epsilon}}.$$
 
-Phép tính rẻ hơn LayerNorm, và thực nghiệm cho chất lượng tương đương. RMSNorm là lựa chọn của nhiều mô hình ngôn ngữ hiện nay, như Llama.
+Với vector $x = (1;\ 2;\ 3;\ 6)$, $\gamma = 1$ và $\beta = 0$, LayerNorm trừ trung bình 3, chia cho độ lệch chuẩn $\sqrt{3{,}5} \approx 1{,}87$ và cho $(-1{,}07;\ -0{,}53;\ 0;\ 1{,}60)$. RMSNorm chỉ chia cho căn trung bình bình phương $\sqrt{12{,}5} \approx 3{,}54$ và cho $(0{,}28;\ 0{,}57;\ 0{,}85;\ 1{,}70)$: các phần tử giữ nguyên dấu và tỉ lệ với nhau, chỉ thang đo thay đổi. Phép tính rẻ hơn LayerNorm, và thực nghiệm cho chất lượng tương đương. RMSNorm là lựa chọn của nhiều mô hình ngôn ngữ hiện nay, như Llama.
 
 Vì sao chuẩn hoá giúp huấn luyện vẫn còn được thảo luận. Bài báo gốc của BatchNorm giải thích bằng việc giảm "dịch chuyển hiệp biến nội tại" (internal covariate shift), nhưng Santurkar và cộng sự (2018) cho thấy lợi ích chủ yếu đến từ việc làm hàm mất mát trơn hơn, cho phép dùng tốc độ học lớn hơn. Tác dụng giữ ổn định độ lớn của tín hiệu, đo được ở Mục 6.3, là một phần của lời giải thích đó.
 
@@ -659,7 +659,7 @@ Cách hiểu thứ hai nhìn theo bài toán cần học. Thay vì học trực 
 
 ### 6.6. Dropout và các phương pháp regularization khác
 
-Ba kỹ thuật trên giúp huấn luyện được mạng sâu; còn lại là chống overfitting. Phương pháp regularization riêng của mạng nơ-ron được dùng nhiều nhất là **dropout** (Srivastava và cộng sự, 2014). Khi huấn luyện, mỗi đơn vị bị đặt bằng 0 với xác suất $p$, độc lập ở mỗi bước, và các đơn vị còn lại được chia cho $1 - p$ để kỳ vọng của đầu ra không đổi; cách làm này gọi là inverted dropout. Khi suy luận, dropout bị tắt và mạng dùng mọi đơn vị. Mỗi bước huấn luyện vì vậy dùng một mạng con khác nhau chia sẻ trọng số, và mạng đầy đủ khi suy luận xấp xỉ trung bình của rất nhiều mạng con. Cơ chế giảm phương sai vì thế tương tự bagging ở Mục 3.3, nhưng không phải huấn luyện nhiều mô hình.
+Ba kỹ thuật trên giúp huấn luyện được mạng sâu; còn lại là chống overfitting. Phương pháp regularization riêng của mạng nơ-ron được dùng nhiều nhất là **dropout** (Srivastava và cộng sự, 2014). Khi huấn luyện, mỗi đơn vị bị đặt bằng 0 với xác suất $p$, độc lập ở mỗi bước, và các đơn vị còn lại được chia cho $1 - p$ để kỳ vọng của đầu ra không đổi; cách làm này gọi là inverted dropout. Chẳng hạn với $p = 0{,}5$, một lớp có đầu ra $(2;\ 4;\ 6;\ 8)$ có thể bị giữ lại phần tử thứ nhất và thứ ba ở một bước, thành $(4;\ 0;\ 12;\ 0)$ sau khi chia cho $0{,}5$. Mỗi phần tử được nhân đôi với xác suất 0,5 và bằng 0 với xác suất 0,5, nên kỳ vọng của nó đúng bằng giá trị ban đầu. Khi suy luận, dropout bị tắt và mạng dùng mọi đơn vị. Mỗi bước huấn luyện vì vậy dùng một mạng con khác nhau chia sẻ trọng số, và mạng đầy đủ khi suy luận xấp xỉ trung bình của rất nhiều mạng con. Cơ chế giảm phương sai vì thế tương tự bagging ở Mục 3.3, nhưng không phải huấn luyện nhiều mô hình.
 
 Với mô hình ngôn ngữ lớn, vai trò của dropout giảm nhiều. Khi tiền huấn luyện trên kho dữ liệu cực lớn, mỗi mẫu thường chỉ được xem một lần nên overfitting không phải vấn đề chính, và một số mô hình như PaLM (Chowdhery và cộng sự, 2022) không dùng dropout khi tiền huấn luyện. Dropout vẫn hữu ích khi tinh chỉnh trên tập dữ liệu nhỏ. Bảng dưới đặt dropout cạnh các phương pháp regularization khác.
 
