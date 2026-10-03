@@ -1616,7 +1616,7 @@ Hàm đối ngẫu $g$ luôn là hàm lõm theo $(\alpha, \nu)$, kể cả khi b
 
 > **Chứng minh.** Lấy $x$ bất kỳ chấp nhận được. Vì $f_i(x) \le 0$, $\alpha_i \ge 0$ và $h_j(x) = 0$, ta có $\mathcal{L}(x, \alpha, \nu) \le f_0(x)$. Do đó $g(\alpha, \nu) \le \mathcal{L}(x, \alpha, \nu) \le f_0(x)$. Lấy cận dưới đúng theo mọi $x$ chấp nhận được, vế phải trở thành $p^*$.
 
-Mỗi giá trị của hàm đối ngẫu là một chặn dưới của giá trị tối ưu. **Bài toán đối ngẫu** là tìm chặn dưới tốt nhất:
+Mỗi giá trị của hàm đối ngẫu là một chặn dưới của giá trị tối ưu. Với ví dụ xuyên suốt, $g(0) = 0$, $g(1) = 0{,}75$, $g(3) = 0{,}75$ và $g(4) = 0$, đều không vượt quá $p^* = 1$. **Bài toán đối ngẫu** là tìm chặn dưới tốt nhất:
 
 $$d^{*} = \max_{\alpha \ge 0,\, \nu} g(\alpha, \nu) \;\le\; p^{*}.$$
 
@@ -1627,6 +1627,8 @@ Hiệu $p^* - d^* \ge 0$ gọi là **khe đối ngẫu**. Khi khe bằng 0 ta c�
 Điều kiện Slater yêu cầu miền chấp nhận được có "phần trong", và hầu hết các bài toán lồi trong học máy thoả điều kiện này. Chẳng hạn, với SVM lề cứng trên dữ liệu tách được, nhân một siêu phẳng tách đúng với một hệ số đủ lớn cho một điểm thoả mọi ràng buộc một cách chặt.
 
 > **Ví dụ 12.3.** Tiếp tục Ví dụ 12.2: $g(\alpha) = \alpha - \alpha^2/4$ đạt cực đại tại $\alpha^* = 2$, với $d^* = g(2) = 1$. Vậy $d^* = p^* = 1$ và khe đối ngẫu bằng 0. Điều kiện Slater thoả vì điểm $x = 2$ có $f_1(2) = -1 < 0$.
+
+Có thể hiểu vì sao giá tốt nhất là 2. Với giá $\alpha$, cực tiểu của hàm Lagrange theo $x$ là $x = \alpha/2$. Giá quá thấp thì vi phạm ràng buộc vẫn có lời: với $\alpha = 1$, cực tiểu là $x = 0{,}5$, nằm ngoài miền $x \ge 1$. Giá quá cao thì ràng buộc bị thoả thừa: với $\alpha = 3$, cực tiểu là $x = 1{,}5$. Ở $\alpha = 2$, cực tiểu rơi đúng vào $x = 1$, điểm biên của ràng buộc, và chặn dưới chạm giá trị tối ưu.
 
 ### 12.4. Điều kiện KKT
 
@@ -1649,11 +1651,11 @@ Nhân tử Lagrange còn có ý nghĩa **giá bóng** (shadow price): nó đo gi
 
 ### 12.5. Ý nghĩa của bài toán đối ngẫu
 
-Có ba lý do để giải bài toán đối ngẫu thay vì bài toán gốc. Lý do đầu tiên là kích thước: bài toán gốc của SVM có $d$ biến là các trọng số, còn bài toán đối ngẫu có $n$ biến, mỗi điểm dữ liệu một nhân tử, nên khi $d$ lớn hơn $n$ nhiều thì bài toán đối ngẫu nhỏ hơn. Lý do thứ hai là chặn dưới: với bất kỳ $\alpha \ge 0$ nào, $g(\alpha)$ là chặn dưới của $p^*$, nên hiệu $f_0(x) - g(\alpha)$ giữa một điểm chấp nhận được và một điểm đối ngẫu cho biết nghiệm hiện tại cách tối ưu tối đa bao xa, và nhiều thuật toán dùng khe này làm tiêu chí dừng. Lý do thứ ba, quan trọng nhất, là cấu trúc: bài toán đối ngẫu của SVM chỉ phụ thuộc vào dữ liệu qua các tích vô hướng $x_i^\top x_j$. Nhận xét này dẫn thẳng tới kernel, vì thay tích vô hướng bằng một hàm kernel là SVM làm việc được trong không gian đặc trưng phi tuyến. Ở dạng bài toán gốc, cấu trúc này không lộ ra.
+Có ba lý do để giải bài toán đối ngẫu thay vì bài toán gốc. Lý do đầu tiên là kích thước: bài toán gốc của SVM có $d$ biến là các trọng số, còn bài toán đối ngẫu có $n$ biến, mỗi điểm dữ liệu một nhân tử, nên khi $d$ lớn hơn $n$ nhiều thì bài toán đối ngẫu nhỏ hơn. Lý do thứ hai là chặn dưới: với bất kỳ $\alpha \ge 0$ nào, $g(\alpha)$ là chặn dưới của $p^*$, nên hiệu $f_0(x) - g(\alpha)$ giữa một điểm chấp nhận được và một điểm đối ngẫu cho biết nghiệm hiện tại cách tối ưu tối đa bao xa, và nhiều thuật toán dùng khe này làm tiêu chí dừng. Với ví dụ xuyên suốt, điểm chấp nhận được $x = 1{,}2$ có $f_0 = 1{,}44$ và $g(1) = 0{,}75$, nên $x = 1{,}2$ cách tối ưu không quá 0,69 mà không cần biết $p^*$; thực tế nó cách 0,44. Lý do thứ ba, quan trọng nhất, là cấu trúc: bài toán đối ngẫu của SVM chỉ phụ thuộc vào dữ liệu qua các tích vô hướng $x_i^\top x_j$. Nhận xét này dẫn thẳng tới kernel, vì thay tích vô hướng bằng một hàm kernel là SVM làm việc được trong không gian đặc trưng phi tuyến. Ở dạng bài toán gốc, cấu trúc này không lộ ra.
 
 ### 12.6. Tóm tắt
 
-Phương pháp Lagrange thay ràng buộc bằng khoản phạt có giá $\alpha_i \ge 0$, và hàm đối ngẫu, cực tiểu của hàm Lagrange theo $x$, luôn lõm. Mỗi giá trị của hàm đối ngẫu là một chặn dưới của giá trị tối ưu, và với bài toán lồi thoả điều kiện Slater, chặn dưới tốt nhất đúng bằng giá trị tối ưu. Điều kiện KKT đặc trưng cho nghiệm tối ưu, trong đó điều kiện bù nói rằng ràng buộc nào không chặt thì có giá bằng 0 và không ảnh hưởng tới nghiệm. Nhân tử Lagrange là giá bóng, đo giá trị tối ưu thay đổi bao nhiêu khi nới ràng buộc. Ví dụ $\min x^2$ với $x \ge 1$ cho $x^* = 1$, $\alpha^* = 2$ và khe đối ngẫu bằng 0.
+Phương pháp Lagrange thay ràng buộc bằng khoản phạt có giá $\alpha_i \ge 0$, và hàm đối ngẫu, cực tiểu của hàm Lagrange theo $x$, luôn lõm. Mỗi giá trị của hàm đối ngẫu là một chặn dưới của giá trị tối ưu, và với bài toán lồi thoả điều kiện Slater, chặn dưới tốt nhất đúng bằng giá trị tối ưu. Điều kiện KKT đặc trưng cho nghiệm tối ưu, trong đó điều kiện bù nói rằng ràng buộc nào không chặt thì có giá bằng 0 và không ảnh hưởng tới nghiệm. Nhân tử Lagrange là giá bóng, đo giá trị tối ưu thay đổi bao nhiêu khi nới ràng buộc. Ví dụ $\min x^2$ với $x \ge 1$ cho $x^* = 1$, $\alpha^* = 2$ và khe đối ngẫu bằng 0; $\alpha^* = 2$ là giá làm cực tiểu không ràng buộc của hàm Lagrange rơi đúng vào biên của ràng buộc.
 
 Chương 13 áp dụng toàn bộ bộ công cụ này cho SVM: bài toán gốc tìm siêu phẳng có lề lớn nhất, điều kiện bù chỉ ra vector hỗ trợ, và bài toán đối ngẫu dẫn tới kernel.
 
