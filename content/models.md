@@ -261,7 +261,7 @@ Cây quyết định chia không gian đặc trưng thành các vùng hình hộ
 
 **Hình 3.** Trái: cây chia mặt phẳng bằng các đường thẳng song song với trục. Phải: cùng mô hình đó vẽ dưới dạng cây nhị phân, mỗi nút trong là một phép chia.
 
-Vì mọi phép chia đều song song với trục, cây có ba tính chất đi liền với nhau. Thứ nhất, cây bất biến với phép biến đổi đơn điệu của từng đặc trưng: lấy logarit hay chuẩn hoá một đặc trưng không đổi thứ tự các giá trị, nên không đổi tập các phép chia có thể có. Vì vậy cây không cần chuẩn hoá đặc trưng, khác với hồi quy logistic, SVM hay k-NN. Thứ hai, cây không ngoại suy được: ngoài miền dữ liệu huấn luyện, nó trả về hằng số của vùng ngoài cùng. Một cây dự đoán giá nhà theo diện tích sẽ cho căn nhà 500 m² cùng giá với căn lớn nhất trong dữ liệu huấn luyện. Thứ ba, cây khó biểu diễn biên chéo. Biên quyết định $x_1 + x_2 > 1$ phải được xấp xỉ bằng một đường bậc thang gồm nhiều phép chia, trong khi mô hình tuyến tính chỉ cần ba tham số.
+Vì mọi phép chia đều song song với trục, cây có ba tính chất đi liền với nhau. Thứ nhất, cây bất biến với phép biến đổi đơn điệu của từng đặc trưng: lấy logarit hay chuẩn hoá một đặc trưng không đổi thứ tự các giá trị, nên không đổi tập các phép chia có thể có. Vì vậy cây không cần chuẩn hoá đặc trưng, khác với hồi quy logistic, SVM hay k-NN. Thứ hai, cây không ngoại suy được: ngoài miền dữ liệu huấn luyện, nó trả về hằng số của vùng ngoài cùng. Một cây dự đoán giá nhà theo diện tích sẽ cho căn nhà 500 m² cùng giá với căn lớn nhất trong dữ liệu huấn luyện. Cây một lần chia ở Mục 1.4 định giá mọi căn từ 70 m² trở lên là 2,7 tỉ, dù căn đó rộng 100 m² hay 500 m². Thứ ba, cây khó biểu diễn biên chéo. Biên quyết định $x_1 + x_2 > 1$ phải được xấp xỉ bằng một đường bậc thang gồm nhiều phép chia, trong khi mô hình tuyến tính chỉ cần ba tham số.
 
 ### 3.2. Chọn phép chia
 
@@ -269,7 +269,7 @@ Cây được xây từ gốc xuống. Tại mỗi nút, thuật toán xét mọ
 
 $$\text{Gini}(p) = 1 - \sum_c p_c^2, \qquad H(p) = -\sum_c p_c \log_2 p_c.$$
 
-Cả hai bằng 0 khi nút chỉ chứa một lớp và lớn nhất khi các lớp chia đều. **Độ lợi** của một phép chia là độ không thuần nhất của nút cha trừ trung bình có trọng số, theo số điểm, của hai nút con. Với hồi quy, độ không thuần nhất là phương sai của $y$ trong nút, và phép chia tốt nhất là phép chia làm giảm tổng bình phương sai số nhiều nhất.
+Cả hai bằng 0 khi nút chỉ chứa một lớp và lớn nhất khi các lớp chia đều. **Độ lợi** của một phép chia là độ không thuần nhất của nút cha trừ trung bình có trọng số, theo số điểm, của hai nút con. Với hồi quy, độ không thuần nhất là phương sai của $y$ trong nút, và phép chia tốt nhất là phép chia làm giảm tổng bình phương sai số nhiều nhất. Với bốn căn hộ, có ba ngưỡng để thử: giữa 40 và 60 m², giữa 60 và 80 m², giữa 80 và 100 m². Khi mọi căn được đoán bằng giá trung bình 2,25 tỉ, tổng bình phương sai số là 1,17. Chia ở 50 m² tách căn nhỏ nhất ra một mình và đoán 2,5 tỉ cho ba căn còn lại, tổng còn 0,42; chia ở 70 m² cho hai nút với giá trung bình 1,8 và 2,7 tỉ, tổng còn 0,36; chia ở 90 m² cũng còn 0,42. Thuật toán chọn ngưỡng 70 m², và đó là cây một lần chia ở Mục 1.4.
 
 > **Ví dụ 3.1.** Một nút có 10 điểm, 6 điểm lớp A và 4 điểm lớp B, nên $\text{Gini} = 1 - 0{,}6^2 - 0{,}4^2 = 0{,}48$. Phép chia thứ nhất cho nút trái 4 điểm (4A, 0B) và nút phải 6 điểm (2A, 4B). Gini của nút trái bằng 0, của nút phải bằng $1 - (1/3)^2 - (2/3)^2 = 0{,}444$, nên trung bình có trọng số là $0{,}4 \cdot 0 + 0{,}6 \cdot 0{,}444 = 0{,}267$ và độ lợi là $0{,}48 - 0{,}267 = 0{,}213$. Phép chia thứ hai cho hai nút 5 điểm: (4A, 1B) có Gini 0,32 và (2A, 3B) có Gini 0,48, trung bình 0,40, nên độ lợi chỉ là 0,08. Thuật toán chọn phép chia thứ nhất. Dùng entropy cũng cho cùng kết luận: độ lợi thông tin là 0,420 bit so với 0,125 bit.
 
@@ -291,7 +291,7 @@ Cách thứ hai là **boosting**: huấn luyện các mô hình tuần tự, m�
 
 $$F_m(x) = F_{m-1}(x) + \eta\, h_m(x),$$
 
-trong đó cây $h_m$ được huấn luyện để xấp xỉ gradient âm của hàm mất mát theo giá trị dự đoán, $-\partial \mathcal{L}(y, F)/\partial F$ tại $F = F_{m-1}(x)$, và $\eta$ là tốc độ học, thường từ 0,01 tới 0,3. Với mất mát bình phương, gradient âm chính là phần dư $y - F_{m-1}(x)$, nên mỗi cây mới học phần dư của các cây trước. Đây là gradient descent trong không gian hàm: thay vì cập nhật tham số, mỗi bước cộng thêm một hàm theo hướng làm giảm mất mát. Vì mỗi cây chỉ cần sửa một phần nhỏ, các cây trong boosting thường rất nông, độ sâu từ 2 tới 6. Tổ hợp của nhiều cây nông có độ chệch thấp hơn nhiều so với từng cây, nên boosting chủ yếu giảm độ chệch.
+trong đó cây $h_m$ được huấn luyện để xấp xỉ gradient âm của hàm mất mát theo giá trị dự đoán, $-\partial \mathcal{L}(y, F)/\partial F$ tại $F = F_{m-1}(x)$, và $\eta$ là tốc độ học, thường từ 0,01 tới 0,3. Với mất mát bình phương, gradient âm chính là phần dư $y - F_{m-1}(x)$, nên mỗi cây mới học phần dư của các cây trước. Với bốn căn hộ và cây một lần chia, $F_0$ là giá trung bình 2,25 tỉ, và phần dư là $-0{,}75$; $-0{,}15$; $0{,}15$; $0{,}75$. Cây đầu tiên khớp phần dư này bằng phép chia ở 70 m², dự đoán $-0{,}45$ cho hai căn nhỏ và $0{,}45$ cho hai căn lớn. Với $\eta = 0{,}1$, $F_1$ chỉ đi một phần mười quãng đường đó: 2,205 tỉ cho hai căn nhỏ, 2,295 tỉ cho hai căn lớn, và sai số bình phương trung bình giảm từ 0,2925 xuống 0,254. Phần dư mới lớn nhất ở hai căn ngoài cùng, nên cây thứ hai chia ở 50 m² để tách căn 40 m², và cây thứ ba chia ở 90 m² để tách căn 100 m². Đây là gradient descent trong không gian hàm: thay vì cập nhật tham số, mỗi bước cộng thêm một hàm theo hướng làm giảm mất mát. Vì mỗi cây chỉ cần sửa một phần nhỏ, các cây trong boosting thường rất nông, độ sâu từ 2 tới 6. Tổ hợp của nhiều cây nông có độ chệch thấp hơn nhiều so với từng cây, nên boosting chủ yếu giảm độ chệch.
 
 ### 3.4. Đo tác dụng của bagging và boosting
 
@@ -313,7 +313,7 @@ Gradient boosting cho tổng sai số thấp nhất. Mỗi cây sâu 2 chỉ có
 
 ### 3.5. Các hiểu lầm thường gặp
 
-Cây và các phương pháp tập hợp đi kèm khá nhiều hiểu lầm phổ biến. Bảng dưới gom những hiểu lầm hay gặp nhất cùng điều đúng tương ứng.
+Cây và các phương pháp tập hợp đi kèm khá nhiều hiểu lầm phổ biến. Một hiểu lầm thấy được ngay trên bốn căn hộ: tiếp tục ví dụ ở Mục 3.3 tới 100 cây thì sai số huấn luyện gần như bằng 0. Tổng các cây khi đó là một hàm bậc thang đi qua đúng bốn mức giá, và nó định giá căn 85 m² là 2,4 tỉ, bằng căn 80 m², trong khi đường thẳng định giá 2,61 tỉ. Bốn điểm dữ liệu không đủ cho 100 cây. Bảng dưới gom những hiểu lầm hay gặp nhất cùng điều đúng tương ứng.
 
 | Phát biểu | Thực tế |
 |---|---|
@@ -336,7 +336,7 @@ So với rừng ngẫu nhiên, gradient boosting thường chính xác hơn khi 
 
 ### 3.7. Tóm tắt
 
-Cây quyết định chia không gian bằng các phép chia song song với trục, chọn tham lam theo độ giảm độ không thuần nhất. Nhờ vậy nó không cần chuẩn hoá đặc trưng, nhưng không ngoại suy được và có phương sai cao. Bagging lấy trung bình nhiều cây trên các mẫu bootstrap để giảm phương sai, tới giới hạn $\rho\sigma^2$ đặt bởi tương quan giữa các cây, và rừng ngẫu nhiên hạ giới hạn đó bằng cách chọn ngẫu nhiên đặc trưng ở mỗi nút. Gradient boosting cộng dần các cây nông, mỗi cây đi theo gradient âm của hàm mất mát, nên chủ yếu giảm độ chệch. Trên bài toán mô phỏng, bagging giảm một nửa phương sai của một cây sâu, còn gradient boosting cho tổng sai số thấp nhất.
+Cây quyết định chia không gian bằng các phép chia song song với trục, chọn tham lam theo độ giảm độ không thuần nhất. Nhờ vậy nó không cần chuẩn hoá đặc trưng, nhưng không ngoại suy được và có phương sai cao. Bagging lấy trung bình nhiều cây trên các mẫu bootstrap để giảm phương sai, tới giới hạn $\rho\sigma^2$ đặt bởi tương quan giữa các cây, và rừng ngẫu nhiên hạ giới hạn đó bằng cách chọn ngẫu nhiên đặc trưng ở mỗi nút. Gradient boosting cộng dần các cây nông, mỗi cây đi theo gradient âm của hàm mất mát, nên chủ yếu giảm độ chệch. Với bốn căn hộ, cây chọn ngưỡng 70 m² vì nó giảm tổng bình phương sai số từ 1,17 xuống 0,36, và gradient boosting với cây một lần chia khớp đúng bốn mức giá sau 100 cây, thành một hàm bậc thang. Trên bài toán mô phỏng, bagging giảm một nửa phương sai của một cây sâu, còn gradient boosting cho tổng sai số thấp nhất.
 
 Gradient boosting là gradient descent trong không gian hàm, mỗi bước cộng thêm một cây. Chương 4 chuyển sang một họ mô hình mà gradient descent chạy trên chính các tham số: mạng nơ-ron nhiều lớp, bắt đầu từ chỗ hồi quy logistic đã dừng.
 
