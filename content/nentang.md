@@ -1941,7 +1941,7 @@ Giảm chiều tìm cấu trúc theo các hướng trong không gian đặc trư
 
 ## 15. Phân cụm K-means
 
-Phân cụm là bài toán học không giám sát điển hình: chia dữ liệu không có nhãn thành các nhóm sao cho điểm trong cùng nhóm giống nhau hơn điểm khác nhóm. Thuật toán phổ biến nhất cho việc này, K-means, đơn giản tới mức có thể mô tả trong hai câu. Nhưng khi dùng thật, nó đặt ra ba câu hỏi mà người mới hay bỏ qua: kết quả có phụ thuộc vào cách khởi tạo không, thuật toán ngầm giả định cụm có hình dạng gì, và chọn số cụm thế nào khi không có nhãn để đối chiếu. Ta xét thuật toán trước, rồi lần lượt trả lời ba câu hỏi đó bằng thí nghiệm.
+Phân cụm là bài toán học không giám sát điển hình: chia dữ liệu không có nhãn thành các nhóm sao cho điểm trong cùng nhóm giống nhau hơn điểm khác nhóm. Thuật toán phổ biến nhất cho việc này, K-means, đơn giản tới mức có thể mô tả trong hai câu. Nhưng khi dùng thật, nó đặt ra ba câu hỏi mà người mới hay bỏ qua: kết quả có phụ thuộc vào cách khởi tạo không, thuật toán ngầm giả định cụm có hình dạng gì, và chọn số cụm thế nào khi không có nhãn để đối chiếu. Ta xét thuật toán trước, rồi lần lượt trả lời ba câu hỏi đó, mỗi câu trước hết trên một ví dụ tính tay được rồi mới bằng thí nghiệm. Ví dụ đó là bốn cửa hàng trên bản đồ, hai cửa hàng phía tây ở $(0; 0)$ và $(0; 1)$, hai cửa hàng phía đông ở $(4; 0)$ và $(4; 1)$, toạ độ tính bằng km. Cần đặt hai kho hàng sao cho tổng bình phương khoảng cách từ mỗi cửa hàng tới kho gần nó nhất là nhỏ nhất, và đó đúng là bài toán K-means với $k = 2$.
 
 ### 15.1. Bài toán phân cụm và thuật toán Lloyd
 
@@ -1951,9 +1951,11 @@ Phân cụm là bài toán học không giám sát điển hình: chia dữ li�
 
 Tìm nghiệm tối ưu toàn cục của bài toán này là NP-khó, kể cả khi $k = 2$ với số chiều tuỳ ý, hoặc khi dữ liệu nằm trong mặt phẳng với $k$ tuỳ ý. Thuật toán thông dụng là thuật toán Lloyd (1957, công bố 1982), tìm nghiệm xấp xỉ bằng cách lặp lại hai bước. Ở bước gán, mỗi điểm được gán vào cụm có tâm gần nó nhất. Ở bước cập nhật, mỗi tâm được thay bằng trung bình của các điểm thuộc cụm đó. Hai bước lặp lại cho tới khi các phép gán không thay đổi.
 
+Với bốn cửa hàng, đặt hai tâm ban đầu tại $(0; 0)$ và $(4; 0)$. Bước gán đưa $(0; 1)$ về tâm thứ nhất và $(4; 1)$ về tâm thứ hai. Bước cập nhật dời hai tâm tới trung điểm của mỗi cặp, $(0; 0{,}5)$ và $(4; 0{,}5)$. Bước gán tiếp theo không đổi gì, và thuật toán dừng với mỗi kho nằm giữa hai cửa hàng cùng phía, inertia $4 \cdot 0{,}5^2 = 1$.
+
 Mỗi bước tối ưu một phần của bài toán khi giữ phần kia cố định: bước gán chọn cụm tốt nhất cho từng điểm khi biết tâm, còn bước cập nhật chọn tâm tốt nhất cho từng cụm khi biết các điểm, vì trung bình là điểm làm tổng bình phương khoảng cách nhỏ nhất. Vì vậy hàm mục tiêu không bao giờ tăng. Số cách chia $n$ điểm thành $k$ cụm là hữu hạn, nên thuật toán chắc chắn dừng sau hữu hạn bước, và mỗi vòng lặp tốn $O(nkd)$ phép tính.
 
-Tuy nhiên, thuật toán chỉ dừng ở một cực tiểu địa phương: một trạng thái mà không bước nào cải thiện được, nhưng chưa chắc tốt nhất. Hàm mục tiêu không lồi theo $(S, \mu)$, nên theo Chương 11 không có bảo đảm nào về chất lượng của điểm dừng.
+Tuy nhiên, thuật toán chỉ dừng ở một cực tiểu địa phương: một trạng thái mà không bước nào cải thiện được, nhưng chưa chắc tốt nhất. Hàm mục tiêu không lồi theo $(S, \mu)$, nên theo Chương 11 không có bảo đảm nào về chất lượng của điểm dừng. Với bốn cửa hàng, đặt hai tâm ban đầu tại $(0; 0)$ và $(0; 1)$, tức cả hai ở phía tây. Bước gán đưa $(4; 0)$ về tâm thứ nhất và $(4; 1)$ về tâm thứ hai, vì mỗi cửa hàng phía đông gần tâm cùng hàng với nó hơn. Bước cập nhật dời hai tâm tới $(2; 0)$ và $(2; 1)$, và từ đó không gì thay đổi nữa: mỗi cửa hàng cách kho của nó 2 km, inertia bằng 16, gấp 16 lần nghiệm tốt nhất.
 
 ### 15.2. Khởi tạo và k-means++
 
@@ -1964,9 +1966,9 @@ Tuy nhiên, thuật toán chỉ dừng ở một cực tiểu địa phương: m
 | Ngẫu nhiên | 407,992 | 517,838 | 71,5% |
 | k-means++ | 407,992 | 476,529 | 46,5% |
 
-Chọn ngẫu nhiên $k$ điểm dữ liệu làm tâm ban đầu dẫn tới nghiệm tồi trong 71,5% số lần chạy. Nghiệm tồi điển hình là hai tâm rơi vào cùng một cụm thật trong khi hai cụm thật khác bị gộp chung một tâm; thuật toán Lloyd không sửa được tình huống này, vì mỗi bước chỉ dịch chuyển tâm một cách cục bộ.
+Chọn ngẫu nhiên $k$ điểm dữ liệu làm tâm ban đầu dẫn tới nghiệm tồi trong 71,5% số lần chạy. Ngay với bốn cửa hàng, tỉ lệ này đã là 1/3: trong 6 cặp điểm có thể chọn làm tâm ban đầu, 2 cặp nằm cùng phía và dẫn tới nghiệm có inertia 16. Nghiệm tồi điển hình là hai tâm rơi vào cùng một cụm thật trong khi hai cụm thật khác bị gộp chung một tâm; thuật toán Lloyd không sửa được tình huống này, vì mỗi bước chỉ dịch chuyển tâm một cách cục bộ.
 
-Cách khởi tạo **k-means++** (Arthur và Vassilvitskii, 2007) chọn tâm ban đầu tuần tự: tâm đầu tiên chọn ngẫu nhiên đều từ dữ liệu, mỗi tâm tiếp theo được chọn với xác suất tỉ lệ với bình phương khoảng cách từ điểm đó tới tâm gần nhất đã chọn. Các điểm xa những tâm hiện có được ưu tiên, nên các tâm ban đầu có xu hướng trải đều ra các cụm. Arthur và Vassilvitskii chứng minh rằng riêng bước khởi tạo này đã cho kỳ vọng inertia không quá $O(\log k)$ lần giá trị tối ưu. Trong thí nghiệm, k-means++ giảm tỉ lệ kẹt từ 71,5% xuống 46,5%: cải thiện rõ, nhưng vẫn gần một nửa số lần chạy cho nghiệm tồi.
+Cách khởi tạo **k-means++** (Arthur và Vassilvitskii, 2007) chọn tâm ban đầu tuần tự: tâm đầu tiên chọn ngẫu nhiên đều từ dữ liệu, mỗi tâm tiếp theo được chọn với xác suất tỉ lệ với bình phương khoảng cách từ điểm đó tới tâm gần nhất đã chọn. Các điểm xa những tâm hiện có được ưu tiên, nên các tâm ban đầu có xu hướng trải đều ra các cụm. Với bốn cửa hàng, giả sử tâm đầu tiên là $(0; 0)$. Bình phương khoảng cách từ ba cửa hàng còn lại tới nó là 1, 16 và 17, nên xác suất tâm thứ hai rơi vào $(0; 1)$, cùng phía với tâm đầu, chỉ là $1/34 \approx 3\%$. Do tính đối xứng, tâm đầu là cửa hàng nào cũng vậy, nên k-means++ kẹt với xác suất khoảng 3% thay vì 33%. Arthur và Vassilvitskii chứng minh rằng riêng bước khởi tạo này đã cho kỳ vọng inertia không quá $O(\log k)$ lần giá trị tối ưu. Trong thí nghiệm, k-means++ giảm tỉ lệ kẹt từ 71,5% xuống 46,5%: cải thiện rõ, nhưng vẫn gần một nửa số lần chạy cho nghiệm tồi, vì với 8 cụm trong đó có những cụm nằm gần nhau, bình phương khoảng cách không chênh lệch rõ như ở bốn cửa hàng.
 
 > **Lưu ý.** Luôn chạy K-means nhiều lần với các khởi tạo khác nhau và giữ kết quả có inertia nhỏ nhất. Trong scikit-learn từ phiên bản 1.4, tham số `n_init` của `KMeans` mặc định là `'auto'`, nghĩa là chỉ chạy một lần khi dùng khởi tạo k-means++. Với dữ liệu như thí nghiệm trên, cần đặt `n_init` tường minh, chẳng hạn `n_init=10`.
 
@@ -1988,13 +1990,13 @@ Câu hỏi thứ hai là K-means ngầm giả định gì về dữ liệu. Thí
 
 Nguyên nhân nằm ở bước gán. Mỗi điểm thuộc về tâm gần nhất theo khoảng cách Euclid, nên biên giới giữa hai cụm luôn là mặt phẳng trung trực của đoạn nối hai tâm, và toàn bộ không gian bị chia thành các ô lồi gọi là sơ đồ Voronoi. Từ đó suy ra ba giả định ngầm của K-means: các cụm có dạng lồi và gần tròn, các cụm có kích thước tương đương nhau, và mọi chiều có cùng thang đo để khoảng cách Euclid có ý nghĩa.
 
-Hai dải dẹt vi phạm giả định thứ nhất. Mỗi dải dài theo phương ngang và hẹp theo phương dọc, và hai dải cách nhau theo phương dọc một khoảng nhỏ hơn chiều dài của chúng. Cách chia có inertia nhỏ nhất vì vậy là cắt đôi theo phương thẳng đứng, mỗi cụm lấy nửa trái hoặc nửa phải của cả hai dải, thay vì tách hai dải ra.
+Hai dải dẹt vi phạm giả định thứ nhất. Mỗi dải dài theo phương ngang và hẹp theo phương dọc, và hai dải cách nhau theo phương dọc một khoảng nhỏ hơn chiều dài của chúng. Cách chia có inertia nhỏ nhất vì vậy là cắt đôi theo phương thẳng đứng, mỗi cụm lấy nửa trái hoặc nửa phải của cả hai dải, thay vì tách hai dải ra. Bốn cửa hàng là phiên bản nhỏ nhất của tình huống này. Nếu hai nhóm cần tìm là hai hàng ngang $y = 0$ và $y = 1$, chẳng hạn hai tuyến đường giao hàng, thì cách chia theo hàng có inertia 16, còn cách chia trái phải có inertia 1, nên K-means luôn chọn trái phải.
 
 Khi các giả định trên không thoả, có các phương pháp khác. **Mô hình hỗn hợp Gauss** (Gaussian mixture model) cho phép mỗi cụm có dạng elip với ma trận hiệp phương sai riêng, và K-means là trường hợp giới hạn của nó khi mọi cụm có hiệp phương sai $\sigma^2 I$ với $\sigma \to 0$. **DBSCAN** gom các điểm theo mật độ, cho phép cụm có hình dạng tuỳ ý và tự xác định số cụm. **Phân cụm phổ** (spectral clustering) biến đổi dữ liệu dựa trên đồ thị láng giềng rồi mới áp dụng K-means, và xử lý tốt dữ liệu hình lưỡi liềm.
 
 ### 15.4. Chọn số cụm
 
-Câu hỏi thứ ba là chọn $k$. Inertia luôn giảm khi $k$ tăng, và bằng 0 khi $k = n$, tức mỗi điểm là một cụm, nên không thể chọn $k$ bằng cách cực tiểu inertia. Bảng sau cho inertia tốt nhất trong 8 lần chạy k-means++ ở mỗi $k$, trên dữ liệu 8 cụm của Mục 15.2.
+Câu hỏi thứ ba là chọn $k$. Inertia luôn giảm khi $k$ tăng, và bằng 0 khi $k = n$, tức mỗi điểm là một cụm, nên không thể chọn $k$ bằng cách cực tiểu inertia. Với bốn cửa hàng, inertia tốt nhất là 17, 1, 0,5 và 0 với $k = 1, 2, 3, 4$: giảm 16 khi tăng từ một lên hai kho, rồi chỉ giảm 0,5 mỗi bước sau đó. Thêm kho thứ ba gần như không rút ngắn được quãng đường nào. Bảng sau cho inertia tốt nhất trong 8 lần chạy k-means++ ở mỗi $k$, trên dữ liệu 8 cụm của Mục 15.2.
 
 | $k$ | Inertia | Giảm so với $k - 1$ |
 |---|---|---|
@@ -2011,7 +2013,7 @@ Mức giảm là 27,7% khi tăng lên $k = 8$ và chỉ 5,4% khi tăng lên $k =
 
 ### 15.5. Tóm tắt
 
-K-means chia dữ liệu thành $k$ cụm để cực tiểu tổng bình phương khoảng cách tới tâm, và thuật toán Lloyd lặp giữa bước gán và bước cập nhật, không bao giờ làm tăng hàm mục tiêu nhưng chỉ dừng ở cực tiểu địa phương. Kết quả phụ thuộc mạnh vào khởi tạo: khởi tạo ngẫu nhiên kẹt ở nghiệm tồi 71,5% số lần trong thí nghiệm, k-means++ giảm xuống 46,5%, nên cần chạy nhiều lần. Vì bước gán chia không gian thành các ô lồi, K-means giả định cụm lồi, gần tròn, cỡ tương đương và các chiều cùng thang đo; với hai dải dẹt song song, nó chỉ đạt 0,5317. Số cụm được chọn bằng khuỷu tay của đồ thị inertia, hệ số silhouette, gap statistic hoặc yêu cầu nghiệp vụ.
+K-means chia dữ liệu thành $k$ cụm để cực tiểu tổng bình phương khoảng cách tới tâm, và thuật toán Lloyd lặp giữa bước gán và bước cập nhật, không bao giờ làm tăng hàm mục tiêu nhưng chỉ dừng ở cực tiểu địa phương: với bốn cửa hàng, hai tâm ban đầu cùng phía cho inertia 16 thay vì 1. Kết quả phụ thuộc mạnh vào khởi tạo. Với bốn cửa hàng, khởi tạo ngẫu nhiên kẹt với xác suất 1/3 và k-means++ chỉ 1/34; trong thí nghiệm 8 cụm, khởi tạo ngẫu nhiên kẹt ở nghiệm tồi 71,5% số lần, k-means++ vẫn 46,5%, nên cần chạy nhiều lần. Vì bước gán chia không gian thành các ô lồi, K-means giả định cụm lồi, gần tròn, cỡ tương đương và các chiều cùng thang đo; với hai dải dẹt song song, nó chỉ đạt 0,5317. Số cụm được chọn bằng khuỷu tay của đồ thị inertia, hệ số silhouette, gap statistic hoặc yêu cầu nghiệp vụ.
 
 PCA và K-means tìm cấu trúc trong một ma trận dữ liệu đầy đủ. Chương cuối xét một bài toán mà phần lớn ma trận bị trống, và cấu trúc hạng thấp của nó là thứ duy nhất cho phép điền vào các ô trống: hệ thống gợi ý.
 
