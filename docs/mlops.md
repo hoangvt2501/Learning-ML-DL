@@ -697,7 +697,7 @@ Phần lớn chỉ số sản phẩm là tỉ lệ: tỉ lệ nhấp, tỉ lệ 
 
 $$n \;=\; \frac{\left(z_{1-\alpha/2} + z_{1-\beta}\right)^2 \left[p_1(1-p_1) + p_2(1-p_2)\right]}{\Delta^2}.$$
 
-Điều cần nhớ nằm ở mẫu số: $n$ tỉ lệ nghịch với bình phương mức chênh lệch. Muốn phát hiện một mức cải thiện nhỏ bằng một nửa, cần gấp bốn lần số mẫu.
+Thay số cho một trường hợp: tỉ lệ nền $p_1 = 5\%$, muốn phát hiện cải thiện tương đối 10%, tức $p_2 = 5{,}5\%$ và $\Delta = 0{,}005$, với $\alpha = 0{,}05$ và lực kiểm định 80%, nên $z_{0{,}975} + z_{0{,}8} = 1{,}960 + 0{,}842 = 2{,}802$. Tử số là $2{,}802^2 \times (0{,}0475 + 0{,}0520) = 7{,}849 \times 0{,}0995$, mẫu số là $0{,}005^2 = 2{,}5 \times 10^{-5}$, và $n \approx 31\,231$ mẫu mỗi nhánh. Điều cần nhớ nằm ở mẫu số: $n$ tỉ lệ nghịch với bình phương mức chênh lệch. Muốn phát hiện một mức cải thiện nhỏ bằng một nửa, cần gấp bốn lần số mẫu.
 
 ![Hình 9](figs/mlops09_abtest.png)
 
@@ -715,7 +715,7 @@ Bảng dưới tính cỡ mẫu với tỉ lệ nền 5%, $\alpha = 0{,}05$ hai 
 
 Dòng đầu tiên giải thích vì sao không thể A/B test mọi thay đổi. Để phát hiện một cải thiện tương đối 1% trên tỉ lệ nền 5%, tức từ 5% lên 5,05%, cần khoảng ba triệu mẫu mỗi nhánh, nghĩa là một tháng lưu lượng cho một ý tưởng. Lưu lượng là tài nguyên khan hiếm, và một quy trình ra mắt tốt không dùng nó cho những ý tưởng có thể loại sớm bằng cách rẻ hơn như đánh giá ngoại tuyến hay shadow.
 
-Công thức cũng cho thấy ba cách giảm cỡ mẫu: chấp nhận chỉ phát hiện mức cải thiện lớn hơn, nới $\alpha$ hoặc lực kiểm định, và giảm phương sai của chỉ số. Hai cách đầu làm thay đổi câu hỏi hoặc giảm độ tin cậy của kết luận; cách thứ ba thì không. Kỹ thuật giảm phương sai phổ biến nhất là CUPED (Deng và cộng sự, 2013). Ý tưởng của nó là phần lớn sự khác biệt giữa người dùng đã có từ trước thí nghiệm: người hay mua sắm vẫn hay mua sắm, dù ở nhánh nào. CUPED dùng giá trị của chính chỉ số đó ở mỗi người dùng trong giai đoạn trước thí nghiệm làm biến hiệp phương sai, và trừ đi phần biến động giải thích được bởi nó. Nếu hệ số tương quan giữa giá trị trước và trong thí nghiệm là $\rho$, phương sai giảm theo hệ số $1 - \rho^2$, và cỡ mẫu cần thiết giảm theo cùng tỉ lệ. [Công cụ cỡ mẫu](mlops-thuc-hanh.html#co-mau) ở trang Phòng thí nghiệm cho phép nhập mức giảm phương sai này.
+Công thức cũng cho thấy ba cách giảm cỡ mẫu: chấp nhận chỉ phát hiện mức cải thiện lớn hơn, nới $\alpha$ hoặc lực kiểm định, và giảm phương sai của chỉ số. Hai cách đầu làm thay đổi câu hỏi hoặc giảm độ tin cậy của kết luận; cách thứ ba thì không. Kỹ thuật giảm phương sai phổ biến nhất là CUPED (Deng và cộng sự, 2013). Ý tưởng của nó là phần lớn sự khác biệt giữa người dùng đã có từ trước thí nghiệm: người hay mua sắm vẫn hay mua sắm, dù ở nhánh nào. CUPED dùng giá trị của chính chỉ số đó ở mỗi người dùng trong giai đoạn trước thí nghiệm làm biến hiệp phương sai, và trừ đi phần biến động giải thích được bởi nó. Nếu hệ số tương quan giữa giá trị trước và trong thí nghiệm là $\rho$, phương sai giảm theo hệ số $1 - \rho^2$, và cỡ mẫu cần thiết giảm theo cùng tỉ lệ. Với $\rho = 0{,}7$, phương sai còn 51%, nên 31 231 mẫu mỗi nhánh ở ví dụ trên giảm còn khoảng 15 900. [Công cụ cỡ mẫu](mlops-thuc-hanh.html#co-mau) ở trang Phòng thí nghiệm cho phép nhập mức giảm phương sai này.
 
 ### 8.5. Sai sót khi phân tích A/B test
 
@@ -794,7 +794,7 @@ Công thức này có một cách hiểu gọn hơn. Tách tổng thành hai ph�
 
 $$\begin{aligned} \mathrm{PSI} &= \sum_j T_j \ln\frac{T_j}{B_j} + \sum_j B_j \ln\frac{B_j}{T_j} \\ &= D_{\mathrm{KL}}(T \,\|\, B) + D_{\mathrm{KL}}(B \,\|\, T). \end{aligned}$$
 
-Vậy PSI là tổng hai chiều của phân kỳ KL, còn gọi là phân kỳ Jeffreys; khác với phân kỳ KL, nó đối xứng giữa hai phân phối. Vì có $\ln(T_j/B_j)$, PSI không xác định khi một bin không có mẫu nào, nên các cài đặt thường thay tỉ lệ 0 bằng một số dương rất nhỏ.
+Vậy PSI là tổng hai chiều của phân kỳ KL, còn gọi là phân kỳ Jeffreys; khác với phân kỳ KL, nó đối xứng giữa hai phân phối. Chẳng hạn với hai bin, tập tham chiếu chia đều $B = (0{,}5;\ 0{,}5)$ còn tập hiện tại là $T = (0{,}6;\ 0{,}4)$: PSI bằng $0{,}1 \ln 1{,}2 + (-0{,}1)\ln 0{,}8 = 0{,}0182 + 0{,}0223 = 0{,}0405$, và cũng bằng tổng của $D_{\mathrm{KL}}(T \,\|\, B) = 0{,}0201$ và $D_{\mathrm{KL}}(B \,\|\, T) = 0{,}0204$. Một thay đổi 10 điểm phần trăm ở mỗi bin vẫn nằm dưới ngưỡng 0,10 thường dùng. Vì có $\ln(T_j/B_j)$, PSI không xác định khi một bin không có mẫu nào, nên các cài đặt thường thay tỉ lệ 0 bằng một số dương rất nhỏ.
 
 Đi kèm PSI là một bộ ngưỡng quy ước được trích dẫn rất nhiều: PSI dưới 0,10 coi như phân phối ổn định, từ 0,10 tới 0,25 là có dịch chuyển nhỏ nên xem xét, trên 0,25 là dịch chuyển đáng kể cần hành động. Mục tiếp theo cho thấy vì sao không nên dùng thẳng bộ ngưỡng này.
 
