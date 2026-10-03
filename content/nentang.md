@@ -184,7 +184,7 @@ Mỗi thuật toán học có giám sát gồm ba thành phần: mô hình là h
 
 ## 2. Đại số tuyến tính
 
-Mọi thuật toán trong giáo trình đều viết bằng ngôn ngữ vector và ma trận, và nhiều kết luận quan trọng ở các chương sau thực ra là hệ quả của vài định lý đại số tuyến tính. Chẳng hạn, việc hồi quy tuyến tính có nghiệm duy nhất hay không phụ thuộc vào hạng của ma trận dữ liệu, còn tốc độ của gradient descent phụ thuộc vào tỉ số giữa trị riêng lớn nhất và nhỏ nhất. Ở đây ta nhắc lại những khái niệm đó, mỗi khái niệm kèm lý do nó cần thiết. Người đã vững đại số tuyến tính có thể đọc lướt bảng ở Mục 2.1 rồi chuyển sang Chương 3.
+Mọi thuật toán trong giáo trình đều viết bằng ngôn ngữ vector và ma trận, và nhiều kết luận quan trọng ở các chương sau thực ra là hệ quả của vài định lý đại số tuyến tính. Chẳng hạn, việc hồi quy tuyến tính có nghiệm duy nhất hay không phụ thuộc vào hạng của ma trận dữ liệu, còn tốc độ của gradient descent phụ thuộc vào tỉ số giữa trị riêng lớn nhất và nhỏ nhất. Ở đây ta nhắc lại những khái niệm đó, mỗi khái niệm kèm lý do nó cần thiết. Các khái niệm được minh hoạ trên cùng một ma trận dữ liệu nhỏ, diện tích của bốn căn hộ, ma trận mà Chương 4 sẽ dùng để định giá căn hộ. Người đã vững đại số tuyến tính có thể đọc lướt bảng ở Mục 2.1 rồi chuyển sang Chương 3.
 
 ### 2.1. Vector, ma trận và hạng
 
@@ -196,9 +196,15 @@ $$Xw = \begin{pmatrix} x_1^\top w \\ \vdots \\ x_n^\top w \end{pmatrix} = w_1 X_
 
 Đọc theo hàng, $Xw$ là vector chứa dự đoán của mô hình tuyến tính cho từng điểm dữ liệu. Đọc theo cột, $Xw$ là một **tổ hợp tuyến tính** của các cột của $X$. Tập mọi tổ hợp tuyến tính như vậy gọi là **không gian cột** của $X$, và hồi quy tuyến tính chính là tìm điểm trong không gian cột gần $y$ nhất (Chương 4).
 
+Bốn căn hộ có diện tích 40, 60, 80 và 100 m² cho thấy cả hai cách đọc. Thêm một cột hằng 1 cho hệ số chặn, ma trận dữ liệu và một vector tham số là
+
+$$X = \begin{pmatrix}1&40\\1&60\\1&80\\1&100\end{pmatrix}, \qquad w = \begin{pmatrix}0{,}57\\0{,}024\end{pmatrix}.$$
+
+Đọc theo hàng, $Xw = (1{,}53;\ 2{,}01;\ 2{,}49;\ 2{,}97)$ là giá dự đoán, tính bằng tỉ đồng, của bốn căn: căn 40 m² được đoán $0{,}57 + 0{,}024 \cdot 40 = 1{,}53$ tỉ. Đọc theo cột, cùng vector đó là 0,57 lần cột hằng cộng 0,024 lần cột diện tích. Chương 4 sẽ chỉ ra vì sao $w$ này là lựa chọn tốt nhất cho bốn căn hộ.
+
 > **Định nghĩa 2.1 (Hạng).** **Hạng** của ma trận $X$, ký hiệu $\operatorname{rank}(X)$, là số cột độc lập tuyến tính lớn nhất của $X$ (bằng số hàng độc lập tuyến tính lớn nhất). Ma trận $X \in \mathbb{R}^{n \times d}$ gọi là **đủ hạng cột** nếu $\operatorname{rank}(X) = d$, tức không cột nào là tổ hợp tuyến tính của các cột còn lại.
 
-Vì hạng không vượt quá số hàng, một ma trận có nhiều cột hơn hàng ($d > n$) không thể đủ hạng cột. Đó chính là cơ sở toán học của nhận xét ở Mục 1.3 rằng dữ liệu có nhiều đặc trưng hơn số điểm cần được xử lý đặc biệt.
+Vì hạng không vượt quá số hàng, một ma trận có nhiều cột hơn hàng ($d > n$) không thể đủ hạng cột. Đó chính là cơ sở toán học của nhận xét ở Mục 1.3 rằng dữ liệu có nhiều đặc trưng hơn số điểm cần được xử lý đặc biệt. Ma trận $X$ của bốn căn hộ có hai cột không tỉ lệ với nhau, nên có hạng 2 và đủ hạng cột. Thêm một cột ghi diện tích bằng dm², tức 100 lần cột diện tích, thì ma trận có ba cột nhưng hạng vẫn là 2 và không còn đủ hạng cột; Mục 4.3 xét đúng tình huống đặc trưng trùng lặp này.
 
 Bảng sau liệt kê các khái niệm của chương và nơi chúng được dùng.
 
@@ -266,7 +272,7 @@ Với ma trận ở Ví dụ 2.2, vết bằng $2 + 2 = 4 = 3 + 1$ và định t
 > **Định nghĩa 2.4 (Số điều kiện).** Với ma trận đối xứng xác định dương $A$, **số điều kiện** là tỉ số giữa trị riêng lớn nhất và nhỏ nhất:
 > $$\kappa(A) = \frac{\lambda_{\max}}{\lambda_{\min}} \ge 1.$$
 
-Số điều kiện đo độ "dẹt" của ma trận: $\kappa = 1$ nghĩa là $A$ kéo dãn mọi hướng như nhau, còn $\kappa$ lớn nghĩa là có hướng bị kéo rất mạnh và có hướng gần như bị ép dẹt. Đại lượng này quyết định tốc độ của gradient descent. Mục 5.3 đo được rằng số vòng lặp cần thiết tỉ lệ thuận với $\kappa$: khi $\kappa$ tăng từ 1 lên 10 000, số vòng lặp tăng từ 1 lên 92 104.
+Số điều kiện đo độ "dẹt" của ma trận: $\kappa = 1$ nghĩa là $A$ kéo dãn mọi hướng như nhau, còn $\kappa$ lớn nghĩa là có hướng bị kéo rất mạnh và có hướng gần như bị ép dẹt. Với bốn căn hộ, $X^\top X = \begin{pmatrix}4 & 280\\ 280 & 21\,600\end{pmatrix}$ có hai trị riêng khoảng 21 604 và 0,37, nên $\kappa \approx 58\,340$: theo một hướng, ma trận kéo dãn mạnh hơn hướng kia khoảng 58 nghìn lần. Đại lượng này quyết định tốc độ của gradient descent. Mục 5.3 đo được rằng số vòng lặp cần thiết tỉ lệ thuận với $\kappa$: khi $\kappa$ tăng từ 1 lên 10 000, số vòng lặp tăng từ 1 lên 92 104. Cũng ở mục đó, chỉ cần trừ trung bình rồi chia diện tích cho độ lệch chuẩn là $\kappa$ của bài toán bốn căn hộ giảm từ 58 340 xuống 1.
 
 ### 2.5. Ma trận xác định dương
 
@@ -274,7 +280,7 @@ Số điều kiện đo độ "dẹt" của ma trận: $\kappa = 1$ nghĩa là $
 
 Sự tương đương với trị riêng suy ra ngay từ định lý phổ: viết $z$ trong hệ toạ độ vector riêng, $z = \sum_i c_i v_i$, thì $z^\top A z = \sum_i \lambda_i c_i^2$. Tổng này dương với mọi $z \ne 0$ khi và chỉ khi mọi $\lambda_i > 0$.
 
-Các chương sau cần tới khái niệm này ở ba chỗ. Thứ nhất, hàm bậc hai $f(z) = \tfrac12 z^\top A z + c^\top z$ là hàm lồi khi và chỉ khi $A$ nửa xác định dương (Chương 11), và khi $A$ xác định dương thì $f$ có đúng một điểm cực tiểu. Thứ hai, ma trận $X^\top X$ luôn nửa xác định dương, vì $z^\top X^\top X z = \|Xz\|_2^2 \ge 0$; nó xác định dương khi và chỉ khi $Xz \ne 0$ với mọi $z \ne 0$, tức khi $X$ đủ hạng cột. Đó chính là điều kiện để phương trình chuẩn của hồi quy tuyến tính có nghiệm duy nhất (Mục 4.3). Thứ ba, nếu $A$ nửa xác định dương và $\lambda > 0$ thì $A + \lambda I$ xác định dương, vì $z^\top (A + \lambda I) z = z^\top A z + \lambda\|z\|^2 > 0$ với mọi $z \ne 0$; các trị riêng của $A + \lambda I$ là $\lambda_i + \lambda$, đều lớn hơn hoặc bằng $\lambda$. Nhờ tính chất này, hồi quy ridge luôn có nghiệm duy nhất, kể cả khi hồi quy tuyến tính thông thường không có (Mục 9.2).
+Các chương sau cần tới khái niệm này ở ba chỗ. Thứ nhất, hàm bậc hai $f(z) = \tfrac12 z^\top A z + c^\top z$ là hàm lồi khi và chỉ khi $A$ nửa xác định dương (Chương 11), và khi $A$ xác định dương thì $f$ có đúng một điểm cực tiểu. Thứ hai, ma trận $X^\top X$ luôn nửa xác định dương, vì $z^\top X^\top X z = \|Xz\|_2^2 \ge 0$; nó xác định dương khi và chỉ khi $Xz \ne 0$ với mọi $z \ne 0$, tức khi $X$ đủ hạng cột. Đó chính là điều kiện để phương trình chuẩn của hồi quy tuyến tính có nghiệm duy nhất (Mục 4.3). Với bốn căn hộ, hai trị riêng 21 604 và 0,37 của $X^\top X$ đều dương, nên ma trận này xác định dương. Thứ ba, nếu $A$ nửa xác định dương và $\lambda > 0$ thì $A + \lambda I$ xác định dương, vì $z^\top (A + \lambda I) z = z^\top A z + \lambda\|z\|^2 > 0$ với mọi $z \ne 0$; các trị riêng của $A + \lambda I$ là $\lambda_i + \lambda$, đều lớn hơn hoặc bằng $\lambda$. Nhờ tính chất này, hồi quy ridge luôn có nghiệm duy nhất, kể cả khi hồi quy tuyến tính thông thường không có (Mục 9.2).
 
 ### 2.6. Phân tích giá trị suy biến (SVD)
 
@@ -288,7 +294,7 @@ Về mặt hình học, SVD nói rằng mọi phép biến đổi tuyến tính 
 
 Hệ quả thứ nhất là liên hệ với trị riêng. Ta có $X^\top X = V D^\top D\, V^\top$, nên các vector riêng của $X^\top X$ là các cột của $V$ và các trị riêng là $d_i^2$. Khi $X$ đã được trừ trung bình theo cột, ma trận hiệp phương sai mẫu là $X^\top X/(n-1)$, nên trị riêng của nó bằng $d_i^2/(n-1)$. Mục 14.2 kiểm chứng điều này bằng số: tính theo hai cách, kết quả lệch nhau $7{,}1 \times 10^{-15}$.
 
-Hệ quả thứ hai là số điều kiện bị bình phương. Vì trị riêng của $X^\top X$ là bình phương giá trị suy biến của $X$, ta có $\kappa(X^\top X) = \kappa(X)^2$, trong đó $\kappa(X) = d_1/d_{\min}$. Nếu $\kappa(X) = 100$ thì $\kappa(X^\top X) = 10^4$. Khi giải một hệ tuyến tính có số điều kiện $\kappa$ bằng số thực dấu phẩy động, ta có thể mất khoảng $\log_{10}\kappa$ chữ số có nghĩa, nên lập $X^\top X$ làm mất gấp đôi số chữ số so với làm việc trực tiếp trên $X$. Vì vậy các thư viện giải bài toán bình phương tối thiểu bằng phân tích QR hoặc SVD của $X$ thay vì dùng công thức $(X^\top X)^{-1}X^\top y$.
+Hệ quả thứ hai là số điều kiện bị bình phương. Vì trị riêng của $X^\top X$ là bình phương giá trị suy biến của $X$, ta có $\kappa(X^\top X) = \kappa(X)^2$, trong đó $\kappa(X) = d_1/d_{\min}$. Nếu $\kappa(X) = 100$ thì $\kappa(X^\top X) = 10^4$. Với bốn căn hộ, hai giá trị suy biến của $X$ là khoảng 146,98 và 0,609, nên $\kappa(X) \approx 241{,}5$ và $\kappa(X^\top X) \approx 241{,}5^2 \approx 58\,340$, đúng số điều kiện ở Mục 2.4. Khi giải một hệ tuyến tính có số điều kiện $\kappa$ bằng số thực dấu phẩy động, ta có thể mất khoảng $\log_{10}\kappa$ chữ số có nghĩa, nên lập $X^\top X$ làm mất gấp đôi số chữ số so với làm việc trực tiếp trên $X$. Vì vậy các thư viện giải bài toán bình phương tối thiểu bằng phân tích QR hoặc SVD của $X$ thay vì dùng công thức $(X^\top X)^{-1}X^\top y$.
 
 Hệ quả thứ ba là xấp xỉ hạng thấp tốt nhất. Giữ lại $k$ giá trị suy biến lớn nhất và đặt các giá trị còn lại bằng 0 cho ma trận hạng $k$ gần $X$ nhất theo chuẩn Frobenius; đây là định lý Eckart–Young, và Mục 14.3 kiểm chứng đẳng thức sai số của nó tới $10^{-13}$.
 
@@ -317,13 +323,13 @@ Số hạng đầu không phụ thuộc $w$ nên có gradient bằng 0. Số h�
 
 $$\nabla_w \|y - Xw\|_2^2 = -2X^\top y + 2X^\top X w = -2X^\top (y - Xw).$$
 
-Cho gradient này bằng 0 ta được phương trình chuẩn của Chương 4. Ma trận Hessian của hàm này là $2X^\top X$, nửa xác định dương theo Mục 2.5, nên hàm lồi và mọi điểm có gradient bằng 0 đều là cực tiểu.
+Cho gradient này bằng 0 ta được phương trình chuẩn của Chương 4. Với bốn căn hộ, giá thật là $y = (1{,}5;\ 2{,}1;\ 2{,}4;\ 3{,}0)$ tỉ, và với $w = (0{,}57;\ 0{,}024)$ ở Mục 2.1, phần dư $y - Xw$ là $(-0{,}03;\ 0{,}09;\ -0{,}09;\ 0{,}03)$. Thành phần thứ nhất của $X^\top(y - Xw)$ là tổng các phần dư, bằng 0; thành phần thứ hai là tổng có trọng số theo diện tích, $-1{,}2 + 5{,}4 - 7{,}2 + 3{,}0 = 0$. Gradient bằng 0, nên $w$ này là nghiệm, đúng như Chương 4 sẽ tìm ra. Ma trận Hessian của hàm này là $2X^\top X$, nửa xác định dương theo Mục 2.5, nên hàm lồi và mọi điểm có gradient bằng 0 đều là cực tiểu.
 
 > **Lưu ý.** Công thức gradient tự suy ra bằng tay rất dễ sai dấu hoặc thiếu hệ số 2. Cách kiểm tra đáng tin là so sánh với đạo hàm tính bằng sai phân hữu hạn. Mục 5.5 trình bày cách làm và cách chọn bước sai phân $\varepsilon$, trong đó $\varepsilon$ quá nhỏ lại cho kết quả kém hơn.
 
 ### 2.8. Tóm tắt
 
-Ma trận dữ liệu xếp mỗi điểm thành một hàng, và tích $Xw$ vừa là vector dự đoán vừa là tổ hợp tuyến tính của các cột. Hạng của $X$ cho biết các cột có độc lập hay không, nên quyết định hồi quy tuyến tính có nghiệm duy nhất hay không. Tích vô hướng đo độ chiếu của vector này lên vector kia, và mặt $w^\top x + b = 0$ là một siêu phẳng với khoảng cách từ một điểm tới nó bằng $|w^\top x_0 + b|/\|w\|$. Chuẩn $\ell_1$ và $\ell_2$ khác nhau ở hình dạng quả cầu đơn vị, và khác biệt đó quyết định hành vi của lasso và ridge. Ma trận đối xứng chỉ kéo dãn các trục vector riêng của nó, số điều kiện đo độ dẹt của phép kéo dãn đó, và SVD mở rộng ý tưởng này cho ma trận chữ nhật. Cuối cùng, gradient của $\|y - Xw\|^2$ là $-2X^\top(y - Xw)$, công thức sẽ dùng ngay ở Chương 4.
+Ma trận dữ liệu xếp mỗi điểm thành một hàng, và tích $Xw$ vừa là vector dự đoán vừa là tổ hợp tuyến tính của các cột. Hạng của $X$ cho biết các cột có độc lập hay không, nên quyết định hồi quy tuyến tính có nghiệm duy nhất hay không. Tích vô hướng đo độ chiếu của vector này lên vector kia, và mặt $w^\top x + b = 0$ là một siêu phẳng với khoảng cách từ một điểm tới nó bằng $|w^\top x_0 + b|/\|w\|$. Chuẩn $\ell_1$ và $\ell_2$ khác nhau ở hình dạng quả cầu đơn vị, và khác biệt đó quyết định hành vi của lasso và ridge. Ma trận đối xứng chỉ kéo dãn các trục vector riêng của nó, số điều kiện đo độ dẹt của phép kéo dãn đó, và SVD mở rộng ý tưởng này cho ma trận chữ nhật. Cuối cùng, gradient của $\|y - Xw\|^2$ là $-2X^\top(y - Xw)$, công thức sẽ dùng ngay ở Chương 4. Ma trận của bốn căn hộ minh hoạ cả chương: $Xw$ cho giá dự đoán, $X$ đủ hạng cột, $\kappa(X^\top X) \approx 58\,340$ là bình phương của $\kappa(X) \approx 241{,}5$, và gradient bằng 0 tại $w = (0{,}57;\ 0{,}024)$.
 
 Đại số tuyến tính mô tả dữ liệu và mô hình, nhưng chưa nói gì về nhiễu. Dữ liệu thật luôn có nhiễu, và mô hình học từ một mẫu hữu hạn nên kết quả của nó cũng ngẫu nhiên. Chương 3 nhắc lại các công cụ xác suất để mô tả sự không chắc chắn đó.
 
@@ -449,7 +455,7 @@ Có đại số tuyến tính và xác suất, ta đã đủ công cụ cho thu�
 
 ## 4. Hồi quy tuyến tính
 
-Ta bắt đầu với một bài toán quen thuộc: định giá căn hộ. Bảng dưới ghi diện tích và giá bán của bốn căn hộ trong cùng một khu. Đây là số liệu minh hoạ, chọn tròn để tính tay được.
+Ta bắt đầu với một bài toán quen thuộc: định giá căn hộ. Bảng dưới ghi diện tích và giá bán của bốn căn hộ trong cùng một khu, chính là bốn căn hộ của ma trận dữ liệu ở Mục 2.1. Đây là số liệu minh hoạ, chọn tròn để tính tay được.
 
 | Căn hộ | Diện tích $x$ (m²) | Giá $y$ (tỉ đồng) |
 |---|---|---|
