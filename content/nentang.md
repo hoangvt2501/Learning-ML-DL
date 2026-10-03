@@ -449,38 +449,95 @@ Có đại số tuyến tính và xác suất, ta đã đủ công cụ cho thu�
 
 ## 4. Hồi quy tuyến tính
 
-Hồi quy tuyến tính là thuật toán học có giám sát đơn giản nhất, nhưng nó đáng được học kỹ vì một lý do cụ thể: bài toán có nghiệm dạng đóng. Nhờ vậy, những hiện tượng sẽ gặp lại ở mọi mô hình phức tạp hơn, như overfitting, regularization, ảnh hưởng của số điều kiện và đánh đổi độ chệch – phương sai, đều quan sát được trực tiếp mà không bị lẫn với câu hỏi thuật toán tối ưu có hội tụ hay không.
+Ta bắt đầu với một bài toán quen thuộc: định giá căn hộ. Bảng dưới ghi diện tích và giá bán của bốn căn hộ trong cùng một khu. Đây là số liệu minh hoạ, chọn tròn để tính tay được.
+
+| Căn hộ | Diện tích $x$ (m²) | Giá $y$ (tỉ đồng) |
+|---|---|---|
+| A | 40 | 1,5 |
+| B | 60 | 2,1 |
+| C | 80 | 2,4 |
+| D | 100 | 3,0 |
+
+Nếu được hỏi một căn 90 m² trong khu này đáng giá bao nhiêu, hầu hết mọi người sẽ trả lời khoảng 2,7 tỉ, vì giá tăng gần đều theo diện tích. Hồi quy tuyến tính biến trực giác "tăng gần đều" đó thành một quy trình chính xác: chọn một đường thẳng, đo xem đường thẳng khớp dữ liệu tới mức nào, rồi tìm đường khớp nhất. Đây là thuật toán học có giám sát đơn giản nhất, nhưng đáng học kỹ vì bài toán có nghiệm dạng đóng. Nhờ vậy, những hiện tượng sẽ gặp lại ở mọi mô hình phức tạp hơn, như overfitting, regularization, ảnh hưởng của số điều kiện và đánh đổi độ chệch – phương sai, đều quan sát được trực tiếp mà không bị lẫn với câu hỏi thuật toán tối ưu có hội tụ hay không.
 
 ### 4.1. Bài toán hồi quy tuyến tính
 
-Cho $n$ điểm dữ liệu $(x_i, y_i)$ với $x_i \in \mathbb{R}^d$ và $y_i \in \mathbb{R}$. Ta muốn tìm một hàm tuyến tính dự đoán $y$ từ $x$. Để công thức gọn, ta thêm vào mỗi $x_i$ một thành phần hằng bằng 1 ở vị trí đầu; khi đó hệ số chặn trở thành trọng số $w_0$ ứng với thành phần này, và mô hình viết được là $f_w(x) = w^\top x$. Giáo trình dùng quy ước này ở mọi chỗ: cột đầu tiên của ma trận dữ liệu $X$ gồm toàn số 1.
+Mô hình đơn giản nhất cho bảng trên là một đường thẳng,
+
+$$f(x) = w_0 + w_1 x.$$
+
+Hệ số $w_1$ là phần giá tăng thêm khi diện tích tăng 1 m², còn $w_0$ là điểm đường thẳng cắt trục tung. Học từ dữ liệu ở đây nghĩa là chọn $w_0$ và $w_1$. Nhưng trước khi chọn, ta cần một cách nói đường thẳng nào tốt hơn đường thẳng nào.
+
+Với mỗi căn hộ, đường thẳng mắc một sai số $y_i - f(x_i)$, tức chênh lệch giữa giá thật và giá dự đoán. Cộng thẳng các sai số thì không dùng được, vì sai số dương và sai số âm triệt tiêu nhau: một đường dự đoán quá cao cho nửa số căn và quá thấp cho nửa còn lại vẫn có thể cho tổng bằng 0. Cách phổ biến nhất là lấy trung bình bình phương sai số,
+
+$$L(w_0, w_1) = \frac1n\sum_{i=1}^{n}\big(y_i - w_0 - w_1 x_i\big)^2.$$
+
+Bình phương làm mọi sai số thành số dương, phạt sai số lớn nặng hơn nhiều so với sai số nhỏ, và cho một hàm trơn, dễ lấy đạo hàm. Còn vì sao là bình phương mà không phải trị tuyệt đối thì có một câu trả lời chính xác hơn, trình bày ở Mục 10.2: bình phương sai số là hệ quả của giả thiết nhiễu có phân phối Gauss.
+
+Có hàm $L$, ta so sánh được các đường thẳng bằng số. Đường $f(x) = 0{,}03x$, tức giá 30 triệu đồng mỗi mét vuông, dự đoán 1,2; 1,8; 2,4 và 3,0 tỉ cho bốn căn. Sai số là 0,3; 0,3; 0 và 0, nên $L = (0{,}09 + 0{,}09)/4 = 0{,}045$. Đường $f(x) = 0{,}6 + 0{,}024x$ dự đoán 1,56; 2,04; 2,52 và 3,0 tỉ, với sai số $-0{,}06$; $0{,}06$; $-0{,}12$ và $0$, nên $L = 0{,}0216/4 = 0{,}0054$, nhỏ hơn khoảng tám lần. Đường thứ hai tốt hơn hẳn. Câu hỏi còn lại là có đường nào tốt hơn nữa không, và đường tốt nhất là đường nào. Mục 4.2 trả lời câu hỏi đó.
+
+Trước khi giải, ta viết bài toán ở dạng tổng quát. Giá căn hộ còn phụ thuộc số phòng, tầng và khoảng cách tới trung tâm, nên mỗi điểm dữ liệu thường là một vector đặc trưng $x_i \in \mathbb{R}^d$ chứ không phải một số. Để công thức gọn, ta thêm vào mỗi $x_i$ một thành phần hằng bằng 1 ở vị trí đầu. Khi đó hệ số chặn trở thành trọng số $w_0$ ứng với thành phần này, và mô hình viết được là $f_w(x) = w^\top x$. Xếp các $x_i$ thành các hàng của ma trận $X$ và các nhãn thành vector $y$, toàn bộ dự đoán trên tập dữ liệu là $Xw$. Giáo trình dùng quy ước này ở mọi chỗ: cột đầu tiên của ma trận dữ liệu $X$ gồm toàn số 1.
+
+Một cách tốt để nắm ký hiệu là tự kiểm tra kích thước. Với $n$ điểm dữ liệu, $X$ có $n$ hàng và $d$ cột, vector $w$ có $d$ thành phần, nên $Xw$ là vector $n$ chiều, cùng kích thước với $y$, đúng như cần để so từng dự đoán với nhãn của nó. Trong ví dụ căn hộ, $n = 4$, $d = 2$, và hàng đầu tiên của $X$ là $(1;\ 40)$.
 
 > **Định nghĩa 4.1 (Hồi quy tuyến tính bình phương tối thiểu).** Với ma trận dữ liệu $X \in \mathbb{R}^{n\times d}$ và vector nhãn $y \in \mathbb{R}^n$, hồi quy tuyến tính tìm
 > $$\begin{aligned} \hat w &= \arg\min_w L(w), \\ L(w) &= \frac1n\sum_{i=1}^{n}\big(y_i - w^\top x_i\big)^2 = \frac1n\,\|y - Xw\|_2^2. \end{aligned}$$
 > Phương pháp này còn gọi là bình phương tối thiểu thông thường (ordinary least squares, OLS).
 
-Theo khung ở Hình 1, mô hình là họ hàm tuyến tính $w^\top x$, hàm mất mát là bình phương sai số, còn thuật toán tối ưu là giải một hệ phương trình tuyến tính, như Mục 4.2 sẽ trình bày. Câu hỏi "vì sao là bình phương mà không phải trị tuyệt đối" có câu trả lời chính xác ở Mục 10.2: bình phương sai số là hệ quả của giả thiết nhiễu có phân phối Gauss.
+Theo khung ở Hình 1, đây là đủ ba thành phần của một thuật toán học: mô hình là họ hàm tuyến tính $w^\top x$, hàm mất mát là bình phương sai số, còn thuật toán tối ưu là cách tìm $\hat w$ mà Mục 4.2 sẽ trình bày.
 
-Bài toán còn có một cách hiểu hình học hữu ích. Khi $w$ chạy khắp $\mathbb{R}^d$, vector dự đoán $Xw$ chạy khắp không gian cột của $X$ (Mục 2.1). Cực tiểu $\|y - Xw\|_2$ nghĩa là tìm điểm trong không gian cột gần $y$ nhất, tức **hình chiếu vuông góc** của $y$ lên không gian cột. Vector phần dư $r = y - X\hat w$ vì thế phải vuông góc với mọi cột của $X$.
+Bài toán còn có một cách hiểu hình học, sẽ dùng nhiều ở các mục sau. Khi $w$ chạy khắp $\mathbb{R}^d$, vector dự đoán $Xw$ chạy khắp không gian cột của $X$ (Mục 2.1). Trong ví dụ căn hộ, $y$ là một vector trong $\mathbb{R}^4$, còn không gian cột là mặt phẳng hai chiều sinh bởi $(1; 1; 1; 1)$ và $(40; 60; 80; 100)$: dự đoán của mọi đường thẳng đều nằm trên mặt phẳng này. Cực tiểu $\|y - Xw\|_2$ nghĩa là tìm điểm trên mặt phẳng gần $y$ nhất, tức **hình chiếu vuông góc** của $y$ lên không gian cột. Vector phần dư $r = y - X\hat w$ vì thế phải vuông góc với mọi cột của $X$.
 
 ### 4.2. Phương trình chuẩn
 
-Mục 2.7 đã tính gradient của $\|y - Xw\|_2^2$. Chia cho $n$ và cho gradient bằng 0, ta được
+Ta tìm đường thẳng tốt nhất cho ví dụ căn hộ trước, rồi mới tổng quát hoá. Hàm $L(w_0, w_1)$ là hàm bậc hai của hai biến và có dạng một cái chén: đi xa theo hướng nào nó cũng tăng. Đáy chén là điểm mà đạo hàm riêng theo cả hai biến đều bằng 0.
 
-$$\nabla_w L = -\frac{2}{n}X^\top(y - Xw) = 0 \;\Longleftrightarrow\; X^\top X\,w = X^\top y.$$
+Đạo hàm theo $w_0$ cho
 
-Hệ phương trình tuyến tính này gọi là **phương trình chuẩn** (normal equations). Tên gọi đến từ cách hiểu hình học ở Mục 4.1: $X^\top(y - Xw) = 0$ nói rằng phần dư vuông góc (normal) với mọi cột của $X$.
+$$\frac{\partial L}{\partial w_0} = -\frac2n\sum_{i=1}^{n}\big(y_i - w_0 - w_1 x_i\big) = 0 \quad\Longleftrightarrow\quad \bar y = w_0 + w_1 \bar x,$$
+
+với $\bar x$ và $\bar y$ là trung bình của các $x_i$ và các $y_i$. Phương trình này đã cho biết một điều cụ thể: đường thẳng tốt nhất luôn đi qua điểm trung bình $(\bar x, \bar y)$ của dữ liệu. Đạo hàm theo $w_1$ cho
+
+$$\frac{\partial L}{\partial w_1} = -\frac2n\sum_{i=1}^{n}x_i\big(y_i - w_0 - w_1 x_i\big) = 0.$$
+
+Thay $w_0 = \bar y - w_1\bar x$ vào phương trình thứ hai, mỗi số hạng trong tổng trở thành $x_i\big[(y_i - \bar y) - w_1(x_i - \bar x)\big]$, và giải ra
+
+$$w_1 = \frac{\sum_i (x_i - \bar x)(y_i - \bar y)}{\sum_i (x_i - \bar x)^2}, \qquad w_0 = \bar y - w_1\bar x.$$
+
+Ở bước cuối, thừa số $x_i$ đứng trước được thay bằng $x_i - \bar x$. Phép thay không làm đổi tử số và mẫu số, vì $\sum_i \bar x\,(y_i - \bar y) = 0$ và $\sum_i \bar x\,(x_i - \bar x) = 0$.
+
+Công thức có một cách đọc quen thuộc từ Chương 3. Chia cả tử và mẫu cho $n$, hệ số góc chính là hiệp phương sai mẫu giữa $x$ và $y$ chia cho phương sai mẫu của $x$. Hệ số góc lớn khi $y$ biến thiên cùng chiều với $x$ và mạnh so với độ phân tán của $x$.
+
+Với bốn căn hộ, $\bar x = 70$ và $\bar y = 2{,}25$. Các độ lệch $x_i - \bar x$ là $-30$; $-10$; $10$; $30$ và các độ lệch $y_i - \bar y$ là $-0{,}75$; $-0{,}15$; $0{,}15$; $0{,}75$, nên tử số bằng $22{,}5 + 1{,}5 + 1{,}5 + 22{,}5 = 48$ và mẫu số bằng $900 + 100 + 100 + 900 = 2\,000$. Do đó $w_1 = 0{,}024$ tỉ đồng mỗi mét vuông, tức 24 triệu đồng, và $w_0 = 2{,}25 - 0{,}024 \cdot 70 = 0{,}57$. Đường thẳng này dự đoán 1,53; 2,01; 2,49 và 2,97 tỉ cho bốn căn, với sai số $-0{,}03$; $0{,}09$; $-0{,}09$; $0{,}03$ và $L = 0{,}018/4 = 0{,}0045$, nhỏ hơn cả đường thứ hai ở Mục 4.1. Căn 90 m² được định giá $0{,}57 + 0{,}024 \cdot 90 = 2{,}73$ tỉ, khớp với ước đoán bằng mắt ở đầu chương.
+
+Hệ số chặn $w_0 = 0{,}57$ tỉ không có nghĩa một căn hộ 0 m² đáng giá 570 triệu đồng. Nó chỉ là điểm đường thẳng cắt trục tung, cần có để đường thẳng khớp dữ liệu trong khoảng 40 tới 100 m². Dùng mô hình cho những điểm nằm xa ngoài khoảng dữ liệu đã thấy, gọi là **ngoại suy** (extrapolation), luôn cần thận trọng.
+
+Cách làm vừa rồi tổng quát hoá trực tiếp sang $d$ đặc trưng nhờ ký hiệu ma trận. Viết bình phương chuẩn thành tích vô hướng rồi khai triển như khai triển $(a - b)^2$:
+
+$$L(w) = \frac1n(y - Xw)^\top(y - Xw) = \frac1n\big(y^\top y - 2\,w^\top X^\top y + w^\top X^\top X\,w\big).$$
+
+Hai số hạng chéo $y^\top X w$ và $w^\top X^\top y$ gộp được làm một vì chúng là cùng một số: một số thực bằng chuyển vị của chính nó. Áp dụng hai quy tắc đạo hàm ở Mục 2.7, $\nabla_w(w^\top a) = a$ và $\nabla_w(w^\top A w) = 2Aw$ với $A$ đối xứng, ta được
+
+$$\nabla_w L = \frac1n\big(2X^\top X\,w - 2X^\top y\big) = -\frac{2}{n}X^\top(y - Xw).$$
+
+Cho gradient bằng 0:
+
+$$X^\top X\,w = X^\top y.$$
+
+Hệ phương trình tuyến tính này gọi là **phương trình chuẩn** (normal equations). Nó có đúng $d$ phương trình và $d$ ẩn, bất kể có bao nhiêu điểm dữ liệu. Với một đặc trưng, hai phương trình của nó chính là hai phương trình đạo hàm riêng ở trên.
+
+Viết dưới dạng $X^\top(y - Xw) = 0$, phương trình chuẩn giải thích được tên gọi của nó và cho thấy nghiệm có tính chất gì. Đặt $r = y - Xw$ là vector phần dư. Thành phần thứ $j$ của $X^\top r$ bằng $\sum_i x_{ij} r_i$, tích vô hướng giữa cột đặc trưng thứ $j$ và phần dư. Phương trình chuẩn đòi hỏi mọi tích vô hướng này bằng 0, tức phần dư vuông góc (normal) với mọi cột của $X$, đúng như cách hiểu hình học ở Mục 4.1. Theo cách nhìn thống kê, ở nghiệm tối ưu phần dư không còn tương quan tuyến tính với đặc trưng nào. Nếu còn, ta chưa ở điểm tốt nhất: chỉnh trọng số theo đặc trưng đó còn giảm được sai số. Riêng cột hằng số cho $\sum_i r_i = 0$, nên với mọi mô hình có hệ số chặn, tổng phần dư bằng 0. Bốn sai số $-0{,}03$; $0{,}09$; $-0{,}09$; $0{,}03$ ở ví dụ căn hộ đúng là có tổng bằng 0.
 
 > **Định lý 4.1 (Nghiệm của bình phương tối thiểu).** Nếu $X$ đủ hạng cột thì $X^\top X$ khả nghịch và bài toán ở Định nghĩa 4.1 có nghiệm duy nhất
 > $$\hat w = (X^\top X)^{-1}X^\top y.$$
 
 Nghiệm này là cực tiểu chứ không phải cực đại hay điểm yên ngựa, vì ma trận Hessian của $L$ bằng $\tfrac{2}{n}X^\top X$, nửa xác định dương theo Mục 2.5. Do đó $L$ là hàm lồi và mọi điểm có gradient bằng 0 đều là cực tiểu toàn cục. Khi $X$ đủ hạng cột, Hessian xác định dương và cực tiểu là duy nhất. Chương 11 trình bày tính lồi một cách đầy đủ.
 
-> **Ví dụ 4.1.** Cho ba điểm $(x, y) = (0, 1), (1, 3), (2, 4)$ và mô hình $y = w_0 + w_1 x$. Ma trận dữ liệu và các tích cần thiết là
-> $$X = \begin{pmatrix}1&0\\1&1\\1&2\end{pmatrix}, \qquad X^\top X = \begin{pmatrix}3&3\\3&5\end{pmatrix}, \qquad X^\top y = \begin{pmatrix}8\\11\end{pmatrix}.$$
-> Định thức của $X^\top X$ là $15 - 9 = 6$, nên
-> $$\hat w = \frac16\begin{pmatrix}5&-3\\-3&3\end{pmatrix}\begin{pmatrix}8\\11\end{pmatrix} = \frac16\begin{pmatrix}7\\9\end{pmatrix} \approx \begin{pmatrix}1{,}1667\\1{,}5\end{pmatrix}.$$
-> Các dự đoán là $1{,}1667$; $2{,}6667$; $4{,}1667$ và phần dư là $-0{,}1667$; $0{,}3333$; $-0{,}1667$. Tổng phần dư bằng 0, đúng như dòng đầu của phương trình chuẩn đòi hỏi: hàng đầu của $X^\top$ gồm toàn số 1, nên $X^\top r = 0$ cho $\sum_i r_i = 0$. Điều này đúng với mọi mô hình có hệ số chặn.
+> **Ví dụ 4.1.** Với bốn căn hộ ở đầu chương, ma trận dữ liệu và các tích cần thiết là
+> $$X = \begin{pmatrix}1&40\\1&60\\1&80\\1&100\end{pmatrix}, \qquad X^\top X = \begin{pmatrix}4&280\\280&21\,600\end{pmatrix}, \qquad X^\top y = \begin{pmatrix}9\\678\end{pmatrix}.$$
+> Định thức của $X^\top X$ là $4 \cdot 21\,600 - 280^2 = 8\,000$, nên
+> $$\hat w = \frac{1}{8\,000}\begin{pmatrix}21\,600&-280\\-280&4\end{pmatrix}\begin{pmatrix}9\\678\end{pmatrix} = \frac{1}{8\,000}\begin{pmatrix}4\,560\\192\end{pmatrix} = \begin{pmatrix}0{,}57\\0{,}024\end{pmatrix},$$
+> trùng với kết quả tính bằng trung bình, hiệp phương sai và phương sai ở trên.
 
 Trên dữ liệu lớn hơn, ta có thể kiểm tra rằng các cách tính khác nhau cho cùng một nghiệm. Thí nghiệm trong `code/nentang/experiments.py` sinh 200 điểm với bốn hệ số thật $(2; -1{,}5; 0{,}8; 3)$ cộng nhiễu, rồi giải bằng ba cách.
 
@@ -496,7 +553,7 @@ Ba cách lệch nhau lớn nhất $1{,}2 \times 10^{-15}$, tức bằng nhau t�
 
 ### 4.3. Trường hợp ma trận $X^\top X$ suy biến
 
-Theo Mục 2.5, $X^\top X$ khả nghịch khi và chỉ khi $X$ đủ hạng cột. Trong thực tế có hai tình huống khiến điều kiện này không thoả. Tình huống thứ nhất là số đặc trưng lớn hơn số điểm dữ liệu ($d > n$): hạng của $X$ không vượt quá $n < d$, nên $X$ không thể đủ hạng cột. Tình huống thứ hai là có đặc trưng phụ thuộc tuyến tính vào các đặc trưng khác. Ví dụ hay gặp là mã hoá one-hot một biến hạng mục có $K$ giá trị thành đủ $K$ cột trong khi vẫn giữ cột hằng số, vì tổng $K$ cột one-hot đúng bằng cột hằng số; cách xử lý thông thường là bỏ một cột one-hot, hoặc bỏ cột hằng số.
+Định lý 4.1 cần một điều kiện: $X$ đủ hạng cột, tức không cột nào biểu diễn được qua các cột còn lại. Theo Mục 2.5, đó cũng là điều kiện để $X^\top X$ khả nghịch. Trong thực tế có hai tình huống khiến điều kiện này không thoả. Tình huống thứ nhất là số đặc trưng lớn hơn số điểm dữ liệu ($d > n$): hạng của $X$ không vượt quá $n < d$, nên $X$ không thể đủ hạng cột. Tình huống thứ hai là có đặc trưng phụ thuộc tuyến tính vào các đặc trưng khác. Nếu bảng căn hộ có thêm cột diện tích tính bằng feet vuông, cột đó đúng bằng 10,764 lần cột diện tích tính bằng mét vuông, và dữ liệu không có cách nào tách ảnh hưởng của hai cột ra khỏi nhau. Một trường hợp hay gặp hơn là mã hoá one-hot một biến hạng mục có $K$ giá trị thành đủ $K$ cột trong khi vẫn giữ cột hằng số, vì tổng $K$ cột one-hot đúng bằng cột hằng số; cách xử lý thông thường là bỏ một cột one-hot, hoặc bỏ cột hằng số.
 
 Thí nghiệm sau sao chép một cột của $X$ rồi thử giải.
 
@@ -513,7 +570,7 @@ Khi có nhiều nghiệm, ta cần một quy tắc chọn. **Giả nghịch đ�
 
 ### 4.4. Đa cộng tuyến
 
-Ngay cả khi $X$ đủ hạng cột, nếu có các cột gần phụ thuộc tuyến tính thì nghiệm vẫn không ổn định. Hiện tượng này gọi là **đa cộng tuyến** (multicollinearity). Thí nghiệm sau dựng hai đặc trưng có hệ số tương quan $\rho$ tăng dần. Với mỗi $\rho$, ma trận $X$ được giữ cố định và nhãn được sinh lại 300 lần với nhiễu khác nhau, để đo xem hệ số và dự đoán dao động bao nhiêu.
+Phụ thuộc tuyến tính chính xác dễ phát hiện, vì thuật toán giải báo lỗi. Khó hơn là trường hợp các cột gần phụ thuộc tuyến tính mà không phụ thuộc hẳn, như diện tích sàn xây dựng và diện tích sử dụng của một căn hộ: hai con số gần tỉ lệ với nhau nhưng không đúng tỉ lệ. Khi đó $X$ vẫn đủ hạng cột và nghiệm vẫn duy nhất, nhưng không ổn định. Hiện tượng này gọi là **đa cộng tuyến** (multicollinearity). Thí nghiệm sau dựng hai đặc trưng có hệ số tương quan $\rho$ tăng dần. Với mỗi $\rho$, ma trận $X$ được giữ cố định và nhãn được sinh lại 300 lần với nhiễu khác nhau, để đo xem hệ số và dự đoán dao động bao nhiêu.
 
 ![Hình 2](figs/nt02_linreg.png)
 
@@ -542,7 +599,7 @@ Như vậy đa cộng tuyến là vấn đề của việc diễn giải hệ s�
 
 Phương pháp bình phương tối thiểu luôn cho ra một nghiệm, nhưng việc diễn giải nghiệm đó, như khoảng tin cậy của hệ số hay kiểm định ý nghĩa thống kê, dựa trên ba giả định.
 
-Giả định đầu tiên là mô hình tuyến tính theo tham số, tức kỳ vọng của $y$ là hàm tuyến tính của $w$. Cần chú ý là tuyến tính theo tham số chứ không nhất thiết theo đầu vào: $y = w_0 + w_1 x + w_2 x^2$ vẫn là hồi quy tuyến tính vì nó tuyến tính theo $w$, chỉ cần coi $x^2$ là một đặc trưng mới. Để kiểm tra, ta vẽ phần dư theo giá trị dự đoán; nếu thấy dạng cong có hệ thống thì giả định bị vi phạm và cần thêm đặc trưng phi tuyến.
+Giả định đầu tiên là mô hình tuyến tính theo tham số, tức kỳ vọng của $y$ là hàm tuyến tính của $w$. Cần chú ý là tuyến tính theo tham số chứ không nhất thiết theo đầu vào: $y = w_0 + w_1 x + w_2 x^2$ vẫn là hồi quy tuyến tính vì nó tuyến tính theo $w$, chỉ cần coi $x^2$ là một đặc trưng mới. Để kiểm tra, ta vẽ phần dư theo giá trị dự đoán; nếu thấy dạng cong có hệ thống thì giả định bị vi phạm và cần thêm đặc trưng phi tuyến. Chẳng hạn, nếu giá căn hộ tăng nhanh dần theo diện tích, một đường thẳng sẽ dự đoán thấp ở hai đầu và cao ở giữa, và đồ thị phần dư có dạng chữ U.
 
 Giả định thứ hai là phương sai của nhiễu không đổi. Độ lớn của nhiễu thay đổi theo $x$, hiện tượng gọi là phương sai thay đổi, rất hay gặp với dữ liệu tiền tệ: sai số dự đoán giá một căn nhà đắt lớn hơn sai số với căn nhà rẻ. Khi đó bình phương tối thiểu vẫn cho ước lượng không chệch, nhưng không còn là ước lượng có phương sai nhỏ nhất, và các khoảng tin cậy tính theo công thức chuẩn bị sai. Cách xử lý thường dùng là lấy logarit của $y$, hoặc dùng bình phương tối thiểu có trọng số.
 
@@ -552,7 +609,7 @@ Giả định thứ hai và thứ ba không ảnh hưởng tới giá trị củ
 
 ### 4.6. Tóm tắt
 
-Hồi quy tuyến tính tìm hàm tuyến tính có tổng bình phương sai số nhỏ nhất, tức hình chiếu vuông góc của $y$ lên không gian cột của $X$. Cho gradient bằng 0 ta được phương trình chuẩn $X^\top X w = X^\top y$, có nghiệm duy nhất khi $X$ đủ hạng cột; trong mã nên giải bằng `lstsq` thay vì lập $X^\top X$, vì số điều kiện bị bình phương. Khi $X$ không đủ hạng cột, bài toán có vô số nghiệm cho cùng dự đoán, và giả nghịch đảo chọn nghiệm có chuẩn nhỏ nhất. Khi các cột gần phụ thuộc tuyến tính, hệ số dao động mạnh, gấp khoảng 25 lần ở tương quan 0,999 trong thí nghiệm, trong khi dự đoán gần như không đổi; hệ số phóng đại phương sai dự đoán được mức tăng này. Việc diễn giải hệ số còn dựa trên các giả định về tính tuyến tính, phương sai không đổi và tính độc lập của nhiễu.
+Hồi quy tuyến tính chọn đường thẳng, hay tổng quát là siêu phẳng, có trung bình bình phương sai số nhỏ nhất. Với một đặc trưng, đường tốt nhất đi qua điểm trung bình của dữ liệu và có hệ số góc bằng hiệp phương sai chia phương sai; trong ví dụ căn hộ, hệ số góc là 24 triệu đồng mỗi mét vuông. Với nhiều đặc trưng, cho gradient bằng 0 được phương trình chuẩn $X^\top X w = X^\top y$, nói rằng phần dư vuông góc với mọi cột của $X$, tức $X\hat w$ là hình chiếu vuông góc của $y$ lên không gian cột. Phương trình có nghiệm duy nhất khi $X$ đủ hạng cột; trong mã nên giải bằng `lstsq` thay vì lập $X^\top X$, vì số điều kiện bị bình phương. Khi $X$ không đủ hạng cột, bài toán có vô số nghiệm cho cùng dự đoán, và giả nghịch đảo chọn nghiệm có chuẩn nhỏ nhất. Khi các cột gần phụ thuộc tuyến tính, hệ số dao động mạnh, gấp khoảng 25 lần ở tương quan 0,999 trong thí nghiệm, trong khi dự đoán gần như không đổi; hệ số phóng đại phương sai dự đoán được mức tăng này. Việc diễn giải hệ số còn dựa trên các giả định về tính tuyến tính, phương sai không đổi và tính độc lập của nhiễu.
 
 Hồi quy tuyến tính giải được bằng một công thức, nhưng công thức đó đòi hỏi giải một hệ $d$ phương trình, còn hầu hết các mô hình khác không có công thức nào cả. Chương 5 trình bày phương pháp lặp được dùng cho gần như mọi mô hình học máy: gradient descent.
 
