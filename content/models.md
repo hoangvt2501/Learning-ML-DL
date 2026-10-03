@@ -462,13 +462,28 @@ Vector $\delta_h$ lại là đầu vào cho lớp phía trước, và mỗi côn
 
 **Hình 6.** Lượt xuôi tính và lưu lại các giá trị trung gian; lượt ngược nhân dần các đạo hàm cục bộ theo thứ tự ngược lại, dùng lại các giá trị đã lưu.
 
+Ví dụ sau thực hiện đầy đủ một lượt xuôi, một lượt ngược và một bước cập nhật trên mạng nhỏ nhất có lớp ẩn, để thấy từng công thức trên hoạt động thế nào.
+
+> **Ví dụ 5.1.** Mạng có đầu vào $x = (1, 2)$, lớp ẩn 2 đơn vị ReLU và một đầu ra tuyến tính, hàm mất mát $\mathcal{L} = \tfrac12(\hat y - y)^2$ với $y = 1$. Tham số:
+> $$\begin{gathered} W_1 = \begin{pmatrix} 0{,}1 & 0{,}2 \\ -0{,}3 & 0{,}1 \end{pmatrix}, \quad b_1 = (0, 0), \\ w_2 = (0{,}5;\; -0{,}4), \quad b_2 = 0{,}2. \end{gathered}$$
+>
+> **Lượt xuôi.** $z = W_1 x + b_1 = (0{,}1 + 0{,}4;\; -0{,}3 + 0{,}2) = (0{,}5;\; -0{,}1)$. Qua ReLU: $h = (0{,}5;\; 0)$. Đầu ra $\hat y = w_2^\top h + b_2 = 0{,}25 + 0 + 0{,}2 = 0{,}45$. Mất mát $\mathcal{L} = \tfrac12(0{,}45 - 1)^2 = 0{,}15125$.
+>
+> **Lượt ngược.** $\partial \mathcal{L}/\partial \hat y = \hat y - y = -0{,}55$. Lớp ra: $\partial \mathcal{L}/\partial w_2 = -0{,}55 \cdot h = (-0{,}275;\; 0)$, $\partial \mathcal{L}/\partial b_2 = -0{,}55$, và $\delta_h = -0{,}55 \cdot w_2 = (-0{,}275;\; 0{,}22)$. Qua ReLU: $\delta_z = \delta_h \odot \mathbb{1}[z > 0] = (-0{,}275;\; 0)$. Lớp ẩn: $\partial \mathcal{L}/\partial W_1 = \delta_z\, x^\top = \begin{pmatrix} -0{,}275 & -0{,}55 \\ 0 & 0 \end{pmatrix}$ và $\partial \mathcal{L}/\partial b_1 = (-0{,}275;\; 0)$.
+>
+> **Kiểm tra bằng sai phân.** Tăng rồi giảm $W_1[1,2]$ một lượng $10^{-4}$: mất mát thành $0{,}151195$ và $0{,}151305$, nên đạo hàm xấp xỉ $(0{,}151195 - 0{,}151305)/(2 \cdot 10^{-4}) = -0{,}55$, khớp với lượt ngược.
+>
+> **Cập nhật.** Một bước gradient descent với $\eta = 0{,}1$ đưa $\hat y$ từ 0,45 lên 0,606 và mất mát từ 0,151 xuống 0,078.
+
+Ví dụ cho thấy một chi tiết quan trọng: đơn vị ẩn thứ hai có $z_2 = -0{,}1 < 0$, nên đạo hàm của ReLU tại đó bằng 0, và toàn bộ hàng thứ hai của $W_1$ nhận gradient bằng 0. Đơn vị nào không kích hoạt với một đầu vào thì không học được gì từ đầu vào đó. Nếu một đơn vị không kích hoạt với mọi đầu vào, nó không bao giờ được cập nhật nữa; đó chính là đơn vị ReLU chết ở Mục 4.2. Cách kiểm tra bằng sai phân, và cách chọn bước sai phân, được trình bày ở [Mục 5.5 của *Nền tảng*](nentang-ch05.html).
+
 ### 5.2. Thứ tự nhân các ma trận Jacobi
 
 Vì sao phải đi ngược mà không đi xuôi? Theo quy tắc dây chuyền, với mạng $x \to h_1 \to \dots \to h_{L-1} \to \mathcal{L}$ trong đó $\mathcal{L}$ là một số, gradient theo đầu vào là tích các ma trận Jacobi:
 
 $$\frac{\partial \mathcal{L}}{\partial x} = \underbrace{\frac{\partial \mathcal{L}}{\partial h_{L-1}}}_{1 \times m}\;\underbrace{\frac{\partial h_{L-1}}{\partial h_{L-2}}}_{m \times m}\;\cdots\;\underbrace{\frac{\partial h_1}{\partial x}}_{m \times d}.$$
 
-Phép nhân ma trận có tính kết hợp, nên có thể nhân theo bất kỳ thứ tự nào, nhưng chi phí rất khác nhau. Nhân từ trái sang phải, tức chế độ ngược của lan truyền ngược, thì kết quả trung gian luôn là một vector hàng $1 \times m$, và mỗi bước chỉ là một phép nhân vector với ma trận, tốn $O(m^2)$. Nhân từ phải sang trái, tức chế độ xuôi, thì kết quả trung gian là một ma trận $m \times d$, và mỗi bước là một phép nhân ma trận với ma trận, tốn $O(m^2 d)$.
+Phép nhân ma trận có tính kết hợp, nên có thể nhân theo bất kỳ thứ tự nào, nhưng chi phí rất khác nhau. Nhân từ trái sang phải, tức chế độ ngược của lan truyền ngược, thì kết quả trung gian luôn là một vector hàng $1 \times m$, và mỗi bước chỉ là một phép nhân vector với ma trận, tốn $O(m^2)$. Nhân từ phải sang trái, tức chế độ xuôi, thì kết quả trung gian là một ma trận $m \times d$, và mỗi bước là một phép nhân ma trận với ma trận, tốn $O(m^2 d)$. Với 10 lớp có $m = d = 1\,000$, chế độ ngược tốn khoảng $10 \times 10^6 = 10^7$ phép nhân, chế độ xuôi khoảng $10 \times 10^9 = 10^{10}$, chênh nhau 1 000 lần, đúng bằng số đầu vào $d$.
 
 Tổng quát hơn, với một hàm từ $n$ đầu vào ra $k$ đầu ra, chế độ ngược tính toàn bộ gradient với chi phí cỡ $k$ lần tính hàm, còn chế độ xuôi cần cỡ $n$ lần (Baydin và cộng sự, 2018). Huấn luyện mạng nơ-ron có $k = 1$, vì hàm mất mát là một số, còn $n$ bằng số tham số, có thể tới hàng tỉ, nên chế độ ngược rẻ hơn hàng tỉ lần. Trên thực tế, một lượt ngược tốn khoảng gấp đôi một lượt xuôi (Mục 12.4), nên tính gradient chỉ tốn cỡ ba lần tính hàm mất mát.
 
@@ -505,7 +520,7 @@ Hai phép chia cho $1 - \beta^t$ gọi là **hiệu chỉnh độ chệch** (bia
 
 $$\mathbb{E}[m_t] = (1-\beta_1)\big(1 + \beta_1 + \dots + \beta_1^{t-1}\big)\,\mathbb{E}[g] = (1 - \beta_1^t)\,\mathbb{E}[g].$$
 
-Như vậy $m_t$ là ước lượng chệch về phía 0 của $\mathbb{E}[g]$, và chia cho $1 - \beta_1^t$ cho ước lượng không chệch. Ở bước đầu, $m_1 = 0{,}1\,g_1$ với $\beta_1 = 0{,}9$, nên nếu không hiệu chỉnh thì các bước đầu nhỏ đi một cách giả tạo. Với $\beta_2 = 0{,}999$, vấn đề nặng hơn nhiều, vì $1 - \beta_2^t$ còn nhỏ trong hàng nghìn bước đầu. Khi $t$ lớn, $\beta^t \to 0$ và phép hiệu chỉnh không còn tác dụng gì.
+Như vậy $m_t$ là ước lượng chệch về phía 0 của $\mathbb{E}[g]$, và chia cho $1 - \beta_1^t$ cho ước lượng không chệch. Cùng lập luận cho $\mathbb{E}[v_t] = (1 - \beta_2^t)\,\mathbb{E}[g^2]$. Hai độ chệch này không bù trừ cho nhau, vì $v_t$ bị kéo về 0 mạnh hơn nhiều. Ở bước đầu, $m_1 = 0{,}1\,g_1$ và $v_1 = 0{,}001\,g_1^2$, nên nếu không hiệu chỉnh, bước đi là $\eta \cdot 0{,}1\,g_1/\sqrt{0{,}001\,g_1^2} \approx 3{,}16\,\eta$ theo dấu của $g_1$, trong khi bước đã hiệu chỉnh là đúng $\eta$. Với gradient không đổi, tỉ số giữa hai bước là $(1 - \beta_1^t)/\sqrt{1 - \beta_2^t}$: bằng 6,5 ở bước 10, 3,2 ở bước 100 và vẫn còn 1,26 ở bước 1 000, vì $1 - \beta_2^t$ tăng rất chậm. Bỏ hiệu chỉnh vì vậy làm các bước đầu lớn bất thường, không phải nhỏ đi; Kingma và Ba (2015) nêu đúng điều này. Khi $t$ lớn, $\beta^t \to 0$ và phép hiệu chỉnh không còn tác dụng gì.
 
 Cuối cùng, **AdamW** (Loshchilov và Hutter, 2019) sửa cách Adam xử lý weight decay. Nếu thêm $\lambda\|\theta\|^2$ vào hàm mất mát rồi dùng Adam, gradient của thành phần phạt $2\lambda\theta$ cũng bị chia cho $\sqrt{\hat v_t}$, nên tham số có gradient lớn lại bị phạt ít hơn, ngược với mục đích của regularization. AdamW tách weight decay ra khỏi gradient và trừ trực tiếp $\eta\lambda\theta_t$ ở mỗi bước. AdamW là lựa chọn mặc định khi huấn luyện Transformer. Bảng dưới so sánh hai nhóm thuật toán.
 
@@ -538,24 +553,7 @@ Bảng dưới gom những hiểu lầm hay gặp về lan truyền ngược và
 | "Gradient bằng 0 nghĩa là đã hội tụ." | Cũng có thể là điểm yên ngựa, đơn vị ReLU đã chết, hoặc gradient đã tiêu biến qua nhiều lớp. |
 | "Lô càng lớn càng tốt." | Lô rất lớn làm mất phần nhiễu có ích, cần chỉnh lại tốc độ học, và lợi ích về thời gian giảm dần khi lô tăng. |
 
-### 5.7. Ví dụ tính tay
-
-Ví dụ sau thực hiện đầy đủ một lượt xuôi, một lượt ngược và một bước cập nhật trên mạng nhỏ nhất có lớp ẩn, để thấy từng công thức ở Mục 5.1 hoạt động thế nào.
-
-> **Ví dụ 5.1.** Mạng có đầu vào $x = (1, 2)$, lớp ẩn 2 đơn vị ReLU và một đầu ra tuyến tính, hàm mất mát $\mathcal{L} = \tfrac12(\hat y - y)^2$ với $y = 1$. Tham số:
-> $$\begin{gathered} W_1 = \begin{pmatrix} 0{,}1 & 0{,}2 \\ -0{,}3 & 0{,}1 \end{pmatrix}, \quad b_1 = (0, 0), \\ w_2 = (0{,}5;\; -0{,}4), \quad b_2 = 0{,}2. \end{gathered}$$
->
-> **Lượt xuôi.** $z = W_1 x + b_1 = (0{,}1 + 0{,}4;\; -0{,}3 + 0{,}2) = (0{,}5;\; -0{,}1)$. Qua ReLU: $h = (0{,}5;\; 0)$. Đầu ra $\hat y = w_2^\top h + b_2 = 0{,}25 + 0 + 0{,}2 = 0{,}45$. Mất mát $\mathcal{L} = \tfrac12(0{,}45 - 1)^2 = 0{,}15125$.
->
-> **Lượt ngược.** $\partial \mathcal{L}/\partial \hat y = \hat y - y = -0{,}55$. Lớp ra: $\partial \mathcal{L}/\partial w_2 = -0{,}55 \cdot h = (-0{,}275;\; 0)$, $\partial \mathcal{L}/\partial b_2 = -0{,}55$, và $\delta_h = -0{,}55 \cdot w_2 = (-0{,}275;\; 0{,}22)$. Qua ReLU: $\delta_z = \delta_h \odot \mathbb{1}[z > 0] = (-0{,}275;\; 0)$. Lớp ẩn: $\partial \mathcal{L}/\partial W_1 = \delta_z\, x^\top = \begin{pmatrix} -0{,}275 & -0{,}55 \\ 0 & 0 \end{pmatrix}$ và $\partial \mathcal{L}/\partial b_1 = (-0{,}275;\; 0)$.
->
-> **Kiểm tra bằng sai phân.** Tăng rồi giảm $W_1[1,2]$ một lượng $10^{-4}$: mất mát thành $0{,}151195$ và $0{,}151305$, nên đạo hàm xấp xỉ $(0{,}151195 - 0{,}151305)/(2 \cdot 10^{-4}) = -0{,}55$, khớp với lượt ngược.
->
-> **Cập nhật.** Một bước gradient descent với $\eta = 0{,}1$ đưa $\hat y$ từ 0,45 lên 0,606 và mất mát từ 0,151 xuống 0,078.
-
-Ví dụ cho thấy một chi tiết quan trọng: đơn vị ẩn thứ hai có $z_2 = -0{,}1 < 0$, nên đạo hàm của ReLU tại đó bằng 0, và toàn bộ hàng thứ hai của $W_1$ nhận gradient bằng 0. Đơn vị nào không kích hoạt với một đầu vào thì không học được gì từ đầu vào đó. Nếu một đơn vị không kích hoạt với mọi đầu vào, nó không bao giờ được cập nhật nữa; đó chính là đơn vị ReLU chết ở Mục 4.2. Cách kiểm tra bằng sai phân, và cách chọn bước sai phân, được trình bày ở [Mục 5.5 của *Nền tảng*](nentang-ch05.html).
-
-### 5.8. Tóm tắt
+### 5.7. Tóm tắt
 
 Lan truyền ngược tính gradient của hàm mất mát theo mọi tham số bằng quy tắc dây chuyền, đi từ đầu ra về đầu vào và dùng lại các giá trị đã lưu ở lượt xuôi. Nhân các ma trận Jacobi theo chiều ngược làm mọi kết quả trung gian là vector, nên với hàm mất mát là một số, tính toàn bộ gradient chỉ tốn cỡ ba lần tính hàm. Đổi lại, các giá trị trung gian phải được giữ trong bộ nhớ, và phần bộ nhớ kích hoạt này tăng theo kích thước lô và độ dài chuỗi. Gradient được dùng bởi SGD theo mini-batch, momentum hoặc Adam; Adam chia bước đi theo từng tham số, cần hiệu chỉnh độ chệch ở các bước đầu và giữ hai giá trị trạng thái cho mỗi tham số, còn AdamW tách weight decay khỏi gradient. Tốc độ học thường đi theo lịch warmup rồi giảm dần.
 

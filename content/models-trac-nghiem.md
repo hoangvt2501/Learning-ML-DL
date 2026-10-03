@@ -144,7 +144,7 @@ dòng `>` là phần giải thích hiện ra sau khi trả lời.
 - [x] Vì đơn vị ẩn thứ hai có $z_2 = -0{,}1 < 0$, nên đạo hàm của ReLU tại đó bằng 0
 - [ ] Vì mất mát đã bằng 0
 - [ ] Vì hệ số chặn bằng 0
-> Đơn vị nào không kích hoạt với một đầu vào thì không nhận gradient từ đầu vào đó. Nếu không kích hoạt với mọi đầu vào, nó thành đơn vị ReLU chết (Mục 5.7).
+> Đơn vị nào không kích hoạt với một đầu vào thì không nhận gradient từ đầu vào đó. Nếu không kích hoạt với mọi đầu vào, nó thành đơn vị ReLU chết (Mục 5.1).
 
 ### Vì sao Adam có bước hiệu chỉnh độ chệch?
 - [ ] Để bù cho độ chệch của mô hình
