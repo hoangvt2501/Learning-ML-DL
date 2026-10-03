@@ -138,11 +138,13 @@ Một tập dữ liệu hữu hạn luôn khớp được với vô số hàm kh
 
 Mỗi họ mô hình có một thiên kiến quy nạp riêng. Hồi quy tuyến tính giả định quan hệ tuyến tính. Regularization $\ell_2$ ưu tiên trọng số nhỏ ([Mục 9.2 của *Nền tảng*](nentang-ch09.html)). k láng giềng gần nhất giả định các điểm gần nhau có nhãn giống nhau. Mạng tích chập giả định đặc trưng có tính cục bộ và giống nhau ở mọi vị trí trong ảnh (Mục 7.1). Transformer giả định rất ít, và vì thế cần rất nhiều dữ liệu.
 
+Bốn căn hộ ở [Chương 4 của *Nền tảng*](nentang-ch04.html), rộng 40, 60, 80, 100 m² với giá 1,5; 2,1; 2,4; 3,0 tỉ đồng, cho thấy thiên kiến quy nạp quyết định dự đoán ra sao. Ba mô hình học từ cùng bốn điểm này. Hồi quy tuyến tính cho đường $0{,}57 + 0{,}024x$. Cây quyết định một lần chia cắt ở 70 m², dự đoán 1,8 tỉ cho mọi căn nhỏ hơn và 2,7 tỉ cho mọi căn lớn hơn. Còn 1 láng giềng gần nhất lấy giá của căn gần nhất. Với căn 120 m², ba mô hình dự đoán lần lượt 3,45; 2,7 và 3,0 tỉ. Cả ba đều khớp bốn căn hộ ở mức chấp nhận được, nhưng khác nhau ở giả định: hồi quy tuyến tính giả định giá tăng đều theo diện tích nên ngoại suy theo đường thẳng, cây giả định giá là hằng số trên từng khoảng nên mọi dự đoán của nó nằm trong khoảng giá đã thấy, còn 1 láng giềng gần nhất giả định một căn hộ đáng giá như căn giống nó nhất đã thấy. Dữ liệu không cho biết giả định nào đúng.
+
 Không có thiên kiến quy nạp nào tốt nhất cho mọi bài toán. Định lý "không có bữa trưa miễn phí" (no free lunch; Wolpert, 1996) phát biểu chặt chẽ điều này: lấy trung bình trên mọi bài toán có thể, mọi thuật toán học có cùng sai số trên các điểm ngoài tập huấn luyện. Một thuật toán chỉ tốt hơn thuật toán khác trên những bài toán mà giả định của nó phù hợp. Vì vậy câu hỏi "mô hình nào tốt nhất" không có câu trả lời chung; câu hỏi đúng là giả định của mô hình nào khớp với cấu trúc của dữ liệu đang có.
 
 ### 1.5. Tóm tắt
 
-Mỗi họ mô hình là một cách trả lời bốn câu hỏi: xét họ hàm nào, số tham số cố định hay tăng theo dữ liệu, tìm tham số bằng cách nào, và kiểm soát overfitting ra sao. Các câu trả lời đó quy về thiên kiến quy nạp của mô hình, tức những giả định nó dùng để chọn giữa các hàm cùng khớp dữ liệu. Không có thiên kiến nào tốt nhất cho mọi bài toán: cây hợp với dữ liệu bảng vì nó chia theo từng trục, còn mạng tích chập và Transformer hợp với ảnh và văn bản vì giả định của chúng khớp với cấu trúc của các loại dữ liệu đó. Dù vậy, dữ liệu và nhãn thường ảnh hưởng tới kết quả nhiều hơn việc chọn mô hình.
+Mỗi họ mô hình là một cách trả lời bốn câu hỏi: xét họ hàm nào, số tham số cố định hay tăng theo dữ liệu, tìm tham số bằng cách nào, và kiểm soát overfitting ra sao. Các câu trả lời đó quy về thiên kiến quy nạp của mô hình, tức những giả định nó dùng để chọn giữa các hàm cùng khớp dữ liệu; từ cùng bốn căn hộ, hồi quy tuyến tính, cây một lần chia và 1 láng giềng gần nhất định giá căn 120 m² là 3,45; 2,7 và 3,0 tỉ. Không có thiên kiến nào tốt nhất cho mọi bài toán: cây hợp với dữ liệu bảng vì nó chia theo từng trục, còn mạng tích chập và Transformer hợp với ảnh và văn bản vì giả định của chúng khớp với cấu trúc của các loại dữ liệu đó. Dù vậy, dữ liệu và nhãn thường ảnh hưởng tới kết quả nhiều hơn việc chọn mô hình.
 
 Giả định càng mạnh thì họ hàm càng hẹp. Nếu giả định đúng, mô hình học được từ ít dữ liệu; nếu sai, nó mắc một sai số có hệ thống mà thêm dữ liệu cũng không sửa được. Chương 2 đặt tên cho loại sai số này và loại sai số đối lập với nó, rồi đo cả hai.
 
@@ -170,7 +172,17 @@ Ba thành phần có ý nghĩa khác nhau. Độ chệch đo sai lệch có hệ
 
 > **Lưu ý.** Độ chệch và phương sai được định nghĩa qua kỳ vọng trên **các tập huấn luyện có thể rút ra**, tại một điểm $x_0$ cố định. Chúng không đo mức dao động của dự đoán giữa các điểm dữ liệu khác nhau. Một mô hình có dự đoán thay đổi mạnh theo $x$ vẫn có thể có phương sai thấp, nếu huấn luyện trên tập dữ liệu khác thì nó cho gần như cùng một hàm.
 
-Khi tăng độ linh hoạt của mô hình, độ chệch thường giảm vì họ hàm rộng hơn, còn phương sai thường tăng vì có nhiều cách hơn để khớp theo nhiễu. Tổng của chúng vì vậy thường có dạng chữ U theo độ linh hoạt. Chữ "thường" ở đây là cần thiết: định lý chỉ khẳng định phép tách, không khẳng định hai thành phần thay đổi đơn điệu, và Mục 2.3 sẽ cho thấy những trường hợp ngoại lệ.
+Bốn căn hộ ở Mục 1.4 cho một phép tính tay. Giả sử giá thật là ${f(x) = 0{,}57 + 0{,}024x}$ cộng nhiễu có phương sai $\sigma^2$ ở mỗi căn, và ta dự đoán giá căn 120 m², nơi $f(120) = 3{,}45$. Ba mô hình dưới đây đều cho dự đoán là một tổ hợp tuyến tính $\sum_i c_i y_i$ của bốn mức giá quan sát được, với các hệ số $c_i$ chỉ phụ thuộc vào diện tích. Nhiễu ở bốn căn độc lập, nên phương sai của dự đoán là $\sigma^2\sum_i c_i^2$.
+
+| Mô hình | Hệ số $c_i$ tại 120 m² | Độ chệch | Phương sai |
+|---|---|---|---|
+| Hằng số: trung bình bốn giá | 0,25 cho mỗi căn | $-1{,}2$ | $0{,}25\,\sigma^2$ |
+| Đường thẳng | $-0{,}5;\ 0;\ 0{,}5;\ 1$ | 0 | $1{,}5\,\sigma^2$ |
+| Đa thức bậc ba qua bốn điểm | $-1;\ 4;\ -6;\ 4$ | 0 | $69\,\sigma^2$ |
+
+Mô hình hằng số có phương sai nhỏ nhất nhưng kỳ vọng của nó là ${f(70) = 2{,}25}$, lệch 1,2 tỉ so với giá thật 3,45 tỉ. Đường thẳng và đa thức bậc ba đều không chệch, vì hàm thật là một đường thẳng, nhưng phương sai của đa thức gấp 46 lần đường thẳng: hệ số $-6$ của căn 80 m² nghĩa là nhiễu ở căn đó bị khuếch đại sáu lần khi ngoại suy ra 120 m². Với $\sigma^2 = 0{,}009$, ước lượng ở [Mục 10.2 của *Nền tảng*](nentang-ch10.html), phần sai số ngoài nhiễu là 1,442 cho mô hình hằng số, 0,0135 cho đường thẳng và 0,621 cho đa thức bậc ba.
+
+Ba mô hình này là một trường hợp của quy luật chung. Khi tăng độ linh hoạt của mô hình, độ chệch thường giảm vì họ hàm rộng hơn, còn phương sai thường tăng vì có nhiều cách hơn để khớp theo nhiễu. Tổng của chúng vì vậy thường có dạng chữ U theo độ linh hoạt. Chữ "thường" ở đây là cần thiết: định lý chỉ khẳng định phép tách, không khẳng định hai thành phần thay đổi đơn điệu, và Mục 2.3 sẽ cho thấy những trường hợp ngoại lệ.
 
 ### 2.3. Đo độ chệch và phương sai bằng mô phỏng
 
@@ -231,7 +243,7 @@ Vì vậy câu "mô hình càng nhiều tham số càng dễ overfitting" chỉ 
 
 ### 2.6. Tóm tắt
 
-Sai số kỳ vọng của một mô hình tại một điểm tách thành độ chệch², phương sai và nhiễu. Độ chệch đến từ họ hàm quá hẹp, phương sai đến từ việc khớp theo nhiễu riêng của từng tập huấn luyện, còn nhiễu là cận dưới không vượt qua được. Mô phỏng với đa thức cho thấy tổng sai số nhỏ nhất ở bậc 5, nơi hai thành phần gần bằng nhau, và độ chệch chỉ giảm khi họ hàm mở rộng theo hướng có ích, như các bậc lẻ với một hàm lẻ. Với dữ liệu thật, đường cong học thay cho phép đo trực tiếp và cho biết nên đổi mô hình hay thu thêm dữ liệu. Ở chế độ nhiều tham số hơn dữ liệu, double descent cho thấy phương sai không nhất thiết tăng theo số tham số.
+Sai số kỳ vọng của một mô hình tại một điểm tách thành độ chệch², phương sai và nhiễu. Độ chệch đến từ họ hàm quá hẹp, phương sai đến từ việc khớp theo nhiễu riêng của từng tập huấn luyện, còn nhiễu là cận dưới không vượt qua được. Với bốn căn hộ và căn 120 m², mô hình hằng số lệch 1,2 tỉ, đường thẳng không chệch với phương sai $1{,}5\,\sigma^2$, còn đa thức bậc ba qua bốn điểm không chệch nhưng có phương sai $69\,\sigma^2$. Mô phỏng với đa thức cho thấy tổng sai số nhỏ nhất ở bậc 5, nơi hai thành phần gần bằng nhau, và độ chệch chỉ giảm khi họ hàm mở rộng theo hướng có ích, như các bậc lẻ với một hàm lẻ. Với dữ liệu thật, đường cong học thay cho phép đo trực tiếp và cho biết nên đổi mô hình hay thu thêm dữ liệu. Ở chế độ nhiều tham số hơn dữ liệu, double descent cho thấy phương sai không nhất thiết tăng theo số tham số.
 
 Một mô hình minh hoạ rất rõ cả hai loại sai số là cây quyết định: cây nông có độ chệch cao, cây sâu có phương sai cao. Chương 3 xét cây quyết định, rồi hai cách kết hợp nhiều cây để giảm từng loại sai số.
 
