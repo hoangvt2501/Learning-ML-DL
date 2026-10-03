@@ -112,21 +112,12 @@
       });
       if (typeof window.QZ_BIND === 'function') window.QZ_BIND();
 
-      // Trang có scroll-behavior: smooth; sang trang mới thì nhảy thẳng tới vị trí
-      // cần đến, không lướt qua cả trang mới từ vị trí cuộn của trang cũ.
-      cuộnNgay(hash && document.getElementById(hash.slice(1)));
+      if (hash) {
+        var t = document.getElementById(hash.slice(1));
+        if (t) { t.scrollIntoView(); return; }
+      }
+      window.scrollTo(0, 0);
     });
-  }
-
-  function cuộnNgay(đích) {
-    try {
-      if (đích) đích.scrollIntoView({ block: 'start', behavior: 'instant' });
-      else window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    } catch (e) {
-      // Trình duyệt cũ không nhận 'instant' thì cuộn theo cách mặc định.
-      if (đích) đích.scrollIntoView();
-      else window.scrollTo(0, 0);
-    }
   }
 
   function đi(href, đẩyLịchSử) {
@@ -182,13 +173,9 @@
     var url = (e.state && e.state.url) || location.pathname + location.search + location.hash;
     var a = document.createElement('a');
     a.href = url;
-    document.documentElement.classList.add('is-navigating');
     tải(a.pathname + a.search)
       .then(function (doc) { return ápDụng(doc, a.pathname, a.hash); })
-      .catch(function () { location.reload(); })
-      .then(function () {
-        document.documentElement.classList.remove('is-navigating');
-      });
+      .catch(function () { location.reload(); });
   });
 
   history.replaceState({ url: location.pathname + location.search + location.hash }, '');

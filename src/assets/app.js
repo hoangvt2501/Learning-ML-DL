@@ -1,6 +1,5 @@
-/* Tương tác dùng chung cho mọi trang: giao diện sáng/tối, phông chữ, mục lục,
-   thu gọn phần và tiến độ "đã học" ở thanh bên, tìm kiếm, phóng to hình, sao
-   chép mã, thanh tiến độ đọc, thời gian đọc còn lại và phần trắc nghiệm. */
+/* Tương tác dùng chung cho mọi trang: giao diện sáng/tối, mục lục, tìm kiếm,
+   phóng to hình, sao chép mã, thanh tiến độ đọc và phần trắc nghiệm. */
 (function () {
   'use strict';
 
@@ -15,32 +14,6 @@
       document.documentElement.dataset.theme = next;
       try { localStorage.setItem('qz-theme', next); } catch (e) {}
     });
-  }
-
-  /* ------------------------------------------------------- phông chữ */
-  // Bài đọc mặc định dùng phông có chân; nút này đổi sang phông không chân của
-  // giao diện và nhớ lựa chọn. Thuộc tính data-font được đặt sẵn trong <head>.
-  var fontBtn = $('#fontBtn');
-  function capNhatNutPhong() {
-    if (fontBtn) fontBtn.setAttribute('aria-pressed', String(document.documentElement.dataset.font === 'sans'));
-  }
-  if (fontBtn) {
-    capNhatNutPhong();
-    fontBtn.addEventListener('click', function () {
-      var sans = document.documentElement.dataset.font !== 'sans';
-      if (sans) document.documentElement.dataset.font = 'sans';
-      else delete document.documentElement.dataset.font;
-      try { localStorage.setItem('qz-font', sans ? 'sans' : 'serif'); } catch (e) {}
-      capNhatNutPhong();
-    });
-  }
-
-  /* Đọc/ghi một đối tượng JSON trong localStorage; trình duyệt chặn thì bỏ qua. */
-  function docKho(khoa) {
-    try { return JSON.parse(localStorage.getItem(khoa)) || {}; } catch (e) { return {}; }
-  }
-  function ghiKho(khoa, giaTri) {
-    try { localStorage.setItem(khoa, JSON.stringify(giaTri)); } catch (e) {}
   }
 
   /* ---------------------------------------------------------- sidebar */
@@ -71,131 +44,6 @@
     var sr = sb.getBoundingClientRect();
     if (r.top < sr.top || r.bottom > sr.bottom) cur.scrollIntoView({ block: 'center' });
   }
-
-  /* ------------------------------------------ thu gọn phần ở thanh bên */
-  // Mặc định chỉ mở phần chứa chương đang đọc. Phần nào người đọc tự mở thì được
-  // nhớ lại, khoá theo đường dẫn chương đầu tiên của phần (duy nhất trên site).
-  var KHOA_PHAN = 'qz-phan-mo';
-
-  function khoaPhan(btn) {
-    var a = btn.nextElementSibling && btn.nextElementSibling.querySelector('a');
-    return a ? a.getAttribute('href') : '';
-  }
-  function datPhan(btn, mo) {
-    btn.setAttribute('aria-expanded', String(mo));
-    if (btn.nextElementSibling) btn.nextElementSibling.hidden = !mo;
-  }
-  function khoiTaoPhan() {
-    var daMo = docKho(KHOA_PHAN);
-    $$('[data-part-toggle]').forEach(function (btn) {
-      var dangDoc = btn.nextElementSibling && btn.nextElementSibling.querySelector('a.is-active');
-      datPhan(btn, Boolean(dangDoc) || Boolean(daMo[khoaPhan(btn)]));
-    });
-  }
-  document.addEventListener('click', function (e) {
-    var btn = e.target.closest && e.target.closest('[data-part-toggle]');
-    if (!btn) return;
-    var mo = btn.getAttribute('aria-expanded') !== 'true';
-    datPhan(btn, mo);
-    var daMo = docKho(KHOA_PHAN);
-    if (mo) daMo[khoaPhan(btn)] = 1;
-    else delete daMo[khoaPhan(btn)];
-    ghiKho(KHOA_PHAN, daMo);
-  });
-
-  /* ------------------------------------------------ đánh dấu đã học */
-  // Chương được đánh dấu khi người đọc cuộn tới phần tự kiểm tra ở cuối, hoặc khi
-  // bấm nút ở cuối chương. Chỉ tính các chương thuộc một phần, không tính bài tập,
-  // câu hỏi phỏng vấn, tài liệu tham khảo và phụ lục. Dữ liệu chỉ nằm trong
-  // trình duyệt này.
-  var KHOA_HOC = 'qz-da-hoc';
-  var daHoc = docKho(KHOA_HOC);
-
-  function chuongDangDoc() {
-    var a = $('[data-part-list] a.is-active');
-    return a && $('#main .chapter-kicker') ? a.getAttribute('href') : '';
-  }
-  function datDaHoc(file, co) {
-    daHoc = docKho(KHOA_HOC);
-    if (co) daHoc[file] = Date.now();
-    else delete daHoc[file];
-    ghiKho(KHOA_HOC, daHoc);
-    veTienDo();
-  }
-  function veTienDo() {
-    var links = $$('[data-part-list] a');
-    var xong = 0;
-    links.forEach(function (a) {
-      var r = Boolean(daHoc[a.getAttribute('href')]);
-      a.classList.toggle('is-read', r);
-      if (r) xong++;
-    });
-    $$('[data-part-toggle]').forEach(function (btn) {
-      var ls = btn.nextElementSibling ? $$('a', btn.nextElementSibling) : [];
-      var n = ls.filter(function (a) { return a.classList.contains('is-read'); }).length;
-      var c = $('[data-part-count]', btn);
-      if (!c) return;
-      c.textContent = n ? n + '/' + ls.length : '';
-      c.classList.toggle('is-full', n > 0 && n === ls.length);
-    });
-    var box = $('[data-nav-progress]');
-    if (box && links.length) {
-      box.hidden = false;
-      box.innerHTML =
-        '<div class="nav-progress-row"><span>Đã học <b>' + xong + '</b>/' + links.length + ' chương</span>' +
-        (xong ? '<button type="button" class="nav-progress-reset" data-progress-reset>Xoá tiến độ</button>' : '') +
-        '</div><div class="nav-progress-bar"><span style="width:' +
-        (100 * xong / links.length).toFixed(1) + '%"></span></div>';
-    }
-    veNutDaHoc();
-  }
-  // Dòng "đã học" ở cuối chương, ngay trên nút chuyển trang.
-  function veNutDaHoc() {
-    var file = chuongDangDoc();
-    var khoi = $('#main .read-mark');
-    if (!file) { if (khoi) khoi.remove(); return; }
-    if (!khoi) {
-      khoi = document.createElement('div');
-      khoi.className = 'read-mark';
-      var main = $('#main');
-      main.insertBefore(khoi, $('.pager', main));
-    }
-    var co = Boolean(daHoc[file]);
-    khoi.classList.toggle('is-read', co);
-    khoi.innerHTML = co
-      ? '<span>✓ Đã học chương này.</span><button type="button" data-read-toggle>Bỏ đánh dấu</button>'
-      : '<span>Đọc xong chương này?</span><button type="button" data-read-toggle>Đánh dấu đã học</button>';
-  }
-  // Mỗi lần mở một chương chỉ tự đánh dấu một lần, và không tự đánh dấu lại
-  // nếu người đọc vừa bấm nút: bỏ đánh dấu ở cuối chương thì phải giữ nguyên.
-  var daXuLy = '';
-  function kiemTraDocXong() {
-    var file = chuongDangDoc();
-    if (!file || daXuLy === file || daHoc[file] || window.scrollY < 1) return;
-    // Lúc router đang thay trang, nội dung mới nằm tạm ở vị trí cuộn của trang cũ.
-    if (document.documentElement.classList.contains('is-navigating')) return;
-    var moc = $('#main .quiz') || $('#main .read-mark');
-    if (moc && moc.getBoundingClientRect().top < window.innerHeight) {
-      daXuLy = file;
-      datDaHoc(file, true);
-    }
-  }
-  document.addEventListener('click', function (e) {
-    if (!e.target.closest) return;
-    if (e.target.closest('[data-read-toggle]')) {
-      var file = chuongDangDoc();
-      if (file) { daXuLy = file; datDaHoc(file, !daHoc[file]); }
-    } else if (e.target.closest('[data-progress-reset]')) {
-      if (!window.confirm('Xoá tiến độ đã học của giáo trình này?')) return;
-      daHoc = docKho(KHOA_HOC);
-      $$('[data-part-list] a').forEach(function (a) { delete daHoc[a.getAttribute('href')]; });
-      ghiKho(KHOA_HOC, daHoc);
-      veTienDo();
-    }
-  });
-
-  khoiTaoPhan();
-  veTienDo();
   cuonToiMucDangDoc();
 
   /* ------------------------------------------------------ sao chép mã */
@@ -268,24 +116,13 @@
   }
   docLaiMucLuc();
 
-  // Thời gian đọc còn lại, hiện dưới tiêu đề mục lục bên phải của các chương.
-  function capNhatThoiGianCon(p) {
-    var o = $('[data-time-left]');
-    if (!o) return;
-    var t = $('#main .kicker-time[data-minutes]');
-    if (!t) { o.hidden = true; return; }
-    var con = Math.max(1, Math.round(+t.getAttribute('data-minutes') * (1 - p)));
-    o.hidden = false;
-    o.textContent = p < 0.98 ? 'Còn khoảng ' + con + ' phút đọc' : 'Đã tới cuối chương';
-  }
-
   var ticking = false;
   function onScroll() {
-    var h = document.documentElement;
-    var max = h.scrollHeight - h.clientHeight;
-    var p = max > 0 ? Math.min(1, h.scrollTop / max) : 1;
-    if (progress) progress.style.width = (max > 0 ? p * 100 : 0) + '%';
-    capNhatThoiGianCon(p);
+    if (progress) {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      progress.style.width = (max > 0 ? Math.min(1, h.scrollTop / max) * 100 : 0) + '%';
+    }
     if (headings.length) {
       var y = window.scrollY + 140;
       var idx = 0;
@@ -297,19 +134,8 @@
     ticking = false;
   }
   window.addEventListener('scroll', function () {
-    if (!ticking) {
-      ticking = true;
-      // Chỉ đánh dấu "đã học" khi người đọc thật sự cuộn, không đánh dấu lúc mới mở trang.
-      requestAnimationFrame(function () { onScroll(); kiemTraDocXong(); });
-    }
+    if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
   }, { passive: true });
-  // Trang có thể dài thêm khi hình và phông nạp xong mà không có sự kiện cuộn nào;
-  // khi đó tính lại thanh tiến độ và thời gian còn lại.
-  if ('ResizeObserver' in window) {
-    new ResizeObserver(function () {
-      if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
-    }).observe(document.body);
-  }
   onScroll();
 
   /* --------------------------------------------------------- tìm kiếm */
@@ -469,62 +295,54 @@
     }
   }
 
-  function capNhatDiem(quiz) {
+  $$('[data-quiz]').forEach(function (quiz) {
     var questions = $$('[data-q]', quiz);
     var score = $('[data-score]', quiz);
     var total = questions.length;
-    var answered = questions.filter(function (q) { return q.dataset.answered; }).length;
-    var right = questions.filter(function (q) { return q.dataset.answered === 'right'; }).length;
-    score.textContent = answered === total
-      ? 'Xong: đúng ' + right + '/' + total + ' câu'
-      : 'Đã trả lời ' + answered + '/' + total;
-    score.classList.toggle('is-done', answered === total);
-  }
 
-  // Router thay nội dung trang mà không tải lại, nên sự kiện được uỷ quyền cho
-  // document; mỗi khối trắc nghiệm mới chỉ cần trộn đáp án và đếm điểm một lần.
-  function khoiTaoTracNghiem() {
-    $$('[data-quiz]').forEach(function (quiz) {
-      if (quiz.dataset.ready) return;
-      quiz.dataset.ready = '1';
-      $$('[data-q]', quiz).forEach(function (q) { shuffle($$('.quiz-opt', q)); });
-      capNhatDiem(quiz);
-    });
-  }
+    questions.forEach(function (q) { shuffle($$('.quiz-opt', q)); });
 
-  document.addEventListener('click', function (e) {
-    var quiz = e.target.closest && e.target.closest('[data-quiz]');
-    if (!quiz) return;
-    var opt = e.target.closest('.quiz-opt');
-    if (opt && !opt.disabled) {
-      var q = opt.closest('[data-q]');
-      var correct = opt.dataset.correct === '1';
-      $$('.quiz-opt', q).forEach(function (o) {
-        o.disabled = true;
-        if (o.dataset.correct === '1') o.classList.add('is-correct');
-      });
-      if (!correct) opt.classList.add('is-wrong');
-      $('.quiz-why', q).hidden = false;
-      q.dataset.answered = correct ? 'right' : 'wrong';
-      capNhatDiem(quiz);
-      return;
+    function refresh() {
+      var answered = questions.filter(function (q) { return q.dataset.answered; }).length;
+      var right = questions.filter(function (q) { return q.dataset.answered === 'right'; }).length;
+      score.textContent = answered === total
+        ? 'Xong: đúng ' + right + '/' + total + ' câu'
+        : 'Đã trả lời ' + answered + '/' + total;
+      score.classList.toggle('is-done', answered === total);
     }
-    if (e.target.closest('[data-reset]')) {
-      $$('[data-q]', quiz).forEach(function (q) {
-        delete q.dataset.answered;
-        $('.quiz-why', q).hidden = true;
-        var opts = $$('.quiz-opt', q);
-        opts.forEach(function (o) {
-          o.disabled = false;
-          o.classList.remove('is-correct', 'is-wrong');
+
+    quiz.addEventListener('click', function (e) {
+      var opt = e.target.closest('.quiz-opt');
+      if (opt && !opt.disabled) {
+        var q = opt.closest('[data-q]');
+        var correct = opt.dataset.correct === '1';
+        $$('.quiz-opt', q).forEach(function (o) {
+          o.disabled = true;
+          if (o.dataset.correct === '1') o.classList.add('is-correct');
         });
-        shuffle(opts);
-      });
-      capNhatDiem(quiz);
-    }
-  });
+        if (!correct) opt.classList.add('is-wrong');
+        $('.quiz-why', q).hidden = false;
+        q.dataset.answered = correct ? 'right' : 'wrong';
+        refresh();
+        return;
+      }
+      if (e.target.closest('[data-reset]')) {
+        questions.forEach(function (q) {
+          delete q.dataset.answered;
+          $('.quiz-why', q).hidden = true;
+          var opts = $$('.quiz-opt', q);
+          opts.forEach(function (o) {
+            o.disabled = false;
+            o.classList.remove('is-correct', 'is-wrong');
+          });
+          shuffle(opts);
+        });
+        refresh();
+      }
+    });
 
-  khoiTaoTracNghiem();
+    refresh();
+  });
 
   /* Đóng thanh bên khi bấm vào một mục điều hướng trên màn hình hẹp. */
   // Uỷ quyền cho document thay vì gắn vào từng thẻ: sau khi router thay thanh
@@ -535,11 +353,7 @@
 
   /* Router gọi lại hàm này mỗi khi thay nội dung trang. */
   window.QZ_BIND = function () {
-    daXuLy = '';
     docLaiMucLuc();
-    khoiTaoPhan();
-    veTienDo();
-    khoiTaoTracNghiem();
     cuonToiMucDangDoc();
     onScroll();
   };

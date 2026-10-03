@@ -208,38 +208,6 @@ body.is-home .prose, body.is-fulltext .prose { max-width: 58rem; }
 }
 .kicker-time { color: var(--text-3); }
 
-/* vị trí của chương: trang chủ / giáo trình / phần */
-.crumbs {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .45rem;
-  margin-bottom: .55rem; font-family: var(--font-ui); font-size: .75rem; color: var(--text-3);
-}
-.crumbs a { color: var(--text-3); text-decoration: none; }
-.crumbs a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
-.crumbs > * + *::before { content: "/"; display: inline-block; margin-right: .45rem; opacity: .55; }
-
-/* dòng "đã học" ở cuối chương */
-.read-mark {
-  display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap;
-  max-width: var(--content-w); margin: 2.5rem auto 0; padding: .7rem 1rem;
-  border: 1px dashed var(--line); border-radius: var(--radius);
-  font-family: var(--font-ui); font-size: .85rem; color: var(--text-2);
-}
-.read-mark.is-read {
-  border-style: solid; border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-  background: color-mix(in srgb, var(--accent-soft) 45%, transparent); color: var(--accent-2);
-}
-.read-mark button {
-  padding: .35rem .8rem; border: 1px solid var(--line); border-radius: var(--radius-sm);
-  background: var(--surface); color: var(--text); cursor: pointer;
-  font: inherit; font-size: .8rem; font-weight: 600;
-}
-.read-mark button:hover { border-color: var(--accent); color: var(--accent-2); }
-.read-mark + .pager { margin-top: 1.5rem; }
-
-/* đổi sang phông không chân cho bài đọc */
-:root[data-font='sans'] { --font-body: var(--font-ui); }
-#fontBtn[aria-pressed='true'] { color: var(--accent-2); background: var(--accent-soft); }
-
 .chapter-lede {
   font-size: 1.08rem; color: var(--text-2); margin: 0 0 2rem;
   padding-bottom: 1.25rem; border-bottom: 1px solid var(--line);
@@ -425,7 +393,6 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
   margin: 0 0 .6rem; font-size: .7rem; font-weight: 600;
   letter-spacing: .09em; text-transform: uppercase; color: var(--text-3);
 }
-.toc-left { margin: -.3rem 0 .75rem; font-size: .74rem; color: var(--text-3); }
 .toc-list { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--line); }
 .toc-list a {
   display: block; padding: .26rem 0 .26rem .75rem; margin-left: -1px;
@@ -1093,16 +1060,12 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
 }
 .home-spine a { color: var(--accent); font-weight: 600; }
 
-/* phần nhỏ trong thanh bên: tên phần là nút thu gọn/mở rộng */
+/* phần nhỏ trong thanh bên */
 .nav-group--part {
-  display: flex; align-items: center; gap: .45rem;
-  width: calc(100% - 1.2rem); padding: .15rem 0;
+  display: flex; align-items: baseline; gap: .45rem;
   margin-top: 1.15rem; text-transform: none; letter-spacing: 0;
-  font-family: inherit; font-size: .78rem; color: var(--text-2); font-weight: 600;
-  background: none; border: 0; text-align: left; cursor: pointer;
+  font-size: .78rem; color: var(--text-2); font-weight: 600;
 }
-.nav-group--part:hover { color: var(--text); }
-.nav-group--part:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .nav-group--part:first-of-type { margin-top: .35rem; }
 .nav-part-no {
   display: inline-flex; align-items: center; justify-content: center;
@@ -1110,33 +1073,6 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
   background: var(--accent); color: #fff;
   font-size: .62rem; font-weight: 700; flex: 0 0 auto;
 }
-.nav-part-name { flex: 1 1 auto; }
-.nav-part-count { font-size: .68rem; color: var(--text-3); font-variant-numeric: tabular-nums; }
-.nav-part-count:empty { display: none; }
-.nav-part-count.is-full { color: var(--accent); }
-.nav-part-chevron { width: .9rem; height: .9rem; color: var(--text-3); transition: transform .15s ease; }
-.nav-group--part[aria-expanded='false'] .nav-part-chevron { transform: rotate(-90deg); }
-
-/* chương đã học: số thứ tự đổi thành dấu ✓ */
-.nav-list a.is-read .nav-num,
-.nav-list a.is-read.is-active .nav-num { position: relative; color: transparent; }
-.nav-list a.is-read .nav-num::after {
-  content: "\2713"; position: absolute; right: 0; top: 0;
-  color: var(--accent); font-weight: 700;
-}
-
-/* tiến độ đã học, đầu danh sách chương */
-.nav-progress { margin: .9rem .6rem .25rem; font-size: .75rem; color: var(--text-2); }
-.nav-progress-row { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; }
-.nav-progress-row b { color: var(--text); font-weight: 650; }
-.nav-progress-reset {
-  padding: 0; background: none; border: 0; cursor: pointer;
-  font: inherit; font-size: .7rem; color: var(--text-3);
-  text-decoration: underline; text-underline-offset: 2px;
-}
-.nav-progress-reset:hover { color: var(--accent); }
-.nav-progress-bar { height: 4px; margin-top: .4rem; border-radius: 99px; background: var(--bg-soft); overflow: hidden; }
-.nav-progress-bar span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width .3s ease; }
 .lt-phan--aux { margin: 0 0 2.5rem; padding-left: .2rem; }
 .lt-aux-head {
   margin: 0 0 .5rem; font-family: var(--font-ui); font-size: .74rem;
@@ -1205,6 +1141,8 @@ a.note-tag:hover { background: color-mix(in srgb, var(--warn) 28%, transparent);
 }
 
 /* tên phần trên dòng kicker của trang chương */
+.kicker-part { font-family: var(--font-ui); font-size: .76rem; color: var(--text-3); }
+.kicker-part::before { content: "\00B7"; margin: 0 .45rem; opacity: .6; }
 
 /* =====================================================================
    HỆ THỐNG GIAO DIỆN: icon Lucide, tiêu đề đánh số, hộp kiểu giáo trình
