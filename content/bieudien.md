@@ -281,6 +281,8 @@ tức cosine của góc giữa chúng. Lý do thường được nêu để dùn
 
 Nếu toàn bộ embedding lệch về một phía so với gốc toạ độ, mọi cặp vector đều tạo góc nhỏ với nhau, không phải vì chúng giống nhau mà vì chúng cùng chứa một thành phần chung lớn. Hiện tượng này gọi là **tính bất đẳng hướng** (anisotropy), và nó thường gặp ở embedding lấy từ các mô hình Transformer (Gao và cộng sự, 2019; Ethayarajh, 2019).
 
+Hai chiều đủ để thấy cơ chế. Lấy $u = (3, 1)$ và $v = (3, -1)$: cả hai cùng chứa thành phần chung $(3, 0)$, phần riêng của chúng là $(0, 1)$ và $(0, -1)$, hai hướng ngược nhau. Cosine giữa $u$ và $v$ là $(9 - 1)/(\sqrt{10}\cdot\sqrt{10}) = 0{,}8$. Trừ thành phần chung đi, phần còn lại có cosine $-1$. Con số 0,8 hoàn toàn đến từ thành phần chung, và nó che mất việc hai phần riêng thực ra ngược hướng.
+
 Thí nghiệm tạo ba đám mây, mỗi đám 900 vector 64 chiều: các vector là nhiễu Gauss độc lập cộng thêm một vector hằng với độ lớn khác nhau. Độ lệch tâm đo bằng độ dài của vector trung bình chia cho độ dài trung bình của các vector.
 
 | Phân bố | Cosine trung bình giữa hai vector | Sau khi trừ vector trung bình | Độ lệch tâm |
@@ -345,7 +347,7 @@ Cách làm đúng là huấn luyện thêm với **mục tiêu tương phản** 
 
 $$\mathcal{L} = -\log\frac{\exp\big(\cos(u, v^{+})/\tau\big)}{\sum_{j=1}^{B}\exp\big(\cos(u, v_j)/\tau\big)},$$
 
-trong đó $u$ là embedding của một câu, $v^{+}$ là embedding của câu cặp với nó, các $v_j$ là embedding của mọi câu cặp trong lô (gồm cả $v^{+}$), và $\tau$ là nhiệt độ, thường cỡ 0,01 tới 0,1. Hàm này có dạng cross-entropy của hồi quy softmax ([Mục 6.4 của *Nền tảng*](nentang-ch06.html)), trong đó "lớp đúng" là câu cặp thật và các "lớp sai" là những câu còn lại trong lô. Dạng hàm mất mát này thường được gọi là InfoNCE (van den Oord, Li và Vinyals, 2018).
+trong đó $u$ là embedding của một câu, $v^{+}$ là embedding của câu cặp với nó, các $v_j$ là embedding của mọi câu cặp trong lô (gồm cả $v^{+}$), và $\tau$ là nhiệt độ, thường cỡ 0,01 tới 0,1. Hàm này có dạng cross-entropy của hồi quy softmax ([Mục 6.4 của *Nền tảng*](nentang-ch06.html)), trong đó "lớp đúng" là câu cặp thật và các "lớp sai" là những câu còn lại trong lô. Dạng hàm mất mát này thường được gọi là InfoNCE (van den Oord, Li và Vinyals, 2018). Chẳng hạn với một lô ba cặp, câu $u$ có cosine 0,8 với câu cặp của nó và 0,3; 0,1 với hai câu còn lại. Với $\tau = 0{,}1$, ba logit là 8, 3 và 1, softmax gán 0,992 cho câu cặp và mất mát chỉ còn 0,008. Với $\tau = 1$, ba logit là 0,8; 0,3; 0,1, câu cặp chỉ nhận xác suất 0,48 và mất mát là 0,74, dù cosine của nó cao nhất. Nhiệt độ nhỏ phóng đại chênh lệch giữa các cosine, nên mô hình được thưởng ngay khi câu cặp đứng đầu một cách rõ ràng.
 
 Các câu khác trong cùng lô đóng vai trò mẫu âm, nên không phải tìm mẫu âm riêng; lô càng lớn thì càng nhiều mẫu âm, và các mô hình embedding tốt thường huấn luyện với lô rất lớn. Đây là cùng ý tưởng lấy mẫu âm ở Mục 2.5. SimCSE (Gao, Yao và Chen, 2021) cho thấy mục tiêu này vẫn hoạt động khi "câu cặp" chỉ là chính câu đó đi qua mô hình hai lần với dropout khác nhau. Các mô hình embedding hiện nay như họ E5 (Wang và cộng sự, 2022), dùng trong các thí nghiệm của *Ứng dụng LLM*, được huấn luyện theo cách này trên hàng trăm triệu cặp văn bản.
 
