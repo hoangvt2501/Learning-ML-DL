@@ -53,7 +53,7 @@
 <article class="prose"><div class="chapter-kicker"><span class="kicker-badge">Chương 7</span><span class="kicker-time"><svg class="ic" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-dong-ho"></use></svg>10 phút đọc</span><span class="kicker-part">Học chuyển giao</span></div><h2 id="sec-7" class="heading"><span class="hnum">7</span><span class="htext">LoRA và tinh chỉnh tiết kiệm tham số<a class="anchor" href="#sec-7" aria-label="Liên kết tới mục này">#</a></span></h2>
 <p>Tinh chỉnh toàn phần cho kết quả tốt nhất khi có đủ dữ liệu (<a href="bieudien-ch06.html#sec-6" class="xref">Chương 6</a>), nhưng đòi hỏi bộ nhớ rất lớn và tạo ra một bản sao đầy đủ của mô hình cho mỗi nhiệm vụ. LoRA (Hu và cộng sự, 2022) giải quyết cả hai vấn đề bằng cách giữ nguyên trọng số gốc và chỉ học một phần cộng thêm có hạng thấp. Muốn thấy LoRA tiết kiệm được bao nhiêu, trước hết cần tính tinh chỉnh toàn phần tốn bao nhiêu.</p>
 <h3 id="sec-7-1" class="heading"><span class="hnum">7.1</span><span class="htext">Chi phí bộ nhớ của tinh chỉnh toàn phần<a class="anchor" href="#sec-7-1" aria-label="Liên kết tới mục này">#</a></span></h3>
-<p>Xét Llama 2 7B với 6 476 005 376 tham số không tính embedding (<a href="models-ch12.html">Chương 12 của <em>Học sâu</em></a>). Tinh chỉnh toàn phần bằng Adam với mọi đại lượng lưu ở FP32 cần:</p>
+<p>Xét Llama 2 7B với 6 476 005 376 tham số không tính embedding (<a href="models-ch12.html">Chương 12 của <em>Học sâu</em></a>). Tinh chỉnh toàn phần bằng Adam với mọi đại lượng lưu ở FP32 cần:</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -115,33 +115,33 @@
 <tr>
 <td>GPT-2 small</td>
 <td>768</td>
-<td>589 824</td>
-<td>12 288</td>
-<td>98 304</td>
+<td>589 824</td>
+<td>12 288</td>
+<td>98 304</td>
 <td>2,083%</td>
 </tr>
 <tr>
 <td>GPT-2 large</td>
-<td>1 280</td>
-<td>1 638 400</td>
-<td>20 480</td>
-<td>163 840</td>
+<td>1 280</td>
+<td>1 638 400</td>
+<td>20 480</td>
+<td>163 840</td>
 <td>1,250%</td>
 </tr>
 <tr>
 <td>Llama 2 7B</td>
-<td>4 096</td>
-<td>16 777 216</td>
-<td>65 536</td>
-<td>524 288</td>
+<td>4 096</td>
+<td>16 777 216</td>
+<td>65 536</td>
+<td>524 288</td>
 <td>0,391%</td>
 </tr>
 <tr>
 <td>Llama 2 70B</td>
-<td>8 192</td>
-<td>67 108 864</td>
-<td>131 072</td>
-<td>1 048 576</td>
+<td>8 192</td>
+<td>67 108 864</td>
+<td>131 072</td>
+<td>1 048 576</td>
 <td>0,195%</td>
 </tr>
 </tbody>
@@ -158,27 +158,27 @@
 <tbody>
 <tr>
 <td>4</td>
-<td>2 097 152</td>
+<td>2 097 152</td>
 <td>0,0324%</td>
 </tr>
 <tr>
 <td>8</td>
-<td>4 194 304</td>
+<td>4 194 304</td>
 <td>0,0648%</td>
 </tr>
 <tr>
 <td>16</td>
-<td>8 388 608</td>
+<td>8 388 608</td>
 <td>0,1295%</td>
 </tr>
 <tr>
 <td>64</td>
-<td>33 554 432</td>
+<td>33 554 432</td>
 <td>0,5181%</td>
 </tr>
 </tbody>
 </table></div>
-<p>Với <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>8</mn></mrow><annotation encoding="application/x-tex">r = 8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">8</span></span></span></span>, trạng thái Adam ở FP32 chỉ còn <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn><mtext> </mtext><mn>194</mn><mtext> </mtext><mn>304</mn><mo>×</mo><mn>2</mn><mo>×</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">4\,194\,304 \times 2 \times 4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">194</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">304</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> byte, tức 32 MiB, so với 48,2 GiB khi tinh chỉnh toàn phần: nhỏ hơn khoảng 1 540 lần. Trọng số gốc vẫn phải nằm trong bộ nhớ, nhưng chỉ ở dạng đọc (13,5 GB ở FP16), và không cần gradient cho chúng. Đó là khác biệt giữa huấn luyện được trên một GPU và cần một cụm máy.</p>
+<p>Với <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>8</mn></mrow><annotation encoding="application/x-tex">r = 8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">8</span></span></span></span>, trạng thái Adam ở FP32 chỉ còn <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn><mtext> </mtext><mn>194</mn><mtext> </mtext><mn>304</mn><mo>×</mo><mn>2</mn><mo>×</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">4\,194\,304 \times 2 \times 4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">194</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">304</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> byte, tức 32 MiB, so với 48,2 GiB khi tinh chỉnh toàn phần: nhỏ hơn khoảng 1 540 lần. Trọng số gốc vẫn phải nằm trong bộ nhớ, nhưng chỉ ở dạng đọc (13,5 GB ở FP16), và không cần gradient cho chúng. Đó là khác biệt giữa huấn luyện được trên một GPU và cần một cụm máy.</p>
 <p>Thực tế về sau cho thấy gắn LoRA vào mọi ma trận tuyến tính, cả attention lẫn FFN, thường cho chất lượng tốt hơn chỉ gắn vào <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>Q</mi></msub></mrow><annotation encoding="application/x-tex">W_Q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">Q</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> và <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>V</mi></msub></mrow><annotation encoding="application/x-tex">W_V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.2222em;">V</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> với cùng số tham số (Dettmers và cộng sự, 2023), nên nhiều thư viện hiện nay mặc định như vậy.</p>
 <h3 id="sec-7-4" class="heading"><span class="hnum">7.4</span><span class="htext">Các hiểu lầm thường gặp<a class="anchor" href="#sec-7-4" aria-label="Liên kết tới mục này">#</a></span></h3>
 <p>Quanh LoRA có ba hiểu lầm hay gặp. Hiểu lầm thứ nhất là LoRA làm mô hình chạy nhanh hơn khi suy luận. Thực tế, khi suy luận có thể cộng <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>A</mi></mrow><annotation encoding="application/x-tex">BA</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mord mathnormal">A</span></span></span></span> vào <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">W_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> một lần rồi dùng ma trận đã gộp, nên tốc độ bằng đúng mô hình gốc; nếu không gộp, để đổi adapter nhanh giữa các yêu cầu, thì còn chậm hơn một chút vì có thêm hai phép nhân nhỏ. LoRA tiết kiệm bộ nhớ khi huấn luyện và dung lượng lưu trữ, không tiết kiệm thời gian suy luận.</p>

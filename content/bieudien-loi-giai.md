@@ -16,7 +16,7 @@ $$\ell'(s) = \#(i,j)\,\big(1 - \sigma(s)\big) - k\,\#(i)\,P_n(j)\,\sigma(s) = 0.
 
 **(b) Nghiệm.** Chuyển vế được $\frac{\sigma(s)}{1 - \sigma(s)} = \frac{\#(i,j)}{k\,\#(i)\,P_n(j)}$. Vì $\sigma(s) = \frac{e^s}{1 + e^s}$ nên vế trái bằng $e^s$. Thay $P_n(j) = \#(j)/N$:
 
-$$e^{s} = \frac{\#(i,j)\,N}{k\,\#(i)\,\#(j)} \;\Longrightarrow\; s = \log\frac{\#(i,j)\,N}{\#(i)\,\#(j)} - \log k = \mathrm{PMI}(i,j) - \log k.$$
+$$\begin{gathered} e^{s} = \frac{\#(i,j)\,N}{k\,\#(i)\,\#(j)} \\ \Longrightarrow\; s = \log\frac{\#(i,j)\,N}{\#(i)\,\#(j)} - \log k = \mathrm{PMI}(i,j) - \log k. \end{gathered}$$
 
 **(c) Tăng $k$ từ 1 lên 15.** Ma trận đích dịch xuống $\log 15 \approx 2{,}71$. Các cặp không liên quan vốn có PMI khoảng 0 trở thành âm, và sau khi cắt phần âm thì bằng 0: ma trận đích thưa hơn nhiều. Trên kho ngữ liệu thật, điều này lọc bỏ các cặp đồng hiện yếu vốn ước lượng rất nhiễu. Trên kho ngữ liệu 20 từ của Mục 2.2, PMI lớn nhất chỉ là 1,19, nên với $k = 15$ mọi phần tử đều âm và bị cắt về 0, không còn gì để phân rã, nên thí nghiệm dùng $k = 1$.
 
@@ -51,7 +51,7 @@ Chi phí chỉ là một phép trừ vector cho mỗi truy vấn.
 
 **(a) Số tham số.** Mỗi lớp có hai ma trận được gắn LoRA ($W_Q$ và $W_V$), mỗi ma trận có $2dr$ tham số:
 
-$$N_{\text{LoRA}} = L \times 2 \times 2dr = 4Ldr = 4 \times 32 \times 4\,096 \times r = 524\,288\,r.$$
+$$\begin{aligned} N_{\text{LoRA}} &= L \times 2 \times 2dr = 4Ldr \\ &= 4 \times 32 \times 4\,096 \times r = 524\,288\,r. \end{aligned}$$
 
 | $r$ | Tham số huấn luyện | Tỉ lệ so với 6 476 005 376 |
 |---|---|---|
@@ -105,7 +105,7 @@ Vậy $x_t = \sqrt{\bar\alpha_t}\,x_0 + \sqrt{1 - \bar\alpha_t}\,\varepsilon$ v�
 
 **(a) Hai đạo hàm.** Với $D = \sigma(s)$ và $\sigma'(s) = \sigma(s)(1 - \sigma(s))$:
 
-$$\frac{\partial}{\partial s}\log\big(1 - \sigma(s)\big) = \frac{-\sigma(s)(1 - \sigma(s))}{1 - \sigma(s)} = -\sigma(s), \qquad \frac{\partial}{\partial s}\log\sigma(s) = \frac{\sigma(s)(1 - \sigma(s))}{\sigma(s)} = 1 - \sigma(s).$$
+$$\begin{aligned} \frac{\partial}{\partial s}\log\big(1 - \sigma(s)\big) &= \frac{-\sigma(s)(1 - \sigma(s))}{1 - \sigma(s)} = -\sigma(s), \\ \frac{\partial}{\partial s}\log\sigma(s) &= \frac{\sigma(s)(1 - \sigma(s))}{\sigma(s)} = 1 - \sigma(s). \end{aligned}$$
 
 **(b) Lúc bắt đầu.** Bộ phân biệt dễ dàng nhận ra mẫu giả nên $\sigma(s) \approx 0$. Dạng gốc cho gradient cỡ $-\sigma(s) \approx 0$; dạng không bão hoà cho $1 - \sigma(s) \approx 1$.
 
@@ -135,7 +135,7 @@ $$\mathcal{L} = \sum_y\pi(y)\,r(y) - \beta\sum_y\pi(y)\log\frac{\pi(y)}{\pi_{\te
 
 Dùng $\frac{\partial}{\partial\pi}\big[\pi\log\frac{\pi}{\pi_{\text{ref}}}\big] = \log\frac{\pi}{\pi_{\text{ref}}} + 1$, cho đạo hàm theo $\pi(y)$ bằng 0:
 
-$$r(y) - \beta\Big(\log\frac{\pi(y)}{\pi_{\text{ref}}(y)} + 1\Big) + \lambda = 0 \;\Longrightarrow\; \pi(y) = \pi_{\text{ref}}(y)\exp\Big(\frac{r(y)}{\beta}\Big)\,e^{\lambda/\beta - 1}.$$
+$$\begin{gathered} r(y) - \beta\Big(\log\frac{\pi(y)}{\pi_{\text{ref}}(y)} + 1\Big) + \lambda = 0 \\ \Longrightarrow\; \pi(y) = \pi_{\text{ref}}(y)\exp\Big(\frac{r(y)}{\beta}\Big)\,e^{\lambda/\beta - 1}. \end{gathered}$$
 
 Thừa số cuối là hằng số, xác định bởi ràng buộc tổng bằng 1, nên
 
@@ -163,13 +163,13 @@ KL và phần thưởng tăng giảm cùng nhau: muốn phần thưởng cao hơ
 
 **(a) Đảo ngược nghiệm dạng đóng.** Lấy logarit hai vế của $\pi^*(y \mid x) = \pi_{\text{ref}}(y \mid x)\exp(r(x, y)/\beta)/Z(x)$:
 
-$$\log\pi^*(y \mid x) = \log\pi_{\text{ref}}(y \mid x) + \frac{r(x, y)}{\beta} - \log Z(x) \;\Longrightarrow\; r(x, y) = \beta\log\frac{\pi^*(y \mid x)}{\pi_{\text{ref}}(y \mid x)} + \beta\log Z(x).$$
+$$\begin{gathered} \log\pi^*(y \mid x) = \log\pi_{\text{ref}}(y \mid x) + \frac{r(x, y)}{\beta} - \log Z(x) \\ \Longrightarrow\; r(x, y) = \beta\log\frac{\pi^*(y \mid x)}{\pi_{\text{ref}}(y \mid x)} + \beta\log Z(x). \end{gathered}$$
 
 Với $\pi_{\text{ref}}$ và $\beta$ cho trước, mỗi chính sách ứng với một hàm thưởng (sai khác một hàm chỉ phụ thuộc $x$), nên tham số hoá chính sách cũng là tham số hoá hàm thưởng.
 
 **(b) Thay vào Bradley–Terry.** Mô hình Bradley–Terry dùng hiệu hai phần thưởng:
 
-$$r(x, y_w) - r(x, y_l) = \Big[\beta\log\frac{\pi(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} + \beta\log Z(x)\Big] - \Big[\beta\log\frac{\pi(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)} + \beta\log Z(x)\Big].$$
+$$\begin{aligned} r(x, y_w) - r(x, y_l) &= \Big[\beta\log\frac{\pi(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} + \beta\log Z(x)\Big] \\ &\quad - \Big[\beta\log\frac{\pi(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)} + \beta\log Z(x)\Big]. \end{aligned}$$
 
 Hai số hạng $\beta\log Z(x)$ ở cuối mỗi ngoặc bằng nhau và triệt tiêu. Kết quả là hàm mất mát DPO:
 
@@ -262,7 +262,7 @@ Thêm hai điểm riêng cho mô hình ngôn ngữ ([Chương 13 của *MLOps*](
 
 **(c) Chỉ số phủ tốt hơn.** Cách đếm hiện tại, số cụm có ít nhất một điểm rơi vào, là chỉ số nhị phân và rất dễ dãi: một cụm nhận 1 điểm được tính ngang một cụm nhận 1 000 điểm. Chỉ số tốt hơn: gọi $p_i$ là tỉ lệ điểm sinh ra rơi vào cụm $i$ (trong số các điểm rơi vào một cụm nào đó), so với tỉ lệ thật $q_i = 1/8$, rồi đo
 
-$$\mathrm{KL}(p \,\|\, q) \qquad\text{hoặc}\qquad \text{số chế độ hiệu dụng} = \exp\big(H(p)\big) = \exp\Big(-\sum_i p_i\log p_i\Big).$$
+$$\begin{gathered} \mathrm{KL}(p \,\|\, q) \quad\text{hoặc} \\ \text{số chế độ hiệu dụng} = \exp\big(H(p)\big) = \exp\Big(-\sum_i p_i\log p_i\Big). \end{gathered}$$
 
 Số chế độ hiệu dụng bằng 8 khi các cụm nhận số điểm bằng nhau và bằng 1 khi mọi điểm dồn vào một cụm, cho một giá trị liên tục trong $[1, 8]$. Đây là cùng đại lượng $e^H$ dùng để đo số lựa chọn hiệu dụng của các chiến lược giải mã ở [Mục 11.3 của *Học sâu*](models-ch11.html).
 

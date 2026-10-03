@@ -229,7 +229,7 @@ với $P_n$ là phân phối để rút từ ngẫu nhiên. Chi phí mỗi cặp
 > **Chứng minh.** Với $N$ là tổng số cặp, cặp $(i, j)$ xuất hiện $\#(i, j)$ lần như cặp thật và, theo kỳ vọng, $k\,\#(i)\,P_n(j)$ lần như cặp âm. Phần hàm mục tiêu phụ thuộc $s = \langle w_i, c_j\rangle$ là
 > $$\#(i,j)\,\log\sigma(s) + k\,\#(i)\,P_n(j)\,\log\sigma(-s).$$
 > Dùng $\frac{d}{ds}\log\sigma(s) = 1 - \sigma(s)$ và $\frac{d}{ds}\log\sigma(-s) = -\sigma(s)$, cho đạo hàm bằng 0:
-> $$\#(i,j)\,(1 - \sigma(s)) = k\,\#(i)\,P_n(j)\,\sigma(s) \;\Longrightarrow\; e^{s} = \frac{\sigma(s)}{1 - \sigma(s)} = \frac{\#(i,j)}{k\,\#(i)\,P_n(j)}.$$
+> $$\begin{gathered} \#(i,j)\,(1 - \sigma(s)) = k\,\#(i)\,P_n(j)\,\sigma(s) \\ \Longrightarrow\; e^{s} = \frac{\sigma(s)}{1 - \sigma(s)} = \frac{\#(i,j)}{k\,\#(i)\,P_n(j)}. \end{gathered}$$
 > Thay $P_n(j) = \#(j)/N$ được $s = \log\frac{\#(i,j)\,N}{\#(i)\,\#(j)} - \log k = \mathrm{PMI}(i,j) - \log k$.
 
 Như vậy skip-gram với lấy mẫu âm là một cách phân rã ma trận PMI (dịch đi $\log k$) mà không cần lập ma trận: mỗi bước gradient chỉ chạm vào một cặp quan sát được và vài cặp ngẫu nhiên. Mô hình cũng không phải mạng nơ-ron sâu như tên gọi thường gợi ý: nó chỉ có một lớp, không có hàm phi tuyến ở giữa.
@@ -648,11 +648,11 @@ Với bộ mã hoá và giải mã tuyến tính, nghiệm tối ưu chính là 
 VAE xem $z$ là biến ẩn ngẫu nhiên với tiên nghiệm cố định $p(z) = \mathcal{N}(0, I)$ và bộ giải mã $p_\theta(x \mid z)$. Hợp lý của dữ liệu $p_\theta(x) = \int p_\theta(x \mid z)\,p(z)\,dz$ không tính được, nên VAE dùng thêm bộ mã hoá $q_\phi(z \mid x) = \mathcal{N}\big(\mu_\phi(x), \operatorname{diag}(\sigma^2_\phi(x))\big)$ để xấp xỉ hậu nghiệm $p_\theta(z \mid x)$.
 
 > **Mệnh đề 9.1 (Chặn dưới của bằng chứng).** Với mọi phân phối $q(z \mid x)$,
-> $$\log p_\theta(x) = \underbrace{\mathbb{E}_{q(z \mid x)}\big[\log p_\theta(x \mid z)\big] - \mathrm{KL}\big(q(z \mid x)\,\|\,p(z)\big)}_{\text{ELBO}} + \mathrm{KL}\big(q(z \mid x)\,\|\,p_\theta(z \mid x)\big),$$
+> $$\begin{aligned} \log p_\theta(x) &= \underbrace{\mathbb{E}_{q(z \mid x)}\big[\log p_\theta(x \mid z)\big] - \mathrm{KL}\big(q(z \mid x)\,\|\,p(z)\big)}_{\text{ELBO}} \\ &\quad + \mathrm{KL}\big(q(z \mid x)\,\|\,p_\theta(z \mid x)\big), \end{aligned}$$
 > và vì KL không âm, $\log p_\theta(x) \ge \text{ELBO}$.
 
 > **Chứng minh.** Theo định lý Bayes, $\log p_\theta(x) = \log p_\theta(x \mid z) + \log p(z) - \log p_\theta(z \mid x)$ với mọi $z$. Cộng và trừ $\log q(z \mid x)$ rồi lấy kỳ vọng theo $q(z \mid x)$ (vế trái không phụ thuộc $z$):
-> $$\log p_\theta(x) = \mathbb{E}_q[\log p_\theta(x \mid z)] - \mathbb{E}_q\Big[\log\frac{q(z \mid x)}{p(z)}\Big] + \mathbb{E}_q\Big[\log\frac{q(z \mid x)}{p_\theta(z \mid x)}\Big],$$
+> $$\begin{aligned} \log p_\theta(x) &= \mathbb{E}_q[\log p_\theta(x \mid z)] - \mathbb{E}_q\Big[\log\frac{q(z \mid x)}{p(z)}\Big] \\ &\quad + \mathbb{E}_q\Big[\log\frac{q(z \mid x)}{p_\theta(z \mid x)}\Big], \end{aligned}$$
 > trong đó hai kỳ vọng cuối chính là hai phân kỳ KL.
 
 VAE tối đa ELBO theo cả $\theta$ và $\phi$. Thêm hệ số $\beta$ cho số hạng KL (Higgins và cộng sự, 2017) được hàm mục tiêu
@@ -985,7 +985,7 @@ $$\nabla_\theta J = \mathbb{E}_{a \sim \pi_\theta}\big[(R(a) - b)\,\nabla_\theta
 
 Phép trừ không làm thay đổi kỳ vọng, với mọi hằng số $b$:
 
-$$\mathbb{E}\big[b\,\nabla_\theta\log\pi_\theta(a)\big] = b\sum_a\pi_\theta(a)\,\nabla_\theta\log\pi_\theta(a) = b\sum_a\nabla_\theta\pi_\theta(a) = b\,\nabla_\theta\sum_a\pi_\theta(a) = b\,\nabla_\theta 1 = 0.$$
+$$\begin{aligned} \mathbb{E}\big[b\,\nabla_\theta\log\pi_\theta(a)\big] &= b\sum_a\pi_\theta(a)\,\nabla_\theta\log\pi_\theta(a) = b\sum_a\nabla_\theta\pi_\theta(a) \\ &= b\,\nabla_\theta\sum_a\pi_\theta(a) = b\,\nabla_\theta 1 = 0. \end{aligned}$$
 
 Tổng xác suất luôn bằng 1, nên đạo hàm của nó bằng 0. Với đường nền gần phần thưởng trung bình, hành động tốt hơn trung bình được đẩy lên, hành động kém hơn bị đẩy xuống, và phương sai giảm.
 
@@ -1069,7 +1069,7 @@ Có mô hình thưởng rồi, cần tìm chính sách cho phần thưởng cao.
 $$\max_\pi\; \mathbb{E}_{y \sim \pi(\cdot \mid x)}\big[r(x, y)\big] - \beta\,\mathrm{KL}\big(\pi(\cdot \mid x)\,\|\,\pi_{\text{ref}}(\cdot \mid x)\big).$$
 
 > **Mệnh đề 14.1.** Nghiệm của bài toán trên là
-> $$\pi^*(y \mid x) = \frac{1}{Z(x)}\,\pi_{\text{ref}}(y \mid x)\,\exp\Big(\frac{r(x, y)}{\beta}\Big), \qquad Z(x) = \sum_y \pi_{\text{ref}}(y \mid x)\,\exp\Big(\frac{r(x, y)}{\beta}\Big).$$
+> $$\begin{gathered} \pi^*(y \mid x) = \frac{1}{Z(x)}\,\pi_{\text{ref}}(y \mid x)\,\exp\Big(\frac{r(x, y)}{\beta}\Big), \\ Z(x) = \sum_y \pi_{\text{ref}}(y \mid x)\,\exp\Big(\frac{r(x, y)}{\beta}\Big). \end{gathered}$$
 
 > **Chứng minh.** Với $x$ cố định, viết mục tiêu dưới dạng tổng trên các câu trả lời và thêm nhân tử Lagrange $\lambda$ cho ràng buộc $\sum_y\pi(y) = 1$ ([Chương 12 của *Nền tảng*](nentang-ch12.html)):
 > $$\mathcal{L} = \sum_y \pi(y)\,r(y) - \beta\sum_y\pi(y)\log\frac{\pi(y)}{\pi_{\text{ref}}(y)} + \lambda\Big(\sum_y\pi(y) - 1\Big).$$
@@ -1120,11 +1120,11 @@ $$r(x, y) = \beta\log\frac{\pi^*(y \mid x)}{\pi_{\text{ref}}(y \mid x)} + \beta\
 
 Số hạng $\beta\log Z(x)$ không tính được, vì $Z(x)$ là tổng trên mọi câu trả lời có thể. Nhưng mô hình Bradley–Terry chỉ dùng hiệu phần thưởng của hai câu trả lời cho **cùng một** câu hỏi:
 
-$$r(x, y_w) - r(x, y_l) = \beta\log\frac{\pi(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta\log\frac{\pi(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)} + \underbrace{\beta\log Z(x) - \beta\log Z(x)}_{=\,0}.$$
+$$\begin{aligned} r(x, y_w) - r(x, y_l) &= \beta\log\frac{\pi(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta\log\frac{\pi(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)} \\ &\quad + \underbrace{\beta\log Z(x) - \beta\log Z(x)}_{=\,0}. \end{aligned}$$
 
 $Z(x)$ phụ thuộc $x$ nhưng không phụ thuộc $y$, nên triệt tiêu khi lấy hiệu. Thay vào hàm mất mát của mô hình thưởng ở Mục 14.3 được hàm mất mát DPO, tối ưu trực tiếp trên tham số của chính sách:
 
-$$\mathcal{L}_{\text{DPO}}(\theta) = -\,\mathbb{E}_{(x, y_w, y_l)}\left[\log\sigma\left(\beta\log\frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta\log\frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\right)\right].$$
+$$\begin{aligned} \mathcal{L}_{\text{DPO}}(\theta) = -\,\mathbb{E}_{(x, y_w, y_l)}\Bigg[\log\sigma\Bigg(&\beta\log\frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} \\ &- \beta\log\frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\Bigg)\Bigg]. \end{aligned}$$
 
 Hàm mất mát có dạng cross-entropy nhị phân ([Chương 6 của *Nền tảng*](nentang-ch06.html)); mỗi số hạng log xác suất tính được bằng một lượt xuôi qua mô hình. Không cần mô hình thưởng, không cần lấy mẫu từ chính sách trong khi huấn luyện, và không cần critic.
 

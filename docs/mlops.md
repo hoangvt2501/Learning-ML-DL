@@ -792,7 +792,7 @@ $$\mathrm{PSI} \;=\; \sum_{j=1}^{k} (T_j - B_j)\,\ln\frac{T_j}{B_j}.$$
 
 Công thức này có một cách hiểu gọn hơn. Tách tổng thành hai phần:
 
-$$\mathrm{PSI} \;=\; \sum_j T_j \ln\frac{T_j}{B_j} \;+\; \sum_j B_j \ln\frac{B_j}{T_j} \;=\; D_{\mathrm{KL}}(T \,\|\, B) + D_{\mathrm{KL}}(B \,\|\, T).$$
+$$\begin{aligned} \mathrm{PSI} &= \sum_j T_j \ln\frac{T_j}{B_j} + \sum_j B_j \ln\frac{B_j}{T_j} \\ &= D_{\mathrm{KL}}(T \,\|\, B) + D_{\mathrm{KL}}(B \,\|\, T). \end{aligned}$$
 
 Vậy PSI là tổng hai chiều của phân kỳ KL, còn gọi là phân kỳ Jeffreys; khác với phân kỳ KL, nó đối xứng giữa hai phân phối. Vì có $\ln(T_j/B_j)$, PSI không xác định khi một bin không có mẫu nào, nên các cài đặt thường thay tỉ lệ 0 bằng một số dương rất nhỏ.
 

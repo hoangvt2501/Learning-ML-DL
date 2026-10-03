@@ -45,11 +45,11 @@ Trong phạm vi các khối Transformer, FFN chiếm $3 \times 2{,}6875/(4 + 3 \
 
 **(a) Số FLOP.** Từ Bài 1, số tham số không tính embedding là
 
-$$N = 2\,147\,483\,648 + 4\,328\,521\,728 = 6\,476\,005\,376 \approx 6{,}48 \times 10^9,$$
+$$\begin{aligned} N &= 2\,147\,483\,648 + 4\,328\,521\,728 \\ &= 6\,476\,005\,376 \approx 6{,}48 \times 10^9, \end{aligned}$$
 
 nên
 
-$$C = 6ND = 6 \times 6{,}476 \times 10^9 \times 2 \times 10^{12} = 7{,}771 \times 10^{22} \text{ FLOP}.$$
+$$\begin{aligned} C = 6ND &= 6 \times 6{,}476 \times 10^9 \times 2 \times 10^{12} \\ &= 7{,}771 \times 10^{22} \text{ FLOP}. \end{aligned}$$
 
 **(b) Số giờ-GPU.** Tốc độ thực tế là $312 \times 10^{12} \times \text{MFU}$ FLOP mỗi giây:
 
@@ -154,8 +154,8 @@ Số đo ở Mục 8.2 khác xa các con số này: với $g = 0{,}9$ là $3{,}2
 
 **(b) Đường ô nhớ của LSTM.**
 
-$$b_f = 1: \; f = \sigma(1) = 0{,}731, \quad 0{,}731^{100} = 2{,}5 \times 10^{-14}, \quad 1/(1-f) \approx 3{,}7 \text{ bước}.$$
-$$b_f = 4: \; f = \sigma(4) = 0{,}982, \quad 0{,}982^{100} = 0{,}16, \quad 1/(1-f) \approx 56 \text{ bước}.$$
+$$\begin{aligned} b_f = 1: \;& f = \sigma(1) = 0{,}731, \quad 0{,}731^{100} = 2{,}5 \times 10^{-14}, \\ & 1/(1-f) \approx 3{,}7 \text{ bước}. \end{aligned}$$
+$$\begin{aligned} b_f = 4: \;& f = \sigma(4) = 0{,}982, \quad 0{,}982^{100} = 0{,}16, \\ & 1/(1-f) \approx 56 \text{ bước}. \end{aligned}$$
 
 Mô phỏng ở Mục 8.2 cho $3{,}0 \times 10^{-15}$ và $0{,}13$, cùng bậc với tính tay; phần chênh đến từ nhiễu cộng vào đầu vào của cổng quên ở mỗi bước. Với $b_f = 1$, bộ nhớ có thang thời gian chỉ vài bước; với $b_f = 4$, khoảng 50 bước. Cấu trúc cổng cho phép mạng điều khiển tích $\prod f_t$, nhưng giá trị của cổng quyết định bộ nhớ dài hay ngắn.
 
@@ -172,7 +172,7 @@ với hệ số 2 đầu cho khoá và giá trị, hệ số 2 cuối là số b
 
 **(a) MHA, 64 đầu khoá–giá trị.**
 
-$$2 \times 80 \times 64 \times 128 \times 4\,096 \times 8 \times 2 = 85\,899\,345\,920 \text{ byte} = 80 \text{ GiB}.$$
+$$\begin{aligned} 2 \times 80 \times 64 \times 128 \times 4\,096 \times 8 \times 2 &= 85\,899\,345\,920 \text{ byte} \\ &= 80 \text{ GiB}. \end{aligned}$$
 
 **(b) GQA, 8 đầu khoá–giá trị.** Chỉ $n_{\text{kv}}$ thay đổi, nên dung lượng giảm đúng $64/8 = 8$ lần: 10 GiB.
 

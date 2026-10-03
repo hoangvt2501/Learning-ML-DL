@@ -15,7 +15,7 @@ Mô phỏng 20 000 lần trong `bai_tap.py` cho trung bình 0,0364, khớp với
 
 **(b) Số cảnh báo giả mỗi ngày.** Vì $\tfrac{n}{2}\,\mathrm{PSI}$ có phân phối xấp xỉ $\chi^2_{k-1}$, xác suất PSI vượt 0,10 khi không có dịch chuyển là
 
-$$P(\mathrm{PSI} > 0{,}10) = P\!\left(\chi^2_9 > \frac{0{,}10 \times 500}{2}\right) = P(\chi^2_9 > 25) \approx 0{,}0030.$$
+$$\begin{aligned} P(\mathrm{PSI} > 0{,}10) &= P\!\left(\chi^2_9 > \frac{0{,}10 \times 500}{2}\right) \\ &= P(\chi^2_9 > 25) \approx 0{,}0030. \end{aligned}$$
 
 Mô phỏng cho 0,0036, lớn hơn công thức một chút, vì các bin được xác định từ chính mẫu tham chiếu và $n$ hữu hạn. Phân phối của PSI khi không có dịch chuyển:
 
@@ -38,11 +38,11 @@ Ngưỡng PSI hợp lý phụ thuộc vào $n$, $k$ và số đặc trưng đư�
 
 **(a) Cỡ mẫu mỗi nhánh.** Cải thiện tương đối 5% trên nền 2%:
 
-$$p_1 = 0{,}02, \qquad p_2 = 0{,}02 \times 1{,}05 = 0{,}021, \qquad \Delta = p_2 - p_1 = 0{,}001.$$
+$$\begin{aligned} p_1 &= 0{,}02, \\ p_2 &= 0{,}02 \times 1{,}05 = 0{,}021, \\ \Delta &= p_2 - p_1 = 0{,}001. \end{aligned}$$
 
 Chênh lệch tuyệt đối chỉ là 0,1 điểm phần trăm; đây là đại lượng đi vào mẫu số của công thức. Với $z_{0{,}975} = 1{,}95996$ và $z_{0{,}80} = 0{,}84162$:
 
-$$n = \frac{(1{,}95996 + 0{,}84162)^2\,\left[0{,}02 \times 0{,}98 + 0{,}021 \times 0{,}979\right]}{0{,}001^2} = \frac{7{,}8489 \times 0{,}040159}{10^{-6}} \approx 315\,203$$
+$$\begin{aligned} n &= \frac{(1{,}95996 + 0{,}84162)^2\,\left[0{,}02 \times 0{,}98 + 0{,}021 \times 0{,}979\right]}{0{,}001^2} \\ &= \frac{7{,}8489 \times 0{,}040159}{10^{-6}} \approx 315\,203 \end{aligned}$$
 
 mẫu mỗi nhánh, tức hơn 630 000 mẫu cho cả thí nghiệm.
 

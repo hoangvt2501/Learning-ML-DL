@@ -168,7 +168,14 @@ export function createMarkdownIt(registry) {
   };
 
   // ---------------------------------------------------------------- bảng
-  md.renderer.rules.table_open = () => '<div class="table-wrap"><table>\n';
+  md.renderer.rules.table_open = (tokens, idx) => {
+    // Bảng từ bảy cột trở lên dùng lề ô hẹp hơn để vừa bề rộng cột chữ.
+    let cols = 0;
+    for (let i = idx + 1; i < tokens.length && tokens[i].type !== 'tr_close'; i++) {
+      if (tokens[i].type === 'th_open') cols++;
+    }
+    return '<div class="table-wrap' + (cols >= 7 ? ' table-wrap--dense' : '') + '"><table>\n';
+  };
   md.renderer.rules.table_close = () => '</table></div>\n';
 
   // ---------------------------------------------------------------- ảnh
@@ -221,6 +228,19 @@ export function createMarkdownIt(registry) {
   md.core.ruler.push('figures', (state) => groupFigures(state, registry));
   // ------------------------------------------------- liên kết chéo trong bài
   md.core.ruler.push('xref', (state) => linkCrossReferences(state, registry));
+  // ------------------------------------------- không ngắt dòng giữa một con số
+  // Dấu cách phân nhóm hàng nghìn ("1 024", "6 476 005 376") đổi thành dấu cách
+  // không ngắt, để số không bị tách làm hai dòng trong ô bảng hẹp hay cuối dòng.
+  md.core.ruler.push('number-nbsp', (state) => {
+    for (const tok of state.tokens) {
+      if (tok.type !== 'inline' || !tok.children) continue;
+      for (const child of tok.children) {
+        if (child.type === 'text' && /\d \d{3}/.test(child.content)) {
+          child.content = child.content.replace(/(\d) (?=\d{3}(?!\d))/g, '$1 ');
+        }
+      }
+    }
+  });
 
   return md;
 }

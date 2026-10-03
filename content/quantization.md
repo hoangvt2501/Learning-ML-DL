@@ -291,7 +291,7 @@ $$\text{SQNR} = 10\log_{10}\frac{\mathbb{E}[x^2]}{\mathbb{E}[(x - \hat{x})^2]} \
 
 Xét trường hợp lý tưởng: $x$ phân phối đều trên $[-c, c]$, dùng lưới đối xứng hạn chế với $q = 2^{b-1} - 1$ mức mỗi phía, $S = c/q$. Công suất tín hiệu là $c^2/3$, công suất nhiễu là $S^2/12$, nên
 
-$$\text{SQNR} = \frac{c^2/3}{S^2/12} = \frac{4c^2}{S^2} = (2q)^2 = (2^b - 2)^2 \;\Rightarrow\; 20\log_{10}(2^b - 2) \approx 6{,}02\, b \text{ dB}.$$
+$$\begin{gathered} \text{SQNR} = \frac{c^2/3}{S^2/12} = \frac{4c^2}{S^2} = (2q)^2 = (2^b - 2)^2 \\ \;\Rightarrow\; 20\log_{10}(2^b - 2) \approx 6{,}02\, b \text{ dB}. \end{gathered}$$
 
 **Kết luận:** mỗi bit thêm vào giảm $S$ một nửa, giảm công suất nhiễu 4 lần, tức tăng SQNR khoảng 6 dB.
 
@@ -643,7 +643,7 @@ thì dải của kênh $i$ ở cả hai lớp đều bằng $\sqrt{r_i^{(1)} r_i
 
 **AdaRound** (Nagel và cộng sự, 2020). Làm tròn đến số gần nhất tối ưu cho *từng trọng số* nhưng không tối ưu cho *đầu ra của lớp*. AdaRound học quyết định làm tròn lên hay xuống cho mỗi trọng số bằng cách tối ưu
 
-$$\min_{V}\; \big\| W x - \widetilde{W}(V)\, x \big\|_F^2 + \lambda\, f_{\text{reg}}(V), \qquad \widetilde{W} = S \cdot \text{clamp}\!\left(\left\lfloor \tfrac{W}{S} \right\rfloor + h(V),\, q_{min},\, q_{max}\right),$$
+$$\begin{gathered} \min_{V}\; \big\| W x - \widetilde{W}(V)\, x \big\|_F^2 + \lambda\, f_{\text{reg}}(V), \\ \widetilde{W} = S \cdot \text{clamp}\!\left(\left\lfloor \tfrac{W}{S} \right\rfloor + h(V),\, q_{min},\, q_{max}\right), \end{gathered}$$
 
 trong đó $h(V) \in [0, 1]$ là một hàm sigmoid chỉnh sửa, và $f_{\text{reg}}$ đẩy $h(V)$ về đúng 0 hoặc 1. Chỉ cần vài trăm hoặc vài nghìn mẫu không nhãn, AdaRound thường đưa PTQ 4 bit trọng số tiến gần QAT. GPTQ (Mục 11.4) theo đuổi cùng mục tiêu "tối thiểu sai số đầu ra thay vì sai số trọng số".
 

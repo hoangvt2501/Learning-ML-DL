@@ -126,7 +126,7 @@ Bảng này giải thích được một kết quả thực nghiệm mà ngườ
 
 Họ mô hình không phải yếu tố duy nhất, và thường cũng không phải yếu tố quan trọng nhất. Với cùng một bài toán, kinh nghiệm thực tế cho thấy thứ tự ảnh hưởng tới kết quả thường là
 
-$$\text{dữ liệu và nhãn} \;>\; \text{đặc trưng} \;>\; \text{họ mô hình} \;>\; \text{siêu tham số} \;>\; \text{chi tiết kiến trúc}.$$
+$$\begin{gathered} \text{dữ liệu và nhãn} \;>\; \text{đặc trưng} \;>\; \text{họ mô hình} \\ \;>\; \text{siêu tham số} \;>\; \text{chi tiết kiến trúc}. \end{gathered}$$
 
 Đây là quy tắc kinh nghiệm, không phải định lý, và có ngoại lệ: với ảnh và văn bản, chọn đúng họ mô hình như mạng tích chập hay Transformer quan trọng hơn nhiều so với tự thiết kế đặc trưng. Nhưng quy tắc này nhắc một điều hay bị quên: nhãn sai, hoặc dữ liệu không đại diện cho tình huống sử dụng thật, là những lỗi mà không mô hình nào sửa được. Giáo trình này tập trung vào ba mức sau; hai mức đầu được bàn trong [*MLOps*](mlops-ch03.html).
 
@@ -161,7 +161,7 @@ Nhiều quyết định trong các chương sau thực chất là điều chỉn
 Giả sử dữ liệu sinh từ mô hình $y = f(x) + \varepsilon$, trong đó $f$ là hàm thật, $\varepsilon$ là nhiễu có $\mathbb{E}[\varepsilon] = 0$, $\operatorname{Var}(\varepsilon) = \sigma^2$ và độc lập với $x$. Một thuật toán học nhận tập huấn luyện $\mathcal{D}$ và trả về hàm dự đoán $\hat f_{\mathcal{D}}$. Vì $\mathcal{D}$ là ngẫu nhiên, giá trị dự đoán $\hat f_{\mathcal{D}}(x_0)$ tại một điểm cố định $x_0$ cũng là một biến ngẫu nhiên.
 
 > **Định lý 2.1 (Phân rã độ chệch – phương sai).** Tại một điểm $x_0$, với $y_0 = f(x_0) + \varepsilon_0$ là một quan sát mới độc lập với tập huấn luyện, sai số bình phương kỳ vọng tách thành ba phần:
-> $$\mathbb{E}\big[(y_0 - \hat f_{\mathcal{D}}(x_0))^2\big] = \underbrace{\big(\mathbb{E}[\hat f_{\mathcal{D}}(x_0)] - f(x_0)\big)^2}_{\text{độ chệch}^2} + \underbrace{\operatorname{Var}\big(\hat f_{\mathcal{D}}(x_0)\big)}_{\text{phương sai}} + \underbrace{\sigma^2}_{\text{nhiễu}},$$
+> $$\begin{aligned} \mathbb{E}\big[(y_0 - \hat f_{\mathcal{D}}(x_0))^2\big] &= \underbrace{\big(\mathbb{E}[\hat f_{\mathcal{D}}(x_0)] - f(x_0)\big)^2}_{\text{độ chệch}^2} \\ &\quad + \underbrace{\operatorname{Var}\big(\hat f_{\mathcal{D}}(x_0)\big)}_{\text{phương sai}} + \underbrace{\sigma^2}_{\text{nhiễu}}, \end{aligned}$$
 > trong đó kỳ vọng và phương sai lấy theo phân phối của tập huấn luyện $\mathcal{D}$ và của nhiễu $\varepsilon_0$.
 
 > **Chứng minh.** Viết gọn $\hat f = \hat f_{\mathcal{D}}(x_0)$, $f = f(x_0)$ và $m = \mathbb{E}[\hat f]$. Ta có $y_0 - \hat f = (f - \hat f) + \varepsilon_0$. Bình phương và lấy kỳ vọng: số hạng chéo $2\,\mathbb{E}[(f - \hat f)\varepsilon_0]$ bằng 0 vì $\varepsilon_0$ độc lập với $\hat f$ và có kỳ vọng 0, còn $\mathbb{E}[\varepsilon_0^2] = \sigma^2$. Phần còn lại $\mathbb{E}[(f - \hat f)^2]$ được tách giống [Định lý 3.2 của *Nền tảng*](nentang-ch03.html): viết $f - \hat f = (f - m) + (m - \hat f)$, số hạng chéo $2(f - m)\,\mathbb{E}[m - \hat f]$ bằng 0, còn lại $(f - m)^2 + \operatorname{Var}(\hat f)$.
@@ -343,7 +343,7 @@ $$W_2(W_1 x + b_1) + b_2 = (W_2 W_1)\,x + (W_2 b_1 + b_2)$$
 vẫn là một phép biến đổi affine của $x$. Chồng bao nhiêu lớp tuyến tính cũng chỉ tương đương một lớp. Muốn nhiều lớp biểu diễn được nhiều hơn một lớp, phải xen giữa chúng một hàm phi tuyến.
 
 > **Định nghĩa 4.1 (Mạng nơ-ron truyền thẳng nhiều lớp).** Một **mạng nơ-ron truyền thẳng nhiều lớp** (multilayer perceptron, MLP) có $L$ lớp tính
-> $$h^{(0)} = x, \qquad h^{(l)} = \phi\big(W^{(l)} h^{(l-1)} + b^{(l)}\big) \;\; (l = 1, \dots, L-1), \qquad \hat y = W^{(L)} h^{(L-1)} + b^{(L)},$$
+> $$\begin{aligned} h^{(0)} &= x, \\ h^{(l)} &= \phi\big(W^{(l)} h^{(l-1)} + b^{(l)}\big), \qquad l = 1, \dots, L-1, \\ \hat y &= W^{(L)} h^{(L-1)} + b^{(L)}, \end{aligned}$$
 > trong đó $\phi$ là hàm kích hoạt áp dụng cho từng phần tử. Các $h^{(l)}$ với $1 \le l \le L-1$ gọi là **lớp ẩn**, số phần tử của mỗi lớp ẩn là **bề rộng** của lớp đó.
 
 Lớp cuối không có hàm kích hoạt vì nó được chọn theo bài toán. Với hồi quy, $\hat y$ được dùng trực tiếp và hàm mất mát là bình phương sai số. Với phân loại nhị phân, $\hat y$ đi qua sigmoid; với nhiều lớp, qua softmax; và hàm mất mát là cross-entropy. Cả hai cặp lựa chọn đều đến từ ước lượng hợp lý cực đại ([Chương 10 của *Nền tảng*](nentang-ch10.html)): bình phương sai số ứng với nhiễu Gauss, cross-entropy ứng với phân phối Bernoulli hoặc phân phối phân loại.
@@ -351,7 +351,7 @@ Lớp cuối không có hàm kích hoạt vì nó được chọn theo bài toá
 Một lớp có $d_{\text{in}}$ đầu vào và $d_{\text{out}}$ đầu ra có $d_{\text{in}} d_{\text{out}} + d_{\text{out}}$ tham số. Chẳng hạn, mạng 784–256–10 cho ảnh chữ số MNIST có $784 \cdot 256 + 256 = 200\,960$ tham số ở lớp ẩn và $256 \cdot 10 + 10 = 2\,570$ tham số ở lớp ra, tổng cộng 203 530.
 
 > **Ví dụ 4.1 (Hàm XOR).** Bốn điểm $(0,0)$, $(1,1)$ có nhãn 0 và $(1,0)$, $(0,1)$ có nhãn 1 không tách được bằng một đường thẳng, nên không mô hình tuyến tính nào phân loại đúng cả bốn. Một mạng có hai đơn vị ReLU ở lớp ẩn làm được:
-> $$h_1 = \operatorname{ReLU}(x_1 + x_2), \qquad h_2 = \operatorname{ReLU}(x_1 + x_2 - 1), \qquad \hat y = h_1 - 2h_2.$$
+> $$\begin{aligned} h_1 &= \operatorname{ReLU}(x_1 + x_2), \\ h_2 &= \operatorname{ReLU}(x_1 + x_2 - 1), \\ \hat y &= h_1 - 2h_2. \end{aligned}$$
 > Kiểm tra: tại $(0,0)$ có $h = (0, 0)$ nên $\hat y = 0$; tại $(1,0)$ và $(0,1)$ có $h = (1, 0)$ nên $\hat y = 1$; tại $(1,1)$ có $h = (2, 1)$ nên $\hat y = 2 - 2 = 0$. Lớp ẩn đã biến đổi bốn điểm sang một không gian mới, trong đó chúng tách được bằng một hàm tuyến tính. Đó là cách hiểu hữu ích về mạng nhiều lớp: các lớp ẩn học một phép biến đổi đặc trưng, lớp cuối là một mô hình tuyến tính trên đặc trưng đã học.
 
 ### 4.2. Hàm kích hoạt
@@ -531,7 +531,7 @@ Bảng dưới gom những hiểu lầm hay gặp về lan truyền ngược và
 Ví dụ sau thực hiện đầy đủ một lượt xuôi, một lượt ngược và một bước cập nhật trên mạng nhỏ nhất có lớp ẩn, để thấy từng công thức ở Mục 5.1 hoạt động thế nào.
 
 > **Ví dụ 5.1.** Mạng có đầu vào $x = (1, 2)$, lớp ẩn 2 đơn vị ReLU và một đầu ra tuyến tính, hàm mất mát $\mathcal{L} = \tfrac12(\hat y - y)^2$ với $y = 1$. Tham số:
-> $$W_1 = \begin{pmatrix} 0{,}1 & 0{,}2 \\ -0{,}3 & 0{,}1 \end{pmatrix}, \quad b_1 = (0, 0), \quad w_2 = (0{,}5;\; -0{,}4), \quad b_2 = 0{,}2.$$
+> $$\begin{gathered} W_1 = \begin{pmatrix} 0{,}1 & 0{,}2 \\ -0{,}3 & 0{,}1 \end{pmatrix}, \quad b_1 = (0, 0), \\ w_2 = (0{,}5;\; -0{,}4), \quad b_2 = 0{,}2. \end{gathered}$$
 >
 > **Lượt xuôi.** $z = W_1 x + b_1 = (0{,}1 + 0{,}4;\; -0{,}3 + 0{,}2) = (0{,}5;\; -0{,}1)$. Qua ReLU: $h = (0{,}5;\; 0)$. Đầu ra $\hat y = w_2^\top h + b_2 = 0{,}25 + 0 + 0{,}2 = 0{,}45$. Mất mát $\mathcal{L} = \tfrac12(0{,}45 - 1)^2 = 0{,}15125$.
 >
@@ -896,8 +896,7 @@ Hai loại sự cố cần cách xử lý khác nhau. Bùng nổ dễ xử lý: 
 
 Kiến trúc giải quyết được vấn đề tiêu biến là **LSTM** (long short-term memory; Hochreiter và Schmidhuber, 1997, với cổng quên do Gers, Schmidhuber và Cummins, 2000 bổ sung). LSTM thêm một **trạng thái ô nhớ** $c_t$ bên cạnh trạng thái ẩn $h_t$, và ba cổng có giá trị trong $(0, 1)$:
 
-$$f_t = \sigma(W_f [h_{t-1}, x_t] + b_f), \quad i_t = \sigma(W_i [h_{t-1}, x_t] + b_i), \quad o_t = \sigma(W_o [h_{t-1}, x_t] + b_o),$$
-$$\tilde c_t = \tanh(W_c [h_{t-1}, x_t] + b_c), \qquad c_t = f_t \odot c_{t-1} + i_t \odot \tilde c_t, \qquad h_t = o_t \odot \tanh(c_t).$$
+$$\begin{aligned} f_t &= \sigma(W_f [h_{t-1}, x_t] + b_f), & \tilde c_t &= \tanh(W_c [h_{t-1}, x_t] + b_c), \\ i_t &= \sigma(W_i [h_{t-1}, x_t] + b_i), & c_t &= f_t \odot c_{t-1} + i_t \odot \tilde c_t, \\ o_t &= \sigma(W_o [h_{t-1}, x_t] + b_o), & h_t &= o_t \odot \tanh(c_t). \end{aligned}$$
 
 Cổng quên $f_t$ quyết định giữ lại bao nhiêu phần của ô nhớ cũ, cổng vào $i_t$ quyết định ghi thêm bao nhiêu thông tin mới, cổng ra $o_t$ quyết định đưa bao nhiêu phần của ô nhớ ra trạng thái ẩn.
 
@@ -989,7 +988,7 @@ Phương sai đo được khớp lý thuyết ở mọi $d_k$. Không chia thì 
 
 Thay vì một phép attention trên $d$ chiều, **attention nhiều đầu** (multi-head attention) chiếu đầu vào xuống $h$ không gian con, mỗi không gian $d_k = d/h$ chiều, thực hiện $h$ phép attention song song, rồi nối kết quả và chiếu lại:
 
-$$\operatorname{head}_i = \operatorname{Attention}(XW_Q^{(i)},\, XW_K^{(i)},\, XW_V^{(i)}), \qquad \operatorname{MultiHead}(X) = \operatorname{Concat}(\operatorname{head}_1, \dots, \operatorname{head}_h)\, W_O.$$
+$$\begin{aligned} \operatorname{head}_i &= \operatorname{Attention}(XW_Q^{(i)},\, XW_K^{(i)},\, XW_V^{(i)}), \\ \operatorname{MultiHead}(X) &= \operatorname{Concat}(\operatorname{head}_1, \dots, \operatorname{head}_h)\, W_O. \end{aligned}$$
 
 Bài báo gốc dùng $d = 512$, $h = 8$, $d_k = 64$. Vì mỗi đầu hẹp đi $h$ lần, tổng số tham số, $4d^2$ cho $W_Q$, $W_K$, $W_V$, $W_O$, và tổng số phép tính gần như bằng attention một đầu trên đủ $d$ chiều. Nhiều đầu không mua thêm khả năng tính toán mà cho phép mô hình cùng lúc chú ý tới những loại quan hệ khác nhau ở những vị trí khác nhau, chẳng hạn một đầu theo quan hệ cú pháp, một đầu theo từ đồng tham chiếu. Với một đầu duy nhất, phép lấy trung bình có trọng số sẽ trộn lẫn các quan hệ đó.
 

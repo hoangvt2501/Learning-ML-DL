@@ -311,7 +311,7 @@ Bốn công thức trong bảng dưới đủ cho toàn bộ giáo trình.
 
 Công thức cuối được dùng nhiều nhất, và suy ra được từ ba công thức đầu. Khai triển
 
-$$\|y - Xw\|_2^2 = (y - Xw)^\top(y - Xw) = y^\top y - 2\,(X^\top y)^\top w + w^\top (X^\top X)\, w.$$
+$$\begin{aligned} \|y - Xw\|_2^2 &= (y - Xw)^\top(y - Xw) \\ &= y^\top y - 2\,(X^\top y)^\top w + w^\top (X^\top X)\, w. \end{aligned}$$
 
 Số hạng đầu không phụ thuộc $w$ nên có gradient bằng 0. Số hạng thứ hai có dạng $a^\top w$ với $a = -2X^\top y$. Số hạng thứ ba có dạng $w^\top A w$ với $A = X^\top X$ đối xứng, nên gradient là $2X^\top X w$. Cộng lại, ta được
 
@@ -340,7 +340,7 @@ Xác suất xuất hiện trong giáo trình theo ba cách. Cách thứ nhất l
 ### 3.2. Kỳ vọng và phương sai
 
 > **Định nghĩa 3.1 (Kỳ vọng, phương sai).** Với biến ngẫu nhiên $X$ có hàm xác suất (hoặc hàm mật độ) $p$, **kỳ vọng** của $X$ là
-> $$\mathbb{E}[X] = \sum_x x\,p(x) \quad \text{(rời rạc)}, \qquad \mathbb{E}[X] = \int x\,p(x)\,dx \quad \text{(liên tục)},$$
+> $$\begin{aligned} \mathbb{E}[X] &= \sum_x x\,p(x) && \text{(rời rạc)}, \\ \mathbb{E}[X] &= \int x\,p(x)\,dx && \text{(liên tục)}, \end{aligned}$$
 > và **phương sai** của $X$ là $\operatorname{Var}(X) = \mathbb{E}\big[(X - \mathbb{E}X)^2\big] = \mathbb{E}[X^2] - (\mathbb{E}X)^2$.
 
 Kỳ vọng là giá trị trung bình nếu lặp lại phép thử rất nhiều lần. Phương sai đo mức phân tán quanh giá trị trung bình đó; căn bậc hai của nó là **độ lệch chuẩn**, có cùng đơn vị với $X$.
@@ -414,7 +414,7 @@ $$\underbrace{p(\theta \mid \mathcal{D})}_{\text{hậu nghiệm}} = \frac{\overb
 
 Phân phối **tiên nghiệm** $p(\theta)$ mô tả hiểu biết về tham số trước khi thấy dữ liệu. Hàm **hợp lý** $p(\mathcal{D} \mid \theta)$ cho biết dữ liệu quan sát được có khả năng xảy ra tới mức nào nếu tham số là $\theta$. Phân phối **hậu nghiệm** $p(\theta \mid \mathcal{D})$ là hiểu biết đã được cập nhật sau khi thấy dữ liệu. Mẫu số $p(\mathcal{D})$ không phụ thuộc $\theta$, nên khi tìm $\theta$ làm hậu nghiệm lớn nhất có thể bỏ qua nó:
 
-$$\arg\max_\theta p(\theta \mid \mathcal{D}) = \arg\max_\theta \; p(\mathcal{D} \mid \theta)\,p(\theta) = \arg\min_\theta \;\big[-\log p(\mathcal{D} \mid \theta) - \log p(\theta)\big].$$
+$$\begin{aligned} \arg\max_\theta p(\theta \mid \mathcal{D}) &= \arg\max_\theta \; p(\mathcal{D} \mid \theta)\,p(\theta) \\ &= \arg\min_\theta \;\big[-\log p(\mathcal{D} \mid \theta) - \log p(\theta)\big]. \end{aligned}$$
 
 Vế phải có dạng "mất mát cộng thành phần phạt". Chương 10 khai triển đẳng thức này và cho thấy thành phần phạt chính là regularization.
 
@@ -456,7 +456,7 @@ Hồi quy tuyến tính là thuật toán học có giám sát đơn giản nh�
 Cho $n$ điểm dữ liệu $(x_i, y_i)$ với $x_i \in \mathbb{R}^d$ và $y_i \in \mathbb{R}$. Ta muốn tìm một hàm tuyến tính dự đoán $y$ từ $x$. Để công thức gọn, ta thêm vào mỗi $x_i$ một thành phần hằng bằng 1 ở vị trí đầu; khi đó hệ số chặn trở thành trọng số $w_0$ ứng với thành phần này, và mô hình viết được là $f_w(x) = w^\top x$. Giáo trình dùng quy ước này ở mọi chỗ: cột đầu tiên của ma trận dữ liệu $X$ gồm toàn số 1.
 
 > **Định nghĩa 4.1 (Hồi quy tuyến tính bình phương tối thiểu).** Với ma trận dữ liệu $X \in \mathbb{R}^{n\times d}$ và vector nhãn $y \in \mathbb{R}^n$, hồi quy tuyến tính tìm
-> $$\hat w = \arg\min_w L(w), \qquad L(w) = \frac1n\sum_{i=1}^{n}\big(y_i - w^\top x_i\big)^2 = \frac1n\,\|y - Xw\|_2^2.$$
+> $$\begin{aligned} \hat w &= \arg\min_w L(w), \\ L(w) &= \frac1n\sum_{i=1}^{n}\big(y_i - w^\top x_i\big)^2 = \frac1n\,\|y - Xw\|_2^2. \end{aligned}$$
 > Phương pháp này còn gọi là bình phương tối thiểu thông thường (ordinary least squares, OLS).
 
 Theo khung ở Hình 1, mô hình là họ hàm tuyến tính $w^\top x$, hàm mất mát là bình phương sai số, còn thuật toán tối ưu là giải một hệ phương trình tuyến tính, như Mục 4.2 sẽ trình bày. Câu hỏi "vì sao là bình phương mà không phải trị tuyệt đối" có câu trả lời chính xác ở Mục 10.2: bình phương sai số là hệ quả của giả thiết nhiễu có phân phối Gauss.
@@ -581,7 +581,7 @@ $$L(\theta + \delta) \approx L(\theta) + \nabla L(\theta)^\top \delta.$$
 Trong mọi $\delta$ có cùng độ dài, số hạng $\nabla L^\top \delta$ âm nhất khi $\delta$ ngược hướng với $\nabla L$, theo bất đẳng thức Cauchy–Schwarz. Lập luận này chỉ đúng cục bộ, vì xấp xỉ bậc nhất chỉ chính xác khi bước đi đủ nhỏ. Nếu $\eta$ quá lớn, bước đi có thể vượt qua cực tiểu và làm $L$ tăng lên.
 
 > **Ví dụ 5.1.** Xét $L(w) = (w - 3)^2$ với cực tiểu tại $w^* = 3$. Gradient là $L'(w) = 2(w - 3)$. Với $\eta = 0{,}1$ và $w_0 = 0$:
-> $$w_1 = 0 - 0{,}1 \cdot 2(0 - 3) = 0{,}6, \quad w_2 = 0{,}6 - 0{,}1 \cdot 2(0{,}6 - 3) = 1{,}08, \quad w_3 = 1{,}464.$$
+> $$\begin{aligned} w_1 &= 0 - 0{,}1 \cdot 2(0 - 3) = 0{,}6, \\ w_2 &= 0{,}6 - 0{,}1 \cdot 2(0{,}6 - 3) = 1{,}08, \\ w_3 &= 1{,}08 - 0{,}1 \cdot 2(1{,}08 - 3) = 1{,}464. \end{aligned}$$
 > Khoảng cách tới cực tiểu lần lượt là $3$; $2{,}4$; $1{,}92$; $1{,}536$, tức mỗi bước nhân với $0{,}8$. Tổng quát, $w_{t+1} - 3 = (1 - 2\eta)(w_t - 3)$, nên thuật toán hội tụ khi $|1 - 2\eta| < 1$, tức $0 < \eta < 1$. Với $\eta = 0{,}5$ nó tới cực tiểu sau đúng một bước; với $\eta = 1$ nó nhảy qua lại giữa $0$ và $6$ mãi mãi; với $\eta > 1$ nó phân kỳ.
 
 Ví dụ này chứa gần như mọi điều cần biết về tốc độ học, và Mục 5.4 tổng quát hoá nó.
@@ -641,7 +641,7 @@ Trong thực tế, ta thử các giá trị cách nhau 3 tới 10 lần, chẳng
 
 Suy ra công thức gradient bằng tay, hoặc cài đặt nó trong mã, rất dễ sai: sai dấu, thiếu hệ số, nhầm chiều ma trận. Một lỗi như vậy thường không làm chương trình báo lỗi, mà chỉ làm mô hình học kém đi một cách khó giải thích. Cách phát hiện đáng tin cậy là so sánh gradient tính bằng công thức với gradient xấp xỉ bằng **sai phân hữu hạn**:
 
-$$\text{sai phân tiến:}\;\; \frac{f(x+\varepsilon) - f(x)}{\varepsilon}, \qquad \text{sai phân trung tâm:}\;\; \frac{f(x+\varepsilon) - f(x-\varepsilon)}{2\varepsilon}.$$
+$$\begin{aligned} &\text{sai phân tiến:} && \frac{f(x+\varepsilon) - f(x)}{\varepsilon}, \\ &\text{sai phân trung tâm:} && \frac{f(x+\varepsilon) - f(x-\varepsilon)}{2\varepsilon}. \end{aligned}$$
 
 Với hàm nhiều biến, ta áp dụng công thức cho từng toạ độ, mỗi lần dịch chuyển một toạ độ một lượng $\varepsilon$.
 
@@ -763,7 +763,7 @@ Hồi quy logistic khắc phục hạn chế của perceptron bằng một hàm 
 > **Định nghĩa 6.3 (Hồi quy logistic).** Mô hình hồi quy logistic cho xác suất lớp dương là
 > $$p(y = 1 \mid x) = \sigma(w^\top x), \qquad \sigma(z) = \frac{1}{1 + e^{-z}},$$
 > trong đó $\sigma$ là **hàm sigmoid**. Tham số được học bằng cách cực tiểu hoá hàm mất mát **cross-entropy**
-> $$L(w) = -\frac{1}{n}\sum_{i=1}^{n}\Big[y_i \log p_i + (1-y_i)\log(1-p_i)\Big], \qquad p_i = \sigma(w^\top x_i).$$
+> $$\begin{aligned} L(w) &= -\frac{1}{n}\sum_{i=1}^{n}\Big[y_i \log p_i + (1-y_i)\log(1-p_i)\Big], \\ p_i &= \sigma(w^\top x_i). \end{aligned}$$
 
 Hàm sigmoid ép mọi số thực vào khoảng $(0, 1)$, với $\sigma(0) = 0{,}5$. Nghịch đảo của nó cho một cách hiểu hệ số rất cụ thể: $w^\top x = \log\frac{p}{1-p}$, tức mô hình tuyến tính đang dự đoán **log tỉ lệ cược** (log-odds). Tăng đặc trưng $x_j$ thêm một đơn vị làm log tỉ lệ cược tăng $w_j$, tức nhân tỉ lệ cược với $e^{w_j}$. Tên gọi "hồi quy" đến từ đây: mô hình hồi quy log tỉ lệ cược theo $x$, dù bài toán là phân loại.
 
@@ -771,7 +771,7 @@ Hàm sigmoid ép mọi số thực vào khoảng $(0, 1)$, với $\sigma(0) = 0{
 
 Gradient của cross-entropy có dạng rất gọn. Dùng tính chất $\sigma'(z) = \sigma(z)\,(1 - \sigma(z))$, đạo hàm của số hạng thứ $i$ theo $w$ là
 
-$$\frac{\partial}{\partial w}\Big[-y_i\log p_i - (1-y_i)\log(1-p_i)\Big] = -y_i(1-p_i)\,x_i + (1-y_i)\,p_i\, x_i = (p_i - y_i)\,x_i.$$
+$$\begin{aligned} &\frac{\partial}{\partial w}\Big[-y_i\log p_i - (1-y_i)\log(1-p_i)\Big] \\ &\qquad = -y_i(1-p_i)\,x_i + (1-y_i)\,p_i\, x_i = (p_i - y_i)\,x_i. \end{aligned}$$
 
 Lấy trung bình trên mọi điểm, ta được
 
@@ -898,8 +898,7 @@ Với giả thiết này, thay vì một phân phối $d$ chiều ta chỉ cần
 Cần chú ý chữ "có điều kiện". Giả thiết không nói các đặc trưng độc lập với nhau, mà nói chúng độc lập khi đã biết lớp. Trong một thư rác, từ "miễn phí" và từ "khuyến mãi" hay cùng xuất hiện, tức không độc lập; Naive Bayes giả định rằng trong riêng nhóm thư rác, biết thư có "miễn phí" không cho thêm thông tin gì về việc có "khuyến mãi". Giả thiết này gần như luôn sai với dữ liệu thật. Tuy vậy Naive Bayes vẫn thường phân loại tốt, vì để chọn đúng nhãn chỉ cần thứ tự của các $p(y = k \mid x)$ đúng, không cần giá trị của chúng đúng. Ngược lại, các xác suất do Naive Bayes đưa ra thường bị đẩy về gần 0 hoặc 1 quá mức, vì những bằng chứng tương quan với nhau bị đếm nhiều lần như thể độc lập, nên không nên dùng đầu ra của nó như xác suất đã hiệu chuẩn.
 
 > **Ví dụ 7.1 (Lọc thư rác với hai từ).** Tập huấn luyện có 4 thư rác và 6 thư thường. Từ "miễn phí" xuất hiện trong 3 thư rác và 1 thư thường; từ "cuộc họp" xuất hiện trong 0 thư rác và 4 thư thường. Dùng mô hình Bernoulli với làm trơn Laplace $\alpha = 1$ (công thức ở dưới):
-> $$p(\text{miễn phí} \mid \text{rác}) = \tfrac{3+1}{4+2} = 0{,}667, \quad p(\text{miễn phí} \mid \text{thường}) = \tfrac{1+1}{6+2} = 0{,}25,$$
-> $$p(\text{cuộc họp} \mid \text{rác}) = \tfrac{0+1}{4+2} = 0{,}167, \quad p(\text{cuộc họp} \mid \text{thường}) = \tfrac{4+1}{6+2} = 0{,}625.$$
+> $$\begin{aligned} p(\text{miễn phí} \mid \text{rác}) &= \tfrac{3+1}{4+2} = 0{,}667, \\ p(\text{miễn phí} \mid \text{thường}) &= \tfrac{1+1}{6+2} = 0{,}25, \\ p(\text{cuộc họp} \mid \text{rác}) &= \tfrac{0+1}{4+2} = 0{,}167, \\ p(\text{cuộc họp} \mid \text{thường}) &= \tfrac{4+1}{6+2} = 0{,}625. \end{aligned}$$
 > Một thư mới chứa cả hai từ. Điểm của lớp rác là $0{,}4 \times 0{,}667 \times 0{,}167 = 0{,}0444$; điểm của lớp thường là $0{,}6 \times 0{,}25 \times 0{,}625 = 0{,}0938$. Chuẩn hoá, $p(\text{rác} \mid x) = 0{,}0444/(0{,}0444 + 0{,}0938) \approx 0{,}32$, nên thư được xếp là thư thường. Nếu thư chỉ chứa "miễn phí" mà không chứa "cuộc họp", cùng cách tính cho $p(\text{rác} \mid x) \approx 0{,}80$.
 
 Ví dụ trên dùng làm trơn Laplace, và cần giải thích vì sao. Nếu không làm trơn thì $p(\text{cuộc họp} \mid \text{rác}) = 0/4 = 0$. Vì Naive Bayes nhân các xác suất, một thừa số bằng 0 làm cả tích bằng 0: mọi thư chứa "cuộc họp" sẽ có xác suất là rác bằng đúng 0, bất kể nó chứa bao nhiêu từ đáng ngờ khác. Một từ chưa từng gặp trong một lớp đủ để phủ quyết mọi bằng chứng còn lại. Cách khắc phục là cộng thêm một lượng nhỏ vào mọi ô đếm. Với đặc trưng rời rạc có $V$ giá trị,
@@ -936,7 +935,7 @@ Hai cài đặt cho hàm phân biệt lệch nhau $1{,}2 \times 10^{-8}$, giới
 
 Hai dòng cuối kiểm chứng một kết quả lý thuyết. Viết logarit tỉ số hậu nghiệm của hai lớp:
 
-$$\log\frac{p(y=1 \mid x)}{p(y=0 \mid x)} = -\tfrac12 (x-\mu_1)^\top\Sigma_1^{-1}(x-\mu_1) + \tfrac12 (x-\mu_0)^\top\Sigma_0^{-1}(x-\mu_0) + \text{hằng số}.$$
+$$\begin{aligned} \log\frac{p(y=1 \mid x)}{p(y=0 \mid x)} &= -\tfrac12 (x-\mu_1)^\top\Sigma_1^{-1}(x-\mu_1) \\ &\quad + \tfrac12 (x-\mu_0)^\top\Sigma_0^{-1}(x-\mu_0) + \text{hằng số}. \end{aligned}$$
 
 Khai triển hai dạng toàn phương, số hạng bậc hai theo $x$ là $-\tfrac12 x^\top(\Sigma_1^{-1} - \Sigma_0^{-1})\,x$. Nếu hai lớp dùng chung ma trận hiệp phương sai, $\Sigma_1 = \Sigma_0 = \Sigma$, số hạng này triệt tiêu và phần còn lại tuyến tính theo $x$:
 
@@ -1143,7 +1142,7 @@ Thí nghiệm dùng dữ liệu 80 điểm, 12 đặc trưng, trong đó mô hì
 
 Có hai cách giải thích vì sao lasso cho nghiệm **thưa**, tức nhiều hệ số bằng đúng 0. Cách thứ nhất là giải tích. Xét trường hợp đơn giản các cột của $X$ trực chuẩn, $X^\top X = I$, và gọi $z_j = (X^\top y)_j$ là nghiệm bình phương tối thiểu của hệ số thứ $j$. Bài toán tách thành từng toạ độ, và nghiệm là
 
-$$\hat w_j^{\text{ridge}} = \frac{z_j}{1 + \lambda}\ \ (\text{với phạt } \lambda\|w\|_2^2), \qquad \hat w_j^{\text{lasso}} = \operatorname{sign}(z_j)\,\max\big(|z_j| - \lambda,\ 0\big).$$
+$$\begin{aligned} \hat w_j^{\text{ridge}} &= \frac{z_j}{1 + \lambda} && (\text{với phạt } \lambda\|w\|_2^2), \\ \hat w_j^{\text{lasso}} &= \operatorname{sign}(z_j)\,\max\big(|z_j| - \lambda,\ 0\big). \end{aligned}$$
 
 Ridge nhân mọi hệ số với cùng một số nhỏ hơn 1, nên hệ số nào khác 0 vẫn khác 0. Lasso trừ mỗi hệ số đi một lượng $\lambda$ và cắt về 0 những hệ số có trị tuyệt đối nhỏ hơn $\lambda$; phép toán này gọi là **ngưỡng mềm** (soft thresholding). Nguồn gốc của khác biệt nằm ở đạo hàm. Đạo hàm của $w^2$ là $2w$, tiến về 0 khi $w$ tiến về 0, nên lực kéo về 0 yếu dần và không bao giờ kéo được tới đúng 0. Còn $|w|$ không khả vi tại 0, và dưới vi phân của nó tại 0 là cả đoạn $[-1, 1]$; muốn một hệ số rời khỏi 0, gradient của phần bình phương sai số phải lớn hơn $\lambda$, nếu không thì hệ số nằm yên ở 0.
 
@@ -1230,7 +1229,7 @@ Mục 6.3 đã nhận xét rằng gradient của hồi quy logistic, $X^\top(p -
 Hợp lý cực đại chỉ dùng dữ liệu, nên không có chỗ nào để đưa vào hiểu biết có sẵn, chẳng hạn "các hệ số hồi quy thường không quá lớn". Định lý Bayes ở Mục 3.5 cho ta chỗ đó.
 
 > **Định nghĩa 10.2 (MAP).** Với phân phối tiên nghiệm $p(\theta)$, **ước lượng hậu nghiệm cực đại** (maximum a posteriori, MAP) là tham số làm hậu nghiệm lớn nhất:
-> $$\hat\theta_{\text{MAP}} = \arg\max_\theta \; p(\mathcal{D}\mid\theta)\,p(\theta) = \arg\min_\theta\;\big[-\log p(\mathcal{D}\mid\theta) - \log p(\theta)\big].$$
+> $$\begin{aligned} \hat\theta_{\text{MAP}} &= \arg\max_\theta \; p(\mathcal{D}\mid\theta)\,p(\theta) \\ &= \arg\min_\theta\;\big[-\log p(\mathcal{D}\mid\theta) - \log p(\theta)\big]. \end{aligned}$$
 
 Số hạng thứ nhất là hàm mất mát của MLE. Số hạng thứ hai chỉ phụ thuộc tham số, và đóng vai trò thành phần regularization.
 
@@ -1404,7 +1403,7 @@ SVM ở Chương 13 là một bài toán tối ưu có ràng buộc: tìm siêu 
 ### 12.1. Bài toán tối ưu có ràng buộc
 
 > **Định nghĩa 12.1 (Dạng chuẩn).** Bài toán tối ưu có ràng buộc ở dạng chuẩn là
-> $$\min_x \; f_0(x) \quad\text{với}\quad f_i(x) \le 0 \;\; (i=1,\dots,m), \qquad h_j(x) = 0 \;\;(j=1,\dots,p).$$
+> $$\begin{aligned} \min_x \quad & f_0(x) \\ \text{với} \quad & f_i(x) \le 0, \quad i = 1, \dots, m, \\ & h_j(x) = 0, \quad j = 1, \dots, p. \end{aligned}$$
 > Điểm thoả mọi ràng buộc gọi là **điểm chấp nhận được**. Giá trị tối ưu ký hiệu là $p^*$. Bài toán gọi là **bài toán lồi** nếu $f_0, f_1, \dots, f_m$ là hàm lồi và mọi $h_j$ là hàm affine.
 
 Ràng buộc đẳng thức phải là affine, không chỉ lồi, vì tập $\{x : h(x) = 0\}$ với $h$ lồi nhưng không affine thường không lồi. Chẳng hạn $h(x) = \|x\|^2 - 1$ lồi, nhưng $\{x : \|x\|^2 = 1\}$ là mặt cầu, không phải tập lồi.
@@ -1506,12 +1505,12 @@ $$\mathcal{L}(w, b, \alpha) = \tfrac12\|w\|^2 + \sum_{i=1}^n \alpha_i\big[1 - y_
 
 Cho đạo hàm theo $w$ và $b$ bằng 0, ta được
 
-$$\nabla_w \mathcal{L} = w - \sum_i \alpha_i y_i x_i = 0 \;\Longrightarrow\; w = \sum_{i}\alpha_i y_i x_i, \qquad \frac{\partial\mathcal{L}}{\partial b} = -\sum_i \alpha_i y_i = 0.$$
+$$\begin{aligned} \nabla_w \mathcal{L} &= w - \sum_i \alpha_i y_i x_i = 0 \;\Longrightarrow\; w = \sum_{i}\alpha_i y_i x_i, \\ \frac{\partial\mathcal{L}}{\partial b} &= -\sum_i \alpha_i y_i = 0. \end{aligned}$$
 
 Thay $w$ trở lại hàm Lagrange, số hạng chứa $b$ biến mất nhờ $\sum_i \alpha_i y_i = 0$, và ta được bài toán đối ngẫu.
 
 > **Định lý 13.1 (Bài toán đối ngẫu của SVM lề cứng).**
-> $$\max_{\alpha} \;\sum_i \alpha_i - \tfrac12\sum_{i,j}\alpha_i\alpha_j y_i y_j \, x_i^\top x_j \qquad\text{với}\quad \alpha_i \ge 0,\quad \sum_i\alpha_i y_i = 0.$$
+> $$\begin{aligned} \max_{\alpha} \quad & \sum_i \alpha_i - \tfrac12\sum_{i,j}\alpha_i\alpha_j y_i y_j \, x_i^\top x_j \\ \text{với} \quad & \alpha_i \ge 0, \quad \sum_i\alpha_i y_i = 0. \end{aligned}$$
 > Từ nghiệm $\alpha^*$, trọng số là $w^* = \sum_i \alpha_i^* y_i x_i$, và bộ phân loại là $f(x) = \sum_i \alpha_i^* y_i\, x_i^\top x + b^*$.
 
 Từ định lý rút ra ngay hai điều. Điều thứ nhất là $w^*$ là tổ hợp tuyến tính của các điểm dữ liệu, với trọng số $\alpha_i^* y_i$. Điều thứ hai đến từ điều kiện bù (Mục 12.4): $\alpha_i^*\,[1 - y_i(w^{*\top} x_i + b^*)] = 0$, nên $\alpha_i^* > 0$ chỉ có thể xảy ra với những điểm có $y_i(w^{*\top} x_i + b^*) = 1$, tức nằm đúng trên lề. Các điểm đó gọi là **vector hỗ trợ**. Mọi điểm khác có $\alpha_i^* = 0$ và không đóng góp gì vào $w^*$.
@@ -1541,7 +1540,7 @@ Chỉ 3 trong 120 điểm là vector hỗ trợ. Bỏ 117 điểm còn lại kh�
 Bài toán ở Định nghĩa 13.1 vô nghiệm khi dữ liệu không tách được tuyến tính, và ngay cả khi tách được, một điểm nhiễu nằm lẫn sang lớp kia có thể ép lề hẹp lại rất nhiều. SVM lề mềm (Cortes và Vapnik, 1995) cho phép vi phạm lề nhưng tính giá cho mỗi vi phạm.
 
 > **Định nghĩa 13.2 (SVM lề mềm).** Với các biến bù $\xi_i \ge 0$ và tham số $C > 0$:
-> $$\min_{w,b,\xi}\;\tfrac12\|w\|^2 + C\sum_{i=1}^n \xi_i \qquad\text{với}\qquad y_i(w^\top x_i + b) \ge 1 - \xi_i,\quad \xi_i \ge 0.$$
+> $$\begin{aligned} \min_{w,b,\xi} \quad & \tfrac12\|w\|^2 + C\sum_{i=1}^n \xi_i \\ \text{với} \quad & y_i(w^\top x_i + b) \ge 1 - \xi_i, \quad \xi_i \ge 0. \end{aligned}$$
 
 Biến bù $\xi_i$ đo mức vi phạm của điểm thứ $i$: $\xi_i = 0$ nếu điểm nằm ngoài lề và đúng phía, $0 < \xi_i \le 1$ nếu điểm nằm trong lề nhưng vẫn đúng phía, $\xi_i > 1$ nếu điểm bị phân loại sai. Tại nghiệm tối ưu, $\xi_i = \max(0, 1 - y_i(w^\top x_i + b))$, đúng bằng mất mát hinge ở Mục 6.1. Do đó bài toán tương đương với
 
@@ -1584,7 +1583,7 @@ $$K(x, x') = \varphi(x)^\top \varphi(x').$$
 Hàm $K$ gọi là **kernel**. Nếu $K$ tính được trực tiếp từ $x$ và $x'$ mà không cần tính $\varphi$, ta làm việc được trong không gian đặc trưng mà không bao giờ phải dựng nó. Kỹ thuật này gọi là **thủ thuật kernel** (kernel trick).
 
 > **Ví dụ 13.1.** Với $x \in \mathbb{R}^2$, xét $K(x, z) = (x^\top z)^2$. Khai triển:
-> $$(x_1 z_1 + x_2 z_2)^2 = x_1^2 z_1^2 + 2x_1x_2 z_1z_2 + x_2^2 z_2^2 = \varphi(x)^\top\varphi(z), \qquad \varphi(x) = \big(x_1^2,\ \sqrt2\,x_1x_2,\ x_2^2\big).$$
+> $$\begin{aligned} (x_1 z_1 + x_2 z_2)^2 &= x_1^2 z_1^2 + 2x_1x_2 z_1z_2 + x_2^2 z_2^2 \\ &= \varphi(x)^\top\varphi(z), \qquad \varphi(x) = \big(x_1^2,\ \sqrt2\,x_1x_2,\ x_2^2\big). \end{aligned}$$
 > Tính $K$ trực tiếp tốn một tích vô hướng hai chiều và một phép bình phương. Chẳng hạn với $x = (1, 2)$ và $z = (3, -1)$: $x^\top z = 1$ nên $K(x, z) = 1$; còn $\varphi(x) = (1;\ 2\sqrt2;\ 4)$ và $\varphi(z) = (9;\ -3\sqrt2;\ 1)$ cho $\varphi(x)^\top\varphi(z) = 9 - 12 + 4 = 1$. Với $x \in \mathbb{R}^d$ và kernel đa thức bậc $p$, không gian đặc trưng có số chiều cỡ $d^p$, trong khi $K$ vẫn chỉ tốn $O(d)$.
 
 Không phải hàm hai biến nào cũng là một kernel. Điều kiện cần và đủ, theo định lý Mercer, là với mọi tập điểm $x_1, \dots, x_n$, **ma trận kernel** $[K(x_i, x_j)]_{i,j}$ đối xứng và nửa xác định dương. Điều kiện này bảo đảm bài toán đối ngẫu vẫn lồi. Bảng dưới liệt kê ba kernel thông dụng.

@@ -22,7 +22,7 @@ $$Z = \left\lfloor q_{min} - \frac{\alpha}{S} \right\rceil = \left\lfloor 0 - (-
 
 **Hệ quả quan trọng.** Vì $Z$ bị làm tròn xuống, dải thực sự biểu diễn được không còn là $[-0{,}5;\ 2{,}5]$ mà là
 
-$$[\,S(0 - 42),\ S(255 - 42)\,] = \left[-\tfrac{42}{85},\ \tfrac{213}{85}\right] = [-0{,}494118;\ 2{,}505882],$$
+$$\begin{aligned} [\,S(0 - 42),\ S(255 - 42)\,] &= \left[-\tfrac{42}{85},\ \tfrac{213}{85}\right] \\ &= [-0{,}494118;\ 2{,}505882], \end{aligned}$$
 
 tức **toàn bộ lưới bị đẩy sang phải $S/2$**. Đúng hiện tượng đã mô tả ở Mục 3.3 với Hình 4.
 
@@ -121,7 +121,7 @@ $$\mathbb{E}[e^2] = \frac{S^2}{12}.$$
 
 **Kết quả.**
 
-$$\text{SQNR} = \frac{4^b S^2 / 12}{S^2/12} = 4^{b} = 2^{2b} \;\Longrightarrow\; 10\log_{10} 2^{2b} = \boxed{20\log_{10}(2^b)} \approx 6{,}0206\,b \ \text{dB}.$$
+$$\begin{gathered} \text{SQNR} = \frac{4^b S^2 / 12}{S^2/12} = 4^{b} = 2^{2b} \\ \Longrightarrow\; 10\log_{10} 2^{2b} = \boxed{20\log_{10}(2^b)} \approx 6{,}0206\,b \ \text{dB}. \end{gathered}$$
 
 **So sánh với $20\log_{10}(2^b - 2)$ ở Mục 4.2.** Hai giả thiết khác nhau ở đúng hai chỗ, và cả hai đều làm *giảm công suất tín hiệu* chứ không đụng tới nhiễu:
 
@@ -147,7 +147,7 @@ Hai cột giữa khớp đúng bảng số liệu ở Mục 4.2.
 
 **Viết lại phép tích chập.** Với trọng số $W[\,j, c, u, v\,]$ có hình $[C_{out}, C_{in}, k_h, k_w]$:
 
-$$y[n, j, p, q] \;=\; \sum_{c=1}^{C_{in}} \sum_{u=1}^{k_h} \sum_{v=1}^{k_w} W[j, c, u, v]\; x[n, c, \,p s + u,\ q s + v] \;+\; b[j].$$
+$$\begin{aligned} y[n, j, p, q] = {} & \sum_{c=1}^{C_{in}} \sum_{u=1}^{k_h} \sum_{v=1}^{k_w} W[j, c, u, v] \\ & \times x[n, c, \,p s + u,\ q s + v] + b[j]. \end{aligned}$$
 
 **Tiêu chuẩn duy nhất** (đúng như lập luận ở Mục 5.2): một hệ số scale đưa được ra ngoài tổng khi và chỉ khi nó **không phụ thuộc chỉ số bị lấy tổng**. Ở đây các chỉ số bị lấy tổng là $c$, $u$, $v$.
 
@@ -184,7 +184,7 @@ Hai thay đổi:
 
 **Công thức đầy đủ.** Khai triển ở Mục 6.2 không giả định gì về $Z_w$:
 
-$$\sum_k (q_{w,k} - Z_w)(q_{x,k} - Z_x) \;=\; \underbrace{\sum_k q_{w,k} q_{x,k}}_{(1)} \;-\; \underbrace{Z_x \sum_k q_{w,k}}_{(2)} \;-\; \underbrace{Z_w \sum_k q_{x,k}}_{(3)} \;+\; \underbrace{K Z_w Z_x}_{(4)}.$$
+$$\begin{aligned} \sum_k (q_{w,k} - Z_w)(q_{x,k} - Z_x) &= \underbrace{\sum_k q_{w,k} q_{x,k}}_{(1)} - \underbrace{Z_x \sum_k q_{w,k}}_{(2)} \\ &\quad - \underbrace{Z_w \sum_k q_{x,k}}_{(3)} + \underbrace{K Z_w Z_x}_{(4)}. \end{aligned}$$
 
 Mã trong `code/numpy_experiments.py` bỏ (3) và (4) vì trọng số đối xứng. Muốn dùng trọng số bất đối xứng thì phải cộng lại đúng hai số hạng đó.
 
@@ -348,11 +348,17 @@ Chạy bằng `python code/sweep_alpha.py`; có matplotlib thì script vẽ luô
 
 **Kết quả đo được.**
 
-| $\alpha$ | 0,00 | 0,20 | 0,30 | 0,40 | 0,50 | **0,60** | 0,70 | 0,80 | 1,00 |
-|---|---|---|---|---|---|---|---|---|---|
-| Sai số đầu ra | 8,02% | 3,60% | 2,48% | 1,81% | 1,44% | **1,34%** | 1,46% | 1,84% | 3,64% |
-| Chênh lệch giữa các kênh $X$ | 91,3× | 37,0× | 23,6× | 15,0× | 9,6× | 6,1× | 3,9× | 2,5× | 1,0× |
-| Chênh lệch giữa các cột $W$ | 1,0× | 2,5× | 3,9× | 6,1× | 9,6× | 15,0× | 23,6× | 37,0× | 91,3× |
+| $\alpha$ | Sai số đầu ra | Chênh lệch giữa các kênh $X$ | Chênh lệch giữa các cột $W$ |
+|---|---|---|---|
+| 0,00 | 8,02% | 91,3× | 1,0× |
+| 0,20 | 3,60% | 37,0× | 2,5× |
+| 0,30 | 2,48% | 23,6× | 3,9× |
+| 0,40 | 1,81% | 15,0× | 6,1× |
+| 0,50 | 1,44% | 9,6× | 9,6× |
+| **0,60** | **1,34%** | 6,1× | 15,0× |
+| 0,70 | 1,46% | 3,9× | 23,6× |
+| 0,80 | 1,84% | 2,5× | 37,0× |
+| 1,00 | 3,64% | 1,0× | 91,3× |
 
 Đường cong đúng là **chữ U** như trực giác dự đoán. Nhưng hai chi tiết chỉ lộ ra khi đo thật.
 
@@ -419,9 +425,9 @@ Khi đó $s_j = \max|X_{:,j}|$:
 
 Bảng ở Mục 11.8 cho số bit thực tế mỗi trọng số của `Q4_K`:
 
-$$\frac{256 \cdot 4 \;+\; 8 \cdot 12 \;+\; 32}{256} = \frac{1024 + 96 + 32}{256} = \frac{1152}{256} = 4{,}5 \ \text{bit/trọng số}.$$
+$$\begin{aligned} \frac{256 \cdot 4 \;+\; 8 \cdot 12 \;+\; 32}{256} &= \frac{1024 + 96 + 32}{256} \\ &= \frac{1152}{256} = 4{,}5 \ \text{bit/trọng số}. \end{aligned}$$
 
-$$13 \times 10^{9} \times 4{,}5 \ \text{bit} = 58{,}5 \times 10^{9} \ \text{bit} = 7{,}3125 \times 10^{9} \ \text{byte} = \boxed{7{,}31\ \text{GB}} = 6{,}81 \ \text{GiB}.$$
+$$\begin{aligned} 13 \times 10^{9} \times 4{,}5 \ \text{bit} &= 58{,}5 \times 10^{9} \ \text{bit} \\ &= 7{,}3125 \times 10^{9} \ \text{byte} \\ &= \boxed{7{,}31\ \text{GB}} = 6{,}81 \ \text{GiB}. \end{aligned}$$
 
 *Đối chiếu thực tế:* một file `Q4_K_M` 13B thật thường lớn hơn con số này một chút (quãng 7,5–8 GiB), vì llama.cpp giữ embedding và lớp đầu ra ở độ chính xác cao hơn và trộn `Q6_K` cho một số tensor — đúng như cảnh báo cuối Mục 11.8.
 

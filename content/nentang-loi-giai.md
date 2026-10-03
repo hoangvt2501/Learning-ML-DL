@@ -54,7 +54,7 @@ Cả hai hệ số co về phía 0: $0{,}5 \to 0{,}4727$ và $1{,}4 \to 1{,}3636
 
 Phần hợp lý, với nhiễu Gauss độc lập:
 
-$$-\log p(\mathcal{D}\mid w) = \sum_{i=1}^{n}\frac{(y_i - w^\top x_i)^2}{2\sigma^2} + \text{hằng số} = \frac{\|y - Xw\|^2}{2\sigma^2} + \text{hằng số}.$$
+$$\begin{aligned} -\log p(\mathcal{D}\mid w) &= \sum_{i=1}^{n}\frac{(y_i - w^\top x_i)^2}{2\sigma^2} + \text{hằng số} \\ &= \frac{\|y - Xw\|^2}{2\sigma^2} + \text{hằng số}. \end{aligned}$$
 
 Phần tiên nghiệm, với $w \sim \mathcal{N}(0, \tau^2 I)$:
 
@@ -121,13 +121,13 @@ $$E(\varepsilon) = C_1\varepsilon^2 + \frac{C_2 u}{\varepsilon}.$$
 
 Lấy đạo hàm và cho bằng 0:
 
-$$E'(\varepsilon) = 2C_1\varepsilon - \frac{C_2u}{\varepsilon^2} = 0 \;\Longrightarrow\; \varepsilon^3 = \frac{C_2 u}{2C_1} \;\Longrightarrow\; \boxed{\varepsilon^* = \left(\frac{C_2u}{2C_1}\right)^{1/3} \propto u^{1/3}}$$
+$$\begin{gathered} E'(\varepsilon) = 2C_1\varepsilon - \frac{C_2u}{\varepsilon^2} = 0 \;\Longrightarrow\; \varepsilon^3 = \frac{C_2 u}{2C_1} \\ \Longrightarrow\; \boxed{\varepsilon^* = \left(\frac{C_2u}{2C_1}\right)^{1/3} \propto u^{1/3}} \end{gathered}$$
 
 Sai số tại đó cỡ $u^{2/3} \approx 3{,}7\times10^{-11}$. Đây là độ chính xác tốt nhất có thể đạt với sai phân trung tâm; không chọn $\varepsilon$ nào cho kết quả tốt hơn.
 
 **(b) Sai phân tiến.** Sai số cắt cụt chỉ bậc nhất:
 
-$$E(\varepsilon) = C_1\varepsilon + \frac{C_2u}{\varepsilon}, \qquad E'(\varepsilon) = C_1 - \frac{C_2u}{\varepsilon^2} = 0 \;\Longrightarrow\; \boxed{\varepsilon^* \propto u^{1/2}}$$
+$$\begin{gathered} E(\varepsilon) = C_1\varepsilon + \frac{C_2u}{\varepsilon}, \\ E'(\varepsilon) = C_1 - \frac{C_2u}{\varepsilon^2} = 0 \;\Longrightarrow\; \boxed{\varepsilon^* \propto u^{1/2}} \end{gathered}$$
 
 Sai số tốt nhất đạt được cỡ $u^{1/2} \approx 1{,}5\times10^{-8}$.
 
@@ -238,7 +238,7 @@ Hai giá trị bằng nhau. Điều này hợp lý: chỉ có hai điểm, cả 
 
 **(c) Nhân tử Lagrange.** Từ $w = \sum_i \alpha_i y_i x_i$:
 
-$$(0{,}5;\,0{,}5) = \alpha_1 \cdot (+1) \cdot (1,1) + \alpha_2 \cdot (-1) \cdot (-1,-1) = (\alpha_1 + \alpha_2)(1,1),$$
+$$\begin{aligned} (0{,}5;\,0{,}5) &= \alpha_1 \cdot (+1) \cdot (1,1) + \alpha_2 \cdot (-1) \cdot (-1,-1) \\ &= (\alpha_1 + \alpha_2)(1,1), \end{aligned}$$
 
 nên $\alpha_1 + \alpha_2 = 0{,}5$. Ràng buộc $\sum_i\alpha_i y_i = 0$ cho $\alpha_1 - \alpha_2 = 0$. Giải hệ:
 
@@ -250,8 +250,7 @@ Bài toán gốc: $\tfrac12\|w\|^2 = \tfrac12 (0{,}5^2 + 0{,}5^2) = \tfrac12 \cd
 
 Bài toán đối ngẫu: với $x_1^\top x_1 = 2$, $x_2^\top x_2 = 2$, $x_1^\top x_2 = -2$ và $y_1y_2 = -1$:
 
-$$\sum_i\alpha_i - \tfrac12\sum_{i,j}\alpha_i\alpha_j y_iy_j x_i^\top x_j = 0{,}5 - \tfrac12\big[0{,}0625\cdot2 + 0{,}0625\cdot2 + 2\cdot0{,}0625\cdot(-1)\cdot(-2)\big]$$
-$$= 0{,}5 - \tfrac12 \cdot 0{,}5 = \mathbf{0{,}25}.$$
+$$\begin{aligned} &\sum_i\alpha_i - \tfrac12\sum_{i,j}\alpha_i\alpha_j y_iy_j x_i^\top x_j \\ &= 0{,}5 - \tfrac12\big[0{,}0625\cdot2 + 0{,}0625\cdot2 + 2\cdot0{,}0625\cdot(-1)\cdot(-2)\big] \\ &= 0{,}5 - \tfrac12 \cdot 0{,}5 = \mathbf{0{,}25}. \end{aligned}$$
 
 Khe đối ngẫu bằng 0, tức đối ngẫu mạnh, đúng như điều kiện Slater bảo đảm.
 
@@ -283,7 +282,7 @@ Cần $\boxed{k = 3}$.
 
 **(b) Sai số tái tạo với $k = 2$, $n = 101$.** Theo định lý Eckart–Young (Mục 14.3):
 
-$$\|X_c - X_k\|_F^2 = (n-1)\sum_{i>k}\lambda_i = 100 \times (3 + 1{,}5 + 0{,}5) = 100 \times 5 = \boxed{500}.$$
+$$\begin{aligned} \|X_c - X_k\|_F^2 &= (n-1)\sum_{i>k}\lambda_i = 100 \times (3 + 1{,}5 + 0{,}5) \\ &= 100 \times 5 = \boxed{500}. \end{aligned}$$
 
 **(c) Bác bỏ "giữ 90% phương sai nên chỉ kém đi một chút".**
 
@@ -353,7 +352,7 @@ Cũng cần cân nhắc khả năng phân cụm không phải công cụ phù h�
 
 **(a) Số tham số.**
 
-$$(n_u + n_i)\,k = (10^6 + 10^5) \times 50 = 1{,}1\times10^6 \times 50 = \boxed{55\,000\,000}$$
+$$\begin{aligned} (n_u + n_i)\,k &= (10^6 + 10^5) \times 50 \\ &= 1{,}1\times10^6 \times 50 = \boxed{55\,000\,000} \end{aligned}$$
 
 Số ô của ma trận đầy đủ: $10^6 \times 10^5 = 10^{11}$.
 

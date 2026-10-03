@@ -19,7 +19,7 @@ chương, dạng bài và độ khó; nó không hiện ra trên trang.
 
 **(a) Mỗi token.** Mỗi lớp lưu một vector key và một vector value cho mỗi đầu key/value:
 
-$$2 \times 40 \text{ lớp} \times 8 \text{ đầu} \times 128 \text{ chiều} \times 2 \text{ byte} = 163\,840 \text{ byte} = 160 \text{ KiB}.$$
+$$\begin{aligned} &2 \times 40 \text{ lớp} \times 8 \text{ đầu} \times 128 \text{ chiều} \times 2 \text{ byte} \\ &\quad = 163\,840 \text{ byte} = 160 \text{ KiB}. \end{aligned}$$
 
 **(b) Một chuỗi và mười chuỗi.** Một chuỗi 32 768 token: $163\,840 \times 32\,768 = 5 \times 2^{30}$ byte $= 5$ GiB. Mười chuỗi đồng thời: 50 GiB, nhiều hơn dung lượng của một GPU 40 GB.
 

@@ -202,7 +202,7 @@ Cửa sổ ngữ cảnh đã lớn lên rất nhanh, từ 2 048 token của GPT-
 
 Lý do thứ nhất là bộ nhớ và tính toán. Trong Transformer, mỗi token phải lưu vector key và value của nó ở mọi lớp để các token sau tham chiếu tới; vùng nhớ này gọi là **KV cache** ([Mục 12.5 của *Học sâu*](models-ch12.html)). Lấy cấu hình công bố của Llama 3 8B, gồm 32 lớp, 8 đầu key/value, mỗi đầu 128 chiều, lưu bằng số 16 bit, ta có
 
-$$\text{KV cache mỗi token} = 2 \times 32 \times 8 \times 128 \times 2 \text{ byte} = 131\,072 \text{ byte} = 128 \text{ KiB}.$$
+$$\begin{aligned} \text{KV cache mỗi token} &= 2 \times 32 \times 8 \times 128 \times 2 \text{ byte} \\ &= 131\,072 \text{ byte} = 128 \text{ KiB}. \end{aligned}$$
 
 Nhân với độ dài ngữ cảnh, ta được dung lượng KV cache cho một chuỗi:
 

@@ -316,9 +316,10 @@ a.xref:hover { border-bottom-style: solid; }
   padding: .55rem .85rem; text-align: left; vertical-align: top;
   border-bottom: 1px solid var(--line); line-height: 1.55;
 }
+.table-wrap--dense th, .table-wrap--dense td { padding: .5rem .55rem; }
 .table-wrap thead th {
   background: var(--bg-soft); font-weight: 600; font-size: .78rem;
-  letter-spacing: .02em; color: var(--text-2); white-space: nowrap;
+  letter-spacing: .02em; color: var(--text-2);
 }
 .table-wrap tbody tr:last-child td { border-bottom: none; }
 .table-wrap tbody tr:hover { background: color-mix(in srgb, var(--accent-soft) 40%, transparent); }
