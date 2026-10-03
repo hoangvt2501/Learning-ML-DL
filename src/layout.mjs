@@ -52,7 +52,10 @@ function renderSidebar(nav, currentFile) {
     switcher +
     // Bỏ hẳn nhóm rỗng: trang Lộ trình không thuộc giáo trình nào nên không có
     // danh sách chương, và một tiêu đề nhóm trống thì chỉ gây rối.
-    (nav.chapters.length ? renderChapterNav(nav, item) : '') +
+    // Tiến độ "đã học" lưu trong trình duyệt, nên app.js điền vào chỗ này.
+    (nav.chapters.length
+      ? '<div class="nav-progress" data-nav-progress hidden></div>' + renderChapterNav(nav, item)
+      : '') +
     (nav.extras.length
       ? '<p class="nav-group">Luyện tập &amp; tra cứu</p><ul class="nav-list">' +
         nav.extras.map(item).join('') + '</ul>'
@@ -86,13 +89,18 @@ function renderChapterNav(nav, item) {
   const coPhan = khoi.some((k) => k.part);
   return khoi
     .map((k, i) => {
+      // Tên phần là nút thu gọn/mở rộng. Không có JavaScript thì mọi phần vẫn mở.
       const nhan = k.part
-        ? '<p class="nav-group nav-group--part">' +
-          '<span class="nav-part-no">' + (i + 1) + '</span>' + escapeHtml(k.part) + '</p>'
+        ? '<button class="nav-group nav-group--part" type="button" aria-expanded="true" data-part-toggle>' +
+          '<span class="nav-part-no">' + (i + 1) + '</span>' +
+          '<span class="nav-part-name">' + escapeHtml(k.part) + '</span>' +
+          '<span class="nav-part-count" data-part-count></span>' +
+          icon('mui-ten-xuong', 'nav-part-chevron') + '</button>'
         : '<p class="nav-group">' +
           escapeHtml(coPhan ? 'Tra cứu trong giáo trình' : (nav.groupLabel || 'Giáo trình')) +
           '</p>';
-      return nhan + '<ul class="nav-list">' + k.items.map(item).join('') + '</ul>';
+      return nhan + '<ul class="nav-list"' + (k.part ? ' data-part-list' : '') + '>' +
+        k.items.map(item).join('') + '</ul>';
     })
     .join('');
 }
@@ -132,7 +140,8 @@ export function page(o) {
   const scripts = (o.scripts || []).map((s) => '<script src="' + s + '" defer></script>').join('');
   const tocAside = o.toc
     ? '<aside class="toc" aria-label="Mục lục trang này"><div class="toc-inner">' +
-      '<p class="toc-head">Trong trang này</p>' + o.toc + '</div></aside>'
+      '<p class="toc-head">Trong trang này</p>' +
+      '<p class="toc-left" data-time-left hidden></p>' + o.toc + '</div></aside>'
     : '';
 
   return `<!doctype html>
@@ -150,12 +159,13 @@ export function page(o) {
 <link rel="stylesheet" href="assets/katex.min.css">
 <link rel="stylesheet" href="assets/style.css">
 <script>
-// Đặt theme trước khi vẽ để không bị nháy trắng.
+// Đặt theme và phông chữ trước khi vẽ để không bị nháy.
 (function () {
   try {
     var t = localStorage.getItem('qz-theme');
     if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     document.documentElement.dataset.theme = t;
+    if (localStorage.getItem('qz-font') === 'sans') document.documentElement.dataset.font = 'sans';
   } catch (e) {}
 })();
 </script>
@@ -178,6 +188,10 @@ ${sprite()}
   <button class="search-btn" id="searchBtn" type="button">
     ${icon('tim')}
     <span>Tìm trong giáo trình</span><kbd>/</kbd>
+  </button>
+  <button class="icon-btn" id="fontBtn" type="button" aria-pressed="false"
+    aria-label="Đổi phông chữ của bài: có chân hoặc không chân" title="Đổi phông chữ có chân / không chân">
+    ${icon('phong-chu')}
   </button>
   <button class="icon-btn" id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">
     ${icon('sang', 'ic-sun')}

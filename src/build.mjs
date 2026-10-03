@@ -231,9 +231,15 @@ function buildBook(spec, books) {
       description: ch.summary,
       body:
         '<article class="prose">' +
+        // Vị trí của chương: trang chủ, giáo trình (neo của nó trên trang chủ), phần.
+        '<nav class="crumbs" aria-label="Vị trí trong giáo trình">' +
+        '<a href="index.html">Trang chủ</a>' +
+        '<a href="index.html#' + spec.id + '">' + escapeHtml(spec.short) + '</a>' +
+        (ch.part ? '<span>' + escapeHtml(ch.part) + '</span>' : '') +
+        '</nav>' +
         '<div class="chapter-kicker"><span class="kicker-badge">' + kicker + '</span>' +
-        '<span class="kicker-time">' + icon('dong-ho') + minutes[ch.num] + ' phút đọc</span>' +
-        (ch.part ? '<span class="kicker-part">' + escapeHtml(ch.part) + '</span>' : '') +
+        '<span class="kicker-time" data-minutes="' + minutes[ch.num] + '">' + icon('dong-ho') +
+        minutes[ch.num] + ' phút đọc</span>' +
         '</div>' +
         withLede + quiz + '</article>',
       nav,

@@ -23,6 +23,8 @@ const BANG = {
   'xong': 'check',
   'ngoai': 'arrow-up-right',
   'mo-rong': 'maximize-2',
+  'mui-ten-xuong': 'chevron-down',
+  'phong-chu': 'case-sensitive',
 
   // trang phụ của mỗi giáo trình
   'chuong': 'book-open',
