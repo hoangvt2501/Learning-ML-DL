@@ -853,7 +853,7 @@ $$\mathcal{L} = \mathbb{E}_{x_0,\,\varepsilon,\,t}\Big[\big\|\varepsilon - \vare
 3. Lấy $\varepsilon \sim \mathcal{N}(0, I)$ và tính $x_t$ bằng dạng đóng.
 4. Tính bình phương sai số giữa $\varepsilon$ và $\varepsilon_\theta(x_t, t)$, cập nhật tham số.
 
-Hàm mất mát này là dạng đơn giản hoá của một chặn dưới biến phân cho log hợp lý, tương tự ELBO của VAE; Ho, Jain và Abbeel (2020) thấy bỏ các trọng số theo $t$ của chặn dưới cho chất lượng mẫu tốt hơn. Vì biết $\varepsilon$ thì suy ra được $x_0$ từ dạng đóng, dự đoán $\varepsilon$ và dự đoán $x_0$ tương đương về mặt toán học; dự đoán $\varepsilon$ là một lựa chọn thực nghiệm. Khi sinh mẫu, mỗi bước dùng $\varepsilon_\theta$ để ước lượng giá trị trung bình của $x_{t-1}$, rồi cộng thêm một lượng nhiễu nhỏ.
+Hàm mất mát này là dạng đơn giản hoá của một chặn dưới biến phân cho log hợp lý, tương tự ELBO của VAE; Ho, Jain và Abbeel (2020) thấy bỏ các trọng số theo $t$ của chặn dưới cho chất lượng mẫu tốt hơn. Vì biết $\varepsilon$ thì suy ra được $x_0$ từ dạng đóng, dự đoán $\varepsilon$ và dự đoán $x_0$ tương đương về mặt toán học; dự đoán $\varepsilon$ là một lựa chọn thực nghiệm. Chẳng hạn với $x_0 = 2$ ở bước 200 của lịch tuyến tính, $\sqrt{\bar\alpha_t} = 0{,}810$ và $\sqrt{1 - \bar\alpha_t} = 0{,}586$. Nếu nhiễu rút ra là $\varepsilon = 0{,}5$ thì $x_t = 0{,}810 \cdot 2 + 0{,}586 \cdot 0{,}5 = 1{,}913$, và đó là đầu vào của mạng, còn đáp án mạng phải đoán là 0,5. Biết đáp án đó thì $x_0 = (1{,}913 - 0{,}586 \cdot 0{,}5)/0{,}810 = 2$. Khi sinh mẫu, mỗi bước dùng $\varepsilon_\theta$ để ước lượng giá trị trung bình của $x_{t-1}$, rồi cộng thêm một lượng nhiễu nhỏ.
 
 ### 11.5. Tăng tốc lấy mẫu
 
@@ -876,7 +876,7 @@ Kỹ thuật **classifier-free guidance** (Ho và Salimans, 2022) làm cho mẫu
 
 $$\tilde\varepsilon = \varepsilon_\theta(x_t, t, \varnothing) + w\,\big(\varepsilon_\theta(x_t, t, c) - \varepsilon_\theta(x_t, t, \varnothing)\big),$$
 
-với $w > 1$ đẩy mẫu theo hướng mà điều kiện $c$ tạo ra. $w$ lớn cho mẫu khớp mô tả hơn nhưng kém đa dạng hơn. [Chương 14 của *Ứng dụng LLM*](ungdung-ch14.html) bàn về việc dùng các mô hình sinh ảnh trong ứng dụng.
+với $w > 1$ đẩy mẫu theo hướng mà điều kiện $c$ tạo ra. Chẳng hạn nếu ở một toạ độ, dự đoán không điều kiện là 0,2 và dự đoán có điều kiện là 0,5, thì với $w = 3$ ta dùng $0{,}2 + 3 \cdot 0{,}3 = 1{,}1$: không dừng ở dự đoán có điều kiện mà đi xa hơn theo cùng hướng. $w$ lớn cho mẫu khớp mô tả hơn nhưng kém đa dạng hơn. [Chương 14 của *Ứng dụng LLM*](ungdung-ch14.html) bàn về việc dùng các mô hình sinh ảnh trong ứng dụng.
 
 ### 11.7. Tóm tắt
 
