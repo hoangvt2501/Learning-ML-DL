@@ -2021,7 +2021,7 @@ PCA và K-means tìm cấu trúc trong một ma trận dữ liệu đầy đủ.
 
 ## 16. Hệ thống gợi ý
 
-Chương cuối của giáo trình là một ứng dụng dùng lại gần như mọi công cụ đã học. Hệ thống gợi ý dự đoán mức độ một người dùng thích một sản phẩm, bộ phim hay bài hát mà họ chưa đánh giá. Phương pháp chính, phân rã ma trận, cần tới hạng của ma trận và SVD ở Chương 2, hồi quy ridge ở Chương 9, và đánh đổi độ chệch – phương sai xuyên suốt giáo trình. Các thí nghiệm của chương tập trung vào một câu hỏi thực tế mà sách thường bỏ qua: cần bao nhiêu dữ liệu thì phương pháp mới bắt đầu có ích, và điều gì xảy ra với người dùng chưa có dữ liệu nào.
+Chương cuối của giáo trình là một ứng dụng dùng lại gần như mọi công cụ đã học. Hệ thống gợi ý dự đoán mức độ một người dùng thích một sản phẩm, bộ phim hay bài hát mà họ chưa đánh giá. Phương pháp chính, phân rã ma trận, cần tới hạng của ma trận và SVD ở Chương 2, hồi quy ridge ở Chương 9, và đánh đổi độ chệch – phương sai xuyên suốt giáo trình. Các thí nghiệm của chương tập trung vào một câu hỏi thực tế mà sách thường bỏ qua: cần bao nhiêu dữ liệu thì phương pháp mới bắt đầu có ích, và điều gì xảy ra với người dùng chưa có dữ liệu nào. Trước các thí nghiệm, một ma trận ba người dùng, ba bộ phim đủ nhỏ để tính tay sẽ cho thấy cơ chế của từng bước.
 
 ### 16.1. Bài toán gợi ý
 
@@ -2039,6 +2039,16 @@ Dữ liệu đánh giá cũng có hai dạng. **Phản hồi tường minh** (ex
 
 Các toạ độ của $p_u$ và $q_i$ gọi là **nhân tố ẩn** (latent factors). Không ai định nghĩa chúng trước; chúng hình thành từ dữ liệu. Với phim ảnh, một nhân tố có thể tương ứng với mức độ "hành động" của phim và mức độ người dùng thích phim hành động, và tích vô hướng $p_u^\top q_i$ lớn khi sở thích của người dùng khớp với đặc điểm của phim. Cách hiểu này chỉ mang tính minh hoạ: các nhân tố học được thường không có nghĩa rõ ràng như vậy.
 
+Ví dụ nhỏ nhất là hạng 1. Ba người dùng Lan, Minh, Hùng chấm ba phim A, B, C trên thang 1 tới 5. Trừ đi 3, mức giữa thang, để điểm dương là thích và điểm âm là không thích:
+
+| | Phim A | Phim B | Phim C |
+|---|---|---|---|
+| Lan | 2 | 2 | −2 |
+| Minh | 1 | ? | −1 |
+| Hùng | −1 | −1 | 1 |
+
+Các ô đã biết khớp đúng với tích $p q^\top$, với $p = (2;\ 1;\ -1)$ cho ba người và $q = (1;\ 1;\ -1)$ cho ba phim. Có thể đọc $q_i$ là mức "hành động" của phim, A và B là phim hành động còn C thì không, và $p_u$ là mức thích phim hành động: Lan thích nhiều, Minh thích vừa, Hùng không thích. Mô hình hạng 1 điền ô trống bằng $1 \cdot 1 = 1$, tức dự đoán Minh chấm phim B 4 sao.
+
 Chỉ các ô đã quan sát, ký hiệu là tập $\Omega$, được dùng để học. Hàm mất mát là bình phương sai số trên các ô đó cộng regularization:
 
 $$\min_{P,Q}\;\sum_{(u,i) \in \Omega}\big(r_{ui} - p_u^\top q_i\big)^2 + \lambda\big(\|P\|_F^2 + \|Q\|_F^2\big).$$
@@ -2047,7 +2057,7 @@ Hàm này không lồi theo $(P, Q)$ đồng thời, vì có tích $p_u^\top q_i
 
 $$p_u = \big(Q_u^\top Q_u + \lambda I\big)^{-1} Q_u^\top r_u,$$
 
-trong đó $Q_u$ gồm các hàng của $Q$ ứng với sản phẩm người dùng $u$ đã đánh giá, và $r_u$ là các đánh giá tương ứng. Tương tự khi cố định $P$ để giải $Q$. Thuật toán luân phiên hai bước này gọi là **bình phương tối thiểu luân phiên** (alternating least squares, ALS), và mỗi bước không làm tăng hàm mất mát. Một lựa chọn khác là SGD trên từng ô quan sát. Các hệ thống thực tế thường thêm hệ số chặn riêng cho người dùng và cho sản phẩm, $\hat r_{ui} = \mu + b_u + b_i + p_u^\top q_i$, để mô tả việc có người chấm điểm rộng tay hơn và có sản phẩm được ưa chuộng hơn mặt bằng chung (Koren, Bell và Volinsky, 2009).
+trong đó $Q_u$ gồm các hàng của $Q$ ứng với sản phẩm người dùng $u$ đã đánh giá, và $r_u$ là các đánh giá tương ứng. Tương tự khi cố định $P$ để giải $Q$. Thuật toán luân phiên hai bước này gọi là **bình phương tối thiểu luân phiên** (alternating least squares, ALS), và mỗi bước không làm tăng hàm mất mát. Với ví dụ ở trên và $q$ đã biết, Minh đánh giá phim A và C, nên $Q_u = (1;\ -1)$ và $r_u = (1;\ -1)$. Công thức cho $p_{\text{Minh}} = (1 \cdot 1 + (-1)(-1))/(1 + 1 + \lambda) = 2/(2 + \lambda)$, bằng 0,952 với $\lambda = 0{,}1$, và dự đoán cho phim B là $0{,}952$ điểm trên mức giữa, tức khoảng 3,95 sao: regularization kéo dự đoán về phía mức giữa thang một chút. Một lựa chọn khác là SGD trên từng ô quan sát. Các hệ thống thực tế thường thêm hệ số chặn riêng cho người dùng và cho sản phẩm, $\hat r_{ui} = \mu + b_u + b_i + p_u^\top q_i$, để mô tả việc có người chấm điểm rộng tay hơn và có sản phẩm được ưa chuộng hơn mặt bằng chung (Koren, Bell và Volinsky, 2009).
 
 Giả thiết hạng thấp là điều làm bài toán có nghĩa. Thí nghiệm của chương dùng 300 người dùng và 200 sản phẩm: ma trận có 60 000 ô, còn mô hình hạng 4 chỉ có $(300 + 200) \times 4 = 2\,000$ tham số, bằng 3,3% số ô. Không có giả thiết như vậy, giá trị của một ô chưa quan sát không liên quan gì tới các ô đã quan sát, và không thể dự đoán.
 
@@ -2072,7 +2082,7 @@ Cột cuối là tỉ số giữa RMSE của mô hình và độ lệch chuẩn 
 
 Ba dòng đầu có tỉ số lớn hơn 1: với khoảng 10 đánh giá mỗi người trở xuống, phân rã ma trận cho sai số lớn hơn cả cách đoán mọi ô bằng 0. Giữa 10,1 và 19,8 đánh giá mỗi người, RMSE giảm từ 3,54 xuống 0,30, hơn 11 lần. Sau ngưỡng đó, thêm dữ liệu chỉ cải thiện từ từ.
 
-Có thể hiểu ngưỡng này bằng cách đếm ẩn số. Mỗi người dùng có $k = 4$ ẩn số trong $p_u$, nên cần ít nhất 4 đánh giá để xác định chúng, kể cả khi $Q$ đã biết chính xác. Nhưng các đánh giá có nhiễu, và $Q$ cũng đang được ước lượng từ chính dữ liệu thưa đó, nên số đánh giá cần thiết lớn hơn nhiều lần mức tối thiểu. Trong thí nghiệm, ngưỡng nằm giữa 10 và 20 đánh giá mỗi người, tức khoảng 2,5 tới 5 lần hạng $k$. Lý thuyết hoàn thiện ma trận (matrix completion) cho kết luận cùng chiều: dưới giả thiết vị trí các ô quan sát ngẫu nhiên, số quan sát cần thiết tăng tuyến tính theo hạng, nhân với một thừa số logarit của kích thước ma trận (Candès và Recht, 2009).
+Có thể hiểu ngưỡng này bằng cách đếm ẩn số. Mỗi người dùng có $k = 4$ ẩn số trong $p_u$, nên cần ít nhất 4 đánh giá để xác định chúng, kể cả khi $Q$ đã biết chính xác. Nhưng các đánh giá có nhiễu, và $Q$ cũng đang được ước lượng từ chính dữ liệu thưa đó, nên số đánh giá cần thiết lớn hơn nhiều lần mức tối thiểu. Ví dụ hạng 1 cho thấy vì sao. Nếu Minh chỉ chấm phim A, một đánh giá là đủ cho một ẩn số: $p_{\text{Minh}} = 1/(1 + \lambda) \approx 0{,}91$, vẫn đúng chiều. Nhưng nếu đánh giá duy nhất đó lệch đi 1 điểm vì nhiễu, Minh chấm A đúng 3 sao, thì $p_{\text{Minh}} = 0$ và mô hình mất hết thông tin về Minh. Có thêm đánh giá phim C, cùng đánh giá lệch đó chỉ kéo $p_{\text{Minh}}$ xuống $1/2{,}1 \approx 0{,}48$, vẫn đúng chiều. Trong thí nghiệm, ngưỡng nằm giữa 10 và 20 đánh giá mỗi người, tức khoảng 2,5 tới 5 lần hạng $k$. Lý thuyết hoàn thiện ma trận (matrix completion) cho kết luận cùng chiều: dưới giả thiết vị trí các ô quan sát ngẫu nhiên, số quan sát cần thiết tăng tuyến tính theo hạng, nhân với một thừa số logarit của kích thước ma trận (Candès và Recht, 2009).
 
 Con số cụ thể của thí nghiệm này phụ thuộc vào mức nhiễu, $\lambda$ và cách chọn ô quan sát, nhưng kết luận định tính là chung: cần số đánh giá mỗi người dùng lớn hơn hạng $k$ nhiều lần thì phân rã ma trận mới có ích. Vì vậy các hệ thống thực tế dùng $k$ tương đối nhỏ, cỡ vài chục tới vài trăm, dù có hàng triệu người dùng: hạng càng lớn thì càng cần nhiều dữ liệu cho mỗi người.
 
@@ -2106,7 +2116,7 @@ RMSE neu doan bua bang 0 : 2.0772
 ||P|| trung binh, nguoi moi: 1.54e-01
 ```
 
-Với người dùng mới, RMSE là 2,2364, còn tệ hơn đoán mọi đánh giá bằng 0 (2,0772). Hai dòng cuối giải thích cơ chế: vector $p_u$ của người dùng mới có chuẩn trung bình 0,154, so với 2,084 của người dùng cũ. Với người dùng không có ô quan sát nào, tổng bình phương sai số trong hàm mất mát ở Mục 16.2 không chứa số hạng nào liên quan tới $p_u$, chỉ còn thành phần regularization $\lambda\|p_u\|^2$, và giá trị cực tiểu của nó là $p_u = 0$. Chuẩn đo được khác 0 một chút vì trong thí nghiệm, các vector này chỉ nhận giá trị khởi tạo ngẫu nhiên nhỏ và không được cập nhật. Mô hình vì vậy dự đoán gần 0 cho mọi sản phẩm với người dùng mới.
+Với người dùng mới, RMSE là 2,2364, còn tệ hơn đoán mọi đánh giá bằng 0 (2,0772). Hai dòng cuối giải thích cơ chế: vector $p_u$ của người dùng mới có chuẩn trung bình 0,154, so với 2,084 của người dùng cũ. Với người dùng không có ô quan sát nào, tổng bình phương sai số trong hàm mất mát ở Mục 16.2 không chứa số hạng nào liên quan tới $p_u$, chỉ còn thành phần regularization $\lambda\|p_u\|^2$, và giá trị cực tiểu của nó là $p_u = 0$. Chuẩn đo được khác 0 một chút vì trong thí nghiệm, các vector này chỉ nhận giá trị khởi tạo ngẫu nhiên nhỏ và không được cập nhật. Mô hình vì vậy dự đoán gần 0 cho mọi sản phẩm với người dùng mới. Trong ví dụ ba người dùng, một người thứ tư chưa chấm phim nào nhận $p_u = 0$ và được đoán chấm mọi phim đúng 3 sao, mức giữa thang, dù người đó mê phim hành động như Lan hay ghét như Hùng.
 
 Vấn đề này gọi là **khởi đầu lạnh** (cold start), và có ba dạng, mỗi dạng một cách xử lý thường dùng.
 
@@ -2122,7 +2132,7 @@ Ngoài khởi đầu lạnh còn một vấn đề mà thí nghiệm tĩnh của
 
 ### 16.6. Tóm tắt
 
-Phân rã ma trận giả định ma trận đánh giá xấp xỉ được bằng tích hai ma trận hạng thấp, mỗi người dùng và mỗi sản phẩm là một vector nhân tố ẩn, và được huấn luyện bằng ALS, trong đó mỗi bước là một hồi quy ridge. Giả thiết hạng thấp là điều làm bài toán có nghĩa, nhưng nó chỉ có ích khi đủ dữ liệu: trong thí nghiệm, với khoảng 10 đánh giá mỗi người trở xuống, mô hình còn tệ hơn đoán mọi ô bằng 0, và RMSE chỉ giảm mạnh khi số đánh giá vượt khoảng 2,5 tới 5 lần hạng. Hạng $k$ được chọn theo đánh đổi độ chệch – phương sai, và sai số trên ô chưa quan sát nhỏ nhất đúng ở hạng thật. Người dùng chưa có đánh giá nào nhận vector bằng 0 do regularization, nên hệ thống thực tế luôn kết hợp lọc cộng tác với lọc dựa trên nội dung.
+Phân rã ma trận giả định ma trận đánh giá xấp xỉ được bằng tích hai ma trận hạng thấp, mỗi người dùng và mỗi sản phẩm là một vector nhân tố ẩn, và được huấn luyện bằng ALS, trong đó mỗi bước là một hồi quy ridge. Với ba người dùng và ba phim, giả thiết hạng 1 điền được ô trống, và bước ridge cho Minh $p = 2/(2 + \lambda)$, tức khoảng 3,95 sao cho phim B. Giả thiết hạng thấp là điều làm bài toán có nghĩa, nhưng nó chỉ có ích khi đủ dữ liệu: một đánh giá có nhiễu đủ làm mất hết thông tin về một người dùng hạng 1, và trong thí nghiệm, với khoảng 10 đánh giá mỗi người trở xuống, mô hình còn tệ hơn đoán mọi ô bằng 0; RMSE chỉ giảm mạnh khi số đánh giá vượt khoảng 2,5 tới 5 lần hạng. Hạng $k$ được chọn theo đánh đổi độ chệch – phương sai, và sai số trên ô chưa quan sát nhỏ nhất đúng ở hạng thật. Người dùng chưa có đánh giá nào nhận vector bằng 0 do regularization và được đoán ở mức giữa cho mọi sản phẩm, nên hệ thống thực tế luôn kết hợp lọc cộng tác với lọc dựa trên nội dung.
 
 Nhìn lại cả giáo trình, mỗi thuật toán đã gặp đều quay về ba thành phần ở Chương 1: một họ hàm, một hàm mất mát và một cách tối ưu. Đại số tuyến tính cho biết bài toán có nghiệm hay không, xác suất cho biết hàm mất mát đến từ đâu, tính lồi cho biết tối ưu có tìm được nghiệm tốt nhất không, và đánh đổi độ chệch – phương sai cho biết mô hình có tổng quát hoá được không. Giáo trình *Học sâu* đi tiếp từ đây: chồng nhiều lớp hồi quy logistic thành mạng nơ-ron, và xét điều gì xảy ra khi bài toán không còn lồi. Chương 17 gồm các bài tập để luyện các phép tính của giáo trình, và Chương 18 gom các câu hỏi phỏng vấn thường gặp.
 
