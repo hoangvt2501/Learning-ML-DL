@@ -158,6 +158,8 @@ Mô hình ngôn ngữ không đọc chữ cái hay từ. Đơn vị nó đọc l
 
 Phần lớn tokenizer hiện nay dùng thuật toán **byte-pair encoding** (BPE) hoặc một biến thể của nó. BPE bắt đầu từ các ký tự hoặc các byte, rồi lặp lại một việc duy nhất: tìm cặp đơn vị đứng cạnh nhau nhiều nhất trong dữ liệu huấn luyện và gộp chúng thành một đơn vị mới, cho tới khi từ vựng đạt kích thước định trước. Chuỗi nào xuất hiện thường xuyên trong dữ liệu huấn luyện tokenizer sẽ trở thành một token duy nhất, còn chuỗi hiếm bị cắt thành nhiều mảnh.
 
+Một kho rất nhỏ cho thấy thuật toán chạy ra sao. Giả sử dữ liệu chỉ có ba từ: "con" xuất hiện 4 lần, "cong" 3 lần, "ong" 2 lần, và từ vựng ban đầu là bốn chữ cái c, o, n, g. Cặp đứng cạnh nhau nhiều nhất là (o, n), xuất hiện $4 + 3 + 2 = 9$ lần, nên lần gộp đầu tạo token "on". Sau đó cặp (c, on) xuất hiện 7 lần, nhiều hơn (on, g) với 5 lần, nên lần gộp thứ hai tạo "con". Lần gộp thứ ba tạo "cong" từ cặp (con, g), xuất hiện 3 lần. Sau ba lần gộp, "con" và "cong" mỗi từ là một token, còn "ong", từ hiếm nhất, vẫn bị cắt thành hai token "on" và "g".
+
 Từ cách xây như vậy có thể đoán rằng số token của cùng một nội dung phụ thuộc vào ngôn ngữ, và phụ thuộc vào dữ liệu đã dùng để huấn luyện tokenizer. Thí nghiệm trong `code/ungdung/experiments.py` kiểm tra điều này trên một văn bản song ngữ: bản tiếng Anh và bản tiếng Việt của Tuyên ngôn Quốc tế Nhân quyền, từ lời nói đầu tới hết Điều 20.
 
 ![Hình 2](figs/ud02_token.png)
