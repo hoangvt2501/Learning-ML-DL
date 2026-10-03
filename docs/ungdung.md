@@ -984,7 +984,7 @@ Cách chữa là kiểm tra sau mỗi bước và thử lại khi phát hiện l
 
 $$q = \sum_{j=0}^{r} p\,\big((1-p)\,c\big)^{j}, \qquad P(\text{hoàn thành}) = q^n.$$
 
-Thí nghiệm mô phỏng 200 000 lần một agent 20 bước với $p = 0{,}95$, và so với công thức:
+Chẳng hạn với $p = 0{,}95$, $c = 0{,}8$ và $r = 1$: một bước thành công ngay lần đầu với xác suất 0,95, hoặc sai nhưng bị phát hiện rồi thử lại đúng với xác suất $0{,}95 \times 0{,}05 \times 0{,}8 = 0{,}038$, nên $q = 0{,}988$ và một chuỗi 20 bước hoàn thành với xác suất $0{,}988^{20} \approx 0{,}785$. Thí nghiệm mô phỏng 200 000 lần một agent 20 bước với $p = 0{,}95$, và so với công thức:
 
 | Tỉ lệ phát hiện lỗi $c$ | Số lần thử lại tối đa $r$ | Công thức | Mô phỏng | Lời gọi trung bình mỗi bước |
 |---|---|---|---|---|
@@ -1256,7 +1256,7 @@ Thước đo cho sinh mã cần giải thích thêm, vì cách tính tự nhiên
 
 $$\text{pass@}k = \mathbb{E}\left[1 - \frac{\binom{n-c}{k}}{\binom{n}{k}}\right],$$
 
-tức xác suất một tập $k$ lời giải chọn ngẫu nhiên trong $n$ lời giải có ít nhất một lời giải đúng. Cách tính ngây thơ $1 - (1 - c/n)^k$ bị chệch khi $n$ nhỏ.
+tức xác suất một tập $k$ lời giải chọn ngẫu nhiên trong $n$ lời giải có ít nhất một lời giải đúng. Cách tính ngây thơ $1 - (1 - c/n)^k$ bị chệch khi $n$ nhỏ. Với một bài có $n = 5$ lời giải, trong đó $c = 2$ lời giải đúng, công thức cho pass@2 $= 1 - \binom{3}{2}/\binom{5}{2} = 1 - 3/10 = 0{,}7$, còn cách ngây thơ cho $1 - 0{,}6^2 = 0{,}64$. Ở $k = 5$, chọn cả năm lời giải thì chắc chắn có lời giải đúng và công thức cho đúng 1, trong khi cách ngây thơ chỉ cho 0,922: nó coi như các lần thử được rút có hoàn lại.
 
 ### 12.4. Cỡ mẫu của bộ đánh giá
 
@@ -1277,7 +1277,7 @@ Bảng dưới tính nửa độ rộng của khoảng này khi độ chính xá
 
 Với 100 câu, độ chính xác đo được 80% chỉ cho biết độ chính xác thật nằm đâu đó trong khoảng 72% tới 88%. Hai phiên bản prompt đo được 78% và 82% trên 100 câu vì thế không cho kết luận gì. Độ rộng giảm theo $1/\sqrt{n}$, nên muốn thu hẹp một nửa thì phải tăng số câu lên bốn lần.
 
-Khi so sánh hai phiên bản A và B, có một cách làm tốt hơn hẳn việc tăng số câu: chấm cả hai trên cùng một bộ câu hỏi thay vì hai bộ khác nhau. Kết quả của hai phiên bản trên cùng một câu tương quan mạnh với nhau, vì câu khó thì cả hai cùng dễ sai, nên phần lớn biến động do độ khó của câu hỏi bị triệt tiêu khi so sánh. Kiểm định phù hợp là **kiểm định McNemar**. Nó chỉ xét các câu mà hai phiên bản cho kết quả khác nhau: nếu A và B tốt như nhau thì số câu "A sai, B đúng" và số câu "A đúng, B sai" phải xấp xỉ bằng nhau, và độ lệch giữa hai số được kiểm định bằng phân phối nhị thức.
+Khi so sánh hai phiên bản A và B, có một cách làm tốt hơn hẳn việc tăng số câu: chấm cả hai trên cùng một bộ câu hỏi thay vì hai bộ khác nhau. Kết quả của hai phiên bản trên cùng một câu tương quan mạnh với nhau, vì câu khó thì cả hai cùng dễ sai, nên phần lớn biến động do độ khó của câu hỏi bị triệt tiêu khi so sánh. Kiểm định phù hợp là **kiểm định McNemar**. Nó chỉ xét các câu mà hai phiên bản cho kết quả khác nhau: nếu A và B tốt như nhau thì số câu "A sai, B đúng" và số câu "A đúng, B sai" phải xấp xỉ bằng nhau, và độ lệch giữa hai số được kiểm định bằng phân phối nhị thức. Chẳng hạn trên 100 câu, B sửa được 9 câu A sai và làm sai 3 câu A đúng, tức B hơn A 6 điểm phần trăm. Chỉ 12 câu bất đồng mang thông tin. Nếu hai phiên bản tốt như nhau, mỗi câu bất đồng nghiêng về B với xác suất 0,5, và xác suất có từ 9 trên 12 câu trở lên nghiêng về B là $(220 + 66 + 12 + 1)/4\,096 \approx 0{,}073$. Giá trị $p$ hai phía là 0,146, nên với 100 câu, chênh lệch 6 điểm này vẫn chưa đủ để kết luận.
 
 Thí nghiệm mô phỏng một tình huống điển hình. Phiên bản A đúng 80%; phiên bản B giữ đúng 97% số câu A đúng và sửa được 27% số câu A sai, nên B đúng 83%. Với mỗi cỡ bộ đánh giá, ta mô phỏng 2 000 lần và đếm tỉ lệ phát hiện được B tốt hơn ở mức ý nghĩa 5%.
 
