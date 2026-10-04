@@ -1341,7 +1341,7 @@ Cả giải mã lẫn các cải tiến ở Chương 10 đều quay về cùng m
 
 ## 12. Tham số, FLOP và bộ nhớ của Transformer
 
-Khi làm việc với mô hình lớn, nhiều câu hỏi quan trọng có thể trả lời trên giấy trong vài phút, trước khi chạy bất cứ thứ gì: mô hình có vừa bộ nhớ GPU không, huấn luyện mất bao lâu, tăng gấp đôi độ dài ngữ cảnh thì chi phí tăng bao nhiêu. Các công thức để trả lời đều dựng được từ những gì đã học ở Chương 9 và 10. Ta sẽ dựng chúng rồi kiểm chứng với các con số đã công bố của GPT-2 và Llama 2; như sẽ thấy, công thức đếm tham số khớp tới từng tham số.
+Khi làm việc với mô hình lớn, nhiều câu hỏi quan trọng có thể trả lời trên giấy trong vài phút, trước khi chạy bất cứ thứ gì: mô hình có vừa bộ nhớ GPU không, huấn luyện mất bao lâu, tăng gấp đôi độ dài ngữ cảnh thì chi phí tăng bao nhiêu. Các công thức để trả lời đều dựng được từ những gì đã học ở Chương 9 và 10. Ta sẽ dựng chúng rồi kiểm chứng với các con số thật của GPT-2 và Llama 2; như sẽ thấy, công thức đếm tham số khớp tới từng tham số.
 
 ### 12.1. Mục đích của việc ước lượng
 
@@ -1366,15 +1366,17 @@ $$N \approx 12\,L\,d^2.$$
 
 ### 12.3. Kiểm chứng trên GPT-2 và Llama 2
 
-Thí nghiệm trong `code/models/experiments.py` tính đầy đủ số tham số, kể cả hệ số chặn và tham số của LayerNorm, rồi so với số tham số của các mô hình GPT-2 đã công bố.
+Thí nghiệm trong `code/models/experiments.py` tính đầy đủ số tham số, kể cả hệ số chặn và tham số của LayerNorm, rồi so với số tham số đếm trực tiếp trên các mô hình GPT-2 mà OpenAI đã phát hành.
 
-| Mô hình | Theo công thức | Đã công bố | Chênh lệch | $12Ld^2$ |
+| Mô hình | Theo công thức | Mô hình phát hành | Chênh lệch | $12Ld^2$ |
 |---|---|---|---|---|
 | GPT-2 small ($L = 12$, $d = 768$) | 124 439 808 | 124 439 808 | 0 | 84 934 656 |
 | GPT-2 medium ($L = 24$, $d = 1\,024$) | 354 823 168 | 354 823 168 | 0 | 301 989 888 |
 | GPT-2 large ($L = 36$, $d = 1\,280$) | 774 030 080 | 774 030 080 | 0 | 707 788 800 |
 
-Công thức khớp chính xác tới từng tham số với cả ba kích thước. Chia nhỏ GPT-2 small cho thấy tham số nằm ở đâu.
+Công thức khớp chính xác tới từng tham số với cả ba kích thước. Các con số trong bài báo GPT-2 lại khác: 117 triệu, 345 triệu và 762 triệu. Kho mã của OpenAI về sau ghi chú rằng các con số ban đầu sai do một lỗi, và tên gọi 124M, 355M, 774M dùng hiện nay đến từ cách đếm trực tiếp như ở bảng trên. Phép đếm tay vì vậy còn có ích để kiểm tra chính các con số được công bố.
+
+Chia nhỏ GPT-2 small cho thấy tham số nằm ở đâu.
 
 | Thành phần | Số tham số | Tỉ lệ |
 |---|---|---|
@@ -1385,7 +1387,7 @@ Công thức khớp chính xác tới từng tham số với cả ba kích thư�
 
 Bảng chia nhỏ cho thấy hai điều. Embedding chiếm 31% số tham số của GPT-2 small: với mô hình nhỏ và từ vựng lớn, phần embedding chiếm tỉ trọng lớn, nên các nghiên cứu về quy luật co giãn tách riêng số tham số không tính embedding. Còn trong các khối Transformer, FFN chiếm 67% số tham số, đúng tỉ lệ $8d^2/12d^2$ ở Mục 12.2.
 
-Cùng cách đếm áp dụng được cho kiến trúc kiểu Llama, chỉ cần sửa bốn chỗ: FFN dạng SwiGLU có ba ma trận, nên mỗi khối có $4d^2 + 3\,d\,d_{\text{ff}}$ tham số; RMSNorm chỉ có $\gamma$; không có hệ số chặn và không có embedding vị trí, vì vị trí được mã hoá bằng RoPE; và lớp chiếu ra không dùng chung trọng số với embedding. Kết quả cho Llama 2 7B là 6 738 415 616 và cho Llama 2 13B là 13 015 864 320, khớp chính xác với số đã công bố. Bài tập 1 yêu cầu tự tính con số của bản 7B.
+Cùng cách đếm áp dụng được cho kiến trúc kiểu Llama, chỉ cần sửa bốn chỗ: FFN dạng SwiGLU có ba ma trận, nên mỗi khối có $4d^2 + 3\,d\,d_{\text{ff}}$ tham số; RMSNorm chỉ có $\gamma$; không có hệ số chặn và không có embedding vị trí, vì vị trí được mã hoá bằng RoPE; và lớp chiếu ra không dùng chung trọng số với embedding. Kết quả cho Llama 2 7B là 6 738 415 616 và cho Llama 2 13B là 13 015 864 320, khớp chính xác với số tham số của trọng số đã phát hành. Bài tập 1 yêu cầu tự tính con số của bản 7B.
 
 ### 12.4. Số FLOP
 
@@ -1397,11 +1399,17 @@ Lượt ngược tốn khoảng gấp đôi lượt xuôi: một lần cho gradi
 
 $$C \approx 6\,N\,D \quad \text{FLOP}.$$
 
-Với GPT-2 small, $N = 84\,934\,656$, nên suy luận tốn khoảng 170 triệu FLOP mỗi token và huấn luyện khoảng 510 triệu FLOP mỗi token.
+Với GPT-2 small, $N = 84\,934\,656$, nên suy luận tốn khoảng 170 triệu FLOP mỗi token và huấn luyện khoảng 510 triệu FLOP mỗi token. Đó là con số theo quy ước của Kaplan và cộng sự, chỉ tính các tham số không thuộc embedding. Bảng embedding đầu vào đúng là không tốn phép tính, vì chỉ là phép tra bảng, nhưng lớp chiếu ra từ vựng là một phép nhân ma trận thật. Với GPT-2 small, lớp này tốn thêm $2Vd \approx 77$ triệu FLOP mỗi token ở lượt xuôi, gần một nửa con số 170 triệu, dù ma trận của nó dùng chung với bảng embedding.
 
 > **Ví dụ 12.1 (Ngân sách huấn luyện Llama 2 7B).** Llama 2 7B có $N = 6\,476\,005\,376$ tham số không tính embedding và được huấn luyện trên $D = 2 \times 10^{12}$ token, nên $C \approx 6ND = 7{,}77 \times 10^{22}$ FLOP. GPU A100 đạt tối đa 312 TFLOPS với số bf16, nhưng trong thực tế chỉ dùng được một phần; tỉ lệ này gọi là mức sử dụng phần cứng (model FLOPs utilization, MFU), thường 30% tới 50% với mô hình lớn. Với MFU 30%, 37,6% và 40%, ước lượng lần lượt là 230 627, 184 011 và 172 970 giờ-GPU. Meta công bố 184 320 giờ-GPU (Touvron và cộng sự, 2023), ứng với MFU khoảng 37,5%, nằm trong khoảng thông thường. Công thức $6ND$ vì vậy cho đúng bậc độ lớn của chi phí huấn luyện; con số chính xác phụ thuộc hiệu suất của hệ thống.
 
-Công thức $6ND$ dẫn tới một câu hỏi thiết kế: với một ngân sách tính toán $C$ cố định, nên chia $C$ giữa kích thước mô hình $N$ và lượng dữ liệu $D$ thế nào? Hoffmann và cộng sự (2022) huấn luyện hơn 400 mô hình và kết luận rằng $N$ và $D$ nên tăng cùng tỉ lệ khi $C$ tăng, với khoảng 20 token dữ liệu cho mỗi tham số; mô hình Chinchilla 70B huấn luyện trên 1,4 nghìn tỉ token theo nguyên tắc này tốt hơn các mô hình lớn hơn nhiều nhưng ít dữ liệu hơn. Kết quả này được gọi là **quy luật co giãn** tối ưu về tính toán. Trong thực tế, nhiều mô hình được huấn luyện trên lượng dữ liệu vượt xa tỉ lệ 20 token mỗi tham số, vì mô hình nhỏ hơn rẻ hơn khi phục vụ; Llama 2 7B dùng khoảng 300 token mỗi tham số.
+Con số 37,5% còn phụ thuộc vào cách đếm. Nếu lấy $N$ là tổng số tham số, 6 738 415 616, MFU thành khoảng 39%. Nếu cộng thêm phép tính của attention theo quy ước của PaLM (Chowdhery và cộng sự, 2022), tức $12LdT$ FLOP mỗi token khi huấn luyện với $T = 4\,096$, MFU thành khoảng 45%. Khi so MFU giữa các báo cáo, cần xem họ đếm những phép tính nào.
+
+Cùng phép tính cho phép trả lời nhanh những câu hỏi mà bài giảng CS336 dùng làm bài tập nhẩm. Huấn luyện một mô hình 70 tỉ tham số trên 15 nghìn tỉ token bằng 1 024 GPU H100 mất bao lâu? Tổng là ${6 \cdot 70 \times 10^9 \cdot 15 \times 10^{12} = 6{,}3 \times 10^{24}}$ FLOP. Một H100 đạt khoảng 989 TFLOPS với bf16 khi không dùng tính thưa; với MFU 50%, 1 024 GPU làm được khoảng $4{,}4 \times 10^{22}$ FLOP mỗi ngày, nên cần khoảng 144 ngày. Karpathy làm phép tính tương tự cho GPT-2 small trong nanoGPT: 124 triệu tham số, 300 tỉ token và 8 GPU A100 với MFU 30% cho khoảng 3,5 ngày, còn lần huấn luyện thật hội tụ sau khoảng 4 ngày.
+
+Công thức $6ND$ dẫn tới một câu hỏi thiết kế: với một ngân sách tính toán $C$ cố định, nên chia $C$ giữa kích thước mô hình $N$ và lượng dữ liệu $D$ thế nào? Hoffmann và cộng sự (2022) huấn luyện hơn 400 mô hình và kết luận rằng $N$ và $D$ nên tăng cùng tỉ lệ khi $C$ tăng, với khoảng 20 token dữ liệu cho mỗi tham số; mô hình Chinchilla 70B huấn luyện trên 1,4 nghìn tỉ token theo nguyên tắc này tốt hơn các mô hình lớn hơn nhiều nhưng ít dữ liệu hơn. Kết quả này được gọi là **quy luật co giãn** tối ưu về tính toán. Trong thực tế, nhiều mô hình được huấn luyện trên lượng dữ liệu vượt xa tỉ lệ 20 token mỗi tham số, vì mô hình nhỏ hơn rẻ hơn khi phục vụ; Llama 2 7B dùng khoảng 300 token mỗi tham số, còn Llama 3 8B dùng hơn 15 nghìn tỉ token, gần 1 900 token mỗi tham số (Llama Team, 2024).
+
+Khi đọc các quy luật co giãn cần để ý $N$ được đếm thế nào. Kaplan và cộng sự dùng số tham số không tính embedding, còn Hoffmann và cộng sự dùng tổng số tham số; với GPT-2 small, hai con số là 85 triệu và 124 triệu. Hai nhóm đi tới hai khuyến nghị khác nhau: Kaplan và cộng sự khuyên tăng $N$ nhanh hơn $D$ nhiều khi ngân sách tăng, còn Chinchilla khuyên tăng như nhau. Pearce và Song (2024) cho thấy phần lớn chênh lệch đó đến từ chính khác biệt trong cách đếm $N$, cộng với việc Kaplan và cộng sự làm thí nghiệm ở quy mô nhỏ, nơi embedding chiếm tỉ trọng lớn.
 
 Công thức $2N$ chỉ tính các phép nhân với ma trận trọng số, chưa tính hai phép nhân phụ thuộc độ dài ngữ cảnh trong attention: điểm số $QK^\top$ và tích với $V$. Với mỗi token và mỗi lớp, mỗi phép tốn khoảng $2Td$ FLOP khi tính trên cả ngữ cảnh $T$ token, tổng $4LTd$ cho cả mô hình. So với $2N = 24Ld^2$, ta có
 
@@ -1421,7 +1429,7 @@ Bộ nhớ gồm nhiều khoản, mỗi khoản phụ thuộc vào những đạ
 | Giá trị kích hoạt | tỉ lệ với $L \times B \times T \times d$, cộng một phần tỉ lệ với $T^2$ nếu lưu ma trận attention | kích thước lô, độ dài chuỗi; chỉ khi huấn luyện |
 | KV cache | $2 \times L \times n_{\text{kv}} \times d_{\text{head}} \times T \times B \times$ số byte | độ dài ngữ cảnh, số chuỗi; chỉ khi suy luận |
 
-Khi huấn luyện với độ chính xác hỗn hợp và Adam, mỗi tham số cần khoảng 16 byte (Rajbhandari và cộng sự, 2020): 2 byte cho trọng số 16 bit, 2 byte cho gradient 16 bit, 4 byte cho bản sao trọng số FP32 mà bộ tối ưu cập nhật, và 8 byte cho hai trạng thái $m$, $v$ của Adam ở FP32. Với mô hình 7 tỉ tham số, con số là 112 GB, chưa tính giá trị kích hoạt, nên không vừa một GPU 80 GB. Các kỹ thuật như ZeRO (Rajbhandari và cộng sự, 2020) chia gradient và trạng thái bộ tối ưu cho nhiều GPU để giải quyết vấn đề này.
+Khi huấn luyện với độ chính xác hỗn hợp và Adam, mỗi tham số cần khoảng 16 byte (Rajbhandari và cộng sự, 2020): 2 byte cho trọng số 16 bit, 2 byte cho gradient 16 bit, 4 byte cho bản sao trọng số FP32 mà bộ tối ưu cập nhật, và 8 byte cho hai trạng thái $m$, $v$ của Adam ở FP32. Với mô hình 7 tỉ tham số, con số là 112 GB, chưa tính giá trị kích hoạt, nên không vừa một GPU 80 GB. Các kỹ thuật như ZeRO (Rajbhandari và cộng sự, 2020) chia gradient và trạng thái bộ tối ưu cho nhiều GPU để giải quyết vấn đề này. Huấn luyện hoàn toàn bằng FP32 cũng tốn đúng 16 byte mỗi tham số, gồm 4 cho trọng số, 4 cho gradient và 8 cho Adam, nên độ chính xác hỗn hợp không giảm các khoản này; lợi ích của nó nằm ở tốc độ tính và ở bộ nhớ cho giá trị kích hoạt, vốn được lưu ở 16 bit. Phép tính theo chiều ngược lại cũng hữu ích, và CS336 dùng nó làm bài tập nhẩm thứ hai: 8 GPU 80 GB, với 16 byte mỗi tham số và mọi khoản được chia đều cho các GPU, chứa được khoảng ${8 \cdot 80 \times 10^9 / 16 = 4 \times 10^{10}}$ tham số, tức 40 tỉ, trước khi tính giá trị kích hoạt.
 
 Giá trị kích hoạt có thể còn lớn hơn thế. Korthikanti và cộng sự (2022) ước lượng mỗi khối Transformer huấn luyện với số 16 bit cần khoảng $sbd\,(34 + 5as/d)$ byte cho giá trị kích hoạt, với $s$ là độ dài chuỗi, $b$ là kích thước lô và $a$ là số đầu attention. Với cấu hình của Llama 2 7B ($d = 4\,096$, $a = 32$, 32 khối), một chuỗi 4 096 token cần khoảng 97 GiB, trong đó 80 GiB là số hạng $5as/d$ đến từ các ma trận attention $T \times T$. FlashAttention (Mục 10.7) không lưu các ma trận này, đưa con số xuống khoảng 17 GiB, và gradient checkpointing (Mục 5.3) giảm tiếp bằng cách tính lại.
 
@@ -1442,7 +1450,7 @@ Các công thức của chương được gom trong bảng dưới.
 | KV cache mỗi token | $2 L\, n_{\text{kv}}\, d_{\text{head}} \times$ số byte | ước lượng bộ nhớ khi suy luận |
 | Bộ nhớ huấn luyện với Adam | khoảng 16 byte mỗi tham số, cộng giá trị kích hoạt | ước lượng bộ nhớ khi huấn luyện |
 
-Công thức đếm tham số khớp tới từng tham số với GPT-2 và Llama 2, còn công thức $6ND$ cho đúng bậc độ lớn của 184 320 giờ-GPU mà Meta công bố cho Llama 2 7B khi mức sử dụng phần cứng khoảng 37,5%. Attention chỉ chi phối chi phí tính toán khi độ dài ngữ cảnh vượt khoảng $6d$. Về bộ nhớ, huấn luyện tốn khoảng 16 byte mỗi tham số cộng giá trị kích hoạt, còn suy luận tốn trọng số cộng KV cache, và mỗi khoản phụ thuộc vào những đại lượng khác nhau.
+Công thức đếm tham số khớp tới từng tham số với GPT-2 và Llama 2, còn công thức $6ND$ cho đúng bậc độ lớn của 184 320 giờ-GPU mà Meta công bố cho Llama 2 7B khi mức sử dụng phần cứng khoảng 37,5%. Khi dùng $6ND$ cần nói rõ $N$ và các phép tính được đếm gồm những gì: cùng số giờ-GPU đó ứng với MFU 37,5%, 39% hay 45% tuỳ cách đếm, và hai quy luật co giãn của Kaplan và của Chinchilla khác nhau phần lớn vì đếm $N$ khác nhau. Attention chỉ chi phối chi phí tính toán khi độ dài ngữ cảnh vượt khoảng $6d$. Về bộ nhớ, huấn luyện tốn khoảng 16 byte mỗi tham số cộng giá trị kích hoạt, còn suy luận tốn trọng số cộng KV cache, và mỗi khoản phụ thuộc vào những đại lượng khác nhau.
 
 Chương này khép lại phần kiến trúc của giáo trình. Đi từ các họ mô hình qua cây, mạng nhiều lớp, mạng tích chập, mạng hồi quy tới Transformer, ta đã thấy cùng một câu hỏi lặp lại dưới nhiều dạng: giả định nào của mô hình khớp với cấu trúc của dữ liệu, và làm sao để gradient đi được qua một mạng sâu. Hai giáo trình tiếp theo dùng trực tiếp các kết quả ở đây: *Biểu diễn & Căn chỉnh* xét những gì một mô hình như vậy học được và cách căn chỉnh nó theo ý người dùng, còn *Quantization* giảm số byte mỗi số trong mọi dòng của bảng bộ nhớ ở Mục 12.5. Chương 13 gồm các bài tập để luyện các phép tính của giáo trình, và Chương 14 gom các câu hỏi phỏng vấn thường gặp.
 
@@ -1826,6 +1834,10 @@ Các câu trả lời mẫu dưới đây dẫn số liệu từ các thí nghi�
 135. DeepSeek-AI. DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model. arXiv:2405.04434, 2024. Multi-head latent attention.
 136. DeepSeek-AI. DeepSeek-V3 Technical Report. arXiv:2412.19437, 2024.
 137. K. Park, J. Wang, T. Berg-Kirkpatrick, N. Polikarpova, L. D'Antoni. Grammar-Aligned Decoding. *NeurIPS*, 2024. Sai lệch phân phối của giải mã có ràng buộc.
+138. Llama Team, AI @ Meta. The Llama 3 Herd of Models. arXiv:2407.21783, 2024.
+139. T. Pearce, J. Song. Reconciling Kaplan and Chinchilla Scaling Laws. arXiv:2406.12907, 2024.
+140. A. Karpathy. *nanoGPT*. GitHub, 2023. Sổ tay transformer_sizing.ipynb ước lượng thời gian huấn luyện GPT-2 small bằng $6ND$.
+141. OpenAI. *gpt-2*, kho mã và ghi chú phát hành. GitHub, 2019. Ghi chú rằng số tham số trong bài báo GPT-2 bị tính sai.
 
 ---
 
