@@ -488,6 +488,8 @@ $$\delta_z = \delta_a \odot \phi'(z), \qquad \frac{\partial \mathcal{L}}{\partia
 
 Vector $\delta_h$ lại là đầu vào cho lớp phía trước, và mỗi công thức chỉ cần các giá trị $z$, $h$ đã lưu ở lượt xuôi. Rumelhart, Hinton và Williams (1986) phổ biến thuật toán này cho mạng nơ-ron; trong toán học ứng dụng, nó là trường hợp riêng của vi phân tự động chế độ ngược.
 
+Bài giảng CS231n trình bày cùng thuật toán theo một cách dễ hình dung hơn: mỗi phép toán là một **cổng**, nhận gradient từ phía sau rồi nhân với đạo hàm cục bộ của chính nó. Lấy $f = (a + b)\,c$ với $a = 1$, $b = 2$, $c = -3$. Lượt xuôi cho $q = a + b = 3$ rồi $f = qc = -9$. Lượt ngược bắt đầu từ $\partial f/\partial f = 1$. Cổng nhân đổi chéo: gradient của $c$ là giá trị của đầu vào kia, $q = 3$, còn gradient của $q$ là $c = -3$. Cổng cộng chia đều: $a$ và $b$ cùng nhận nguyên gradient $-3$ của $q$. Cổng max, như trong ReLU, chuyển toàn bộ gradient cho đầu vào lớn hơn và cho đầu vào kia 0. Khi một biến được dùng ở nhiều chỗ, gradient của nó là tổng gradient từ mọi nhánh; Karpathy (2022) minh hoạ bằng $b = a + a$, có đạo hàm 2 chứ không phải 1, và quên cộng dồn là lỗi kinh điển khi tự cài lan truyền ngược.
+
 ![Hình 6](figs/models06_backprop.png)
 
 **Hình 6.** Lượt xuôi tính và lưu lại các giá trị trung gian; lượt ngược nhân dần các đạo hàm cục bộ theo thứ tự ngược lại, dùng lại các giá trị đã lưu.
@@ -505,7 +507,7 @@ Ví dụ sau thực hiện đầy đủ một lượt xuôi, một lượt ngư�
 >
 > **Cập nhật.** Một bước gradient descent với $\eta = 0{,}1$ đưa $\hat y$ từ 0,45 lên 0,606 và mất mát từ 0,151 xuống 0,078.
 
-Ví dụ cho thấy một chi tiết quan trọng: đơn vị ẩn thứ hai có $z_2 = -0{,}1 < 0$, nên đạo hàm của ReLU tại đó bằng 0, và toàn bộ hàng thứ hai của $W_1$ nhận gradient bằng 0. Đơn vị nào không kích hoạt với một đầu vào thì không học được gì từ đầu vào đó. Nếu một đơn vị không kích hoạt với mọi đầu vào, nó không bao giờ được cập nhật nữa; đó chính là đơn vị ReLU chết ở Mục 4.2. Cách kiểm tra bằng sai phân, và cách chọn bước sai phân, được trình bày ở [Mục 5.5 của *Nền tảng*](nentang-ch05.html).
+Ví dụ cho thấy một chi tiết quan trọng: đơn vị ẩn thứ hai có $z_2 = -0{,}1 < 0$, nên đạo hàm của ReLU tại đó bằng 0, và toàn bộ hàng thứ hai của $W_1$ nhận gradient bằng 0. Đơn vị nào không kích hoạt với một đầu vào thì không học được gì từ đầu vào đó. Nếu một đơn vị không kích hoạt với mọi đầu vào, nó không bao giờ được cập nhật nữa; đó chính là đơn vị ReLU chết ở Mục 4.2. Cách kiểm tra bằng sai phân, và cách chọn bước sai phân, được trình bày ở [Mục 5.5 của *Nền tảng*](nentang-ch05.html). Khi kiểm tra gradient của cả một mạng, CS231n khuyên dùng sai phân trung tâm như trong ví dụ và so bằng sai số tương đối $|a - n|/\max(|a|, |n|)$ giữa gradient giải tích $a$ và gradient số $n$: dưới $10^{-7}$ là tốt, còn trên $10^{-2}$ thì gần như chắc chắn có lỗi. Phép kiểm tra nên chạy bằng số thực 64 bit, trên vài điểm dữ liệu, và tắt dropout cùng regularization. Với ReLU, các giá trị trước hàm kích hoạt nên cách 0 xa hơn bước sai phân, như $z_2 = -0{,}1$ trong ví dụ, để phép sai phân không vắt qua điểm gãy.
 
 ### 5.2. Thứ tự nhân các ma trận Jacobi
 
@@ -515,7 +517,7 @@ $$\frac{\partial \mathcal{L}}{\partial x} = \underbrace{\frac{\partial \mathcal{
 
 Phép nhân ma trận có tính kết hợp, nên có thể nhân theo bất kỳ thứ tự nào, nhưng chi phí rất khác nhau. Nhân từ trái sang phải, tức chế độ ngược của lan truyền ngược, thì kết quả trung gian luôn là một vector hàng $1 \times m$, và mỗi bước chỉ là một phép nhân vector với ma trận, tốn $O(m^2)$. Nhân từ phải sang trái, tức chế độ xuôi, thì kết quả trung gian là một ma trận $m \times d$, và mỗi bước là một phép nhân ma trận với ma trận, tốn $O(m^2 d)$. Với 10 lớp có $m = d = 1\,000$, chế độ ngược tốn khoảng $10 \times 10^6 = 10^7$ phép nhân, chế độ xuôi khoảng $10 \times 10^9 = 10^{10}$, chênh nhau 1 000 lần, đúng bằng số đầu vào $d$.
 
-Tổng quát hơn, với một hàm từ $n$ đầu vào ra $k$ đầu ra, chế độ ngược tính toàn bộ gradient với chi phí cỡ $k$ lần tính hàm, còn chế độ xuôi cần cỡ $n$ lần (Baydin và cộng sự, 2018). Huấn luyện mạng nơ-ron có $k = 1$, vì hàm mất mát là một số, còn $n$ bằng số tham số, có thể tới hàng tỉ, nên chế độ ngược rẻ hơn hàng tỉ lần. Trên thực tế, một lượt ngược tốn khoảng gấp đôi một lượt xuôi (Mục 12.4), nên tính gradient chỉ tốn cỡ ba lần tính hàm mất mát.
+Tổng quát hơn, với một hàm từ $n$ đầu vào ra $k$ đầu ra, chế độ ngược tính toàn bộ gradient với chi phí cỡ $k$ lần tính hàm, còn chế độ xuôi cần cỡ $n$ lần (Baydin và cộng sự, 2018). Huấn luyện mạng nơ-ron có $k = 1$, vì hàm mất mát là một số, còn $n$ bằng số tham số, có thể tới hàng tỉ, nên chế độ ngược rẻ hơn hàng tỉ lần. Trên thực tế, một lượt ngược tốn khoảng gấp đôi một lượt xuôi (Mục 12.4), nên tính gradient chỉ tốn cỡ ba lần tính hàm mất mát. Đặt cạnh cách tính bằng sai phân, vốn cần thêm một lượt tính hàm mất mát cho mỗi tham số, tức một triệu lẻ một lượt với một mô hình một triệu tham số (Nielsen, 2015), hai cách chênh nhau hơn trăm nghìn lần.
 
 Ngược lại, khi cần đạo hàm của nhiều đầu ra theo ít đầu vào, chế độ xuôi rẻ hơn. Các thư viện như PyTorch và JAX cài đặt cả hai chế độ.
 
@@ -527,7 +529,7 @@ $$\text{số lớp} \times \text{kích thước lô} \times \text{độ dài chu
 
 Bộ nhớ kích hoạt không tỉ lệ với số tham số mà tỉ lệ với kích thước lô và độ dài chuỗi. Vì vậy khi huấn luyện bị hết bộ nhớ, cách xử lý đầu tiên thường là giảm kích thước lô, không phải thu nhỏ mô hình.
 
-Có hai kỹ thuật đổi thời gian tính lấy bộ nhớ. **Gradient checkpointing** (Chen và cộng sự, 2016) chỉ lưu giá trị trung gian tại một số lớp mốc; các lớp khác được tính lại từ mốc gần nhất khi lượt ngược cần tới. Đặt mốc cách nhau $\sqrt{L}$ lớp thì bộ nhớ kích hoạt giảm từ $O(L)$ xuống $O(\sqrt L)$, đổi lại phải tính thêm khoảng một lượt xuôi, tức thời gian tăng khoảng một phần ba. **Tích luỹ gradient** (gradient accumulation) chia một lô lớn thành nhiều lô nhỏ, cộng dồn gradient của các lô nhỏ rồi mới cập nhật một lần. Kết quả tương đương huấn luyện với lô lớn, bộ nhớ chỉ bằng của lô nhỏ, nhưng không nhanh hơn.
+Có hai kỹ thuật đổi thời gian tính lấy bộ nhớ. **Gradient checkpointing** (Chen và cộng sự, 2016) chỉ lưu giá trị trung gian tại một số lớp mốc; các lớp khác được tính lại từ mốc gần nhất khi lượt ngược cần tới. Đặt mốc cách nhau $\sqrt{L}$ lớp thì bộ nhớ kích hoạt giảm từ $O(L)$ xuống $O(\sqrt L)$, đổi lại phải tính thêm khoảng một lượt xuôi, tức thời gian tăng khoảng một phần ba. **Tích luỹ gradient** (gradient accumulation) chia một lô lớn thành nhiều lô nhỏ, cộng dồn gradient của các lô nhỏ rồi mới cập nhật một lần. Kết quả tương đương huấn luyện với lô lớn, bộ nhớ chỉ bằng của lô nhỏ, nhưng không nhanh hơn. Có một chi tiết dễ quên: khi mất mát của mỗi lô nhỏ là trung bình trên lô đó, phải chia nó cho số lô nhỏ trước khi cộng dồn, nếu không gradient sẽ lớn gấp từng ấy lần so với khi huấn luyện thật với lô lớn (Karpathy, 2024).
 
 ### 5.4. SGD, momentum và Adam
 
@@ -537,7 +539,9 @@ Cải tiến đầu tiên là **momentum**, giữ một trung bình trượt c�
 
 $$v_{t+1} = \beta v_t + g_t, \qquad \theta_{t+1} = \theta_t - \eta\, v_{t+1}.$$
 
-Trong một thung lũng hẹp và dài, gradient đổi dấu liên tục theo chiều ngang thung lũng và giữ cùng dấu theo chiều dọc. Trung bình trượt triệt tiêu phần dao động ngang và cộng dồn phần dọc, nên với $\beta = 0{,}9$, bước đi theo hướng ổn định lớn gấp khoảng $1/(1-\beta) = 10$ lần. [Mục 5.3 của *Nền tảng*](nentang-ch05.html) đã đo được tác dụng này: số vòng lặp giảm từ bậc $\kappa$ xuống bậc $\sqrt\kappa$.
+Trong một thung lũng hẹp và dài, gradient đổi dấu liên tục theo chiều ngang thung lũng và giữ cùng dấu theo chiều dọc. Trung bình trượt triệt tiêu phần dao động ngang và cộng dồn phần dọc, nên với $\beta = 0{,}9$, bước đi theo hướng ổn định lớn gấp khoảng $1/(1-\beta) = 10$ lần. [Mục 5.3 của *Nền tảng*](nentang-ch05.html) đã đo được tác dụng này: số vòng lặp giảm từ bậc $\kappa$ xuống bậc $\sqrt\kappa$. CS231n và Andrew Ng cùng dùng hình ảnh một quả bóng lăn xuống dốc có ma sát: gradient đóng vai trò gia tốc, $v$ là vận tốc, còn $\beta$ là hệ số giữ lại vận tốc sau mỗi bước, tức phần bù của ma sát.
+
+Các tài liệu viết momentum theo ba cách sai khác nhau một hệ số. Cách ở trên, $v \leftarrow \beta v + g$, là cách của PyTorch. CS231n viết $v \leftarrow \mu v - \eta g$ rồi cộng thẳng $v$ vào tham số, tương đương với cách trên. Andrew Ng viết $v \leftarrow \beta v + (1 - \beta)\,g$, một trung bình trượt mũ thật sự, nên với cùng $\eta$, bước đi nhỏ hơn $1/(1-\beta)$ lần, tức 10 lần khi $\beta = 0{,}9$. Khi chuyển công thức hay siêu tham số giữa các tài liệu, tốc độ học phải được chỉnh lại theo hệ số đó. Tên "trung bình trượt" cũng có nghĩa cụ thể: với $\beta = 0{,}9$, trọng số của giá trị cách đây 10 bước là $0{,}9^{10} \approx 0{,}35 \approx 1/e$, nên trung bình chủ yếu gồm khoảng $1/(1-\beta) = 10$ giá trị gần nhất.
 
 **Adam** (Kingma và Ba, 2015) đi xa hơn: giữ trung bình trượt của cả gradient và bình phương gradient, rồi chia từng toạ độ cho căn bậc hai của trung bình bình phương, nên mỗi tham số có một bước đi riêng:
 
@@ -550,7 +554,7 @@ Hai phép chia cho $1 - \beta^t$ gọi là **hiệu chỉnh độ chệch** (bia
 
 $$\mathbb{E}[m_t] = (1-\beta_1)\big(1 + \beta_1 + \dots + \beta_1^{t-1}\big)\,\mathbb{E}[g] = (1 - \beta_1^t)\,\mathbb{E}[g].$$
 
-Như vậy $m_t$ là ước lượng chệch về phía 0 của $\mathbb{E}[g]$, và chia cho $1 - \beta_1^t$ cho ước lượng không chệch. Cùng lập luận cho $\mathbb{E}[v_t] = (1 - \beta_2^t)\,\mathbb{E}[g^2]$. Hai độ chệch này không bù trừ cho nhau, vì $v_t$ bị kéo về 0 mạnh hơn nhiều. Ở bước đầu, $m_1 = 0{,}1\,g_1$ và $v_1 = 0{,}001\,g_1^2$, nên nếu không hiệu chỉnh, bước đi là $\eta \cdot 0{,}1\,g_1/\sqrt{0{,}001\,g_1^2} \approx 3{,}16\,\eta$ theo dấu của $g_1$, trong khi bước đã hiệu chỉnh là đúng $\eta$. Với gradient không đổi, tỉ số giữa hai bước là $(1 - \beta_1^t)/\sqrt{1 - \beta_2^t}$: bằng 6,5 ở bước 10, 3,2 ở bước 100 và vẫn còn 1,26 ở bước 1 000, vì $1 - \beta_2^t$ tăng rất chậm. Bỏ hiệu chỉnh vì vậy làm các bước đầu lớn bất thường, không phải nhỏ đi; Kingma và Ba (2015) nêu đúng điều này. Khi $t$ lớn, $\beta^t \to 0$ và phép hiệu chỉnh không còn tác dụng gì.
+Như vậy $m_t$ là ước lượng chệch về phía 0 của $\mathbb{E}[g]$, và chia cho $1 - \beta_1^t$ cho ước lượng không chệch. Andrew Ng giảng điều này bằng trung bình trượt của nhiệt độ hằng ngày. Với nhiệt độ ba ngày đầu là 30, 32 và 31 °C và hệ số 0,9, trung bình trượt khởi tạo từ 0 cho 3; 5,9 và 8,41, thấp xa nhiệt độ thật; chia lần lượt cho $1 - 0{,}9 = 0{,}1$, $1 - 0{,}9^2 = 0{,}19$ và $1 - 0{,}9^3 = 0{,}271$ được 30; 31,05 và 31,03. Cùng lập luận cho $\mathbb{E}[v_t] = (1 - \beta_2^t)\,\mathbb{E}[g^2]$. Hai độ chệch này không bù trừ cho nhau, vì $v_t$ bị kéo về 0 mạnh hơn nhiều. Ở bước đầu, $m_1 = 0{,}1\,g_1$ và $v_1 = 0{,}001\,g_1^2$, nên nếu không hiệu chỉnh, bước đi là $\eta \cdot 0{,}1\,g_1/\sqrt{0{,}001\,g_1^2} \approx 3{,}16\,\eta$ theo dấu của $g_1$, trong khi bước đã hiệu chỉnh là đúng $\eta$. Với gradient không đổi, tỉ số giữa hai bước là $(1 - \beta_1^t)/\sqrt{1 - \beta_2^t}$: tăng lên tới khoảng 6,6 quanh bước 12, còn 3,2 ở bước 100 và vẫn còn 1,26 ở bước 1 000, vì $1 - \beta_2^t$ tăng rất chậm. Bỏ hiệu chỉnh vì vậy làm các bước đầu lớn bất thường, không phải nhỏ đi; Kingma và Ba (2015) nêu đúng điều này. Khi $t$ lớn, $\beta^t \to 0$ và phép hiệu chỉnh không còn tác dụng gì.
 
 Cuối cùng, **AdamW** (Loshchilov và Hutter, 2019) sửa cách Adam xử lý weight decay. Nếu thêm $\lambda\|\theta\|^2$ vào hàm mất mát rồi dùng Adam, gradient của thành phần phạt $2\lambda\theta$ cũng bị chia cho $\sqrt{\hat v_t}$, nên tham số có gradient lớn lại bị phạt ít hơn, ngược với mục đích của regularization. AdamW tách weight decay ra khỏi gradient và trừ trực tiếp $\eta\lambda\theta_t$ ở mỗi bước. AdamW là lựa chọn mặc định khi huấn luyện Transformer. Bảng dưới so sánh hai nhóm thuật toán.
 
@@ -571,6 +575,10 @@ Sau warmup, tốc độ học được giảm dần. Lịch phổ biến khi hu�
 
 Khi tăng kích thước lô lên $k$ lần, gradient ít nhiễu hơn nên có thể dùng tốc độ học lớn hơn. Với SGD, Goyal và cộng sự (2017) dùng **quy tắc tuyến tính**: nhân tốc độ học với $k$, kèm warmup, và huấn luyện được ResNet-50 trên ImageNet với lô 8 192 ảnh mà không giảm độ chính xác. Với Adam, Malladi và cộng sự (2022) lập luận rằng quy tắc phù hợp là nhân với $\sqrt{k}$. Cả hai là quy tắc kinh nghiệm có cơ sở lý thuyết một phần, và đều không còn đúng khi lô quá lớn.
 
+Một lịch cụ thể cho thấy các thành phần này ghép với nhau ra sao. Khi tái hiện GPT-2 124 triệu tham số, Karpathy (2024) dùng AdamW với $\beta_1 = 0{,}9$, $\beta_2 = 0{,}95$, warmup tuyến tính trong 715 bước lên $6 \times 10^{-4}$, rồi giảm theo cosine xuống $6 \times 10^{-5}$ ở bước 19 073, kèm cắt chuẩn gradient ở 1,0.
+
+Đường mất mát cho biết tốc độ học đang ở mức nào: mất mát gần như không giảm là dấu hiệu tốc độ học quá nhỏ, còn mất mát tăng vọt hoặc thành NaN là dấu hiệu quá lớn. CS231n khuyên theo dõi thêm tỉ số giữa độ lớn của bước cập nhật và độ lớn của tham số, nên ở quanh $10^{-3}$. Và trước khi huấn luyện thật, nên cho mạng khớp hoàn toàn một tập rất nhỏ, chẳng hạn 20 mẫu: một mạng đủ lớn phải đưa được mất mát trên 20 mẫu đó về gần 0, nếu không thì mã có lỗi.
+
 ### 5.6. Các hiểu lầm thường gặp
 
 Bảng dưới gom những hiểu lầm hay gặp về lan truyền ngược và tối ưu.
@@ -585,7 +593,7 @@ Bảng dưới gom những hiểu lầm hay gặp về lan truyền ngược và
 
 ### 5.7. Tóm tắt
 
-Lan truyền ngược tính gradient của hàm mất mát theo mọi tham số bằng quy tắc dây chuyền, đi từ đầu ra về đầu vào và dùng lại các giá trị đã lưu ở lượt xuôi. Nhân các ma trận Jacobi theo chiều ngược làm mọi kết quả trung gian là vector, nên với hàm mất mát là một số, tính toàn bộ gradient chỉ tốn cỡ ba lần tính hàm. Đổi lại, các giá trị trung gian phải được giữ trong bộ nhớ, và phần bộ nhớ kích hoạt này tăng theo kích thước lô và độ dài chuỗi. Gradient được dùng bởi SGD theo mini-batch, momentum hoặc Adam; Adam chia bước đi theo từng tham số, cần hiệu chỉnh độ chệch ở các bước đầu và giữ hai giá trị trạng thái cho mỗi tham số, còn AdamW tách weight decay khỏi gradient. Tốc độ học thường đi theo lịch warmup rồi giảm dần.
+Lan truyền ngược tính gradient của hàm mất mát theo mọi tham số bằng quy tắc dây chuyền, đi từ đầu ra về đầu vào và dùng lại các giá trị đã lưu ở lượt xuôi; nhìn theo từng cổng, cổng cộng chia đều gradient, cổng nhân đổi chéo, cổng max chuyển gradient cho đầu vào lớn hơn, và gradient của một biến dùng ở nhiều chỗ là tổng các nhánh. Nhân các ma trận Jacobi theo chiều ngược làm mọi kết quả trung gian là vector, nên với hàm mất mát là một số, tính toàn bộ gradient chỉ tốn cỡ ba lần tính hàm. Đổi lại, các giá trị trung gian phải được giữ trong bộ nhớ, và phần bộ nhớ kích hoạt này tăng theo kích thước lô và độ dài chuỗi. Gradient được dùng bởi SGD theo mini-batch, momentum hoặc Adam; Adam chia bước đi theo từng tham số, cần hiệu chỉnh độ chệch ở các bước đầu và giữ hai giá trị trạng thái cho mỗi tham số, còn AdamW tách weight decay khỏi gradient. Momentum được viết theo nhiều quy ước sai khác nhau một hệ số $1/(1-\beta)$, nên phải chỉnh tốc độ học khi đổi quy ước. Tốc độ học thường đi theo lịch warmup rồi giảm dần, và trước khi huấn luyện thật, kiểm tra gradient bằng sai số tương đối và cho mạng khớp một tập rất nhỏ là hai bước kiểm tra rẻ.
 
 Với các công cụ này, ví dụ tính tay đã chạy đúng trên một mạng hai lớp. Khi mạng có hàng chục lớp, một vấn đề mới xuất hiện ngay trong công thức lan truyền ngược: gradient là tích của nhiều ma trận, và tích đó có thể co về 0 hoặc phình ra rất nhanh. Chương 6 xét vấn đề này.
 
@@ -1775,6 +1783,8 @@ Các câu trả lời mẫu dưới đây dẫn số liệu từ các thí nghi�
 118. A. Zhang, Z. C. Lipton, M. Li, A. J. Smola. *Dive into Deep Learning*. Cambridge University Press, 2023. Cách mở đầu chương mạng nhiều lớp ở Mục 4.1 và nhiều ví dụ tính tay.
 119. M. Nielsen. *Neural Networks and Deep Learning*. Determination Press, 2015. Chứng minh bằng hình của định lý xấp xỉ phổ quát và phân tích gradient tiêu biến.
 120. A. Karpathy. *A Recipe for Training Neural Networks*. 2019. Các kiểm tra lúc khởi tạo ở Mục 4.5.
+121. A. Karpathy. *The Spelled-Out Intro to Neural Networks and Backpropagation: Building Micrograd*. Bài giảng video, 2022. Ví dụ cộng dồn gradient ở Mục 5.1.
+122. A. Karpathy. *Let's Reproduce GPT-2 (124M)*. Bài giảng video và mã nguồn build-nanogpt, 2024. Lịch tốc độ học ở Mục 5.5 và cách chia mất mát khi tích luỹ gradient ở Mục 5.3.
 
 ---
 
