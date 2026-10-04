@@ -166,6 +166,18 @@ Nhiều quyết định trong các chương sau thực chất là điều chỉn
 
 Giả sử dữ liệu sinh từ mô hình $y = f(x) + \varepsilon$, trong đó $f$ là hàm thật, $\varepsilon$ là nhiễu có $\mathbb{E}[\varepsilon] = 0$, $\operatorname{Var}(\varepsilon) = \sigma^2$ và độc lập với $x$. Một thuật toán học nhận tập huấn luyện $\mathcal{D}$ và trả về hàm dự đoán $\hat f_{\mathcal{D}}$. Vì $\mathcal{D}$ là ngẫu nhiên, giá trị dự đoán $\hat f_{\mathcal{D}}(x_0)$ tại một điểm cố định $x_0$ cũng là một biến ngẫu nhiên.
 
+Trước khi phát biểu định lý, hai loại sai số nói ở Mục 2.1 có thể thấy ngay trên bốn căn hộ ở Mục 1.4. Bài giảng CS229 cũng đi theo thứ tự đó: độ chệch được hiểu trước hết là sai số vẫn còn kể cả khi có vô hạn dữ liệu, phương sai là mức mô hình thay đổi giữa các tập huấn luyện, và phép phân rã chặt chẽ đến sau. Giả sử giá thật là ${f(x) = 0{,}57 + 0{,}024x}$ cộng nhiễu có phương sai $\sigma^2$ ở mỗi căn, và ta dự đoán giá căn 120 m², nơi $f(120) = 3{,}45$. Ba mô hình dưới đây đều cho dự đoán là một tổ hợp tuyến tính $\sum_i c_i y_i$ của bốn mức giá quan sát được, với các hệ số $c_i$ chỉ phụ thuộc vào diện tích. Nhiễu ở bốn căn độc lập, nên phương sai của dự đoán là $\sigma^2\sum_i c_i^2$.
+
+| Mô hình | Hệ số $c_i$ tại 120 m² | Độ chệch | Phương sai |
+|---|---|---|---|
+| Hằng số: trung bình bốn giá | 0,25 cho mỗi căn | $-1{,}2$ | $0{,}25\,\sigma^2$ |
+| Đường thẳng | $-0{,}5;\ 0;\ 0{,}5;\ 1$ | 0 | $1{,}5\,\sigma^2$ |
+| Đa thức bậc ba qua bốn điểm | $-1;\ 4;\ -6;\ 4$ | 0 | $69\,\sigma^2$ |
+
+Mô hình hằng số có phương sai nhỏ nhất nhưng kỳ vọng của nó là ${f(70) = 2{,}25}$, lệch 1,2 tỉ so với giá thật 3,45 tỉ. Đường thẳng và đa thức bậc ba đều không chệch, vì hàm thật là một đường thẳng, nhưng phương sai của đa thức gấp 46 lần đường thẳng: hệ số $-6$ của căn 80 m² nghĩa là nhiễu ở căn đó bị khuếch đại sáu lần khi ngoại suy ra 120 m². Với $\sigma^2 = 0{,}009$, ước lượng ở [Mục 10.2 của *Nền tảng*](nentang-ch10.html), phần sai số ngoài nhiễu là 1,442 cho mô hình hằng số, 0,0135 cho đường thẳng và 0,621 cho đa thức bậc ba.
+
+Con số $69\,\sigma^2$ cần được đọc đúng. Tại chính bốn diện tích đã thấy, phương sai trung bình của ba mô hình chỉ là $0{,}25\,\sigma^2$, $0{,}5\,\sigma^2$ và $1{,}0\,\sigma^2$, bằng số tham số chia cho số điểm (Hastie, Tibshirani và Friedman, 2009). Phương sai của đa thức bậc ba lên tới $69\,\sigma^2$ chủ yếu vì 120 m² nằm ngoài khoảng dữ liệu, nơi nó phải ngoại suy: độ linh hoạt khuếch đại nhiễu mạnh nhất ở những chỗ dữ liệu không ràng buộc được mô hình. Định lý sau cho thấy độ chệch bình phương, phương sai và nhiễu cộng lại đúng bằng sai số kỳ vọng tại một điểm.
+
 > **Định lý 2.1 (Phân rã độ chệch – phương sai).** Tại một điểm $x_0$, với $y_0 = f(x_0) + \varepsilon_0$ là một quan sát mới độc lập với tập huấn luyện, sai số bình phương kỳ vọng tách thành ba phần:
 > $$\begin{aligned} \mathbb{E}\big[(y_0 - \hat f_{\mathcal{D}}(x_0))^2\big] &= \underbrace{\big(\mathbb{E}[\hat f_{\mathcal{D}}(x_0)] - f(x_0)\big)^2}_{\text{độ chệch}^2} \\ &\quad + \underbrace{\operatorname{Var}\big(\hat f_{\mathcal{D}}(x_0)\big)}_{\text{phương sai}} + \underbrace{\sigma^2}_{\text{nhiễu}}, \end{aligned}$$
 > trong đó kỳ vọng và phương sai lấy theo phân phối của tập huấn luyện $\mathcal{D}$ và của nhiễu $\varepsilon_0$.
@@ -176,17 +188,9 @@ Ba thành phần có ý nghĩa khác nhau. Độ chệch đo sai lệch có hệ
 
 > **Lưu ý.** Độ chệch và phương sai được định nghĩa qua kỳ vọng trên **các tập huấn luyện có thể rút ra**, tại một điểm $x_0$ cố định. Chúng không đo mức dao động của dự đoán giữa các điểm dữ liệu khác nhau. Một mô hình có dự đoán thay đổi mạnh theo $x$ vẫn có thể có phương sai thấp, nếu huấn luyện trên tập dữ liệu khác thì nó cho gần như cùng một hàm.
 
-Bốn căn hộ ở Mục 1.4 cho một phép tính tay. Giả sử giá thật là ${f(x) = 0{,}57 + 0{,}024x}$ cộng nhiễu có phương sai $\sigma^2$ ở mỗi căn, và ta dự đoán giá căn 120 m², nơi $f(120) = 3{,}45$. Ba mô hình dưới đây đều cho dự đoán là một tổ hợp tuyến tính $\sum_i c_i y_i$ của bốn mức giá quan sát được, với các hệ số $c_i$ chỉ phụ thuộc vào diện tích. Nhiễu ở bốn căn độc lập, nên phương sai của dự đoán là $\sigma^2\sum_i c_i^2$.
+> **Lưu ý.** Phân rã trên chỉ đúng với mất mát bình phương. Với mất mát 0–1 của bài toán phân loại, chưa có một phân rã được chấp nhận chung, và trực giác từ hồi quy có thể sai. Nếu xác suất thật của lớp dương tại một điểm là 0,9 mà mô hình luôn ước lượng 0,6, độ chệch bình phương của ước lượng xác suất là 0,09, nhưng mô hình vẫn chọn đúng lớp dương, nên sai số 0–1 không tăng chút nào so với một mô hình biết xác suất thật (Hastie, Tibshirani và Friedman, 2009).
 
-| Mô hình | Hệ số $c_i$ tại 120 m² | Độ chệch | Phương sai |
-|---|---|---|---|
-| Hằng số: trung bình bốn giá | 0,25 cho mỗi căn | $-1{,}2$ | $0{,}25\,\sigma^2$ |
-| Đường thẳng | $-0{,}5;\ 0;\ 0{,}5;\ 1$ | 0 | $1{,}5\,\sigma^2$ |
-| Đa thức bậc ba qua bốn điểm | $-1;\ 4;\ -6;\ 4$ | 0 | $69\,\sigma^2$ |
-
-Mô hình hằng số có phương sai nhỏ nhất nhưng kỳ vọng của nó là ${f(70) = 2{,}25}$, lệch 1,2 tỉ so với giá thật 3,45 tỉ. Đường thẳng và đa thức bậc ba đều không chệch, vì hàm thật là một đường thẳng, nhưng phương sai của đa thức gấp 46 lần đường thẳng: hệ số $-6$ của căn 80 m² nghĩa là nhiễu ở căn đó bị khuếch đại sáu lần khi ngoại suy ra 120 m². Với $\sigma^2 = 0{,}009$, ước lượng ở [Mục 10.2 của *Nền tảng*](nentang-ch10.html), phần sai số ngoài nhiễu là 1,442 cho mô hình hằng số, 0,0135 cho đường thẳng và 0,621 cho đa thức bậc ba.
-
-Ba mô hình này là một trường hợp của quy luật chung. Khi tăng độ linh hoạt của mô hình, độ chệch thường giảm vì họ hàm rộng hơn, còn phương sai thường tăng vì có nhiều cách hơn để khớp theo nhiễu. Tổng của chúng vì vậy thường có dạng chữ U theo độ linh hoạt. Chữ "thường" ở đây là cần thiết: định lý chỉ khẳng định phép tách, không khẳng định hai thành phần thay đổi đơn điệu, và Mục 2.3 sẽ cho thấy những trường hợp ngoại lệ.
+Ba mô hình này là một trường hợp của quy luật chung. Khi tăng độ linh hoạt của mô hình, độ chệch thường giảm vì họ hàm rộng hơn, còn phương sai thường tăng vì có nhiều cách hơn để khớp theo nhiễu. Tổng của chúng vì vậy thường có dạng chữ U theo độ linh hoạt. Chữ "thường" ở đây là cần thiết: định lý chỉ khẳng định phép tách, không khẳng định hai thành phần thay đổi đơn điệu, và Mục 2.3 sẽ cho thấy những trường hợp ngoại lệ. Chữ "đánh đổi" cũng không có nghĩa là giảm thành phần này buộc phải tăng thành phần kia: độ chệch và phương sai có thể cùng cao, và với mạng nơ-ron, tăng kích thước mạng đi kèm regularization thích hợp thường giảm được độ chệch mà không làm tăng phương sai, điều Andrew Ng nhấn mạnh trong khoá Deep Learning Specialization.
 
 ### 2.3. Đo độ chệch và phương sai bằng mô phỏng
 
@@ -237,17 +241,27 @@ Dòng cuối cần chú ý vì nó trông như tin tốt. Tình huống vô hạ
 
 Hai đường cong theo số điểm dữ liệu còn trả lời một câu hỏi có giá trị kinh tế: thu thêm dữ liệu có đáng không. Nếu đường sai số xác thực đã nằm ngang và sát đường sai số huấn luyện, thêm dữ liệu không giúp gì; nếu nó vẫn đang giảm và còn cách xa đường huấn luyện, thêm dữ liệu nhiều khả năng giúp được.
 
+Andrew Ng dạy cách chẩn đoán này bằng những cặp số cụ thể, và cách dạy đó dễ nhớ hơn một bảng quy tắc. Sai số huấn luyện 2% và sai số xác thực 12%: khoảng cách lớn, nên phương sai cao. Sai số 14% và 15%: cả hai cùng cao và sát nhau, nên độ chệch cao. Sai số 14% và 28%: cả hai vấn đề cùng lúc. Sai số 1% và 1,5%: không có vấn đề gì đáng kể. Cách đọc này ngầm giả định rằng sai số nhỏ nhất có thể đạt được, gọi là sai số Bayes, gần bằng 0. Nếu ảnh mờ tới mức người giỏi nhất cũng sai 13%, thì cặp 14% và 15% lại là một mô hình tốt.
+
+Từ đó Ng tách sai số theo một mức tham chiếu, thường là sai số của người giỏi nhất, dùng làm ước lượng cho sai số Bayes. Khoảng cách từ mức tham chiếu tới sai số huấn luyện là **độ chệch tránh được** (avoidable bias), còn khoảng cách từ sai số huấn luyện tới sai số xác thực là phương sai. Với sai số huấn luyện 6% và sai số xác thực 9%, nếu người làm được 1% thì độ chệch tránh được là 5 điểm, lớn hơn phương sai 3 điểm, nên cần một mô hình mạnh hơn trước; nếu người cũng sai 5% thì độ chệch tránh được chỉ còn 1 điểm, và phần đáng giảm là phương sai.
+
+Khi dữ liệu huấn luyện và dữ liệu dùng thật đến từ hai phân phối khác nhau, chẳng hạn huấn luyện trên ảnh sản phẩm lấy từ web mà dùng cho ảnh chụp bằng điện thoại, khoảng cách giữa sai số huấn luyện và sai số xác thực lẫn hai thứ: phương sai và độ lệch giữa hai phân phối. Ng tách chúng bằng một tập **huấn luyện–xác thực** (train-dev), rút từ cùng phân phối với tập huấn luyện nhưng không dùng để huấn luyện. Với sai số huấn luyện 2%, huấn luyện–xác thực 8% và xác thực 9%, khoảng cách đã xuất hiện ngay trên dữ liệu cùng phân phối, nên đó là phương sai. Với 2%, 2,5% và 9%, mô hình tổng quát tốt trên phân phối cũ nhưng hỏng khi đổi phân phối; vấn đề là độ lệch dữ liệu, và thêm dữ liệu cùng loại cũ không giúp được ([Chương 9 của *MLOps*](mlops-ch09.html)).
+
+Thứ tự xử lý mà Ng khuyên là giải quyết độ chệch trước, nhìn vào sai số huấn luyện: dùng mạng lớn hơn, huấn luyện lâu hơn hoặc đổi kiến trúc. Khi sai số huấn luyện đã chấp nhận được mới xét phương sai, nhìn vào sai số xác thực: thêm dữ liệu, tăng regularization hoặc đổi kiến trúc. Hai bước được lặp lại cho tới khi cả hai sai số đều đạt yêu cầu.
+
 ### 2.5. Double descent
 
-Đường chữ U ở Mục 2.3 là bức tranh cổ điển, đúng khi số tham số nhỏ hơn số điểm dữ liệu. Với mô hình có số tham số vượt xa số điểm dữ liệu, như các mạng nơ-ron hiện đại, người ta quan sát được hiện tượng **double descent** (Belkin và cộng sự, 2019): sai số xác thực tăng lên tới một đỉnh tại ngưỡng mà mô hình vừa đủ tham số để khớp chính xác mọi điểm huấn luyện, gọi là ngưỡng nội suy, rồi giảm trở lại khi số tham số tiếp tục tăng. Nakkiran và cộng sự (2020) quan sát cùng hiện tượng với mạng tích chập và Transformer, theo cả số tham số lẫn số vòng huấn luyện.
+Đường chữ U ở Mục 2.3 là bức tranh cổ điển, đúng khi số tham số nhỏ hơn số điểm dữ liệu. Với mô hình có số tham số vượt xa số điểm dữ liệu, như các mạng nơ-ron hiện đại, người ta quan sát được hiện tượng **double descent** (Belkin và cộng sự, 2019): sai số xác thực tăng lên tới một đỉnh tại ngưỡng mà mô hình vừa đủ tham số để khớp chính xác mọi điểm huấn luyện, gọi là ngưỡng nội suy, rồi giảm trở lại khi số tham số tiếp tục tăng. Nakkiran và cộng sự (2020) quan sát cùng hiện tượng với mạng tích chập và Transformer, theo cả số tham số lẫn số vòng huấn luyện, và thấy cả những trường hợp thêm dữ liệu lại làm sai số tăng.
 
 Double descent không mâu thuẫn với Định lý 2.1, vì phân rã là một đẳng thức và luôn đúng. Điều thay đổi là cách phương sai phụ thuộc vào số tham số. Khi có nhiều tham số hơn số điểm dữ liệu, có vô số nghiệm khớp chính xác dữ liệu huấn luyện, và thuật toán tối ưu chọn một trong số đó. Với hồi quy tuyến tính, có thể chứng minh gradient descent khởi tạo từ 0 hội tụ tới nghiệm có chuẩn nhỏ nhất, tức nghiệm giả nghịch đảo ([Mục 4.3 của *Nền tảng*](nentang-ch04.html)). Việc chọn nghiệm chuẩn nhỏ nhất tác dụng như một dạng regularization ngầm, và càng nhiều tham số thì nghiệm chuẩn nhỏ nhất càng trơn. Với mạng sâu, cơ chế tương tự được nhiều nghiên cứu ủng hộ nhưng chưa được chứng minh đầy đủ.
+
+Hai nhận xét giúp đọc đúng hiện tượng này. Thứ nhất, đỉnh ở ngưỡng nội suy phần lớn đến từ việc khớp dữ liệu mà không có regularization: với cường độ regularization được chọn tối ưu, đỉnh giảm hẳn hoặc biến mất (Nakkiran và cộng sự, 2021), và James và cộng sự (2021) nhấn mạnh rằng double descent không mâu thuẫn với đánh đổi độ chệch – phương sai. Thứ hai, khi có vô số nghiệm khớp dữ liệu, số tham số là một thước đo tồi cho độ linh hoạt: ghi chú bài giảng CS229 cho thấy vẽ sai số theo chuẩn của nghiệm thay vì theo số tham số thì đường cong không còn hai lần giảm.
 
 Vì vậy câu "mô hình càng nhiều tham số càng dễ overfitting" chỉ đúng trong chế độ cổ điển, khi số tham số nhỏ hơn số điểm dữ liệu. Trong chế độ nhiều tham số hơn dữ liệu, nó không còn đúng hiển nhiên, và đó là một phần lời giải thích cho việc các mô hình hàng tỉ tham số vẫn tổng quát hoá được. Tuy vậy, ngay trong chế độ này, regularization, dừng sớm và dữ liệu nhiều hơn vẫn có ích; double descent không có nghĩa là có thể bỏ qua overfitting.
 
 ### 2.6. Tóm tắt
 
-Sai số kỳ vọng của một mô hình tại một điểm tách thành độ chệch², phương sai và nhiễu. Độ chệch đến từ họ hàm quá hẹp, phương sai đến từ việc khớp theo nhiễu riêng của từng tập huấn luyện, còn nhiễu là cận dưới không vượt qua được. Với bốn căn hộ và căn 120 m², mô hình hằng số lệch 1,2 tỉ, đường thẳng không chệch với phương sai $1{,}5\,\sigma^2$, còn đa thức bậc ba qua bốn điểm không chệch nhưng có phương sai $69\,\sigma^2$. Mô phỏng với đa thức cho thấy tổng sai số nhỏ nhất ở bậc 5, nơi hai thành phần gần bằng nhau, và độ chệch chỉ giảm khi họ hàm mở rộng theo hướng có ích, như các bậc lẻ với một hàm lẻ. Với dữ liệu thật, đường cong học thay cho phép đo trực tiếp và cho biết nên đổi mô hình hay thu thêm dữ liệu. Ở chế độ nhiều tham số hơn dữ liệu, double descent cho thấy phương sai không nhất thiết tăng theo số tham số.
+Sai số kỳ vọng của một mô hình tại một điểm tách thành độ chệch², phương sai và nhiễu. Độ chệch đến từ họ hàm quá hẹp, phương sai đến từ việc khớp theo nhiễu riêng của từng tập huấn luyện, còn nhiễu là cận dưới không vượt qua được. Với bốn căn hộ và căn 120 m², mô hình hằng số lệch 1,2 tỉ, đường thẳng không chệch với phương sai $1{,}5\,\sigma^2$, còn đa thức bậc ba qua bốn điểm không chệch nhưng có phương sai $69\,\sigma^2$, phần lớn vì phải ngoại suy. Phân rã này chỉ đúng với mất mát bình phương. Mô phỏng với đa thức cho thấy tổng sai số nhỏ nhất ở bậc 5, nơi hai thành phần gần bằng nhau, và độ chệch chỉ giảm khi họ hàm mở rộng theo hướng có ích, như các bậc lẻ với một hàm lẻ. Với dữ liệu thật, đường cong học thay cho phép đo trực tiếp và cho biết nên đổi mô hình hay thu thêm dữ liệu; so sánh sai số huấn luyện và xác thực với một mức tham chiếu như sai số của người cho biết nên giảm độ chệch tránh được hay phương sai, còn tập huấn luyện–xác thực tách phương sai khỏi độ lệch phân phối. Ở chế độ nhiều tham số hơn dữ liệu, double descent cho thấy phương sai không nhất thiết tăng theo số tham số, và đỉnh của nó phần lớn biến mất khi regularization được chọn đúng.
 
 Một mô hình minh hoạ rất rõ cả hai loại sai số là cây quyết định: cây nông có độ chệch cao, cây sâu có phương sai cao. Chương 3 xét cây quyết định, rồi hai cách kết hợp nhiều cây để giảm từng loại sai số.
 
@@ -1743,6 +1757,8 @@ Các câu trả lời mẫu dưới đây dẫn số liệu từ các thí nghi�
 112. D. McElfresh và cộng sự. When Do Neural Nets Outperform Boosted Trees on Tabular Data? *NeurIPS Datasets and Benchmarks*, 2023.
 113. A. Ng, T. Ma. *CS229: Machine Learning, Lecture Notes*. Stanford University. Cách trình bày độ chệch – phương sai, cây quyết định và phương pháp tập hợp; phần hướng dẫn áp dụng học máy đi kèm là nguồn của phân tích lỗi và phân tích loại bỏ ở Mục 1.3.
 114. A. Ng. *Deep Learning Specialization*. DeepLearning.AI và Coursera, 2017. Đồ thị hiệu năng theo lượng dữ liệu ở Mục 1.4; chẩn đoán bằng sai số huấn luyện và xác thực, độ chệch tránh được và tập huấn luyện–xác thực ở Mục 2.4.
+115. G. James, D. Witten, T. Hastie, R. Tibshirani. *An Introduction to Statistical Learning*, 2nd ed. Springer, 2021. Nhận xét rằng double descent không mâu thuẫn với đánh đổi độ chệch – phương sai, và cách cắt tỉa cây ở Mục 3.2.
+116. P. Nakkiran, P. Venkat, S. Kakade, T. Ma. Optimal Regularization Can Mitigate Double Descent. *ICLR*, 2021.
 
 ---
 
