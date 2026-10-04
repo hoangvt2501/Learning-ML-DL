@@ -611,7 +611,7 @@ Ba kỹ thuật trong chương này đều nhằm giữ $\gamma$ gần 1, và ch
 
 ### 6.2. Khởi tạo Xavier và He
 
-Kỹ thuật đầu tiên tác động ngay từ bước khởi tạo. Xét một lớp $z = Wa$ với $W \in \mathbb{R}^{n_{\text{out}} \times n_{\text{in}}}$. Giả sử các phần tử của $W$ độc lập, có trung bình 0 và phương sai $\sigma_W^2$, và độc lập với $a$. Khi đó mỗi thành phần của $z$ có
+Kỹ thuật đầu tiên tác động ngay từ bước khởi tạo. Trước hết, các trọng số không được khởi tạo bằng nhau, chẳng hạn cùng bằng 0: khi đó mọi đơn vị trong một lớp tính cùng một giá trị, nhận cùng một gradient và mãi giống hệt nhau, nên một lớp rộng 128 đơn vị chỉ làm được việc của một đơn vị (CS231n). Khởi tạo ngẫu nhiên phá vỡ sự đối xứng đó, và câu hỏi còn lại là phương sai bao nhiêu. Xét một lớp $z = Wa$ với $W \in \mathbb{R}^{n_{\text{out}} \times n_{\text{in}}}$. Giả sử các phần tử của $W$ độc lập, có trung bình 0 và phương sai $\sigma_W^2$, và độc lập với $a$. Khi đó mỗi thành phần của $z$ có
 
 $$\operatorname{Var}(z_i) = \sum_{j=1}^{n_{\text{in}}} \operatorname{Var}(W_{ij} a_j) = n_{\text{in}}\,\sigma_W^2\,\mathbb{E}[a_j^2].$$
 
@@ -627,7 +627,7 @@ Thay vào công thức trên, phương sai giữ nguyên qua các lớp khi $n_{
 
 $$\sigma_W^2 = \frac{2}{n_{\text{in}}}.$$
 
-Đây là **khởi tạo He** (He và cộng sự, 2015). Hệ số 2 đến trực tiếp từ việc ReLU loại bỏ một nửa phân phối. Với các lớp rộng 128 đơn vị ở Mục 6.3, khởi tạo He lấy $\sigma_W^2 = 2/128 \approx 0{,}0156$, tức độ lệch chuẩn 0,125, còn Xavier lấy $2/256$, tức độ lệch chuẩn khoảng 0,088, nhỏ hơn $\sqrt2$ lần. Dùng Xavier cho mạng ReLU thì mỗi lớp nhân độ lớn tín hiệu với khoảng $1/\sqrt2 \approx 0{,}71$, và qua 40 lớp còn $2^{-20} \approx 10^{-6}$. Nguyên tắc chung là khởi tạo phải khớp với hàm kích hoạt: Xavier cho tanh và sigmoid, He cho ReLU và các biến thể gần giống.
+Đây là **khởi tạo He** (He và cộng sự, 2015). Hệ số 2 đến trực tiếp từ việc ReLU loại bỏ một nửa phân phối. Với các lớp rộng 128 đơn vị ở Mục 6.3, khởi tạo He lấy $\sigma_W^2 = 2/128 \approx 0{,}0156$, tức độ lệch chuẩn 0,125, còn Xavier lấy $2/256$, tức độ lệch chuẩn khoảng 0,088, nhỏ hơn $\sqrt2$ lần. Lớp vuông che mất tính chất dung hoà của Xavier; với một lớp có $n_{\text{in}} = 512$ và $n_{\text{out}} = 128$, điều kiện của lượt xuôi đòi phương sai $1/512$, tức độ lệch chuẩn 0,044, điều kiện của lượt ngược đòi $1/128$, tức 0,088, còn Xavier chọn $2/640$, tức 0,056, nằm giữa hai giá trị đó. Dùng Xavier cho mạng ReLU thì mỗi lớp nhân độ lớn tín hiệu với khoảng $1/\sqrt2 \approx 0{,}71$, và qua 40 lớp còn $2^{-20} \approx 10^{-6}$. Nguyên tắc chung là khởi tạo phải khớp với hàm kích hoạt: Xavier cho tanh và sigmoid, He cho ReLU và các biến thể gần giống.
 
 ### 6.3. Thí nghiệm với mạng 40 lớp
 
@@ -656,6 +656,8 @@ Dòng cuối cho thấy cách kết hợp đúng: chuẩn hoá trong nhánh kèm
 
 Trang thí nghiệm tương tác của giáo trình cho phép tự chọn gain, số lớp và các thành phần để quan sát các đường trong Hình 7.
 
+Hai bài giảng nổi tiếng quan sát cùng hiện tượng theo hai cách khác, cũng nên dùng khi gỡ lỗi. CS231n vẽ phân phối giá trị kích hoạt ở từng lớp của một mạng 10 lớp tanh: khởi tạo quá nhỏ làm các giá trị co dần về 0 ở các lớp sâu, quá lớn làm chúng dồn về $\pm 1$, tức tanh bão hoà, còn Xavier giữ được phân phối qua mọi lớp; chuyển sang ReLU thì Xavier lại làm các giá trị co dần, và phải thêm hệ số 2 của He. Karpathy, trong bài giảng makemore về giá trị kích hoạt và gradient, theo dõi trong khi huấn luyện tỉ lệ đơn vị tanh bão hoà, với $|\tanh| > 0{,}97$, và tỉ số giữa độ lớn của bước cập nhật và độ lớn của tham số ở từng lớp, nên ở quanh $10^{-3}$ như Mục 5.5.
+
 ### 6.4. BatchNorm, LayerNorm và RMSNorm
 
 Kỹ thuật thứ hai là chuẩn hoá. Các lớp chuẩn hoá đưa giá trị kích hoạt về trung bình 0, phương sai 1, rồi nhân với một hệ số $\gamma$ và cộng một độ dịch $\beta$ học được, để mạng vẫn biểu diễn được mọi thang đo nếu cần:
@@ -677,7 +679,9 @@ Transformer dùng LayerNorm thay cho BatchNorm, và ba hàng đầu của bảng
 
 $$\operatorname{RMSNorm}(x) = \gamma \odot \frac{x}{\sqrt{\frac{1}{d}\sum_{i=1}^{d} x_i^2 + \epsilon}}.$$
 
-Với vector $x = (1;\ 2;\ 3;\ 6)$, $\gamma = 1$ và $\beta = 0$, LayerNorm trừ trung bình 3, chia cho độ lệch chuẩn $\sqrt{3{,}5} \approx 1{,}87$ và cho $(-1{,}07;\ -0{,}53;\ 0;\ 1{,}60)$. RMSNorm chỉ chia cho căn trung bình bình phương $\sqrt{12{,}5} \approx 3{,}54$ và cho $(0{,}28;\ 0{,}57;\ 0{,}85;\ 1{,}70)$: các phần tử giữ nguyên dấu và tỉ lệ với nhau, chỉ thang đo thay đổi. Phép tính rẻ hơn LayerNorm, và thực nghiệm cho chất lượng tương đương. RMSNorm là lựa chọn của nhiều mô hình ngôn ngữ hiện nay, như Llama.
+Với vector $x = (1;\ 2;\ 3;\ 6)$, $\gamma = 1$ và $\beta = 0$, LayerNorm trừ trung bình 3, chia cho độ lệch chuẩn $\sqrt{3{,}5} \approx 1{,}87$, với phương sai tính bằng mẫu số $n = 4$ như các thư viện làm, và cho $(-1{,}07;\ -0{,}53;\ 0;\ 1{,}60)$. RMSNorm chỉ chia cho căn trung bình bình phương $\sqrt{12{,}5} \approx 3{,}54$ và cho $(0{,}28;\ 0{,}57;\ 0{,}85;\ 1{,}70)$: các phần tử giữ nguyên dấu và tỉ lệ với nhau, chỉ thang đo thay đổi. Phép tính rẻ hơn LayerNorm, và thực nghiệm cho chất lượng tương đương. RMSNorm là lựa chọn của nhiều mô hình ngôn ngữ hiện nay, như Llama.
+
+Hai chi tiết cài đặt của BatchNorm hay gây nhầm. Hệ số chặn của lớp đứng ngay trước BatchNorm là thừa, vì phép trừ trung bình triệt tiêu nó; độ dịch $\beta$ đã làm việc đó. Còn tham số momentum của BatchNorm trong PyTorch, mặc định 0,1, là trọng số dành cho lô mới khi cập nhật trung bình trượt dùng lúc suy luận, ngược với vai trò của $\beta$ trong momentum ở Mục 5.4.
 
 Vì sao chuẩn hoá giúp huấn luyện vẫn còn được thảo luận. Bài báo gốc của BatchNorm giải thích bằng việc giảm "dịch chuyển hiệp biến nội tại" (internal covariate shift), nhưng Santurkar và cộng sự (2018) cho thấy lợi ích chủ yếu đến từ việc làm hàm mất mát trơn hơn, cho phép dùng tốc độ học lớn hơn. Tác dụng giữ ổn định độ lớn của tín hiệu, đo được ở Mục 6.3, là một phần của lời giải thích đó.
 
@@ -691,13 +695,15 @@ trong đó $F$ là một khối gồm vài lớp. Có hai cách hiểu bổ sung
 
 Cách hiểu thứ nhất nhìn theo đường đi của gradient. Jacobi của một khối là $\partial h/\partial x = I + \partial F/\partial x$, và số hạng $I$ bảo đảm gradient luôn có một đường đi thẳng từ đầu ra về đầu vào mà không nhân với ma trận trọng số nào. Qua nhiều khối, tích $\prod_l (I + J_l)$ khai triển thành tổng của mọi tích con, trong đó có số hạng $I$, nên không tự co về 0 như $\prod_l J_l$.
 
-Cách hiểu thứ hai nhìn theo bài toán cần học. Thay vì học trực tiếp hàm $H(x)$, khối học phần dư $F(x) = H(x) - x$. Nếu ánh xạ đồng nhất đã là một xấp xỉ tốt, khối chỉ cần học một hiệu chỉnh nhỏ, và khởi tạo $F \approx 0$ đã là một điểm xuất phát tốt. Đây là lập luận của bài báo ResNet (He và cộng sự, 2016), xuất phát từ **vấn đề suy thoái** (degradation problem): trên CIFAR-10, mạng thường 56 lớp có sai số huấn luyện cao hơn mạng 20 lớp. Mạng 56 lớp biểu diễn được mọi hàm mà mạng 20 lớp biểu diễn được, chỉ cần 36 lớp thừa là ánh xạ đồng nhất, nên sai số huấn luyện cao hơn không phải do overfitting mà do khó tối ưu. Kết nối tắt làm ánh xạ đồng nhất trở nên dễ biểu diễn, và mạng ResNet với hơn 100 lớp huấn luyện được bình thường.
+Cách hiểu thứ hai nhìn theo bài toán cần học. Thay vì học trực tiếp hàm $H(x)$, khối học phần dư $F(x) = H(x) - x$. Nếu ánh xạ đồng nhất đã là một xấp xỉ tốt, khối chỉ cần học một hiệu chỉnh nhỏ, và khởi tạo $F \approx 0$ đã là một điểm xuất phát tốt. Đây là lập luận của bài báo ResNet (He và cộng sự, 2016), xuất phát từ **vấn đề suy thoái** (degradation problem): trên CIFAR-10, mạng thường 56 lớp có sai số huấn luyện cao hơn mạng 20 lớp. Mạng 56 lớp biểu diễn được mọi hàm mà mạng 20 lớp biểu diễn được, chỉ cần 36 lớp thừa là ánh xạ đồng nhất, nên sai số huấn luyện cao hơn không phải do overfitting mà do khó tối ưu. Kết nối tắt làm ánh xạ đồng nhất trở nên dễ biểu diễn, và mạng ResNet với hơn 100 lớp huấn luyện được bình thường. d2l.ai diễn đạt cùng lập luận bằng các họ hàm lồng nhau: nếu khối mới biểu diễn được ánh xạ đồng nhất thì họ hàm của mạng sâu hơn chứa họ hàm của mạng nông hơn, nên thêm khối không thể làm mạng kém đi về mặt biểu diễn.
+
+Một cách khác để giữ độ lớn của tín hiệu trên đường tắt là thu nhỏ các nhánh ngay từ lúc khởi tạo. GPT-2 nhân trọng số ở lối ra của mỗi nhánh dư với $1/\sqrt{N}$, với $N$ là số nhánh dư trong mạng (Radford và cộng sự, 2019). Nếu mỗi nhánh đóng góp một lượng có phương sai cỡ $1/N$, tổng của $N$ nhánh cộng dồn có phương sai cỡ 1, thay vì tăng tỉ lệ với độ sâu như dòng thứ năm của bảng ở Mục 6.3.
 
 > **Lưu ý.** Kết nối tắt ra đời để giải quyết vấn đề suy thoái, tức sai số huấn luyện tăng theo độ sâu, không phải để chống overfitting. Và như Mục 6.3 cho thấy, kết nối tắt cần đi kèm chuẩn hoá thì gradient mới ổn định.
 
 ### 6.6. Dropout và các phương pháp regularization khác
 
-Ba kỹ thuật trên giúp huấn luyện được mạng sâu; còn lại là chống overfitting. Phương pháp regularization riêng của mạng nơ-ron được dùng nhiều nhất là **dropout** (Srivastava và cộng sự, 2014). Khi huấn luyện, mỗi đơn vị bị đặt bằng 0 với xác suất $p$, độc lập ở mỗi bước, và các đơn vị còn lại được chia cho $1 - p$ để kỳ vọng của đầu ra không đổi; cách làm này gọi là inverted dropout. Chẳng hạn với $p = 0{,}5$, một lớp có đầu ra $(2;\ 4;\ 6;\ 8)$ có thể bị giữ lại phần tử thứ nhất và thứ ba ở một bước, thành $(4;\ 0;\ 12;\ 0)$ sau khi chia cho $0{,}5$. Mỗi phần tử được nhân đôi với xác suất 0,5 và bằng 0 với xác suất 0,5, nên kỳ vọng của nó đúng bằng giá trị ban đầu. Khi suy luận, dropout bị tắt và mạng dùng mọi đơn vị. Mỗi bước huấn luyện vì vậy dùng một mạng con khác nhau chia sẻ trọng số, và mạng đầy đủ khi suy luận xấp xỉ trung bình của rất nhiều mạng con. Cơ chế giảm phương sai vì thế tương tự bagging ở Mục 3.3, nhưng không phải huấn luyện nhiều mô hình.
+Ba kỹ thuật trên giúp huấn luyện được mạng sâu; còn lại là chống overfitting. Phương pháp regularization riêng của mạng nơ-ron được dùng nhiều nhất là **dropout** (Srivastava và cộng sự, 2014). Khi huấn luyện, mỗi đơn vị bị đặt bằng 0 với xác suất $p$, độc lập ở mỗi bước, và các đơn vị còn lại được chia cho $1 - p$ để kỳ vọng của đầu ra không đổi; cách làm này gọi là inverted dropout. Chẳng hạn với $p = 0{,}5$, một lớp có đầu ra $(2;\ 4;\ 6;\ 8)$ có thể bị giữ lại phần tử thứ nhất và thứ ba ở một bước, thành $(4;\ 0;\ 12;\ 0)$ sau khi chia cho $0{,}5$. Mỗi phần tử được nhân đôi với xác suất 0,5 và bằng 0 với xác suất 0,5, nên kỳ vọng của nó đúng bằng giá trị ban đầu. Các tài liệu dùng hai quy ước cho $p$: PyTorch và d2l.ai dùng xác suất bị bỏ như ở đây, còn CS231n và Andrew Ng dùng xác suất được giữ lại. Khi suy luận, dropout bị tắt và mạng dùng mọi đơn vị. Mỗi bước huấn luyện vì vậy dùng một mạng con khác nhau chia sẻ trọng số, và mạng đầy đủ khi suy luận xấp xỉ trung bình của rất nhiều mạng con. Cơ chế giảm phương sai vì thế tương tự bagging ở Mục 3.3, nhưng không phải huấn luyện nhiều mô hình.
 
 Với mô hình ngôn ngữ lớn, vai trò của dropout giảm nhiều. Khi tiền huấn luyện trên kho dữ liệu cực lớn, mỗi mẫu thường chỉ được xem một lần nên overfitting không phải vấn đề chính, và một số mô hình như PaLM (Chowdhery và cộng sự, 2022) không dùng dropout khi tiền huấn luyện. Dropout vẫn hữu ích khi tinh chỉnh trên tập dữ liệu nhỏ. Bảng dưới đặt dropout cạnh các phương pháp regularization khác.
 
@@ -709,11 +715,11 @@ Với mô hình ngôn ngữ lớn, vai trò của dropout giảm nhiều. Khi ti
 | Tăng cường dữ liệu | tạo thêm mẫu bằng các biến đổi giữ nguyên nhãn: lật, cắt, xoay ảnh, thêm nhiễu vào âm thanh | ảnh, âm thanh |
 | Làm mượt nhãn | thay nhãn one-hot $e_y$ bằng $(1 - \epsilon)\,e_y + \epsilon/K$, để mô hình không bị đẩy tới xác suất tuyệt đối 0 và 1 (Szegedy và cộng sự, 2016) | phân loại nhiều lớp |
 
-Weight decay có một cách hiểu từ *Nền tảng*: regularization $\ell_2$ tương đương ước lượng MAP với tiên nghiệm Gauss trên trọng số ([Chương 10 của *Nền tảng*](nentang-ch10.html)). Dừng sớm cũng có liên hệ với regularization: với hồi quy tuyến tính, dừng gradient descent sau $t$ bước cho kết quả gần giống hồi quy ridge với $\lambda$ tỉ lệ nghịch với $\eta t$.
+Weight decay có một cách hiểu từ *Nền tảng*: regularization $\ell_2$ tương đương ước lượng MAP với tiên nghiệm Gauss trên trọng số ([Chương 10 của *Nền tảng*](nentang-ch10.html)). Dừng sớm cũng có liên hệ với regularization: với hồi quy tuyến tính, dừng gradient descent sau $t$ bước cho kết quả gần giống hồi quy ridge với $\lambda$ tỉ lệ nghịch với $\eta t$. Andrew Ng lưu ý rằng dừng sớm gộp hai việc vốn nên tách riêng, giảm mất mát huấn luyện và chống overfitting, nên khi tài nguyên cho phép thử nhiều giá trị của hệ số regularization, ông thích dùng regularization $\ell_2$ hơn. Trong thực hành, weight decay thường chỉ áp dụng cho các ma trận trọng số, không áp dụng cho hệ số chặn và tham số của các lớp chuẩn hoá (Karpathy, 2024).
 
 ### 6.7. Tóm tắt
 
-Qua nhiều lớp, gradient bị nhân với tích của các ma trận Jacobi, nên chỉ cần mỗi lớp lệch khỏi hệ số 1 một chút là gradient tiêu biến hoặc bùng nổ. Khởi tạo phải khớp với hàm kích hoạt: Xavier cho tanh, He với phương sai $2/n_{\text{in}}$ cho ReLU. Chuẩn hoá giữ đầu ra mỗi lớp ở độ lớn cố định; Transformer dùng LayerNorm hoặc RMSNorm thay BatchNorm vì không muốn phụ thuộc vào lô. Kết nối tắt cho gradient một đường đi thẳng và giải quyết vấn đề suy thoái, nhưng thí nghiệm với mạng 40 lớp cho thấy nó làm gradient bùng nổ tới $2{,}4 \times 10^{8}$ lần nếu không có chuẩn hoá trong nhánh. Dropout, weight decay và dừng sớm lo phần chống overfitting, dù vai trò của dropout giảm nhiều khi tiền huấn luyện mô hình ngôn ngữ lớn.
+Qua nhiều lớp, gradient bị nhân với tích của các ma trận Jacobi, nên chỉ cần mỗi lớp lệch khỏi hệ số 1 một chút là gradient tiêu biến hoặc bùng nổ. Khởi tạo phải phá vỡ đối xứng giữa các đơn vị và khớp với hàm kích hoạt: Xavier cho tanh, He với phương sai $2/n_{\text{in}}$ cho ReLU. Chuẩn hoá giữ đầu ra mỗi lớp ở độ lớn cố định; Transformer dùng LayerNorm hoặc RMSNorm thay BatchNorm vì không muốn phụ thuộc vào lô. Kết nối tắt cho gradient một đường đi thẳng và giải quyết vấn đề suy thoái, và GPT-2 còn thu nhỏ các nhánh dư theo $1/\sqrt{N}$ lúc khởi tạo; nhưng thí nghiệm với mạng 40 lớp cho thấy kết nối tắt làm gradient bùng nổ tới $2{,}4 \times 10^{8}$ lần nếu không có chuẩn hoá trong nhánh. Dropout, weight decay và dừng sớm lo phần chống overfitting, dù vai trò của dropout giảm nhiều khi tiền huấn luyện mô hình ngôn ngữ lớn.
 
 Với các kỹ thuật này, ta huấn luyện được mạng hàng trăm lớp. Nhưng mạng kết nối đầy đủ vẫn rất lãng phí khi đầu vào là ảnh: chỉ riêng một lớp nhận ảnh $224 \times 224 \times 3$ và cho 1 000 đơn vị ẩn đã cần khoảng 150 triệu tham số. Chương 7 trình bày một kiến trúc khai thác cấu trúc không gian của ảnh, nhờ đó số tham số giảm đi hàng nghìn lần.
 
@@ -1785,6 +1791,7 @@ Các câu trả lời mẫu dưới đây dẫn số liệu từ các thí nghi�
 120. A. Karpathy. *A Recipe for Training Neural Networks*. 2019. Các kiểm tra lúc khởi tạo ở Mục 4.5.
 121. A. Karpathy. *The Spelled-Out Intro to Neural Networks and Backpropagation: Building Micrograd*. Bài giảng video, 2022. Ví dụ cộng dồn gradient ở Mục 5.1.
 122. A. Karpathy. *Let's Reproduce GPT-2 (124M)*. Bài giảng video và mã nguồn build-nanogpt, 2024. Lịch tốc độ học ở Mục 5.5 và cách chia mất mát khi tích luỹ gradient ở Mục 5.3.
+123. A. Karpathy. *Building makemore Part 3: Activations & Gradients, BatchNorm*. Bài giảng video, 2022. Các đồ thị theo dõi tỉ lệ bão hoà và tỉ số cập nhật ở Mục 6.3.
 
 ---
 
