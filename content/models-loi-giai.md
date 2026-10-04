@@ -254,3 +254,59 @@ $$\text{AP} = 0{,}25 \times 1 + 0{,}25 \times 1 + 0{,}25 \times 0{,}75 = 0{,}687
 Theo cách tính 11 điểm của VOC 2007: precision nội suy bằng 1 tại 6 mức recall $0; 0{,}1; \dots; 0{,}5$, bằng 0,75 tại hai mức 0,6 và 0,7, và bằng 0 tại 0,8; 0,9; 1. AP $= (6 + 1{,}5)/11 \approx 0{,}682$, gần nhưng không bằng cách tính mọi điểm.
 
 **(d) Hộp trùng.** Mỗi hộp thật chỉ được ghép với một hộp dự đoán. Hộp dự đoán thứ hai của cùng một đối tượng không còn hộp thật nào để ghép, nên bị tính là dương tính giả và làm giảm precision. Vì vậy NMS làm tăng AP: nó loại các hộp trùng trước khi đánh giá. Trong thí nghiệm ở Mục 7.5, AP50 tăng từ 0,885 lên 0,913 sau NMS. Nhưng nếu ngưỡng NMS quá thấp, hộp đúng của một đối tượng khác đứng sát bên cũng bị loại, và recall giảm.
+
+## Bài 12
+@meta chuong=11 | dang=Tính tay | kho=Trung bình
+
+**(a) Greedy và beam search.** Greedy chọn "phở" (0,5) rồi "bò" (0,5), được chuỗi "phở bò" với xác suất $0{,}5 \cdot 0{,}5 = 0{,}25$. Beam search với $b = 2$ giữ "phở" và "cơm" sau bước đầu, rồi so năm chuỗi ở bước hai:
+
+| Chuỗi | Xác suất |
+|---|---|
+| cơm tấm | $0{,}4 \cdot 0{,}8 = 0{,}32$ |
+| phở bò | $0{,}5 \cdot 0{,}5 = 0{,}25$ |
+| phở gà | $0{,}5 \cdot 0{,}3 = 0{,}15$ |
+| phở cuốn | $0{,}5 \cdot 0{,}2 = 0{,}10$ |
+| cơm rang | $0{,}4 \cdot 0{,}2 = 0{,}08$ |
+
+Beam giữ "cơm tấm" và "phở bò", và chọn "cơm tấm" với xác suất 0,32, cao hơn chuỗi của greedy dù "cơm" chỉ đứng thứ hai ở bước đầu. Lý do là sau "cơm", mô hình rất chắc chắn về token tiếp theo, còn sau "phở" thì xác suất chia cho ba lựa chọn.
+
+**(b) Chuẩn hoá theo độ dài.** Điểm số là tổng log-xác suất chia cho $L^\alpha$:
+
+| $\alpha$ | Chuỗi 4 token | Chuỗi 8 token | Chọn |
+|---|---|---|---|
+| 0 | $-2{,}800$ | $-4{,}400$ | chuỗi ngắn |
+| 0,75 | $-2{,}8/2{,}828 = -0{,}990$ | $-4{,}4/4{,}757 = -0{,}925$ | chuỗi dài |
+| 1 | $-0{,}700$ | $-0{,}550$ | chuỗi dài |
+
+Không chuẩn hoá thì chuỗi ngắn thắng chỉ vì có ít số hạng âm hơn. Tính trung bình mỗi token, chuỗi dài có xác suất cao hơn, $e^{-0{,}55} = 0{,}58$ so với $e^{-0{,}70} = 0{,}50$, nên nó được chọn khi $\alpha = 0{,}75$ hay 1. Hai chuỗi hoà nhau khi $-2{,}8/4^\alpha = -4{,}4/8^\alpha$, tức $2^\alpha = 4{,}4/2{,}8$, hay $\alpha \approx 0{,}65$.
+
+**(c) Quy tắc chấp nhận.** Xác suất nhận là $\min(1,\ p/q)$: A được nhận với xác suất $0{,}3/0{,}6 = 0{,}5$, còn B và C luôn được nhận vì $p \ge q$ ở hai token này. Việc từ chối chỉ xảy ra khi A được đề xuất rồi bị từ chối, với xác suất $0{,}6 \cdot 0{,}5 = 0{,}3$. Phần dư là $\max(0,\ p - q) = (0;\ 0{,}1;\ 0{,}2)$, chuẩn hoá thành $(0;\ \tfrac13;\ \tfrac23)$. Phân phối của đầu ra:
+
+| Token | Đề xuất và được nhận | Lấy từ phần dư | Tổng |
+|---|---|---|---|
+| A | $0{,}6 \cdot 0{,}5 = 0{,}3$ | 0 | 0,3 |
+| B | $0{,}3 \cdot 1 = 0{,}3$ | $0{,}3 \cdot \tfrac13 = 0{,}1$ | 0,4 |
+| C | $0{,}1 \cdot 1 = 0{,}1$ | $0{,}3 \cdot \tfrac23 = 0{,}2$ | 0,3 |
+
+Cột tổng đúng bằng $p$. Phần dư bù chính xác lượng xác suất mà mô hình nhỏ đặt thiếu cho B và C.
+
+**(d) Tốc độ.** $\alpha = \sum_x \min(p(x), q(x)) = 0{,}3 + 0{,}3 + 0{,}1 = 0{,}7$, bằng một trừ xác suất từ chối 0,3 ở (c). Với $\gamma = 3$, số token kỳ vọng sau một lượt xuôi của mô hình lớn là
+
+$$\frac{1 - 0{,}7^{4}}{1 - 0{,}7} = \frac{0{,}7599}{0{,}3} \approx 2{,}53.$$
+
+Mức tăng tốc thực tế thấp hơn con số này, vì còn thời gian chạy mô hình nhỏ.
+
+## Bài 13
+@meta chuong=12 | dang=Tính tay | kho=Cơ bản
+
+**(a) Thời gian.** Tổng số phép tính là ${C = 6ND = 6 \cdot 13 \times 10^9 \cdot 2 \times 10^{12} = 1{,}56 \times 10^{23}}$ FLOP. Mỗi giờ, một A100 với MFU 40% làm được ${312 \times 10^{12} \cdot 0{,}4 \cdot 3\,600 = 4{,}49 \times 10^{17}}$ FLOP, nên
+
+$$\frac{1{,}56 \times 10^{23}}{4{,}49 \times 10^{17}} \approx 347\,000 \text{ giờ-GPU}.$$
+
+Với 1 024 GPU, con số này ứng với $347\,000 / (1\,024 \cdot 24) \approx 14$ ngày.
+
+**(b) MFU của Llama 2 13B.** Ở tốc độ đỉnh, 368 640 giờ-GPU cung cấp ${368\,640 \cdot 3\,600 \cdot 312 \times 10^{12} = 4{,}14 \times 10^{23}}$ FLOP, nên MFU khoảng $1{,}56/4{,}14 \approx 37{,}7\%$, gần như bằng 37,5% của bản 7B. Hai mô hình được huấn luyện trên cùng một hệ thống, nên hiệu suất gần nhau là hợp lý, và đây là một phép kiểm tra chéo cho công thức $6ND$. Ở đây $N$ được làm tròn thành 13 tỉ; với số tham số không tính embedding, 12 687 769 600, MFU thấp hơn một chút, khoảng 36,8%.
+
+**(c) Bộ nhớ.** Với 16 byte mỗi tham số, trọng số, gradient và trạng thái của Adam cần $13 \times 10^9 \cdot 16 = 208$ GB. Chia đều cho các GPU 80 GB cần ít nhất $208/80 = 2{,}6$, tức 3 GPU. Con số thực tế lớn hơn vì còn giá trị kích hoạt, vốn tăng theo kích thước lô và độ dài chuỗi (Mục 12.5), cùng các bộ đệm cho việc trao đổi dữ liệu giữa các GPU. Trong thực tế, số GPU thường được chọn theo thời gian huấn luyện mong muốn như ở (a), chứ không theo mức tối thiểu về bộ nhớ.
+
+**(d) Lớp chiếu ra.** Bảng embedding đầu vào chỉ là phép tra một hàng của ma trận, không có phép nhân nào. Lớp chiếu ra nhân vector $d$ chiều với ma trận $d \times V$, tốn $2Vd = 2 \cdot 32\,000 \cdot 5\,120 \approx 3{,}3 \times 10^8$ FLOP mỗi token ở lượt xuôi, tức khoảng 1,3% của $2N = 2{,}6 \times 10^{10}$. Với GPT-2 small, cùng khoản này bằng gần một nửa $2N$ (Mục 12.4). Khác biệt đến từ tỉ số $2Vd/2N \approx V/(12Ld)$, giảm khi $L$ và $d$ tăng: mô hình nhỏ có $L$ và $d$ nhỏ nhưng từ vựng vẫn lớn.

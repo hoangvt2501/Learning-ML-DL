@@ -1518,6 +1518,18 @@ Các bài tập trải đều trên các chương của giáo trình. Phần l�
 (c) Một lớp có 4 hộp thật. Bộ phát hiện trả về 6 hộp; xếp theo điểm giảm dần, kết quả ghép ở ngưỡng IoU 0,5 lần lượt là: đúng, đúng, sai, đúng, sai, sai. Tính precision và recall sau mỗi hộp, rồi tính AP theo cách tính mọi điểm của PASCAL VOC.
 (d) Vì sao một hộp dự đoán trùng với hộp đúng của cùng đối tượng bị tính là dương tính giả, và điều đó liên quan gì tới NMS?
 
+**Bài 12 (tính tay).** Giải mã (Mục 11.4 và 11.5).
+(a) Sau câu "Tôi muốn ăn", mô hình cho "phở" xác suất 0,5, "cơm" 0,4 và "bún" 0,1. Sau "phở", token tiếp theo là "bò" với xác suất 0,5, "gà" 0,3 và "cuốn" 0,2; sau "cơm", là "tấm" 0,8 và "rang" 0,2. Tìm chuỗi hai token mà greedy chọn và chuỗi mà beam search với $b = 2$ chọn, kèm xác suất của chúng.
+(b) Hai chuỗi hoàn chỉnh: chuỗi 4 token có tổng log-xác suất $-2{,}8$, chuỗi 8 token có tổng $-4{,}4$. Với $\alpha = 0$, $0{,}75$ và $1$, chuẩn hoá theo độ dài chọn chuỗi nào?
+(c) Giải mã suy đoán trên ba token A, B, C, với phân phối của mô hình nhỏ $q = (0{,}6;\ 0{,}3;\ 0{,}1)$ và của mô hình lớn $p = (0{,}3;\ 0{,}4;\ 0{,}3)$. Tính xác suất nhận của từng token và phân phối phần dư, rồi kiểm tra rằng phân phối của đầu ra đúng bằng $p$.
+(d) Tính tỉ lệ chấp nhận $\alpha$ trong (c) và số token kỳ vọng sau một lượt xuôi của mô hình lớn khi mô hình nhỏ đề xuất $\gamma = 3$ token mỗi lượt.
+
+**Bài 13 (tính tay).** Tính toán tài nguyên theo kiểu bài tập nhẩm của CS336 (Mục 12.4 và 12.5). Một mô hình 13 tỉ tham số được huấn luyện trên 2 nghìn tỉ token bằng GPU A100, đạt tối đa 312 TFLOPS với bf16.
+(a) Với MFU 40%, ước lượng số giờ-GPU, và số ngày nếu dùng 1 024 GPU.
+(b) Meta công bố 368 640 giờ-GPU cho Llama 2 13B. Suy ra MFU và so với con số 37,5% của Llama 2 7B ở Ví dụ 12.1.
+(c) Với Adam và độ chính xác hỗn hợp, trọng số, gradient và trạng thái của bộ tối ưu cần bao nhiêu GB? Cần ít nhất bao nhiêu GPU 80 GB nếu mọi khoản được chia đều, và vì sao con số thực tế lớn hơn?
+(d) Với $V = 32\,000$ và $d = 5\,120$, lớp chiếu ra từ vựng tốn bao nhiêu FLOP mỗi token ở lượt xuôi, và bằng bao nhiêu phần trăm của $2N$? So với GPT-2 small ở Mục 12.4.
+
 ---
 
 ## 14. Câu hỏi phỏng vấn
