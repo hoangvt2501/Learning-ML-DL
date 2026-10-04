@@ -370,6 +370,8 @@ Hồi quy logistic ở [Chương 6 của *Nền tảng*](nentang-ch06.html) là 
 
 ### 4.1. Từ mô hình tuyến tính tới mạng nhiều lớp
 
+Mô hình tuyến tính ngầm giả định rằng mỗi đặc trưng tác động theo một chiều cố định và với cùng một mức ở mọi nơi. Giả định đó sai ở nhiều bài toán quen thuộc, và d2l.ai mở đầu chương về mạng nhiều lớp bằng đúng nhận xét này. Mức thoải mái của người trong phòng cao nhất quanh 25 °C và giảm khi phòng nóng lên hay lạnh đi, nên không hàm tuyến tính nào của nhiệt độ mô tả được nó; trường hợp này còn sửa được bằng tay, bằng cách dùng khoảng cách tới 25 °C làm đặc trưng. Với ảnh thì không: giá trị của một điểm ảnh riêng lẻ không cho biết ảnh có con mèo hay không, vì điều đó phụ thuộc vào quan hệ giữa rất nhiều điểm ảnh, và không có đặc trưng tự tạo đơn giản nào nắm được quan hệ ấy. Mạng nhiều lớp học những đặc trưng như vậy từ dữ liệu.
+
 Một lớp tuyến tính tính $Wx + b$. Chồng hai lớp tuyến tính không tạo ra gì mới, vì
 
 $$W_2(W_1 x + b_1) + b_2 = (W_2 W_1)\,x + (W_2 b_1 + b_2)$$
@@ -380,13 +382,13 @@ vẫn là một phép biến đổi affine của $x$. Chồng bao nhiêu lớp t
 > $$\begin{aligned} h^{(0)} &= x, \\ h^{(l)} &= \phi\big(W^{(l)} h^{(l-1)} + b^{(l)}\big), \qquad l = 1, \dots, L-1, \\ \hat y &= W^{(L)} h^{(L-1)} + b^{(L)}, \end{aligned}$$
 > trong đó $\phi$ là hàm kích hoạt áp dụng cho từng phần tử. Các $h^{(l)}$ với $1 \le l \le L-1$ gọi là **lớp ẩn**, số phần tử của mỗi lớp ẩn là **bề rộng** của lớp đó.
 
-Lớp cuối không có hàm kích hoạt vì nó được chọn theo bài toán. Với hồi quy, $\hat y$ được dùng trực tiếp và hàm mất mát là bình phương sai số. Với phân loại nhị phân, $\hat y$ đi qua sigmoid; với nhiều lớp, qua softmax; và hàm mất mát là cross-entropy. Cả hai cặp lựa chọn đều đến từ ước lượng hợp lý cực đại ([Chương 10 của *Nền tảng*](nentang-ch10.html)): bình phương sai số ứng với nhiễu Gauss, cross-entropy ứng với phân phối Bernoulli hoặc phân phối phân loại.
+Định nghĩa đếm các lớp có trọng số, không đếm lớp đầu vào, theo cùng quy ước với CS231n: mạng 784–256–10 ở dưới là mạng hai lớp. Lớp cuối không có hàm kích hoạt vì nó được chọn theo bài toán. Với hồi quy, $\hat y$ được dùng trực tiếp và hàm mất mát là bình phương sai số. Với phân loại nhị phân, $\hat y$ đi qua sigmoid; với nhiều lớp, qua softmax; và hàm mất mát là cross-entropy. Cả hai cặp lựa chọn đều đến từ ước lượng hợp lý cực đại ([Chương 10 của *Nền tảng*](nentang-ch10.html)): bình phương sai số ứng với nhiễu Gauss, cross-entropy ứng với phân phối Bernoulli hoặc phân phối phân loại.
 
 Một lớp có $d_{\text{in}}$ đầu vào và $d_{\text{out}}$ đầu ra có $d_{\text{in}} d_{\text{out}} + d_{\text{out}}$ tham số. Chẳng hạn, mạng 784–256–10 cho ảnh chữ số MNIST có $784 \cdot 256 + 256 = 200\,960$ tham số ở lớp ẩn và $256 \cdot 10 + 10 = 2\,570$ tham số ở lớp ra, tổng cộng 203 530.
 
 > **Ví dụ 4.1 (Hàm XOR).** Bốn điểm $(0,0)$, $(1,1)$ có nhãn 0 và $(1,0)$, $(0,1)$ có nhãn 1 không tách được bằng một đường thẳng, nên không mô hình tuyến tính nào phân loại đúng cả bốn. Một mạng có hai đơn vị ReLU ở lớp ẩn làm được:
 > $$\begin{aligned} h_1 &= \operatorname{ReLU}(x_1 + x_2), \\ h_2 &= \operatorname{ReLU}(x_1 + x_2 - 1), \\ \hat y &= h_1 - 2h_2. \end{aligned}$$
-> Kiểm tra: tại $(0,0)$ có $h = (0, 0)$ nên $\hat y = 0$; tại $(1,0)$ và $(0,1)$ có $h = (1, 0)$ nên $\hat y = 1$; tại $(1,1)$ có $h = (2, 1)$ nên $\hat y = 2 - 2 = 0$. Lớp ẩn đã biến đổi bốn điểm sang một không gian mới, trong đó chúng tách được bằng một hàm tuyến tính. Đó là cách hiểu hữu ích về mạng nhiều lớp: các lớp ẩn học một phép biến đổi đặc trưng, lớp cuối là một mô hình tuyến tính trên đặc trưng đã học.
+> Kiểm tra: tại $(0,0)$ có $h = (0, 0)$ nên $\hat y = 0$; tại $(1,0)$ và $(0,1)$ có $h = (1, 0)$ nên $\hat y = 1$; tại $(1,1)$ có $h = (2, 1)$ nên $\hat y = 2 - 2 = 0$. Lớp ẩn đã biến đổi bốn điểm sang một không gian mới, trong đó chúng tách được bằng một hàm tuyến tính. Đó là cách hiểu hữu ích về mạng nhiều lớp: các lớp ẩn học một phép biến đổi đặc trưng, lớp cuối là một mô hình tuyến tính trên đặc trưng đã học. Nghiệm này cũng là nghiệm mà Goodfellow, Bengio và Courville (2016, Mục 6.1) dùng để giới thiệu mạng truyền thẳng.
 
 ### 4.2. Hàm kích hoạt
 
@@ -417,7 +419,9 @@ Một câu hỏi tự nhiên là mạng nhiều lớp biểu diễn được nh�
 
 Cybenko (1989) chứng minh định lý cho hàm sigmoid, Hornik (1991) mở rộng, và Leshno và cộng sự (1993) chứng minh điều kiện "không phải đa thức" là đủ, nên định lý áp dụng cho cả ReLU.
 
-Định lý nói rằng mạng một lớp ẩn đủ rộng biểu diễn được mọi hàm liên tục, nhưng nó chỉ khẳng định sự tồn tại. Nó không cho biết cần bao nhiêu đơn vị ẩn, và với một số hàm, con số này tăng theo hàm mũ của số chiều $d$ hoặc của độ phức tạp của hàm. Nó không cho biết gradient descent có tìm được bộ trọng số đó hay không. Và nó cũng không cho biết cần bao nhiêu dữ liệu để tìm được bộ trọng số đó mà không overfitting. Ba câu hỏi này mới là những câu quan trọng trong thực tế.
+Với đầu vào một chiều, có thể thấy định lý đúng bằng một phép dựng tay, theo tinh thần chứng minh bằng hình của Nielsen (2015). Mỗi đơn vị $\operatorname{ReLU}(x - a)$ bằng 0 bên trái $a$ và tăng tuyến tính bên phải $a$, nên tổng của vài đơn vị như vậy là một đường gấp khúc có điểm gãy tại các $a$ đã chọn. Đường gấp khúc đi qua các điểm của một hàm liên tục, với các điểm gãy đủ dày, xấp xỉ hàm đó tốt tuỳ ý. Chẳng hạn trên đoạn $[0, 1]$, hàm $g(x) = 0{,}5\operatorname{ReLU}(x) + \operatorname{ReLU}(x - 0{,}5)$ có hệ số góc 0,5 rồi 1,5, đi qua đúng các điểm $(0; 0)$, $(0{,}5; 0{,}25)$ và $(1; 1)$ của $x^2$, và lệch khỏi $x^2$ nhiều nhất 0,0625. Dùng bốn đơn vị với các điểm gãy cách nhau 0,25 thì sai số lớn nhất còn 0,0156: mỗi lần gấp đôi số đơn vị, sai số giảm bốn lần.
+
+Định lý nói rằng mạng một lớp ẩn đủ rộng biểu diễn được mọi hàm liên tục, nhưng nó chỉ khẳng định sự tồn tại. Nó không cho biết cần bao nhiêu đơn vị ẩn, và với một số hàm, con số này tăng theo hàm mũ của số chiều $d$ hoặc của độ phức tạp của hàm. Nó không cho biết gradient descent có tìm được bộ trọng số đó hay không. Và nó cũng không cho biết cần bao nhiêu dữ liệu để tìm được bộ trọng số đó mà không overfitting. Ba câu hỏi này mới là những câu quan trọng trong thực tế. d2l.ai so sánh định lý với nhận xét rằng ngôn ngữ C viết được mọi chương trình: điều đó đúng, nhưng viết ra chương trình cần thiết mới là phần khó.
 
 Vì vậy định lý không giải thích được vì sao mạng sâu hoạt động tốt hơn mạng nông mà rộng. Mục 4.4 trả lời một phần câu hỏi này: có những hàm mà mạng sâu biểu diễn bằng số tham số tăng tuyến tính, trong khi mạng một lớp ẩn cần số tham số tăng theo hàm mũ.
 
@@ -454,11 +458,15 @@ Kết quả này cần được đọc đúng phạm vi. Đây là so sánh về
 
 Với dữ liệu không có cấu trúc không gian hay thời gian, một số lựa chọn mặc định thường là điểm khởi đầu tốt. Đầu vào cần được chuẩn hoá: đưa mỗi đặc trưng số về trung bình 0, độ lệch chuẩn 1, dùng thống kê tính trên tập huấn luyện. Khác với cây quyết định, mạng nơ-ron nhạy với thang đo của đặc trưng, vì thang đo ảnh hưởng tới số điều kiện của bài toán tối ưu ([Mục 5.3 của *Nền tảng*](nentang-ch05.html)). Mạng nên có 2 tới 4 lớp ẩn, bề rộng bằng nhau hoặc giảm dần; mạng sâu hơn cần kết nối tắt và chuẩn hoá (Chương 6). Hàm kích hoạt nên là ReLU hoặc GELU, và thuật toán tối ưu là Adam hoặc AdamW với tốc độ học khoảng $10^{-3}$ (Mục 5.4). Để chống overfitting, dừng sớm dựa trên sai số xác thực là biện pháp rẻ và hiệu quả nhất, nên làm trước; sau đó mới tới weight decay và dropout với tỉ lệ 0,1 tới 0,3 (Mục 6.6).
 
-Trên dữ liệu dạng bảng, nên so sánh MLP với gradient boosting (Mục 3.6) trước khi kết luận, vì như Mục 1.2 đã nêu, gradient boosting thường tốt hơn.
+Trước khi huấn luyện lâu, có hai kiểm tra rẻ ngay ở bước khởi tạo. Với bài toán phân loại $C$ lớp, mạng vừa khởi tạo nên cho xác suất gần đều trên các lớp, nên cross-entropy ban đầu phải gần $\ln C$, tức khoảng 2,303 với 10 lớp. Một con số lớn hơn nhiều cho thấy logit ban đầu quá lớn, và mạng sẽ tốn những vòng huấn luyện đầu chỉ để thu nhỏ chúng (CS231n; Karpathy, 2019). Kiểm tra thứ hai là đặt sẵn hệ số chặn của lớp ra theo dữ liệu: bằng trung bình của biến mục tiêu với hồi quy, hoặc bằng log tỉ lệ cược của tỉ lệ lớp với phân loại mất cân bằng; chẳng hạn khi 10% mẫu là dương, hệ số chặn ban đầu là $\ln(0{,}1/0{,}9) \approx -2{,}2$, ứng với xác suất dự đoán 0,1. Như vậy mô hình không phải học điều hiển nhiên đó trong những vòng đầu.
+
+CS231n còn có một lời khuyên đi ngược trực giác: không thu nhỏ mạng để chống overfitting. Mạng nhỏ dễ dừng ở những nghiệm có mất mát cao và cho kết quả dao động nhiều giữa các lần khởi tạo; nên dùng mạng lớn nhất mà tài nguyên cho phép rồi kiểm soát overfitting bằng regularization.
+
+Trên dữ liệu dạng bảng, nên so sánh MLP với gradient boosting (Mục 3.6) trước khi kết luận, vì như Mục 1.2 đã nêu, gradient boosting thường tốt bằng hoặc tốt hơn.
 
 ### 4.6. Tóm tắt
 
-Mạng nơ-ron nhiều lớp chồng các phép biến đổi affine xen với hàm kích hoạt phi tuyến; không có hàm phi tuyến thì chồng bao nhiêu lớp cũng chỉ bằng một lớp. Các lớp ẩn học một phép biến đổi đặc trưng, như ví dụ XOR cho thấy, còn lớp ra là một mô hình tuyến tính trên đặc trưng đã học, với hàm kích hoạt và hàm mất mát chọn theo bài toán. ReLU thay sigmoid trong mạng sâu vì đạo hàm của nó bằng 1 ở phía dương. Định lý xấp xỉ phổ quát bảo đảm mạng một lớp ẩn đủ rộng biểu diễn được mọi hàm liên tục, nhưng không nói gì về số đơn vị cần thiết hay về việc học. Với hàm răng cưa $2^k$ đoạn, mạng sâu cần $6k$ tham số, trong khi mạng một lớp cần cỡ $3 \cdot 2^k$.
+Mạng nơ-ron nhiều lớp chồng các phép biến đổi affine xen với hàm kích hoạt phi tuyến; không có hàm phi tuyến thì chồng bao nhiêu lớp cũng chỉ bằng một lớp. Các lớp ẩn học một phép biến đổi đặc trưng, như ví dụ XOR cho thấy, còn lớp ra là một mô hình tuyến tính trên đặc trưng đã học, với hàm kích hoạt và hàm mất mát chọn theo bài toán. ReLU thay sigmoid trong mạng sâu vì đạo hàm của nó bằng 1 ở phía dương. Định lý xấp xỉ phổ quát bảo đảm mạng một lớp ẩn đủ rộng biểu diễn được mọi hàm liên tục, và với ReLU có thể thấy điều đó bằng một đường gấp khúc đi qua các điểm của hàm cần xấp xỉ; nhưng định lý không nói gì về số đơn vị cần thiết hay về việc học. Trước khi huấn luyện, mất mát ban đầu gần $\ln C$ và hệ số chặn lớp ra đặt theo dữ liệu là hai kiểm tra rẻ. Với hàm răng cưa $2^k$ đoạn, mạng sâu cần $6k$ tham số, trong khi mạng một lớp cần cỡ $3 \cdot 2^k$.
 
 Biểu diễn được một hàm chưa có nghĩa là học được nó. Để học, ta cần gradient của hàm mất mát theo mọi tham số của mạng, và một cách dùng gradient đó để cập nhật tham số. Chương 5 trình bày cả hai việc.
 
@@ -1763,6 +1771,10 @@ Các câu trả lời mẫu dưới đây dẫn số liệu từ các thí nghi�
 114. A. Ng. *Deep Learning Specialization*. DeepLearning.AI và Coursera, 2017. Đồ thị hiệu năng theo lượng dữ liệu ở Mục 1.4; chẩn đoán bằng sai số huấn luyện và xác thực, độ chệch tránh được và tập huấn luyện–xác thực ở Mục 2.4.
 115. G. James, D. Witten, T. Hastie, R. Tibshirani. *An Introduction to Statistical Learning*, 2nd ed. Springer, 2021. Nhận xét rằng double descent không mâu thuẫn với đánh đổi độ chệch – phương sai, và cách cắt tỉa cây ở Mục 3.2.
 116. P. Nakkiran, P. Venkat, S. Kakade, T. Ma. Optimal Regularization Can Mitigate Double Descent. *ICLR*, 2021.
+117. F.-F. Li, J. Johnson, A. Karpathy và cộng sự. *CS231n: Deep Learning for Computer Vision, Course Notes*. Stanford University. Cách nhìn lan truyền ngược qua các cổng, kiểm tra gradient, các kiểm tra trước khi huấn luyện, khởi tạo và BatchNorm.
+118. A. Zhang, Z. C. Lipton, M. Li, A. J. Smola. *Dive into Deep Learning*. Cambridge University Press, 2023. Cách mở đầu chương mạng nhiều lớp ở Mục 4.1 và nhiều ví dụ tính tay.
+119. M. Nielsen. *Neural Networks and Deep Learning*. Determination Press, 2015. Chứng minh bằng hình của định lý xấp xỉ phổ quát và phân tích gradient tiêu biến.
+120. A. Karpathy. *A Recipe for Training Neural Networks*. 2019. Các kiểm tra lúc khởi tạo ở Mục 4.5.
 
 ---
 
