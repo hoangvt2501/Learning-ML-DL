@@ -1626,6 +1626,22 @@ Các câu trả lời mẫu dưới đây dẫn số liệu từ các thí nghi�
 
 > **Trả lời.** Tính chính xác attention mà không lưu ma trận $T \times T$ trong bộ nhớ chính của GPU: chia $Q$, $K$, $V$ thành khối nằm vừa bộ nhớ trên chip, tính softmax theo từng khối bằng softmax trực tuyến, và tính lại ở lượt ngược. Bộ nhớ cho attention tăng tuyến tính theo $T$ thay vì bậc hai, và thời gian giảm vì ít truy cập bộ nhớ. Số phép tính vẫn là $O(T^2)$.
 
+**Câu hỏi: Nhiệt độ, top-$k$ và top-$p$ khác nhau thế nào?**
+
+> **Trả lời.** Nhiệt độ chia mọi logit cho $\tau$, nên co giãn cả phân phối mà không loại token nào; top-$k$ và top-$p$ cắt bỏ phần đuôi rồi chuẩn hoá lại. Top-$k$ giữ một số token cố định, còn top-$p$ giữ tập nhỏ nhất có tổng xác suất đạt $p$, nên thích ứng theo mức chắc chắn của mô hình: giữ ít token khi mô hình chắc chắn, nhiều token khi không. Trên phân phối đuôi dài ở Mục 11.3, cần 8 362 token để phủ 90% xác suất; $\tau = 0{,}7$ vẫn để lại 1 215 token trong vùng đó, còn top-$k$ với $k = 40$ chỉ còn 33. Vì hai cơ chế khác nhau nên chúng thường được dùng cùng nhau.
+
+**Câu hỏi: Vì sao không dùng beam search để sinh văn bản mở?**
+
+> **Trả lời.** Beam search tìm chuỗi có xác suất cao, nhưng văn bản do người viết không có xác suất cao một cách đều đặn. Trên GPT-2 Large, văn bản của người có perplexity 12,38 theo mô hình, còn văn bản của beam search chỉ có 1,48, và 28,94% số đoạn beam search sinh ra rơi vào vòng lặp, so với 0,28% ở văn bản thật (Holtzman và cộng sự, 2020). Beam search vẫn hợp với bài toán có một đáp án đúng như dịch máy, với điểm số được chuẩn hoá theo độ dài để khỏi thiên về câu ngắn.
+
+**Câu hỏi: Đặt nhiệt độ bằng 0 thì đầu ra có tất định không?**
+
+> **Trả lời.** Chưa chắc. Quy tắc giải mã khi đó là greedy, nhưng phép cộng số thực không có tính kết hợp, và thứ tự cộng trong các kernel phụ thuộc kích thước lô, tức phụ thuộc vào những yêu cầu khác đang được xử lý cùng lúc. Khi hai logit gần bằng nhau, token được chọn có thể đổi. Trong thí nghiệm của He (2025), 1 000 lần gọi cùng một câu lệnh cho 80 kết quả khác nhau; chỉ khi dùng các kernel không phụ thuộc kích thước lô, cả 1 000 kết quả mới giống hệt nhau.
+
+**Câu hỏi: Giải mã suy đoán tăng tốc mà vẫn giữ đúng phân phối của mô hình lớn bằng cách nào?**
+
+> **Trả lời.** Một mô hình nhỏ đề xuất $\gamma$ token, rồi mô hình lớn kiểm tra tất cả trong một lượt xuôi. Token $x$ được nhận với xác suất $\min(1,\ p(x)/q(x))$, và khi bị từ chối thì được lấy mẫu lại từ phần dư $\max(0,\ p - q)$ đã chuẩn hoá; quy tắc này bảo đảm đầu ra có đúng phân phối $p$ của mô hình lớn. Với tỉ lệ chấp nhận $\alpha$, mỗi lượt xuôi của mô hình lớn sinh trung bình $(1 - \alpha^{\gamma+1})/(1 - \alpha)$ token, khoảng 3,36 khi $\alpha = 0{,}8$ và $\gamma = 4$. Mức tăng tốc đo được thường là 2 đến 3 lần, vì mô hình nhỏ cũng tốn thời gian.
+
 ### 14.5. Tính toán tài nguyên
 
 **Câu hỏi: Một Transformer $L$ lớp, số chiều $d$ có bao nhiêu tham số?**
@@ -1635,6 +1651,10 @@ Các câu trả lời mẫu dưới đây dẫn số liệu từ các thí nghi�
 **Câu hỏi: Huấn luyện một mô hình tốn bao nhiêu phép tính?**
 
 > **Trả lời.** $C \approx 6ND$: mỗi token tốn khoảng $2N$ FLOP ở lượt xuôi và $4N$ ở lượt ngược, với $N$ là số tham số không tính embedding. Với Llama 2 7B, $N \approx 6{,}48$ tỉ và $D = 2 \times 10^{12}$ token, $C \approx 7{,}8 \times 10^{22}$ FLOP. Con số 184 320 giờ-GPU A100 mà Meta công bố ứng với mức sử dụng phần cứng khoảng 37,5%, nằm trong khoảng thông thường 30–50%.
+
+**Câu hỏi: MFU là gì, và vì sao cần hỏi nó được đếm thế nào?**
+
+> **Trả lời.** MFU (model FLOPs utilization) là tỉ số giữa tốc độ tính hữu ích, tức số phép tính mà mô hình cần theo công thức chia cho thời gian huấn luyện, và tốc độ đỉnh của phần cứng; với mô hình lớn, con số thường từ 30% tới 50%. Nó phụ thuộc vào cách đếm: cùng 184 320 giờ-GPU của Llama 2 7B ứng với MFU 37,5% nếu $N$ không tính embedding, 39% nếu $N$ là tổng số tham số, và khoảng 45% nếu cộng thêm phép tính của attention theo quy ước của PaLM. Khi so hiệu suất của hai hệ thống, cần biết mỗi bên đếm những phép tính nào.
 
 **Câu hỏi: Khi nào chi phí bậc hai của attention trở thành vấn đề?**
 
