@@ -1010,7 +1010,7 @@ Một từ điển trả về giá trị ứng với khoá khớp đúng truy v�
 > $$\operatorname{Attention}(Q, K, V) = \operatorname{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V,$$
 > trong đó softmax áp dụng cho từng hàng. Ma trận $A = \operatorname{softmax}(QK^\top/\sqrt{d_k}) \in \mathbb{R}^{T_q \times T_k}$ gọi là ma trận trọng số attention; mỗi hàng của nó không âm và có tổng bằng 1.
 
-Ba ma trận đóng ba vai khác nhau trong phép tra cứu, như bảng dưới tóm tắt.
+Ba ma trận đóng ba vai khác nhau trong phép tra cứu, như bảng dưới tóm tắt. Alammar (2019) ví chúng với một tủ hồ sơ: truy vấn là tờ giấy ghi điều cần tìm, khoá là nhãn dán trên từng tập hồ sơ, còn giá trị là nội dung bên trong; attention so tờ giấy với mọi nhãn rồi lấy về một hỗn hợp nội dung theo mức khớp.
 
 | Ký hiệu | Vai trò |
 |---|---|
@@ -1019,6 +1019,8 @@ Ba ma trận đóng ba vai khác nhau trong phép tra cứu, như bảng dưới
 | $V$ (value, giá trị) | nội dung được lấy về từ từng vị trí |
 
 Trong **self-attention**, cả ba ma trận là phép chiếu tuyến tính của cùng một chuỗi đầu vào $X \in \mathbb{R}^{T \times d}$: $Q = XW_Q$, $K = XW_K$, $V = XW_V$. Trong **cross-attention**, $Q$ lấy từ một chuỗi còn $K$ và $V$ lấy từ chuỗi khác, chẳng hạn câu đang dịch và câu nguồn. Cơ chế attention được Bahdanau, Cho và Bengio (2015) đưa vào dịch máy trước khi có Transformer, dùng kết hợp với RNN.
+
+Bài giảng CS224n dựng Transformer theo một trình tự đáng theo: bắt đầu từ self-attention thuần, chỉ ra từng thiếu sót của nó, rồi thêm đúng một thành phần để sửa mỗi thiếu sót. Self-attention thuần không biết thứ tự của các token, nên cần mã hoá vị trí (Mục 9.6). Nó chỉ lấy trung bình có trọng số, nên cần thêm một khối phi tuyến cho từng vị trí (Mục 9.5). Và khi sinh văn bản, nó nhìn thấy cả các token tương lai, nên cần mặt nạ (Mục 9.4). Các mục dưới đi qua từng thành phần đó, sau khi xét kỹ phép tính attention.
 
 > **Ví dụ 9.1.** Truy vấn $q = (1, 0)$, ba khoá $k_1 = (1, 0)$, $k_2 = (0, 1)$, $k_3 = (1, 1)$ và ba giá trị $v_1 = (1, 0)$, $v_2 = (0, 1)$, $v_3 = (2, 2)$, với $d_k = 2$. Điểm số $q \cdot k_j$ là $(1, 0, 1)$; chia cho $\sqrt2$ được $(0{,}707;\; 0;\; 0{,}707)$. Softmax cho trọng số $(0{,}401;\; 0{,}198;\; 0{,}401)$: truy vấn "giống" khoá 1 và khoá 3 như nhau và giống khoá 2 ít hơn. Đầu ra là $0{,}401\,v_1 + 0{,}198\,v_2 + 0{,}401\,v_3 = (1{,}203;\; 1{,}000)$.
 
@@ -1030,7 +1032,7 @@ Trong Định nghĩa 9.1, điểm số được chia cho $\sqrt{d_k}$ trước s
 
 > **Chứng minh.** $q \cdot k = \sum_{i=1}^{d_k} q_i k_i$. Mỗi số hạng có $\mathbb{E}[q_i k_i] = \mathbb{E}[q_i]\mathbb{E}[k_i] = 0$ và $\operatorname{Var}(q_i k_i) = \mathbb{E}[q_i^2]\mathbb{E}[k_i^2] = 1$. Các số hạng độc lập với nhau, nên phương sai của tổng bằng tổng các phương sai, tức $d_k$.
 
-Như vậy độ lệch chuẩn của điểm số tăng theo $\sqrt{d_k}$: với $d_k = 64$, các điểm số trải trong khoảng cỡ $\pm 8$; với $d_k = 1\,024$ là $\pm 32$. Softmax của các số chênh nhau hàng chục đơn vị gần như là một vector one-hot. Đạo hàm của softmax là $\partial p_i/\partial s_j = p_i(\delta_{ij} - p_j)$, và khi $p$ gần one-hot thì mọi phần tử của ma trận này đều gần 0, nên gradient gần như không truyền qua được. Chia điểm số cho $\sqrt{d_k}$ đưa phương sai về 1 với mọi $d_k$. Vaswani và cộng sự (2017) nêu lập luận này trong chú thích 4 của bài báo.
+Như vậy độ lệch chuẩn của điểm số tăng theo $\sqrt{d_k}$: với $d_k = 64$, các điểm số trải trong khoảng cỡ $\pm 8$; với $d_k = 1\,024$ là $\pm 32$. Softmax của các số chênh nhau hàng chục đơn vị gần như là một vector one-hot. Karpathy (2023) cho thấy điều này bằng một phép thử nhỏ, có thể làm lại với số riêng: softmax của bốn điểm số 0,2; $-0{,}1$; 0,4; 0 là $(0{,}26;\ 0{,}20;\ 0{,}32;\ 0{,}22)$, khá đều; nhân cả bốn với 8, như khi độ lệch chuẩn của điểm số lớn gấp 8 lần, softmax thành $(0{,}16;\ 0{,}02;\ 0{,}79;\ 0{,}03)$, gần như dồn hết vào một khoá. Đạo hàm của softmax là $\partial p_i/\partial s_j = p_i(\delta_{ij} - p_j)$, và khi $p$ gần one-hot thì mọi phần tử của ma trận này đều gần 0, nên gradient gần như không truyền qua được. Chia điểm số cho $\sqrt{d_k}$ đưa phương sai về 1 với mọi $d_k$. Vaswani và cộng sự (2017) nêu lập luận này trong chú thích 4 của bài báo.
 
 Thí nghiệm trong `code/models/experiments.py` kiểm tra cả hai vế của lập luận: tạo 4 000 truy vấn và 64 khoá ngẫu nhiên theo phân phối chuẩn tắc, đo phương sai của điểm số và entropy của phân phối attention trên 64 khoá, có và không có phép chia.
 
@@ -1054,7 +1056,7 @@ Thay vì một phép attention trên $d$ chiều, **attention nhiều đầu** (
 
 $$\begin{aligned} \operatorname{head}_i &= \operatorname{Attention}(XW_Q^{(i)},\, XW_K^{(i)},\, XW_V^{(i)}), \\ \operatorname{MultiHead}(X) &= \operatorname{Concat}(\operatorname{head}_1, \dots, \operatorname{head}_h)\, W_O. \end{aligned}$$
 
-Bài báo gốc dùng $d = 512$, $h = 8$, $d_k = 64$. Vì mỗi đầu hẹp đi $h$ lần, tổng số tham số, $4d^2$ cho $W_Q$, $W_K$, $W_V$, $W_O$, và tổng số phép tính gần như bằng attention một đầu trên đủ $d$ chiều. Nhiều đầu không mua thêm khả năng tính toán mà cho phép mô hình cùng lúc chú ý tới những loại quan hệ khác nhau ở những vị trí khác nhau, chẳng hạn một đầu theo quan hệ cú pháp, một đầu theo từ đồng tham chiếu. Với một đầu duy nhất, phép lấy trung bình có trọng số sẽ trộn lẫn các quan hệ đó.
+Bài báo gốc dùng $d = 512$, $h = 8$, $d_k = 64$. Phép chia ở Mục 9.2 dùng số chiều của mỗi đầu, $\sqrt{d_k} = \sqrt{d/h} = 8$, không phải $\sqrt{d}$, vì phương sai cần đưa về 1 là phương sai của tích vô hướng trong từng đầu. Về cài đặt, $h$ đầu được tính cùng lúc như thêm một trục lô, nên chi phí gần như bằng một đầu trên đủ $d$ chiều. Vì mỗi đầu hẹp đi $h$ lần, tổng số tham số, $4d^2$ cho $W_Q$, $W_K$, $W_V$, $W_O$, và tổng số phép tính gần như bằng attention một đầu trên đủ $d$ chiều. Nhiều đầu không mua thêm khả năng tính toán mà cho phép mô hình cùng lúc chú ý tới những loại quan hệ khác nhau ở những vị trí khác nhau, chẳng hạn một đầu theo quan hệ cú pháp, một đầu theo từ đồng tham chiếu. Với một đầu duy nhất, phép lấy trung bình có trọng số sẽ trộn lẫn các quan hệ đó.
 
 Không phải đầu nào cũng quan trọng như nhau. Michel, Levy và Neubig (2019) cho thấy có thể bỏ phần lớn các đầu của một mô hình đã huấn luyện mà chất lượng giảm rất ít, dù một số ít đầu là thiết yếu. Nhận xét này là cơ sở cho các cách chia sẻ khoá và giá trị giữa các đầu ở Mục 10.4.
 
@@ -1067,7 +1069,7 @@ Không phải đầu nào cũng quan trọng như nhau. Michel, Levy và Neubig 
 | Mặt nạ nhân quả (causal mask) | mọi vị trí $j > i$ khi tính đầu ra tại vị trí $i$ | mô hình sinh văn bản không được nhìn thấy các token phía sau |
 | Mặt nạ đệm (padding mask) | các vị trí đệm thêm để các chuỗi trong lô dài bằng nhau | phần đệm không đóng góp vào kết quả |
 
-Mặt nạ được cài đặt bằng cách cộng $-\infty$, trong thực tế là một số âm rất lớn, vào điểm số của các vị trí bị che trước khi tính softmax, để sau softmax trọng số của chúng bằng đúng 0. Chẳng hạn với ba token có điểm số bằng nhau ở mọi cặp, không có mặt nạ thì mỗi hàng của ma trận trọng số là $(1/3;\ 1/3;\ 1/3)$. Có mặt nạ nhân quả, hàng thứ nhất chỉ còn chính nó, $(1;\ 0;\ 0)$; hàng thứ hai chia đều cho hai vị trí đầu, $(0{,}5;\ 0{,}5;\ 0)$; hàng thứ ba giữ nguyên $(1/3;\ 1/3;\ 1/3)$.
+Mặt nạ được cài đặt bằng cách cộng $-\infty$, trong thực tế là một số âm rất lớn, vào điểm số của các vị trí bị che trước khi tính softmax, để sau softmax trọng số của chúng bằng đúng 0. Chẳng hạn với ba token có điểm số bằng nhau ở mọi cặp, không có mặt nạ thì mỗi hàng của ma trận trọng số là $(1/3;\ 1/3;\ 1/3)$. Có mặt nạ nhân quả, hàng thứ nhất chỉ còn chính nó, $(1;\ 0;\ 0)$; hàng thứ hai chia đều cho hai vị trí đầu, $(0{,}5;\ 0{,}5;\ 0)$; hàng thứ ba giữ nguyên $(1/3;\ 1/3;\ 1/3)$. Ba hàng đó là ma trận tam giác dưới chuẩn hoá theo hàng, và nhân nó với dãy vector giá trị $(1; 4)$, $(3; 2)$, $(5; 0)$ cho $(1; 4)$, $(2; 3)$, $(3; 2)$: mỗi vị trí lấy trung bình của chính nó và mọi vị trí trước nó. Karpathy (2023) giới thiệu self-attention nhân quả bằng đúng phép nhân này, rồi thay các điểm số bằng nhau bằng các điểm số học được từ truy vấn và khoá. Lý do dùng một số âm rất lớn thay cho $-\infty$ thật là nếu cả một hàng bị che, softmax trên toàn $-\infty$ cho kết quả NaN.
 
 Mặt nạ nhân quả còn cho phép một điều quan trọng khi huấn luyện. Với một chuỗi $T$ token, một lượt xuôi duy nhất tính được dự đoán cho cả $T$ vị trí cùng lúc, và vị trí nào cũng chỉ thấy các token phía trước nó. Mỗi chuỗi huấn luyện vì vậy cho $T$ bài toán dự đoán token tiếp theo, tính song song. RNN cũng cho $T$ dự đoán, nhưng phải tính tuần tự.
 
@@ -1092,13 +1094,13 @@ trong đó $\operatorname{FFN}(x) = W_2\,\phi(W_1 x + b_1) + b_2$ là một MLP 
 | Số tham số, với $d_{\text{ff}} = 4d$, bỏ qua hệ số chặn | $4d^2$ | $8d^2$ |
 | Số phép tính theo độ dài chuỗi | $O(T^2 d + T d^2)$ | $O(T d^2)$ |
 
-Từ bảng rút ra hai điều mà người mới thường không để ý. FFN chiếm hai phần ba số tham số của mỗi khối, dù attention là phần được nói tới nhiều hơn; Chương 12 kiểm chứng con số này trên GPT-2. Và attention là thành phần duy nhất kết hợp thông tin giữa các vị trí: bỏ attention đi, Transformer chỉ còn là một MLP áp dụng độc lập cho từng token.
+Từ bảng rút ra hai điều mà người mới thường không để ý. FFN chiếm hai phần ba số tham số của mỗi khối, dù attention là phần được nói tới nhiều hơn; Chương 12 kiểm chứng con số này trên GPT-2. Và attention là thành phần duy nhất kết hợp thông tin giữa các vị trí: bỏ attention đi, Transformer chỉ còn là một MLP áp dụng độc lập cho từng token. Chiều ngược lại cũng đáng nhớ: bỏ FFN đi thì đầu ra của mỗi lớp chỉ là trung bình có trọng số của các phép biến đổi tuyến tính của đầu vào, và ghi chú CS224n của Hewitt chỉ ra rằng thiếu phần phi tuyến theo từng vị trí, mô hình không biến đổi được đặc trưng của từng token. Karpathy (2023) tóm gọn sự phân công này: attention là cơ chế để các token trao đổi thông tin với nhau, còn FFN là nơi mỗi token xử lý thông tin vừa nhận được.
 
 ### 9.6. Mã hoá vị trí
 
 Self-attention không có khái niệm thứ tự. Nếu hoán vị các token đầu vào, khi không có mặt nạ, thì các vector đầu ra chỉ hoán vị theo, giá trị của từng vector không đổi. Hai câu "chó cắn người" và "người cắn chó" vì vậy sẽ cho cùng một tập biểu diễn. Ví dụ 9.1 cho thấy điều này ở quy mô nhỏ: đổi thứ tự ba cặp khoá–giá trị thì ba trọng số đổi chỗ theo, còn đầu ra vẫn là $(1{,}203;\ 1{,}000)$, vì trung bình có trọng số không phụ thuộc thứ tự cộng. Thông tin vị trí phải được đưa vào riêng, và có ba cách chính.
 
-Cách đầu tiên, dùng trong bài báo gốc (Vaswani và cộng sự, 2017), là mã hoá sin–cos cố định: cộng vào embedding của token ở vị trí $i$ vector $p_i$ với $p_{i,2t} = \sin(i/10000^{2t/d})$ và $p_{i,2t+1} = \cos(i/10000^{2t/d})$. Cách này không có tham số học. Các tần số khác nhau cho phép biểu diễn cả khoảng cách gần lẫn xa, và $p_{i+k}$ là một phép biến đổi tuyến tính của $p_i$, nên mô hình có thể học quan hệ theo khoảng cách tương đối.
+Cách đầu tiên, dùng trong bài báo gốc (Vaswani và cộng sự, 2017), là mã hoá sin–cos cố định: cộng vào embedding của token ở vị trí $i$ vector $p_i$ với $p_{i,2t} = \sin(i/10000^{2t/d})$ và $p_{i,2t+1} = \cos(i/10000^{2t/d})$. Cách này không có tham số học, và bài báo gốc thấy embedding vị trí học được cho kết quả gần như như nhau. Các tần số khác nhau cho phép biểu diễn cả khoảng cách gần lẫn xa, và $p_{i+k}$ là một phép biến đổi tuyến tính của $p_i$, nên mô hình có thể học quan hệ theo khoảng cách tương đối.
 
 Cách thứ hai, dùng trong BERT và GPT-2, là embedding vị trí học được: một bảng tra kích thước $T_{\max} \times d$, học như embedding của từ. Cách này đơn giản, nhưng không dùng được cho vị trí vượt quá $T_{\max}$, tức 512 với BERT và 1 024 với GPT-2.
 
@@ -1802,6 +1804,8 @@ Các câu trả lời mẫu dưới đây dẫn số liệu từ các thí nghi�
 125. A. Karpathy. *The Unreasonable Effectiveness of Recurrent Neural Networks*. 2015. Ví dụ mô hình ký tự ở Mục 8.1.
 126. C. Olah. *Understanding LSTM Networks*. 2015. Hình ảnh băng chuyền của ô nhớ ở Mục 8.3.
 127. C. D. Manning và cộng sự. *CS224n: Natural Language Processing with Deep Learning, Lecture Notes and Slides*. Stanford University. Gradient tiêu biến trong RNN, attention, Transformer và các chiến lược giải mã.
+128. J. Alammar. *The Illustrated Transformer* và *The Illustrated GPT-2*. 2018–2019. Hình ảnh tủ hồ sơ cho truy vấn, khoá và giá trị.
+129. A. Karpathy. *Let's Build GPT: from Scratch, in Code, Spelled Out*. Bài giảng video, 2023. Mẹo ma trận tam giác dưới ở Mục 9.4 và phép thử độ bão hoà của softmax ở Mục 9.2.
 
 ---
 
