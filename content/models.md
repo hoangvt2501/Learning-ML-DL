@@ -1146,13 +1146,15 @@ Nếu đặt sơ đồ một khối của Llama 2 cạnh sơ đồ trong bài b�
 
 Llama 2 (Touvron và cộng sự, 2023) là một ví dụ dùng cả năm lựa chọn ở cột thứ ba, với một ngoại lệ: bản 7B và 13B dùng MHA, chỉ bản 70B dùng GQA. Hai thay đổi còn lại của chương, mixture of experts và FlashAttention, không nằm trong bảng vì chúng không thay một thành phần mà thay cách tổ chức hoặc cách tính.
 
+Bảng cũng chưa liệt kê những thay đổi nhỏ hơn mà các mô hình 2024–2025 dùng rộng rãi, theo tổng hợp của Raschka (2025) và bài giảng CS336. Phần lớn mô hình bỏ hệ số chặn trong các lớp tuyến tính và không dùng dropout khi tiền huấn luyện. Nhiều mô hình chuẩn hoá truy vấn và khoá trước khi tính điểm số, gọi là QK-norm, để điểm số attention không phình ra trong khi huấn luyện. Một số mô hình xen các lớp attention cục bộ, chỉ nhìn một cửa sổ trượt, với các lớp attention toàn cục để giảm KV cache: Gemma 3 dùng năm lớp cục bộ với cửa sổ 1 024 token cho mỗi lớp toàn cục (Gemma Team, 2025).
+
 ### 10.2. Pre-LN và post-LN
 
 Bài báo gốc đặt chuẩn hoá sau phép cộng của kết nối tắt, $x \leftarrow \operatorname{LN}(x + F(x))$, cách làm gọi là post-LN. Phần lớn mô hình hiện nay đặt chuẩn hoá trước khối con, $x \leftarrow x + F(\operatorname{LN}(x))$, gọi là pre-LN, và thêm một lớp chuẩn hoá sau khối cuối cùng.
 
 Khác biệt nằm ở đường tắt. Với post-LN, tín hiệu đi từ đầu vào tới đầu ra phải qua một lớp chuẩn hoá ở mỗi khối. Với pre-LN, đường tắt đi thẳng qua mọi khối mà không qua phép biến đổi nào, đúng cấu hình "chuẩn hoá trong nhánh, đường tắt đi thẳng" mà Mục 6.3 đo được là ổn định. Xiong và cộng sự (2020) phân tích gradient lúc khởi tạo và chỉ ra rằng với post-LN, gradient của các tham số gần đầu ra rất lớn, nên cần warmup để tránh các bước cập nhật quá lớn ở đầu quá trình huấn luyện; với pre-LN, gradient có độ lớn hợp lý ở mọi lớp, và mô hình huấn luyện được với ít hoặc không cần warmup.
 
-Pre-LN cũng có nhược điểm: độ lớn của tín hiệu trên đường tắt tăng dần theo độ sâu, nên các khối ở sâu đóng góp tương đối ít hơn. Một số nghiên cứu cho thấy post-LN, khi huấn luyện được ổn định, có thể cho chất lượng cuối cao hơn một chút, và đã có các biến thể kết hợp ưu điểm của cả hai. Trong thực hành, pre-LN vẫn là lựa chọn mặc định, vì khi huấn luyện một mô hình lớn tốn kém, độ ổn định quan trọng hơn một chút chất lượng.
+Pre-LN cũng có nhược điểm: độ lớn của tín hiệu trên đường tắt tăng dần theo độ sâu, nên các khối ở sâu đóng góp tương đối ít hơn. Một số nghiên cứu cho thấy post-LN, khi huấn luyện được ổn định, có thể cho chất lượng cuối cao hơn một chút, và đã có các biến thể kết hợp ưu điểm của cả hai. Trong thực hành, pre-LN vẫn là lựa chọn mặc định, vì khi huấn luyện một mô hình lớn tốn kém, độ ổn định quan trọng hơn một chút chất lượng. Một số mô hình mới thử vị trí khác mà vẫn giữ đường tắt đi thẳng: OLMo 2 (Team OLMo, 2024) đặt chuẩn hoá ở cuối nhánh dư, sau khối con, còn Gemma 3 chuẩn hoá cả trước lẫn sau khối con. Bài giảng CS336 lưu ý rằng cả hai đều không phải post-LN kiểu 2017, vì phép cộng của đường tắt không đi qua lớp chuẩn hoá nào.
 
 ### 10.3. RoPE
 
@@ -1164,7 +1166,7 @@ Pre-LN cũng có nhược điểm: độ lớn của tín hiệu trên đường
 
 > **Chứng minh.** $R_m$ là ma trận khối đường chéo gồm các ma trận quay $2 \times 2$, nên nó trực giao: $R_m^\top = R_m^{-1} = R_{-m}$. Hai phép quay cùng mặt phẳng cộng góc, nên $R_{-m} R_n = R_{n-m}$. Do đó $\langle R_m q, R_n k\rangle = q^\top R_m^\top R_n k = q^\top R_{n-m}\, k$.
 
-Trường hợp $d = 2$ cho thấy cơ chế mà không cần ký hiệu khối: chỉ có một cặp, và $R_m$ là phép quay góc $m\theta$. Lấy $q = k = (1, 0)$ và $\theta = 0{,}5$. Tại $m = 1$ và $n = 3$, $R_1 q = (\cos 0{,}5;\ \sin 0{,}5)$ và $R_3 k = (\cos 1{,}5;\ \sin 1{,}5)$, nên tích vô hướng là $\cos 1{,}5 \cos 0{,}5 + \sin 1{,}5 \sin 0{,}5 = \cos 1 \approx 0{,}540$. Dời cả hai sang vị trí 10 và 12 thì góc chênh vẫn là $2\theta = 1$ và tích vô hướng vẫn là 0,540. Dãy tần số $\theta_i$ giống dãy tần số của mã hoá sin–cos ở Mục 9.6: cặp đầu quay nhanh, phù hợp để phân biệt khoảng cách gần; cặp cuối quay rất chậm, phân biệt được khoảng cách xa.
+Trường hợp $d = 2$ cho thấy cơ chế mà không cần ký hiệu khối: chỉ có một cặp, và $R_m$ là phép quay góc $m\theta$. Lấy $q = k = (1, 0)$ và $\theta = 0{,}5$. Tại $m = 1$ và $n = 3$, $R_1 q = (\cos 0{,}5;\ \sin 0{,}5)$ và $R_3 k = (\cos 1{,}5;\ \sin 1{,}5)$, nên tích vô hướng là $\cos 1{,}5 \cos 0{,}5 + \sin 1{,}5 \sin 0{,}5 = \cos 1 \approx 0{,}540$. Dời cả hai sang vị trí 10 và 12 thì góc chênh vẫn là $2\theta = 1$ và tích vô hướng vẫn là 0,540. Bài giảng CS336 diễn đạt cùng ý bằng một câu: trong "chúng tôi biết" và "dĩ nhiên chúng tôi biết", hai chữ "tôi" và "biết" đứng ở những vị trí tuyệt đối khác nhau nhưng cách nhau cùng một khoảng, nên với RoPE, điểm số giữa chúng như nhau. Dãy tần số $\theta_i$ giống dãy tần số của mã hoá sin–cos ở Mục 9.6: cặp đầu quay nhanh, phù hợp để phân biệt khoảng cách gần; cặp cuối quay rất chậm, phân biệt được khoảng cách xa.
 
 Thí nghiệm trong `code/models/experiments.py` kiểm tra mệnh đề với $d = 64$ và hai vector ngẫu nhiên.
 
@@ -1186,9 +1188,9 @@ Các cặp có cùng khoảng cách cho cùng giá trị tới chữ số thứ 
 |---|---|---|---|---|
 | $\langle R_\Delta v, v\rangle / \lVert v\rVert^2$ | 1,000 | 0,708 | 0,439 | 0,319 |
 
-Kết quả này có công thức rõ ràng: $\langle R_\Delta v, v\rangle = \sum_i (v_{2i}^2 + v_{2i+1}^2)\cos(\Delta\theta_i)$, tức một trung bình có trọng số của $\cos(\Delta \theta_i)$. Khi $\Delta$ tăng, các cặp có tần số khác nhau lệch pha nhau và trung bình giảm dần. Đây là tính chất **suy giảm theo khoảng cách** mà bài báo RoPE nêu: cùng một nội dung, ở xa thì có xu hướng nhận điểm attention thấp hơn.
+Kết quả này có công thức rõ ràng: $\langle R_\Delta v, v\rangle = \sum_i (v_{2i}^2 + v_{2i+1}^2)\cos(\Delta\theta_i)$, tức một trung bình có trọng số của $\cos(\Delta \theta_i)$. Khi $\Delta$ tăng, các cặp có tần số khác nhau lệch pha nhau và trung bình giảm dần. Đây là tính chất **suy giảm theo khoảng cách** mà bài báo RoPE nêu: cùng một nội dung, ở xa thì có xu hướng nhận điểm attention thấp hơn. Bài báo chỉ chứng minh tính chất này cho một chặn trên của điểm số chứ không cho chính điểm số, vì vậy nó chỉ nên được hiểu như một xu hướng. Về thực nghiệm, nhóm EleutherAI đo trên mô hình 125 triệu tham số được mất mát xác thực 2,809 với embedding vị trí học được, 2,801 với cách mã hoá tương đối của T5 và 2,759 với RoPE (Biderman và cộng sự, 2021).
 
-RoPE có ba ưu điểm. Nó mã hoá vị trí tương đối mà không cần bảng tham số riêng. Nó chỉ tác động lên $Q$ và $K$, không thay đổi $V$, không thêm tham số và không đổi kích thước tensor. Và nó cho phép mở rộng ngữ cảnh sau khi huấn luyện: vì không có bảng vị trí với giới hạn cứng, có thể co giãn các góc quay để mô hình huấn luyện với ngữ cảnh 4 096 token dùng được cho ngữ cảnh dài hơn, kèm một bước tinh chỉnh ngắn. Hai phương pháp phổ biến là nội suy vị trí (position interpolation; Chen và cộng sự, 2023), chia chỉ số vị trí cho hệ số mở rộng, và YaRN (Peng và cộng sự, 2024), co giãn khác nhau cho các dải tần số.
+RoPE có ba ưu điểm. Nó mã hoá vị trí tương đối mà không cần bảng tham số riêng. Nó chỉ tác động lên $Q$ và $K$, không thay đổi $V$, không thêm tham số và không đổi kích thước tensor. Và nó cho phép mở rộng ngữ cảnh sau khi huấn luyện: vì không có bảng vị trí với giới hạn cứng, có thể co giãn các góc quay để mô hình huấn luyện với ngữ cảnh 4 096 token dùng được cho ngữ cảnh dài hơn, kèm một bước tinh chỉnh ngắn. Hai phương pháp phổ biến là nội suy vị trí (position interpolation; Chen và cộng sự, 2023), chia chỉ số vị trí cho hệ số mở rộng, và YaRN (Peng và cộng sự, 2024), co giãn khác nhau cho các dải tần số. Với nội suy vị trí, Chen và cộng sự mở rộng ngữ cảnh của LLaMA lên 32 768 token chỉ với khoảng 1 000 bước tinh chỉnh.
 
 ### 10.4. MQA và GQA
 
@@ -1202,7 +1204,7 @@ trong đó hệ số 2 cho khoá và giá trị, $n_{\text{kv}}$ là số đầu
 
 KV cache giảm đúng $h/g$ lần. Với một mô hình cỡ Llama 2 70B (80 lớp, $d_{\text{head}} = 128$, 64 đầu truy vấn), ngữ cảnh 4 096 token, 8 chuỗi cùng lúc, lưu ở FP16, MHA với 64 đầu khoá–giá trị cần 80 GiB, còn GQA với 8 đầu cần 10 GiB. Mỗi token của mỗi chuỗi tốn 2,5 MiB với MHA và 0,3125 MiB với GQA.
 
-MQA giảm KV cache nhiều nhất nhưng có thể làm giảm chất lượng và làm huấn luyện kém ổn định. Ainslie và cộng sự (2023) cho thấy GQA cho chất lượng gần MHA với tốc độ suy luận gần MQA, và một mô hình MHA đã huấn luyện có thể chuyển sang GQA bằng cách huấn luyện thêm với khoảng 5% lượng tính toán ban đầu. GQA vì vậy là một quyết định thiết kế vì bộ nhớ lúc suy luận, không phải vì chất lượng. [Mục 2.2 của *Ứng dụng LLM*](ungdung-ch02.html) tính KV cache của Llama 3 8B, một mô hình dùng GQA, và hệ quả của nó lên chi phí phục vụ.
+MQA giảm KV cache nhiều nhất nhưng có thể làm giảm chất lượng và làm huấn luyện kém ổn định. Ainslie và cộng sự (2023) cho thấy GQA cho chất lượng gần MHA với tốc độ suy luận gần MQA, và một mô hình MHA đã huấn luyện có thể chuyển sang GQA bằng cách huấn luyện thêm với khoảng 5% lượng tính toán ban đầu. GQA vì vậy là một quyết định thiết kế vì bộ nhớ lúc suy luận, không phải vì chất lượng. DeepSeek-V2 (DeepSeek-AI, 2024) đi xa hơn với multi-head latent attention (MLA): khoá và giá trị được nén vào một vector ẩn nhỏ, và KV cache chỉ lưu vector đó; báo cáo của mô hình cho biết KV cache của MLA tương đương GQA với khoảng 2,25 nhóm, trong khi chất lượng tốt hơn MHA. [Mục 2.2 của *Ứng dụng LLM*](ungdung-ch02.html) tính KV cache của Llama 3 8B, một mô hình dùng GQA, và hệ quả của nó lên chi phí phục vụ.
 
 ### 10.5. SwiGLU
 
@@ -1216,13 +1218,13 @@ SwiGLU có ba ma trận $W$, $V$, $W_2$ thay vì hai. Để số tham số và s
 
 $$d_{\text{ff}}' = \frac{2}{3} \cdot 4d = \frac{8}{3}\,d.$$
 
-Bài báo làm đúng như vậy: mô hình gốc có $d_{\text{ff}} = 3\,072$, các biến thể có cổng dùng $d_{\text{ff}} = 2\,048$. Trong thực tế, $\tfrac83 d$ được làm tròn lên bội của một số như 128 hoặc 256 cho hiệu quả phần cứng. Với Llama 2 7B, $d = 4\,096$ nên $\tfrac83 d \approx 10\,923$, và giá trị thật $d_{\text{ff}} = 11\,008 = 43 \times 256$ chính là số đó làm tròn lên bội của 256.
+Bài báo làm đúng như vậy: mô hình gốc có $d_{\text{ff}} = 3\,072$, các biến thể có cổng dùng $d_{\text{ff}} = 2\,048$. Trong thực tế, $\tfrac83 d$ được làm tròn lên bội của một số như 128 hoặc 256 cho hiệu quả phần cứng. Với Llama 2 7B, $d = 4\,096$ nên $\tfrac83 d \approx 10\,923$, và giá trị thật $d_{\text{ff}} = 11\,008 = 43 \times 256$ chính là số đó làm tròn lên bội của 256. Tỉ lệ $\tfrac83$ chỉ là điểm xuất phát: Llama 2 70B dùng $d_{\text{ff}} = 28\,672 = 3{,}5d$.
 
 ### 10.6. Mixture of experts
 
 Các thay đổi trên giữ nguyên số phép tính cho mỗi token. Mixture of experts đi theo hướng khác: tăng số tham số mà không tăng số phép tính. Trong một lớp **mixture of experts** (MoE; Shazeer và cộng sự, 2017), khối FFN được thay bằng $E$ khối FFN song song gọi là chuyên gia (expert), cùng một **bộ định tuyến** (router) chọn $k$ chuyên gia cho mỗi token, thường $k = 1$ hoặc 2. Đầu ra là tổng có trọng số của các chuyên gia được chọn, với trọng số do bộ định tuyến tính.
 
-Như vậy MoE tách số tham số khỏi số phép tính: tổng số tham số tăng theo $E$, nhưng mỗi token chỉ đi qua $k$ chuyên gia. Chẳng hạn, Mixtral 8x7B (Jiang và cộng sự, 2024) có 8 chuyên gia mỗi lớp, mỗi token dùng 2, tổng khoảng 47 tỉ tham số nhưng mỗi token chỉ dùng khoảng 13 tỉ.
+Như vậy MoE tách số tham số khỏi số phép tính: tổng số tham số tăng theo $E$, nhưng mỗi token chỉ đi qua $k$ chuyên gia. Chẳng hạn, Mixtral 8x7B (Jiang và cộng sự, 2024) có 8 chuyên gia mỗi lớp, mỗi token dùng 2, tổng khoảng 47 tỉ tham số nhưng mỗi token chỉ dùng khoảng 13 tỉ. Tổng không phải $8 \times 7 = 56$ tỉ, vì chỉ các khối FFN được nhân bản, còn attention và embedding dùng chung. Các mô hình về sau chia nhỏ chuyên gia hơn nhiều: DeepSeek-V3 (DeepSeek-AI, 2024) có 256 chuyên gia trong mỗi lớp MoE cộng một chuyên gia dùng chung mà mọi token đều đi qua, mỗi token chọn 8 chuyên gia, nên trong 671 tỉ tham số chỉ khoảng 37 tỉ được dùng cho mỗi token.
 
 Đổi lại, MoE kéo theo ba vấn đề kỹ thuật. Vấn đề đầu tiên là cân bằng tải: bộ định tuyến có xu hướng dồn phần lớn token vào vài chuyên gia, làm các chuyên gia khác không được huấn luyện, và cách xử lý thông dụng là thêm một hàm mất mát phụ phạt sự mất cân bằng (Fedus, Zoph và Shazeer, 2022). Vấn đề thứ hai là bộ nhớ: dù mỗi token chỉ dùng một phần, mọi chuyên gia đều phải nằm sẵn trong bộ nhớ, vì token tiếp theo có thể cần bất kỳ chuyên gia nào. Vấn đề thứ ba là truyền dữ liệu: khi các chuyên gia nằm trên nhiều GPU khác nhau, mỗi lớp MoE phải gửi token tới GPU chứa chuyên gia được chọn rồi nhận kết quả về. Vì vậy MoE có lợi khi giới hạn là số phép tính; nếu giới hạn là bộ nhớ, MoE không giúp được.
 
@@ -1232,7 +1234,7 @@ Thay đổi cuối cùng không động tới mô hình mà tới cách tính. T
 
 **FlashAttention** (Dao và cộng sự, 2022) tính chính xác cùng kết quả mà không bao giờ tạo ra toàn bộ ma trận $T \times T$. Thuật toán chia $Q$, $K$, $V$ thành các khối đủ nhỏ để nằm trong bộ nhớ nhanh trên chip (SRAM), và tính softmax theo từng khối bằng kỹ thuật softmax trực tuyến (Milakov và Gimelshein, 2018). Với mỗi hàng, thuật toán giữ giá trị lớn nhất $m$ và tổng $\ell = \sum_j e^{s_j - m}$ của các điểm số đã xử lý; khi gặp khối mới có giá trị lớn nhất $m' > m$, nó nhân tổng cũ và kết quả tích luỹ cũ với $e^{m - m'}$ rồi cộng phần của khối mới. Chẳng hạn một hàng có bốn điểm số chia thành hai khối $(1, 2)$ và $(3, 0)$. Sau khối đầu, $m = 2$ và $\ell = e^{-1} + e^{0} = 1{,}368$. Khối thứ hai có giá trị lớn nhất 3, nên tổng cũ được nhân với $e^{2 - 3}$ rồi cộng thêm $e^{0} + e^{-3}$: $\ell = 1{,}368 \cdot 0{,}368 + 1 + 0{,}050 = 1{,}553$, đúng bằng tổng $\sum_j e^{s_j - 3}$ tính trực tiếp trên cả bốn điểm số. Ở lượt ngược, các giá trị cần thiết được tính lại từ các khối thay vì đọc từ bộ nhớ.
 
-Nhờ vậy bộ nhớ cho attention tăng tuyến tính theo $T$ thay vì theo $T^2$, và thời gian chạy giảm đáng kể vì ít truy cập HBM hơn, dù số phép tính tăng nhẹ do phải tính lại ở lượt ngược. FlashAttention không thay đổi bậc $O(T^2)$ của số phép tính; nó thay đổi cách thực hiện chúng trên phần cứng. Các thư viện huấn luyện và phục vụ mô hình ngôn ngữ hiện nay đều dùng FlashAttention hoặc các cài đặt cùng ý tưởng (Dao, 2024).
+Nhờ vậy bộ nhớ cho attention tăng tuyến tính theo $T$ thay vì theo $T^2$, và thời gian chạy giảm đáng kể vì ít truy cập HBM hơn, dù số phép tính tăng nhẹ do phải tính lại ở lượt ngược. FlashAttention không thay đổi bậc $O(T^2)$ của số phép tính; nó thay đổi cách thực hiện chúng trên phần cứng. Bài báo đo cụ thể trên GPT-2 medium với chuỗi 1 024 token trên GPU A100, tính cả lượt xuôi và lượt ngược: FlashAttention làm nhiều phép tính hơn, 75,2 so với 66,6 GFLOP, nhưng đọc ghi bộ nhớ chính ít hơn khoảng chín lần, 4,4 so với 40,3 GB, và chạy nhanh hơn khoảng 5,7 lần, 7,3 so với 41,7 ms. Số phép tính không quyết định thời gian chạy khi giới hạn nằm ở bộ nhớ. Các thư viện huấn luyện và phục vụ mô hình ngôn ngữ hiện nay đều dùng FlashAttention hoặc các cài đặt cùng ý tưởng (Dao, 2024).
 
 ### 10.8. Tóm tắt
 
@@ -1806,6 +1808,13 @@ Các câu trả lời mẫu dưới đây dẫn số liệu từ các thí nghi�
 127. C. D. Manning và cộng sự. *CS224n: Natural Language Processing with Deep Learning, Lecture Notes and Slides*. Stanford University. Gradient tiêu biến trong RNN, attention, Transformer và các chiến lược giải mã.
 128. J. Alammar. *The Illustrated Transformer* và *The Illustrated GPT-2*. 2018–2019. Hình ảnh tủ hồ sơ cho truy vấn, khoá và giá trị.
 129. A. Karpathy. *Let's Build GPT: from Scratch, in Code, Spelled Out*. Bài giảng video, 2023. Mẹo ma trận tam giác dưới ở Mục 9.4 và phép thử độ bão hoà của softmax ở Mục 9.2.
+130. P. Liang, T. Hashimoto. *CS336: Language Modeling from Scratch*. Stanford University, 2025. Các bài giảng về kiến trúc, mixture of experts và tính toán tài nguyên.
+131. S. Raschka. *The Big LLM Architecture Comparison*. 2025. Tổng hợp các thay đổi kiến trúc ở Mục 10.1.
+132. S. Biderman và cộng sự. *Rotary Embeddings: A Relative Revolution*. EleutherAI, 2021. So sánh RoPE với các cách mã hoá vị trí khác.
+133. Gemma Team. Gemma 3 Technical Report. arXiv:2503.19786, 2025.
+134. Team OLMo. 2 OLMo 2 Furious. arXiv:2501.00656, 2024. Báo cáo kỹ thuật của OLMo 2.
+135. DeepSeek-AI. DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model. arXiv:2405.04434, 2024. Multi-head latent attention.
+136. DeepSeek-AI. DeepSeek-V3 Technical Report. arXiv:2412.19437, 2024.
 
 ---
 
